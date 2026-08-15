@@ -1,0 +1,30 @@
+# local.properties.example — 复制为 local.properties 后修改实际值
+# 本文件仅作为模板，不含真实凭据。local.properties 已被 .gitignore 排除。
+
+# ============================================================
+# Android SDK 路径
+# ============================================================
+# Windows 示例
+sdk.dir=C\:\\Users\\YourName\\AppData\\Local\\Android\\Sdk
+# macOS 示例
+# sdk.dir=/Users/YourName/Library/Android/sdk
+# Linux 示例
+# sdk.dir=/home/YourName/Android/Sdk
+
+# ============================================================
+# 签名配置（Release 打包时需要，Debug 构建可忽略）
+# ============================================================
+# Keystore 文件路径（相对于项目根目录，或使用绝对路径）
+# 建议将 keystore 放在项目根目录（已被 .gitignore 排除 *.jks）
+RELEASE_STORE_FILE=release.jks
+# Keystore 密码
+RELEASE_STORE_PASSWORD=your_keystore_password
+# 密钥别名
+RELEASE_KEY_ALIAS=draftpeek_key
+# 密钥密码
+RELEASE_KEY_PASSWORD=your_key_password
+
+# ============================================================
+# CI 构建标识（仅 CI 环境使用，本地开发无需设置）
+# ============================================================
+# ci.build=true
