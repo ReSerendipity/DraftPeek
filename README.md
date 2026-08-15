@@ -232,3 +232,18 @@ scripts\run-unit-tests.bat
 - [docs/ARCHITECTURE.md](docs/ARCHITECTURE.md) — 架构设计文档
 - [docs/CODE_QUALITY_REPORT.md](docs/CODE_QUALITY_REPORT.md) — 代码质量报告
 - [docs/LARGE_FILE_SUPPORT.md](docs/LARGE_FILE_SUPPORT.md) — 大文件支持方案
+
+## ⚠️ Git 分支使用说明
+
+**重要**: 本项目已统一使用 main 作为主分支名称。
+
+- **所有开发工作都应该在 \main\ 分支上进行**
+- **请勿再使用 \public\ 分支进行开发**
+- **所有代码提交应直接到 \main\ 分支**
+
+历史背景：该项目之前曾创建过一个名为 public 的 orphan branch 用于潜在的公开目的，但现在该策略已变更，所有开发和版本管理都统一到 main 分支。
+
+如需推送远程仓库，请确保推送到 main 分支：
+```bash
+git push origin main
+```
