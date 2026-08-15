@@ -1,0 +1,498 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>WYSIWYG Markdown Editor</title>
+    <style>
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+            line-height: 1.6;
+            color: #333;
+            background: #fff;
+            padding: 16px;
+            overflow-x: hidden;
+        }
+
+        body.dark {
+            background: #1e1e1e;
+            color: #d4d4d4;
+        }
+
+        /* Contenteditable area */
+        #editor {
+            min-height: 100vh;
+            outline: none;
+            padding: 16px;
+            font-size: 16px;
+            line-height: 1.6;
+            word-wrap: break-word;
+            white-space: pre-wrap;
+        }
+
+        #editor:focus {
+            outline: none;
+        }
+
+        /* Markdown rendered styles */
+        #editor h1 { font-size: 2em; margin: 0.67em 0; font-weight: bold; }
+        #editor h2 { font-size: 1.5em; margin: 0.83em 0; font-weight: bold; }
+        #editor h3 { font-size: 1.17em; margin: 1em 0; font-weight: bold; }
+        #editor h4 { font-size: 1em; margin: 1.33em 0; font-weight: bold; }
+        #editor h5 { font-size: 0.83em; margin: 1.67em 0; font-weight: bold; }
+        #editor h6 { font-size: 0.67em; margin: 2.33em 0; font-weight: bold; }
+
+        #editor p { margin: 1em 0; }
+
+        #editor blockquote {
+            border-left: 4px solid #ddd;
+            padding-left: 16px;
+            color: #666;
+            margin: 1em 0;
+        }
+
+        body.dark #editor blockquote {
+            border-left-color: #555;
+            color: #999;
+        }
+
+        #editor pre {
+            background: #f5f5f5;
+            border-radius: 4px;
+            padding: 12px;
+            overflow-x: auto;
+            font-family: 'Monaco', 'Menlo', 'Ubuntu Mono', monospace;
+            font-size: 14px;
+            margin: 1em 0;
+        }
+
+        body.dark #editor pre {
+            background: #2d2d2d;
+        }
+
+        #editor code {
+            background: #f0f0f0;
+            padding: 2px 6px;
+            border-radius: 3px;
+            font-family: 'Monaco', 'Menlo', 'Ubuntu Mono', monospace;
+            font-size: 0.9em;
+        }
+
+        body.dark #editor code {
+            background: #3d3d3d;
+        }
+
+        #editor pre code {
+            background: transparent;
+            padding: 0;
+        }
+
+        #editor ul, #editor ol {
+            padding-left: 2em;
+            margin: 1em 0;
+        }
+
+        #editor li { margin: 0.5em 0; }
+
+        #editor a {
+            color: #0366d6;
+            text-decoration: none;
+        }
+
+        body.dark #editor a {
+            color: #6db3f2;
+        }
+
+        #editor a:hover {
+            text-decoration: underline;
+        }
+
+        #editor img {
+            max-width: 100%;
+            height: auto;
+            border-radius: 4px;
+            margin: 1em 0;
+        }
+
+        #editor table {
+            border-collapse: collapse;
+            width: 100%;
+            margin: 1em 0;
+        }
+
+        #editor th, #editor td {
+            border: 1px solid #ddd;
+            padding: 8px 12px;
+            text-align: left;
+        }
+
+        body.dark #editor th, body.dark #editor td {
+            border-color: #555;
+        }
+
+        #editor th {
+            background: #f5f5f5;
+            font-weight: bold;
+        }
+
+        body.dark #editor th {
+            background: #333;
+        }
+
+        #editor hr {
+            border: none;
+            border-top: 1px solid #ddd;
+            margin: 2em 0;
+        }
+
+        body.dark #editor hr {
+            border-top-color: #555;
+        }
+
+        /* Formatting toolbar */
+        #toolbar {
+            position: fixed;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            background: #f8f9fa;
+            border-top: 1px solid #ddd;
+            padding: 8px;
+            display: flex;
+            justify-content: space-around;
+            z-index: 1000;
+        }
+
+        body.dark #toolbar {
+            background: #2d2d2d;
+            border-top-color: #555;
+        }
+
+        #toolbar button {
+            background: transparent;
+            border: none;
+            border-radius: 4px;
+            padding: 8px 12px;
+            font-size: 14px;
+            cursor: pointer;
+            min-width: 40px;
+            min-height: 40px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        #toolbar button:hover {
+            background: rgba(0,0,0,0.1);
+        }
+
+        body.dark #toolbar button:hover {
+            background: rgba(255,255,255,0.1);
+        }
+
+        #toolbar button:active {
+            background: rgba(0,0,0,0.2);
+        }
+
+        body.dark #toolbar button:active {
+            background: rgba(255,255,255,0.2);
+        }
+
+        /* Status bar */
+        #status {
+            position: fixed;
+            bottom: 56px;
+            left: 0;
+            right: 0;
+            background: rgba(248,249,250,0.9);
+            border-top: 1px solid #eee;
+            padding: 4px 16px;
+            font-size: 12px;
+            color: #666;
+            display: flex;
+            justify-content: space-between;
+        }
+
+        body.dark #status {
+            background: rgba(45,45,45,0.9);
+            border-top-color: #555;
+            color: #999;
+        }
+    </style>
+</head>
+<body>
+    <div id="editor" contenteditable="true" spellcheck="false"></div>
+
+    <div id="status">
+        <span id="line-count">0 lines</span>
+        <span id="word-count">0 words</span>
+    </div>
+
+    <div id="toolbar">
+        <button onclick="formatText('bold')" title="Bold (Ctrl+B)">
+            <strong>B</strong>
+        </button>
+        <button onclick="formatText('italic')" title="Italic (Ctrl+I)">
+            <em>I</em>
+        </button>
+        <button onclick="formatText('strikethrough')" title="Strikethrough">
+            <s>S</s>
+        </button>
+        <button onclick="formatText('code')" title="Inline Code">
+            &lt;/&gt;
+        </button>
+        <button onclick="formatText('heading')" title="Heading">
+            H
+        </button>
+        <button onclick="formatText('link')" title="Link">
+            🔗
+        </button>
+        <button onclick="formatText('list')" title="List">
+            ☰
+        </button>
+        <button onclick="formatText('quote')" title="Blockquote">
+            "
+        </button>
+    </div>
+
+    <script>
+        let lastContent = '';
+        let debounceTimer = null;
+        let isUpdating = false;
+
+        // Load file content from URL parameter
+        window.onload = function() {
+            const params = new URLSearchParams(window.location.search);
+            const fileUrl = params.get('file');
+            const darkMode = params.get('dark') === '1';
+
+            if (darkMode) {
+                document.body.classList.add('dark');
+            }
+
+            if (fileUrl) {
+                loadFileContent(decodeURIComponent(fileUrl));
+            }
+        };
+
+        function loadFileContent(url) {
+            fetch(url)
+                .then(response => response.text())
+                .then(content => {
+                    renderMarkdown(content);
+                    lastContent = content;
+                    updateCounts();
+                })
+                .catch(error => {
+                    console.error('Failed to load file:', error);
+                    document.getElementById('editor').textContent = 'Failed to load file';
+                });
+        }
+
+        function renderMarkdown(markdown) {
+            const editor = document.getElementById('editor');
+            if (isUpdating) return;
+
+            // Simple Markdown to HTML conversion
+            let html = markdown
+                // Escape HTML
+                .replace(/&/g, '&amp;')
+                .replace(/</g, '&lt;')
+                .replace(/>/g, '&gt;')
+                // Code blocks
+                .replace(/```(\w*)\n([\s\S]*?)```/g, '<pre><code class="language-$1">$2</code></pre>')
+                // Inline code
+                .replace(/`([^`]+)`/g, '<code>$1</code>')
+                // Headers
+                .replace(/^### (.+)$/gm, '<h3>$1</h3>')
+                .replace(/^## (.+)$/gm, '<h2>$1</h2>')
+                .replace(/^# (.+)$/gm, '<h1>$1</h1>')
+                // Bold and italic
+                .replace(/\*\*\*(.+?)\*\*\*/g, '<strong><em>$1</em></strong>')
+                .replace(/\*\*(.+?)\*\*/g, '<strong>$1</strong>')
+                .replace(/\*(.+?)\*/g, '<em>$1</em>')
+                .replace(/~~(.+?)~~/g, '<s>$1</s>')
+                // Links
+                .replace(/\[([^\]]+)\]\(([^)]+)\)/g, '<a href="$2" target="_blank">$1</a>')
+                // Images
+                .replace(/!\[([^\]]*)\]\(([^)]+)\)/g, '<img src="$2" alt="$1">')
+                // Blockquotes
+                .replace(/^> (.+)$/gm, '<blockquote>$1</blockquote>')
+                // Horizontal rules
+                .replace(/^---$/gm, '<hr>')
+                .replace(/^\*\*\*$/gm, '<hr>')
+                // Unordered lists
+                .replace(/^\s*[-*+] (.+)$/gm, '<li>$1</li>')
+                // Ordered lists
+                .replace(/^\s*\d+\. (.+)$/gm, '<li>$1</li>')
+                // Paragraphs
+                .replace(/\n\n/g, '</p><p>')
+                .replace(/\n/g, '<br>');
+
+            // Wrap in paragraphs if needed
+            if (!html.startsWith('<')) {
+                html = '<p>' + html + '</p>';
+            }
+
+            editor.innerHTML = html;
+        }
+
+        function formatText(format) {
+            const editor = document.getElementById('editor');
+            const selection = window.getSelection();
+            const selectedText = selection.toString();
+
+            let replacement = '';
+            switch (format) {
+                case 'bold':
+                    replacement = `**${selectedText || 'bold text'}**`;
+                    break;
+                case 'italic':
+                    replacement = `*${selectedText || 'italic text'}*`;
+                    break;
+                case 'strikethrough':
+                    replacement = `~~${selectedText || 'strikethrough text'}~~`;
+                    break;
+                case 'code':
+                    replacement = `\`${selectedText || 'code'}\``;
+                    break;
+                case 'heading':
+                    replacement = `## ${selectedText || 'Heading'}`;
+                    break;
+                case 'link':
+                    replacement = `[${selectedText || 'link text'}](url)`;
+                    break;
+                case 'list':
+                    replacement = `- ${selectedText || 'list item'}`;
+                    break;
+                case 'quote':
+                    replacement = `> ${selectedText || 'quote'}`;
+                    break;
+            }
+
+            // Insert the replacement
+            if (selectedText) {
+                document.execCommand('insertText', false, replacement);
+            } else {
+                document.execCommand('insertText', false, replacement);
+            }
+
+            // Trigger content change
+            onContentChange();
+        }
+
+        function onContentChange() {
+            if (isUpdating) return;
+
+            clearTimeout(debounceTimer);
+            debounceTimer = setTimeout(() => {
+                const editor = document.getElementById('editor');
+                const html = editor.innerHTML;
+
+                // Convert HTML back to Markdown (simplified)
+                const markdown = htmlToMarkdown(html);
+
+                if (markdown !== lastContent) {
+                    lastContent = markdown;
+                    updateCounts();
+
+                    // Send to Android
+                    if (window.Android) {
+                        window.Android.onContentChanged(markdown);
+                    }
+                }
+            }, 300);
+        }
+
+        function htmlToMarkdown(html) {
+            // Simple HTML to Markdown conversion
+            let markdown = html
+                // Remove extra whitespace
+                .replace(/\s+/g, ' ')
+                // Headers
+                .replace(/<h1[^>]*>(.*?)<\/h1>/gi, '# $1\n\n')
+                .replace(/<h2[^>]*>(.*?)<\/h2>/gi, '## $1\n\n')
+                .replace(/<h3[^>]*>(.*?)<\/h3>/gi, '### $1\n\n')
+                .replace(/<h4[^>]*>(.*?)<\/h4>/gi, '#### $1\n\n')
+                .replace(/<h5[^>]*>(.*?)<\/h5>/gi, '##### $1\n\n')
+                .replace(/<h6[^>]*>(.*?)<\/h6>/gi, '###### $1\n\n')
+                // Bold and italic
+                .replace(/<strong[^>]*>(.*?)<\/strong>/gi, '**$1**')
+                .replace(/<em[^>]*>(.*?)<\/em>/gi, '*$1*')
+                .replace(/<s[^>]*>(.*?)<\/s>/gi, '~~$1~~')
+                // Code
+                .replace(/<code[^>]*>(.*?)<\/code>/gi, '`$1`')
+                // Links
+                .replace(/<a[^>]*href="([^"]*)"[^>]*>(.*?)<\/a>/gi, '[$2]($1)')
+                // Images
+                .replace(/<img[^>]*src="([^"]*)"[^>]*alt="([^"]*)"[^>]*>/gi, '![$2]($1)')
+                .replace(/<img[^>]*src="([^"]*)"[^>]*>/gi, '![]($1)')
+                // Blockquotes
+                .replace(/<blockquote[^>]*>(.*?)<\/blockquote>/gi, '> $1\n')
+                // Lists
+                .replace(/<li[^>]*>(.*?)<\/li>/gi, '- $1\n')
+                // Horizontal rules
+                .replace(/<hr[^>]*>/gi, '\n---\n')
+                // Paragraphs
+                .replace(/<p[^>]*>(.*?)<\/p>/gi, '$1\n\n')
+                // Line breaks
+                .replace(/<br[^>]*>/gi, '\n')
+                // Remove remaining tags
+                .replace(/<[^>]+>/g, '')
+                // Clean up whitespace
+                .replace(/
+\s*
+\s*
+/g, '
+
+')
+                .trim();
+
+            return markdown;
+        }
+
+        function updateCounts() {
+            const editor = document.getElementById('editor');
+            const text = editor.textContent || editor.innerText;
+            const lines = text.split('\n').length;
+            const words = text.trim() ? text.trim().split(/\s+/).length : 0;
+
+            document.getElementById('line-count').textContent = `${lines} lines`;
+            document.getElementById('word-count').textContent = `${words} words`;
+        }
+
+        // Set up event listeners
+        document.addEventListener('DOMContentLoaded', function() {
+            const editor = document.getElementById('editor');
+
+            editor.addEventListener('input', onContentChange);
+
+            // Keyboard shortcuts
+            editor.addEventListener('keydown', function(e) {
+                if (e.ctrlKey || e.metaKey) {
+                    switch (e.key.toLowerCase()) {
+                        case 'b':
+                            e.preventDefault();
+                            formatText('bold');
+                            break;
+                        case 'i':
+                            e.preventDefault();
+                            formatText('italic');
+                            break;
+                        case 'k':
+                            e.preventDefault();
+                            formatText('link');
+                            break;
+                    }
+                }
+            });
+        });
+    </script>
+</body>
+</html>

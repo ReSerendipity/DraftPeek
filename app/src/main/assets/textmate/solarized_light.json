@@ -1,0 +1,37 @@
+{
+  "name": "Solarized Light",
+  "type": "light",
+  "colors": {
+    "editor.background": "#FDF6E3",
+    "editor.foreground": "#657B83",
+    "editorLineNumber.foreground": "#93A1A1",
+    "editorLineNumber.activeForeground": "#657B83",
+    "editorCursor.foreground": "#586E75",
+    "editor.selectionBackground": "#EEE8D5",
+    "editor.inactiveSelectionBackground": "#EEE8D5",
+    "editor.lineHighlightBackground": "#EEE8D5",
+    "editorIndentGuide.background": "#EEE8D5",
+    "editorIndentGuide.activeBackground": "#93A1A1",
+    "editorWhitespace.foreground": "#EEE8D5",
+    "editorBracketMatch.background": "#268BD210",
+    "editorBracketMatch.border": "#268BD240"
+  },
+  "tokenColors": [
+    { "settings": { "foreground": "#657B83" } },
+    { "name": "Comments", "scope": ["comment", "punctuation.definition.comment"], "settings": { "foreground": "#93A1A1", "fontStyle": "italic" } },
+    { "name": "Keywords", "scope": ["keyword", "storage.type", "storage.modifier"], "settings": { "foreground": "#859900" } },
+    { "name": "Strings", "scope": ["string", "string.quoted"], "settings": { "foreground": "#2AA198" } },
+    { "name": "Numbers", "scope": ["constant.numeric"], "settings": { "foreground": "#D33682" } },
+    { "name": "Boolean/Null", "scope": ["constant.language"], "settings": { "foreground": "#CB4B16" } },
+    { "name": "Functions", "scope": ["entity.name.function", "support.function"], "settings": { "foreground": "#268BD2" } },
+    { "name": "Types/Classes", "scope": ["entity.name.type", "entity.name.class", "support.type"], "settings": { "foreground": "#B58900" } },
+    { "name": "Variables", "scope": ["variable", "variable.parameter"], "settings": { "foreground": "#657B83" } },
+    { "name": "Operators", "scope": ["keyword.operator"], "settings": { "foreground": "#859900" } },
+    { "name": "Punctuation", "scope": ["punctuation"], "settings": { "foreground": "#657B83" } },
+    { "name": "Annotations", "scope": ["storage.type.annotation", "meta.decorator"], "settings": { "foreground": "#268BD2" } },
+    { "name": "Tags (HTML/XML)", "scope": ["entity.name.tag"], "settings": { "foreground": "#859900" } },
+    { "name": "Tag Attributes", "scope": ["entity.other.attribute-name"], "settings": { "foreground": "#268BD2" } },
+    { "name": "Regex", "scope": ["string.regexp"], "settings": { "foreground": "#CB4B16" } },
+    { "name": "Escape Characters", "scope": ["constant.character.escape"], "settings": { "foreground": "#D33682" } }
+  ]
+}

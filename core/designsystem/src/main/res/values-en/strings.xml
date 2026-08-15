@@ -1,0 +1,24 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="core_designsystem_app_name">DraftPeek</string>
+    <string name="font_inter">Inter</string>
+    <string name="font_inter_desc">Modern sans-serif Latin font, clean and UI-friendly</string>
+    <string name="font_jetbrains_mono">JetBrains Mono</string>
+    <string name="font_jetbrains_mono_desc">Monospace font designed for programming, with ligature support and excellent code readability</string>
+    <string name="font_kaiti">KaiTi</string>
+    <string name="font_kaiti_desc">Calligraphic style font, elegant and literary, ideal for creative content</string>
+    <string name="font_microsoft_yahei">Microsoft YaHei</string>
+    <string name="font_microsoft_yahei_desc">Default Chinese font on Windows, clear strokes and sharp rendering</string>
+    <string name="font_noto_sans_cjk">Noto Sans CJK</string>
+    <string name="font_noto_sans_cjk_desc">Open-source Chinese font by Google, the top choice for on-screen reading with high clarity</string>
+    <string name="font_pingfang_sc">PingFang SC</string>
+    <string name="font_pingfang_sc_desc">Apple system font, clean and elegant, comfortable to read</string>
+    <string name="font_simsun">SimSun</string>
+    <string name="font_simsun_desc">Traditional serif font for long-form reading, classic print style</string>
+    <string name="font_system_mono">System Monospace</string>
+    <string name="font_system_mono_desc">System default monospace font, best compatibility and rendering performance</string>
+    <string name="font_system_sans">System Sans-serif</string>
+    <string name="font_system_sans_desc">System default sans-serif font, best compatibility</string>
+    <string name="font_system_serif">System Serif</string>
+    <string name="font_system_serif_desc">System default serif font, formal and dignified</string>
+</resources>

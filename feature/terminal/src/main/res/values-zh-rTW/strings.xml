@@ -1,0 +1,33 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!-- Terminal UI -->
+    <string name="terminal_title">終端機</string>
+    <string name="terminal_close_session">關閉工作階段</string>
+    <string name="terminal_new_session">新建工作階段</string>
+    <string name="terminal_input_hint">輸入命令…</string>
+    <string name="terminal_send">傳送</string>
+    <string name="terminal_restore">還原終端機</string>
+    <string name="terminal_minimize">最小化</string>
+    <string name="terminal_floating_close">關閉</string>
+
+    <!-- Terminal Service (Ch7#7 P1) -->
+    <string name="terminal_notification_title">終端機執行中</string>
+    <string name="terminal_notification_text">DraftPeek 終端機工作階段正在執行</string>
+    <string name="terminal_notification_stop">停止</string>
+    <string name="terminal_notification_channel_name">終端機服務</string>
+    <string name="terminal_notification_channel_desc">保持終端機工作階段在背景執行</string>
+
+    <!-- Integrated Terminal -->
+    <string name="terminal_cwd_label">目前目錄</string>
+    <string name="terminal_proot_guide_title">首次使用 · 正在準備 Linux 環境</string>
+    <string name="terminal_proot_guide_desc">正在解壓 Linux 執行環境（約50MB），完成後可使用完整終端機功能。注意：終端機可執行任意指令，請僅執行您信任的指令，操作不當可能導致資料遺失</string>
+    <string name="terminal_proot_ready">Linux 環境已就緒</string>
+    <string name="terminal_proot_error">Linux 環境準備失敗</string>
+    <string name="terminal_unavailable_hint">該位置無法開啟終端機</string>
+
+    <!-- Security: Permission for TerminalCommandReceiver (VULN-001) -->
+    <string name="permission_terminal_command_label">Execute Terminal Commands</string>
+    <string name="permission_terminal_command_desc">Allows apps signed with the same key to send terminal commands to DraftPeek</string>
+    <!-- Diff / Encoding dialogs -->
+    <string name="terminal_service_running">命令在背景執行中</string>
+</resources>

@@ -1,0 +1,32 @@
+<?xml version="1.0" encoding="utf-8"?>
+<network-security-config>
+    <!-- 禁止明文 HTTP 流量 -->
+    <base-config cleartextTrafficPermitted="false">
+        <trust-anchors>
+            <certificates src="system" />
+        </trust-anchors>
+    </base-config>
+
+    <!-- SECURITY VULN-017: 证书锁定 api.github.com
+         注意：实际部署前需从可信网络环境（非代理/VPN）获取正确的 pin 值。
+         获取方式：openssl s_client -connect api.github.com:443 | openssl x509 -pubkey -noout |
+         openssl pkey -pubin -outform der | openssl dgst -sha256 -binary | openssl base64 -A
+         当前注释状态：pin 需验证后取消注释启用。-->
+    <!--
+    <domain-config>
+        <domain includeSubdomains="false">api.github.com</domain>
+        <pin-set expiration="2027-08-07">
+            <pin digest="SHA-256">需替换为正确的pin值</pin>
+            <pin digest="SHA-256">需替换为备份pin值</pin>
+        </pin-set>
+    </domain-config>
+    -->
+
+    <!-- Debug 模式下允许开发者工具使用明文流量（如调试 proxy） -->
+    <debug-overrides>
+        <trust-anchors>
+            <certificates src="user" />
+            <certificates src="system" />
+        </trust-anchors>
+    </debug-overrides>
+</network-security-config>

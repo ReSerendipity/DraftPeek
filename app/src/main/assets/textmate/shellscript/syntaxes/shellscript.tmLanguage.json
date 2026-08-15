@@ -1,0 +1,97 @@
+{
+  "information_for_contributors": [
+    "This is a basic shell syntax file for DraftPeek. For a complete syntax, please use a proper TextMate shell grammar."
+  ],
+  "version": "draftpeek-basic-shell",
+  "name": "Shell Script",
+  "scopeName": "source.shell",
+  "patterns": [
+    {
+      "include": "#comment"
+    },
+    {
+      "include": "#string"
+    },
+    {
+      "include": "#variable"
+    },
+    {
+      "include": "#keyword"
+    }
+  ],
+  "repository": {
+    "comment": {
+      "patterns": [
+        {
+          "name": "comment.line.number-sign.shell",
+          "match": "#.*$"
+        }
+      ]
+    },
+    "string": {
+      "patterns": [
+        {
+          "name": "string.quoted.double.shell",
+          "begin": "\"",
+          "end": "\"",
+          "patterns": [
+            {
+              "include": "#escape"
+            },
+            {
+              "include": "#variable"
+            }
+          ]
+        },
+        {
+          "name": "string.quoted.single.shell",
+          "begin": "'",
+          "end": "'"
+        }
+      ]
+    },
+    "escape": {
+      "patterns": [
+        {
+          "name": "constant.character.escape.shell",
+          "match": "\\\\."
+        }
+      ]
+    },
+    "variable": {
+      "patterns": [
+        {
+          "name": "variable.other.normal.shell",
+          "match": "\\$[a-zA-Z_][a-zA-Z0-9_]*"
+        },
+        {
+          "name": "variable.other.special.shell",
+          "match": "\\$[?!@#$*0-9]"
+        },
+        {
+          "name": "variable.other.brace.shell",
+          "begin": "\\$\\{",
+          "end": "\\}",
+          "patterns": [
+            {
+              "name": "variable.other.special.shell",
+              "match": "[a-zA-Z_][a-zA-Z0-9_]*"
+            }
+          ]
+        }
+      ]
+    },
+    "keyword": {
+      "patterns": [
+        {
+          "name": "keyword.control.shell",
+          "match": "\\b(if|then|else|elif|fi|for|while|do|done|case|esac|in|function|return|exit|export|source|alias|unalias|set|unset|readonly|local|declare|typeset|eval|exec|trap|wait|kill|cd|pwd|echo|printf|read|test|shift|unset|getopts|select)\\b"
+        },
+        {
+          "name": "keyword.operator.shell",
+          "match": "\\b(and|or|not|pipe|redirect|append|here|here-string|process-substitution)\\b"
+        }
+      ]
+    }
+  }
+}

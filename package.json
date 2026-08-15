@@ -1,0 +1,10 @@
+{
+  "name": "draftpeek-node-scripts",
+  "description": "Node.js scripts for document export (docx, exceljs, pdfkit, pptxgenjs). Playwright removed — Android E2E uses Macrobenchmark + Firebase Test Lab, not Playwright.",
+  "dependencies": {
+    "docx": "^9.7.1",
+    "exceljs": "^4.4.0",
+    "pdfkit": "^0.19.1",
+    "pptxgenjs": "^4.0.1"
+  }
+}

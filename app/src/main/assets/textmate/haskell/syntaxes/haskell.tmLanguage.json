@@ -1,0 +1,140 @@
+{
+  "$schema": "https://raw.githubusercontent.com/martinring/tmlanguage/master/tmlanguage.json",
+  "name": "Haskell",
+  "scopeName": "source.haskell",
+  "patterns": [
+    { "include": "#comments" },
+    { "include": "#strings" },
+    { "include": "#chars" },
+    { "include": "#numbers" },
+    { "include": "#keywords" },
+    { "include": "#types" },
+    { "include": "#functions" },
+    { "include": "#operators" }
+  ],
+  "repository": {
+    "comments": {
+      "patterns": [
+        {
+          "name": "comment.line.double-dash.haskell",
+          "match": "--.*$"
+        },
+        {
+          "name": "comment.block.haskell",
+          "begin": "\\{-",
+          "end": "-\\}",
+          "patterns": [
+            { "include": "#comments" }
+          ]
+        }
+      ]
+    },
+    "strings": {
+      "patterns": [
+        {
+          "name": "string.quoted.double.haskell",
+          "begin": "\"",
+          "end": "\"",
+          "patterns": [
+            {
+              "name": "constant.character.escape.haskell",
+              "match": "\\\\(NUL|SOH|STX|ETX|EOT|ENQ|ACK|BEL|BS|HT|LF|VT|FF|CR|SO|SI|DLE|DC1|DC2|DC3|DC4|NAK|SYN|ETB|CAN|EM|SUB|ESC|FS|GS|RS|US|SP|DEL|[abfnrtv\\\\\\\"'\\&])"
+            },
+            {
+              "name": "constant.character.escape.haskell",
+              "match": "\\\\o[0-7]+|\\\\x[0-9A-Fa-f]+|\\\\[0-9]+"
+            },
+            {
+              "name": "constant.character.escape.haskell",
+              "match": "\\\\\\^[@A-Z\\[\\]\\\\\\^_]"
+            }
+          ]
+        }
+      ]
+    },
+    "chars": {
+      "patterns": [
+        {
+          "name": "string.quoted.single.haskell",
+          "match": "'(\\\\(NUL|SOH|STX|ETX|EOT|ENQ|ACK|BEL|BS|HT|LF|VT|FF|CR|SO|SI|DLE|DC1|DC2|DC3|DC4|NAK|SYN|ETB|CAN|EM|SUB|ESC|FS|GS|RS|US|SP|DEL|[abfnrtv\\\\\\\"'\\&])|\\\\o[0-7]+|\\\\x[0-9A-Fa-f]+|\\\\[0-9]+|\\\\\\^[@A-Z\\[\\]\\\\\\^_]|[^\\\\'])'"
+        }
+      ]
+    },
+    "numbers": {
+      "patterns": [
+        {
+          "name": "constant.numeric.hex.haskell",
+          "match": "\\b0[xX][0-9A-Fa-f]+\\b"
+        },
+        {
+          "name": "constant.numeric.octal.haskell",
+          "match": "\\b0[oO][0-7]+\\b"
+        },
+        {
+          "name": "constant.numeric.binary.haskell",
+          "match": "\\b0[bB][01]+\\b"
+        },
+        {
+          "name": "constant.numeric.float.haskell",
+          "match": "\\b[0-9]+\\.[0-9]+([eE][+-]?[0-9]+)?\\b"
+        },
+        {
+          "name": "constant.numeric.integer.haskell",
+          "match": "\\b[0-9]+\\b"
+        }
+      ]
+    },
+    "keywords": {
+      "patterns": [
+        {
+          "name": "keyword.control.haskell",
+          "match": "\\b(module|import|where|do|let|in|case|of|if|then|else)\\b"
+        },
+        {
+          "name": "keyword.declaration.haskell",
+          "match": "\\b(data|type|newtype|class|instance|deriving|default|foreign)\\b"
+        },
+        {
+          "name": "keyword.operator.fixity.haskell",
+          "match": "\\b(infix|infixl|infixr)\\b"
+        },
+        {
+          "name": "keyword.other.haskell",
+          "match": "\\b(forall|mdo|proc|rec)\\b"
+        }
+      ]
+    },
+    "types": {
+      "patterns": [
+        {
+          "name": "storage.type.haskell",
+          "match": "\\b[A-Z][a-zA-Z0-9_']*\\b"
+        }
+      ]
+    },
+    "functions": {
+      "patterns": [
+        {
+          "name": "entity.name.function.haskell",
+          "match": "\\b[a-z_][a-zA-Z0-9_']*(?=\\s+[^=]*=)"
+        },
+        {
+          "name": "entity.name.function.haskell",
+          "match": "(?<=\\bforeign\\s+(import|export)\\s+)[a-z_][a-zA-Z0-9_']*"
+        }
+      ]
+    },
+    "operators": {
+      "patterns": [
+        {
+          "name": "keyword.operator.haskell",
+          "match": "(==|/=|<=?|>=?|&&|\\|\\||>>=?|<<=|\\+\\+|\\$\\$?|\\.|\\\\|->|<-|=>|::|@|~)"
+        },
+        {
+          "name": "keyword.operator.arithmetic.haskell",
+          "match": "(\\+|-|\\*|/|\\^|\\*\\*|`div`|`mod`|`rem`|`quot`)"
+        }
+      ]
+    }
+  }
+}

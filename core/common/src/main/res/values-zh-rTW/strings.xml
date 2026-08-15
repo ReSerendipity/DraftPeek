@@ -1,0 +1,52 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!-- Error: Network -->
+    <string name="error_network_no_connection">網路連線不可用</string>
+    <string name="error_network_timeout">網路請求逾時</string>
+    <string name="error_network_general">網路錯誤</string>
+
+    <!-- Error: File Operation -->
+    <string name="error_file_not_found">檔案未找到</string>
+    <string name="error_file_permission_denied">檔案存取權限被拒絕</string>
+
+    <!-- Error: Parse -->
+    <string name="error_parse_unsupported_encoding">不支援的字元編碼</string>
+    <string name="error_parse_json">JSON 解析錯誤</string>
+
+    <!-- Error: System -->
+    <string name="error_out_of_memory">記憶體不足</string>
+    <string name="error_unknown">發生未知錯誤</string>
+
+    <!-- General UI -->
+    <string name="save_in_progress">正在儲存，請稍候…</string>
+    <string name="save_success">儲存成功</string>
+
+    <!-- GitHub URL Validation -->
+    <string name="error_url_too_long">URL 過長（最多 2048 個字元）</string>
+    <string name="error_url_empty">URL 不能為空</string>
+    <string name="error_url_invalid_chars">URL 包含無效字元</string>
+    <string name="error_url_invalid_format">無效的 GitHub URL 格式</string>
+    <string name="error_git_repo_exists">該目錄已存在 Git 儲存庫</string>
+
+    <!-- Git Clone Errors -->
+    <string name="git_error_network">網路連線失敗，請檢查網路後重試</string>
+    <string name="git_error_timeout">網路連線逾時，請檢查網路後重試</string>
+    <string name="git_error_upload_pack">無法連線到 Git 儲存庫，請檢查 URL 或網路後重試</string>
+    <string name="git_error_auth">儲存庫為私有或需要授權，請確認 URL 後重試</string>
+    <string name="git_error_not_found">儲存庫地址無效或儲存庫不存在</string>
+    <string name="git_error_path">目標路徑不存在</string>
+    <string name="git_error_transport">Git 傳輸錯誤：%1$s</string>
+    <string name="git_error_ssl">SSL 握手失敗，請檢查網路或鏡像地址設定</string>
+    <string name="git_error_unknown">未知錯誤</string>
+    <string name="git_error_generic">複製失敗：%1$s，請重試</string>
+
+    <!-- Git Credential Errors -->
+    <string name="git_credential_locked">安全憑證已失效，請重新輸入 Git 憑證</string>
+    <string name="git_credential_save_success">憑證已儲存</string>
+    <string name="git_credential_delete_success">憑證已刪除</string>
+    <string name="git_credential_not_found">未找到該主機的憑證</string>
+
+    <!-- EditorConfig -->
+    <string name="editorconfig_applied">已套用 .editorconfig 設定</string>
+    <string name="editorconfig_not_found">未找到 .editorconfig 檔案</string>
+</resources>

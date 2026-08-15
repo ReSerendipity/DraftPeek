@@ -1,0 +1,28 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="core_designsystem_app_name">撰碼輕覽</string>
+
+    <!-- 字型選項名稱 -->
+    <string name="font_jetbrains_mono">JetBrains Mono</string>
+    <string name="font_system_mono">系統等寬</string>
+    <string name="font_inter">Inter</string>
+    <string name="font_noto_sans_cjk">思源黑體</string>
+    <string name="font_microsoft_yahei">微軟正黑體</string>
+    <string name="font_pingfang_sc">蘋方</string>
+    <string name="font_simsun">宋體</string>
+    <string name="font_kaiti">楷體</string>
+    <string name="font_system_sans">系統無襯線</string>
+    <string name="font_system_serif">系統襯線</string>
+
+    <!-- 字型選項描述 -->
+    <string name="font_jetbrains_mono_desc">專為程式設計的等寬字型，連字支援，程式碼可讀性極佳</string>
+    <string name="font_system_mono_desc">系統預設等寬字型，相容性好，渲染效能最優</string>
+    <string name="font_inter_desc">現代無襯線西文字型，介面清晰，適合UI顯示</string>
+    <string name="font_noto_sans_cjk_desc">Google開源中文字型，螢幕閱讀首選，清晰度高</string>
+    <string name="font_microsoft_yahei_desc">Windows預設中文字型，筆畫清晰，顯示銳利</string>
+    <string name="font_pingfang_sc_desc">蘋果系統字型，簡潔優雅，閱讀舒適</string>
+    <string name="font_simsun_desc">傳統襯線字型，適合長文閱讀，經典印刷風格</string>
+    <string name="font_kaiti_desc">書法風格字型，文藝優雅，適合創意內容</string>
+    <string name="font_system_sans_desc">系統預設無襯線字型，相容性最佳</string>
+    <string name="font_system_serif_desc">系統預設襯線字型，正式莊重</string>
+</resources>

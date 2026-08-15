@@ -1,0 +1,6 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <color name="brand_primary">#C41E3A</color>      <!-- Cinnabar red -->
+    <color name="brand_primary_dark">#7F0F1F</color> <!-- Darker cinnabar -->
+    <color name="brand_accent">#3178C6</color>       <!-- TypeScript blue -->
+</resources>

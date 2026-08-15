@@ -1,0 +1,28 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="core_ui_app_name">DraftPeek</string>
+
+    <!-- 글꼴 옵션 이름 -->
+    <string name="font_jetbrains_mono">JetBrains Mono</string>
+    <string name="font_system_mono">시스템 고정폭</string>
+    <string name="font_inter">Inter</string>
+    <string name="font_noto_sans_cjk">Noto Sans CJK</string>
+    <string name="font_microsoft_yahei">Microsoft YaHei</string>
+    <string name="font_pingfang_sc">PingFang SC</string>
+    <string name="font_simsun">SimSun (송체)</string>
+    <string name="font_kaiti">KaiTi (해서)</string>
+    <string name="font_system_sans">시스템 산세리프</string>
+    <string name="font_system_serif">시스템 세리프</string>
+
+    <!-- 글꼴 옵션 설명 -->
+    <string name="font_jetbrains_mono_desc">프로그래밍용 고정폭 글꼴, 합자 지원, 뛰어난 가독성</string>
+    <string name="font_system_mono_desc">시스템 기본 고정폭 글꼴, 최고의 호환성과 렌더링 성능</string>
+    <string name="font_inter_desc">현대적인 산세리프 서양 글꼴, UI 표시에 적합</string>
+    <string name="font_noto_sans_cjk_desc">Google 오픈소스 CJK 글꼴, 화면 읽기에 최적</string>
+    <string name="font_microsoft_yahei_desc">Windows 기본 중국어 글꼴, 선명하고 깨끗한 렌더링</string>
+    <string name="font_pingfang_sc_desc">Apple 시스템 글꼴, 우아하고 편안한 읽기</string>
+    <string name="font_simsun_desc">전통적인 세리프 글꼴, 장문 읽기에 적합</string>
+    <string name="font_kaiti_desc">서예 스타일, 예술적이고 우아함</string>
+    <string name="font_system_sans_desc">시스템 기본 산세리프, 최고의 호환성</string>
+    <string name="font_system_serif_desc">시스템 기본 세리프, 격식 있고 클래식</string>
+</resources>

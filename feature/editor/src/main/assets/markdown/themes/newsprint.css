@@ -1,0 +1,18 @@
+/* Newsprint / newspaper style theme */
+:root.newsprint {
+  --bg-color: #f8f5f0;
+  --text-color: #2c2c2c;
+  --code-bg: #ede8e0;
+  --border-color: #c9c4bc;
+  --link-color: #8b4513;
+  --table-border: #c9c4bc;
+  --table-header-bg: #ede8e0;
+  --blockquote-border: #8b4513;
+  --blockquote-bg: #f0ebe4;
+  font-family: 'Georgia', 'Times New Roman', serif;
+  font-size: 16px;
+  line-height: 1.8;
+}
+.newsprint h1, .newsprint h2 { font-family: 'Georgia', serif; border-bottom: 2px solid var(--text-color); }
+.newsprint h1 { font-size: 2em; text-transform: uppercase; letter-spacing: 2px; }
+.newsprint h2 { font-size: 1.5em; }

@@ -1,0 +1,101 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="app_name">撰碼輕覽</string>
+
+    <!-- MainActivity navigation labels -->
+    <string name="app_nav_file_browser">檔案瀏覽</string>
+    <string name="app_nav_stats">統計</string>
+    <string name="app_nav_settings">設定</string>
+    <string name="app_nav_me">我的</string>
+    <string name="app_nav_files">檔案</string>
+
+    <!-- MainActivity titles -->
+    <string name="app_title_split_view">分割檢視</string>
+    <string name="app_title_file_browser">檔案瀏覽</string>
+    <string name="app_title_profile">我的</string>
+    <string name="app_title_editor_home">編輯器</string>
+    <string name="app_title_editor">編輯器</string>
+    <string name="app_title_settings">設定</string>
+    <string name="app_title_stats">使用統計</string>
+    <string name="app_title_snippets">程式碼片段</string>
+    <string name="app_title_sample_files">範例檔案</string>
+    <string name="app_title_terminal">終端機</string>
+    <string name="app_title_default">撰碼輕覽</string>
+
+    <!-- MainActivity actions -->
+    <string name="app_action_close_split">關閉分割</string>
+    <string name="app_action_open_split">開啟分割</string>
+    <string name="app_action_navigate_back">返回</string>
+
+    <!-- DraftPeekNavHost -->
+    <string name="app_hint_select_file_editor">選擇檔案以在編輯器中開啟</string>
+    <string name="app_hint_select_file_editor_home">開啟檔案以開始編輯</string>
+
+    <!-- Browser screen -->
+    <string name="browser_continue_editing">繼續編輯</string>
+    <string name="browser_search_hint">搜尋檔案…</string>
+    <string name="browser_new_file">新建檔案</string>
+    <string name="browser_open_file">開啟檔案</string>
+    <string name="browser_directories">目錄</string>
+    <string name="browser_template_empty">空檔案</string>
+    <string name="browser_template_hello">Hello World</string>
+    <string name="browser_template_class">類別範本</string>
+    <string name="browser_edited_ago">%1$s前編輯</string>
+
+    <!-- Profile screen -->
+    <string name="profile_title">我的</string>
+    <string name="profile_stat_edits">編輯</string>
+    <string name="profile_stat_files">檔案</string>
+    <string name="profile_stat_active_days">活躍天</string>
+    <string name="profile_section_stats">統計</string>
+    <string name="profile_section_activity">活動</string>
+    <string name="profile_section_settings">設定</string>
+
+    <!-- Security -->
+    <string name="security_operation_restricted">安全校驗未通過，此操作暫時不可用</string>
+
+    <!-- AI Protection: security status notification -->
+    <string name="security_notification_channel_security_status">安全狀態</string>
+    <string name="security_notification_official_title">官方版本驗證通過</string>
+    <string name="security_notification_official_text">簽章 SHA-256 已校驗</string>
+    <string name="security_notification_unofficial_title">非官方版本！風險警告</string>
+    <string name="security_notification_unofficial_text">此 APK 可能被篡改，存在帳號/資料被盜風險。點擊查看詳情。</string>
+
+    <!-- AI Protection: legal warning dialogs -->
+    <string name="security_legal_warning_title_warning">安全警告</string>
+    <string name="security_legal_warning_title_locked">安全鎖定</string>
+    <string name="security_legal_warning_title_tampered">偵測到非官方 APK</string>
+    <string name="security_legal_warning_action_uninstall">前往解除安裝</string>
+    <string name="security_legal_warning_action_download_official">下載官方版</string>
+    <string name="security_legal_warning_action_acknowledge_risk">我已知曉風險</string>
+
+    <!-- AI Protection: splash tamper warning -->
+    <string name="security_splash_tamper_title">偵測到非官方 APK</string>
+    <string name="security_splash_tamper_risk_1">資料竊取風險</string>
+    <string name="security_splash_tamper_risk_2">廣告注入風險</string>
+    <string name="security_splash_tamper_risk_3">惡意程式碼植入風險</string>
+
+    <!-- AI Protection: security status section -->
+    <string name="security_status_section_title">安全狀態</string>
+    <string name="security_status_signature_verified">簽章校驗：✅ 已驗證官方</string>
+    <string name="security_status_signature_unverified">簽章校驗：❌ 非官方</string>
+    <string name="security_status_dex_passed">DEX 完整性：✅ 通過</string>
+    <string name="security_status_dex_failed">DEX 完整性：❌ 已修改</string>
+    <string name="security_status_environment_safe">執行時環境：安全</string>
+    <string name="security_status_environment_suspicious">執行時環境：可疑</string>
+    <string name="security_status_environment_hostile">執行時環境：敵對</string>
+    <string name="security_status_recheck">重新校驗</string>
+    <string name="security_status_export_report">匯出安全事件報告</string>
+    <string name="security_status_clear_logs">清空安全事件日誌</string>
+    <string name="security_ai_threat_detected">security_ai_threat_detected</string>
+
+    <!-- Encrypted export (.jenc) -->
+    <string name="encrypted_export_extension">.jenc</string>
+    <string name="encrypted_export_description">AES-256-GCM 加密匯出檔案</string>
+
+    <!-- Glance AppWidget -->
+    <string name="widget_recent_files_title">最近檔案</string>
+    <string name="widget_no_recent_files">暫無最近檔案</string>
+    <string name="widget_description">快速存取最近開啟的檔案</string>
+    <string name="widget_loading">載入中…</string>
+</resources>

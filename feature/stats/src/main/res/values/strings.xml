@@ -1,0 +1,328 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="stats_title">使用统计</string>
+    <string name="stats_tab_overview">概览</string>
+    <string name="stats_tab_calendar">日历</string>
+    <string name="stats_filter_all">全部</string>
+    <string name="stats_filter_30d">30天</string>
+    <string name="stats_filter_7d">7天</string>
+    <string name="stats_card_file_opens">会话</string>
+    <string name="stats_card_text_edits">代码编辑</string>
+    <string name="stats_card_other_ops">其他操作</string>
+    <string name="stats_card_preview">代码预览</string>
+    <string name="stats_card_search">搜索</string>
+    <string name="stats_card_snippets">片段</string>
+    <string name="stats_card_diffs">对比</string>
+    <string name="stats_card_active_days">活跃天数</string>
+    <string name="stats_card_current_streak">当前连续</string>
+    <string name="stats_card_longest_streak">最长连续</string>
+    <string name="stats_card_peak_hour">峰值时段</string>
+    <string name="stats_card_favorite_type">偏好语言</string>
+    <string name="stats_no_data">暂无活动数据</string>
+    <string name="stats_no_data_hint">打开或编辑一个文件开始记录你的创作历程</string>
+    <string name="stats_open_editor">去编辑</string>
+    <string name="stats_year_label">年</string>
+    <string name="stats_less">少</string>
+    <string name="stats_more">多</string>
+    <string name="stats_contributions_format">过去一年内共有 %1$d 次活动</string>
+    <string name="stats_day_detail_title">%1$s 活动详情</string>
+    <string name="stats_day_file_opens">文件打开：%1$d</string>
+    <string name="stats_day_text_edits">文本编辑：%1$d</string>
+    <string name="stats_day_other_ops">其他操作：%1$d</string>
+    <string name="stats_peak_hour_format">%1$02d:00</string>
+    <string name="stats_streak_day">%1$d天</string>
+    <string name="stats_error_load_failed">加载统计数据失败</string>
+    <string name="stats_retry">重试</string>
+    <string name="stats_close">关闭</string>
+    <string name="stats_export_csv">导出 CSV</string>
+    <string name="stats_export_image">导出图片</string>
+    <string name="stats_export_success">已导出到下载目录</string>
+    <string name="stats_export_failed">导出失败</string>
+    <string name="stats_overview_title">接下来做什么?</string>
+    <string name="stats_overview_models"></string>
+    <string name="stats_learn_counting">了解活动计数方式</string>
+
+    <!-- ProfileScreen -->
+    <string name="profile_page_title">我的</string>
+    <string name="profile_title">我的</string>
+    <string name="profile_section_stats">统计</string>
+    <string name="profile_section_activity">活动</string>
+    <string name="profile_section_settings">设置</string>
+    <string name="profile_section_editor">编辑器设置</string>
+    <string name="profile_section_appearance">外观</string>
+    <string name="profile_section_about">关于</string>
+    <string name="profile_open_source_license">开源许可</string>
+    <string name="profile_oss_dialog_text">本应用内置 proot（GPL-2.0）等开源组件。完整许可文本已随包提供（应用资源 assets/licenses/GPL-2.0.txt），相关组件源码可通过下方按钮查看。</string>
+    <string name="profile_oss_dialog_source">查看 proot 源码</string>
+    <string name="profile_oss_dialog_close">关闭</string>
+    <string name="profile_section_danger">危险区域</string>
+    <string name="profile_stat_edits">编辑</string>
+    <string name="profile_stat_files">文件</string>
+    <string name="profile_stat_operations">次操作</string>
+    <string name="profile_stat_active_days">活跃天</string>
+    <string name="profile_stat_files_created">打开文件</string>
+    <string name="profile_stat_lines_written">编写行数</string>
+    <string name="profile_stat_hours_coded">编码时长</string>
+    <string name="profile_period_year">年</string>
+    <string name="profile_period_month">月</string>
+    <string name="profile_period_week">周</string>
+    <string name="profile_stats_range_today">今天</string>
+    <string name="profile_stats_range_week">本周</string>
+    <string name="profile_stats_range_month">本月</string>
+    <string name="profile_stats_range_year">全年</string>
+    <string name="profile_legend_less">少</string>
+    <string name="profile_legend_more">多</string>
+    <string name="profile_activity_placeholder">活动热力图将在此显示</string>
+    <string name="profile_activity_empty_title">暂无活动记录</string>
+    <string name="profile_activity_empty_hint">打开或编辑文件即可开始记录</string>
+    <string name="profile_no_activity_data">暂无活动数据</string>
+    <string name="profile_no_activity_hint">打开或编辑文件即可开始记录活动</string>
+    <string name="profile_setting_theme">主题</string>
+    <string name="profile_setting_theme_system">跟随系统</string>
+    <string name="profile_setting_dark_mode">深色模式</string>
+    <string name="profile_setting_font_size">代码字体大小</string>
+    <string name="profile_setting_font_family">字体选择</string>
+    <string name="profile_setting_tab_width">制表符宽度</string>
+    <string name="profile_setting_line_wrapping">自动换行</string>
+    <string name="profile_setting_off">关</string>
+    <string name="profile_setting_encoding">编码格式</string>
+    <string name="profile_setting_auto_save">自动保存</string>
+    <string name="profile_setting_auto_save_value">30s</string>
+    <string name="profile_setting_version">版本</string>
+    <string name="profile_setting_licenses">开源许可</string>
+    <string name="profile_setting_source_code">开源许可</string>
+    <string name="profile_setting_check_updates">检查更新</string>
+    <string name="profile_setting_clear_cache">清除缓存</string>
+    <string name="profile_setting_reset_settings">重置设置</string>
+    <string name="profile_section_recent_files">最近文件</string>
+    <string name="profile_setting_language">语言</string>
+    <string name="profile_setting_on">开</string>
+    <string name="profile_setting_theme_light">浅色</string>
+    <string name="profile_setting_theme_dark">深色</string>
+    <string name="profile_setting_language_system">跟随系统</string>
+    <string name="profile_setting_language_zh">中文</string>
+    <string name="profile_setting_language_zh_tw">繁體中文</string>
+    <string name="profile_setting_language_en">English</string>
+    <string name="profile_setting_language_ja">日本語</string>
+    <string name="profile_setting_language_ko">한국어</string>
+    <string name="profile_setting_font_size_format">%dsp</string>
+    <string name="profile_setting_tab_width_format">%d格</string>
+    <string name="profile_setting_auto_save_interval_format">%d秒</string>
+    <string name="profile_dialog_confirm">确定</string>
+    <string name="profile_dialog_close">关闭</string>
+    <string name="profile_theme_dialog_title">选择主题</string>
+    <string name="profile_language_dialog_title">选择语言</string>
+    <string name="profile_font_size_dialog_title">字体大小</string>
+    <string name="profile_tab_width_dialog_title">制表符宽度</string>
+    <string name="profile_setting_recent_files_limit">最近打开数量</string>
+    <string name="profile_recent_files_limit_dialog_title">最近打开数量</string>
+    <string name="profile_recent_files_limit_count">%d 个</string>
+    <string name="profile_encoding_dialog_title">默认编码格式</string>
+    <string name="profile_empty_no_history">暂无文件历史</string>
+    <string name="profile_setting_auto_save_interval">自动保存间隔</string>
+    <string name="profile_view_all">查看全部</string>
+    <string name="profile_setting_show_line_numbers">显示行号</string>
+    <string name="profile_setting_auto_indent">自动缩进</string>
+    <string name="profile_setting_highlight_current_line">高亮当前行</string>
+    <string name="profile_setting_indent_guides">缩进参考线</string>
+    <string name="profile_setting_sticky_scroll">粘性滚动</string>
+    <string name="profile_setting_snippets">代码片段</string>
+    <string name="profile_auto_save_interval_dialog_title">自动保存间隔</string>
+    <string name="profile_footer_made_with">由 DraftPeek 打造</string>
+    <string name="profile_footer_for_devs">为开发者而生</string>
+    <string name="profile_dialog_cancel">取消</string>
+    <string name="profile_dialog_reset_title">重置设置</string>
+    <string name="profile_dialog_reset_message">确定要将所有设置重置为默认值吗？此操作无法撤销。</string>
+    <string name="profile_dialog_reset_confirm">重置</string>
+    <string name="profile_dialog_clear_cache_title">清除缓存</string>
+    <string name="profile_dialog_clear_cache_message">清除临时缓存文件？这不会删除您的文档或设置。</string>
+    <string name="profile_dialog_clear_cache_confirm">清除</string>
+    <string name="profile_cache_cleared">缓存已清除</string>
+    <string name="profile_dialog_font_family_title">字体选择</string>
+    <string name="profile_font_jetbrains_mono">JetBrains Mono（默认）</string>
+    <string name="profile_font_system_sans">系统无衬线</string>
+    <string name="profile_font_system_serif">系统衬线</string>
+    <string name="profile_font_editor_hint">编辑器字体</string>
+    <string name="profile_tab_width_spaces">%d 空格</string>
+    <string name="profile_quick_settings">快捷设置</string>
+    <string name="profile_weekday_mon">一</string>
+    <string name="profile_weekday_tue">二</string>
+    <string name="profile_weekday_wed">三</string>
+    <string name="profile_weekday_thu">四</string>
+    <string name="profile_weekday_fri">五</string>
+    <string name="profile_weekday_sat">六</string>
+    <string name="profile_weekday_sun">日</string>
+    <string name="profile_month_jan">1</string>
+    <string name="profile_month_feb">2</string>
+    <string name="profile_month_mar">3</string>
+    <string name="profile_month_apr">4</string>
+    <string name="profile_month_may">5</string>
+    <string name="profile_month_jun">6</string>
+    <string name="profile_month_jul">7</string>
+    <string name="profile_month_aug">8</string>
+    <string name="profile_month_sep">9</string>
+    <string name="profile_month_oct">10</string>
+    <string name="profile_month_nov">11</string>
+    <string name="profile_month_dec">12</string>
+    <string name="profile_default_user_name">用户</string>
+    <string name="profile_edit_user_name_title">编辑用户名</string>
+    <string name="profile_edit_user_name_hint">请输入用户名</string>
+    <string name="profile_select_avatar">选择头像</string>
+
+    <!-- Accessibility Settings -->
+    <string name="accessibility_page_title">无障碍</string>
+    <string name="accessibility_section_visual">视觉辅助</string>
+    <string name="accessibility_section_hearing">听觉辅助</string>
+    <string name="accessibility_section_motor">操作辅助</string>
+    <string name="accessibility_section_screen_reader">屏幕阅读器</string>
+
+    <string name="accessibility_color_blind_mode">色盲模式</string>
+    <string name="accessibility_color_blind_mode_none">关闭</string>
+    <string name="accessibility_color_blind_mode_protanopia">红色盲</string>
+    <string name="accessibility_color_blind_mode_deuteranopia">绿色盲</string>
+    <string name="accessibility_color_blind_mode_tritanopia">蓝色盲</string>
+    <string name="accessibility_color_blind_mode_desc">调整界面色彩以适配不同色盲类型</string>
+
+    <string name="accessibility_high_contrast">高对比度模式</string>
+    <string name="accessibility_high_contrast_desc">增强前景与背景的对比度，符合 WCAG 2.1 AA 标准</string>
+
+    <string name="accessibility_text_scale">界面文字缩放</string>
+    <string name="accessibility_text_scale_desc">调整界面文字的缩放比例</string>
+    <string name="accessibility_text_scale_small">小</string>
+    <string name="accessibility_text_scale_normal">标准</string>
+    <string name="accessibility_text_scale_large">大</string>
+    <string name="accessibility_text_scale_xlarge">超大</string>
+
+    <string name="accessibility_non_color_indicators">非色彩标识</string>
+    <string name="accessibility_non_color_indicators_desc">为依赖颜色的界面元素添加图标、形状和文本标签</string>
+
+    <string name="accessibility_screen_reader_optimized">屏幕阅读器优化</string>
+    <string name="accessibility_screen_reader_optimized_desc">增强界面语义信息，适配 TalkBack 等屏幕阅读器</string>
+
+    <string name="accessibility_vibration_feedback">振动反馈</string>
+    <string name="accessibility_vibration_feedback_desc">在重要操作和通知时提供振动提示</string>
+
+    <string name="accessibility_visual_cues">视觉提示</string>
+    <string name="accessibility_visual_cues_desc">为所有音频信息提供视觉替代方案</string>
+
+    <string name="accessibility_voice_control">语音控制</string>
+    <string name="accessibility_voice_control_desc">支持通过语音指令执行核心操作</string>
+
+    <string name="accessibility_test_vibration">测试振动</string>
+    <string name="accessibility_wcag_info">本应用的无障碍功能遵循 WCAG 2.1 AA 级标准</string>
+    <string name="profile_section_accessibility">无障碍</string>
+    <string name="profile_section_network">网络</string>
+    <string name="profile_setting_github_mirror">GitHub 镜像</string>
+    <string name="profile_setting_github_mirror_hint">留空则直接访问 github.com</string>
+    <string name="profile_github_mirror_dialog_title">GitHub 镜像地址</string>
+    <string name="profile_github_mirror_dialog_hint">例如: https://ghproxy.net</string>
+
+    <!-- Font selection dialog -->
+    <string name="font_tab_code">代码字体</string>
+    <string name="font_tab_ui">界面字体</string>
+    <string name="font_preview_text">中文预览 字体效果 The quick brown fox jumps over the lazy dog. 0123456789</string>
+
+    <!-- Stats New UI Components -->
+    <string name="stats_period_summary">汇总</string>
+    <string name="stats_period_year">本年</string>
+    <string name="stats_period_month">本月</string>
+    <string name="stats_period_week">本周</string>
+    <string name="stats_period_today">今天</string>
+    <string name="stats_period_yesterday">昨天</string>
+    <string name="stats_card_usage_duration">使用时长</string>
+    <string name="stats_card_chars_written">书写字符</string>
+    <string name="stats_card_files_read">阅读文件</string>
+    <string name="stats_card_files_created">创建文件</string>
+    <string name="stats_greeting_hello">你好！%1$s</string>
+    <string name="stats_greeting_days">这是你使用 DraftPeek 的第 %1$d 天</string>
+    <string name="stats_achievements_empty">继续使用以解锁成就...</string>
+    <string name="stats_achievements_title">成就</string>
+    <string name="stats_achievement_unlocked_count">已解锁</string>
+    <string name="stats_achievement_locked_count">待解锁</string>
+    <string name="stats_achievement_completion">完成度</string>
+    <string name="stats_day_detail_format">%1$d年%2$d月%3$d日</string>
+    <string name="stats_unit_min">分钟</string>
+    <string name="stats_unit_hour">小时</string>
+    <string name="stats_unit_chars">字</string>
+    <string name="stats_unit_files">个</string>
+    <string name="stats_unit_percent">%%</string>
+    <string name="stats_day_detail_month_day_format">%1$d月%2$d日</string>
+    <string name="stats_weekday_mon">星期一</string>
+    <string name="stats_weekday_tue">星期二</string>
+    <string name="stats_weekday_wed">星期三</string>
+    <string name="stats_weekday_thu">星期四</string>
+    <string name="stats_weekday_fri">星期五</string>
+    <string name="stats_weekday_sat">星期六</string>
+    <string name="stats_weekday_sun">星期日</string>
+
+    <!-- Feedback & Social -->
+    <string name="profile_section_feedback">反馈问题</string>
+    <string name="profile_section_social">社交账号</string>
+    <string name="profile_feedback_title">反馈问题</string>
+    <string name="profile_feedback_description_hint">请详细描述您遇到的问题...</string>
+    <string name="profile_feedback_upload_screenshot">添加截图（可选）</string>
+    <string name="profile_feedback_screenshot_attached">已添加 %d 张截图</string>
+    <string name="profile_feedback_screenshot_remove">移除截图</string>
+    <string name="profile_feedback_no_email_client">未找到邮件客户端，请直接发送邮件反馈</string>
+    <string name="profile_feedback_email_subject">DraftPeek 用户反馈</string>
+    <string name="profile_feedback_hint">请详细描述您遇到的问题、复现步骤和设备信息，我们会尽快处理</string>
+    <string name="profile_feedback_submit">通过邮件发送反馈</string>
+    <string name="profile_feedback_thanks">反馈邮件已准备好，请在邮件客户端中发送</string>
+    <string name="profile_feedback_failed">无法打开邮件客户端</string>
+    <string name="profile_social_wechat">微信</string>
+    <string name="profile_social_weibo">微博</string>
+    <string name="profile_social_douyin">抖音</string>
+    <string name="profile_social_bilibili">B站</string>
+    <string name="profile_social_xiaohongshu">小红书</string>
+    <string name="profile_social_kuaishou">快手</string>
+    <string name="profile_social_github">GitHub</string>
+    <string name="profile_social_follow_us">关注我们</string>
+    <string name="profile_social_open_failed">无法打开该应用</string>
+    <string name="profile_social_coming_soon">敬请期待</string>
+
+    <!-- Feature Flags -->
+    <string name="stats_feature_flags_section">功能开关</string>
+    <string name="feature_flag_lsp_client">LSP 语言服务器（智能补全）</string>
+    <string name="feature_flag_terminal">内置终端模拟器</string>
+    <string name="feature_flag_tree_sitter">Tree-sitter 增量语法高亮</string>
+    <string name="feature_flag_markdown_wysiwyg">所见即所得 Markdown 编辑</string>
+    <string name="feature_flag_markdown_editor">Markdown 编辑工具栏</string>
+    <string name="feature_flag_git_ui">Git 版本控制操作</string>
+    <string name="feature_flag_commonmark_parser">CommonMark 原生 Markdown 解析</string>
+    <string name="feature_flag_feature_toggle">运行时功能开关系统</string>
+
+    <!-- Security -->
+    <string name="security_operation_restricted">安全校验未通过，此操作暂时不可用</string>
+
+    <!-- AI Protection: security status section -->
+    <string name="security_status_section_title">安全状态</string>
+    <string name="security_status_signature_verified">签名校验：✅ 已验证官方</string>
+    <string name="security_status_signature_unverified">签名校验：❌ 非官方</string>
+    <string name="security_status_dex_passed">DEX 完整性：✅ 通过</string>
+    <string name="security_status_dex_failed">DEX 完整性：❌ 已修改</string>
+    <string name="security_status_environment_safe">运行时环境：安全</string>
+    <string name="security_status_environment_suspicious">运行时环境：可疑</string>
+    <string name="security_status_environment_hostile">运行时环境：敌对</string>
+    <string name="security_status_recheck">重新校验</string>
+    <string name="security_status_export_report">导出安全事件报告</string>
+    <string name="security_status_clear_logs">清空安全事件日志</string>
+
+    <!-- App Verification -->
+    <string name="profile_verify_app">验证应用</string>
+    <string name="profile_verify_app_title">应用真伪验证</string>
+    <string name="profile_verify_app_description">点击下方按钮验证当前应用的签名证书指纹，确保您使用的是官方正版应用。</string>
+    <string name="profile_verify_app_button">开始验证</string>
+    <string name="profile_verify_app_success">应用验证通过：正版应用</string>
+    <string name="profile_verify_app_failed">应用验证失败：可能已被篡改</string>
+    <string name="profile_verify_app_error">验证过程出错</string>
+    <string name="profile_verify_fingerprint_label">签名证书指纹：</string>
+    <string name="profile_verify_fingerprint_hint">请对比以下指纹与官方发布的指纹是否一致</string>
+
+    <!-- Markdown Theme & Custom CSS -->
+    <string name="profile_setting_markdown_theme">Markdown 预览主题</string>
+    <string name="profile_setting_custom_css">自定义 CSS</string>
+    <string name="profile_setting_custom_css_hint">未设置</string>
+    <string name="profile_custom_css_dialog_title">自定义 CSS</string>
+    <string name="profile_custom_css_dialog_hint">输入自定义 CSS</string>
+    <string name="profile_custom_css_dialog_description">自定义 CSS 将应用于 Markdown 预览页面</string>
+</resources>

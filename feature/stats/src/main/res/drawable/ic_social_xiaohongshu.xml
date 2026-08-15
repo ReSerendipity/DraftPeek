@@ -1,0 +1,39 @@
+<vector xmlns:android="http://schemas.android.com/apk/res/android"
+    android:width="24dp"
+    android:height="24dp"
+    android:viewportWidth="24"
+    android:viewportHeight="24">
+    <!-- Xiaohongshu/小红书 - open book icon, brand red -->
+    <!-- Left page (slightly curved) -->
+    <path
+        android:fillColor="#FF2442"
+        android:pathData="M11.8,5.5 L6.2,5.5 C5.0,5.5 4.0,6.5 4.0,7.7 L4.0,18.3 C4.0,18.9 4.4,19.3 5.0,19.3 L11.0,19.3 L11.0,4.5 C11.0,4.5 11.8,4.5 11.8,5.5 Z" />
+    <!-- Right page (slightly curved) -->
+    <path
+        android:fillColor="#FF2442"
+        android:pathData="M12.2,5.5 L17.8,5.5 C19.0,5.5 20.0,6.5 20.0,7.7 L20.0,18.3 C20.0,18.9 19.6,19.3 19.0,19.3 L13.0,19.3 L13.0,4.5 C13.0,4.5 12.2,4.5 12.2,5.5 Z" />
+    <!-- Book spine (thin white gap) -->
+    <path
+        android:fillColor="#FFFFFF"
+        android:pathData="M11.0,4.5 L11.0,19.3 L13.0,19.3 L13.0,4.5 Z" />
+    <!-- Left page text lines -->
+    <path
+        android:fillColor="#FFFFFF"
+        android:pathData="M6.5,9.0 L10.0,9.0 L10.0,10.0 L6.5,10.0 Z" />
+    <path
+        android:fillColor="#FFFFFF"
+        android:pathData="M6.5,11.5 L9.5,11.5 L9.5,12.5 L6.5,12.5 Z" />
+    <path
+        android:fillColor="#FFFFFF"
+        android:pathData="M6.5,14.0 L8.5,14.0 L8.5,15.0 L6.5,15.0 Z" />
+    <!-- Right page text lines -->
+    <path
+        android:fillColor="#FFFFFF"
+        android:pathData="M14.0,9.0 L17.5,9.0 L17.5,10.0 L14.0,10.0 Z" />
+    <path
+        android:fillColor="#FFFFFF"
+        android:pathData="M14.0,11.5 L17.0,11.5 L17.0,12.5 L14.0,12.5 Z" />
+    <path
+        android:fillColor="#FFFFFF"
+        android:pathData="M14.0,14.0 L16.0,14.0 L16.0,15.0 L14.0,15.0 Z" />
+</vector>

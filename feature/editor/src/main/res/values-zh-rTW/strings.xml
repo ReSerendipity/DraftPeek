@@ -1,0 +1,385 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources xmlns:tools="http://schemas.android.com/tools">
+    <!-- Common -->
+    <string name="editor_cancel">取消</string>
+    <string name="editor_close">關閉</string>
+    <string name="editor_confirm">確定</string>
+    <string name="editor_back">返回</string>
+    <string name="editor_retry">重試</string>
+    <string name="editor_init_failed">編輯器初始化失敗</string>
+    <string name="editor_init_timeout">編輯器初始化逾時，請重試</string>
+
+    <!-- Quick actions (used by CommandPalette) -->
+    <string name="editor_action_new_file">新建檔案</string>
+    <string name="editor_action_open_file">開啟檔案</string>
+    <string name="editor_action_snippets">程式碼片段</string>
+
+    <!-- Dialog: Unsaved changes -->
+    <string name="editor_unsaved_changes">未儲存的修改</string>
+    <string name="editor_tab_close_modified_message">「%1$s」已修改但未儲存，確定關閉嗎？</string>
+    <string name="editor_tab_file">檔案</string>
+    <string name="editor_saving_file">正在儲存檔案，請稍候…</string>
+    <string name="editor_unsaved_exit_message">檔案已修改但未儲存，是否退出？</string>
+    <string name="editor_wait_save">等待儲存</string>
+    <string name="editor_discard_changes">放棄修改</string>
+
+    <!-- Dialog: Go to line -->
+    <string name="editor_go_to_line">跳轉到行</string>
+    <string name="editor_line_number_range">行號 (1-%1$d)</string>
+    <string name="editor_enter_line_number">請輸入行號</string>
+    <string name="editor_enter_valid_line">請輸入有效的行號</string>
+    <string name="editor_out_of_range">超出範圍，文件共 %1$d 行</string>
+    <string name="editor_go">跳轉</string>
+
+    <!-- Search / Replace -->
+    <string name="editor_find">搜尋</string>
+    <string name="editor_find_content">搜尋內容</string>
+    <string name="editor_regex">.*</string>
+    <string name="editor_match_case">Aa</string>
+    <string name="editor_whole_word">W</string>
+    <string name="editor_replace">取代</string>
+    <string name="editor_replace_with">取代為</string>
+    <string name="editor_replace_all">全部取代</string>
+    <string name="editor_search">搜尋</string>
+    <string name="editor_search_content">搜尋內容</string>
+    <string name="editor_no_match_found">未找到符合結果</string>
+    <string name="editor_line_snippet">行%1$s: %2$s</string>
+
+    <!-- Snippet -->
+    <string name="editor_save_as_snippet">儲存為程式碼片段</string>
+    <string name="editor_snippet_title">標題</string>
+    <string name="editor_snippet_content">程式碼內容</string>
+    <string name="editor_snippet_category">分類</string>
+    <string name="editor_uncategorized">未分類</string>
+    <string name="editor_insert_snippet">插入程式碼片段</string>
+    <string name="editor_no_snippets">暫無已儲存的程式碼片段</string>
+
+    <!-- Format action content descriptions -->
+    <string name="editor_action_bold">粗體</string>
+    <string name="editor_action_italic">斜體</string>
+    <string name="editor_action_strikethrough">刪除線</string>
+    <string name="editor_action_highlight">反白</string>
+    <string name="editor_action_underline">底線</string>
+    <string name="editor_action_inline_code">行內程式碼</string>
+    <string name="editor_action_inline_formula">行內公式</string>
+    <string name="editor_action_heading_1">一級標題</string>
+    <string name="editor_action_heading_2">二級標題</string>
+    <string name="editor_action_heading_3">三級標題</string>
+    <string name="editor_action_unordered_list">無序清單</string>
+    <string name="editor_action_ordered_list">有序清單</string>
+    <string name="editor_action_task_list">任務清單</string>
+    <string name="editor_action_toggle_list">切換清單類型</string>
+    <string name="editor_action_link">連結</string>
+    <string name="editor_action_image_link">圖片連結</string>
+    <string name="editor_action_insert_image">插入圖片</string>
+    <string name="editor_action_code_block">程式碼區塊</string>
+    <string name="editor_action_table">表格</string>
+    <string name="editor_action_math_formula">數學公式</string>
+    <string name="editor_action_blockquote">引用</string>
+    <string name="editor_action_horizontal_rule">分隔線</string>
+    <string name="editor_action_superscript">上標</string>
+    <string name="editor_action_subscript">下標</string>
+    <string name="editor_action_insert_link_dialog">插入連結</string>
+    <string name="editor_action_insert_image_dialog">插入圖片</string>
+    <string name="editor_action_insert_table">插入表格</string>
+    <string name="editor_action_code_block_lang">程式碼區塊（選擇語言）</string>
+    <string name="editor_action_mermaid">Mermaid 圖表</string>
+
+    <!-- Toolbar -->
+    <string name="editor_toolbar_more">更多</string>
+
+    <!-- Insert link dialog -->
+    <string name="editor_insert_link_title">插入連結</string>
+    <string name="editor_insert_link_text">連結文字</string>
+    <string name="editor_insert_link_url">連結網址</string>
+    <string name="editor_insert_link_text_hint">請輸入連結文字</string>
+    <string name="editor_insert_link_url_hint">https://example.com</string>
+
+    <!-- Insert image dialog -->
+    <string name="editor_insert_image_title">插入圖片</string>
+    <string name="editor_insert_image_alt">替代文字</string>
+    <string name="editor_insert_image_url">圖片網址</string>
+    <string name="editor_insert_image_alt_hint">請輸入圖片描述</string>
+    <string name="editor_insert_image_url_hint">https://example.com/image.png</string>
+
+    <!-- Insert table dialog -->
+    <string name="editor_insert_table_title">插入表格</string>
+    <string name="editor_insert_table_rows">列數</string>
+    <string name="editor_insert_table_cols">欄數</string>
+    <string name="editor_insert_table_rows_hint">3</string>
+    <string name="editor_insert_table_cols_hint">3</string>
+
+    <!-- Code block language selector -->
+    <string name="editor_code_block_language">語言選擇</string>
+    <string name="editor_code_block_language_hint">例如：python, javascript</string>
+
+    <!-- Template insertion strings (inserted into document) -->
+    <string name="editor_tpl_bold">粗體文字</string>
+    <string name="editor_tpl_italic">斜體文字</string>
+    <string name="editor_tpl_strikethrough">刪除文字</string>
+    <string name="editor_tpl_highlight">反白文字</string>
+    <string name="editor_tpl_underline">底線</string>
+    <string name="editor_tpl_code">程式碼</string>
+    <string name="editor_tpl_formula">公式</string>
+    <string name="editor_tpl_link">[連結文字](url)</string>
+    <string name="editor_tpl_image">![圖片描述](圖片路徑)</string>
+    <string name="editor_tpl_code_block">```\n程式碼\n```</string>
+    <string name="editor_tpl_table">| 欄1 | 欄2 | 欄3 |\n| --- | --- | --- |\n| 內容 | 內容 | 內容 |</string>
+    <string name="editor_tpl_math">$$\n數學公式\n$$</string>
+    <string name="editor_tpl_superscript">上標文字</string>
+    <string name="editor_tpl_subscript">下標文字</string>
+<string name="editor_tpl_mermaid" tools:ignore="TypographyDashes">```mermaid
+graph TD
+    A[開始] --> B[結束]
+```</string>
+    <string name="editor_tpl_image_from_picker">![圖片](%1$s)</string>
+    <string name="editor_image_alt_text">圖片</string>
+
+    <!-- Editor UI labels -->
+    <string name="editor_title">編輯器</string>
+    <string name="editor_document_mode">文件模式</string>
+    <string name="editor_code_mode">程式碼模式</string>
+    <string name="editor_mode_switch">模式切換</string>
+    <string name="editor_preview">預覽</string>
+    <string name="editor_split_view">分割</string>
+    <string name="editor_edit">編輯</string>
+    <string name="editor_outline">大綱</string>
+    <string name="editor_focus_mode">專注模式</string>
+    <string name="editor_exit_focus">退出專注</string>
+    <string name="editor_typewriter_mode">打字機模式</string>
+    <string name="editor_exit_typewriter">退出打字機</string>
+    <string name="editor_undo">復原</string>
+    <string name="editor_redo">重做</string>
+    <string name="editor_save">儲存</string>
+    <string name="editor_more_actions">更多操作</string>
+<string name="editor_action_open_terminal">終端機</string>
+    <string name="editor_more">更多</string>
+    <string name="editor_quick_settings">快捷設定</string>
+    <string name="editor_cross_file_search">跨檔案搜尋</string>
+    <string name="editor_reopen_with_encoding">選擇編碼重新開啟</string>
+    <string name="editor_save_with_encoding">透過編碼儲存</string>
+    <string name="editor_export_html">匯出為 HTML</string>
+    <string name="editor_export_pdf">匯出為 PDF</string>
+    <string name="editor_export_plaintext">匯出為純文字</string>
+    <string name="editor_export_image">匯出為圖片</string>
+    <string name="editor_export_zip">匯出為 ZIP</string>
+    <string name="editor_preview_theme">預覽主題</string>
+    <string name="editor_edit_custom_style">編輯自訂樣式</string>
+    <string name="editor_export_file">匯出檔案</string>
+    <string name="editor_delete_file">刪除檔案</string>
+    <string name="editor_load_failed">載入失敗</string>
+
+    <!-- Status bar -->
+    <string name="editor_read_only">唯讀</string>
+    <string name="editor_modified">已修改</string>
+    <string name="editor_word_count">%1$d 字</string>
+    <string name="editor_char_count">%1$d 字元</string>
+    <string name="editor_line_count">%1$d 行</string>
+    <string name="editor_status_indent_spaces">Spaces: %1$d</string>
+    <string name="editor_status_indent_tab">Tab: %1$d</string>
+    <string name="editor_status_selection_count">%1$d 選取</string>
+    <string name="editor_status_editable">編輯</string>
+    <string name="editor_status_language_switch">語言模式：已切換為 %1$s</string>
+
+    <!-- Search panel tabs -->
+    <string name="editor_search_tab_find">搜尋</string>
+    <string name="editor_search_tab_replace">取代</string>
+    <string name="editor_search_tab_goto_line">跳轉到行</string>
+
+    <!-- Menu items with subtitles -->
+    <string name="editor_menu_search">搜尋</string>
+    <string name="editor_menu_undo_desc">撤銷上一步編輯操作</string>
+    <string name="editor_menu_redo_desc">重做被撤銷的操作</string>
+    <string name="editor_menu_search_desc">開啟 搜尋 / 取代 / 跳轉到行 面板</string>
+    <string name="editor_menu_terminal_desc">開啟內建終端機</string>
+
+    <!-- Quick settings -->
+    <string name="editor_font_size">字型大小: %1$dsp</string>
+    <string name="editor_word_wrap">自動換行</string>
+    <string name="editor_show_line_numbers">顯示行號</string>
+    <string name="editor_tab_width">定位元寬度</string>
+    <string name="editor_quick_settings_title">快捷設定</string>
+
+    <!-- Export dialog -->
+    <string name="editor_export_as_pdf">匯出為 PDF</string>
+    <string name="editor_export_as_html">匯出為 HTML</string>
+    <string name="editor_page_size">頁面大小</string>
+    <string name="editor_include_toc">包含目錄</string>
+    <string name="editor_export">匯出</string>
+
+    <!-- Delete dialog -->
+    <string name="editor_delete_confirm_message">確定刪除檔案「%1$s」？此操作將永久刪除檔案，且無法恢復。</string>
+    <string name="editor_delete">刪除</string>
+
+    <!-- Read-only banner -->
+    <string name="editor_readonly_banner">目前是內建範例檔案，僅可檢視，不能修改。\n如需編輯，請返回並點擊底部\"檔案瀏覽\"選擇手機裡的檔案；或複製範例內容後新建檔案編輯。</string>
+    <string name="editor_close_hint">關閉提示</string>
+
+    <!-- Toast messages -->
+    <string name="editor_export_success">匯出成功</string>
+    <string name="editor_export_failed">匯出失敗: %1$s</string>
+    <string name="editor_saving_please_wait">正在儲存，請稍候…</string>
+    <string name="editor_save_success">儲存成功</string>
+    <string name="editor_save_failed">儲存失敗: %1$s</string>
+
+    <!-- Preview -->
+    <string name="editor_preview_truncated">*內容過長，預覽已截斷。完整內容請在編輯模式檢視。*</string>
+
+    <!-- Binary file -->
+    <string name="editor_cannot_display_file">無法顯示此檔案</string>
+    <string name="editor_binary_file_message">此檔案是二進位格式，無法以文字形式顯示。</string>
+    <string name="editor_file_size">檔案大小: %1$s</string>
+
+    <!-- Encoding -->
+    <string name="editor_encoding_select">編碼選擇</string>
+    <string name="editor_select_encoding">選擇編碼格式</string>
+    <string name="editor_encoding_failed_message">檔案編碼偵測失敗或需要手動指定編碼。請選擇正確的編碼格式重新開啟檔案。</string>
+    <string name="editor_available_encodings">可用編碼：</string>
+
+    <!-- Tab -->
+    <string name="editor_close_tab">關閉分頁</string>
+    <string name="editor_unsaved_tab_message">\"%1$s\" 已修改但未儲存，確定關閉嗎？</string>
+    <string name="editor_file">檔案</string>
+
+    <!-- Outline -->
+    <string name="editor_no_headings">未找到標題</string>
+
+    <!-- Diff -->
+    <string name="editor_diff_count">%1$d 處差異</string>
+    <string name="editor_diff_position">%1$d/%2$d 處差異</string>
+    <string name="editor_prev_diff">上一處差異</string>
+    <string name="editor_next_diff">下一處差異</string>
+    <string name="editor_original">原始</string>
+    <string name="editor_modified_tab">修改</string>
+    <string name="editor_no_file_uri">未提供檔案 URI</string>
+    <string name="editor_load_file_failed">載入檔案失敗</string>
+    <string name="editor_error_permission_expired">檔案存取權限已失效，請重新從檔案瀏覽器選擇該檔案</string>
+    <string name="editor_error_external_file_not_found">檔案不存在或已被移動/刪除</string>
+
+    <!-- Media viewer -->
+    <string name="editor_unsupported_media">不支援的媒體類型</string>
+    <string name="editor_cannot_decode_image">無法解碼圖片</string>
+    <string name="editor_image_load_failed">圖片載入失敗</string>
+    <string name="editor_image_preview">圖片預覽</string>
+    <string name="editor_player_error">播放器錯誤: what=%1$d, extra=%2$d</string>
+    <string name="editor_cannot_load_audio">無法載入音訊</string>
+    <string name="editor_audio_file">音訊檔案</string>
+    <string name="editor_audio_load_failed">音訊載入失敗</string>
+    <string name="editor_pause">暫停</string>
+    <string name="editor_play">播放</string>
+    <string name="editor_video_load_failed">影片載入失敗</string>
+    <string name="editor_cannot_load_video">無法載入影片</string>
+
+    <!-- PDF -->
+    <string name="editor_cannot_load_pdf">無法載入 PDF 檔案</string>
+
+    <!-- Scroll -->
+    <string name="editor_scroll_to_top">回到頂端</string>
+
+    <!-- Sticky scroll -->
+    <string name="editor_sticky_scroll">黏性捲動</string>
+
+    <!-- File size warnings -->
+    <string name="editor_file_too_large_readonly">檔案過大（%1$s），已強制使用唯讀模式，編輯可能不穩定</string>
+    <string name="editor_file_large_slow">檔案較大（%1$s），開啟和編輯可能會變慢</string>
+    <string name="editor_highlight_disabled_large_file">語法反白已停用（檔案超過1MB），以純文字模式顯示</string>
+    <string name="editor_large_file_preview_hint">大檔案已使用純文字編輯模式。可切換到預覽模式檢視渲染效果</string>
+
+    <!-- Theme names -->
+    <string name="editor_theme_default">預設</string>
+    <string name="editor_theme_github">GitHub</string>
+    <string name="editor_theme_newsprint">新聞紙</string>
+    <string name="editor_theme_night">夜間</string>
+    <string name="editor_theme_pixy">Pixy</string>
+    <string name="editor_theme_academic">學術</string>
+
+    <!-- Editor Input Validation -->
+    <string name="editor_search_too_long">搜尋內容過長（最多 1000 個字元）</string>
+    <string name="editor_replace_too_long">取代內容過長（最多 5000 個字元）</string>
+    <string name="editor_cross_search_too_long">搜尋內容過長（最多 500 個字元）</string>
+    <string name="editor_snippet_title_too_long">標題過長（最多 200 個字元）</string>
+    <string name="editor_snippet_content_too_long">內容過長（最多 100000 個字元）</string>
+    <string name="editor_snippet_category_too_long">分類過長（最多 100 個字元）</string>
+
+    <!-- Command Palette -->
+    <string name="editor_command_palette">命令面板</string>
+    <string name="editor_search_commands">搜尋命令…</string>
+    <string name="editor_command_palette_shortcut">Ctrl+Shift+P</string>
+    <string name="editor_command_palette_close_tab">關閉分頁</string>
+    <string name="editor_command_palette_close_all_tabs">關閉所有分頁</string>
+    <string name="editor_command_palette_toggle_minimap">切換縮圖</string>
+    <string name="editor_command_palette_goto_last_edit">跳轉到上次編輯位置</string>
+    <string name="editor_select_all">全選</string>
+    <string name="editor_toggle_preview">切換預覽</string>
+    <string name="editor_next_tab">下一個分頁</string>
+    <string name="editor_previous_tab">上一個分頁</string>
+    <string name="editor_diff">差異比對</string>
+    <string name="editor_toggle_theme">切換主題</string>
+    <string name="editor_category_edit">編輯</string>
+    <string name="editor_category_view">檢視</string>
+    <string name="editor_category_navigation">導覽</string>
+    <string name="editor_category_tools">工具</string>
+    <string name="editor_category_help">說明</string>
+    <string name="editor_command_markdown_cheat_sheet">Markdown 語法參考</string>
+
+    <!-- TreeSitter & Plugin System (Phase 4) -->
+    <string name="editor_treesitter_highlight">TreeSitter 增量反白</string>
+    <string name="editor_plugin_system">外掛系統</string>
+
+    <!-- Markdown Cheat Sheet -->
+    <string name="editor_markdown_cheat_sheet">Markdown 語法參考</string>
+    <string name="editor_cheatsheet_headers">標題</string>
+    <string name="editor_cheatsheet_heading1">一級標題</string>
+    <string name="editor_cheatsheet_heading2">二級標題</string>
+    <string name="editor_cheatsheet_heading3">三級標題</string>
+    <string name="editor_cheatsheet_emphasis">強調</string>
+    <string name="editor_cheatsheet_bold">粗體</string>
+    <string name="editor_cheatsheet_italic">斜體</string>
+    <string name="editor_cheatsheet_strikethrough">刪除線</string>
+    <string name="editor_cheatsheet_links_images">連結與圖片</string>
+    <string name="editor_cheatsheet_link">超連結</string>
+    <string name="editor_cheatsheet_image">圖片</string>
+    <string name="editor_cheatsheet_code">程式碼</string>
+    <string name="editor_cheatsheet_inline_code">行內程式碼</string>
+    <string name="editor_cheatsheet_code_block">程式碼區塊</string>
+    <string name="editor_cheatsheet_lists">清單</string>
+    <string name="editor_cheatsheet_unordered">無序清單</string>
+    <string name="editor_cheatsheet_ordered">有序清單</string>
+    <string name="editor_cheatsheet_task">任務清單</string>
+    <string name="editor_cheatsheet_blockquotes">引用</string>
+    <string name="editor_cheatsheet_blockquote_desc">區塊引用</string>
+    <string name="editor_cheatsheet_tables">表格</string>
+    <string name="editor_cheatsheet_table_desc">表格</string>
+    <string name="editor_cheatsheet_math">數學公式</string>
+    <string name="editor_cheatsheet_inline_math">行內公式</string>
+    <string name="editor_cheatsheet_display_math">區塊級公式</string>
+    <string name="editor_cheatsheet_mermaid">圖表</string>
+    <string name="editor_cheatsheet_mermaid_desc">Mermaid 流程圖</string>
+
+    <!-- Security -->
+    <string name="security_operation_restricted">安全校驗未通過，此操作暫時不可用</string>
+
+    <!-- Symbol Panel (Ch1 Item 19, P3) -->
+    <string name="editor_symbol_panel_title">符號面板</string>
+    <string name="editor_symbol_panel_common">常用</string>
+    <string name="editor_symbol_panel_cjk">中文</string>
+    <string name="editor_symbol_panel_math">數學</string>
+    <string name="editor_symbol_panel_arrows">箭頭</string>
+    <string name="editor_command_palette_toggle_symbol_panel">切換符號面板</string>
+    <string name="editor_convert_html_to_markdown">轉換為 Markdown</string>
+
+    <!-- Rich Editor (Ch6#2 P1: native Compose WYSIWYG) -->
+    <string name="editor_rich_editor_bold">粗體</string>
+    <string name="editor_rich_editor_italic">斜體</string>
+    <string name="editor_rich_editor_strikethrough">刪除線</string>
+    <string name="editor_rich_editor_code">程式碼</string>
+    <string name="editor_rich_editor_unordered_list">無序清單</string>
+    <string name="editor_rich_editor_ordered_list">有序清單</string>
+    <string name="editor_rich_editor_quote">引用</string>
+    <string name="editor_rich_editor_link">連結</string>
+    <string name="editor_rich_editor_mode">富文字</string>
+    <!-- Diff / Encoding dialogs -->
+    <string name="editor_diff_original">原始</string>
+    <string name="editor_diff_modified">修改</string>
+    <string name="editor_encoding_select_title">選擇編碼格式</string>
+</resources>

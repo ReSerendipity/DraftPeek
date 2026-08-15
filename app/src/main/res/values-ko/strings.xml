@@ -1,0 +1,97 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="app_name">DraftPeek</string>
+
+    <!-- MainActivity navigation labels -->
+    <string name="app_nav_file_browser">파일 브라우저</string>
+    <string name="app_nav_stats">통계</string>
+    <string name="app_nav_settings">설정</string>
+    <string name="app_nav_me">나</string>
+    <string name="app_nav_files">파일</string>
+
+    <!-- MainActivity titles -->
+    <string name="app_title_split_view">분할 보기</string>
+    <string name="app_title_file_browser">파일 브라우저</string>
+    <string name="app_title_profile">나</string>
+    <string name="app_title_editor_home">에디터</string>
+    <string name="app_title_editor">에디터</string>
+    <string name="app_title_settings">설정</string>
+    <string name="app_title_stats">사용 통계</string>
+    <string name="app_title_snippets">스니펫</string>
+    <string name="app_title_sample_files">샘플 파일</string>
+    <string name="app_title_default">DraftPeek</string>
+
+    <!-- MainActivity actions -->
+    <string name="app_action_close_split">분할 보기 닫기</string>
+    <string name="app_action_open_split">분할 보기 열기</string>
+    <string name="app_action_navigate_back">뒤로</string>
+
+    <!-- DraftPeekNavHost -->
+    <string name="app_hint_select_file_editor">파일을 선택하여 에디터에서 열기</string>
+    <string name="app_hint_select_file_editor_home">파일을 열어 편집 시작</string>
+
+    <!-- Browser screen -->
+    <string name="browser_continue_editing">편집 계속</string>
+    <string name="browser_search_hint">파일 검색…</string>
+    <string name="browser_new_file">새 파일</string>
+    <string name="browser_open_file">파일 열기</string>
+    <string name="browser_directories">디렉토리</string>
+    <string name="browser_template_empty">빈 파일</string>
+    <string name="browser_template_hello">Hello World</string>
+    <string name="browser_template_class">Class 템플릿</string>
+    <string name="browser_edited_ago">%1$s전에 편집</string>
+
+    <!-- Profile screen -->
+    <string name="profile_title">나</string>
+    <string name="profile_stat_edits">편집</string>
+    <string name="profile_stat_files">파일</string>
+    <string name="profile_stat_active_days">활동 일</string>
+    <string name="profile_section_stats">통계</string>
+    <string name="profile_section_activity">활동</string>
+    <string name="profile_section_settings">설정</string>
+
+    <!-- Security -->
+    <string name="security_operation_restricted">보안 검증에 실패했습니다. 이 작업은 일시적으로 사용할 수 없습니다.</string>
+
+    <!-- AI Protection: security status notification -->
+    <string name="security_notification_channel_security_status">보안 상태</string>
+    <string name="security_notification_official_title">공식 빌드 검증됨</string>
+    <string name="security_notification_official_text">서명 SHA-256 검증됨</string>
+    <string name="security_notification_unofficial_title">비공식 빌드! 위험 경고</string>
+    <string name="security_notification_unofficial_text">이 APK가 변조되었을 수 있습니다. 탭하여 상세 확인.</string>
+
+    <!-- AI Protection: legal warning dialogs -->
+    <string name="security_legal_warning_title_warning">보안 경고</string>
+    <string name="security_legal_warning_title_locked">보안 잠김</string>
+    <string name="security_legal_warning_title_tampered">비공식 APK 감지</string>
+    <string name="security_legal_warning_action_uninstall">제거로 이동</string>
+    <string name="security_legal_warning_action_download_official">공식 버전 다운로드</string>
+    <string name="security_legal_warning_action_acknowledge_risk">위험을 인지했습니다</string>
+
+    <!-- AI Protection: splash tamper warning -->
+    <string name="security_splash_tamper_title">비공식 APK 감지</string>
+    <string name="security_splash_tamper_risk_1">데이터 도난 위험</string>
+    <string name="security_splash_tamper_risk_2">광고 주입 위험</string>
+    <string name="security_splash_tamper_risk_3">악성 코드 위험</string>
+
+    <!-- AI Protection: security status section -->
+    <string name="security_status_section_title">보안 상태</string>
+    <string name="security_status_signature_verified">서명: ✅ 공식 검증됨</string>
+    <string name="security_status_signature_unverified">서명: ❌ 비공식</string>
+    <string name="security_status_dex_passed">DEX 무결성: ✅ 통과</string>
+    <string name="security_status_dex_failed">DEX 무결성: ❌ 수정됨</string>
+    <string name="security_status_environment_safe">실행 환경: 안전</string>
+    <string name="security_status_environment_suspicious">실행 환경: 의심됨</string>
+    <string name="security_status_environment_hostile">실행 환경: 적대적</string>
+    <string name="security_status_recheck">재검증</string>
+    <string name="security_status_export_report">보안 이벤트 보고서 내보내기</string>
+    <string name="security_status_clear_logs">보안 이벤트 로그 삭제</string>
+    <string name="security_ai_threat_detected">security_ai_threat_detected</string>
+    <string name="app_title_terminal">터미널</string>
+    <string name="encrypted_export_description">AES-256-GCM 암호화 내보내기 파일</string>
+    <string name="encrypted_export_extension">.jenc</string>
+    <string name="widget_description">최근 연 파일에 빠르게 접근</string>
+    <string name="widget_loading">로딩 중…</string>
+    <string name="widget_no_recent_files">최근 파일이 없습니다</string>
+    <string name="widget_recent_files_title">최근 파일</string>
+</resources>

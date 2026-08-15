@@ -1,0 +1,988 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<style>
+:root{
+  --bg-color:#ffffff;
+  --text-color:#1c1c1e;
+  --code-bg:#f5f5f5;
+  --border-color:#e0e0e0;
+  --link-color:#0066cc;
+  --table-border:#d0d0d0;
+  --table-header-bg:#e8e8ed;
+  --table-stripe-bg:#f9f9fb;
+  --blockquote-border:#d0d0d0;
+  --blockquote-bg:#f9f9f9;
+  --code-lang-bg:#e0e0e5;
+  --footnote-bg:#fafafa;
+}
+.dark{
+  --bg-color:#1c1c1e;
+  --text-color:#e0e0e0;
+  --code-bg:#2c2c2e;
+  --border-color:#3a3a3c;
+  --link-color:#64b5f6;
+  --table-border:#3a3a3c;
+  --table-header-bg:#3a3a3c;
+  --table-stripe-bg:#252528;
+  --blockquote-border:#3a3a3c;
+  --blockquote-bg:#2c2c2e;
+  --code-lang-bg:#3a3a3c;
+  --footnote-bg:#252528;
+}
+*{box-sizing:border-box}
+body{
+  font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,'Noto Sans SC',sans-serif;
+  font-size:14.5px;line-height:1.7;color:var(--text-color);
+  background:var(--bg-color);padding:22px 22px 40px;margin:0;
+  word-wrap:break-word;overflow-wrap:break-word;
+  -webkit-font-smoothing:antialiased;
+}
+h1,h2,h3,h4,h5,h6{margin-top:1.4em;margin-bottom:.6em;font-weight:700;line-height:1.3}
+h1{font-size:24px;font-weight:700;letter-spacing:-0.01em;border-bottom:1px solid var(--border-color);padding-bottom:10px}
+h2{font-size:1.5em;border-bottom:1px solid var(--border-color);padding-bottom:.3em}
+h3{font-size:1.3em}h4{font-size:1.15em}h5{font-size:1em}h6{font-size:.9em;opacity:.75}
+h1:first-child,h2:first-child{margin-top:0}
+p{margin:.8em 0}
+a{color:var(--link-color);text-decoration:none;word-break:break-all}
+a:hover{text-decoration:underline}
+code{
+  background:var(--code-bg);padding:2px 6px;border-radius:4px;
+  font-family:'Menlo','Consolas','Monaco',monospace;font-size:.88em;
+}
+pre{
+  background:var(--code-bg);padding:0;border-radius:8px;
+  overflow-x:auto;margin:1em 0;position:relative;
+  border:1px solid var(--border-color);
+}
+pre code{
+  background:transparent;padding:14px 16px;display:block;
+  font-size:.88em;line-height:1.6;
+}
+pre .code-lang{
+  position:absolute;top:0;right:0;
+  background:var(--code-lang-bg);color:var(--text-color);
+  padding:2px 10px;font-size:.75em;border-bottom-left-radius:6px;
+  font-family:'Menlo','Consolas',monospace;
+  opacity:.65;user-select:none;z-index:1;
+}
+blockquote{
+  border-left:4px solid var(--blockquote-border);
+  background:var(--blockquote-bg);margin:1em 0;
+  padding:10px 16px;border-radius:0 6px 6px 0;color:#666;
+}
+.dark blockquote{color:#999}
+blockquote p{margin:.4em 0}
+blockquote p:first-child{margin-top:0}
+blockquote p:last-child{margin-bottom:0}
+.table-wrap{overflow-x:auto;margin:1em 0;border-radius:6px;border:1px solid var(--table-border)}
+table{
+  border-collapse:collapse;width:100%;margin:0;
+  border:none;border-radius:6px;
+}
+th,td{
+  border:1px solid var(--table-border);
+  padding:10px 14px;text-align:left;
+}
+th{
+  background:var(--table-header-bg);font-weight:600;
+}
+tbody tr:nth-child(even){background:var(--table-stripe-bg)}
+img{max-width:100%;height:auto;border-radius:4px;display:block;margin:.8em auto}
+ul,ol{padding-left:2em;margin:.6em 0}
+li{margin:.3em 0}
+.task-list-item{list-style:none;margin-left:-1.5em}
+.task-list-item input[type="checkbox"]{
+  margin-right:8px;width:16px;height:16px;cursor:pointer;
+  accent-color:var(--link-color);vertical-align:middle;
+}
+hr{border:none;border-top:1px solid var(--border-color);margin:1.8em 0}
+del{opacity:.6}
+sup.footnote-ref{font-size:.75em;line-height:0}
+sup.footnote-ref a{
+  background:var(--code-bg);padding:1px 5px;border-radius:4px;
+  text-decoration:none;font-weight:500;
+}
+.footnotes{
+  margin-top:2em;padding-top:1em;
+  border-top:1px solid var(--border-color);font-size:.9em;
+}
+.footnotes ol{padding-left:1.5em}
+.footnotes li{
+  margin:.4em 0;padding:4px 8px;border-radius:4px;
+}
+.footnotes li:target{background:var(--footnote-bg)}
+.footnote-backref{text-decoration:none;font-size:.8em;margin-left:4px;opacity:.6}
+.footnote-backref:hover{opacity:1}
+.katex-display{margin:1em 0;overflow-x:auto;overflow-y:hidden;padding:.4em 0}
+.katex{font-size:1.1em}
+.math-error{
+  color:#cc0000;background:#ffe0e0;padding:4px 8px;
+  border-radius:4px;font-family:monospace;font-size:.9em;
+  display:inline-block;
+}
+.mermaid-container{
+  text-align:center;margin:1em 0;overflow-x:auto;
+  padding:12px;background:var(--bg-color);
+  border:1px solid var(--border-color);border-radius:8px;
+}
+.mermaid-error{
+  color:#cc0000;background:#ffe0e0;padding:12px;
+  border-radius:8px;font-size:.9em;margin:1em 0;
+  border:1px solid #ffcccc;white-space:pre-wrap;font-family:monospace;
+}
+.front-matter{
+  background:var(--blockquote-bg);border:1px solid var(--border-color);
+  border-radius:8px;padding:14px 18px;margin-bottom:16px;font-size:.9em;
+}
+.front-matter h4{
+  margin-top:0;margin-bottom:10px;font-size:.8em;
+  color:#888;text-transform:uppercase;letter-spacing:.5px;
+}
+.front-matter .fm-field{margin:5px 0}
+.front-matter .fm-key{font-weight:600;color:var(--text-color)}
+.front-matter .fm-value{color:#888}
+.dark .front-matter .fm-value{color:#aaa}
+.front-matter .fm-tags{display:flex;flex-wrap:wrap;gap:6px;margin-top:6px}
+.front-matter .fm-tag{
+  background:var(--code-bg);padding:3px 10px;border-radius:12px;font-size:.85em;
+}
+mark{background:#fff3a3;padding:2px 4px;border-radius:2px}
+.dark mark{background:#6b5e00;color:#f0f0f0}
+.toc{
+  background:var(--blockquote-bg);border:1px solid var(--border-color);
+  border-radius:8px;padding:14px 18px;margin:1em 0;
+}
+.toc-title{font-weight:600;margin-bottom:10px;font-size:.95em}
+.toc ul{list-style:none;padding-left:0;margin:0}
+.toc ul ul{padding-left:1.2em}
+.toc li{margin:4px 0;line-height:1.5}
+.toc a{color:var(--link-color);text-decoration:none}
+.toc a:hover{text-decoration:underline}
+.render-error{
+  background:#ffe0e0;border:1px solid #cc0000;border-radius:8px;
+  padding:14px;margin:8px 0;color:#cc0000;font-size:13px;
+}
+:target{background:var(--table-stripe-bg);border-radius:4px;animation:hl 1.5s ease}
+@keyframes hl{0%{background:#ffffa0}100%{background:transparent}}
+/* Deferred rendering: content-visibility allows the browser to skip rendering
+   off-screen elements, improving initial paint performance. contain-intrinsic-size
+   provides an estimated size so layout is stable before the element is visible. */
+.deferred-content{
+  content-visibility:auto;
+  contain-intrinsic-size:0 500px;
+}
+pre,table,.mermaid-container,.katex-display{
+  content-visibility:auto;
+  contain-intrinsic-size:0 300px;
+}
+img{
+  content-visibility:auto;
+  contain-intrinsic-size:0 200px;
+}
+</style>
+</head>
+<body>
+<div id="content"></div>
+<script src="marked.min.js"></script>
+<script>
+(function(){
+  'use strict';
+
+  function loadResource(type, src) {
+    return new Promise(function(resolve) {
+      var el;
+      if (type === 'css') {
+        el = document.createElement('link');
+        el.rel = 'stylesheet';
+        el.href = src;
+      } else {
+        el = document.createElement('script');
+        el.src = src;
+      }
+      el.onload = function() { resolve(); };
+      el.onerror = function() {
+        console.warn('Failed to load resource: ' + src);
+        resolve();
+      };
+      document.head.appendChild(el);
+    });
+  }
+
+  function injectResourcesIfNeeded(content) {
+    var needsMath = /\$/.test(content);
+    var needsMermaid = /```(?:mermaid|graphviz)\b/i.test(content);
+    var needsHighlight = /```/.test(content);
+
+    console.log('Conditional resource injection: math=' + needsMath + ', mermaid=' + needsMermaid + ', highlight=' + needsHighlight);
+
+    var chain = Promise.resolve();
+
+    if (needsMath) {
+      chain = chain.then(function() { return loadResource('css', 'katex.min.css'); });
+      chain = chain.then(function() { return loadResource('js', 'katex.min.js'); });
+      chain = chain.then(function() { return loadResource('js', 'katex-mhchem.min.js'); });
+    }
+
+    if (needsHighlight) {
+      chain = chain.then(function() { return loadResource('js', 'highlight.min.js'); });
+    }
+
+    if (needsMermaid) {
+      chain = chain.then(function() { return loadResource('js', 'mermaid.min.js'); });
+    }
+
+    return chain;
+  }
+
+  // ===== SECURITY: 渲染前 HTML 消毒（阻断 XSS） =====
+  // marked 渲染的 Markdown 可能包含原始 HTML。若用户打开含恶意
+  // <script>/<img onerror> 的 .md 文件，直接注入 innerHTML 将触发 XSS，
+  // 甚至经 WebView 访问本地文件。此处用白名单过滤标签/属性/事件。
+  var SANITIZE_ALLOWED_TAGS = [
+    'a','abbr','b','blockquote','br','code','del','em','h1','h2','h3','h4','h5','h6',
+    'hr','i','img','kbd','li','mark','ol','p','pre','s','span','strong','sub','sup',
+    'table','thead','tbody','tr','th','td','ul','input'
+  ];
+  var SANITIZE_ALLOWED_ATTR = ['href','title','src','alt','class','id','target','rel','type','checked','disabled','width','height','start','align','colspan','rowspan'];
+  var SAFE_PROTOCOLS = ['http:', 'https:', 'mailto:'];
+  var SANITIZE_BLOCK_TAGS = ['script','style','iframe','object','embed','form','svg','math','link','meta','noscript','base'];
+
+  function sanitizeHtml(html) {
+    try {
+      var doc = new DOMParser().parseFromString(html, 'text/html');
+      var walk = function(node) {
+        var children = Array.prototype.slice.call(node.childNodes);
+        children.forEach(function(child) {
+          if (child.nodeType === 1) { // Element
+            var tag = child.tagName ? child.tagName.toLowerCase() : '';
+            if (SANITIZE_BLOCK_TAGS.indexOf(tag) !== -1) {
+              // 整块移除（script/style/iframe 等）
+              child.parentNode.removeChild(child);
+              return;
+            }
+            if (SANITIZE_ALLOWED_TAGS.indexOf(tag) === -1) {
+              // 未允许的标签：保留文本内容，剥离标签本身
+              var frag = document.createDocumentFragment();
+              while (child.firstChild) frag.appendChild(child.firstChild);
+              child.parentNode.replaceChild(frag, child);
+              return;
+            }
+            // 过滤属性
+            var attrs = Array.prototype.slice.call(child.attributes);
+            attrs.forEach(function(attr) {
+              var name = attr.name.toLowerCase();
+              if (SANITIZE_ALLOWED_ATTR.indexOf(name) === -1) {
+                child.removeAttribute(attr.name);
+                return;
+              }
+              if (name === 'href' || name === 'src') {
+                var val = (attr.value || '').trim().toLowerCase();
+                // 仅允许安全协议，拦截 javascript: / data: 等
+                if (!/^[a-z][a-z0-9+.-]*:/i.test(val) || SAFE_PROTOCOLS.indexOf(val.split(':')[0] + ':') === -1) {
+                  child.removeAttribute(attr.name);
+                }
+              }
+              if (tag === 'img' && name === 'src') {
+                // 移除 img 上的任何事件属性（onerror 等已在白名单外被过滤）
+                ['onerror','onload','onclick','onmouseover','onmouseout'].forEach(function(ev) {
+                  child.removeAttribute(ev);
+                });
+              }
+            });
+            walk(child);
+          } else if (child.nodeType === 8) { // Comment
+            child.parentNode.removeChild(child);
+          }
+        });
+      };
+      walk(doc.body || doc);
+      return (doc.body || doc).innerHTML;
+    } catch (e) {
+      // 解析失败时保守返回空（比渲染恶意内容安全）
+      console.error('sanitizeHtml error:', e);
+      return '';
+    }
+  }
+
+  var contentEl = document.getElementById('content');
+  var markedInited = false;
+  var idCounter = 0;
+
+  var PH_CB = '\x01CB';
+  var PH_IC = '\x01IC';
+  var PH_MB = '\x01MB';
+  var PH_TOC = '\x01TOC';
+
+  function uniqId(prefix) {
+    return (prefix || 'id') + '-' + (++idCounter) + '-' + Math.random().toString(36).substr(2, 8);
+  }
+
+  function escapeHtml(s) {
+    return String(s)
+      .replace(/&/g,'&amp;')
+      .replace(/</g,'&lt;')
+      .replace(/>/g,'&gt;')
+      .replace(/"/g,'&quot;')
+      .replace(/'/g,'&#39;');
+  }
+
+  function slugify(text) {
+    return String(text)
+      .toLowerCase()
+      .trim()
+      .replace(/[^\w\u4e00-\u9fa5\s-]/g,'')
+      .replace(/\s+/g,'-')
+      .replace(/-+/g,'-')
+      .replace(/^-|-$/g,'') || 'heading';
+  }
+
+  function inlineMarkdown(text) {
+    var s = escapeHtml(text);
+    s = s.replace(/`([^`]+)`/g, '<code>$1</code>');
+    s = s.replace(/\*\*([^*]+)\*\*/g, '<strong>$1</strong>');
+    s = s.replace(/__([^_]+)__/g, '<strong>$1</strong>');
+    s = s.replace(/(^|[^*])\*([^*]+)\*(?!\*)/g, '$1<em>$2</em>');
+    s = s.replace(/(^|[^_])_([^_]+)_(?!_)/g, '$1<em>$2</em>');
+    s = s.replace(/\[([^\]]+)\]\(([^)]+)\)/g, '<a href="$2">$1</a>');
+    return s;
+  }
+
+  function initMarked() {
+    if (typeof marked === 'undefined') return false;
+    try {
+      var renderer = new marked.Renderer();
+
+      renderer.listitem = function(obj) {
+        var text = obj.text || '';
+        if (obj.task) {
+          return '<li class="task-list-item"><input type="checkbox"' + (obj.checked ? ' checked' : '') + '>' + text + '</li>';
+        }
+        return '<li>' + text + '</li>';
+      };
+
+      renderer.heading = function(obj) {
+        var text = obj.text || '';
+        var level = obj.depth;
+        return '<h' + level + '>' + text + '</h' + level + '>';
+      };
+
+      marked.setOptions({
+        gfm: true,
+        breaks: true,
+        tables: true,
+        pedantic: false,
+        smartypants: false,
+        headerIds: false,
+        mangle: false
+      });
+
+      marked.use({renderer: renderer});
+      markedInited = true;
+      console.log('marked v' + (marked.version || '?') + ' initialized (GFM, breaks, tables enabled)');
+    } catch(e) {
+      console.error('marked init error:', e);
+    }
+    return markedInited;
+  }
+
+  function initMermaid(dark) {
+    if (typeof mermaid === 'undefined') return;
+    try {
+      mermaid.initialize({
+        startOnLoad: false,
+        theme: dark ? 'dark' : 'default',
+        securityLevel: 'loose',
+        themeVariables: dark ? {
+          primaryColor: '#2c2c2e',
+          primaryTextColor: '#e0e0e0',
+          primaryBorderColor: '#48484a',
+          lineColor: '#8e8e93',
+          secondaryColor: '#3a3a3c',
+          tertiaryColor: '#1c1c1e'
+        } : {}
+      });
+    } catch(e) {
+      console.error('mermaid init error:', e);
+    }
+  }
+
+  function parseFrontMatter(text) {
+    var m = text.match(/^---\r?\n([\s\S]*?)\r?\n---\r?\n?/);
+    if (!m) return {front: null, content: text};
+    var fields = [];
+    var lines = m[1].split(/\r?\n/);
+    for (var i = 0; i < lines.length; i++) {
+      var line = lines[i];
+      var ci = line.indexOf(':');
+      if (ci > 0) {
+        var key = line.substring(0, ci).trim();
+        var val = line.substring(ci + 1).trim();
+        if (key && val) {
+          val = val.replace(/^['"]|['"]$/g, '');
+          fields.push({key: key, value: val});
+        }
+      }
+    }
+    return {front: fields.length ? fields : null, content: text.substring(m[0].length)};
+  }
+
+  function renderFrontMatter(fields) {
+    if (!fields || !fields.length) return '';
+    var html = '<div class="front-matter"><h4>文档信息</h4>';
+    for (var i = 0; i < fields.length; i++) {
+      var f = fields[i];
+      if (f.key === 'tags' || f.key === 'categories') {
+        var items = f.value.replace(/[\[\]"']/g,'').split(',').map(function(s){return s.trim()}).filter(Boolean);
+        html += '<div class="fm-field"><span class="fm-key">' + escapeHtml(f.key) + ':</span></div>';
+        html += '<div class="fm-tags">';
+        for (var j = 0; j < items.length; j++) {
+          html += '<span class="fm-tag">' + escapeHtml(items[j]) + '</span>';
+        }
+        html += '</div>';
+      } else {
+        html += '<div class="fm-field"><span class="fm-key">' + escapeHtml(f.key) + ':</span> <span class="fm-value">' + escapeHtml(f.value) + '</span></div>';
+      }
+    }
+    return html + '</div>';
+  }
+
+  function extractFencedCode(text) {
+    var blocks = [];
+    var lines = text.split(/\r?\n/);
+    var result = [];
+    var i = 0;
+    while (i < lines.length) {
+      var line = lines[i];
+      var fenceMatch = line.match(/^(`{3,})(.*)$/);
+      if (fenceMatch) {
+        var fence = fenceMatch[1];
+        var lang = fenceMatch[2].trim();
+        var codeLines = [];
+        i++;
+        while (i < lines.length) {
+          var cline = lines[i];
+          var closeFenceRe = new RegExp('^' + fence.replace(/[.*+?^${}()|[\]\\]/g, '\\$&') + '\\s*$');
+          if (closeFenceRe.test(cline)) {
+            i++;
+            break;
+          }
+          codeLines.push(cline);
+          i++;
+        }
+        var idx = blocks.length;
+        blocks.push({lang: lang, code: codeLines.join('\n')});
+        result.push('');
+        result.push(PH_CB + idx + PH_CB);
+        result.push('');
+      } else {
+        result.push(line);
+        i++;
+      }
+    }
+    return {text: result.join('\n'), blocks: blocks};
+  }
+
+  function extractInlineCode(text) {
+    var codes = [];
+    var regex = /(`+)([\s\S]*?)\1/g;
+    text = text.replace(regex, function(match, ticks, code) {
+      if (code.indexOf('\n') !== -1) return match;
+      if (ticks.length > 1 && code.indexOf(ticks.charAt(0)) !== -1) return match;
+      var idx = codes.length;
+      codes.push(code);
+      return PH_IC + idx + PH_IC;
+    });
+    return {text: text, codes: codes};
+  }
+
+  function processFootnotes(text) {
+    var fnDefRegex = /\[\^([^\]]+)\]:\s*([\s\S]*?)(?=\n{2,}|\n\[\^[^\]]+\]:\s*|$)/g;
+    var footnotes = {};
+    var fnOrder = [];
+
+    text = text.replace(fnDefRegex, function(match, name, content) {
+      name = name.trim();
+      content = content.replace(/^\s+/gm, '').trim();
+      content = content.replace(/\n\s{2,}/g, ' ');
+      content = content.replace(/\n/g, ' ');
+      if (!footnotes[name]) {
+        footnotes[name] = {name: name, content: content, index: fnOrder.length + 1};
+        fnOrder.push(name);
+      }
+      return '';
+    });
+
+    if (!fnOrder.length) return {text: text, footnotesHtml: ''};
+
+    var fnRefMap = {};
+    var refCounter = 0;
+    text = text.replace(/\[\^([^\]]+)\](?!:)/g, function(match, name) {
+      name = name.trim();
+      if (!footnotes[name]) return match;
+      refCounter++;
+      var safeName = name.replace(/[^a-zA-Z0-9_-]/g,'_');
+      var refId = 'fnref-' + safeName + '-' + refCounter;
+      if (!fnRefMap[name]) fnRefMap[name] = [];
+      fnRefMap[name].push(refId);
+      return '<sup class="footnote-ref"><a href="#fn-' + safeName + '" id="' + refId + '">' + footnotes[name].index + '</a></sup>';
+    });
+
+    var fnHtml = '<section class="footnotes"><ol>';
+    for (var i = 0; i < fnOrder.length; i++) {
+      var name = fnOrder[i];
+      var fn = footnotes[name];
+      var safeName = name.replace(/[^a-zA-Z0-9_-]/g,'_');
+      var backrefs = '';
+      if (fnRefMap[name]) {
+        for (var j = 0; j < fnRefMap[name].length; j++) {
+          backrefs += ' <a href="#' + fnRefMap[name][j] + '" class="footnote-backref">\u21a9' + (fnRefMap[name].length > 1 ? (j + 1) : '') + '</a>';
+        }
+      }
+      fnHtml += '<li id="fn-' + safeName + '">' + inlineMarkdown(fn.content) + backrefs + '</li>';
+    }
+    fnHtml += '</ol></section>';
+    return {text: text, footnotesHtml: fnHtml};
+  }
+
+  function renderCodeBlock(lang, code) {
+    if (lang === 'mermaid') {
+      var mid = uniqId('mermaid');
+      return '<div class="mermaid" id="' + mid + '">' + escapeHtml(code) + '</div>';
+    }
+    var highlighted = escapeHtml(code);
+    if (typeof hljs !== 'undefined') {
+      try {
+        if (lang && hljs.getLanguage(lang)) {
+          highlighted = hljs.highlight(code, {language: lang, ignoreIllegals: true}).value;
+        } else {
+          var auto = hljs.highlightAuto(code);
+          highlighted = auto.value;
+          if (!lang && auto.language) lang = auto.language;
+        }
+      } catch(e) {}
+    }
+    var langTag = lang ? '<span class="code-lang">' + escapeHtml(lang) + '</span>' : '';
+    return '<pre>' + langTag + '<code' + (lang ? ' class="language-' + escapeHtml(lang) + '"' : '') + '>' + highlighted + '</code></pre>';
+  }
+
+  function renderMermaid() {
+    if (typeof mermaid === 'undefined') return;
+    var els = document.querySelectorAll('.mermaid');
+    for (var i = 0; i < els.length; i++) {
+      (function(el) {
+        var code = el.textContent || el.innerText || '';
+        var containerId = uniqId('mermaid');
+        var showMermaidError = function(errMsg) {
+          var errDiv = document.createElement('div');
+          errDiv.className = 'mermaid-error';
+          errDiv.textContent = 'Mermaid 图表渲染失败: ' + errMsg + '\n\n' + code;
+          el.replaceWith(errDiv);
+        };
+        var insertSvg = function(svgCode) {
+          var container = document.createElement('div');
+          container.className = 'mermaid-container';
+          container.innerHTML = svgCode;
+          el.replaceWith(container);
+        };
+        try {
+          var result = mermaid.render(containerId, code);
+          if (result && typeof result.then === 'function') {
+            result.then(function(res) {
+              insertSvg(res.svg || res);
+            }).catch(function(e) {
+              console.error('Mermaid async render error:', e);
+              showMermaidError(e.message || String(e));
+            });
+          } else {
+            insertSvg(result.svg || result);
+          }
+        } catch(e) {
+          console.error('Mermaid render error:', e);
+          showMermaidError(e.message || String(e));
+        }
+      })(els[i]);
+    }
+  }
+
+  function showError(md, msg) {
+    contentEl.innerHTML = '<div class="render-error"><b>Markdown 渲染失败</b><br>' + escapeHtml(msg) + '</div>' +
+      '<pre style="background:var(--code-bg);padding:12px;border-radius:6px;white-space:pre-wrap;font-size:12px;opacity:.7;overflow-x:auto">' +
+      escapeHtml((md||'').substring(0, 5000)) + '</pre>';
+  }
+
+  /**
+   * Find heavy content elements (pre, table, img, .mermaid-container, .katex-display)
+   * that are below the current viewport and add the .deferred-content class to them.
+   * This enables content-visibility:auto deferral so the browser skips their
+   * layout/paint until they are about to become visible, improving initial render.
+   * The first few elements are left without the class to ensure above-fold content
+   * renders immediately.
+   */
+  function applyDeferredContent() {
+    var viewportHeight = window.innerHeight || document.documentElement.clientHeight;
+    var skipCount = 3; // Keep first N heavy elements un-deferred for instant above-fold
+    var candidates = contentEl.querySelectorAll('pre, table, img, .mermaid-container, .katex-display');
+    var appliedCount = 0;
+    for (var i = 0; i < candidates.length; i++) {
+      var el = candidates[i];
+      if (appliedCount < skipCount) {
+        appliedCount++;
+        continue;
+      }
+      var rect = el.getBoundingClientRect();
+      // If the element's top is below the viewport, defer it
+      if (rect.top > viewportHeight) {
+        el.classList.add('deferred-content');
+      }
+    }
+  }
+
+  /**
+   * Pre-scan the raw Markdown source to build a mapping of heading text
+   * (lowercased, trimmed) to its 0-based source line index.
+   * Supports both ATX (# Heading) and setext (underlined) headings.
+   */
+  function buildHeadingLineMap(md) {
+    var map = {};
+    var lines = md.split(/\r?\n/);
+    for (var i = 0; i < lines.length; i++) {
+      var line = lines[i];
+      // ATX-style
+      var atxMatch = line.match(/^(#{1,6})\s+(.+)$/);
+      if (atxMatch) {
+        var text = atxMatch[2].replace(/#+\s*$/, '').trim();
+        map[text.toLowerCase()] = i;
+        continue;
+      }
+      // Setext-style
+      if (i + 1 < lines.length) {
+        var nextLine = lines[i + 1].trim();
+        if (nextLine.length >= 2 && line.trim().length > 0) {
+          if (nextLine.split('').every(function(c){ return c === '='; })) {
+            map[line.trim().toLowerCase()] = i;
+          } else if (nextLine.split('').every(function(c){ return c === '-'; })) {
+            map[line.trim().toLowerCase()] = i;
+          }
+        }
+      }
+    }
+    return map;
+  }
+
+  function processMarkdown(md, dark, theme) {
+    idCounter = 0;
+    try {
+      if (!markedInited && !initMarked()) {
+        throw new Error('marked.js 未加载');
+      }
+
+      initMermaid(dark);
+      document.body.className = (theme||'') + ((theme&&dark)?' ':'') + (dark?'dark':'');
+
+      if (theme && theme !== 'default') {
+        var oldTheme = document.getElementById('theme-css');
+        if (oldTheme) oldTheme.remove();
+        var lk = document.createElement('link');
+        lk.id = 'theme-css';
+        lk.rel = 'stylesheet';
+        lk.href = 'themes/' + theme + '.css';
+        document.head.appendChild(lk);
+      } else {
+        var oldThemeDefault = document.getElementById('theme-css');
+        if (oldThemeDefault) oldThemeDefault.remove();
+      }
+
+      // Build source-line map for headings before content is transformed
+      var headingLineMap = buildHeadingLineMap(md);
+
+      var parsed = parseFrontMatter(md);
+      var content = parsed.content;
+
+      var fencedData = extractFencedCode(content);
+      content = fencedData.text;
+      var codeBlocks = fencedData.blocks;
+
+      var inlineData = extractInlineCode(content);
+      content = inlineData.text;
+      var inlineCodes = inlineData.codes;
+
+      var mathBlocks = [];
+
+      content = content.replace(/\$\$([\s\S]*?)\$\$/g, function(_, formula) {
+        var idx = mathBlocks.length;
+        if (typeof katex !== 'undefined') {
+          try {
+            mathBlocks.push('<div class="katex-display">' + katex.renderToString(formula.trim(), {
+              displayMode: true,
+              throwOnError: false,
+              strict: 'ignore'
+            }) + '</div>');
+          } catch(e) {
+            mathBlocks.push('<div class="math-error">公式错误: ' + escapeHtml(e.message) + '</div>');
+          }
+        } else {
+          mathBlocks.push('<div class="katex-display">$$' + escapeHtml(formula) + '$$</div>');
+        }
+        return PH_MB + idx + PH_MB;
+      });
+
+      content = content.replace(/\\\$/g, '\x01DOL\x01');
+
+      content = content.replace(/\$([^\$\n]+?)\$/g, function(_, formula) {
+        var idx = mathBlocks.length;
+        if (typeof katex !== 'undefined') {
+          try {
+            mathBlocks.push(katex.renderToString(formula.trim(), {
+              displayMode: false,
+              throwOnError: false,
+              strict: 'ignore'
+            }));
+          } catch(e) {
+            mathBlocks.push('<span class="math-error">公式错误</span>');
+          }
+        } else {
+          mathBlocks.push('$' + escapeHtml(formula) + '$');
+        }
+        return PH_MB + idx + PH_MB;
+      });
+
+      content = content.replace(/\x01DOL\x01/g, '\\$');
+
+      var fnResult = processFootnotes(content);
+      content = fnResult.text;
+
+      content = content.replace(/==([^=]+)==/g, '<mark>$1</mark>');
+
+      content = content.replace(/\[TOC\]/gi, PH_TOC);
+
+      function finishRender(html) {
+        html = html.split(PH_CB).map(function(part, i) {
+          if (i % 2 === 1) {
+            var idx = parseInt(part);
+            var nextPH = part.indexOf(PH_CB);
+            if (nextPH > 0) {
+              idx = parseInt(part.substring(0, nextPH));
+            }
+            var block = codeBlocks[idx];
+            if (block) {
+              return renderCodeBlock(block.lang, block.code) + (nextPH > 0 ? part.substring(nextPH + PH_CB.length) : '');
+            }
+            return part;
+          }
+          return part;
+        }).join('');
+
+        html = html.split(PH_IC).map(function(part, i) {
+          if (i % 2 === 1) {
+            var idx = parseInt(part);
+            var nextPH = part.indexOf(PH_IC);
+            if (nextPH > 0) {
+              idx = parseInt(part.substring(0, nextPH));
+            }
+            var code = inlineCodes[idx];
+            return '<code>' + escapeHtml(code) + '</code>' + (nextPH > 0 ? part.substring(nextPH + PH_IC.length) : '');
+          }
+          return part;
+        }).join('');
+
+        html = html.split(PH_MB).map(function(part, i) {
+          if (i % 2 === 1) {
+            var idx = parseInt(part);
+            var nextPH = part.indexOf(PH_MB);
+            if (nextPH > 0) {
+              idx = parseInt(part.substring(0, nextPH));
+            }
+            return mathBlocks[idx] + (nextPH > 0 ? part.substring(nextPH + PH_MB.length) : '');
+          }
+          return part;
+        }).join('');
+
+        if (fnResult.footnotesHtml) {
+          html += fnResult.footnotesHtml;
+        }
+
+        if (parsed.front) {
+          html = renderFrontMatter(parsed.front) + html;
+        }
+
+        // SECURITY: 消毒后再注入，阻断 XSS（脚本/事件/危险协议全部过滤）
+        contentEl.innerHTML = sanitizeHtml(html);
+
+        // Apply deferred-content class to heavy elements below the fold
+        applyDeferredContent();
+
+        var headings = contentEl.querySelectorAll('h1, h2, h3, h4, h5, h6');
+        var usedHIds = {};
+        for (var hi = 0; hi < headings.length; hi++) {
+          var h = headings[hi];
+          var hText = h.textContent || '';
+          var baseId = slugify(hText);
+          var hid = baseId;
+          var n = 1;
+          while (usedHIds[hid]) {
+            hid = baseId + '-' + (++n);
+          }
+          usedHIds[hid] = true;
+          h.id = hid;
+          // Inject source line number for preview-to-editor jump
+          var srcLine = headingLineMap[hText.toLowerCase()];
+          if (typeof srcLine === 'number') {
+            h.setAttribute('data-source-line', srcLine);
+          }
+        }
+
+        var tables = contentEl.querySelectorAll('table');
+        for (var ti2 = 0; ti2 < tables.length; ti2++) {
+          var tbl = tables[ti2];
+          if (tbl.parentElement && tbl.parentElement.classList.contains('table-wrap')) continue;
+          var wrapper = document.createElement('div');
+          wrapper.className = 'table-wrap';
+          tbl.parentNode.insertBefore(wrapper, tbl);
+          wrapper.appendChild(tbl);
+        }
+
+        var allParas = contentEl.getElementsByTagName('p');
+        var tocParas = [];
+        for (var pi = 0; pi < allParas.length; pi++) {
+          tocParas.push(allParas[pi]);
+        }
+        for (var ti = tocParas.length - 1; ti >= 0; ti--) {
+          var p = tocParas[ti];
+          if (p.textContent === PH_TOC || p.textContent.trim() === 'TOC') {
+            if (headings.length) {
+              var minLevel = 6;
+              for (var mi = 0; mi < headings.length; mi++) {
+                var ml = parseInt(headings[mi].tagName.charAt(1));
+                if (ml < minLevel) minLevel = ml;
+              }
+              var tocHtml = '<div class="toc"><div class="toc-title">目录</div><ul>';
+              var prevAdjLevel = 1;
+              var stack = [];
+              for (var hi2 = 0; hi2 < headings.length; hi2++) {
+                var h2 = headings[hi2];
+                var rawLevel = parseInt(h2.tagName.charAt(1));
+                var adjLevel = rawLevel - minLevel + 1;
+                var hText2 = h2.textContent || '';
+                while (adjLevel > prevAdjLevel) {
+                  tocHtml += '<ul>';
+                  stack.push('</ul>');
+                  prevAdjLevel++;
+                }
+                while (adjLevel < prevAdjLevel && stack.length) {
+                  tocHtml += stack.pop();
+                  prevAdjLevel--;
+                }
+                tocHtml += '<li><a href="#' + h2.id + '">' + escapeHtml(hText2) + '</a></li>';
+              }
+              while (stack.length) {
+                tocHtml += stack.pop();
+              }
+              tocHtml += '</ul></div>';
+              var tocDiv = document.createElement('div');
+              tocDiv.innerHTML = tocHtml;
+              p.replaceWith(tocDiv.firstChild);
+            } else {
+              p.remove();
+            }
+            break;
+          }
+        }
+
+        setTimeout(renderMermaid, 30);
+      }
+
+      var parseResult;
+      try {
+        parseResult = marked.parse(content);
+      } catch(e) {
+        throw new Error('Markdown 解析错误: ' + e.message);
+      }
+
+      if (parseResult && typeof parseResult.then === 'function') {
+        parseResult.then(finishRender).catch(function(e) {
+          console.error('Markdown async render error:', e);
+          showError(md, e.message || String(e));
+        });
+      } else {
+        finishRender(parseResult);
+      }
+
+    } catch(e) {
+      console.error('Markdown render error:', e);
+      showError(md, e.message || String(e));
+    }
+  }
+
+  window.renderMarkdown = function() {
+    injectResourcesIfNeeded(window.__mdContent || '').then(function() {
+      processMarkdown(
+        window.__mdContent || '',
+        window.__mdDark || false,
+        window.__mdTheme || ''
+      );
+    });
+  };
+
+  document.addEventListener('click', function(e) {
+    if (['INPUT','A','BUTTON','VIDEO'].indexOf(e.target.tagName) >= 0) return;
+    var t = e.target;
+    while (t && t !== contentEl && !/^(H[1-6]|P|LI|PRE|BLOCKQUOTE|TD)$/.test(t.tagName)) {
+      t = t.parentElement;
+    }
+    if (t && t !== contentEl) {
+      // If a heading was clicked and has a source line, notify native side for editor jump
+      if (/^H[1-6]$/.test(t.tagName)) {
+        var srcLine = t.getAttribute('data-source-line');
+        if (srcLine !== null && typeof Android !== 'undefined' && Android.onHeadingClick) {
+          Android.onHeadingClick(srcLine);
+        }
+      }
+      var x = t.textContent.trim().substring(0, 200);
+      if (x && typeof Android !== 'undefined' && Android.onPreviewClick) {
+        Android.onPreviewClick(x);
+      }
+    }
+  });
+
+  document.addEventListener('change', function(e) {
+    if (e.target.type === 'checkbox' && e.target.closest('.task-list-item')) {
+      var states = Array.prototype.slice.call(
+        document.querySelectorAll('.task-list-item input[type="checkbox"]')
+      ).map(function(c) { return c.checked; });
+      if (typeof Android !== 'undefined' && Android.onCheckboxChanged) {
+        Android.onCheckboxChanged(JSON.stringify(states));
+      }
+    }
+  });
+
+  (function() {
+    var params = new URLSearchParams(window.location.search);
+    var fp = params.get('file');
+    if (fp) {
+      try {
+        var xhr = new XMLHttpRequest();
+        xhr.open('GET', fp, false);
+        xhr.send();
+        if (xhr.status === 200) {
+          window.__mdContent = xhr.responseText;
+          window.__mdDark = params.get('dark') === '1';
+          window.__mdTheme = params.get('theme') || 'default';
+          injectResourcesIfNeeded(window.__mdContent).then(function() {
+            processMarkdown(window.__mdContent, window.__mdDark, window.__mdTheme);
+          });
+        } else {
+          showError('', '文件加载失败: HTTP ' + xhr.status);
+        }
+      } catch(e) {
+        showError('', '文件加载失败: ' + e.message);
+      }
+    }
+  })();
+
+})();
+</script>
+</body>
+</html>

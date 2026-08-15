@@ -1,0 +1,52 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!-- Error: Network -->
+    <string name="error_network_no_connection">Network connection unavailable</string>
+    <string name="error_network_timeout">Network request timed out</string>
+    <string name="error_network_general">Network error</string>
+
+    <!-- Error: File Operation -->
+    <string name="error_file_not_found">File not found</string>
+    <string name="error_file_permission_denied">File access permission denied</string>
+
+    <!-- Error: Parse -->
+    <string name="error_parse_unsupported_encoding">Unsupported character encoding</string>
+    <string name="error_parse_json">JSON parsing error</string>
+
+    <!-- Error: System -->
+    <string name="error_out_of_memory">Out of memory</string>
+    <string name="error_unknown">An unknown error occurred</string>
+
+    <!-- General UI -->
+    <string name="save_in_progress">Saving, please wait…</string>
+    <string name="save_success">Saved successfully</string>
+
+    <!-- GitHub URL Validation -->
+    <string name="error_url_too_long">URL is too long (max 2048 characters)</string>
+    <string name="error_url_empty">URL cannot be empty</string>
+    <string name="error_url_invalid_chars">URL contains invalid characters</string>
+    <string name="error_url_invalid_format">Invalid GitHub URL format</string>
+    <string name="error_git_repo_exists">Directory already contains a Git repository</string>
+
+    <!-- Git Clone Errors -->
+    <string name="git_error_network">Network connection failed. Please check your network and try again.</string>
+    <string name="git_error_timeout">Network connection timed out. Please check your network and try again.</string>
+    <string name="git_error_upload_pack">Unable to connect to the Git repository. Please check the URL or your network and try again.</string>
+    <string name="git_error_auth">The repository is private or requires authorization. Please verify the URL and try again.</string>
+    <string name="git_error_not_found">Invalid repository address or repository does not exist.</string>
+    <string name="git_error_path">Target path does not exist.</string>
+    <string name="git_error_transport">Git transport error: %1$s</string>
+    <string name="git_error_ssl">SSL handshake failed. Check your network or mirror URL configuration.</string>
+    <string name="git_error_unknown">Unknown error</string>
+    <string name="git_error_generic">Clone failed: %1$s. Please try again.</string>
+
+    <!-- Git Credential Errors -->
+    <string name="git_credential_locked">Secure credentials have been invalidated. Please re-enter your Git credentials.</string>
+    <string name="git_credential_save_success">Credentials saved</string>
+    <string name="git_credential_delete_success">Credentials deleted</string>
+    <string name="git_credential_not_found">No credentials found for this host</string>
+
+    <!-- EditorConfig -->
+    <string name="editorconfig_applied">Applied .editorconfig configuration</string>
+    <string name="editorconfig_not_found">No .editorconfig file found</string>
+</resources>

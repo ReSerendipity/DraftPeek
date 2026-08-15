@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <color name="brand_primary">#E8A838</color>      <!-- Amber gold -->
+    <color name="brand_primary_dark">#3D2D15</color> <!-- Dark amber -->
+    <color name="brand_accent">#5A9BD5</color>       <!-- Lighter blue -->
+    <color name="splash_background">#080808</color>
+</resources>

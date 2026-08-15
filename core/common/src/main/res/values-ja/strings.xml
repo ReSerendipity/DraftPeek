@@ -1,0 +1,52 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!-- Error: Network -->
+    <string name="error_network_no_connection">ネットワーク接続が利用できません</string>
+    <string name="error_network_timeout">ネットワークリクエストがタイムアウトしました</string>
+    <string name="error_network_general">ネットワークエラー</string>
+
+    <!-- Error: File Operation -->
+    <string name="error_file_not_found">ファイルが見つかりません</string>
+    <string name="error_file_permission_denied">ファイルアクセスの権限が拒否されました</string>
+
+    <!-- Error: Parse -->
+    <string name="error_parse_unsupported_encoding">サポートされていない文字エンコーディング</string>
+    <string name="error_parse_json">JSON解析エラー</string>
+
+    <!-- Error: System -->
+    <string name="error_out_of_memory">メモリ不足</string>
+    <string name="error_unknown">不明なエラーが発生しました</string>
+
+    <!-- General UI -->
+    <string name="save_in_progress">保存中です、しばらくお待ちください…</string>
+    <string name="save_success">保存しました</string>
+
+    <!-- GitHub URL Validation -->
+    <string name="error_url_too_long">URL が長すぎます（最大 2048 文字）</string>
+    <string name="error_url_empty">URLを入力してください</string>
+    <string name="error_url_invalid_chars">URL に無効な文字が含まれています</string>
+    <string name="error_url_invalid_format">GitHub URL の形式が無効です</string>
+    <string name="error_git_repo_exists">そのディレクトリにはGitリポジトリが既に存在します</string>
+
+    <!-- Git Clone Errors -->
+    <string name="git_error_network">ネットワーク接続に失敗しました。ネットワークを確認して再試行してください。</string>
+    <string name="git_error_timeout">ネットワーク接続がタイムアウトしました。ネットワークを確認して再試行してください。</string>
+    <string name="git_error_upload_pack">Gitリポジトリに接続できません。URLまたはネットワークを確認して再試行してください。</string>
+    <string name="git_error_auth">リポジトリはプライベート、または認証が必要です。URLを確認して再試行してください。</string>
+    <string name="git_error_not_found">リポジトリのアドレスが無効か、リポジトリが存在しません。</string>
+    <string name="git_error_path">ターゲットパスが存在しません。</string>
+    <string name="git_error_transport">Git転送エラー：%1$s</string>
+    <string name="git_error_ssl">SSLハンドシェイクに失敗しました。ネットワークまたはミラーURLの設定を確認してください。</string>
+    <string name="git_error_unknown">不明なエラー</string>
+    <string name="git_error_generic">クローンに失敗しました：%1$s。再試行してください。</string>
+
+    <!-- Git Credential Errors -->
+    <string name="git_credential_locked">安全な認証情報が無効化されました。Git認証情報を再入力してください。</string>
+    <string name="git_credential_save_success">認証情報を保存しました</string>
+    <string name="git_credential_delete_success">認証情報を削除しました</string>
+    <string name="git_credential_not_found">このホストの認証情報が見つかりません</string>
+
+    <!-- EditorConfig -->
+    <string name="editorconfig_applied">.editorconfig設定を適用しました</string>
+    <string name="editorconfig_not_found">.editorconfigファイルが見つかりません</string>
+</resources>
