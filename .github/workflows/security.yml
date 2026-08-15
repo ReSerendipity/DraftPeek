@@ -111,3 +111,9 @@ jobs:
           severity: 'CRITICAL,HIGH'
           scanners: 'secret'
           scan-ref: '.'
+          # 排除构建产物/缓存/IDE/日志目录，避免 hex 高熵日志误报；
+          # 真实源码（app/src、core、feature、server 等）仍全量扫描。
+          # trivy-action 声明式输入（README: skip-dirs/skip-files 逗号分隔），
+          # 等价于 CLI 的 --skip-dirs/--skip-files，且不影响其余输入语义。
+          skip-dirs: '_archive, build, .gradle, .kotlin, .idea, node_modules, logs, .cxx'
+          skip-files: '*.log'
