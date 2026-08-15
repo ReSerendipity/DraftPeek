@@ -1,0 +1,113 @@
+# ============================================================
+# DraftPeek Security Review Workflow
+# ============================================================
+# 学习借鉴：Image_MultiModel / Seedvr2 / SpiritPal 的安全审查机制。
+# 覆盖四种安全审查维度：
+#   1) dependency-review —— PR 中依赖变更的漏洞审查（GitHub 官方，基于 OSV）
+#   2) CodeQL         —— 静态安全分析（kotlin/java），security-and-quality 套件
+#   3) secret-scan    —— 密钥泄露扫描（Trivy FS，学习 Image_MultiModel）
+#   4) 定时任务       —— 每周定期全量安全扫描
+# ============================================================
+
+name: Security Review
+
+on:
+  push:
+    branches: [main, develop]
+  pull_request:
+    branches: [main, develop]
+  schedule:
+    # 每周一 01:00 UTC 定期全量扫描
+    - cron: '0 1 * * 1'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: security-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  # ── 1. 依赖漏洞审查 (dependency-review) ──────────────────
+  # 学习 Image_MultiModel 的依赖扫描思路：审查 PR 引入/变更的
+  # Gradle/Maven 依赖，命中已知漏洞时阻断合并。
+  dependency-review:
+    name: Dependency Review (PR 依赖变更审查)
+    if: github.event_name == 'pull_request'
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Dependency Review
+        uses: actions/dependency-review-action@v4
+        with:
+          fail-on-severity: high
+          # 仅审查依赖变更 diff，不审查完整 SBOM
+          comment-summary-in-pr: always
+
+  # ── 2. CodeQL 静态安全分析 ──────────────────────────────
+  # 学习 Image_MultiModel / SpiritPal 的 CodeQL 配置，使用
+  # security-and-quality 查询套件（含安全 + 代码质量）。
+  codeql:
+    name: CodeQL (kotlin/java 静态安全分析)
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    permissions:
+      actions: read
+      contents: read
+      security-events: write
+    strategy:
+      fail-fast: false
+      matrix:
+        language: ['java-kotlin']
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Set up JDK 17
+        uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: 17
+
+      - name: Initialize CodeQL
+        uses: github/codeql-action/init@v3
+        with:
+          languages: ${{ matrix.language }}
+          queries: security-and-quality
+
+      # 预编译依赖以保证 CodeQL 能正确分析 Kotlin 代码
+      - name: Autobuild
+        uses: github/codeql-action/autobuild@v3
+
+      - name: Perform CodeQL Analysis
+        uses: github/codeql-action/analyze@v3
+        with:
+          category: '/language:${{ matrix.language }}'
+
+  # ── 3. 密钥泄露扫描 (Trivy FS) ──────────────────────────
+  # 学习 Image_MultiModel 的 secret-scan job：扫描整个仓库
+  # 历史中的密钥/Token 泄露，防止凭据意外提交。
+  secret-scan:
+    name: Secret Scanning (Trivy FS 密钥泄露扫描)
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    if: github.event_name != 'pull_request'
+    steps:
+      - name: Checkout (含完整历史)
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Run Trivy secret scanner
+        uses: aquasecurity/trivy-action@master
+        with:
+          scan-type: 'fs'
+          format: 'table'
+          exit-code: '1'
+          severity: 'CRITICAL,HIGH'
+          scanners: 'secret'
+          scan-ref: '.'

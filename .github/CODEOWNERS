@@ -1,0 +1,20 @@
+# ============================================================
+# DraftPeek CODEOWNERS — 代码审查负责人机制
+# 安全相关代码指定专人审查，确保任何改动都经过安全把关。
+# 格式：<路径> <审查者>（可为 GitHub 用户名或团队）
+# ============================================================
+
+# 安全核心模块 — 所有改动必须由安全负责人审查
+app/src/main/java/com/draftpeek/security/ @ReSerendipity
+app/src/main/cpp/ @ReSerendipity
+
+# 安全策略与审查流程
+SECURITY.md @ReSerendipity
+.github/workflows/security.yml @ReSerendipity
+.github/CODEOWNERS @ReSerendipity
+
+# 构建与签名配置 — 涉及凭据与发布安全
+app/build.gradle.kts @ReSerendipity
+app/signing.gradle @ReSerendipity
+app/proguard-rules.pro @ReSerendipity
+app/proguard-dict.txt @ReSerendipity

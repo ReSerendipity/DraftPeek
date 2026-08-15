@@ -1,0 +1,108 @@
+# ============================================================
+# DraftPeek Release Workflow
+# ============================================================
+# 当推送 v* 格式的 tag 时触发，自动构建 Release APK 并创建 GitHub Release。
+# 需在 GitHub Secrets 中配置签名凭据：
+#   RELEASE_STORE_FILE (base64 编码的 keystore)
+#   RELEASE_STORE_PASSWORD
+#   RELEASE_KEY_ALIAS
+#   RELEASE_KEY_PASSWORD
+# ============================================================
+
+name: Release
+
+on:
+  push:
+    tags:
+      - 'v*'
+
+permissions:
+  contents: write
+
+jobs:
+  release:
+    name: Build & Release APK
+    runs-on: ubuntu-latest
+    timeout-minutes: 45
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Set up JDK 17
+        uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: 17
+
+      - name: Set up Gradle
+        uses: gradle/actions/setup-gradle@v4
+        with:
+          gradle-home-cache-cleanup: true
+
+      - name: Cache Gradle wrapper
+        uses: actions/cache@v4
+        with:
+          path: |
+            ~/.gradle/caches
+            ~/.gradle/wrapper
+          key: gradle-${{ runner.os }}-${{ hashFiles('**/*.gradle*', 'gradle/libs.versions.toml', 'gradle.properties') }}
+          restore-keys: |
+            gradle-${{ runner.os }}-
+
+      - name: Decode signing keystore
+        env:
+          RELEASE_STORE_FILE_BASE64: ${{ secrets.RELEASE_STORE_FILE_BASE64 }}
+        run: |
+          if [ -n "$RELEASE_STORE_FILE_BASE64" ]; then
+            echo "$RELEASE_STORE_FILE_BASE64" | base64 -d > release.jks
+          fi
+
+      - name: Configure local.properties
+        env:
+          RELEASE_STORE_PASSWORD: ${{ secrets.RELEASE_STORE_PASSWORD }}
+          RELEASE_KEY_ALIAS: ${{ secrets.RELEASE_KEY_ALIAS }}
+          RELEASE_KEY_PASSWORD: ${{ secrets.RELEASE_KEY_PASSWORD }}
+        run: |
+          echo "ci.build=true" > local.properties
+          echo "RELEASE_STORE_FILE=release.jks" >> local.properties
+          echo "RELEASE_STORE_PASSWORD=$RELEASE_STORE_PASSWORD" >> local.properties
+          echo "RELEASE_KEY_ALIAS=$RELEASE_KEY_ALIAS" >> local.properties
+          echo "RELEASE_KEY_PASSWORD=$RELEASE_KEY_PASSWORD" >> local.properties
+
+      - name: Grant execute permission for gradlew
+        run: chmod +x ./gradlew
+
+      - name: Run Tests
+        run: ./gradlew test --stacktrace
+
+      - name: Build Release APK
+        run: ./gradlew assembleRelease --stacktrace
+
+      - name: Extract version from tag
+        id: version
+        run: echo "VERSION=${GITHUB_REF#refs/tags/}" >> $GITHUB_OUTPUT
+
+      - name: Create GitHub Release
+        uses: softprops/action-gh-release@v2
+        with:
+          tag_name: ${{ steps.version.outputs.VERSION }}
+          name: DraftPeek ${{ steps.version.outputs.VERSION }}
+          generate_release_notes: true
+          draft: true
+          files: |
+            app/build/outputs/apk/release/*.apk
+          body: |
+            ## DraftPeek ${{ steps.version.outputs.VERSION }}
+
+            ### 下载
+            - 将下方 APK 文件下载到设备安装即可
+
+            ### 安全验证
+            - APK 已使用正式签名密钥签名
+            - 安全模块（反调试、DEX 完整性、签名校验）将在首次启动时自动运行
+
+            ---
+            *此 Release 由 GitHub Actions 自动生成，请手动验证后发布。*
