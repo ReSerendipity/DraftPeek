@@ -1,0 +1,31 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!-- Terminal UI -->
+    <string name="terminal_close_session">セッションを閉じる</string>
+    <string name="terminal_new_session">新しいセッション</string>
+    <string name="terminal_input_hint">コマンドを入力…</string>
+    <string name="terminal_send">送信</string>
+    <string name="terminal_restore">ターミナルを復元</string>
+    <string name="terminal_minimize">最小化</string>
+    <string name="terminal_floating_close">閉じる</string>
+
+    <!-- Terminal Service (Ch7#7 P1) -->
+    <string name="terminal_notification_title">ターミナル実行中</string>
+    <string name="terminal_notification_text">DraftPeekターミナルセッションが実行中</string>
+    <string name="terminal_notification_stop">停止</string>
+    <string name="terminal_notification_channel_name">ターミナルサービス</string>
+    <string name="terminal_notification_channel_desc">バックグラウンドでターミナルセッションを維持</string>
+    <string name="permission_terminal_command_desc">同じ鍵で署名されたアプリが DraftPeek にターミナルコマンドを送信できるようにします</string>
+    <string name="permission_terminal_command_label">ターミナルコマンドを実行</string>
+    <string name="terminal_title">ターミナル</string>
+    <!-- Diff / Encoding dialogs -->
+    <string name="terminal_service_running">コマンドをバックグラウンドで実行中</string>
+
+    <!-- Integrated Terminal -->
+    <string name="terminal_cwd_label">作業ディレクトリ</string>
+    <string name="terminal_proot_guide_title">初回使用 · Linux環境を準備中</string>
+    <string name="terminal_proot_guide_desc">Linux 実行環境を展開しています（約50MB）。完了後、完全なターミナル機能が利用できます。注意：ターミナルでは任意のコマンドを実行できます。信頼できるコマンドのみを実行してください。誤った操作はデータ損失を引き起こす可能性があります。</string>
+    <string name="terminal_proot_ready">Linux環境の準備が完了しました</string>
+    <string name="terminal_proot_error">Linux環境の準備に失敗しました</string>
+    <string name="terminal_unavailable_hint">この位置ではターミナルを開けません</string>
+</resources>

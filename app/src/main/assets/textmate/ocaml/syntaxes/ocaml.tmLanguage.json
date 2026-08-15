@@ -1,0 +1,167 @@
+{
+  "$schema": "https://raw.githubusercontent.com/martinring/tmlanguage/master/tmlanguage.json",
+  "name": "OCaml",
+  "scopeName": "source.ocaml",
+  "patterns": [
+    { "include": "#comments" },
+    { "include": "#strings" },
+    { "include": "#chars" },
+    { "include": "#numbers" },
+    { "include": "#keywords" },
+    { "include": "#types" },
+    { "include": "#modules" },
+    { "include": "#functions" },
+    { "include": "#operators" },
+    { "include": "#variants" }
+  ],
+  "repository": {
+    "comments": {
+      "patterns": [
+        {
+          "name": "comment.block.ocaml",
+          "begin": "\\(\\*",
+          "end": "\\*\\)",
+          "patterns": [
+            { "include": "#comments" }
+          ]
+        }
+      ]
+    },
+    "strings": {
+      "patterns": [
+        {
+          "name": "string.quoted.double.ocaml",
+          "begin": "\"",
+          "end": "\"",
+          "patterns": [
+            {
+              "name": "constant.character.escape.ocaml",
+              "match": "\\\\[\\\\\"'ntbr ]"
+            },
+            {
+              "name": "constant.character.escape.ocaml",
+              "match": "\\\\[0-9]{3}"
+            },
+            {
+              "name": "constant.character.escape.ocaml",
+              "match": "\\\\x[0-9A-Fa-f]{2}"
+            },
+            {
+              "name": "constant.character.escape.ocaml",
+              "match": "\\\\o[0-3][0-7]{2}"
+            },
+            {
+              "name": "constant.character.escape.ocaml",
+              "match": "\\\\u\\{[0-9A-Fa-f]+\\}"
+            }
+          ]
+        },
+        {
+          "name": "string.quoted.other.delimiter.ocaml",
+          "begin": "\\{[a-z]*\\|",
+          "end": "\\|[a-z]*\\}"
+        }
+      ]
+    },
+    "chars": {
+      "patterns": [
+        {
+          "name": "string.quoted.single.ocaml",
+          "match": "'(\\\\[\\\\\"'ntbr ]|\\\\[0-9]{3}|\\\\x[0-9A-Fa-f]{2}|[^\\\\'])'"
+        }
+      ]
+    },
+    "numbers": {
+      "patterns": [
+        {
+          "name": "constant.numeric.hex.ocaml",
+          "match": "\\b0[xX][0-9A-Fa-f][0-9A-Fa-f_]*\\b"
+        },
+        {
+          "name": "constant.numeric.octal.ocaml",
+          "match": "\\b0[oO][0-7][0-7_]*\\b"
+        },
+        {
+          "name": "constant.numeric.binary.ocaml",
+          "match": "\\b0[bB][01][01_]*\\b"
+        },
+        {
+          "name": "constant.numeric.float.ocaml",
+          "match": "\\b[0-9][0-9_]*\\.[0-9_]*([eE][+-]?[0-9][0-9_]*)?\\b"
+        },
+        {
+          "name": "constant.numeric.integer.ocaml",
+          "match": "\\b[0-9][0-9_]*\\b"
+        }
+      ]
+    },
+    "keywords": {
+      "patterns": [
+        {
+          "name": "keyword.control.ocaml",
+          "match": "\\b(let|in|fun|function|match|with|if|then|else|for|while|do|done|begin|end|to|downto)\\b"
+        },
+        {
+          "name": "keyword.declaration.ocaml",
+          "match": "\\b(type|module|struct|sig|open|include|exception|external|val|method|object|class|inherit|initializer|new)\\b"
+        },
+        {
+          "name": "keyword.other.ocaml",
+          "match": "\\b(try|raise|raise_notrace|mutable|rec|and|assert|lazy|virtual|private|constraint|of|as|when)\\b"
+        },
+        {
+          "name": "keyword.operator.logical.ocaml",
+          "match": "\\b(and|or|not|mod|land|lor|lxor|lsl|lsr|asr)\\b"
+        },
+        {
+          "name": "constant.language.ocaml",
+          "match": "\\b(true|false)\\b"
+        }
+      ]
+    },
+    "types": {
+      "patterns": [
+        {
+          "name": "storage.type.ocaml",
+          "match": "\\b(int|float|string|bool|char|unit|list|array|option|ref|exn|format|in_channel|out_channel|bytes|nativeint|int32|int64|lazy_t|result)\\b"
+        }
+      ]
+    },
+    "modules": {
+      "patterns": [
+        {
+          "name": "entity.name.type.module.ocaml",
+          "match": "\\b[A-Z][a-zA-Z0-9_']*\\b"
+        }
+      ]
+    },
+    "variants": {
+      "patterns": [
+        {
+          "name": "entity.name.tag.variant.ocaml",
+          "match": "`[a-zA-Z][a-zA-Z0-9_']*"
+        }
+      ]
+    },
+    "functions": {
+      "patterns": [
+        {
+          "name": "entity.name.function.ocaml",
+          "match": "\\b[a-z_][a-zA-Z0-9_']*(?=\\s+[^=]*=\\s*(fun|function))"
+        },
+        {
+          "name": "entity.name.function.ocaml",
+          "match": "(?<=\\blet\\s)[a-z_][a-zA-Z0-9_']*"
+        }
+      ]
+    },
+    "operators": {
+      "patterns": [
+        {
+          "name": "keyword.operator.ocaml",
+          "match": "(->|<-|:=|::|\\|>|@@|@|\\^|\\+|\\-|\\*|/|\\.|\\|\\||&&|==|<>|<=|>=|<|>|=|\\|)"
+        }
+      ]
+    }
+  }
+}

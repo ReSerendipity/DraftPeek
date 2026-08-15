@@ -1,0 +1,1183 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="canvas:width" content="393">
+<meta name="canvas:height" content="852">
+<title>DraftPeek 撰码轻览 · UI 原型</title>
+<style>
+/* ============================================================
+   DraftPeek (撰码轻览) 高保真 UI 原型
+   视觉依据: core/designsystem 设计令牌 (Color.kt / Spacing.kt / Type.kt)
+   品牌: 朱砂红 #C41E3A 功能强调色 + 冷灰中性基调
+   说明: 所有屏幕以 data-component 标注对应 Compose 组件, 便于落回代码。
+   ============================================================ */
+
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+
+/* ---- Seed tokens (Light, default) ---- */
+:root{
+  --seed-page-bg:#EFEFEF;
+  --seed-bg:#F5F5F5;
+  --seed-surface:#FFFFFF;
+  --seed-surface-variant:#FAFAFA;
+  --seed-fg:#18181B;
+  --seed-fg-soft:#3A3A42;
+  --seed-muted:#8E8E96;
+  --seed-muted-soft:#B0B0B8;
+  --seed-border:#E5E5E5;
+  --seed-border-soft:#EDEDED;
+  --seed-surface-hover:#F0F0F0;
+  --seed-primary:#C41E3A;
+  --seed-on-primary:#FFFFFF;
+  --seed-primary-container:#FCE8EC;
+  --seed-on-primary-container:#7F0F1F;
+  --seed-radius:12px;
+
+  --seed-heat-0:#F4F4F5;
+  --seed-heat-1:rgba(196,30,58,.12);
+  --seed-heat-2:rgba(196,30,58,.30);
+  --seed-heat-3:rgba(196,30,58,.50);
+  --seed-heat-4:rgba(196,30,58,.75);
+
+  /* Derived semantic aliases */
+  --page-bg:var(--seed-page-bg);
+  --bg:var(--seed-bg);
+  --surface:var(--seed-surface);
+  --surface-variant:var(--seed-surface-variant);
+  --fg:var(--seed-fg);
+  --fg-soft:var(--seed-fg-soft);
+  --muted:var(--seed-muted);
+  --muted-soft:var(--seed-muted-soft);
+  --border:var(--seed-border);
+  --border-soft:var(--seed-border-soft);
+  --surface-hover:var(--seed-surface-hover);
+  --accent:var(--seed-primary);
+  --on-accent:var(--seed-on-primary);
+  --accent-container:var(--seed-primary-container);
+  --on-accent-container:var(--seed-on-primary-container);
+  --accent-soft:color-mix(in srgb, var(--seed-primary) 10%, transparent);
+  --radius:var(--seed-radius);
+  --radius-sm:calc(var(--seed-radius) - 2px);
+  --radius-lg:calc(var(--seed-radius) + 4px);
+
+  /* Semantic (constant across themes) */
+  --secondary:#3178C6;
+  --tertiary:#059669;
+  --success:#34C759;
+  --warning:#FF9F0A;
+  --danger:#FF3B30;
+  --info:#0A84FF;
+  --folder:#2E9E5E;
+
+  /* File-type brand colors */
+  --ft-kt:#7F52FF; --ft-js:#F7DF1E; --ft-py:#059669; --ft-md:#C41E3A;
+  --ft-json:#D97706; --ft-html:#E34F26; --ft-java:#ED8B00; --ft-ts:#3178C6;
+  --ft-css:#42A5F5; --ft-sh:#4EAA25;
+
+  --heat-0:var(--seed-heat-0);
+  --heat-1:var(--seed-heat-1);
+  --heat-2:var(--seed-heat-2);
+  --heat-3:var(--seed-heat-3);
+  --heat-4:var(--seed-heat-4);
+
+  --font-ui:'Inter','PingFang SC','Microsoft YaHei','Noto Sans SC',system-ui,sans-serif;
+  --font-mono:'JetBrains Mono','Cascadia Code','SFMono-Regular',Consolas,'Liberation Mono',monospace;
+
+  --shadow-1:0 1px 2px rgba(0,0,0,.06),0 1px 3px rgba(0,0,0,.05);
+  --shadow-2:0 4px 12px rgba(0,0,0,.10),0 2px 4px rgba(0,0,0,.06);
+  --shadow-fab:0 6px 16px rgba(196,30,58,.30),0 2px 6px rgba(0,0,0,.12);
+
+  /* Prototype shell (workspace around the phone) */
+  --shell-bg:#1b1b1f;
+  --shell-fg:#e6e6ea;
+  --shell-fg-strong:#f2f2f5;
+  --shell-muted:#8b8b93;
+  --shell-muted-2:#b9b9c1;
+  --shell-panel:#232329;
+  --shell-panel-border:#33333b;
+  --shell-btn:#2c2c33;
+  --shell-btn-border:#3a3a42;
+  --shell-btn-hover:#34343c;
+  --shell-bezel:#0d0d10;
+  --shell-bezel-ring:#2a2a30;
+  --brand-mark:#C41E3A;
+  --dot-close:#FF5F57;
+  --dot-min:#FEBC2E;
+  --dot-max:#28C840;
+}
+
+/* ---- Dark theme seeds ---- */
+.theme-dark{
+  --seed-page-bg:#080808;
+  --seed-bg:#0A0A0A;
+  --seed-surface:#141416;
+  --seed-surface-variant:#1C1C1C;
+  --seed-fg:#EDEDED;
+  --seed-fg-soft:#C0C0C8;
+  --seed-muted:#787886;
+  --seed-muted-soft:#585866;
+  --seed-border:#282828;
+  --seed-border-soft:#1F1F1F;
+  --seed-surface-hover:#222222;
+  --seed-primary:#E8A838;
+  --seed-on-primary:#FFFFFF;
+  --seed-primary-container:#3D2D15;
+  --seed-on-primary-container:#FFD9D9;
+
+  --seed-heat-0:#1C1C1F;
+  --seed-heat-1:rgba(232,168,56,.15);
+  --seed-heat-2:rgba(232,168,56,.35);
+  --seed-heat-3:rgba(232,168,56,.55);
+  --seed-heat-4:rgba(232,168,56,.80);
+
+  --secondary:#5A9BD5;
+  --tertiary:#4ADE80;
+  --folder:#3CB371;
+  --ft-kt:#B388FF; --ft-js:#FFF176; --ft-py:#4ADE80; --ft-md:#E05555;
+  --ft-json:#FBBF24; --ft-html:#FF8A65; --ft-java:#FFB74D; --ft-ts:#5A9BD5;
+  --ft-css:#60A5FA; --ft-sh:#A5D610;
+
+  --shadow-1:0 1px 2px rgba(0,0,0,.4);
+  --shadow-2:0 4px 12px rgba(0,0,0,.5);
+  --shadow-fab:0 6px 16px rgba(232,168,56,.28),0 2px 6px rgba(0,0,0,.4);
+}
+
+/* ============================================================
+   Prototype shell (outside the phone)
+   ============================================================ */
+body{
+  font-family:var(--font-ui);
+  background:var(--shell-bg);
+  color:var(--shell-fg);
+  min-height:100vh;
+  display:flex;
+  flex-direction:column;
+  align-items:center;
+  gap:20px;
+  padding:28px 16px 48px;
+}
+.proto-head{width:100%;max-width:920px;text-align:center}
+.proto-head h1{
+  font-size:1.35rem;font-weight:700;letter-spacing:-0.01em;color:var(--shell-fg-strong);
+  display:flex;align-items:center;justify-content:center;gap:10px;
+}
+.proto-head h1 .mark{
+  width:26px;height:26px;border-radius:7px;background:var(--brand-mark);
+  display:inline-flex;align-items:center;justify-content:center;
+  font-family:var(--font-mono);font-size:14px;font-weight:700;color:#fff;
+}
+.proto-head p{margin-top:6px;font-size:.8rem;color:var(--shell-muted);letter-spacing:.01em}
+
+.proto-toolbar{
+  width:100%;max-width:920px;display:flex;flex-wrap:wrap;gap:8px;
+  align-items:center;justify-content:center;
+  background:var(--shell-panel);border:1px solid var(--shell-panel-border);border-radius:14px;padding:10px 12px;
+}
+.screen-jump{display:flex;flex-wrap:wrap;gap:6px}
+.jump-btn{
+  font-family:var(--font-ui);font-size:12.5px;font-weight:550;letter-spacing:.01em;
+  color:var(--shell-muted-2);background:var(--shell-btn);border:1px solid var(--shell-btn-border);border-radius:9px;
+  padding:7px 12px;cursor:pointer;transition:all .15s ease;
+}
+.jump-btn:hover{background:var(--shell-btn-hover);color:var(--shell-fg)}
+.jump-btn[aria-pressed="true"]{background:var(--brand-mark);border-color:var(--brand-mark);color:#fff}
+.theme-toggle{
+  margin-left:auto;display:flex;align-items:center;gap:8px;
+  font-size:12.5px;font-weight:550;color:var(--shell-muted-2);
+  background:var(--shell-btn);border:1px solid var(--shell-btn-border);border-radius:9px;padding:7px 12px;cursor:pointer;
+}
+.theme-toggle:hover{background:var(--shell-btn-hover);color:var(--shell-fg)}
+.theme-toggle svg{width:16px;height:16px}
+
+/* ============================================================
+   Device frame (Android phone, portrait 393x852)
+   ============================================================ */
+.device{
+  position:relative;width:393px;height:852px;flex:0 0 auto;
+  background:var(--page-bg);
+  border-radius:44px;
+  border:1px solid rgba(255,255,255,.06);
+  box-shadow:0 0 0 11px var(--shell-bezel), 0 0 0 12px var(--shell-bezel-ring), 0 30px 70px rgba(0,0,0,.55);
+  overflow:hidden;
+  color:var(--fg);
+  transition:background .25s ease,color .25s ease;
+}
+/* punch-hole camera */
+.device::before{
+  content:"";position:absolute;top:11px;left:50%;transform:translateX(-50%);
+  width:11px;height:11px;border-radius:50%;background:var(--shell-bezel);z-index:60;
+  box-shadow:inset 0 0 2px rgba(255,255,255,.15);
+}
+/* status bar */
+.statusbar{
+  position:absolute;top:0;left:0;right:0;height:34px;z-index:55;
+  display:flex;align-items:center;justify-content:space-between;
+  padding:0 22px;font-size:13px;font-weight:600;color:var(--fg);
+  font-variant-numeric:tabular-nums;pointer-events:none;
+}
+.statusbar .sb-right{display:flex;align-items:center;gap:6px}
+.statusbar svg{width:16px;height:16px;display:block}
+/* home indicator */
+.home-indicator{
+  position:absolute;bottom:7px;left:50%;transform:translateX(-50%);
+  width:134px;height:5px;border-radius:3px;background:var(--fg);opacity:.85;z-index:55;pointer-events:none;
+}
+
+/* screens stack */
+.screens{position:absolute;inset:0}
+.screen{
+  position:absolute;inset:0;display:none;flex-direction:column;
+  background:var(--page-bg);overflow:hidden;
+}
+.screen.active{display:flex}
+.screen-scroll{flex:1;overflow-y:auto;overflow-x:hidden;scrollbar-width:none}
+.screen-scroll::-webkit-scrollbar{display:none}
+
+/* ============================================================
+   Shared brand primitives
+   ============================================================ */
+.topbar{
+  flex:0 0 auto;min-height:52px;display:flex;align-items:center;gap:8px;
+  padding:0 20px;padding-top:34px;min-height:86px;
+  background:var(--surface);border-bottom:1px solid var(--border);
+}
+.topbar.sub{padding-left:12px}
+.topbar .title{font-size:20px;font-weight:700;letter-spacing:-0.01em;color:var(--fg);line-height:1.1}
+.topbar .title.mono{font-family:var(--font-mono);font-size:17px;letter-spacing:.02em}
+.topbar .spacer{flex:1}
+.icon-btn{
+  width:40px;height:40px;flex:0 0 auto;border-radius:10px;border:none;background:transparent;
+  display:inline-flex;align-items:center;justify-content:center;cursor:pointer;color:var(--fg-soft);
+}
+.icon-btn:hover{background:var(--surface-hover)}
+.icon-btn.accent{color:var(--accent)}
+.icon-btn svg{width:22px;height:22px}
+.icon-btn.sm{width:34px;height:34px}
+.icon-btn.sm svg{width:19px;height:19px}
+
+.section-label{
+  font-family:var(--font-mono);font-size:10px;font-weight:700;letter-spacing:.12em;
+  text-transform:uppercase;color:var(--muted);padding:16px 20px 8px;
+}
+.section-label .cnt{color:var(--muted-soft);font-weight:600}
+.section-label.danger{color:var(--danger)}
+
+.card{
+  background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);
+}
+
+/* chips */
+.chip{
+  height:32px;flex:0 0 auto;display:inline-flex;align-items:center;padding:0 14px;
+  border-radius:10px;border:1px solid var(--border);background:var(--surface);
+  font-size:13px;font-weight:500;color:var(--fg-soft);cursor:pointer;white-space:nowrap;
+}
+.chip[aria-pressed="true"]{background:var(--accent);border-color:var(--accent);color:var(--on-accent)}
+.filter-chip{
+  height:28px;flex:0 0 auto;display:inline-flex;align-items:center;padding:0 12px;
+  border-radius:999px;border:1px solid var(--border);background:var(--surface);
+  font-size:11px;font-weight:550;color:var(--muted);cursor:pointer;white-space:nowrap;
+}
+.filter-chip[aria-pressed="true"]{background:var(--accent-soft);border-color:transparent;color:var(--accent)}
+
+.hscroll{display:flex;gap:8px;overflow-x:auto;padding:0 20px;scrollbar-width:none}
+.hscroll::-webkit-scrollbar{display:none}
+
+/* file type badge */
+.ft-badge{
+  width:28px;height:28px;flex:0 0 auto;border-radius:6px;display:inline-flex;
+  align-items:center;justify-content:center;font-family:var(--font-mono);
+  font-size:8.5px;font-weight:700;color:#fff;letter-spacing:.02em;
+}
+.ft-badge.mini{width:16px;height:16px;border-radius:4px;font-size:6px}
+.ft-badge.small{width:24px;height:24px;border-radius:5px;font-size:7.5px}
+
+/* buttons */
+.btn{
+  height:48px;border-radius:10px;border:none;cursor:pointer;font-family:var(--font-ui);
+  font-size:14px;font-weight:600;letter-spacing:.01em;display:inline-flex;align-items:center;
+  justify-content:center;gap:8px;padding:0 20px;
+}
+.btn.filled{background:var(--accent);color:var(--on-accent)}
+.btn.outlined{background:transparent;border:1px solid var(--border);color:var(--fg)}
+.btn.tonal{background:var(--accent-soft);color:var(--accent)}
+
+/* bottom nav */
+.bottomnav{
+  flex:0 0 auto;height:64px;display:flex;background:var(--surface);
+  border-top:1px solid var(--border);padding-bottom:8px;
+}
+.nav-item{
+  flex:1;border:none;background:transparent;cursor:pointer;display:flex;flex-direction:column;
+  align-items:center;justify-content:center;gap:3px;color:var(--muted);font-family:var(--font-ui);
+}
+.nav-item svg{width:24px;height:24px}
+.nav-item span{font-size:10px;font-weight:500;letter-spacing:.01em}
+.nav-item[aria-current="true"]{color:var(--accent)}
+.nav-item[aria-current="true"] span{font-weight:650}
+
+/* FAB */
+.fab{
+  position:absolute;right:16px;bottom:80px;width:56px;height:56px;border-radius:16px;
+  background:var(--accent);color:var(--on-accent);border:none;cursor:pointer;z-index:30;
+  display:flex;align-items:center;justify-content:center;box-shadow:var(--shadow-fab);
+  transition:transform .18s ease;
+}
+.fab:active{transform:scale(.94)}
+.fab svg{width:26px;height:26px;transition:transform .2s ease}
+.fab.open svg{transform:rotate(45deg)}
+.speed-dial{
+  position:absolute;right:16px;bottom:146px;z-index:29;display:flex;flex-direction:column;
+  gap:10px;align-items:flex-end;opacity:0;pointer-events:none;transform:translateY(8px);
+  transition:opacity .18s ease,transform .18s ease;
+}
+.speed-dial.open{opacity:1;pointer-events:auto;transform:translateY(0)}
+.speed-item{display:flex;align-items:center;gap:10px;cursor:pointer}
+.speed-item .lbl{
+  background:var(--surface);border:1px solid var(--border);border-radius:8px;
+  padding:6px 12px;font-size:12.5px;font-weight:550;color:var(--fg);box-shadow:var(--shadow-1);
+}
+.speed-item .sic{
+  width:44px;height:44px;border-radius:12px;background:var(--surface);border:1px solid var(--border);
+  display:flex;align-items:center;justify-content:center;color:var(--accent);box-shadow:var(--shadow-1);
+}
+.speed-item .sic svg{width:22px;height:22px}
+
+/* settings row */
+.setting-row{
+  min-height:52px;display:flex;align-items:center;gap:12px;padding:8px 20px;cursor:pointer;
+}
+.setting-row:hover{background:var(--surface-hover)}
+.setting-icon{
+  width:32px;height:32px;flex:0 0 auto;border-radius:9px;background:var(--accent-soft);
+  display:flex;align-items:center;justify-content:center;color:var(--accent);
+}
+.setting-icon svg{width:18px;height:18px}
+.setting-icon.danger{background:color-mix(in srgb,var(--danger) 12%,transparent);color:var(--danger)}
+.setting-text{flex:1;min-width:0}
+.setting-text .name{font-size:14px;font-weight:500;color:var(--fg);line-height:1.25}
+.setting-text .desc{font-size:11px;color:var(--muted);margin-top:1px}
+.setting-value{font-family:var(--font-mono);font-size:13px;color:var(--muted)}
+.chev{width:14px;height:14px;color:var(--muted-soft);flex:0 0 auto}
+.divider{height:1px;background:var(--border-soft);margin:0 20px}
+
+/* switch */
+.switch{
+  width:50px;height:30px;flex:0 0 auto;border-radius:999px;background:var(--border);
+  border:none;cursor:pointer;position:relative;transition:background .18s ease;padding:0;
+}
+.switch::after{
+  content:"";position:absolute;top:2px;left:2px;width:26px;height:26px;border-radius:50%;
+  background:#fff;box-shadow:0 1px 3px rgba(0,0,0,.3);transition:transform .18s ease;
+}
+.switch[aria-checked="true"]{background:var(--accent)}
+.switch[aria-checked="true"]::after{transform:translateX(20px)}
+
+/* ============================================================
+   Screen 1 — Splash / Onboarding
+   ============================================================ */
+.splash{background:var(--page-bg);align-items:center;justify-content:center;text-align:center}
+.splash-code{
+  width:280px;background:var(--surface);border:1px solid var(--border);border-radius:14px;
+  box-shadow:var(--shadow-2);overflow:hidden;text-align:left;margin-bottom:34px;
+}
+.splash-code .chrome{display:flex;align-items:center;gap:7px;padding:11px 14px;border-bottom:1px solid var(--border-soft)}
+.splash-code .dot{width:11px;height:11px;border-radius:50%}
+.splash-code .dot.r{background:var(--dot-close)}
+.splash-code .dot.y{background:var(--dot-min)}
+.splash-code .dot.g{background:var(--dot-max)}
+.splash-code .fname{margin-left:6px;font-family:var(--font-mono);font-size:11px;color:var(--muted)}
+.splash-code .lines{padding:12px 0;font-family:var(--font-mono);font-size:12px;line-height:1.85}
+.splash-code .cl{display:flex;padding:0 14px}
+.splash-code .ln{width:22px;color:var(--accent);opacity:.7;flex:0 0 auto;text-align:right;margin-right:12px}
+.splash-code .cd{color:var(--fg-soft)}
+.splash-code .kw{color:var(--accent)}
+.splash-code .st{color:var(--tertiary)}
+.splash-code .fn{color:var(--secondary)}
+.splash-code .cm{color:var(--muted)}
+.splash-brand{font-size:32px;font-weight:600;letter-spacing:-0.01em;color:var(--fg)}
+.splash-cn{margin-top:8px;font-size:14px;letter-spacing:.5em;color:var(--muted);padding-left:.5em}
+.splash-tag{margin-top:14px;font-size:13px;color:var(--muted);font-family:var(--font-mono)}
+.splash-dots{position:absolute;bottom:96px;left:0;right:0;display:flex;gap:8px;justify-content:center}
+.splash-dots i{width:8px;height:8px;border-radius:999px;background:var(--border);transition:all .2s}
+.splash-dots i.on{width:24px;background:var(--accent)}
+.splash-cta{position:absolute;bottom:120px;left:50%;transform:translateX(-50%)}
+
+/* ============================================================
+   Screen 2 — File Browser
+   ============================================================ */
+.searchbar{
+  margin:12px 20px 0;height:40px;display:flex;align-items:center;gap:10px;
+  background:var(--surface);border:1px solid var(--border);border-radius:10px;padding:0 14px;
+  color:var(--muted);font-size:14px;
+}
+.searchbar svg{width:18px;height:18px;flex:0 0 auto}
+.file-row{
+  display:flex;align-items:center;gap:12px;padding:10px 20px;cursor:pointer;
+}
+.file-row:hover{background:var(--surface-hover)}
+.file-row .meta{flex:1;min-width:0}
+.file-row .fname{font-family:var(--font-mono);font-size:13px;color:var(--fg);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.file-row .fmeta{font-size:11px;color:var(--muted);margin-top:2px;font-variant-numeric:tabular-nums}
+.file-row .git-dot{width:7px;height:7px;border-radius:50%;flex:0 0 auto}
+.dir-row{display:flex;align-items:center;gap:12px;padding:9px 20px;cursor:pointer}
+.dir-row:hover{background:var(--surface-hover)}
+.dir-row .dir-ic{width:24px;height:24px;color:var(--folder);flex:0 0 auto}
+.dir-row .dir-ic svg{width:24px;height:24px}
+.dir-row .dname{font-size:14px;font-weight:500;color:var(--fg);flex:1}
+.dir-row .cnt{font-size:11px;color:var(--muted);font-family:var(--font-mono)}
+.dir-children{display:none}
+.dir-children.open{display:block}
+.dir-children .file-row{padding-left:56px}
+.recent-card{margin:4px 20px 0;padding:14px;display:flex;flex-direction:column;gap:12px}
+.recent-hero{display:flex;gap:12px;align-items:flex-start}
+.recent-hero .code-preview{
+  flex:1;background:var(--bg);border:1px solid var(--border-soft);border-radius:8px;
+  padding:10px 12px;font-family:var(--font-mono);font-size:11px;line-height:1.7;color:var(--fg-soft);
+  max-height:88px;overflow:hidden;
+}
+.recent-hero .code-preview .kw{color:var(--accent)}
+.recent-hero .code-preview .fn{color:var(--secondary)}
+.recent-hero .code-preview .st{color:var(--tertiary)}
+
+/* ============================================================
+   Screen 3 — Editor
+   ============================================================ */
+.editor-topbar{
+  flex:0 0 auto;min-height:78px;padding-top:34px;background:var(--surface);
+  border-bottom:1px solid var(--border);display:flex;flex-direction:column;
+}
+.editor-topbar .row1{display:flex;align-items:center;gap:6px;padding:0 8px;height:44px}
+.editor-topbar .fname{font-family:var(--font-mono);font-size:13px;color:var(--fg);display:flex;align-items:center;gap:6px}
+.mod-dot{width:6px;height:6px;border-radius:50%;background:var(--accent)}
+.tabbar{
+  flex:0 0 auto;display:flex;background:var(--surface);border-bottom:1px solid var(--border);
+  overflow-x:auto;scrollbar-width:none;
+}
+.tabbar::-webkit-scrollbar{display:none}
+.etab{
+  display:flex;align-items:center;gap:7px;padding:0 14px;height:38px;flex:0 0 auto;cursor:pointer;
+  background:var(--surface);border-right:1px solid var(--border-soft);color:var(--muted);
+  border-bottom:2px solid transparent;
+}
+.etab .tname{font-family:var(--font-mono);font-size:12px;white-space:nowrap}
+.etab .tx{width:14px;height:14px;opacity:.6}
+.etab[aria-selected="true"]{background:var(--bg);color:var(--fg);border-bottom-color:var(--accent)}
+.code-area{flex:1;overflow:auto;background:var(--bg);font-family:var(--font-mono);font-size:13px;line-height:1.65}
+.code-line{display:flex;padding:0 0;white-space:pre}
+.code-line .gutter{
+  width:36px;flex:0 0 auto;text-align:right;padding-right:14px;color:var(--muted);
+  font-size:11px;user-select:none;
+}
+.code-line .code{color:var(--fg-soft);padding-right:16px}
+.code-line.hl{background:color-mix(in srgb,var(--accent) 6%,transparent)}
+.code-line.hl .gutter{color:var(--accent)}
+.tk-kw{color:var(--accent)}
+.tk-fn{color:var(--secondary)}
+.tk-str{color:var(--tertiary)}
+.tk-num{color:var(--warning)}
+.tk-com{color:var(--muted);font-style:italic}
+.tk-ty{color:color-mix(in srgb,var(--secondary) 80%,var(--fg))}
+.editor-status{
+  flex:0 0 auto;height:28px;display:flex;align-items:center;gap:8px;padding:0 16px;
+  background:var(--surface);border-top:1px solid var(--border);
+  font-family:var(--font-mono);font-size:11px;color:var(--muted);
+}
+.editor-status .spacer{flex:1}
+.editor-status .st-dot{width:6px;height:6px;border-radius:50%}
+.editor-status .saved{color:var(--success)}
+
+/* command palette */
+.palette-scrim{
+  position:absolute;inset:0;z-index:50;background:color-mix(in srgb,var(--page-bg) 92%,transparent);
+  display:none;align-items:flex-start;justify-content:center;padding-top:96px;
+}
+.palette-scrim.open{display:flex}
+.palette{
+  width:88%;max-height:60%;background:var(--surface);border:1px solid var(--border);
+  border-radius:18px;box-shadow:var(--shadow-2);display:flex;flex-direction:column;overflow:hidden;
+}
+.palette .p-search{display:flex;align-items:center;gap:10px;padding:14px 18px;border-bottom:1px solid var(--border)}
+.palette .p-search svg{width:18px;height:18px;color:var(--muted)}
+.palette .p-search input{flex:1;border:none;background:transparent;outline:none;font-family:var(--font-ui);font-size:15px;color:var(--fg)}
+.palette .p-list{overflow-y:auto;padding:6px 0}
+.p-cat{font-family:var(--font-mono);font-size:10px;font-weight:700;letter-spacing:.1em;text-transform:uppercase;color:var(--muted);padding:10px 18px 4px}
+.p-item{display:flex;align-items:center;justify-content:space-between;padding:0 18px;min-height:42px;cursor:pointer}
+.p-item:hover,.p-item.sel{background:var(--surface-hover)}
+.p-item .pl{font-size:14px;color:var(--fg)}
+.p-item.sel .pl{color:var(--accent)}
+.p-item .kbd{font-family:var(--font-mono);font-size:11px;color:var(--muted);border:1px solid var(--border);border-radius:6px;padding:2px 7px}
+
+/* ============================================================
+   Screen 4 — Markdown preview
+   ============================================================ */
+.md-toolbar{
+  flex:0 0 auto;display:flex;align-items:center;gap:2px;background:var(--surface);
+  border-bottom:1px solid var(--border);padding:6px 10px;overflow-x:auto;scrollbar-width:none;
+}
+.md-toolbar::-webkit-scrollbar{display:none}
+.md-btn{
+  min-width:32px;height:28px;flex:0 0 auto;border-radius:6px;border:none;background:transparent;
+  color:var(--muted);cursor:pointer;font-family:var(--font-mono);font-size:12px;font-weight:700;
+  display:inline-flex;align-items:center;justify-content:center;padding:0 6px;
+}
+.md-btn:hover{background:var(--surface-hover);color:var(--fg-soft)}
+.md-btn svg{width:17px;height:17px}
+.md-sep{width:1px;height:18px;background:var(--border-soft);margin:0 5px;flex:0 0 auto}
+.mode-switch{display:flex;background:var(--bg);border-radius:8px;padding:2px;margin-left:auto;flex:0 0 auto}
+.mode-switch button{
+  border:none;background:transparent;height:24px;padding:0 10px;border-radius:6px;cursor:pointer;
+  font-size:11px;font-weight:600;color:var(--muted);
+}
+.mode-switch button[aria-pressed="true"]{background:var(--surface);color:var(--accent);box-shadow:var(--shadow-1)}
+.md-preview{flex:1;overflow-y:auto;background:var(--surface);padding:22px 22px 40px}
+.md-preview h1{font-size:24px;font-weight:700;letter-spacing:-0.01em;color:var(--fg);margin:0 0 6px;padding-bottom:10px;border-bottom:1px solid var(--border-soft)}
+.md-preview h2{font-size:18px;font-weight:700;color:var(--fg);margin:22px 0 8px}
+.md-preview p{font-size:14.5px;line-height:1.7;color:var(--fg-soft);margin:0 0 12px}
+.md-preview code{font-family:var(--font-mono);font-size:12.5px;background:var(--accent-soft);color:var(--accent);padding:2px 6px;border-radius:5px}
+.md-preview pre{background:var(--bg);border:1px solid var(--border-soft);border-radius:10px;padding:14px 16px;overflow-x:auto;margin:0 0 14px}
+.md-preview pre code{background:transparent;color:var(--fg-soft);padding:0;font-size:12.5px;line-height:1.7}
+.md-preview pre .kw{color:var(--accent)}
+.md-preview pre .fn{color:var(--secondary)}
+.md-preview pre .st{color:var(--tertiary)}
+.md-preview ul{margin:0 0 12px;padding-left:20px}
+.md-preview li{font-size:14.5px;line-height:1.7;color:var(--fg-soft);margin-bottom:4px}
+.md-preview table{width:100%;border-collapse:collapse;margin:0 0 14px;font-size:13px}
+.md-preview th,.md-preview td{border:1px solid var(--border);padding:8px 10px;text-align:left}
+.md-preview th{background:var(--bg);font-weight:650;color:var(--fg)}
+.md-preview td{color:var(--fg-soft)}
+.md-task{display:flex;align-items:center;gap:9px;font-size:14.5px;color:var(--fg-soft);margin-bottom:7px}
+.md-task .box{width:17px;height:17px;border-radius:5px;border:1.5px solid var(--border);flex:0 0 auto;display:flex;align-items:center;justify-content:center}
+.md-task.done .box{background:var(--accent);border-color:var(--accent)}
+.md-task.done .box svg{width:12px;height:12px;color:var(--on-accent)}
+.md-task.done span{text-decoration:line-through;color:var(--muted)}
+
+/* ============================================================
+   Screen 5 — Stats / Profile
+   ============================================================ */
+.profile-head{display:flex;flex-direction:column;align-items:center;padding:20px 20px 8px;text-align:center}
+.avatar{position:relative;width:64px;height:64px;border-radius:50%;background:var(--accent-soft);display:flex;align-items:center;justify-content:center;font-family:var(--font-mono);font-size:22px;font-weight:700;color:var(--accent)}
+.avatar .edit-badge{position:absolute;right:-2px;bottom:-2px;width:24px;height:24px;border-radius:50%;background:var(--accent);color:var(--on-accent);display:flex;align-items:center;justify-content:center;border:2px solid var(--page-bg)}
+.avatar .edit-badge svg{width:12px;height:12px}
+.profile-head .uname{margin-top:12px;font-size:18px;font-weight:650;color:var(--fg)}
+.ver-pill{margin-top:8px;display:inline-flex;align-items:center;gap:6px;height:24px;padding:0 12px;border-radius:999px;background:var(--surface);border:1px solid var(--border);font-family:var(--font-mono);font-size:11px;color:var(--muted)}
+.ver-pill .gdot{width:7px;height:7px;border-radius:50%;background:var(--success)}
+.stat-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px;padding:16px 20px 4px}
+.stat-card{padding:14px}
+.stat-card .sl{font-size:11px;color:var(--muted);letter-spacing:.01em}
+.stat-card .sv{margin-top:6px;font-family:var(--font-mono);font-size:22px;font-weight:700;color:var(--fg);font-variant-numeric:tabular-nums}
+.stat-card .sv small{font-size:12px;font-weight:500;color:var(--muted);margin-left:3px}
+.greeting{padding:18px 20px 4px}
+.greeting .g1{font-size:24px;font-weight:700;letter-spacing:-0.01em;color:var(--fg)}
+.greeting .g2{margin-top:6px;font-size:13px;color:var(--fg-soft);line-height:1.6}
+.greeting .g2 b{color:var(--accent);font-weight:700}
+.heat-card{margin:8px 20px 0;padding:14px}
+.heat-months{display:flex;padding-left:26px;margin-bottom:5px}
+.heat-months span{font-size:9.5px;color:var(--muted);font-family:var(--font-mono)}
+.heat-body{display:flex;gap:6px}
+.heat-days{display:flex;flex-direction:column;gap:3px;justify-content:flex-start}
+.heat-days span{height:12px;font-size:9px;color:var(--muted);font-family:var(--font-mono);line-height:12px}
+.heat-grid{display:grid;grid-auto-flow:column;grid-template-rows:repeat(7,12px);gap:3px}
+.heat-grid i{width:12px;height:12px;border-radius:2px;background:var(--heat-0)}
+.heat-grid i.l1{background:var(--heat-1)}
+.heat-grid i.l2{background:var(--heat-2)}
+.heat-grid i.l3{background:var(--heat-3)}
+.heat-grid i.l4{background:var(--heat-4)}
+.heat-legend{display:flex;align-items:center;gap:4px;justify-content:flex-end;margin-top:10px;font-size:10px;color:var(--muted)}
+.heat-legend i{width:11px;height:11px;border-radius:2px;display:inline-block}
+.social-row{display:flex;gap:12px;padding:6px 20px 4px;overflow-x:auto;scrollbar-width:none}
+.social-row::-webkit-scrollbar{display:none}
+.social-btn{width:48px;height:48px;flex:0 0 auto;border-radius:50%;background:var(--surface);border:1px solid var(--border);display:flex;align-items:center;justify-content:center;color:var(--fg-soft);cursor:pointer}
+.social-btn svg{width:22px;height:22px}
+.proto-footer{text-align:center;padding:24px 20px 34px;font-size:11px;color:var(--muted-soft)}
+.proto-footer b{color:var(--muted);font-weight:600}
+
+/* ============================================================
+   Screen 7 — Terminal
+   ============================================================ */
+.term-sessionbar{flex:0 0 auto;display:flex;align-items:center;gap:8px;padding:34px 12px 8px;background:var(--surface-variant)}
+.term-session{display:flex;align-items:center;gap:7px;height:30px;padding:0 12px;border-radius:8px;background:var(--surface);color:var(--muted);font-size:12px;font-weight:550;cursor:pointer}
+.term-session[aria-selected="true"]{background:var(--accent-container);color:var(--on-accent-container)}
+.term-session .tx{width:13px;height:13px;opacity:.6}
+.term-add{margin-left:auto;width:30px;height:30px;border-radius:8px;border:none;background:transparent;color:var(--fg-soft);cursor:pointer;display:flex;align-items:center;justify-content:center}
+.term-add svg{width:18px;height:18px}
+.term-output{flex:1;overflow-y:auto;background:var(--bg);padding:12px 14px;font-family:var(--font-mono);font-size:12.5px;line-height:1.7;color:var(--fg-soft)}
+.term-output .tl{white-space:pre-wrap;word-break:break-all}
+.term-output .prompt{color:var(--tertiary)}
+.term-output .cmd{color:var(--fg)}
+.term-output .ok{color:var(--success)}
+.term-output .warn{color:var(--warning)}
+.term-output .dim{color:var(--muted)}
+.term-input{flex:0 0 auto;display:flex;align-items:center;gap:8px;padding:8px 12px 14px;background:var(--surface-variant)}
+.term-input .ps{font-family:var(--font-mono);font-size:14px;color:var(--tertiary)}
+.term-input input{flex:1;border:none;background:transparent;outline:none;font-family:var(--font-mono);font-size:14px;color:var(--fg)}
+.term-send{width:38px;height:38px;border-radius:9px;border:none;background:var(--accent);color:var(--on-accent);cursor:pointer;display:flex;align-items:center;justify-content:center}
+.term-send svg{width:19px;height:19px}
+
+/* small helper */
+.pad-x{padding-left:20px;padding-right:20px}
+.spacer-96{height:96px;flex:0 0 auto}
+</style>
+</head>
+<body>
+
+<div class="proto-head">
+  <h1><span class="mark">D</span>DraftPeek · 撰码轻览 UI 原型</h1>
+  <p>高保真可点击原型 · 视觉依据 core/designsystem 设计令牌 · 点击仅切换界面状态, 无真实功能反馈</p>
+</div>
+
+<div class="proto-toolbar">
+  <div class="screen-jump" role="tablist" aria-label="屏幕切换">
+    <button class="jump-btn" data-goto="splash" aria-pressed="false">启动</button>
+    <button class="jump-btn" data-goto="browser" aria-pressed="true">文件</button>
+    <button class="jump-btn" data-goto="editor" aria-pressed="false">编辑器</button>
+    <button class="jump-btn" data-goto="markdown" aria-pressed="false">Markdown</button>
+    <button class="jump-btn" data-goto="stats" aria-pressed="false">统计</button>
+    <button class="jump-btn" data-goto="settings" aria-pressed="false">设置</button>
+    <button class="jump-btn" data-goto="terminal" aria-pressed="false">终端</button>
+  </div>
+  <button class="theme-toggle" id="themeToggle" aria-label="切换浅色/深色主题">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M21 12.8A9 9 0 1 1 11.2 3 7 7 0 0 0 21 12.8z"/></svg>
+    <span id="themeLabel">深色</span>
+  </button>
+</div>
+
+<main class="proto-stage" aria-label="DraftPeek 应用原型预览">
+<div class="device" id="device">
+  <!-- status bar -->
+  <div class="statusbar">
+    <span>9:41</span>
+    <span class="sb-right">
+      <svg viewBox="0 0 24 24" fill="currentColor"><path d="M2 22h3v-6H2v6zm5 0h3V10H7v12zm5 0h3V6h-3v16zm5 0h3V2h-3v20z"/></svg>
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><path d="M5 12.5a10 10 0 0 1 14 0M8 15.5a6 6 0 0 1 8 0M11 18.5a2 2 0 0 1 2 0"/></svg>
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><rect x="2" y="7" width="18" height="10" rx="2.5"/><rect x="4" y="9" width="12" height="6" rx="1" fill="currentColor" stroke="none"/><path d="M21 10v4" stroke-linecap="round"/></svg>
+    </span>
+  </div>
+
+  <div class="screens">
+
+    <!-- ===================== SCREEN 1: SPLASH / ONBOARDING ===================== -->
+    <section class="screen splash" id="screen-splash" data-component="OnboardingScreen">
+      <div class="splash-code" aria-hidden="true">
+        <div class="chrome">
+          <span class="dot r"></span>
+          <span class="dot y"></span>
+          <span class="dot g"></span>
+          <span class="fname">main.kt</span>
+        </div>
+        <div class="lines">
+          <div class="cl"><span class="ln">1</span><span class="cd"><span class="kw">fun</span> <span class="fn">main</span>() {</span></div>
+          <div class="cl"><span class="ln">2</span><span class="cd">&nbsp;&nbsp;<span class="kw">val</span> draft = <span class="fn">peek</span>(<span class="st">"path"</span>)</span></div>
+          <div class="cl"><span class="ln">3</span><span class="cd">&nbsp;&nbsp;<span class="cm">// clean code reading</span></span></div>
+          <div class="cl"><span class="ln">4</span><span class="cd">}</span></div>
+        </div>
+      </div>
+      <div class="splash-brand">DraftPeek</div>
+      <div class="splash-cn">撰码轻览</div>
+      <div class="splash-tag">Clean code reading</div>
+      <div class="splash-cta">
+        <button class="btn filled" style="width:200px" data-goto="browser">开始使用</button>
+      </div>
+      <div class="splash-dots" aria-hidden="true"><i class="on"></i><i></i><i></i><i></i></div>
+    </section>
+
+    <!-- ===================== SCREEN 2: FILE BROWSER ===================== -->
+    <section class="screen" id="screen-browser" data-component="FileBrowserScreen">
+      <div class="topbar">
+        <span class="title mono">文件</span>
+        <span class="spacer"></span>
+        <button class="icon-btn accent" aria-label="Git 变更">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="6" cy="6" r="2.5"/><circle cx="6" cy="18" r="2.5"/><circle cx="18" cy="9" r="2.5"/><path d="M6 8.5v7M18 11.5c0 3-3 3.5-6 3.5H8.5"/></svg>
+        </button>
+      </div>
+      <div class="screen-scroll">
+        <div class="searchbar">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><circle cx="11" cy="11" r="7"/><path d="m20 20-3.2-3.2"/></svg>
+          <span>搜索文件…</span>
+        </div>
+        <div class="hscroll" style="padding-top:12px;padding-bottom:4px">
+          <button class="chip" aria-pressed="true">全部</button>
+          <button class="chip" aria-pressed="false">最近</button>
+          <button class="chip" aria-pressed="false">收藏</button>
+          <button class="chip" aria-pressed="false">书签</button>
+          <button class="chip" aria-pressed="false">代码</button>
+          <button class="chip" aria-pressed="false">文档</button>
+          <button class="chip" aria-pressed="false">媒体</button>
+        </div>
+
+        <div class="section-label">最近打开 <span class="cnt">· 2</span></div>
+        <div class="card recent-card" data-component="RecentFileCard">
+          <div class="recent-hero">
+            <span class="ft-badge small" style="background:var(--ft-kt)">KT</span>
+            <div style="flex:1;min-width:0">
+              <div style="font-family:var(--font-mono);font-size:13px;color:var(--fg)">EditorViewModel.kt</div>
+              <div style="font-size:11px;color:var(--muted);margin-top:2px">feature/editor · 12.4 KB · 刚刚</div>
+            </div>
+          </div>
+          <div class="code-preview" aria-hidden="true"><span class="kw">fun</span> <span class="fn">loadFileFromUri</span>(uri: String) {<br>&nbsp;&nbsp;viewModelScope.<span class="fn">launch</span> {<br>&nbsp;&nbsp;&nbsp;&nbsp;<span class="kw">val</span> c = repo.<span class="fn">read</span>(uri)<br>&nbsp;&nbsp;}<br>}</div>
+        </div>
+
+        <div class="section-label">文件夹 <span class="cnt">· 3</span></div>
+        <div data-component="DirectoryList">
+          <div class="dir-row" data-dir="app">
+            <span class="dir-ic"><svg viewBox="0 0 24 24" fill="currentColor"><path d="M10 4H4a2 2 0 0 0-2 2v12a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2V8a2 2 0 0 0-2-2h-8l-2-2z"/></svg></span>
+            <span class="dname">app</span><span class="cnt">8 项</span>
+            <svg class="chev" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="m9 6 6 6-6 6"/></svg>
+          </div>
+          <div class="dir-children" id="dir-app">
+            <div class="file-row" data-goto="editor"><span class="ft-badge" style="background:var(--ft-kt)">KT</span><div class="meta"><div class="fname">MainActivity.kt</div><div class="fmeta">6.1 KB · 2 小时前</div></div></div>
+            <div class="file-row"><span class="ft-badge" style="background:var(--ft-xml)">XML</span><div class="meta"><div class="fname">AndroidManifest.xml</div><div class="fmeta">2.3 KB · 昨天</div></div></div>
+          </div>
+          <div class="dir-row" data-dir="feature">
+            <span class="dir-ic"><svg viewBox="0 0 24 24" fill="currentColor"><path d="M10 4H4a2 2 0 0 0-2 2v12a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2V8a2 2 0 0 0-2-2h-8l-2-2z"/></svg></span>
+            <span class="dname">feature</span><span class="cnt">5 项</span>
+            <svg class="chev" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="m9 6 6 6-6 6"/></svg>
+          </div>
+          <div class="dir-children" id="dir-feature">
+            <div class="file-row" data-goto="editor"><span class="ft-badge" style="background:var(--ft-kt)">KT</span><div class="meta"><div class="fname">EditorScreen.kt</div><div class="fmeta">18.7 KB · 刚刚</div></div></div>
+            <div class="file-row" data-goto="markdown"><span class="ft-badge" style="background:var(--ft-md)">MD</span><div class="meta"><div class="fname">README.md</div><div class="fmeta">4.2 KB · 3 天前</div></div></div>
+          </div>
+          <div class="dir-row" data-dir="core">
+            <span class="dir-ic"><svg viewBox="0 0 24 24" fill="currentColor"><path d="M10 4H4a2 2 0 0 0-2 2v12a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2V8a2 2 0 0 0-2-2h-8l-2-2z"/></svg></span>
+            <span class="dname">core</span><span class="cnt">3 项</span>
+            <svg class="chev" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="m9 6 6 6-6 6"/></svg>
+          </div>
+          <div class="dir-children" id="dir-core">
+            <div class="file-row"><span class="ft-badge" style="background:var(--ft-json)">JS</span><div class="meta"><div class="fname">design-tokens.json</div><div class="fmeta">1.1 KB · 上周</div></div></div>
+          </div>
+        </div>
+
+        <div class="section-label">文件 <span class="cnt">· 4</span></div>
+        <div data-component="FileList">
+          <div class="file-row" data-goto="editor"><span class="ft-badge" style="background:var(--ft-kt)">KT</span><div class="meta"><div class="fname">DraftPeekNavHost.kt</div><div class="fmeta">9.8 KB · 1 小时前</div></div><span class="git-dot" style="background:var(--warning)" title="已修改"></span></div>
+          <div class="file-row" data-goto="editor"><span class="ft-badge" style="background:var(--ft-py)">PY</span><div class="meta"><div class="fname">lsp_server.py</div><div class="fmeta">3.5 KB · 昨天</div></div></div>
+          <div class="file-row" data-goto="markdown"><span class="ft-badge" style="background:var(--ft-md)">MD</span><div class="meta"><div class="fname">CHANGELOG.md</div><div class="fmeta">7.0 KB · 2 天前</div></div></div>
+          <div class="file-row"><span class="ft-badge" style="background:var(--ft-json)">JSON</span><div class="meta"><div class="fname">libs.versions.toml</div><div class="fmeta">5.4 KB · 上周</div></div></div>
+        </div>
+        <div class="spacer-96"></div>
+      </div>
+
+      <!-- FAB + speed dial -->
+      <div class="speed-dial" id="speedDial" data-component="FabSpeedDial">
+        <div class="speed-item"><span class="lbl">新建文件</span><span class="sic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><path d="M12 5v14M5 12h14"/></svg></span></div>
+        <div class="speed-item"><span class="lbl">从 GitHub 导入</span><span class="sic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3v12m0 0 4-4m-4 4-4-4M4 17v2a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-2"/></svg></span></div>
+        <div class="speed-item" data-goto="terminal"><span class="lbl">终端</span><span class="sic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="m5 7 5 5-5 5M13 17h6"/></svg></span></div>
+        <div class="speed-item"><span class="lbl">示例文件</span><span class="sic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M14 3v5h5M7 3h7l5 5v13a1 1 0 0 1-1 1H7a1 1 0 0 1-1-1V4a1 1 0 0 1 1-1z"/></svg></span></div>
+      </div>
+      <button class="fab" id="fab" aria-label="新建" aria-expanded="false">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M12 5v14M5 12h14"/></svg>
+      </button>
+
+      <!-- bottom nav -->
+      <nav class="bottomnav" data-component="BottomNav">
+        <button class="nav-item" aria-current="true" data-goto="browser"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linejoin="round"><path d="M3 7a2 2 0 0 1 2-2h4l2 2h8a2 2 0 0 1 2 2v9a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V7z"/></svg><span>文件</span></button>
+        <button class="nav-item" aria-current="false" data-goto="stats"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><circle cx="12" cy="8" r="4"/><path d="M4 20c0-4 3.6-6 8-6s8 2 8 6"/></svg><span>我的</span></button>
+      </nav>
+    </section>
+
+    <!-- ===================== SCREEN 3: EDITOR ===================== -->
+    <section class="screen" id="screen-editor" data-component="EditorScreen">
+      <div class="editor-topbar">
+        <div class="row1">
+          <button class="icon-btn sm" data-goto="browser" aria-label="返回"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m15 6-6 6 6 6"/></svg></button>
+          <span class="fname"><span class="mod-dot"></span>EditorViewModel.kt</span>
+          <span class="spacer" style="flex:1"></span>
+          <button class="icon-btn sm" aria-label="撤销"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M9 7 4 12l5 5M4 12h11a5 5 0 0 1 0 10h-1"/></svg></button>
+          <button class="icon-btn sm" aria-label="重做"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="m15 7 5 5-5 5M20 12H9a5 5 0 0 0 0 10h1"/></svg></button>
+          <button class="icon-btn sm" aria-label="搜索"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><circle cx="11" cy="11" r="7"/><path d="m20 20-3.2-3.2"/></svg></button>
+          <button class="icon-btn sm accent" aria-label="保存"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M5 3h11l3 3v15a1 1 0 0 1-1 1H5a1 1 0 0 1-1-1V4a1 1 0 0 1 1-1z"/><path d="M8 3v5h7M8 21v-6h8v6"/></svg></button>
+          <button class="icon-btn sm" id="paletteBtn" aria-label="命令面板"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><circle cx="5" cy="12" r="1.4"/><circle cx="12" cy="12" r="1.4"/><circle cx="19" cy="12" r="1.4"/></svg></button>
+        </div>
+      </div>
+      <div class="tabbar" role="tablist" data-component="TabBar">
+        <div class="etab" role="tab" aria-selected="true"><span class="ft-badge mini" style="background:var(--ft-kt)">KT</span><span class="tname">EditorViewModel.kt</span><svg class="tx" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M6 6l12 12M18 6 6 18"/></svg></div>
+        <div class="etab" role="tab" aria-selected="false"><span class="ft-badge mini" style="background:var(--ft-kt)">KT</span><span class="tname">EditorScreen.kt</span><svg class="tx" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M6 6l12 12M18 6 6 18"/></svg></div>
+        <div class="etab" role="tab" aria-selected="false"><span class="ft-badge mini" style="background:var(--ft-md)">MD</span><span class="tname">README.md</span><svg class="tx" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M6 6l12 12M18 6 6 18"/></svg></div>
+      </div>
+      <div class="code-area" data-component="SoraEditor">
+        <div class="code-line"><span class="gutter">14</span><span class="code"><span class="tk-kw">class</span> <span class="tk-ty">EditorViewModel</span> <span class="tk-kw">constructor</span>(</span></div>
+        <div class="code-line"><span class="gutter">15</span><span class="code">    <span class="tk-kw">private val</span> repository: <span class="tk-ty">EditorRepository</span>,</span></div>
+        <div class="code-line"><span class="gutter">16</span><span class="code">    <span class="tk-kw">private val</span> stateManager: <span class="tk-ty">EditorStateManager</span></span></div>
+        <div class="code-line"><span class="gutter">17</span><span class="code">) : <span class="tk-ty">ViewModel</span>() {</span></div>
+        <div class="code-line"><span class="gutter">18</span><span class="code"> </span></div>
+        <div class="code-line"><span class="gutter">19</span><span class="code">    <span class="tk-com">// 从 Uri 加载文件内容 (IO 线程)</span></span></div>
+        <div class="code-line hl"><span class="gutter">20</span><span class="code">    <span class="tk-kw">fun</span> <span class="tk-fn">loadFileFromUri</span>(uriString: <span class="tk-ty">String</span>) {</span></div>
+        <div class="code-line hl"><span class="gutter">21</span><span class="code">        viewModelScope.<span class="tk-fn">launch</span>(<span class="tk-ty">Dispatchers</span>.IO) {</span></div>
+        <div class="code-line hl"><span class="gutter">22</span><span class="code">            <span class="tk-kw">val</span> uri = <span class="tk-ty">Uri</span>.<span class="tk-fn">parse</span>(uriString)</span></div>
+        <div class="code-line hl"><span class="gutter">23</span><span class="code">            <span class="tk-kw">val</span> content = repository.<span class="tk-fn">readFile</span>(uri)</span></div>
+        <div class="code-line"><span class="gutter">24</span><span class="code">            stateManager.<span class="tk-fn">onContentLoaded</span>(content)</span></div>
+        <div class="code-line"><span class="gutter">25</span><span class="code">        }</span></div>
+        <div class="code-line"><span class="gutter">26</span><span class="code">    }</span></div>
+        <div class="code-line"><span class="gutter">27</span><span class="code"> </span></div>
+        <div class="code-line"><span class="gutter">28</span><span class="code">    <span class="tk-kw">fun</span> <span class="tk-fn">saveFile</span>(content: <span class="tk-ty">String</span>) {</span></div>
+        <div class="code-line"><span class="gutter">29</span><span class="code">        viewModelScope.<span class="tk-fn">launch</span>(<span class="tk-ty">Dispatchers</span>.IO) {</span></div>
+        <div class="code-line"><span class="gutter">30</span><span class="code">            repository.<span class="tk-fn">writeFile</span>(currentUri, content)</span></div>
+        <div class="code-line"><span class="gutter">31</span><span class="code">            errorEvent.<span class="tk-fn">emit</span>(<span class="tk-str">"保存成功"</span>)</span></div>
+        <div class="code-line"><span class="gutter">32</span><span class="code">        }</span></div>
+        <div class="code-line"><span class="gutter">33</span><span class="code">    }</span></div>
+        <div class="code-line"><span class="gutter">34</span><span class="code">}</span></div>
+      </div>
+      <div class="editor-status" data-component="EditorStatusBar">
+        <span>Ln 21, Col 34</span><span>|</span><span>UTF-8</span><span>|</span><span>Kotlin</span>
+        <span class="spacer"></span>
+        <span class="st-dot" style="background:var(--warning)"></span>
+        <span style="color:var(--warning)">Modified</span>
+      </div>
+
+      <!-- command palette overlay -->
+      <div class="palette-scrim" id="paletteScrim" data-component="CommandPalette">
+        <div class="palette">
+          <div class="p-search">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><circle cx="11" cy="11" r="7"/><path d="m20 20-3.2-3.2"/></svg>
+            <input type="text" placeholder="搜索命令…" aria-label="搜索命令">
+          </div>
+          <div class="p-list">
+            <div class="p-cat">文件</div>
+            <div class="p-item sel"><span class="pl">保存</span><span class="kbd">Ctrl+S</span></div>
+            <div class="p-item"><span class="pl">新建文件</span><span class="kbd">Ctrl+N</span></div>
+            <div class="p-item"><span class="pl">导出文件</span></div>
+            <div class="p-cat">编辑</div>
+            <div class="p-item"><span class="pl">查找</span><span class="kbd">Ctrl+F</span></div>
+            <div class="p-item"><span class="pl">替换</span><span class="kbd">Ctrl+H</span></div>
+            <div class="p-item"><span class="pl">跳转到行</span><span class="kbd">Ctrl+G</span></div>
+            <div class="p-cat">视图</div>
+            <div class="p-item"><span class="pl">切换预览</span></div>
+            <div class="p-item"><span class="pl">专注模式</span></div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ===================== SCREEN 4: MARKDOWN PREVIEW ===================== -->
+    <section class="screen" id="screen-markdown" data-component="MarkdownPreviewScreen">
+      <div class="topbar sub">
+        <button class="icon-btn sm" data-goto="editor" aria-label="返回"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m15 6-6 6 6 6"/></svg></button>
+        <span class="title mono" style="font-size:15px">README.md</span>
+        <span class="spacer"></span>
+        <div class="mode-switch" data-component="MarkdownViewMode">
+          <button aria-pressed="false">编辑</button>
+          <button aria-pressed="true">预览</button>
+          <button aria-pressed="false">分屏</button>
+        </div>
+      </div>
+      <div class="md-toolbar" data-component="MarkdownToolbar">
+        <button class="md-btn" aria-label="加粗">B</button>
+        <button class="md-btn" aria-label="斜体" style="font-style:italic">I</button>
+        <button class="md-btn" aria-label="删除线" style="text-decoration:line-through">S</button>
+        <button class="md-btn" aria-label="行内代码"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="m8 8-4 4 4 4M16 8l4 4-4 4"/></svg></button>
+        <span class="md-sep"></span>
+        <button class="md-btn" aria-label="标题1">H1</button>
+        <button class="md-btn" aria-label="标题2">H2</button>
+        <button class="md-btn" aria-label="标题3">H3</button>
+        <span class="md-sep"></span>
+        <button class="md-btn" aria-label="无序列表"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><path d="M8 6h13M8 12h13M8 18h13M3.5 6h.01M3.5 12h.01M3.5 18h.01"/></svg></button>
+        <button class="md-btn" aria-label="任务列表"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="7" height="7" rx="1.5"/><path d="m5 7.5 1.5 1.5L9 6M13 6h8M13 12h8M13 18h8M3 18h7"/></svg></button>
+        <span class="md-sep"></span>
+        <button class="md-btn" aria-label="代码块"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="16" rx="2"/><path d="m8 10 2 2-2 2M13 14h3"/></svg></button>
+        <button class="md-btn" aria-label="表格"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linejoin="round"><rect x="3" y="4" width="18" height="16" rx="2"/><path d="M3 10h18M3 15h18M9 4v16M15 4v16"/></svg></button>
+        <button class="md-btn" aria-label="公式"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M5 4h6M8 4c0 4-1 6-3 8 2 2 3 4 3 8M13 8l6 8M19 8l-6 8"/></svg></button>
+      </div>
+      <div class="md-preview" data-component="MarkdownWebViewPreview">
+        <h1>DraftPeek 撰码轻览</h1>
+        <p>一款现代、轻量的 Android 代码查看与编辑器，基于 <code>Jetpack Compose</code> 与 sora-editor 构建，支持 TextMate 与 Tree-sitter 语法高亮。</p>
+        <h2>核心特性</h2>
+        <div class="md-task done"><span class="box"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><path d="m5 12 5 5 9-11"/></svg></span><span>多标签编辑与语法高亮</span></div>
+        <div class="md-task done"><span class="box"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><path d="m5 12 5 5 9-11"/></svg></span><span>Markdown 实时预览（KaTeX / Mermaid）</span></div>
+        <div class="md-task"><span class="box"></span><span>LSP 智能补全（实验性）</span></div>
+        <h2>快速开始</h2>
+        <pre><code><span class="kw">fun</span> <span class="fn">main</span>() {<br>    <span class="kw">val</span> app = <span class="fn">DraftPeek</span>.<span class="fn">init</span>()<br>    app.<span class="fn">open</span>(<span class="st">"main.kt"</span>)  <span class="dim">// 开始阅读代码</span><br>}</code></pre>
+        <h2>模块结构</h2>
+        <table>
+          <thead><tr><th>模块</th><th>职责</th></tr></thead>
+          <tbody>
+            <tr><td>app</td><td>壳模块与导航</td></tr>
+            <tr><td>feature/editor</td><td>编辑器核心</td></tr>
+            <tr><td>core/designsystem</td><td>设计令牌</td></tr>
+          </tbody>
+        </table>
+        <p>更多细节请参阅项目内的 <code>AGENTS.md</code>。</p>
+      </div>
+    </section>
+
+    <!-- ===================== SCREEN 5: STATS / PROFILE ===================== -->
+    <section class="screen" id="screen-stats" data-component="ProfileScreen">
+      <div class="topbar"><span class="title mono" style="letter-spacing:.06em">我的</span><span class="spacer"></span>
+        <button class="icon-btn" data-goto="settings" aria-label="设置"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.6 1.6 0 0 0 .3 1.8l.1.1a2 2 0 1 1-2.8 2.8l-.1-.1a1.6 1.6 0 0 0-2.7 1.1V21a2 2 0 1 1-4 0v-.1A1.6 1.6 0 0 0 7 19.4a1.6 1.6 0 0 0-1.8.3l-.1.1a2 2 0 1 1-2.8-2.8l.1-.1a1.6 1.6 0 0 0-1.1-2.7H1a2 2 0 1 1 0-4h.1A1.6 1.6 0 0 0 2.6 7a1.6 1.6 0 0 0-.3-1.8l-.1-.1a2 2 0 1 1 2.8-2.8l.1.1A1.6 1.6 0 0 0 7 2.6h.1A1.6 1.6 0 0 0 8.7 1V1a2 2 0 1 1 4 0v.1a1.6 1.6 0 0 0 2.7 1.1 1.6 1.6 0 0 0 1.8-.3l.1-.1a2 2 0 1 1 2.8 2.8l-.1.1a1.6 1.6 0 0 0-.3 1.8v.1a1.6 1.6 0 0 0 1.5 1H23a2 2 0 1 1 0 4h-.1a1.6 1.6 0 0 0-1.5 1z"/></svg></button>
+      </div>
+      <div class="screen-scroll">
+        <div class="profile-head" data-component="ProfileHeader">
+          <div class="avatar">D<span class="edit-badge"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 20h9M16.5 3.5a2.1 2.1 0 0 1 3 3L7 19l-4 1 1-4z"/></svg></span></div>
+          <div class="uname">Doro</div>
+          <span class="ver-pill"><span class="gdot"></span>v1.0.24</span>
+        </div>
+
+        <div class="hscroll" style="padding-top:8px" data-component="PeriodChipRow">
+          <button class="filter-chip" aria-pressed="false">汇总</button>
+          <button class="filter-chip" aria-pressed="false">本年</button>
+          <button class="filter-chip" aria-pressed="true">本月</button>
+          <button class="filter-chip" aria-pressed="false">本周</button>
+          <button class="filter-chip" aria-pressed="false">今天</button>
+          <button class="filter-chip" aria-pressed="false">昨天</button>
+        </div>
+
+        <div class="stat-grid" data-component="StatCardGrid">
+          <div class="card stat-card"><div class="sl">使用时长</div><div class="sv">18.5<small>小时</small></div></div>
+          <div class="card stat-card"><div class="sl">书写字符</div><div class="sv">42.3<small>千字</small></div></div>
+          <div class="card stat-card"><div class="sl">阅读文件</div><div class="sv">128<small>个</small></div></div>
+          <div class="card stat-card"><div class="sl">创建文件</div><div class="sv">36<small>个</small></div></div>
+        </div>
+
+        <div class="greeting" data-component="GreetingSection">
+          <div class="g1">你好！Doro</div>
+          <div class="g2">这是你使用 <b>DraftPeek</b> 的第 <b>128</b> 天</div>
+        </div>
+
+        <div class="section-label">活动 <span class="cnt">· 2026</span></div>
+        <div class="card heat-card" data-component="ActivityCalendarGrid">
+          <div class="heat-months"><span style="flex:1">2月</span><span style="flex:1">3月</span><span style="flex:1">4月</span><span style="flex:1">5月</span><span style="flex:1">6月</span><span style="flex:1">7月</span></div>
+          <div class="heat-body">
+            <div class="heat-days"><span>一</span><span></span><span>三</span><span></span><span>五</span><span></span><span>日</span></div>
+            <div class="heat-grid" id="heatGrid"></div>
+          </div>
+          <div class="heat-legend">少 <i style="background:var(--heat-0)"></i><i style="background:var(--heat-1)"></i><i style="background:var(--heat-2)"></i><i style="background:var(--heat-3)"></i><i style="background:var(--heat-4)"></i> 多</div>
+        </div>
+        <div class="spacer-96" style="height:24px"></div>
+      </div>
+      <nav class="bottomnav" data-component="BottomNav">
+        <button class="nav-item" aria-current="false" data-goto="browser"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linejoin="round"><path d="M3 7a2 2 0 0 1 2-2h4l2 2h8a2 2 0 0 1 2 2v9a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V7z"/></svg><span>文件</span></button>
+        <button class="nav-item" aria-current="true" data-goto="stats"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><circle cx="12" cy="8" r="4"/><path d="M4 20c0-4 3.6-6 8-6s8 2 8 6"/></svg><span>我的</span></button>
+      </nav>
+    </section>
+
+    <!-- ===================== SCREEN 6: SETTINGS ===================== -->
+    <section class="screen" id="screen-settings" data-component="SettingsSection">
+      <div class="topbar sub">
+        <button class="icon-btn sm" data-goto="stats" aria-label="返回"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m15 6-6 6 6 6"/></svg></button>
+        <span class="title">设置</span>
+      </div>
+      <div class="screen-scroll">
+        <div class="section-label">编辑器设置</div>
+        <div class="card" style="margin:0 20px" data-component="EditorSettings">
+          <div class="setting-row"><span class="setting-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><path d="M4 7V4h16v3M9 20h6M12 4v16"/></svg></span><div class="setting-text"><div class="name">代码字体大小</div></div><span class="setting-value">14sp</span><svg class="chev" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="m9 6 6 6-6 6"/></svg></div>
+          <div class="divider"></div>
+          <div class="setting-row"><span class="setting-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M21 12.8A9 9 0 1 1 11.2 3 7 7 0 0 0 21 12.8z"/></svg></span><div class="setting-text"><div class="name">主题</div></div><span class="setting-value">浅色</span><svg class="chev" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="m9 6 6 6-6 6"/></svg></div>
+          <div class="divider"></div>
+          <div class="setting-row"><span class="setting-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><path d="M4 6h16M4 12h10M4 18h13"/></svg></span><div class="setting-text"><div class="name">自动换行</div></div><button class="switch" role="switch" aria-checked="true" aria-label="自动换行"></button></div>
+          <div class="divider"></div>
+          <div class="setting-row"><span class="setting-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><path d="M4 6h16M4 12h16M4 18h16M8 6v12"/></svg></span><div class="setting-text"><div class="name">显示行号</div></div><button class="switch" role="switch" aria-checked="true" aria-label="显示行号"></button></div>
+          <div class="divider"></div>
+          <div class="setting-row"><span class="setting-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M5 3h11l3 3v15a1 1 0 0 1-1 1H5a1 1 0 0 1-1-1V4a1 1 0 0 1 1-1z"/><path d="M8 3v5h7"/></svg></span><div class="setting-text"><div class="name">自动保存</div></div><button class="switch" role="switch" aria-checked="false" aria-label="自动保存"></button></div>
+          <div class="divider"></div>
+          <div class="setting-row"><span class="setting-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><path d="M4 6h16M4 12h16M4 18h10"/></svg></span><div class="setting-text"><div class="name">制表符宽度</div></div><span class="setting-value">4 空格</span><svg class="chev" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="m9 6 6 6-6 6"/></svg></div>
+          <div class="divider"></div>
+          <div class="setting-row"><span class="setting-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><path d="M4 7V4h16v3M9 20h6M12 4v16"/></svg></span><div class="setting-text"><div class="name">语言</div></div><span class="setting-value">中文</span><svg class="chev" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="m9 6 6 6-6 6"/></svg></div>
+        </div>
+
+        <div class="section-label">功能开关</div>
+        <div class="card" style="margin:0 20px" data-component="FeatureFlags">
+          <div class="setting-row"><span class="setting-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linejoin="round"><path d="M5 21V4M5 4h11l-1.5 3L16 10H5"/></svg></span><div class="setting-text"><div class="name">LSP 语言服务器</div><div class="desc">智能补全（实验性）</div></div><button class="switch" role="switch" aria-checked="false" aria-label="LSP 语言服务器"></button></div>
+          <div class="divider"></div>
+          <div class="setting-row"><span class="setting-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="m5 7 5 5-5 5M13 17h6"/></svg></span><div class="setting-text"><div class="name">内置终端模拟器</div></div><button class="switch" role="switch" aria-checked="true" aria-label="内置终端模拟器"></button></div>
+          <div class="divider"></div>
+          <div class="setting-row"><span class="setting-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="m8 8-4 4 4 4M16 8l4 4-4 4"/></svg></span><div class="setting-text"><div class="name">Tree-sitter 增量高亮</div></div><button class="switch" role="switch" aria-checked="true" aria-label="Tree-sitter 增量高亮"></button></div>
+        </div>
+
+        <div class="section-label">关于</div>
+        <div class="card" style="margin:0 20px" data-component="AboutSection">
+          <div class="setting-row"><span class="setting-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3 4 6v6c0 5 3.5 7.5 8 9 4.5-1.5 8-4 8-9V6l-8-3z"/></svg></span><div class="setting-text"><div class="name">验证应用</div></div><svg class="chev" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="m9 6 6 6-6 6"/></svg></div>
+          <div class="divider"></div>
+          <div class="setting-row"><span class="setting-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><circle cx="12" cy="12" r="9"/><path d="M12 11v5M12 8h.01"/></svg></span><div class="setting-text"><div class="name">版本</div></div><span class="setting-value">1.0.24</span></div>
+        </div>
+
+        <div class="section-label danger">危险区域</div>
+        <div class="card" style="margin:0 20px" data-component="DangerZone">
+          <div class="setting-row"><span class="setting-icon danger"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M3 6h18M8 6V4h8v2M6 6l1 14h10l1-14"/></svg></span><div class="setting-text"><div class="name" style="color:var(--danger)">清除缓存</div></div></div>
+          <div class="divider"></div>
+          <div class="setting-row"><span class="setting-icon danger"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M3 12a9 9 0 1 0 3-6.7L3 8M3 3v5h5"/></svg></span><div class="setting-text"><div class="name" style="color:var(--danger)">重置设置</div></div></div>
+        </div>
+
+        <div class="proto-footer">由 <b>DraftPeek</b> 打造 · 为开发者而生</div>
+      </div>
+    </section>
+
+    <!-- ===================== SCREEN 7: TERMINAL ===================== -->
+    <section class="screen" id="screen-terminal" data-component="TerminalScreen">
+      <div class="term-sessionbar" data-component="TerminalSessionBar">
+        <div class="term-session" aria-selected="true">bash<svg class="tx" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M6 6l12 12M18 6 6 18"/></svg></div>
+        <div class="term-session" aria-selected="false">proot<svg class="tx" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M6 6l12 12M18 6 6 18"/></svg></div>
+        <button class="term-add" aria-label="新建会话"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M12 5v14M5 12h14"/></svg></button>
+      </div>
+      <div class="term-output" data-component="TerminalOutput">
+        <div class="tl"><span class="prompt">draftpeek@android</span>:<span class="dim">~/project</span>$ <span class="cmd">ls -la</span></div>
+        <div class="tl dim">total 48</div>
+        <div class="tl dim">drwxrwx--x 6 u0_a248 4096 Aug  2 09:31 .</div>
+        <div class="tl">drwxr-xr-x app/</div>
+        <div class="tl">drwxr-xr-x core/</div>
+        <div class="tl">drwxr-xr-x feature/</div>
+        <div class="tl">-rw-rw-r-- build.gradle.kts</div>
+        <div class="tl">-rw-rw-r-- settings.gradle.kts</div>
+        <div class="tl">&nbsp;</div>
+        <div class="tl"><span class="prompt">draftpeek@android</span>:<span class="dim">~/project</span>$ <span class="cmd">./gradlew assembleRelease</span></div>
+        <div class="tl dim">&gt; Task :app:preBuild UP-TO-DATE</div>
+        <div class="tl dim">&gt; Task :core:designsystem:compileReleaseKotlin</div>
+        <div class="tl dim">&gt; Task :feature:editor:compileReleaseKotlin</div>
+        <div class="tl dim">&gt; Task :app:packageRelease</div>
+        <div class="tl ok">BUILD SUCCESSFUL in 42s</div>
+        <div class="tl dim">18 actionable tasks: 16 executed, 2 up-to-date</div>
+        <div class="tl">&nbsp;</div>
+        <div class="tl"><span class="prompt">draftpeek@android</span>:<span class="dim">~/project</span>$ <span class="cmd">git status</span></div>
+        <div class="tl">On branch <span class="warn">develop</span></div>
+        <div class="tl">Changes not staged for commit:</div>
+        <div class="tl">  <span class="warn">modified:</span> feature/editor/ui/EditorScreen.kt</div>
+      </div>
+      <div class="term-input" data-component="TerminalInput">
+        <span class="ps">$</span>
+        <input type="text" value="git diff --stat" aria-label="终端输入">
+        <button class="term-send" aria-label="发送"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M22 2 11 13M22 2l-7 20-4-9-9-4 20-7z"/></svg></button>
+      </div>
+    </section>
+
+  </div>
+
+  <div class="home-indicator"></div>
+</div>
+</main>
+
+<script>
+(function(){
+  "use strict";
+  var device = document.getElementById('device');
+  var screens = Array.prototype.slice.call(document.querySelectorAll('.screen'));
+  var jumpBtns = Array.prototype.slice.call(document.querySelectorAll('.jump-btn'));
+
+  function showScreen(id){
+    screens.forEach(function(s){
+      s.classList.toggle('active', s.id === 'screen-' + id);
+    });
+    jumpBtns.forEach(function(b){
+      b.setAttribute('aria-pressed', String(b.getAttribute('data-goto') === id));
+    });
+    // close transient overlays when navigating
+    var scrim = document.getElementById('paletteScrim');
+    if(scrim) scrim.classList.remove('open');
+    var fab = document.getElementById('fab');
+    var dial = document.getElementById('speedDial');
+    if(fab){ fab.classList.remove('open'); fab.setAttribute('aria-expanded','false'); }
+    if(dial) dial.classList.remove('open');
+  }
+
+  // any element with data-goto navigates
+  document.addEventListener('click', function(e){
+    var t = e.target.closest('[data-goto]');
+    if(t){ showScreen(t.getAttribute('data-goto')); }
+  });
+
+  // theme toggle
+  var themeToggle = document.getElementById('themeToggle');
+  var themeLabel = document.getElementById('themeLabel');
+  themeToggle.addEventListener('click', function(){
+    var dark = device.classList.toggle('theme-dark');
+    themeLabel.textContent = dark ? '浅色' : '深色';
+  });
+
+  // editor tabs
+  document.querySelectorAll('.tabbar .etab').forEach(function(tab){
+    tab.addEventListener('click', function(){
+      document.querySelectorAll('.tabbar .etab').forEach(function(t){ t.setAttribute('aria-selected','false'); });
+      tab.setAttribute('aria-selected','true');
+    });
+  });
+
+  // command palette
+  var paletteBtn = document.getElementById('paletteBtn');
+  var paletteScrim = document.getElementById('paletteScrim');
+  if(paletteBtn && paletteScrim){
+    paletteBtn.addEventListener('click', function(e){ e.stopPropagation(); paletteScrim.classList.add('open'); });
+    paletteScrim.addEventListener('click', function(e){ if(e.target === paletteScrim) paletteScrim.classList.remove('open'); });
+  }
+  document.querySelectorAll('.p-item').forEach(function(it){
+    it.addEventListener('click', function(){
+      document.querySelectorAll('.p-item').forEach(function(x){ x.classList.remove('sel'); });
+      it.classList.add('sel');
+    });
+  });
+
+  // directory expand/collapse
+  document.querySelectorAll('.dir-row').forEach(function(row){
+    row.addEventListener('click', function(){
+      var id = 'dir-' + row.getAttribute('data-dir');
+      var children = document.getElementById(id);
+      if(children) children.classList.toggle('open');
+    });
+  });
+
+  // FAB speed dial
+  var fab = document.getElementById('fab');
+  var speedDial = document.getElementById('speedDial');
+  if(fab && speedDial){
+    fab.addEventListener('click', function(e){
+      e.stopPropagation();
+      var open = fab.classList.toggle('open');
+      fab.setAttribute('aria-expanded', String(open));
+      speedDial.classList.toggle('open', open);
+    });
+  }
+
+  // chips (single-select within a row)
+  document.querySelectorAll('.hscroll').forEach(function(row){
+    row.querySelectorAll('.chip, .filter-chip').forEach(function(chip){
+      chip.addEventListener('click', function(){
+        row.querySelectorAll('.chip, .filter-chip').forEach(function(c){ c.setAttribute('aria-pressed','false'); });
+        chip.setAttribute('aria-pressed','true');
+      });
+    });
+  });
+
+  // mode switch (markdown)
+  document.querySelectorAll('.mode-switch').forEach(function(sw){
+    sw.querySelectorAll('button').forEach(function(btn){
+      btn.addEventListener('click', function(){
+        sw.querySelectorAll('button').forEach(function(b){ b.setAttribute('aria-pressed','false'); });
+        btn.setAttribute('aria-pressed','true');
+      });
+    });
+  });
+
+  // switches toggle
+  document.querySelectorAll('.switch').forEach(function(sw){
+    sw.addEventListener('click', function(){
+      sw.setAttribute('aria-checked', String(sw.getAttribute('aria-checked') !== 'true'));
+    });
+  });
+
+  // terminal session tabs
+  document.querySelectorAll('.term-session').forEach(function(s){
+    s.addEventListener('click', function(){
+      document.querySelectorAll('.term-session').forEach(function(x){ x.setAttribute('aria-selected','false'); });
+      s.setAttribute('aria-selected','true');
+    });
+  });
+
+  // build heatmap (7 rows x 18 weeks) with deterministic pseudo-random levels
+  var grid = document.getElementById('heatGrid');
+  if(grid){
+    var levels = [0,1,2,3,4];
+    var seed = 7;
+    for(var i=0;i<18*7;i++){
+      seed = (seed * 1103515245 + 12345) & 0x7fffffff;
+      var r = (seed >> 8) % 100;
+      var lv = r < 34 ? 0 : r < 58 ? 1 : r < 78 ? 2 : r < 92 ? 3 : 4;
+      var cell = document.createElement('i');
+      if(lv > 0) cell.className = 'l' + lv;
+      grid.appendChild(cell);
+    }
+  }
+
+  // init
+  showScreen('browser');
+})();
+</script>
+</body>
+</html>

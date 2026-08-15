@@ -1,0 +1,59 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!-- Group Headers -->
+    <string name="settings_group_appearance">外観</string>
+    <string name="settings_group_editor">エディター</string>
+    <string name="settings_group_font">フォント</string>
+    <string name="settings_group_file_management">ファイル管理</string>
+    <string name="settings_group_about">概要</string>
+
+    <!-- Editor Settings -->
+    <string name="settings_editor_font_size">フォントサイズ</string>
+    <string name="settings_editor_tab_width">タブ幅</string>
+    <string name="settings_editor_tab_width_format">%dスペース</string>
+    <string name="settings_editor_word_wrap">折り返し</string>
+    <string name="settings_editor_line_numbers">行番号</string>
+    <string name="settings_editor_auto_indent">自動インデント</string>
+    <string name="settings_editor_highlight_current_line">現在行のハイライト</string>
+    <string name="settings_editor_indent_guides">インデントガイド</string>
+    <string name="settings_editor_auto_save">自動保存</string>
+
+    <!-- Appearance -->
+    <string name="settings_appearance_theme">テーマ</string>
+    <string name="settings_appearance_language">言語</string>
+    <string name="settings_appearance_dynamic_color">Material You ダイナミックカラー</string>
+    <string name="settings_appearance_font_family">エディターフォント</string>
+    <string name="settings_appearance_font_monospace">等幅</string>
+    <string name="settings_appearance_font_serif">セリフ</string>
+    <string name="settings_appearance_font_sans_serif">サンセリフ</string>
+
+    <!-- File Management -->
+    <string name="settings_file_management_default_encoding">デフォルトエンコーディング</string>
+    <string name="settings_file_management_auto_save_interval">自動保存間隔</string>
+    <string name="settings_file_management_auto_save_interval_format">%d秒</string>
+
+    <!-- About -->
+    <string name="settings_about_version">バージョン</string>
+    <string name="settings_about_version_unknown">不明</string>
+    <string name="settings_about_open_source_licenses">オープンソースライセンス</string>
+    <string name="settings_about_app_feedback">アプリフィードバック</string>
+    <string name="settings_about_app_feedback_toast">フィードバック機能は開発中です。お楽しみに！</string>
+
+    <!-- Theme Dialog -->
+    <string name="settings_theme_dialog_title">テーマを選択</string>
+    <string name="settings_theme_light">ライト</string>
+    <string name="settings_theme_dark">ダーク</string>
+    <string name="settings_theme_system">システムに従う</string>
+
+    <!-- Dialog Buttons -->
+    <string name="settings_dialog_confirm">OK</string>
+    <string name="settings_dialog_close">閉じる</string>
+
+    <!-- Language -->
+    <string name="settings_language_dialog_title">言語を選択</string>
+    <string name="settings_language_system">システムに従う</string>
+    <string name="settings_language_zh">中文</string>
+    <string name="settings_language_en">English</string>
+    <string name="settings_language_ja">日本語</string>
+    <string name="settings_language_ko">한국어</string>
+</resources>

@@ -1,0 +1,31 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <color name="splash_background">#F5F7FA</color>
+    <color name="splash_background_dark">#080808</color>
+    <color name="page_background_light">#EFEFEF</color>
+    <color name="page_background_dark">#080808</color>
+
+    <!-- DayNight parent lets the system window background follow the current
+         app/ui mode before Compose takes over, avoiding a bright flash when
+         dark theme is active. -->
+    <style name="Theme.DraftPeek" parent="Theme.AppCompat.DayNight.NoActionBar">
+        <item name="android:windowBackground">@color/page_background_light</item>
+        <item name="android:statusBarColor">@color/page_background_light</item>
+        <item name="android:navigationBarColor">@color/page_background_light</item>
+        <item name="android:windowLightStatusBar">true</item>
+        <item name="colorPrimary">@color/brand_primary</item>
+        <item name="colorPrimaryDark">@color/brand_primary_dark</item>
+        <item name="colorAccent">@color/brand_accent</item>
+    </style>
+
+    <!-- Splash screen: cold gray background, no title bar -->
+    <style name="Theme.DraftPeek.Splash" parent="Theme.AppCompat.DayNight.NoActionBar">
+        <item name="android:windowBackground">@color/splash_background</item>
+        <item name="android:statusBarColor">@color/splash_background</item>
+        <item name="android:navigationBarColor">@color/splash_background</item>
+        <item name="android:windowLightStatusBar">true</item>
+        <item name="colorPrimary">@color/brand_primary</item>
+        <item name="colorPrimaryDark">@color/brand_primary_dark</item>
+        <item name="colorAccent">@color/brand_accent</item>
+    </style>
+</resources>

@@ -1,0 +1,23 @@
+/* Academic paper style theme */
+:root.academic {
+  --bg-color: #ffffff;
+  --text-color: #333333;
+  --code-bg: #f5f5f5;
+  --border-color: #cccccc;
+  --link-color: #0066cc;
+  --table-border: #cccccc;
+  --table-header-bg: #f5f5f5;
+  --blockquote-border: #0066cc;
+  --blockquote-bg: #f9f9f9;
+  font-family: 'Computer Modern', 'Latin Modern', 'Georgia', serif;
+  font-size: 12pt;
+  line-height: 1.6;
+  max-width: 680px;
+  margin: 0 auto;
+}
+.academic h1 { font-size: 1.5em; text-align: center; margin-bottom: 0.5em; }
+.academic h2 { font-size: 1.2em; border-bottom: none; }
+.academic h3 { font-size: 1.1em; font-style: italic; }
+.academic p { text-align: justify; text-indent: 2em; }
+.academic p:first-child { text-indent: 0; }
+.academic table { font-size: 0.9em; }

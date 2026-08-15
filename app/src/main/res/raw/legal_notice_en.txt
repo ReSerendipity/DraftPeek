@@ -1,0 +1,20 @@
+DraftPeek Software Copyright Legal Notice
+
+Copyright (C) 2024-2026 DraftPeek Team. All rights reserved.
+
+This software is protected by applicable copyright law, the Computer Fraud and Abuse Act,
+and international copyright treaties.
+
+Unauthorized reverse engineering, modification, or circumvention of this software's
+security mechanisms may result in civil and criminal penalties, including imprisonment
+and fines.
+
+Distributing cracked versions or assisting others in cracking constitutes contributory
+infringement and carries joint liability. Use of AI models to facilitate the above may be
+traced through AI request logs and used as evidence.
+
+If you received a tampered unofficial APK, please uninstall immediately and download
+from the official channel: https://draftpeek.com/download
+
+Security vulnerability disclosure: security@draftpeek.com
+Official contact: support@draftpeek.com

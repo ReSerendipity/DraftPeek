@@ -1,0 +1,281 @@
+{
+  "$schema": "https://raw.githubusercontent.com/martinring/tmlanguage/master/tmlanguage.json",
+  "name": "Elixir",
+  "scopeName": "source.elixir",
+  "patterns": [
+    { "include": "#comments" },
+    { "include": "#heredoc" },
+    { "include": "#strings" },
+    { "include": "#charlist" },
+    { "include": "#sigils" },
+    { "include": "#atoms" },
+    { "include": "#module_attributes" },
+    { "include": "#numbers" },
+    { "include": "#keywords" },
+    { "include": "#modules" },
+    { "include": "#functions" },
+    { "include": "#operators" },
+    { "include": "#variables" }
+  ],
+  "repository": {
+    "comments": {
+      "patterns": [
+        {
+          "name": "comment.line.number-sign.elixir",
+          "match": "#.*$"
+        }
+      ]
+    },
+    "heredoc": {
+      "patterns": [
+        {
+          "name": "string.quoted.triple.double.elixir",
+          "begin": "\"\"\"",
+          "end": "\"\"\"",
+          "patterns": [
+            { "include": "#interpolation" },
+            {
+              "name": "constant.character.escape.elixir",
+              "match": "\\\\."
+            }
+          ]
+        },
+        {
+          "name": "string.quoted.triple.single.elixir",
+          "begin": "'''",
+          "end": "'''",
+          "patterns": [
+            { "include": "#interpolation" },
+            {
+              "name": "constant.character.escape.elixir",
+              "match": "\\\\."
+            }
+          ]
+        }
+      ]
+    },
+    "strings": {
+      "patterns": [
+        {
+          "name": "string.quoted.double.elixir",
+          "begin": "\"",
+          "end": "\"",
+          "patterns": [
+            { "include": "#interpolation" },
+            {
+              "name": "constant.character.escape.elixir",
+              "match": "\\\\."
+            }
+          ]
+        }
+      ]
+    },
+    "charlist": {
+      "patterns": [
+        {
+          "name": "string.quoted.single.elixir",
+          "begin": "'",
+          "end": "'",
+          "patterns": [
+            { "include": "#interpolation" },
+            {
+              "name": "constant.character.escape.elixir",
+              "match": "\\\\."
+            }
+          ]
+        }
+      ]
+    },
+    "interpolation": {
+      "patterns": [
+        {
+          "name": "meta.embedded.elixir",
+          "begin": "#\\{",
+          "end": "\\}",
+          "beginCaptures": {
+            "0": { "name": "punctuation.section.embedded.begin.elixir" }
+          },
+          "endCaptures": {
+            "0": { "name": "punctuation.section.embedded.end.elixir" }
+          },
+          "patterns": [
+            { "include": "source.elixir" }
+          ]
+        }
+      ]
+    },
+    "sigils": {
+      "patterns": [
+        {
+          "name": "string.interpolated.sigil.elixir",
+          "begin": "~[a-z]\\{",
+          "end": "\\}[a-z]*",
+          "patterns": [
+            { "include": "#interpolation" }
+          ]
+        },
+        {
+          "name": "string.interpolated.sigil.elixir",
+          "begin": "~[a-z]\\[",
+          "end": "\\][a-z]*",
+          "patterns": [
+            { "include": "#interpolation" }
+          ]
+        },
+        {
+          "name": "string.interpolated.sigil.elixir",
+          "begin": "~[a-z]\\(",
+          "end": "\\)[a-z]*",
+          "patterns": [
+            { "include": "#interpolation" }
+          ]
+        },
+        {
+          "name": "string.interpolated.sigil.elixir",
+          "begin": "~[a-z]<",
+          "end": ">[a-z]*",
+          "patterns": [
+            { "include": "#interpolation" }
+          ]
+        },
+        {
+          "name": "string.interpolated.sigil.elixir",
+          "begin": "~[a-z](?=[|/\"'])",
+          "end": "(\\2)[a-z]*",
+          "patterns": [
+            { "include": "#interpolation" }
+          ]
+        },
+        {
+          "name": "string.literal.sigil.elixir",
+          "begin": "~[A-Z]\\{",
+          "end": "\\}[a-z]*"
+        },
+        {
+          "name": "string.literal.sigil.elixir",
+          "begin": "~[A-Z]\\[",
+          "end": "\\][a-z]*"
+        },
+        {
+          "name": "string.literal.sigil.elixir",
+          "begin": "~[A-Z]\\(",
+          "end": "\\)[a-z]*"
+        },
+        {
+          "name": "string.literal.sigil.elixir",
+          "begin": "~[A-Z]<",
+          "end": ">[a-z]*"
+        }
+      ]
+    },
+    "atoms": {
+      "patterns": [
+        {
+          "name": "constant.other.symbol.elixir",
+          "match": ":[a-zA-Z_][a-zA-Z0-9_@]*[?!]?"
+        },
+        {
+          "name": "constant.other.symbol.quoted.elixir",
+          "begin": ":\"",
+          "end": "\""
+        }
+      ]
+    },
+    "module_attributes": {
+      "patterns": [
+        {
+          "name": "variable.other.readwrite.module.elixir",
+          "match": "@[a-zA-Z_][a-zA-Z0-9_]*"
+        }
+      ]
+    },
+    "numbers": {
+      "patterns": [
+        {
+          "name": "constant.numeric.hex.elixir",
+          "match": "\\b0[xX][0-9A-Fa-f](_?[0-9A-Fa-f])*\\b"
+        },
+        {
+          "name": "constant.numeric.octal.elixir",
+          "match": "\\b0[oO][0-7](_?[0-7])*\\b"
+        },
+        {
+          "name": "constant.numeric.binary.elixir",
+          "match": "\\b0[bB][01](_?[01])*\\b"
+        },
+        {
+          "name": "constant.numeric.float.elixir",
+          "match": "\\b[0-9](_?[0-9])*\\.[0-9](_?[0-9])*([eE][+-]?[0-9]+)?\\b"
+        },
+        {
+          "name": "constant.numeric.integer.elixir",
+          "match": "\\b[0-9](_?[0-9])*\\b"
+        },
+        {
+          "name": "constant.numeric.char.elixir",
+          "match": "\\?\\\\?."
+        }
+      ]
+    },
+    "keywords": {
+      "patterns": [
+        {
+          "name": "keyword.control.elixir",
+          "match": "\\b(def|defp|defmodule|defmacro|defmacrop|defstruct|defprotocol|defimpl|defexception|defguard|defguardp|defdelegate|defoverridable)\\b"
+        },
+        {
+          "name": "keyword.control.conditional.elixir",
+          "match": "\\b(if|else|unless|case|cond|when|with|for)\\b"
+        },
+        {
+          "name": "keyword.control.flow.elixir",
+          "match": "\\b(do|end|fn|raise|reraise|receive|after|try|rescue|catch|throw|exit)\\b"
+        },
+        {
+          "name": "keyword.other.elixir",
+          "match": "\\b(require|import|alias|use|quote|unquote|unquote_splicing|super|__MODULE__|__DIR__|__ENV__|__CALLER__)\\b"
+        },
+        {
+          "name": "constant.language.elixir",
+          "match": "\\b(true|false|nil)\\b"
+        }
+      ]
+    },
+    "modules": {
+      "patterns": [
+        {
+          "name": "entity.name.type.module.elixir",
+          "match": "\\b[A-Z][a-zA-Z0-9_]*\\b"
+        }
+      ]
+    },
+    "functions": {
+      "patterns": [
+        {
+          "name": "entity.name.function.elixir",
+          "match": "\\b[a-z_][a-zA-Z0-9_]*[?!]?(?=\\s*\\()"
+        }
+      ]
+    },
+    "operators": {
+      "patterns": [
+        {
+          "name": "keyword.operator.elixir",
+          "match": "(\\|>|<~>|<>|<<<|>>>|~>>|<<~|<\\|>|<~|~>|&&&|&\\(&&\\)|\\|\\|\\||\\^\\^\\^|===|!==|==|!=|<=|>=|<|>|\\+\\+|--|\\+|-|\\*|/|=~|&&|\\|\\||!|not|and|or|\\^|&|\\||\\\\\\\\|<-|->|::|\\.\\.|\\.|=)"
+        }
+      ]
+    },
+    "variables": {
+      "patterns": [
+        {
+          "name": "variable.other.unused.elixir",
+          "match": "\\b_[a-zA-Z0-9_]*\\b"
+        },
+        {
+          "name": "variable.other.elixir",
+          "match": "\\b[a-z_][a-zA-Z0-9_]*\\b"
+        }
+      ]
+    }
+  }
+}

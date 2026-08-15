@@ -1,0 +1,31 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!-- Terminal UI -->
+    <string name="terminal_close_session">Close session</string>
+    <string name="terminal_new_session">New session</string>
+    <string name="terminal_input_hint">Enter command…</string>
+    <string name="terminal_send">Send</string>
+    <string name="terminal_restore">Restore terminal</string>
+    <string name="terminal_minimize">Minimize</string>
+    <string name="terminal_floating_close">Close</string>
+
+    <!-- Terminal Service (Ch7#7 P1) -->
+    <string name="terminal_notification_title">Terminal Running</string>
+    <string name="terminal_notification_text">DraftPeek terminal session is running</string>
+    <string name="terminal_notification_stop">Stop</string>
+    <string name="terminal_notification_channel_name">Terminal Service</string>
+    <string name="terminal_notification_channel_desc">Keeps terminal session running in the background</string>
+    <string name="permission_terminal_command_desc">Allows apps signed with the same key to send terminal commands to DraftPeek</string>
+    <string name="permission_terminal_command_label">Execute Terminal Commands</string>
+    <string name="terminal_title">Terminal</string>
+    <!-- Diff / Encoding dialogs -->
+    <string name="terminal_service_running">Command running in background</string>
+
+    <!-- Integrated Terminal -->
+    <string name="terminal_cwd_label">Working directory</string>
+    <string name="terminal_proot_guide_title">First use · Preparing Linux environment</string>
+    <string name="terminal_proot_guide_desc">Extracting Linux runtime (~50MB). Full terminal features will be available once complete. Note: The terminal can execute arbitrary commands. Only run commands you trust; improper operations may cause data loss.</string>
+    <string name="terminal_proot_ready">Linux environment ready</string>
+    <string name="terminal_proot_error">Linux environment setup failed</string>
+    <string name="terminal_unavailable_hint">Cannot open terminal at this location</string>
+</resources>

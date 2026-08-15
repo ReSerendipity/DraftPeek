@@ -1,0 +1,17 @@
+/* Pixy - soft pastel theme */
+:root.pixy {
+  --bg-color: #fef6f0;
+  --text-color: #5b5ea6;
+  --code-bg: #f0e6f6;
+  --border-color: #d4b8e0;
+  --link-color: #9b59b6;
+  --table-border: #d4b8e0;
+  --table-header-bg: #f0e6f6;
+  --blockquote-border: #9b59b6;
+  --blockquote-bg: #f5edf8;
+  font-family: 'Quicksand', -apple-system, sans-serif;
+  font-size: 15px;
+  line-height: 1.7;
+}
+.pixy h1 { color: #9b59b6; }
+.pixy h2 { color: #8e44ad; }

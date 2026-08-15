@@ -1,0 +1,28 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="core_ui_app_name">DraftPeek</string>
+
+    <!-- フォントオプション名 -->
+    <string name="font_jetbrains_mono">JetBrains Mono</string>
+    <string name="font_system_mono">システム等幅</string>
+    <string name="font_inter">Inter</string>
+    <string name="font_noto_sans_cjk">Noto Sans CJK</string>
+    <string name="font_microsoft_yahei">Microsoft YaHei</string>
+    <string name="font_pingfang_sc">PingFang SC</string>
+    <string name="font_simsun">SimSun (宋体)</string>
+    <string name="font_kaiti">KaiTi (楷書)</string>
+    <string name="font_system_sans">システムサンセリフ</string>
+    <string name="font_system_serif">システムセリフ</string>
+
+    <!-- フォントオプション説明 -->
+    <string name="font_jetbrains_mono_desc">プログラミング向け等幅フォント、リガチャ対応、可読性に優れる</string>
+    <string name="font_system_mono_desc">システム標準の等幅フォント、互換性とレンダリング性能が最適</string>
+    <string name="font_inter_desc">モダンなサンセリフ欧文フォント、UI表示に最適</string>
+    <string name="font_noto_sans_cjk_desc">Google製オープンソースCJKフォント、画面読み上げに最適</string>
+    <string name="font_microsoft_yahei_desc">Windows標準中国語フォント、鮮明でシャープな表示</string>
+    <string name="font_pingfang_sc_desc">Appleシステムフォント、エレガントで読みやすい</string>
+    <string name="font_simsun_desc">伝統的なセリフ体、長文読解に適する</string>
+    <string name="font_kaiti_desc">書道スタイル、芸術的でエレガント</string>
+    <string name="font_system_sans_desc">システム標準サンセリフ、互換性が最高</string>
+    <string name="font_system_serif_desc">システム標準セリフ、フォーマルでクラシック</string>
+</resources>

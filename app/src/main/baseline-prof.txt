@@ -1,0 +1,90 @@
+HSPLcom/draftpeek/MainActivity;->onCreate(Landroid/os/Bundle;)V
+HSPLcom/draftpeek/SplashActivity;->onCreate(Landroid/os/Bundle;)V
+HSPLcom/draftpeek/navigation/DraftPeekNavHost$Companion;->*()V
+HSPLcom/draftpeek/feature/editor/ui/EditorScreen;->*()V
+HSPLcom/draftpeek/feature/editor/viewmodel/EditorViewModel;->*()V
+HSPLcom/draftpeek/feature/editor/sora/SoraEditorWrapper;->*()V
+HSPLcom/draftpeek/feature/browser/ui/FileBrowserScreen;->*()V
+HSPLcom/draftpeek/feature/browser/viewmodel/FileBrowserViewModel;->*()V
+HSPLcom/draftpeek/core/data/db/AppDatabase;->*()V
+HSPLcom/draftpeek/core/data/dao/RecentFileDao_Impl;->*()V
+HSPLcom/draftpeek/core/ui/theme/ThemeKt;->*()V
+HSPLcom/draftpeek/feature/editor/ui/EditorScreen;->EditorScreen()V
+HSPLcom/draftpeek/feature/browser/ui/FileBrowserScreen;->FileBrowserScreen()V
+HSPLcom/draftpeek/MainActivity;->onCreate()V
+HSPLcom/draftpeek/SplashActivity;->onCreate()V
+HSPLcom/draftpeek/DraftPeekApp;->onCreate()V
+HSPLcom/draftpeek/core/data/di/DataModule;->provideAppDatabase()V
+HSPLcom/draftpeek/core/data/di/DataModule;->provideRecentFileDao()V
+
+# Terminal module
+HSPLcom/draftpeek/feature/terminal/ui/TerminalScreen;->*()V
+HSPLcom/draftpeek/feature/terminal/viewmodel/TerminalViewModel;->*()V
+HSPLcom/draftpeek/feature/terminal/emulator/TerminalSessionManager;->*()V
+
+# Editor enhancements
+HSPLcom/draftpeek/feature/editor/ui/MarkdownWebViewPreview;->*()V
+HSPLcom/draftpeek/feature/editor/ui/WysiwYGWebViewPreview;->*()V
+HSPLcom/draftpeek/feature/editor/ui/MarkdownPreviewScreen;->*()V
+HSPLcom/draftpeek/feature/editor/ui/MarkdownToolbar;->*()V
+HSPLcom/draftpeek/feature/editor/ui/OutlineDrawer;->*()V
+
+# LSP support
+HSPLcom/draftpeek/feature/editor/lsp/LspManager;->*()V
+HSPLcom/draftpeek/feature/editor/lsp/LspClient;->*()V
+HSPLcom/draftpeek/feature/editor/lsp/PythonLspProvider;->*()V
+HSPLcom/draftpeek/feature/editor/lsp/KotlinLspProvider;->*()V
+HSPLcom/draftpeek/feature/editor/lsp/JavaLspProvider;->*()V
+HSPLcom/draftpeek/feature/editor/lsp/JavaScriptLspProvider;->*()V
+HSPLcom/draftpeek/feature/editor/lsp/DartLspProvider;->*()V
+HSPLcom/draftpeek/feature/editor/lsp/GoLspProvider;->*()V
+
+# Settings
+HSPLcom/draftpeek/feature/settings/viewmodel/SettingsViewModel;->*()V
+HSPLcom/draftpeek/feature/settings/repository/SettingsRepositoryImpl;->*()V
+
+# Stats
+HSPLcom/draftpeek/feature/stats/ui/ProfileScreen;->*()V
+HSPLcom/draftpeek/feature/stats/viewmodel/StatsViewModel;->*()V
+
+# Core utilities
+HSPLcom/draftpeek/core/common/util/CommonMarkParser;->*()V
+HSPLcom/draftpeek/core/common/util/NativeMarkdownRenderer;->*()V
+HSPLcom/draftpeek/core/common/util/CssThemeManager;->*()V
+HSPLcom/draftpeek/core/common/util/DiffEngine;->*()V
+HSPLcom/draftpeek/core/common/util/EncodingDetector;->*()V
+
+# Data layer
+HSPLcom/draftpeek/core/data/repository/EditorFileRepositoryImpl;->*()V
+HSPLcom/draftpeek/core/data/repository/RecentFilesRepositoryImpl;->*()V
+HSPLcom/draftpeek/core/data/repository/SnippetRepositoryImpl;->*()V
+HSPLcom/draftpeek/core/data/repository/UserActivityRepositoryImpl;->*()V
+
+# UI components
+HSPLcom/draftpeek/core/ui/component/BrandButtonKt;->*()V
+HSPLcom/draftpeek/core/ui/component/BrandSwitchKt;->*()V
+HSPLcom/draftpeek/core/ui/component/BrandDialogKt;->*()V
+HSPLcom/draftpeek/core/ui/component/BrandOutlinedTextFieldKt;->*()V
+
+# Navigation
+HSPLcom/draftpeek/navigation/RouteKt;->*()V
+HSPLcom/draftpeek/navigation/DraftPeekTransitionsKt;->*()V
+
+# Security
+HSPLcom/draftpeek/security/AntiDebug;->*()V
+HSPLcom/draftpeek/security/ApkIntegrityChecker;->*()V
+HSPLcom/draftpeek/security/DexIntegrityChecker;->*()V
+
+# Plugin system
+HSPLcom/draftpeek/core/common/plugin/PluginManager;->*()V
+HSPLcom/draftpeek/core/common/plugin/DraftPeekPlugin;->*()V
+
+# Error handling
+HSPLcom/draftpeek/core/common/error/AppError;->*()V
+HSPLcom/draftpeek/core/common/error/ErrorHandler;->*()V
+HSPLcom/draftpeek/core/common/error/ErrorEvent;->*()V
+
+# Thread safety
+HSPLcom/draftpeek/core/common/util/NetworkConnectivityChecker;->*()V
+HSPLcom/draftpeek/core/common/util/HapticFeedbackHelper;->*()V
+HSPLcom/draftpeek/core/common/util/PerformanceBenchmark;->*()V

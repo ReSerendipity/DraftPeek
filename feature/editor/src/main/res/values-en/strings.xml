@@ -1,0 +1,379 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources xmlns:tools="http://schemas.android.com/tools">
+    <!-- Common -->
+    <string name="editor_cancel">Cancel</string>
+    <string name="editor_close">Close</string>
+    <string name="editor_confirm">Confirm</string>
+    <string name="editor_back">Back</string>
+    <string name="editor_retry">Retry</string>
+    <string name="editor_init_failed">Editor initialization failed</string>
+    <string name="editor_init_timeout">Editor initialization timed out, please retry</string>
+
+    <!-- Dialog: Unsaved changes -->
+    <string name="editor_unsaved_changes">Unsaved Changes</string>
+    <string name="editor_tab_close_modified_message">"%1$s" has been modified but not saved. Close anyway?</string>
+    <string name="editor_tab_file">File</string>
+    <string name="editor_saving_file">Saving file, please wait…</string>
+    <string name="editor_unsaved_exit_message">File has been modified but not saved. Exit anyway?</string>
+    <string name="editor_wait_save">Waiting for save</string>
+    <string name="editor_discard_changes">Discard changes</string>
+
+    <!-- Dialog: Go to line -->
+    <string name="editor_go_to_line">Go to Line</string>
+    <string name="editor_line_number_range">Line (1-%1$d)</string>
+    <string name="editor_enter_line_number">Please enter a line number</string>
+    <string name="editor_enter_valid_line">Please enter a valid line number</string>
+    <string name="editor_out_of_range">Out of range, document has %1$d lines</string>
+    <string name="editor_go">Go</string>
+
+    <!-- Search / Replace -->
+    <string name="editor_find">Find</string>
+    <string name="editor_find_content">Find content</string>
+    <string name="editor_regex">.*</string>
+    <string name="editor_match_case">Aa</string>
+    <string name="editor_whole_word">W</string>
+    <string name="editor_replace">Replace</string>
+    <string name="editor_replace_with">Replace with</string>
+    <string name="editor_replace_all">Replace all</string>
+    <string name="editor_search">Search</string>
+    <string name="editor_search_content">Search content</string>
+    <string name="editor_no_match_found">No matching results found</string>
+    <string name="editor_line_snippet">Line %1$s: %2$s</string>
+
+    <!-- Snippet -->
+    <string name="editor_save_as_snippet">Save as Snippet</string>
+    <string name="editor_snippet_title">Title</string>
+    <string name="editor_snippet_content">Code content</string>
+    <string name="editor_snippet_category">Category</string>
+    <string name="editor_uncategorized">Uncategorized</string>
+    <string name="editor_insert_snippet">Insert Snippet</string>
+    <string name="editor_no_snippets">No saved snippets</string>
+
+    <!-- Format action content descriptions -->
+    <string name="editor_action_bold">Bold</string>
+    <string name="editor_action_italic">Italic</string>
+    <string name="editor_action_strikethrough">Strikethrough</string>
+    <string name="editor_action_highlight">Highlight</string>
+    <string name="editor_action_underline">Underline</string>
+    <string name="editor_action_inline_code">Inline Code</string>
+    <string name="editor_action_inline_formula">Inline Formula</string>
+    <string name="editor_action_heading_1">Heading 1</string>
+    <string name="editor_action_heading_2">Heading 2</string>
+    <string name="editor_action_heading_3">Heading 3</string>
+    <string name="editor_action_unordered_list">Unordered List</string>
+    <string name="editor_action_ordered_list">Ordered List</string>
+    <string name="editor_action_task_list">Task List</string>
+    <string name="editor_action_toggle_list">Toggle List Type</string>
+    <string name="editor_action_link">Link</string>
+    <string name="editor_action_image_link">Image Link</string>
+    <string name="editor_action_insert_image">Insert Image</string>
+    <string name="editor_action_code_block">Code Block</string>
+    <string name="editor_action_table">Table</string>
+    <string name="editor_action_math_formula">Math Formula</string>
+    <string name="editor_action_blockquote">Blockquote</string>
+    <string name="editor_action_horizontal_rule">Horizontal Rule</string>
+    <string name="editor_action_superscript">Superscript</string>
+    <string name="editor_action_subscript">Subscript</string>
+    <string name="editor_action_insert_link_dialog">Insert Link</string>
+    <string name="editor_action_insert_image_dialog">Insert Image</string>
+    <string name="editor_action_insert_table">Insert Table</string>
+    <string name="editor_action_code_block_lang">Code Block (Select Language)</string>
+    <string name="editor_action_mermaid">Mermaid Diagram</string>
+
+    <!-- Toolbar -->
+    <string name="editor_toolbar_more">More</string>
+
+    <!-- Insert link dialog -->
+    <string name="editor_insert_link_title">Insert Link</string>
+    <string name="editor_insert_link_text">Link Text</string>
+    <string name="editor_insert_link_url">Link URL</string>
+    <string name="editor_insert_link_text_hint">Enter link text</string>
+    <string name="editor_insert_link_url_hint">https://example.com</string>
+
+    <!-- Insert image dialog -->
+    <string name="editor_insert_image_title">Insert Image</string>
+    <string name="editor_insert_image_alt">Alt Text</string>
+    <string name="editor_insert_image_url">Image URL</string>
+    <string name="editor_insert_image_alt_hint">Enter image description</string>
+    <string name="editor_insert_image_url_hint">https://example.com/image.png</string>
+
+    <!-- Insert table dialog -->
+    <string name="editor_insert_table_title">Insert Table</string>
+    <string name="editor_insert_table_rows">Rows</string>
+    <string name="editor_insert_table_cols">Columns</string>
+    <string name="editor_insert_table_rows_hint">3</string>
+    <string name="editor_insert_table_cols_hint">3</string>
+
+    <!-- Code block language selector -->
+    <string name="editor_code_block_language">Select Language</string>
+    <string name="editor_code_block_language_hint">e.g. python, javascript</string>
+
+    <!-- Template insertion strings (inserted into document) -->
+    <string name="editor_tpl_bold">Bold text</string>
+    <string name="editor_tpl_italic">Italic text</string>
+    <string name="editor_tpl_strikethrough">Deleted text</string>
+    <string name="editor_tpl_highlight">Highlighted text</string>
+    <string name="editor_tpl_underline">Underline</string>
+    <string name="editor_tpl_code">Code</string>
+    <string name="editor_tpl_formula">Formula</string>
+    <string name="editor_tpl_link">[Link text](url)</string>
+    <string name="editor_tpl_image">![Image description](image-path)</string>
+    <string name="editor_tpl_code_block">```\ncode\n```</string>
+    <string name="editor_tpl_table">| Col 1 | Col 2 | Col 3 |\n| --- | --- | --- |\n| Content | Content | Content |</string>
+    <string name="editor_tpl_math">$$\nmath formula\n$$</string>
+    <string name="editor_tpl_superscript">Superscript text</string>
+    <string name="editor_tpl_subscript">Subscript text</string>
+    <string name="editor_tpl_mermaid" tools:ignore="TypographyDashes">```mermaid
+graph TD
+    A[Start] --> B[End]
+```</string>
+    <string name="editor_tpl_image_from_picker">![Image](%1$s)</string>
+    <string name="editor_image_alt_text">Image</string>
+
+    <!-- Editor UI labels -->
+    <string name="editor_title">Editor</string>
+    <string name="editor_document_mode">Document Mode</string>
+    <string name="editor_code_mode">Code Mode</string>
+    <string name="editor_mode_switch">Mode Switch</string>
+    <string name="editor_preview">Preview</string>
+    <string name="editor_split_view">Split View</string>
+    <string name="editor_edit">Edit</string>
+    <string name="editor_outline">Outline</string>
+    <string name="editor_focus_mode">Focus Mode</string>
+    <string name="editor_exit_focus">Exit Focus</string>
+    <string name="editor_typewriter_mode">Typewriter Mode</string>
+    <string name="editor_exit_typewriter">Exit Typewriter</string>
+    <string name="editor_undo">Undo</string>
+    <string name="editor_redo">Redo</string>
+    <string name="editor_save">Save</string>
+    <string name="editor_more_actions">More Actions</string>
+<string name="editor_action_open_terminal">Terminal</string>
+    <string name="editor_more">More</string>
+    <string name="editor_quick_settings">Quick Settings</string>
+    <string name="editor_cross_file_search">Cross-file Search</string>
+    <string name="editor_reopen_with_encoding">Reopen with Encoding</string>
+    <string name="editor_save_with_encoding">Save with Encoding</string>
+    <string name="editor_export_html">Export as HTML</string>
+    <string name="editor_export_pdf">Export as PDF</string>
+    <string name="editor_export_plaintext">Export as Plain Text</string>
+    <string name="editor_export_image">Export as Image</string>
+    <string name="editor_export_zip">Export as ZIP</string>
+    <string name="editor_preview_theme">Preview Theme</string>
+    <string name="editor_edit_custom_style">Edit Custom Style</string>
+    <string name="editor_export_file">Export File</string>
+    <string name="editor_delete_file">Delete File</string>
+    <string name="editor_load_failed">Load Failed</string>
+
+    <!-- Status bar -->
+    <string name="editor_read_only">Read Only</string>
+    <string name="editor_modified">Modified</string>
+    <string name="editor_word_count">%1$d words</string>
+    <string name="editor_char_count">%1$d characters</string>
+    <string name="editor_line_count">%1$d lines</string>
+    <string name="editor_status_indent_spaces">Spaces: %1$d</string>
+    <string name="editor_status_indent_tab">Tab: %1$d</string>
+    <string name="editor_status_selection_count">%1$d selected</string>
+    <string name="editor_status_editable">Edit</string>
+    <string name="editor_status_language_switch">Language mode: switched to %1$s</string>
+
+    <!-- Search panel tabs -->
+    <string name="editor_search_tab_find">Find</string>
+    <string name="editor_search_tab_replace">Replace</string>
+    <string name="editor_search_tab_goto_line">Go to Line</string>
+
+    <!-- Menu items with subtitles -->
+    <string name="editor_menu_search">Search</string>
+    <string name="editor_menu_undo_desc">Undo the last edit</string>
+    <string name="editor_menu_redo_desc">Redo the undone operation</string>
+    <string name="editor_menu_search_desc">Open Find / Replace / Go to Line panel</string>
+    <string name="editor_menu_terminal_desc">Open built-in terminal</string>
+
+    <!-- Quick settings -->
+    <string name="editor_font_size">Font size: %1$dsp</string>
+    <string name="editor_word_wrap">Word Wrap</string>
+    <string name="editor_show_line_numbers">Show Line Numbers</string>
+    <string name="editor_tab_width">Tab Width</string>
+    <string name="editor_quick_settings_title">Quick Settings</string>
+
+    <!-- Export dialog -->
+    <string name="editor_export_as_pdf">Export as PDF</string>
+    <string name="editor_export_as_html">Export as HTML</string>
+    <string name="editor_page_size">Page Size</string>
+    <string name="editor_include_toc">Include Table of Contents</string>
+    <string name="editor_export">Export</string>
+
+    <!-- Delete dialog -->
+    <string name="editor_delete_confirm_message">Are you sure you want to delete \"%1$s\"? This action cannot be undone.</string>
+    <string name="editor_delete">Delete</string>
+
+    <!-- Read-only banner -->
+    <string name="editor_readonly_banner">This is a built-in sample file and is read-only.\nTo edit, go back and tap \"File Browser\" at the bottom to select a file from your device, or copy the sample content and create a new file.</string>
+    <string name="editor_close_hint">Close hint</string>
+
+    <!-- Toast messages -->
+    <string name="editor_export_success">Export successful</string>
+    <string name="editor_export_failed">Export failed: %1$s</string>
+    <string name="editor_saving_please_wait">Saving, please wait…</string>
+    <string name="editor_save_success">Saved</string>
+    <string name="editor_save_failed">Save failed: %1$s</string>
+
+    <!-- Preview -->
+    <string name="editor_preview_truncated">*Content too long, preview truncated. View the full content in edit mode.*</string>
+
+    <!-- Binary file -->
+    <string name="editor_cannot_display_file">Cannot display this file</string>
+    <string name="editor_binary_file_message">This file is in binary format and cannot be displayed as text.</string>
+    <string name="editor_file_size">File size: %1$s</string>
+
+    <!-- Encoding -->
+    <string name="editor_encoding_select">Encoding Selection</string>
+    <string name="editor_select_encoding">Select Encoding</string>
+    <string name="editor_encoding_failed_message">File encoding detection failed or manual specification is required. Please select the correct encoding to reopen the file.</string>
+    <string name="editor_available_encodings">Available encodings:</string>
+
+    <!-- Tab -->
+    <string name="editor_close_tab">Close tab</string>
+    <string name="editor_unsaved_tab_message">\"%1$s\" has been modified but not saved. Close anyway?</string>
+    <string name="editor_file">File</string>
+
+    <!-- Outline -->
+    <string name="editor_no_headings">No headings found</string>
+
+    <!-- Diff -->
+    <string name="editor_diff_count">%1$d differences</string>
+    <string name="editor_diff_position">%1$d/%2$d differences</string>
+    <string name="editor_prev_diff">Previous difference</string>
+    <string name="editor_next_diff">Next difference</string>
+    <string name="editor_original">Original</string>
+    <string name="editor_modified_tab">Modified</string>
+    <string name="editor_no_file_uri">No file URI provided</string>
+    <string name="editor_load_file_failed">Failed to load file</string>
+    <string name="editor_error_permission_expired">File access permission has expired. Please reselect the file from the file browser.</string>
+    <string name="editor_error_external_file_not_found">File does not exist or has been moved/deleted.</string>
+
+    <!-- Media viewer -->
+    <string name="editor_unsupported_media">Unsupported media type</string>
+    <string name="editor_cannot_decode_image">Cannot decode image</string>
+    <string name="editor_image_load_failed">Image load failed</string>
+    <string name="editor_image_preview">Image Preview</string>
+    <string name="editor_player_error">Player error: what=%1$d, extra=%2$d</string>
+    <string name="editor_cannot_load_audio">Cannot load audio</string>
+    <string name="editor_audio_file">Audio file</string>
+    <string name="editor_audio_load_failed">Audio load failed</string>
+    <string name="editor_pause">Pause</string>
+    <string name="editor_play">Play</string>
+    <string name="editor_video_load_failed">Video load failed</string>
+    <string name="editor_cannot_load_video">Cannot load video</string>
+
+    <!-- PDF -->
+    <string name="editor_cannot_load_pdf">Cannot load PDF file</string>
+
+    <!-- Scroll -->
+    <string name="editor_scroll_to_top">Back to top</string>
+
+    <!-- File size warnings -->
+    <string name="editor_file_too_large_readonly">File too large (%1$s), forced read-only mode, editing may be unstable</string>
+    <string name="editor_file_large_slow">File is large (%1$s), opening and editing may be slow</string>
+    <string name="editor_large_file_preview_hint">Large file is in plain text edit mode. Switch to preview to see rendered output</string>
+
+    <!-- Theme names -->
+    <string name="editor_theme_default">Default</string>
+    <string name="editor_theme_github">GitHub</string>
+    <string name="editor_theme_newsprint">Newsprint</string>
+    <string name="editor_theme_night">Night</string>
+    <string name="editor_theme_pixy">Pixy</string>
+    <string name="editor_theme_academic">Academic</string>
+
+    <!-- Editor Input Validation -->
+    <string name="editor_search_too_long">Search query too long (max 1000 characters)</string>
+    <string name="editor_replace_too_long">Replacement text too long (max 5000 characters)</string>
+    <string name="editor_cross_search_too_long">Search query too long (max 500 characters)</string>
+    <string name="editor_snippet_title_too_long">Title too long (max 200 characters)</string>
+    <string name="editor_snippet_content_too_long">Content too long (max 100000 characters)</string>
+    <string name="editor_snippet_category_too_long">Category too long (max 100 characters)</string>
+
+    <!-- Command Palette -->
+    <string name="editor_command_palette">Command Palette</string>
+    <string name="editor_search_commands">Search commands…</string>
+    <string name="editor_command_palette_shortcut">Ctrl+Shift+P</string>
+    <string name="editor_command_palette_close_tab">Close Tab</string>
+    <string name="editor_command_palette_close_all_tabs">Close All Tabs</string>
+    <string name="editor_command_palette_toggle_minimap">Toggle Minimap</string>
+    <string name="editor_command_palette_goto_last_edit">Go to Last Edit Location</string>
+    <string name="editor_select_all">Select All</string>
+    <string name="editor_toggle_preview">Toggle Preview</string>
+    <string name="editor_next_tab">Next Tab</string>
+    <string name="editor_previous_tab">Previous Tab</string>
+    <string name="editor_diff">Diff</string>
+    <string name="editor_toggle_theme">Toggle Theme</string>
+    <string name="editor_category_edit">Edit</string>
+    <string name="editor_category_view">View</string>
+    <string name="editor_category_navigation">Navigation</string>
+    <string name="editor_category_tools">Tools</string>
+    <string name="editor_category_help">Help</string>
+    <string name="editor_command_markdown_cheat_sheet">Markdown Cheat Sheet</string>
+    <string name="editor_treesitter_highlight">TreeSitter Incremental Highlighting</string>
+    <string name="editor_plugin_system">Plugin System</string>
+
+    <!-- Markdown Cheat Sheet -->
+    <string name="editor_markdown_cheat_sheet">Markdown Cheat Sheet</string>
+    <string name="editor_cheatsheet_headers">Headers</string>
+    <string name="editor_cheatsheet_heading1">Heading 1</string>
+    <string name="editor_cheatsheet_heading2">Heading 2</string>
+    <string name="editor_cheatsheet_heading3">Heading 3</string>
+    <string name="editor_cheatsheet_emphasis">Emphasis</string>
+    <string name="editor_cheatsheet_bold">Bold</string>
+    <string name="editor_cheatsheet_italic">Italic</string>
+    <string name="editor_cheatsheet_strikethrough">Strikethrough</string>
+    <string name="editor_cheatsheet_links_images">Links &amp; Images</string>
+    <string name="editor_cheatsheet_link">Hyperlink</string>
+    <string name="editor_cheatsheet_image">Image</string>
+    <string name="editor_cheatsheet_code">Code</string>
+    <string name="editor_cheatsheet_inline_code">Inline code</string>
+    <string name="editor_cheatsheet_code_block">Code block</string>
+    <string name="editor_cheatsheet_lists">Lists</string>
+    <string name="editor_cheatsheet_unordered">Unordered list</string>
+    <string name="editor_cheatsheet_ordered">Ordered list</string>
+    <string name="editor_cheatsheet_task">Task list</string>
+    <string name="editor_cheatsheet_blockquotes">Blockquotes</string>
+    <string name="editor_cheatsheet_blockquote_desc">Block quote</string>
+    <string name="editor_cheatsheet_tables">Tables</string>
+    <string name="editor_cheatsheet_table_desc">Table</string>
+    <string name="editor_cheatsheet_math">Math</string>
+    <string name="editor_cheatsheet_inline_math">Inline math</string>
+    <string name="editor_cheatsheet_display_math">Display math</string>
+    <string name="editor_cheatsheet_mermaid">Diagrams</string>
+    <string name="editor_cheatsheet_mermaid_desc">Mermaid diagram</string>
+
+    <!-- Security -->
+    <string name="security_operation_restricted">Security verification failed. This operation is temporarily unavailable.</string>
+
+    <!-- Symbol Panel (Ch1 Item 19, P3) -->
+    <string name="editor_symbol_panel_title">Symbol Panel</string>
+    <string name="editor_symbol_panel_common">Common</string>
+    <string name="editor_symbol_panel_cjk">CJK</string>
+    <string name="editor_symbol_panel_math">Math</string>
+    <string name="editor_symbol_panel_arrows">Arrows</string>
+    <string name="editor_command_palette_toggle_symbol_panel">Toggle Symbol Panel</string>
+
+    <!-- Rich Editor (Ch6#2 P1: native Compose WYSIWYG) -->
+    <string name="editor_rich_editor_bold">Bold</string>
+    <string name="editor_rich_editor_italic">Italic</string>
+    <string name="editor_rich_editor_strikethrough">Strikethrough</string>
+    <string name="editor_rich_editor_code">Code</string>
+    <string name="editor_rich_editor_unordered_list">Unordered List</string>
+    <string name="editor_rich_editor_ordered_list">Ordered List</string>
+    <string name="editor_rich_editor_quote">Quote</string>
+    <string name="editor_rich_editor_link">Link</string>
+    <string name="editor_rich_editor_mode">Rich Text</string>
+    <string name="editor_action_new_file">New file</string>
+    <string name="editor_action_open_file">Open file</string>
+    <string name="editor_action_snippets">Snippets</string>
+    <string name="editor_convert_html_to_markdown">Convert to Markdown</string>
+    <string name="editor_highlight_disabled_large_file">Syntax highlighting disabled (file exceeds 1 MB), showing in plain-text mode</string>
+    <string name="editor_sticky_scroll">Sticky scroll</string>
+    <!-- Diff / Encoding dialogs -->
+    <string name="editor_diff_original">Original</string>
+    <string name="editor_diff_modified">Modified</string>
+    <string name="editor_encoding_select_title">Select encoding</string>
+</resources>

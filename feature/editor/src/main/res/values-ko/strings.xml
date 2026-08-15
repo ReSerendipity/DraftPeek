@@ -1,0 +1,379 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources xmlns:tools="http://schemas.android.com/tools">
+    <!-- Common -->
+    <string name="editor_cancel">취소</string>
+    <string name="editor_close">닫기</string>
+    <string name="editor_confirm">확인</string>
+    <string name="editor_back">뒤로</string>
+
+    <!-- Dialog: Unsaved changes -->
+    <string name="editor_unsaved_changes">저장되지 않은 변경사항</string>
+    <string name="editor_tab_close_modified_message">"%1$s"이(가) 수정되었지만 저장되지 않았습니다. 닫으시겠습니까?</string>
+    <string name="editor_tab_file">파일</string>
+    <string name="editor_saving_file">파일 저장 중…</string>
+    <string name="editor_unsaved_exit_message">파일이 수정되었지만 저장되지 않았습니다. 종료하시겠습니까?</string>
+    <string name="editor_wait_save">저장 대기 중</string>
+    <string name="editor_discard_changes">변경 사항 폐기</string>
+
+    <!-- Dialog: Go to line -->
+    <string name="editor_go_to_line">행으로 이동</string>
+    <string name="editor_line_number_range">줄 번호 (1-%1$d)</string>
+    <string name="editor_enter_line_number">줄 번호를 입력해 주세요</string>
+    <string name="editor_enter_valid_line">유효한 줄 번호를 입력해 주세요</string>
+    <string name="editor_out_of_range">범위를 벗어남, 문서는 총 %1$d행입니다</string>
+    <string name="editor_go">이동</string>
+
+    <!-- Search / Replace -->
+    <string name="editor_find">찾기</string>
+    <string name="editor_find_content">찾을 내용</string>
+    <string name="editor_regex">.*</string>
+    <string name="editor_match_case">Aa</string>
+    <string name="editor_whole_word">W</string>
+    <string name="editor_replace">바꾸기</string>
+    <string name="editor_replace_with">바꿀 내용</string>
+    <string name="editor_replace_all">모두 바꾸기</string>
+    <string name="editor_search">검색</string>
+    <string name="editor_search_content">검색 내용</string>
+    <string name="editor_no_match_found">일치하는 결과가 없습니다</string>
+    <string name="editor_line_snippet">%1$s행: %2$s</string>
+
+    <!-- Snippet -->
+    <string name="editor_save_as_snippet">스니펫으로 저장</string>
+    <string name="editor_snippet_title">제목</string>
+    <string name="editor_snippet_content">코드 내용</string>
+    <string name="editor_snippet_category">분류</string>
+    <string name="editor_uncategorized">분류 없음</string>
+    <string name="editor_insert_snippet">스니펫 삽입</string>
+    <string name="editor_no_snippets">저장된 스니펫이 없습니다</string>
+
+    <!-- Format action content descriptions -->
+    <string name="editor_action_bold">굵게</string>
+    <string name="editor_action_italic">기울임</string>
+    <string name="editor_action_strikethrough">취소선</string>
+    <string name="editor_action_highlight">강조</string>
+    <string name="editor_action_underline">밑줄</string>
+    <string name="editor_action_inline_code">인라인 코드</string>
+    <string name="editor_action_inline_formula">인라인 수식</string>
+    <string name="editor_action_heading_1">제목 1</string>
+    <string name="editor_action_heading_2">제목 2</string>
+    <string name="editor_action_heading_3">제목 3</string>
+    <string name="editor_action_unordered_list">순서 없는 목록</string>
+    <string name="editor_action_ordered_list">순차 목록</string>
+    <string name="editor_action_task_list">작업 목록</string>
+    <string name="editor_action_toggle_list">목록 유형 전환</string>
+    <string name="editor_action_link">링크</string>
+    <string name="editor_action_image_link">이미지 링크</string>
+    <string name="editor_action_insert_image">이미지 삽입</string>
+    <string name="editor_action_code_block">코드 블록</string>
+    <string name="editor_action_table">표</string>
+    <string name="editor_action_math_formula">수학 공식</string>
+    <string name="editor_action_blockquote">인용</string>
+    <string name="editor_action_horizontal_rule">구분선</string>
+    <string name="editor_action_superscript">윗첨자</string>
+    <string name="editor_action_subscript">아래첨자</string>
+    <string name="editor_action_insert_link_dialog">링크 삽입</string>
+    <string name="editor_action_insert_image_dialog">이미지 삽입</string>
+    <string name="editor_action_insert_table">표 삽입</string>
+    <string name="editor_action_code_block_lang">코드 블록 (언어 선택)</string>
+    <string name="editor_action_mermaid">Mermaid 다이어그램</string>
+
+    <!-- Toolbar category labels -->
+    <string name="editor_toolbar_more">더보기</string>
+
+    <!-- Insert link dialog -->
+    <string name="editor_insert_link_title">링크 삽입</string>
+    <string name="editor_insert_link_text">링크 텍스트</string>
+    <string name="editor_insert_link_url">URL</string>
+    <string name="editor_insert_link_text_hint">표시 텍스트 입력</string>
+    <string name="editor_insert_link_url_hint">https://example.com</string>
+
+    <!-- Insert image dialog -->
+    <string name="editor_insert_image_title">이미지 삽입</string>
+    <string name="editor_insert_image_alt">대체 텍스트</string>
+    <string name="editor_insert_image_url">이미지 URL</string>
+    <string name="editor_insert_image_alt_hint">이미지 설명을 입력하세요</string>
+    <string name="editor_insert_image_url_hint">https://example.com/image.png</string>
+
+    <!-- Insert table dialog -->
+    <string name="editor_insert_table_title">표 삽입</string>
+    <string name="editor_insert_table_rows">행 수</string>
+    <string name="editor_insert_table_cols">열 수</string>
+    <string name="editor_insert_table_rows_hint">3</string>
+    <string name="editor_insert_table_cols_hint">3</string>
+
+    <!-- Code block language selector -->
+    <string name="editor_code_block_language">언어 선택</string>
+    <string name="editor_code_block_language_hint">예: python, javascript</string>
+
+    <!-- Template insertion strings (inserted into document) -->
+    <string name="editor_tpl_bold">굵은 텍스트</string>
+    <string name="editor_tpl_italic">기울임 텍스트</string>
+    <string name="editor_tpl_strikethrough">삭제 텍스트</string>
+    <string name="editor_tpl_highlight">강조 텍스트</string>
+    <string name="editor_tpl_underline">밑줄</string>
+    <string name="editor_tpl_code">코드</string>
+    <string name="editor_tpl_formula">공식</string>
+    <string name="editor_tpl_link">[링크 텍스트](url)</string>
+    <string name="editor_tpl_image">![이미지 설명](이미지 경로)</string>
+    <string name="editor_tpl_code_block">```\n코드\n```</string>
+    <string name="editor_tpl_table">| 열1 | 열2 | 열3 |\n| --- | --- | --- |\n| 내용 | 내용 | 내용 |</string>
+    <string name="editor_tpl_math">$$\n수학 공식\n$$</string>
+    <string name="editor_tpl_superscript">윗첨자 텍스트</string>
+    <string name="editor_tpl_subscript">아래첨자 텍스트</string>
+    <string name="editor_tpl_mermaid" tools:ignore="TypographyDashes">```mermaid
+graph TD
+    A[시작] --> B[종료]
+```</string>
+    <string name="editor_tpl_image_from_picker">![이미지](%1$s)</string>
+    <string name="editor_image_alt_text">이미지</string>
+
+    <!-- Editor UI labels -->
+    <string name="editor_title">편집기</string>
+    <string name="editor_document_mode">문서 모드</string>
+    <string name="editor_code_mode">코드 모드</string>
+    <string name="editor_mode_switch">모드 전환</string>
+    <string name="editor_preview">미리보기</string>
+    <string name="editor_split_view">분할 보기</string>
+    <string name="editor_edit">편집</string>
+    <string name="editor_outline">개요</string>
+    <string name="editor_focus_mode">집중 모드</string>
+    <string name="editor_exit_focus">집중 해제</string>
+    <string name="editor_typewriter_mode">타자기 모드</string>
+    <string name="editor_exit_typewriter">타자기 해제</string>
+    <string name="editor_undo">실행 취소</string>
+    <string name="editor_redo">다시 실행</string>
+    <string name="editor_save">저장</string>
+    <string name="editor_more_actions">더 많은 작업</string>
+<string name="editor_action_open_terminal">터미널</string>
+    <string name="editor_more">더보기</string>
+    <string name="editor_quick_settings">빠른 설정</string>
+    <string name="editor_cross_file_search">파일 간 검색</string>
+    <string name="editor_reopen_with_encoding">인코딩 선택하여 다시 열기</string>
+    <string name="editor_save_with_encoding">인코딩 지정하여 저장</string>
+    <string name="editor_export_html">HTML로 내보내기</string>
+    <string name="editor_export_pdf">PDF로 내보내기</string>
+    <string name="editor_export_plaintext">일본 텍스트로 내보내기</string>
+    <string name="editor_export_image">이미지로 내보내기</string>
+    <string name="editor_export_zip">ZIP으로 내보내기</string>
+    <string name="editor_preview_theme">미리보기 테마</string>
+    <string name="editor_edit_custom_style">사용자 정의 스타일 편집</string>
+    <string name="editor_export_file">파일 내보내기</string>
+    <string name="editor_delete_file">파일 삭제</string>
+    <string name="editor_load_failed">로드 실패</string>
+
+<!-- Status bar -->
+<string name="editor_read_only">읽기 전용</string>
+<string name="editor_modified">수정됨</string>
+<string name="editor_word_count">%1$d단어</string>
+<string name="editor_char_count">%1$d문자</string>
+<string name="editor_line_count">%1$d줄</string>
+<string name="editor_status_indent_spaces">Spaces: %1$d</string>
+<string name="editor_status_indent_tab">Tab: %1$d</string>
+<string name="editor_status_selection_count">%1$d 선택됨</string>
+<string name="editor_status_editable">편집</string>
+<string name="editor_status_language_switch">언어 모드: %1$s(으)로 전환됨</string>
+
+<!-- Search panel tabs -->
+<string name="editor_search_tab_find">찾기</string>
+<string name="editor_search_tab_replace">바꾸기</string>
+<string name="editor_search_tab_goto_line">줄로 이동</string>
+
+<!-- Menu items with subtitles -->
+<string name="editor_menu_search">검색</string>
+<string name="editor_menu_undo_desc">마지막 편집 작업 취소</string>
+<string name="editor_menu_redo_desc">취소한 작업 다시 실행</string>
+<string name="editor_menu_search_desc">찾기 / 바꾸기 / 줄로 이동 패널 열기</string>
+<string name="editor_menu_terminal_desc">내장 터미널 열기</string>
+
+    <!-- Quick settings -->
+    <string name="editor_font_size">글꼴 크기: %1$dsp</string>
+    <string name="editor_word_wrap">자동 줄바꿈</string>
+    <string name="editor_show_line_numbers">줄 번호 표시</string>
+    <string name="editor_tab_width">탭 너비</string>
+    <string name="editor_quick_settings_title">빠른 설정</string>
+
+    <!-- Export dialog -->
+    <string name="editor_export_as_pdf">PDF로 내보내기</string>
+    <string name="editor_export_as_html">HTML로 내보내기</string>
+    <string name="editor_page_size">페이지 크기</string>
+    <string name="editor_include_toc">목차 포함</string>
+    <string name="editor_export">내보내기</string>
+
+    <!-- Delete dialog -->
+    <string name="editor_delete_confirm_message">파일 \"%1$s\"을(를) 삭제하시겠습니까? 이 작업은 되돌릴 수 없습니다.</string>
+    <string name="editor_delete">삭제</string>
+
+    <!-- Read-only banner -->
+    <string name="editor_readonly_banner">현재는 내장 샘플 파일로, 읽기만 가능합니다.\n편집하려면 뒤로 돌아가 아래의 \"파일 탐색\"에서 기기 파일을 선택하거나, 샘플 내용을 복사하여 새 파일을 만드세요.</string>
+    <string name="editor_close_hint">힌트 닫기</string>
+
+    <!-- Toast messages -->
+    <string name="editor_export_success">내보내기 성공</string>
+    <string name="editor_export_failed">내보내기 실패: %1$s</string>
+    <string name="editor_saving_please_wait">저장 중입니다…</string>
+    <string name="editor_save_success">저장 완료</string>
+    <string name="editor_save_failed">저장 실패: %1$s</string>
+
+    <!-- Preview -->
+    <string name="editor_preview_truncated">*내용이 너무 길어 미리보기가 잘렸습니다. 전체 내용은 편집 모드에서 확인하세요.*</string>
+
+    <!-- Binary file -->
+    <string name="editor_cannot_display_file">이 파일을 표시할 수 없습니다</string>
+    <string name="editor_binary_file_message">이 파일은 바이너리 형식이어서 텍스트 형식으로 표시할 수 없습니다.</string>
+    <string name="editor_file_size">파일 크기: %1$s</string>
+
+    <!-- Encoding -->
+    <string name="editor_encoding_select">인코딩 선택</string>
+    <string name="editor_select_encoding">인코딩 형식 선택</string>
+    <string name="editor_encoding_failed_message">파일 인코딩 감지에 실패했거나 수동 지정이 필요합니다. 올바른 인코딩을 선택하여 파일을 다시 여세요.</string>
+    <string name="editor_available_encodings">사용 가능한 인코딩:</string>
+
+    <!-- Tab -->
+    <string name="editor_close_tab">탭 닫기</string>
+    <string name="editor_unsaved_tab_message">\"%1$s\"이(가) 수정되었지만 저장되지 않았습니다. 닫으시겠습니까?</string>
+    <string name="editor_file">파일</string>
+
+    <!-- Outline -->
+    <string name="editor_no_headings">제목을 찾을 수 없습니다</string>
+
+    <!-- Diff -->
+    <string name="editor_diff_count">%1$d곳 차이</string>
+    <string name="editor_diff_position">%1$d/%2$d 차이</string>
+    <string name="editor_prev_diff">이전 차이</string>
+    <string name="editor_next_diff">다음 차이</string>
+    <string name="editor_original">원본</string>
+    <string name="editor_modified_tab">수정됨</string>
+    <string name="editor_no_file_uri">파일 URI가 제공되지 않았습니다</string>
+    <string name="editor_load_file_failed">파일 로드 실패</string>
+    <string name="editor_error_permission_expired">파일 접근 권한이 만료되었습니다. 파일 브라우저에서 파일을 다시 선택해 주세요.</string>
+    <string name="editor_error_external_file_not_found">파일이 존재하지 않거나 이동/삭제되었습니다.</string>
+
+    <!-- Media viewer -->
+    <string name="editor_unsupported_media">지원되지 않는 미디어 유형</string>
+    <string name="editor_cannot_decode_image">이미지를 디코드할 수 없습니다</string>
+    <string name="editor_image_load_failed">이미지 로드 실패</string>
+    <string name="editor_image_preview">이미지 미리보기</string>
+    <string name="editor_player_error">재생기 오류: what=%1$d, extra=%2$d</string>
+    <string name="editor_cannot_load_audio">오디오를 로드할 수 없습니다</string>
+    <string name="editor_audio_file">오디오 파일</string>
+    <string name="editor_audio_load_failed">오디오 로드 실패</string>
+    <string name="editor_pause">일시정지</string>
+    <string name="editor_play">재생</string>
+    <string name="editor_video_load_failed">비디오 로드 실패</string>
+    <string name="editor_cannot_load_video">비디오를 로드할 수 없습니다</string>
+
+    <!-- PDF -->
+    <string name="editor_cannot_load_pdf">PDF 파일을 로드할 수 없습니다</string>
+
+    <!-- Scroll -->
+    <string name="editor_scroll_to_top">맨 위로</string>
+
+    <!-- File size warnings -->
+    <string name="editor_file_too_large_readonly">파일이 너무 큽니다(%1$s), 읽기 전용 모드가 강제되며 편집이 불안정할 수 있습니다</string>
+    <string name="editor_file_large_slow">파일이 큽니다(%1$s), 열거나 편집 속도가 느려질 수 있습니다</string>
+    <string name="editor_large_file_preview_hint">큰 파일은 일반 텍스트 편집 모드입니다. 미리보기로 전환하여 렌더링 결과를 확인할 수 있습니다</string>
+
+    <!-- Theme names -->
+    <string name="editor_theme_default">기본</string>
+    <string name="editor_theme_github">GitHub</string>
+    <string name="editor_theme_newsprint">신문</string>
+    <string name="editor_theme_night">나이트</string>
+    <string name="editor_theme_pixy">Pixy</string>
+    <string name="editor_theme_academic">학술</string>
+
+    <!-- Editor Input Validation -->
+    <string name="editor_search_too_long">검색 내용이 너무 깁니다 (최대 1000자)</string>
+    <string name="editor_replace_too_long">대체 텍스트가 너무 깁니다 (최대 5000자)</string>
+    <string name="editor_cross_search_too_long">검색 내용이 너무 깁니다 (최대 500자)</string>
+    <string name="editor_snippet_title_too_long">제목이 너무 깁니다 (최대 200자)</string>
+    <string name="editor_snippet_content_too_long">내용이 너무 깁니다 (최대 100000자)</string>
+    <string name="editor_snippet_category_too_long">카테고리가 너무 깁니다 (최대 100자)</string>
+
+    <!-- Command Palette -->
+    <string name="editor_command_palette">명령 팔레트</string>
+    <string name="editor_search_commands">명령 검색…</string>
+    <string name="editor_command_palette_shortcut">Ctrl+Shift+P</string>
+    <string name="editor_command_palette_close_tab">탭 닫기</string>
+    <string name="editor_command_palette_close_all_tabs">모든 탭 닫기</string>
+    <string name="editor_command_palette_toggle_minimap">미니맵 전환</string>
+    <string name="editor_command_palette_goto_last_edit">마지막 편집 위치로 이동</string>
+    <string name="editor_select_all">모두 선택</string>
+    <string name="editor_toggle_preview">미리보기 전환</string>
+    <string name="editor_next_tab">다음 탭</string>
+    <string name="editor_previous_tab">이전 탭</string>
+    <string name="editor_diff">차이 비교</string>
+    <string name="editor_toggle_theme">테마 전환</string>
+    <string name="editor_category_edit">편집</string>
+    <string name="editor_category_view">보기</string>
+    <string name="editor_category_navigation">탐색</string>
+    <string name="editor_category_tools">도구</string>
+    <string name="editor_category_help">도움말</string>
+    <string name="editor_command_markdown_cheat_sheet">Markdown 치트시트</string>
+    <string name="editor_treesitter_highlight">TreeSitter 증분 하이라이트</string>
+    <string name="editor_plugin_system">플러그인 시스템</string>
+
+    <!-- Markdown Cheat Sheet -->
+    <string name="editor_markdown_cheat_sheet">Markdown 치트시트</string>
+    <string name="editor_cheatsheet_headers">제목</string>
+    <string name="editor_cheatsheet_heading1">제목 1</string>
+    <string name="editor_cheatsheet_heading2">제목 2</string>
+    <string name="editor_cheatsheet_heading3">제목 3</string>
+    <string name="editor_cheatsheet_emphasis">강조</string>
+    <string name="editor_cheatsheet_bold">굵게</string>
+    <string name="editor_cheatsheet_italic">기울임</string>
+    <string name="editor_cheatsheet_strikethrough">취소선</string>
+    <string name="editor_cheatsheet_links_images">링크와 이미지</string>
+    <string name="editor_cheatsheet_link">하이퍼링크</string>
+    <string name="editor_cheatsheet_image">이미지</string>
+    <string name="editor_cheatsheet_code">코드</string>
+    <string name="editor_cheatsheet_inline_code">인라인 코드</string>
+    <string name="editor_cheatsheet_code_block">코드 블록</string>
+    <string name="editor_cheatsheet_lists">목록</string>
+    <string name="editor_cheatsheet_unordered">순서 없는 목록</string>
+    <string name="editor_cheatsheet_ordered">순차 목록</string>
+    <string name="editor_cheatsheet_task">작업 목록</string>
+    <string name="editor_cheatsheet_blockquotes">인용</string>
+    <string name="editor_cheatsheet_blockquote_desc">블록 인용</string>
+    <string name="editor_cheatsheet_tables">표</string>
+    <string name="editor_cheatsheet_table_desc">표</string>
+    <string name="editor_cheatsheet_math">수식</string>
+    <string name="editor_cheatsheet_inline_math">인라인 수식</string>
+    <string name="editor_cheatsheet_display_math">블록 수식</string>
+    <string name="editor_cheatsheet_mermaid">다이어그램</string>
+    <string name="editor_cheatsheet_mermaid_desc">Mermaid 다이어그램</string>
+
+    <!-- Security -->
+    <string name="security_operation_restricted">보안 검증에 실패했습니다. 이 작업은 일시적으로 사용할 수 없습니다.</string>
+
+    <!-- Symbol Panel (Ch1 Item 19, P3) -->
+    <string name="editor_symbol_panel_title">기호 패널</string>
+    <string name="editor_symbol_panel_common">일반</string>
+    <string name="editor_symbol_panel_cjk">CJK</string>
+    <string name="editor_symbol_panel_math">수학</string>
+    <string name="editor_symbol_panel_arrows">화살표</string>
+    <string name="editor_command_palette_toggle_symbol_panel">기호 패널 전환</string>
+
+    <!-- Rich Editor (Ch6#2 P1: native Compose WYSIWYG) -->
+    <string name="editor_rich_editor_bold">굵게</string>
+    <string name="editor_rich_editor_italic">기울임</string>
+    <string name="editor_rich_editor_strikethrough">취소선</string>
+    <string name="editor_rich_editor_code">코드</string>
+    <string name="editor_rich_editor_unordered_list">글머리 기호</string>
+    <string name="editor_rich_editor_ordered_list">번호 매기기</string>
+    <string name="editor_rich_editor_quote">인용</string>
+    <string name="editor_rich_editor_link">링크</string>
+    <string name="editor_rich_editor_mode">리치 텍스트</string>
+    <string name="editor_action_new_file">새 파일</string>
+    <string name="editor_action_open_file">파일 열기</string>
+    <string name="editor_action_snippets">코드 스니펫</string>
+    <string name="editor_convert_html_to_markdown">Markdown으로 변환</string>
+    <string name="editor_highlight_disabled_large_file">구문 강조가 비활성화되었습니다(1MB 초과 파일). 일반 텍스트 모드로 표시됩니다</string>
+    <string name="editor_init_failed">편집기 초기화 실패</string>
+    <string name="editor_init_timeout">편집기 초기화 시간 초과, 다시 시도하세요</string>
+    <string name="editor_retry">다시 시도</string>
+    <string name="editor_sticky_scroll">스티키 스크롤</string>
+    <!-- Diff / Encoding dialogs -->
+    <string name="editor_diff_original">원본</string>
+    <string name="editor_diff_modified">수정됨</string>
+    <string name="editor_encoding_select_title">인코딩 선택</string>
+</resources>

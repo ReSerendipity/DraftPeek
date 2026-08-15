@@ -1,0 +1,13 @@
+# DraftPeek Server Dependencies
+# Yjs CRDT Collaboration Server + Cloud Sync Server
+#
+# Install: pip install -r server/requirements.txt
+
+# CRDT Collaboration Server (server/crdt_server.py)
+websockets>=12.0
+uvicorn>=0.27.0
+ypy>=0.6.0
+
+# Cloud Sync Server (server/sync_server/main.py)
+fastapi>=0.109.0
+python-multipart>=0.0.6

@@ -1,0 +1,59 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!-- Group Headers -->
+    <string name="settings_group_appearance">외관</string>
+    <string name="settings_group_editor">편집기</string>
+    <string name="settings_group_font">글꼴</string>
+    <string name="settings_group_file_management">파일 관리</string>
+    <string name="settings_group_about">정보</string>
+
+    <!-- Editor Settings -->
+    <string name="settings_editor_font_size">글꼴 크기</string>
+    <string name="settings_editor_tab_width">탭 너비</string>
+    <string name="settings_editor_tab_width_format">%d칸</string>
+    <string name="settings_editor_word_wrap">자동 줄바꿈</string>
+    <string name="settings_editor_line_numbers">줄 번호</string>
+    <string name="settings_editor_auto_indent">자동 들여쓰기</string>
+    <string name="settings_editor_highlight_current_line">현재 줄 강조</string>
+    <string name="settings_editor_indent_guides">들여쓰기 가이드</string>
+    <string name="settings_editor_auto_save">자동 저장</string>
+
+    <!-- Appearance -->
+    <string name="settings_appearance_theme">테마</string>
+    <string name="settings_appearance_language">언어</string>
+    <string name="settings_appearance_dynamic_color">Material You 다이내믹 컬러</string>
+    <string name="settings_appearance_font_family">편집기 글꼴</string>
+    <string name="settings_appearance_font_monospace">고정폭</string>
+    <string name="settings_appearance_font_serif">세리프</string>
+    <string name="settings_appearance_font_sans_serif">산세리프</string>
+
+    <!-- File Management -->
+    <string name="settings_file_management_default_encoding">기본 인코딩</string>
+    <string name="settings_file_management_auto_save_interval">자동 저장 간격</string>
+    <string name="settings_file_management_auto_save_interval_format">%d초</string>
+
+    <!-- About -->
+    <string name="settings_about_version">버전</string>
+    <string name="settings_about_version_unknown">알 수 없음</string>
+    <string name="settings_about_open_source_licenses">오픈소스 라이선스</string>
+    <string name="settings_about_app_feedback">앱 피드백</string>
+    <string name="settings_about_app_feedback_toast">피드백 기능은 개발 중입니다. 기대해 주세요!</string>
+
+    <!-- Theme Dialog -->
+    <string name="settings_theme_dialog_title">테마 선택</string>
+    <string name="settings_theme_light">라이트</string>
+    <string name="settings_theme_dark">다크</string>
+    <string name="settings_theme_system">시스템 따르기</string>
+
+    <!-- Dialog Buttons -->
+    <string name="settings_dialog_confirm">확인</string>
+    <string name="settings_dialog_close">닫기</string>
+
+    <!-- Language -->
+    <string name="settings_language_dialog_title">언어 선택</string>
+    <string name="settings_language_system">시스템 따르기</string>
+    <string name="settings_language_zh">中文</string>
+    <string name="settings_language_en">English</string>
+    <string name="settings_language_ja">日本語</string>
+    <string name="settings_language_ko">한국어</string>
+</resources>

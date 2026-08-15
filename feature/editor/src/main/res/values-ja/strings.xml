@@ -1,0 +1,369 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources xmlns:tools="http://schemas.android.com/tools">
+    <!-- Common -->
+    <string name="editor_cancel">キャンセル</string>
+    <string name="editor_close">閉じる</string>
+    <string name="editor_confirm">確認</string>
+    <string name="editor_back">戻る</string>
+
+    <!-- Dialog: Unsaved changes -->
+    <string name="editor_unsaved_changes">未保存の変更</string>
+    <string name="editor_saving_file">ファイルを保存中です…</string>
+    <string name="editor_unsaved_exit_message">ファイルは変更されましたが保存されていません。終了しますか？</string>
+    <string name="editor_wait_save">保存待機中</string>
+    <string name="editor_discard_changes">変更を破棄</string>
+
+    <!-- Dialog: Go to line -->
+    <string name="editor_go_to_line">行に移動</string>
+    <string name="editor_line_number_range">行番号 (1-%1$d)</string>
+    <string name="editor_enter_line_number">行番号を入力してください</string>
+    <string name="editor_enter_valid_line">有効な行番号を入力してください</string>
+    <string name="editor_out_of_range">範囲外、ドキュメントは%1$d行です</string>
+    <string name="editor_go">移動</string>
+
+    <!-- Search / Replace -->
+    <string name="editor_find">検索</string>
+    <string name="editor_find_content">検索内容</string>
+    <string name="editor_regex">.*</string>
+    <string name="editor_match_case">Aa</string>
+    <string name="editor_whole_word">W</string>
+    <string name="editor_replace">置換</string>
+    <string name="editor_replace_with">置換後</string>
+    <string name="editor_replace_all">すべて置換</string>
+    <string name="editor_search">検索</string>
+    <string name="editor_search_content">検索内容</string>
+    <string name="editor_no_match_found">一致する結果が見つかりません</string>
+    <string name="editor_line_snippet">行%1$s: %2$s</string>
+
+    <!-- Snippet -->
+    <string name="editor_save_as_snippet">スニペットとして保存</string>
+    <string name="editor_snippet_title">タイトル</string>
+    <string name="editor_snippet_content">コード内容</string>
+    <string name="editor_snippet_category">カテゴリ</string>
+    <string name="editor_uncategorized">未分類</string>
+    <string name="editor_insert_snippet">スニペットを挿入</string>
+    <string name="editor_no_snippets">保存されたスニペットはありません</string>
+
+    <!-- Format action content descriptions -->
+    <string name="editor_action_bold">太字</string>
+    <string name="editor_action_italic">斜体</string>
+    <string name="editor_action_strikethrough">取り消し線</string>
+    <string name="editor_action_highlight">ハイライト</string>
+    <string name="editor_action_underline">下線</string>
+    <string name="editor_action_inline_code">インラインコード</string>
+    <string name="editor_action_inline_formula">インライン数式</string>
+    <string name="editor_action_heading_1">見出し1</string>
+    <string name="editor_action_heading_2">見出し2</string>
+    <string name="editor_action_heading_3">見出し3</string>
+    <string name="editor_action_unordered_list">順序なしリスト</string>
+    <string name="editor_action_ordered_list">順序付きリスト</string>
+    <string name="editor_action_task_list">タスクリスト</string>
+    <string name="editor_action_toggle_list">リストタイプ切替</string>
+    <string name="editor_action_link">リンク</string>
+    <string name="editor_action_image_link">画像リンク</string>
+    <string name="editor_action_insert_image">画像を挿入</string>
+    <string name="editor_action_code_block">コードブロック</string>
+    <string name="editor_action_table">テーブル</string>
+    <string name="editor_action_math_formula">数式</string>
+    <string name="editor_action_blockquote">引用</string>
+    <string name="editor_action_horizontal_rule">水平線</string>
+
+    <!-- Template insertion strings (inserted into document) -->
+    <string name="editor_tpl_bold">太字テキスト</string>
+    <string name="editor_tpl_italic">斜体テキスト</string>
+    <string name="editor_tpl_strikethrough">取り消しテキスト</string>
+    <string name="editor_tpl_highlight">ハイライトテキスト</string>
+    <string name="editor_tpl_underline">下線</string>
+    <string name="editor_tpl_code">コード</string>
+    <string name="editor_tpl_formula">数式</string>
+    <string name="editor_tpl_link">[リンクテキスト](url)</string>
+    <string name="editor_tpl_image">![画像の説明](画像パス)</string>
+    <string name="editor_tpl_code_block">```\nコード\n```</string>
+    <string name="editor_tpl_table">| 列1 | 列2 | 列3 |\n| --- | --- | --- |\n| 内容 | 内容 | 内容 |</string>
+    <string name="editor_tpl_math">$$\n数式\n$$</string>
+    <string name="editor_tpl_superscript">上付きテキスト</string>
+    <string name="editor_tpl_subscript">下付きテキスト</string>
+    <string name="editor_tpl_mermaid" tools:ignore="TypographyDashes">```mermaid
+graph TD
+    A[開始] --> B[終了]
+```</string>
+    <string name="editor_tpl_image_from_picker">![画像](%1$s)</string>
+    <string name="editor_image_alt_text">画像</string>
+
+    <!-- Editor UI labels -->
+    <string name="editor_title">エディタ</string>
+    <string name="editor_document_mode">ドキュメントモード</string>
+    <string name="editor_code_mode">コードモード</string>
+    <string name="editor_mode_switch">モード切替</string>
+    <string name="editor_preview">プレビュー</string>
+    <string name="editor_split_view">分割表示</string>
+    <string name="editor_edit">編集</string>
+    <string name="editor_outline">アウトライン</string>
+    <string name="editor_focus_mode">集中モード</string>
+    <string name="editor_exit_focus">集中モード解除</string>
+    <string name="editor_typewriter_mode">タイプライターモード</string>
+    <string name="editor_exit_typewriter">タイプライターモード解除</string>
+    <string name="editor_undo">元に戻す</string>
+    <string name="editor_redo">やり直す</string>
+    <string name="editor_save">保存</string>
+    <string name="editor_more_actions">その他の操作</string>
+<string name="editor_action_open_terminal">ターミナル</string>
+    <string name="editor_more">その他</string>
+    <string name="editor_quick_settings">クイック設定</string>
+    <string name="editor_cross_file_search">ファイル横断検索</string>
+    <string name="editor_reopen_with_encoding">エンコーディングを選択して再開</string>
+    <string name="editor_save_with_encoding">エンコーディングを指定して保存</string>
+    <string name="editor_export_html">HTMLとしてエクスポート</string>
+    <string name="editor_export_pdf">PDFとしてエクスポート</string>
+    <string name="editor_export_plaintext">プレーンテキストとしてエクスポート</string>
+    <string name="editor_export_image">画像としてエクスポート</string>
+    <string name="editor_export_zip">ZIPとしてエクスポート</string>
+    <string name="editor_preview_theme">プレビューテーマ</string>
+    <string name="editor_edit_custom_style">カスタムスタイルを編集</string>
+    <string name="editor_export_file">ファイルをエクスポート</string>
+    <string name="editor_delete_file">ファイルを削除</string>
+    <string name="editor_load_failed">読み込み失敗</string>
+
+<!-- Status bar -->
+<string name="editor_read_only">読み取り専用</string>
+<string name="editor_modified">変更済み</string>
+<string name="editor_word_count">%1$d語</string>
+<string name="editor_char_count">%1$d文字</string>
+<string name="editor_line_count">%1$d行</string>
+<string name="editor_status_indent_spaces">Spaces: %1$d</string>
+<string name="editor_status_indent_tab">Tab: %1$d</string>
+<string name="editor_status_selection_count">%1$d 選択</string>
+<string name="editor_status_editable">編集</string>
+<string name="editor_status_language_switch">言語モード：%1$s に切り替えました</string>
+
+<!-- Search panel tabs -->
+<string name="editor_search_tab_find">検索</string>
+<string name="editor_search_tab_replace">置換</string>
+<string name="editor_search_tab_goto_line">行にジャンプ</string>
+
+<!-- Menu items with subtitles -->
+<string name="editor_menu_search">検索</string>
+<string name="editor_menu_undo_desc">最後の編集操作を取り消す</string>
+<string name="editor_menu_redo_desc">取り消した操作をやり直す</string>
+<string name="editor_menu_search_desc">検索 / 置換 / 行にジャンプ パネルを開く</string>
+<string name="editor_menu_terminal_desc">組み込みターミナルを開く</string>
+
+    <!-- Quick settings -->
+    <string name="editor_font_size">フォントサイズ: %1$dsp</string>
+    <string name="editor_word_wrap">自動改行</string>
+    <string name="editor_show_line_numbers">行番号を表示</string>
+    <string name="editor_tab_width">タブ幅</string>
+    <string name="editor_quick_settings_title">クイック設定</string>
+
+    <!-- Export dialog -->
+    <string name="editor_export_as_pdf">PDFとしてエクスポート</string>
+    <string name="editor_export_as_html">HTMLとしてエクスポート</string>
+    <string name="editor_page_size">ページサイズ</string>
+    <string name="editor_include_toc">目次を含む</string>
+    <string name="editor_export">エクスポート</string>
+
+    <!-- Delete dialog -->
+    <string name="editor_delete_confirm_message">ファイル「%1$s」を削除してよろしいですか？この操作は取り消せません。</string>
+    <string name="editor_delete">削除</string>
+
+    <!-- Read-only banner -->
+    <string name="editor_readonly_banner">これは内蔵サンプルファイルで、閲覧のみ可能です。\n編集するには、戻って下部の「ファイルブラウザ」からデバイスのファイルを選択するか、サンプル内容をコピーして新しいファイルを作成してください。</string>
+    <string name="editor_close_hint">ヒントを閉じる</string>
+
+    <!-- Toast messages -->
+    <string name="editor_export_success">エクスポート成功</string>
+    <string name="editor_export_failed">エクスポート失敗: %1$s</string>
+    <string name="editor_saving_please_wait">保存中です…</string>
+    <string name="editor_save_success">保存しました</string>
+    <string name="editor_save_failed">保存失敗: %1$s</string>
+
+    <!-- Preview -->
+    <string name="editor_preview_truncated">*内容が長すぎるため、プレビューは切り詰められています。完全な内容は編集モードでご覧ください。*</string>
+
+    <!-- Binary file -->
+    <string name="editor_cannot_display_file">このファイルは表示できません</string>
+    <string name="editor_binary_file_message">このファイルはバイナリ形式で、テキストとして表示できません。</string>
+    <string name="editor_file_size">ファイルサイズ: %1$s</string>
+
+    <!-- Encoding -->
+    <string name="editor_encoding_select">エンコーディング選択</string>
+    <string name="editor_select_encoding">エンコーディングを選択</string>
+    <string name="editor_encoding_failed_message">ファイルのエンコーディング検出に失敗したか、手動指定が必要です。正しいエンコーディングを選択してファイルを再び開いてください。</string>
+    <string name="editor_available_encodings">利用可能なエンコーディング：</string>
+
+    <!-- Tab -->
+    <string name="editor_close_tab">タブを閉じる</string>
+    <string name="editor_unsaved_tab_message">\"%1$s\"は変更されましたが保存されていません。閉じますか？</string>
+    <string name="editor_file">ファイル</string>
+
+    <!-- Outline -->
+    <string name="editor_no_headings">見出しが見つかりません</string>
+
+    <!-- Diff -->
+    <string name="editor_diff_count">%1$d箇所の差分</string>
+    <string name="editor_diff_position">%1$d/%2$d箇所の差分</string>
+    <string name="editor_prev_diff">前の差分</string>
+    <string name="editor_next_diff">次の差分</string>
+    <string name="editor_original">元の</string>
+    <string name="editor_modified_tab">変更</string>
+    <string name="editor_no_file_uri">ファイルURIが提供されていません</string>
+    <string name="editor_load_file_failed">ファイルの読み込みに失敗しました</string>
+    <string name="editor_error_permission_expired">ファイルのアクセス権限が失効しました。ファイルブラウザから再度選択してください。</string>
+    <string name="editor_error_external_file_not_found">ファイルが存在しないか、移動または削除されています。</string>
+
+    <!-- Media viewer -->
+    <string name="editor_unsupported_media">サポートされていないメディアタイプ</string>
+    <string name="editor_cannot_decode_image">画像をデコードできません</string>
+    <string name="editor_image_load_failed">画像の読み込みに失敗</string>
+    <string name="editor_image_preview">画像プレビュー</string>
+    <string name="editor_player_error">プレーヤーエラー: what=%1$d, extra=%2$d</string>
+    <string name="editor_cannot_load_audio">音声を読み込めません</string>
+    <string name="editor_audio_file">オーディオファイル</string>
+    <string name="editor_audio_load_failed">音声の読み込みに失敗</string>
+    <string name="editor_pause">一時停止</string>
+    <string name="editor_play">再生</string>
+    <string name="editor_video_load_failed">動画の読み込みに失敗</string>
+    <string name="editor_cannot_load_video">動画を読み込めません</string>
+
+    <!-- PDF -->
+    <string name="editor_cannot_load_pdf">PDFファイルを読み込めません</string>
+
+    <!-- Scroll -->
+    <string name="editor_scroll_to_top">トップに戻る</string>
+
+    <!-- File size warnings -->
+    <string name="editor_file_too_large_readonly">ファイルが大きすぎます（%1$s）、読み取り専用モードが強制され、編集が不安定になる場合があります</string>
+    <string name="editor_file_large_slow">ファイルが大きいです（%1$s）、開くや編集が遅くなる場合があります</string>
+    <string name="editor_large_file_preview_hint">大きなファイルはプレーンテキスト編集モードです。プレビューに切り替えてレンダリング結果を確認できます</string>
+
+    <!-- Theme names -->
+    <string name="editor_theme_default">デフォルト</string>
+    <string name="editor_theme_github">GitHub</string>
+    <string name="editor_theme_newsprint">ニュースプリント</string>
+    <string name="editor_theme_night">ナイト</string>
+    <string name="editor_theme_pixy">Pixy</string>
+    <string name="editor_theme_academic">アカデミック</string>
+
+    <!-- Editor Input Validation -->
+    <string name="editor_search_too_long">検索内容が長すぎます（最大 1000 文字）</string>
+    <string name="editor_replace_too_long">置換テキストが長すぎます（最大 5000 文字）</string>
+    <string name="editor_cross_search_too_long">検索内容が長すぎます（最大 500 文字）</string>
+    <string name="editor_snippet_title_too_long">タイトルが長すぎます（最大 200 文字）</string>
+    <string name="editor_snippet_content_too_long">内容が長すぎます（最大 100000 文字）</string>
+    <string name="editor_snippet_category_too_long">カテゴリが長すぎます（最大 100 文字）</string>
+
+    <!-- Command Palette -->
+    <string name="editor_command_palette">コマンドパレット</string>
+    <string name="editor_search_commands">コマンドを検索…</string>
+    <string name="editor_command_palette_shortcut">Ctrl+Shift+P</string>
+    <string name="editor_command_palette_close_tab">タブを閉じる</string>
+    <string name="editor_command_palette_close_all_tabs">すべてのタブを閉じる</string>
+    <string name="editor_command_palette_toggle_minimap">ミニマップ切替</string>
+    <string name="editor_command_palette_goto_last_edit">最後の編集位置に移動</string>
+    <string name="editor_select_all">すべて選択</string>
+    <string name="editor_toggle_preview">プレビュー切替</string>
+    <string name="editor_next_tab">次のタブ</string>
+    <string name="editor_previous_tab">前のタブ</string>
+    <string name="editor_diff">差分</string>
+    <string name="editor_toggle_theme">テーマ切替</string>
+    <string name="editor_category_edit">編集</string>
+    <string name="editor_category_view">表示</string>
+    <string name="editor_category_navigation">ナビゲーション</string>
+    <string name="editor_category_tools">ツール</string>
+    <string name="editor_category_help">ヘルプ</string>
+    <string name="editor_command_markdown_cheat_sheet">Markdown チートシート</string>
+    <string name="editor_treesitter_highlight">TreeSitter インクリメンタルハイライト</string>
+    <string name="editor_plugin_system">プラグインシステム</string>
+
+    <!-- Markdown Cheat Sheet -->
+    <string name="editor_markdown_cheat_sheet">Markdown チートシート</string>
+    <string name="editor_cheatsheet_headers">見出し</string>
+    <string name="editor_cheatsheet_heading1">見出し1</string>
+    <string name="editor_cheatsheet_heading2">見出し2</string>
+    <string name="editor_cheatsheet_heading3">見出し3</string>
+    <string name="editor_cheatsheet_emphasis">強調</string>
+    <string name="editor_cheatsheet_bold">太字</string>
+    <string name="editor_cheatsheet_italic">斜体</string>
+    <string name="editor_cheatsheet_strikethrough">取り消し線</string>
+    <string name="editor_cheatsheet_links_images">リンクと画像</string>
+    <string name="editor_cheatsheet_link">ハイパーリンク</string>
+    <string name="editor_cheatsheet_image">画像</string>
+    <string name="editor_cheatsheet_code">コード</string>
+    <string name="editor_cheatsheet_inline_code">インラインコード</string>
+    <string name="editor_cheatsheet_code_block">コードブロック</string>
+    <string name="editor_cheatsheet_lists">リスト</string>
+    <string name="editor_cheatsheet_unordered">順序なしリスト</string>
+    <string name="editor_cheatsheet_ordered">順序付きリスト</string>
+    <string name="editor_cheatsheet_task">タスクリスト</string>
+    <string name="editor_cheatsheet_blockquotes">引用</string>
+    <string name="editor_cheatsheet_blockquote_desc">ブロック引用</string>
+    <string name="editor_cheatsheet_tables">テーブル</string>
+    <string name="editor_cheatsheet_table_desc">テーブル</string>
+    <string name="editor_cheatsheet_math">数式</string>
+    <string name="editor_cheatsheet_inline_math">インライン数式</string>
+    <string name="editor_cheatsheet_display_math">ブロック数式</string>
+    <string name="editor_cheatsheet_mermaid">図表</string>
+    <string name="editor_cheatsheet_mermaid_desc">Mermaid ダイアグラム</string>
+
+    <!-- Security -->
+    <string name="security_operation_restricted">セキュリティ検証に失敗しました。この操作は一時的に利用できません。</string>
+
+    <!-- Symbol Panel (Ch1 Item 19, P3) -->
+    <string name="editor_symbol_panel_title">記号パネル</string>
+    <string name="editor_symbol_panel_common">よく使う</string>
+    <string name="editor_symbol_panel_cjk">CJK</string>
+    <string name="editor_symbol_panel_math">数学</string>
+    <string name="editor_symbol_panel_arrows">矢印</string>
+    <string name="editor_command_palette_toggle_symbol_panel">記号パネル切替</string>
+
+    <!-- Rich Editor (Ch6#2 P1: native Compose WYSIWYG) -->
+    <string name="editor_rich_editor_bold">太字</string>
+    <string name="editor_rich_editor_italic">斜体</string>
+    <string name="editor_rich_editor_strikethrough">取り消し線</string>
+    <string name="editor_rich_editor_code">コード</string>
+    <string name="editor_rich_editor_unordered_list">箇条書き</string>
+    <string name="editor_rich_editor_ordered_list">番号付きリスト</string>
+    <string name="editor_rich_editor_quote">引用</string>
+    <string name="editor_rich_editor_link">リンク</string>
+    <string name="editor_rich_editor_mode">リッチテキスト</string>
+    <string name="editor_action_code_block_lang">コードブロック（言語選択）</string>
+    <string name="editor_action_insert_image_dialog">画像を挿入</string>
+    <string name="editor_action_insert_link_dialog">リンクを挿入</string>
+    <string name="editor_action_insert_table">表を挿入</string>
+    <string name="editor_action_mermaid">Mermaid 図</string>
+    <string name="editor_action_new_file">新規ファイル</string>
+    <string name="editor_action_open_file">ファイルを開く</string>
+    <string name="editor_action_snippets">コードスニペット</string>
+    <string name="editor_action_subscript">下付き文字</string>
+    <string name="editor_action_superscript">上付き文字</string>
+    <string name="editor_code_block_language">言語の選択</string>
+    <string name="editor_code_block_language_hint">例：python, javascript</string>
+    <string name="editor_convert_html_to_markdown">Markdownに変換</string>
+    <string name="editor_highlight_disabled_large_file">構文ハイライトは無効です（1MB超のファイル）。プレーンテキストモードで表示します</string>
+    <string name="editor_init_failed">エディタの初期化に失敗しました</string>
+    <string name="editor_init_timeout">エディタの初期化がタイムアウトしました。再試行してください</string>
+    <string name="editor_insert_image_alt">代替テキスト</string>
+    <string name="editor_insert_image_alt_hint">画像の説明を入力してください</string>
+    <string name="editor_insert_image_title">画像を挿入</string>
+    <string name="editor_insert_image_url">画像URL</string>
+    <string name="editor_insert_image_url_hint">https://example.com/image.png</string>
+    <string name="editor_insert_link_text">リンクテキスト</string>
+    <string name="editor_insert_link_text_hint">リンクテキストを入力してください</string>
+    <string name="editor_insert_link_title">リンクを挿入</string>
+    <string name="editor_insert_link_url">リンクURL</string>
+    <string name="editor_insert_link_url_hint">https://example.com</string>
+    <string name="editor_insert_table_cols">列数</string>
+    <string name="editor_insert_table_cols_hint">3</string>
+    <string name="editor_insert_table_rows">行数</string>
+    <string name="editor_insert_table_rows_hint">3</string>
+    <string name="editor_insert_table_title">表を挿入</string>
+    <string name="editor_retry">再試行</string>
+    <string name="editor_sticky_scroll">スティッキースクロール</string>
+    <string name="editor_tab_close_modified_message">「%1$s」は変更されていますが保存されていません。閉じてもよろしいですか？</string>
+    <string name="editor_tab_file">ファイル</string>
+    <string name="editor_toolbar_more">その他</string>
+    <!-- Diff / Encoding dialogs -->
+    <string name="editor_diff_original">元の</string>
+    <string name="editor_diff_modified">変更後</string>
+    <string name="editor_encoding_select_title">エンコーディングを選択</string>
+</resources>

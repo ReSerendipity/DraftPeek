@@ -1,0 +1,28 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="core_ui_app_name">DraftPeek</string>
+
+    <!-- Font option names -->
+    <string name="font_jetbrains_mono">JetBrains Mono</string>
+    <string name="font_system_mono">System Monospace</string>
+    <string name="font_inter">Inter</string>
+    <string name="font_noto_sans_cjk">Noto Sans CJK</string>
+    <string name="font_microsoft_yahei">Microsoft YaHei</string>
+    <string name="font_pingfang_sc">PingFang SC</string>
+    <string name="font_simsun">SimSun (Songti)</string>
+    <string name="font_kaiti">KaiTi</string>
+    <string name="font_system_sans">System Sans-Serif</string>
+    <string name="font_system_serif">System Serif</string>
+
+    <!-- Font option descriptions -->
+    <string name="font_jetbrains_mono_desc">Programming font with ligatures, excellent code readability</string>
+    <string name="font_system_mono_desc">Default system monospace, best compatibility and rendering performance</string>
+    <string name="font_inter_desc">Modern sans-serif for UI, clean and legible</string>
+    <string name="font_noto_sans_cjk_desc">Google\'s open-source CJK font, ideal for screen reading</string>
+    <string name="font_microsoft_yahei_desc">Windows default Chinese font, clear and sharp rendering</string>
+    <string name="font_pingfang_sc_desc">Apple system font, elegant and comfortable reading</string>
+    <string name="font_simsun_desc">Traditional serif font, suitable for long-form reading</string>
+    <string name="font_kaiti_desc">Calligraphic style, artistic and elegant</string>
+    <string name="font_system_sans_desc">Default system sans-serif, best compatibility</string>
+    <string name="font_system_serif_desc">Default system serif, formal and classic</string>
+</resources>

@@ -1,0 +1,139 @@
+{
+  "summary": {
+    "projectName": "DraftPeek",
+    "locale": "zh-CN",
+    "modelId": "agent-work-loop-v4",
+    "reportContractVersion": 25,
+    "overview": "项目仅有一份详尽的根 AGENTS.md 作为 agent 指引，但其中存在两处与项目实态直接矛盾的陈旧内容（谎称无 CI、遗漏 feature/terminal 模块），会误导 agent 决策；当前工作树存在 311 文件 / 28158 行的未提交巨量变更，其改动的错误契约与 UI 表面缺乏配套校验；会话证据仅 1 个自我分析会话，无法判定重复工作或学习闭环。",
+    "aiAgentPractice": {
+      "inspectedSurfaces": [
+        "Rules",
+        "Workflows"
+      ],
+      "coverageRows": [
+        {
+          "surface": "Rules",
+          "scopes": [
+            "Project"
+          ],
+          "count": 1,
+          "paths": [
+            "AGENTS.md"
+          ]
+        },
+        {
+          "surface": "Workflows",
+          "scopes": [
+            "Project"
+          ],
+          "count": 1,
+          "paths": [
+            ".github/workflows/android.yml"
+          ]
+        },
+        {
+          "surface": "Skills",
+          "scopes": [
+            "Project"
+          ],
+          "count": 0,
+          "paths": []
+        },
+        {
+          "surface": "Custom Agents",
+          "scopes": [
+            "Project"
+          ],
+          "count": 0
+        }
+      ]
+    },
+    "assignmentSummaries": [],
+    "dimensions": [
+      {
+        "id": "task-understanding",
+        "label": "任务理解",
+        "score": 56,
+        "summary": "AGENTS.md 内容丰富，但存在两处与项目实态矛盾的陈旧上下文，会误导 agent；任务意图与范围因缺乏可复核的任务证据保持未观测。",
+        "findingRefs": [
+          "agents-md-false-no-ci-claim",
+          "agents-md-missing-terminal-module"
+        ]
+      },
+      {
+        "id": "controlled-execution",
+        "label": "可控执行",
+        "score": 62,
+        "summary": "构建/运行命令与 CI 路径均有文档与清单（Present），但无任务证据证明其被实际使用，权限边界未观测。",
+        "findingRefs": []
+      },
+      {
+        "id": "change-validation",
+        "label": "改动验证",
+        "score": 52,
+        "summary": "CI 覆盖 lint + debug 构建 + 单元测试，但当前巨量变更的错误契约与 UI 表面缺乏配套校验，release 构建未在 CI 验证。",
+        "findingRefs": [
+          "large-change-set-missing-companion-checks"
+        ]
+      },
+      {
+        "id": "reliable-delivery",
+        "label": "可靠交付",
+        "score": 55,
+        "summary": "存在基于 push/PR 的 CI 门禁，但交付验收、发布/部署与回滚均因缺乏任务证据而未观测。",
+        "findingRefs": []
+      },
+      {
+        "id": "learning-capture",
+        "label": "经验沉淀",
+        "score": 40,
+        "summary": "30 天窗口内仅 1 个自我分析会话、0 个任务片段，无法判定重复工作或评估可复用能力覆盖，学习闭环证据不可裁决。",
+        "findingRefs": []
+      }
+    ]
+  },
+  "findings": [
+    {
+      "id": "agents-md-false-no-ci-claim",
+      "title": "AGENTS.md 声称项目无 CI，与实际存在的 CI 工作流矛盾",
+      "severity": "Medium",
+      "reason": "事实：AGENTS.md 第 511 行「Known Gotchas」明确写「No CI workflow files exist yet — no .github/workflows/」，但 .github/workflows/android.yml（111 行，含 lint、assembleDebug、单元测试、artifact 上传，触发于 push/PR 到 main/develop）确实存在。推断：信任该陈述的 agent 会据错误前提行动——例如误答「项目无 CI」、在新增模块时不更新 CI，或重复搭建已存在的工作流。归属：根 AGENTS.md 维护者（唯一 project 级 rules 资产）。置信度高：两份均为 project 级可验证资产，内容直接冲突。",
+      "expectedOutput": [
+        "AGENTS.md 中不再存在否认 CI 存在的陈述，且 CI 描述与 android.yml 的实际覆盖范围一致。"
+      ],
+      "expectedArtifact": "AGENTS.md",
+      "aiFixPrompt": "/better-harness fix this issue\n\n修正 AGENTS.md「Known Gotchas」中关于 CI 的陈旧陈述：删除或改写「No CI workflow files exist yet」，据 .github/workflows/android.yml 的实际内容补充 CI 概要（触发分支 main/develop、覆盖 lint + assembleDebug + 单元测试、artifact 保留 7 天）及其局限（无 release 构建验证、无 instrumentation 测试）。仅修改文档，不改动 CI 配置。\n\n## Validation\n\n- 在 AGENTS.md 中检索「No CI」「.github/workflows」，确认不再有否认 CI 存在的表述\n- 对比修订后的描述与 .github/workflows/android.yml 的 jobs/steps，确认一致",
+      "dimensionRefs": [
+        "task-understanding"
+      ]
+    },
+    {
+      "id": "agents-md-missing-terminal-module",
+      "title": "feature/terminal 模块完全未记录在 AGENTS.md 模块地图中",
+      "severity": "Medium",
+      "reason": "事实：settings.gradle.kts 与文件系统均包含 :feature:terminal 模块（含 emulator/SecurityValidator、CommandExecutor、TerminalService 等源码），但在 AGENTS.md 全文检索「terminal」为零命中——Module Structure 图、Key File Map、Dependency rules 均未提及。推断：以 AGENTS.md 为路由依据的 agent 不会意识到该模块存在，在跨模块变更（如新增 core 公共 API）时会遗漏其消费者，或在架构问答中漏报模块。归属：根 AGENTS.md 维护者。置信度高：模块存在与文档缺失均已在 project scope 直接验证。",
+      "expectedOutput": [
+        "AGENTS.md 的模块地图、文件地图与依赖规则完整覆盖 feature/terminal，与 settings.gradle.kts 声明的模块集合一致。"
+      ],
+      "expectedArtifact": "AGENTS.md",
+      "aiFixPrompt": "/better-harness fix this issue\n\n在 AGENTS.md 中补齐 feature/terminal 模块：在 Module Structure 图与 feature 依赖说明中加入 terminal，在 Key File Map 增加 feature/terminal 子章节（service/emulator/viewmodel/ui 关键文件及职责），并在 Dependency rules 中说明其依赖关系。以 settings.gradle.kts 的 include 列表和 feature/terminal 实际目录为准，仅修改文档。\n\n## Validation\n\n- 在 AGENTS.md 检索「terminal」应有命中，且覆盖 Module Structure、Key File Map、Dependency rules 三处\n- 对比 settings.gradle.kts 的 include 模块列表与 AGENTS.md Module Structure，确认无模块遗漏",
+      "dimensionRefs": [
+        "task-understanding"
+      ]
+    },
+    {
+      "id": "large-change-set-missing-companion-checks",
+      "title": "巨量未提交变更改动错误契约与 UI 表面却缺乏配套校验",
+      "severity": "Medium",
+      "reason": "事实：core-change-watch 证据包报告工作树有 311 个变更文件 / 28158 变更行（diffSeverity=critical），companionHits 仅 9；changeDrift 检测到 2 个变更表面缺失配套证据（error-contract:1、ui-story-snapshot:1）。CI 覆盖 lint + assembleDebug + 单元测试，但项目共 320 个 Kotlin 源文件仅 23 个测试文件，且 release 构建不在 CI 验证。推断：面对这一不可分割的巨型变更，agent 无法将改动的错误契约/UI 行为映射到能直接覆盖其行为的最小校验，回归定位退化为猜测。归属：变更提交者 / 变更表面的配套校验。置信度：变更规模与 changeDrift 为确定性静态证据；测试是否实际通过为 UNVERIFIED。",
+      "expectedOutput": [
+        "被 changeDrift 标记的错误契约与 UI 变更具备可运行且通过的配套校验，且变更被拆分为可独立审查的原子提交。"
+      ],
+      "expectedArtifact": "Tests",
+      "aiFixPrompt": "/better-harness fix this issue\n\n为当前变更中被 changeDrift 标记的错误契约与 UI 表面补齐最小配套校验，并将巨型工作树拆分为聚焦的原子提交：\n1. 运行 git status 确认 staged/unstaged 范围；\n2. 对 changeDrift 标记的 error-contract 变更补充/更新对应单元测试，对 ui-story-snapshot 变更补充对应的快照或 UI 测试；\n3. 按 Conventional Commits 将无关变更拆分为独立提交。\n仅在本地校验，不执行 push、release 或其他外部写操作（如需推送须单独授权）。\n\n## Validation\n\n- 对被标记的变更文件运行其模块的 `./gradlew :<module>:test`，确认新增校验通过\n- 重新运行 `core-change-watch evidence-pack` 确认 companionHits 上升、changeDrift findingCount 下降",
+      "dimensionRefs": [
+        "change-validation"
+      ]
+    }
+  ]
+}

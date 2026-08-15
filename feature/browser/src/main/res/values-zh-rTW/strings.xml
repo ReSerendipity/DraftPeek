@@ -1,0 +1,293 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!-- BrowseHistoryScreen -->
+    <string name="browser_title_history">歷史記錄</string>
+    <string name="browser_dialog_clear_history_title">清除瀏覽記錄</string>
+    <string name="browser_dialog_clear_history_message">確定清除所有最近瀏覽記錄？此操作不會刪除檔案本身，收藏的記錄將保留。</string>
+    <string name="browser_action_clear">清除</string>
+    <string name="browser_action_cancel">取消</string>
+    <string name="browser_action_unfavorite">取消收藏</string>
+    <string name="browser_action_favorite">收藏</string>
+    <string name="browser_action_select">選擇</string>
+    <string name="browser_action_remove_from_list">從清單移除</string>
+    <string name="browser_action_clear_history">清除歷史</string>
+    <string name="browser_empty_no_history">暫無瀏覽記錄</string>
+    <string name="browser_empty_history_title">暫無歷史</string>
+    <string name="browser_empty_history_subtitle">開啟的檔案將顯示在這裡</string>
+    <string name="browser_section_recent_files">最近檔案</string>
+    <string name="browser_section_favorites">收藏</string>
+    <string name="browser_section_today">今天</string>
+    <string name="browser_section_yesterday">昨天</string>
+    <string name="browser_section_this_week">本週稍早</string>
+    <string name="browser_section_earlier">更早</string>
+    <string name="browser_filter_today">今天</string>
+    <string name="browser_filter_yesterday">昨天</string>
+    <string name="browser_filter_this_week">本週</string>
+    <string name="browser_filter_this_month">本月</string>
+    <string name="browser_content_desc_file">檔案</string>
+    <string name="browser_content_desc_clear_history">清除瀏覽記錄</string>
+
+    <!-- FileBrowserScreen -->
+    <string name="browser_page_title">檔案</string>
+    <string name="browser_title_file_browser">檔案瀏覽</string>
+    <string name="browser_action_browse_history">瀏覽歷史</string>
+    <string name="browser_action_sample_files">範例檔案</string>
+    <string name="browser_action_change_directory">更換目錄</string>
+    <string name="browser_action_refresh">重新整理</string>
+    <string name="browser_action_sort_by">排序方式</string>
+    <string name="browser_sort_name_asc">按名稱 (A-Z)</string>
+    <string name="browser_sort_name_desc">按名稱 (Z-A)</string>
+    <string name="browser_sort_size_desc">按大小 (從大到小)</string>
+    <string name="browser_sort_size_asc">按大小 (從小到大)</string>
+    <string name="browser_sort_modified_desc">按修改時間 (最新)</string>
+    <string name="browser_sort_modified_asc">按修改時間 (最舊)</string>
+    <string name="browser_sort_type">按類型</string>
+    <string name="browser_action_cancel_compare">取消比較</string>
+    <string name="browser_action_compare_files">比較檔案</string>
+    <string name="browser_action_new">新建</string>
+    <string name="browser_action_close">關閉</string>
+    <string name="browser_action_new_file">新建檔案</string>
+    <string name="browser_action_new_snippet">新建程式碼片段</string>
+    <string name="browser_hint_select_file_preview">選擇檔案以預覽</string>
+    <string name="browser_label_size">大小</string>
+    <string name="browser_label_modified_time">修改時間</string>
+    <string name="browser_label_type">類型</string>
+    <string name="browser_label_extension">副檔名</string>
+    <string name="browser_action_open_in_editor">在編輯器中開啟</string>
+    <string name="browser_action_drag_reorder">拖曳重新排序</string>
+    <string name="browser_import_multiple_success">成功匯入 %1$d 個檔案</string>
+    <string name="browser_import_multiple_failed">匯入失敗</string>
+    <string name="browser_import_multiple_partial">成功匯入 %1$d 個，%2$d 個失敗</string>
+    <string name="browser_hint_select_directory">選擇一個目錄開始瀏覽檔案</string>
+    <string name="browser_hint_or_browse_samples">或者先瀏覽內建的範例檔案（包含 Markdown 範例）</string>
+    <string name="browser_action_select_directory">選擇目錄</string>
+    <string name="browser_action_open_file">開啟檔案</string>
+    <string name="browser_action_open_folder">開啟資料夾</string>
+    <string name="browser_action_browse_samples">瀏覽範例檔案</string>
+    <string name="browser_search_hint">搜尋檔案…</string>
+    <string name="browser_search_hint_new">搜尋檔案…</string>
+    <string name="browser_filter_bookmarks">書籤</string>
+    <string name="browser_filter_recent">最近</string>
+    <string name="browser_filter_favorites">收藏</string>
+    <string name="browser_filter_code">程式碼</string>
+    <string name="browser_filter_documents">文件</string>
+    <string name="browser_filter_media">媒體</string>
+    <string name="browser_continue_editing">繼續編輯</string>
+    <string name="browser_new_file">新建檔案</string>
+    <string name="browser_open_file_label">開啟檔案</string>
+    <string name="browser_action_retry">重試</string>
+    <string name="browser_section_git_changes">Git 變更</string>
+    <string name="browser_changes_section">變更</string>
+    <string name="browser_folders_section">資料夾</string>
+    <string name="browser_files_section">檔案</string>
+    <string name="browser_empty_directory">空目錄</string>
+    <string name="browser_no_files_yet">暫無檔案</string>
+    <string name="browser_no_files_hint">點擊 + 建立第一個檔案</string>
+    <string name="browser_no_matching_files">未找到符合的檔案</string>
+    <string name="browser_open_from_device">從裝置開啟</string>
+    <string name="browser_open_from_device_desc">授權存取手機上的資料夾，即可從任意位置瀏覽和開啟程式碼檔案。</string>
+    <string name="browser_choose_folder">選擇資料夾</string>
+    <string name="browser_external_readonly_hint">外部檔案以唯讀模式開啟。點擊\"儲存\"可將副本匯入 DraftPeek 進行編輯。</string>
+    <string name="browser_content_desc_bookmarked">已加書籤</string>
+    <string name="browser_content_desc_read_only">唯讀</string>
+    <string name="browser_content_desc_folder">資料夾</string>
+    <string name="browser_content_desc_pinned">已釘選</string>
+    <string name="browser_content_desc_settings">設定</string>
+    <string name="browser_history_content_desc">歷史記錄</string>
+    <string name="browser_fab_new_file">新建檔案</string>
+    <string name="browser_fab_new_folder">新建資料夾</string>
+    <string name="browser_fab_import_file">匯入到內部</string>
+    <string name="browser_fab_open_file">開啟外部檔案</string>
+    <string name="browser_fab_terminal">終端機</string>
+    <string name="browser_fab_samples">範例檔案</string>
+    <string name="browser_action_snippets">程式碼片段</string>
+    <string name="browser_action_pin">釘選</string>
+    <string name="browser_action_unpin">取消釘選</string>
+    <string name="browser_action_bookmark">加入書籤</string>
+    <string name="browser_action_unbookmark">移除書籤</string>
+    <string name="browser_action_move_to">移動到…</string>
+    <string name="browser_action_multi_select">多選</string>
+    <string name="browser_action_open_terminal">在此開啟終端機</string>
+    <string name="browser_action_move">移動 (%d)</string>
+    <string name="browser_action_deselect_all">取消全選</string>
+    <string name="browser_dialog_new_folder_title">新建資料夾</string>
+    <string name="browser_hint_enter_folder_name">輸入資料夾名稱</string>
+    <string name="browser_dialog_move_to_title">移動到</string>
+    <string name="browser_move_to_internal">內部儲存</string>
+    <string name="browser_move_success">已移動 %d 個檔案</string>
+    <string name="browser_move_failed">移動失敗</string>
+    <string name="browser_folder_create_success">資料夾建立成功</string>
+    <string name="browser_folder_create_failed">資料夾建立失敗</string>
+    <string name="browser_error_folder_exists">資料夾已存在</string>
+    <string name="browser_error_folder_name_empty">資料夾名稱不能為空</string>
+    <string name="browser_bookmarks_section">書籤</string>
+    <string name="browser_git_status_added">新增</string>
+    <string name="browser_git_status_modified">已修改</string>
+    <string name="browser_git_status_deleted">已刪除</string>
+    <string name="browser_git_status_untracked">未追蹤</string>
+    <string name="browser_git_status_unmodified">未修改</string>
+    <string name="browser_git_status_conflicted">衝突</string>
+
+    <!-- FileBrowserViewModel -->
+    <string name="browser_error_load_failed">無法載入目錄: %s</string>
+    <string name="browser_error_not_directory">不是有效的目錄</string>
+    <string name="browser_internal_storage">內部儲存</string>
+    <string name="browser_sd_card">SD 卡 (%s)</string>
+    <string name="browser_usb_storage">USB 儲存</string>
+    <string name="browser_storage">儲存</string>
+
+    <!-- SnippetScreen -->
+    <string name="browser_snippet_export_success">匯出成功</string>
+    <string name="browser_snippet_export_failed">匯出失敗: %s</string>
+    <string name="browser_file_create_success">檔案建立成功</string>
+    <string name="browser_file_create_failed">建立失敗: %s</string>
+    <string name="browser_dialog_delete_snippet_title">刪除程式碼片段</string>
+    <string name="browser_dialog_delete_snippet_message">確定要刪除「%s」嗎？</string>
+    <string name="browser_action_delete">刪除</string>
+    <string name="browser_hint_search_snippets">搜尋程式碼片段…</string>
+    <string name="browser_content_desc_search">搜尋</string>
+    <string name="browser_action_add_snippet">加入程式碼片段</string>
+    <string name="browser_tab_snippets">程式碼片段</string>
+    <string name="browser_tab_new_file">新建檔案</string>
+    <string name="browser_filter_all">全部</string>
+    <string name="browser_empty_no_matching_snippets">未找到符合的程式碼片段</string>
+    <string name="browser_snippet_guide_title">程式碼片段</string>
+    <string name="browser_snippet_guide_description">程式碼片段是儲存在本地資料庫中的常用程式碼區塊，方便快速搜尋和複用。</string>
+    <string name="browser_snippet_guide_create_hint">點擊右下角 + 按鈕建立新片段</string>
+    <string name="browser_snippet_guide_save_hint">在編輯器中點擊更多 → 儲存為程式碼片段，快速儲存目前內容</string>
+    <string name="browser_action_got_it">知道了</string>
+    <string name="browser_title_new_file_mode">新建檔案模式</string>
+    <string name="browser_hint_create_file">點擊右下角 + 按鈕，建立新的程式碼檔案</string>
+
+    <!-- SnippetViewModel -->
+    <string name="browser_snippet_category_uncategorized">未分類</string>
+
+    <!-- CreateFileDialog -->
+    <string name="browser_default_filename_untitled">未命名</string>
+    <string name="browser_dialog_new_file_title">新建檔案</string>
+    <string name="browser_label_filename">檔案名稱</string>
+    <string name="browser_label_template">範本</string>
+    <string name="browser_hint_enter_filename">輸入檔案名稱（不含副檔名）</string>
+    <string name="browser_label_file_type">檔案類型</string>
+    <string name="browser_label_final_filename">最終檔案名稱:</string>
+    <string name="browser_hint_extension_auto">副檔名將根據所選語言自動新增</string>
+    <string name="browser_template_empty">空檔案</string>
+    <string name="browser_template_hello_world">Hello World</string>
+    <string name="browser_template_class">類別</string>
+    <string name="browser_action_create_open">建立並開啟</string>
+    <string name="browser_action_create">建立</string>
+
+    <!-- SnippetDetailDialog -->
+    <string name="browser_dialog_edit_snippet_title">編輯程式碼片段</string>
+    <string name="browser_dialog_new_snippet_title">新建程式碼片段</string>
+    <string name="browser_label_title">標題</string>
+    <string name="browser_label_code_content">程式碼內容</string>
+    <string name="browser_label_language">語言</string>
+    <string name="browser_label_category">分類</string>
+    <string name="browser_action_save">儲存</string>
+    <string name="browser_action_export_as_file">匯出為檔案</string>
+
+    <!-- SampleFilesScreen -->
+    <string name="browser_title_sample_files">範例檔案</string>
+    <string name="browser_action_navigate_back">返回</string>
+    <string name="browser_hint_sample_files">內建範例檔案，點擊即可在編輯器中瀏覽</string>
+
+    <!-- LanguageConfig validation errors (used in CreateFileDialog) -->
+    <string name="browser_error_filename_empty">檔案名稱不能為空</string>
+    <string name="browser_error_filename_too_long">檔案名稱過長（最多200個字元）</string>
+    <string name="browser_error_filename_illegal_chars">檔案名稱包含非法字元</string>
+    <string name="browser_error_filename_digit_start">該語言檔案名稱不能以數字開頭</string>
+
+    <!-- GitHub Import -->
+    <string name="browser_github_import">從 GitHub 匯入</string>
+    <string name="browser_github_url_hint">輸入儲存庫 URL</string>
+    <string name="browser_github_browse">瀏覽</string>
+    <string name="browser_github_loading">載入中…</string>
+    <string name="browser_github_error_invalid_url">無效的 GitHub URL</string>
+    <string name="browser_github_error_network">網路錯誤</string>
+    <string name="browser_github_error_truncated">檔案清單不完整（儲存庫過大），請手動選擇檔案</string>
+    <string name="browser_github_error_rate_limited">GitHub API 請求次數超限，請稍後再試</string>
+    <string name="browser_github_success">匯入成功</string>
+    <string name="browser_github_select_files">選擇要匯入的檔案</string>
+    <string name="browser_action_select_all">全選</string>
+
+    <!-- Browser Input Validation -->
+    <string name="browser_github_url_too_long">URL 過長（最多 2048 個字元）</string>
+    <string name="browser_github_url_invalid_chars">URL 包含無效字元</string>
+
+    <!-- Save External File -->
+    <string name="browser_save_external_success">已儲存到應用程式內部儲存</string>
+    <string name="browser_save_external_failed">儲存失敗</string>
+
+    <!-- Delete File -->
+    <string name="browser_dialog_delete_file_title">刪除檔案</string>
+    <string name="browser_dialog_delete_file_message">確定要刪除「%s」嗎？此操作無法撤銷。</string>
+    <string name="browser_delete_success">已刪除</string>
+    <string name="browser_delete_failed">刪除失敗</string>
+    <string name="browser_action_delete_file">刪除</string>
+
+    <!-- GitScreen -->
+    <string name="browser_git_screen_title">Git 管理</string>
+    <string name="browser_git_tab_status">狀態</string>
+    <string name="browser_git_tab_commit">提交</string>
+    <string name="browser_git_tab_remote">遠端</string>
+    <string name="browser_git_tab_branches">分支</string>
+    <string name="browser_git_tab_log">日誌</string>
+    <string name="browser_git_no_repo">目前目錄不是 Git 儲存庫</string>
+    <string name="browser_git_changed_files">變更檔案</string>
+    <string name="browser_git_commit_message_label">提交訊息</string>
+    <string name="browser_git_stage_files">暫存檔案</string>
+    <string name="browser_git_no_remote">未設定遠端儲存庫</string>
+    <string name="browser_git_push_desc">將本地提交推送到遠端儲存庫</string>
+    <string name="browser_git_pull_desc">從遠端儲存庫拉取最新變更</string>
+    <string name="browser_git_fetch_desc">取得遠端儲存庫最新資訊</string>
+    <string name="browser_git_remote_info">遠端儲存庫</string>
+    <string name="browser_git_no_commits">暫無提交記錄</string>
+
+    <!-- Git UI -->
+    <string name="browser_git_action_sheet">Git 操作</string>
+    <string name="browser_git_status_summary">%d 個檔案有變更</string>
+    <string name="browser_git_status_clean">工作區乾淨，沒有待提交的變更</string>
+    <string name="browser_git_last_commit">最近提交</string>
+    <string name="browser_git_actions">操作</string>
+    <string name="browser_git_action_push">推送</string>
+    <string name="browser_git_action_pull">拉取</string>
+    <string name="browser_git_action_fetch">取得</string>
+    <string name="browser_git_action_commit">提交</string>
+    <string name="browser_git_checkout_branch">切換分支</string>
+    <string name="browser_git_show_branches">顯示分支清單</string>
+    <string name="browser_git_hide_branches">隱藏分支清單</string>
+    <string name="browser_git_loading_branches">載入分支…</string>
+    <string name="browser_git_no_branches">未找到分支</string>
+    <string name="browser_git_current_branch">目前</string>
+    <string name="browser_git_commit_title">提交變更</string>
+    <string name="browser_git_commit_message_hint">輸入提交訊息</string>
+    <string name="browser_git_commit_files">%d 個檔案</string>
+    <string name="browser_git_no_changes">沒有可提交的變更</string>
+    <string name="browser_git_select_all">全選</string>
+    <string name="browser_git_deselect_all">取消全選</string>
+
+    <!-- Git operation results -->
+    <string name="browser_git_commit_success">提交成功</string>
+    <string name="browser_git_commit_failed">提交失敗: %s</string>
+    <string name="browser_git_push_success">推送成功</string>
+    <string name="browser_git_push_failed">推送失敗: %s</string>
+    <string name="browser_git_pull_success">拉取成功</string>
+    <string name="browser_git_pull_failed">拉取失敗: %s</string>
+    <string name="browser_git_fetch_success">取得成功</string>
+    <string name="browser_git_fetch_failed">取得失敗: %s</string>
+    <string name="browser_git_checkout_success">已切換到分支 %s</string>
+    <string name="browser_git_checkout_failed">切換分支失敗: %s</string>
+    <string name="browser_git_error_empty_message">提交訊息不能為空</string>
+    <string name="browser_git_error_no_repo">未找到 Git 儲存庫</string>
+
+    <!-- Security -->
+    <string name="security_operation_restricted">安全校驗未通過，此操作暫時不可用</string>
+
+    <!-- Virtual folders -->
+    <string name="browser_recent_section">最近開啟</string>
+    <string name="browser_favorites_section">收藏檔案</string>
+    <string name="browser_no_recent_files">暫無最近開啟的檔案</string>
+    <string name="browser_no_favorite_files">暫無收藏檔案</string>
+    <string name="browser_recent_no_preview">無內容預覽</string>
+</resources>

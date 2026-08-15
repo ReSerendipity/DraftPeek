@@ -1,0 +1,24 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="core_designsystem_app_name">DraftPeek</string>
+    <string name="font_inter">Inter</string>
+    <string name="font_inter_desc">현대적인 산세리프 라틴 폰트, 깔끔하고 UI 표시에 적합</string>
+    <string name="font_jetbrains_mono">JetBrains Mono</string>
+    <string name="font_jetbrains_mono_desc">프로그래밍용 모노스페이스 폰트, 합자 지원, 코드 가독성 우수</string>
+    <string name="font_kaiti">해서체</string>
+    <string name="font_kaiti_desc">서예 스타일 폰트, 우아하고 문학적이며 창의적인 콘텐츠에 적합</string>
+    <string name="font_microsoft_yahei">Microsoft YaHei</string>
+    <string name="font_microsoft_yahei_desc">Windows 기본 중국어 폰트, 획이 선명하고 표시가 또렷함</string>
+    <string name="font_noto_sans_cjk">Noto Sans CJK</string>
+    <string name="font_noto_sans_cjk_desc">Google 오픈소스 중국어 폰트, 화면 읽기에 최적이며 선명도가 높음</string>
+    <string name="font_pingfang_sc">PingFang SC</string>
+    <string name="font_pingfang_sc_desc">Apple 시스템 폰트, 깔끔하고 우아하며 읽기가 편안함</string>
+    <string name="font_simsun">명조체</string>
+    <string name="font_simsun_desc">전통적인 명조체, 장문 독서에 적합, 클래식한 인쇄 스타일</string>
+    <string name="font_system_mono">시스템 모노스페이스</string>
+    <string name="font_system_mono_desc">시스템 기본 모노스페이스 폰트, 호환성과 렌더링 성능이 우수</string>
+    <string name="font_system_sans">시스템 산세리프</string>
+    <string name="font_system_sans_desc">시스템 기본 산세리프 폰트, 호환성 최고</string>
+    <string name="font_system_serif">시스템 세리프</string>
+    <string name="font_system_serif_desc">시스템 기본 세리프 폰트, 격식 있고 중후함</string>
+</resources>

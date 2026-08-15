@@ -1,0 +1,31 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!-- Terminal UI -->
+    <string name="terminal_close_session">세션 닫기</string>
+    <string name="terminal_new_session">새 세션</string>
+    <string name="terminal_input_hint">명령어 입력…</string>
+    <string name="terminal_send">전송</string>
+    <string name="terminal_restore">터미널 복원</string>
+    <string name="terminal_minimize">최소화</string>
+    <string name="terminal_floating_close">닫기</string>
+
+    <!-- Terminal Service (Ch7#7 P1) -->
+    <string name="terminal_notification_title">터미널 실행 중</string>
+    <string name="terminal_notification_text">DraftPeek 터미널 세션이 실행 중입니다</string>
+    <string name="terminal_notification_stop">중지</string>
+    <string name="terminal_notification_channel_name">터미널 서비스</string>
+    <string name="terminal_notification_channel_desc">백그라운드에서 터미널 세션 유지</string>
+    <string name="permission_terminal_command_desc">동일한 키로 서명된 앱이 DraftPeek에 터미널 명령을 보낼 수 있게 허용합니다</string>
+    <string name="permission_terminal_command_label">터미널 명령 실행</string>
+    <string name="terminal_title">터미널</string>
+    <!-- Diff / Encoding dialogs -->
+    <string name="terminal_service_running">명령이 백그라운드에서 실행 중입니다</string>
+
+    <!-- Integrated Terminal -->
+    <string name="terminal_cwd_label">작업 디렉토리</string>
+    <string name="terminal_proot_guide_title">첫 사용 · Linux 환경 준비 중</string>
+    <string name="terminal_proot_guide_desc">Linux 실행 환경을 추출하는 중입니다 (약 50MB). 완료 후 전체 터미널 기능을 사용할 수 있습니다. 주의: 터미널에서 임의의 명령을 실행할 수 있습니다. 신뢰할 수 있는 명령만 실행하세요. 잘못된 조작은 데이터 손실로 이어질 수 있습니다.</string>
+    <string name="terminal_proot_ready">Linux 환경이 준비되었습니다</string>
+    <string name="terminal_proot_error">Linux 환경 설정에 실패했습니다</string>
+    <string name="terminal_unavailable_hint">이 위치에서는 터미널을 열 수 없습니다</string>
+</resources>

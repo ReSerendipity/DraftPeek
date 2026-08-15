@@ -1,0 +1,97 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="app_name">DraftPeek</string>
+
+    <!-- MainActivity navigation labels -->
+    <string name="app_nav_file_browser">ファイルブラウザ</string>
+    <string name="app_nav_stats">統計</string>
+    <string name="app_nav_settings">設定</string>
+    <string name="app_nav_me">マイページ</string>
+    <string name="app_nav_files">ファイル</string>
+
+    <!-- MainActivity titles -->
+    <string name="app_title_split_view">分割ビュー</string>
+    <string name="app_title_file_browser">ファイルブラウザ</string>
+    <string name="app_title_profile">マイページ</string>
+    <string name="app_title_editor_home">エディタ</string>
+    <string name="app_title_editor">エディタ</string>
+    <string name="app_title_settings">設定</string>
+    <string name="app_title_stats">使用統計</string>
+    <string name="app_title_snippets">スニペット</string>
+    <string name="app_title_sample_files">サンプルファイル</string>
+    <string name="app_title_default">DraftPeek</string>
+
+    <!-- MainActivity actions -->
+    <string name="app_action_close_split">分割ビューを閉じる</string>
+    <string name="app_action_open_split">分割ビューを開く</string>
+    <string name="app_action_navigate_back">戻る</string>
+
+    <!-- DraftPeekNavHost -->
+    <string name="app_hint_select_file_editor">ファイルを選択してエディタで開く</string>
+    <string name="app_hint_select_file_editor_home">ファイルを開いて編集を開始</string>
+
+    <!-- Browser screen -->
+    <string name="browser_continue_editing">編集を続ける</string>
+    <string name="browser_search_hint">ファイルを検索…</string>
+    <string name="browser_new_file">新規ファイル</string>
+    <string name="browser_open_file">ファイルを開く</string>
+    <string name="browser_directories">ディレクトリ</string>
+    <string name="browser_template_empty">空のファイル</string>
+    <string name="browser_template_hello">Hello World</string>
+    <string name="browser_template_class">クラステンプレート</string>
+    <string name="browser_edited_ago">%1$s前に編集</string>
+
+    <!-- Profile screen -->
+    <string name="profile_title">マイページ</string>
+    <string name="profile_stat_edits">編集</string>
+    <string name="profile_stat_files">ファイル</string>
+    <string name="profile_stat_active_days">活動日</string>
+    <string name="profile_section_stats">統計</string>
+    <string name="profile_section_activity">アクティビティ</string>
+    <string name="profile_section_settings">設定</string>
+
+    <!-- Security -->
+    <string name="security_operation_restricted">セキュリティ検証に失敗しました。この操作は一時的に利用できません。</string>
+
+    <!-- AI Protection: security status notification -->
+    <string name="security_notification_channel_security_status">セキュリティステータス</string>
+    <string name="security_notification_official_title">公式ビルド検証済み</string>
+    <string name="security_notification_official_text">署名 SHA-256 検証済み</string>
+    <string name="security_notification_unofficial_title">非公式ビルド！リスク警告</string>
+    <string name="security_notification_unofficial_text">このAPKは改ざんされている可能性があります。タップして詳細を確認。</string>
+
+    <!-- AI Protection: legal warning dialogs -->
+    <string name="security_legal_warning_title_warning">セキュリティ警告</string>
+    <string name="security_legal_warning_title_locked">セキュリティロック</string>
+    <string name="security_legal_warning_title_tampered">非公式APKを検出</string>
+    <string name="security_legal_warning_action_uninstall">アンインストールへ</string>
+    <string name="security_legal_warning_action_download_official">公式版をダウンロード</string>
+    <string name="security_legal_warning_action_acknowledge_risk">リスクを承知しました</string>
+
+    <!-- AI Protection: splash tamper warning -->
+    <string name="security_splash_tamper_title">非公式APKを検出</string>
+    <string name="security_splash_tamper_risk_1">データ盗難リスク</string>
+    <string name="security_splash_tamper_risk_2">広告注入リスク</string>
+    <string name="security_splash_tamper_risk_3">悪意あるコードリスク</string>
+
+    <!-- AI Protection: security status section -->
+    <string name="security_status_section_title">セキュリティステータス</string>
+    <string name="security_status_signature_verified">署名: ✅ 公式検証済み</string>
+    <string name="security_status_signature_unverified">署名: ❌ 非公式</string>
+    <string name="security_status_dex_passed">DEX整合性: ✅ 合格</string>
+    <string name="security_status_dex_failed">DEX整合性: ❌ 変更あり</string>
+    <string name="security_status_environment_safe">実行環境: 安全</string>
+    <string name="security_status_environment_suspicious">実行環境: 疑わしい</string>
+    <string name="security_status_environment_hostile">実行環境: 敵対的</string>
+    <string name="security_status_recheck">再検証</string>
+    <string name="security_status_export_report">セキュリティイベントレポートをエクスポート</string>
+    <string name="security_status_clear_logs">セキュリティイベントログをクリア</string>
+    <string name="security_ai_threat_detected">security_ai_threat_detected</string>
+    <string name="app_title_terminal">ターミナル</string>
+    <string name="encrypted_export_description">AES-256-GCM 暗号化エクスポートファイル</string>
+    <string name="encrypted_export_extension">.jenc</string>
+    <string name="widget_description">最近開いたファイルへのクイックアクセス</string>
+    <string name="widget_loading">読み込み中…</string>
+    <string name="widget_no_recent_files">最近のファイルはありません</string>
+    <string name="widget_recent_files_title">最近のファイル</string>
+</resources>

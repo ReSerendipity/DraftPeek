@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+    Android 12+ 数据提取规则。
+    应用 allowBackup=false（安全策略：本地加密数据不参与云备份/设备迁移），
+    此处显式排除全部数据，与 allowBackup=false 行为保持一致并消除
+    android:dataExtractionRules 缺失警告。
+-->
+<data-extraction-rules>
+    <cloud-backup>
+        <exclude domain="root" path="." />
+    </cloud-backup>
+    <device-transfer>
+        <exclude domain="root" path="." />
+    </device-transfer>
+</data-extraction-rules>
