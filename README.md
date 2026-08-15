@@ -247,3 +247,34 @@ scripts\run-unit-tests.bat
 ```bash
 git push origin main
 ```
+
+## ⚠️ Git 分支使用说明
+
+**重要**: 本项目采用「本地开发 + 远程公开」双分支策略。
+
+- **main 分支 (本地)**: 日常开发与私有工作的**本地主分支**
+- **public 分支 (远程)**: 用于公开发布的**远程分支**
+
+### 📌 开发规范
+
+1. **开发时在 \main\ 分支上提交代码**
+2. **只推送公共内容到 \public\ 分支，绝不要推送 \main\ 分支到远程**
+
+### 🔒 工作流程
+
+**日常开发：**
+```bash
+git checkout main      # 切换到本地主分支
+git add .              # 添加文件
+git commit -m "..."
+# 本地提交（不会推送到远程）
+```
+
+**需要公开发布时（手动合并到 public 分支后推送）：**
+```bash
+git checkout public    # 切换到公开发布分支
+git merge main         # 合并本地开发内容（如有需要，可 cherry-pick 特定提交）
+git push origin public # 推送到远程公开分支
+```
+
+⚠️ **警告**: 绝对不要执行 \git push origin main\，否则会将本地私有代码泄露到远程仓库。
