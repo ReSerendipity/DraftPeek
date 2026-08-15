@@ -1,0 +1,291 @@
+/* CSS：网页样式语言，用于美化 HTML 页面。 */
+/* 本示例覆盖：选择器、盒模型、Flexbox、Grid、定位、
+    动画、媒体查询、CSS变量、伪类、伪元素、字体、滤镜。 */
+
+/* ── 1. CSS 变量（自定义属性） ──────────────────────── */
+:root {
+  --primary-color: #2563eb;
+  --text-color: #1f2937;
+  --bg-color: #f3f4f6;
+  --spacing: 16px;
+  --radius: 8px;
+}
+
+/* ── 2. 通配符选择器与盒模型 ───────────────────────── */
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+body {
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+  background: var(--bg-color);
+  color: var(--text-color);
+  line-height: 1.6;
+}
+
+/* ── 3. 类型选择器 ─────────────────────────────────── */
+h1 { font-size: 2rem; font-weight: 700; }
+h2 { font-size: 1.5rem; margin-bottom: 12px; }
+p { margin-bottom: 12px; }
+
+/* ── 4. 类选择器 ───────────────────────────────────── */
+.card {
+  background: white;
+  border-radius: var(--radius);
+  padding: 24px;
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+  margin: var(--spacing);
+  /* 过渡动画 */
+  transition: transform 0.3s, box-shadow 0.3s;
+}
+
+.card:hover {
+  transform: translateY(-4px);
+  box-shadow: 0 12px 24px rgba(0, 0, 0, 0.15);
+}
+
+/* ── 5. ID 选择器 ──────────────────────────────────── */
+#header { padding: 20px; }
+
+/* ── 6. 属性选择器 ─────────────────────────────────── */
+input[type="text"] {
+  border: 1px solid #d1d5db;
+  border-radius: 6px;
+  padding: 8px 12px;
+  width: 100%;
+}
+input[type="text"]:focus {
+  outline: none;
+  border-color: var(--primary-color);
+  box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.1);
+}
+a[href^="https"]::after {
+  content: " ↗";
+  font-size: 0.8em;
+}
+
+/* ── 7. 后代选择器与子选择器 ───────────────────────── */
+nav a {                       /* nav 内所有 a（后代） */
+  text-decoration: none;
+  color: var(--primary-color);
+}
+.nav > li {                   /* 直接子元素 */
+  display: inline-block;
+  margin-right: 16px;
+}
+
+/* ── 8. 相邻兄弟与通用兄弟选择器 ──────────────────── */
+h2 + p {                      /* h2 紧邻后的 p */
+  color: #6b7280;
+  font-weight: 500;
+}
+h2 ~ p {                      /* h2 之后所有同级 p */
+  font-size: 0.95em;
+}
+
+/* ── 9. 伪类 ──────────────────────────────────────── */
+/* 链接状态 */
+a:link    { color: var(--primary-color); }
+a:visited { color: #7c3aed; }
+a:hover   { text-decoration: underline; }
+a:active  { color: #dc2626; }
+/* 结构伪类 */
+li:first-child  { font-weight: 700; }
+li:last-child   { margin-bottom: 0; }
+li:nth-child(odd)  { background: #f9fafb; }
+li:nth-child(even) { background: white; }
+li:nth-child(3n+1) { border-left: 3px solid var(--primary-color); }
+/* 否定伪类 */
+div:not(.card) { margin: 0; }
+
+/* ── 10. 伪元素 ───────────────────────────────────── */
+.card::before {
+  content: "📌";
+  display: block;
+  margin-bottom: 8px;
+}
+::selection {
+  background: var(--primary-color);
+  color: white;
+}
+::placeholder {
+  color: #9ca3af;
+  font-style: italic;
+}
+
+/* ── 11. Flexbox 布局 ─────────────────────────────── */
+.container {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 16px;
+  justify-content: space-between; /* 主轴对齐 */
+  align-items: center;            /* 交叉轴对齐 */
+}
+
+.flex-item {
+  flex: 1 1 200px;                /* grow shrink basis */
+  padding: 16px;
+}
+.flex-item.static {
+  flex: 0 0 100px;                /* 不伸缩，固定 100px */
+}
+
+/* ── 12. Grid 布局 ────────────────────────────────── */
+.grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+  gap: 16px;
+}
+.grid-area-example {
+  display: grid;
+  grid-template-areas:
+    "header  header header"
+    "sidebar main   aside"
+    "footer  footer footer";
+  grid-template-columns: 200px 1fr 200px;
+  gap: 8px;
+}
+.grid-area-example .header  { grid-area: header; }
+.grid-area-example .sidebar { grid-area: sidebar; }
+.grid-area-example .main    { grid-area: main; }
+.grid-area-example .aside   { grid-area: aside; }
+.grid-area-example .footer  { grid-area: footer; }
+
+/* ── 13. 位置（Position） ─────────────────────────── */
+.position-static   { position: static;    /* 默认值 */ }
+.position-relative { position: relative; top: 5px; }
+.position-absolute { position: absolute; top: 0; right: 0; }
+.position-fixed    { position: fixed; bottom: 16px; right: 16px; z-index: 100; }
+.position-sticky   { position: sticky; top: 0; z-index: 10; }
+
+/* ── 14. 浮动与清除 ───────────────────────────────── */
+.float-left  { float: left;  margin-right: 16px; }
+.float-right { float: right; margin-left: 16px; }
+.clearfix::after {
+  content: "";
+  display: table;
+  clear: both;
+}
+
+/* ── 15. 文本处理 ─────────────────────────────────── */
+.text-center      { text-align: center; }
+.text-uppercase   { text-transform: uppercase; }
+.text-ellipsis    {                    /* 单行省略 */
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.line-clamp-3     {                    /* 多行省略 */
+  display: -webkit-box;
+  -webkit-line-clamp: 3;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+}
+
+/* ── 16. 溢出处理 ─────────────────────────────────── */
+.overflow-hidden { overflow: hidden; }
+.overflow-scroll { overflow: scroll; }
+.overflow-auto   { overflow: auto;    /* 需要时才滚动 */ }
+
+/* ── 17. 背景 ─────────────────────────────────────── */
+.bg-gradient {
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  color: white;
+}
+.bg-image {
+  background: url('bg.jpg') no-repeat center/cover;
+}
+
+/* ── 18. 动画关键帧 ───────────────────────────────── */
+@keyframes slideIn {
+  from { opacity: 0; transform: translateX(-20px); }
+  to   { opacity: 1; transform: translateX(0); }
+}
+.animate-slide-in {
+  animation: slideIn 0.5s ease-out;
+}
+
+@keyframes pulse {
+  0%, 100% { transform: scale(1); }
+  50%      { transform: scale(1.05); }
+}
+.animate-pulse {
+  animation: pulse 2s infinite;
+}
+
+/* ── 19. 媒体查询 ─────────────────────────────────── */
+/* 平板及以下 */
+@media (max-width: 768px) {
+  .container {
+    flex-direction: column;
+  }
+  .grid {
+    grid-template-columns: 1fr;
+  }
+  html { font-size: 14px; }
+}
+/* 手机横屏 */
+@media (max-width: 480px) {
+  body { padding: 8px; }
+}
+/* prefers-reduced-motion：减少动画 */
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after {
+    animation-duration: 0.01ms !important;
+    transition-duration: 0.01ms !important;
+  }
+}
+/* prefers-color-scheme：深色模式 */
+@media (prefers-color-scheme: dark) {
+  :root {
+    --bg-color: #111827;
+    --text-color: #f3f4f6;
+  }
+}
+
+/* ── 20. @font-face ───────────────────────────────── */
+@font-face {
+  font-family: "MyCustomFont";
+  src: url("fonts/MyCustomFont.woff2") format("woff2"),
+       url("fonts/MyCustomFont.woff") format("woff");
+  font-weight: 400 700;
+  font-style: normal;
+  font-display: swap;
+}
+
+/* ── 21. 滤镜与混合模式 ───────────────────────────── */
+.blur     { filter: blur(5px); }
+.grayscale { filter: grayscale(100%); }
+.brightness { filter: brightness(1.2); }
+
+.backdrop-blur {
+  background: rgba(255,255,255,0.5);
+  backdrop-filter: blur(10px);
+}
+.mix-blend {
+  mix-blend-mode: multiply;
+}
+
+/* ── 22. CSS 函数 ─────────────────────────────────── */
+.function-examples {
+  width: calc(100% - 40px);               /* 计算 */
+  font-size: clamp(14px, 2vw, 24px);     /* 限制范围 */
+  padding: min(5vw, 32px);               /* 取较小值 */
+  margin: max(1vw, 16px);                /* 取较大值 */
+}
+
+/* ── 23. @supports 特性检测 ───────────────────────── */
+@supports (display: grid) {
+  .grid-supported { display: grid; }
+}
+
+/* ── 24. 打印样式 ─────────────────────────────────── */
+@media print {
+  .no-print { display: none; }
+  body { font-size: 12pt; }
+  a::after { content: " (" attr(href) ")"; }
+}

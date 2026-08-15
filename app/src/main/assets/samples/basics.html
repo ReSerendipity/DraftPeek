@@ -1,0 +1,293 @@
+<!DOCTYPE html>
+<!-- HTML：网页标记语言，浏览器直接渲染显示内容。 -->
+<!-- 本示例覆盖：文档结构、语义化标签、文本标签、表格、
+     表单、多媒体、链接、列表、容器、元信息、Canvas、模板。 -->
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="description" content="HTML 语法速览 - 撰码轻览">
+  <meta name="keywords" content="HTML, 语法, 示例">
+  <title>HTML 语法速览</title>
+  <style>
+    body { font-family: sans-serif; max-width: 900px; margin: 0 auto; padding: 20px; }
+    nav a { margin-right: 10px; }
+    table { border-collapse: collapse; width: 100%; }
+    th, td { border: 1px solid #ccc; padding: 8px; text-align: left; }
+    th { background: #f0f0f0; }
+    fieldset { margin-bottom: 16px; }
+  </style>
+  <!-- 外部样式链接 -->
+  <!-- <link rel="stylesheet" href="styles.css"> -->
+  <!-- 外部脚本 -->
+  <!-- <script src="app.js" defer></script> -->
+</head>
+<body>
+  <!-- ── 1. 头部与导航 ──────────────────────────────── -->
+  <header>
+    <h1>撰码轻览 · HTML 语法速览</h1>
+    <nav aria-label="主导航">
+      <a href="#text">文本</a>
+      <a href="#lists">列表</a>
+      <a href="#table">表格</a>
+      <a href="#form">表单</a>
+      <a href="#media">多媒体</a>
+      <a href="#canvas">Canvas</a>
+    </nav>
+  </header>
+
+  <main>
+    <!-- ── 2. 文本标签与语义化 ──────────────────────── -->
+    <section id="text">
+      <h2>文本与段落</h2>
+      <p>这是一个普通段落，包含<strong>粗体</strong>、<em>斜体</em>、<b>粗体样式</b>、<i>斜体样式</i>。</p>
+      <p>可以标记<mark>高亮文字</mark>、<del>删除文字</del>、<ins>插入文字</ins>。</p>
+      <p>上标<sup>2</sup>和下标<sub>0</sub>，化学式 H<sub>2</sub>O，数学 x<sup>2</sup>。</p>
+      <p>行内代码 <code>const x = 5;</code> 和缩写 <abbr title="HyperText Markup Language">HTML</abbr>。</p>
+      <p><small>小号文字，常用于版权声明。</small></p>
+
+      <h3>引用与预格式化</h3>
+      <blockquote cite="https://example.com">
+        这是一个引用块，通常包含引用来源信息。
+      </blockquote>
+      <p>他说：<q>这句话是行内引用。</q></p>
+      <pre><code>
+// 预格式化文本，保留空格和换行
+function hello() {
+  console.log("Hello HTML");
+}
+      </code></pre>
+    </section>
+
+    <!-- ── 3. 列表类型 ────────────────────────────────── -->
+    <section id="lists">
+      <h2>列表</h2>
+
+      <h3>无序列表</h3>
+      <ul>
+        <li>项目一</li>
+        <li>项目二
+          <ul>
+            <li>子项目 2.1</li>
+            <li>子项目 2.2</li>
+          </ul>
+        </li>
+        <li>项目三</li>
+      </ul>
+
+      <h3>有序列表</h3>
+      <ol start="5">
+        <li>第5步</li>
+        <li>第6步</li>
+        <li>第7步</li>
+      </ol>
+
+      <h3>定义列表</h3>
+      <dl>
+        <dt>HTML</dt>
+        <dd>超文本标记语言，定义网页结构</dd>
+        <dt>CSS</dt>
+        <dd>层叠样式表，定义页面样式</dd>
+      </dl>
+    </section>
+
+    <!-- ── 4. 表格 ────────────────────────────────────── -->
+    <section id="table">
+      <h2>表格</h2>
+      <table>
+        <caption>编程语言对比表</caption>
+        <thead>
+          <tr><th>语言</th><th>类型</th><th>诞生年份</th></tr>
+        </thead>
+        <tbody>
+          <tr><td>Python</td><td>动态</td><td>1991</td></tr>
+          <tr><td>Java</td><td>静态</td><td>1995</td></tr>
+          <tr><td>Go</td><td>静态</td><td>2009</td></tr>
+        </tbody>
+        <tfoot>
+          <tr><td colspan="3">数据来源: TIOBE 2024</td></tr>
+        </tfoot>
+      </table>
+    </section>
+
+    <!-- ── 5. 表单 ────────────────────────────────────── -->
+    <section id="form">
+      <h2>表单</h2>
+      <form action="/submit" method="post" enctype="multipart/form-data">
+
+        <fieldset>
+          <legend>基本信息</legend>
+
+          <label for="name">姓名：</label>
+          <input type="text" id="name" name="name" placeholder="请输入姓名" required minlength="2">
+
+          <label for="email">邮箱：</label>
+          <input type="email" id="email" name="email">
+
+          <label for="age">年龄：</label>
+          <input type="number" id="age" name="age" min="1" max="120">
+
+          <label for="password">密码：</label>
+          <input type="password" id="password" name="password" minlength="6">
+
+          <label for="dob">生日：</label>
+          <input type="date" id="dob" name="dob">
+
+          <label for="color">颜色：</label>
+          <input type="color" id="color" name="color" value="#2563eb">
+
+          <label for="volume">音量：</label>
+          <input type="range" id="volume" name="volume" min="0" max="100" value="50">
+        </fieldset>
+
+        <fieldset>
+          <legend>选择项</legend>
+
+          <label for="country">国家：</label>
+          <select id="country" name="country" multiple size="3">
+            <option value="cn">中国</option>
+            <option value="us">美国</option>
+            <option value="jp">日本</option>
+            <option value="uk">英国</option>
+          </select>
+
+          <label for="plan">方案：</label>
+          <select id="plan" name="plan">
+            <optgroup label="个人">
+              <option value="free">免费版</option>
+              <option value="pro">专业版</option>
+            </optgroup>
+            <optgroup label="企业">
+              <option value="team">团队版</option>
+              <option value="enterprise">企业版</option>
+            </optgroup>
+          </select>
+        </fieldset>
+
+        <fieldset>
+          <legend>偏好设置</legend>
+
+          <label><input type="radio" name="gender" value="male"> 男</label>
+          <label><input type="radio" name="gender" value="female"> 女</label>
+
+          <label><input type="checkbox" name="subscribe" checked> 订阅邮件</label>
+          <label><input type="checkbox" name="agree"> 同意条款</label>
+
+          <label for="comment">备注：</label>
+          <textarea id="comment" name="comment" rows="4" placeholder="请输入备注"></textarea>
+
+          <label for="file">文件：</label>
+          <input type="file" id="file" name="file" accept=".pdf,.txt">
+
+          <!-- datalist 自动补全建议 -->
+          <label for="browser">浏览器：</label>
+          <input list="browsers" id="browser" name="browser">
+          <datalist id="browsers">
+            <option value="Chrome">
+            <option value="Firefox">
+            <option value="Safari">
+          </datalist>
+        </fieldset>
+
+        <button type="reset">重置</button>
+        <button type="submit">提交</button>
+      </form>
+    </section>
+
+    <!-- ── 6. 多媒体 ──────────────────────────────────── -->
+    <section id="media">
+      <h2>多媒体</h2>
+
+      <h3>图片</h3>
+      <figure>
+        <img src="sample.jpg" alt="示例图片" width="400" loading="lazy">
+        <figcaption>图片说明文字</figcaption>
+      </figure>
+
+      <h3>视频</h3>
+      <video controls width="480" poster="poster.jpg">
+        <source src="sample.mp4" type="video/mp4">
+        <source src="sample.webm" type="video/webm">
+        <track kind="subtitles" srclang="zh" src="sample.vtt" label="中文">
+        您的浏览器不支持视频标签。
+      </video>
+
+      <h3>音频</h3>
+      <audio controls>
+        <source src="sample.mp3" type="audio/mpeg">
+        <source src="sample.ogg" type="audio/ogg">
+        您的浏览器不支持音频标签。
+      </audio>
+
+      <h3>嵌入内容</h3>
+      <!-- iframe 嵌入其他页面 -->
+      <iframe src="about:blank" title="示例嵌入" width="320" height="160" sandbox="allow-scripts">
+        您的浏览器不支持内嵌框架。
+      </iframe>
+    </section>
+
+    <!-- ── 7. Canvas ──────────────────────────────────── -->
+    <section id="canvas">
+      <h2>Canvas 绘图</h2>
+      <canvas id="myCanvas" width="300" height="150" style="border:1px solid #ccc;">
+        您的浏览器不支持 Canvas。
+      </canvas>
+    </section>
+
+    <!-- ── 8. 交互元素 ────────────────────────────────── -->
+    <section id="interactive">
+      <h2>交互元素</h2>
+
+      <details>
+        <summary>点击展开详细信息</summary>
+        <p>这是一段折叠内容，常用于 FAQ 或帮助文档。</p>
+      </details>
+
+      <!-- 进度条 -->
+      <progress value="75" max="100">75%</progress>
+
+      <!-- 计量条 -->
+      <meter value="0.6" min="0" max="1" low="0.3" high="0.7">60%</meter>
+    </section>
+
+    <!-- ── 9. 模板 ────────────────────────────────────── -->
+    <template id="card-template">
+      <div class="card">
+        <h3 class="card-title"></h3>
+        <p class="card-description"></p>
+      </div>
+    </template>
+  </main>
+
+  <!-- ── 10. 侧边栏与页脚 ───────────────────────────── -->
+  <aside>
+    <h3>补充信息</h3>
+    <p>这是一个侧边栏区域，常放相关链接或广告。</p>
+  </aside>
+
+  <footer>
+    <hr>
+    <p>&copy; 2025 DraftPeek</p>
+    <address>
+      联系邮箱：<a href="mailto:hello@example.com">hello@example.com</a>
+    </address>
+  </footer>
+
+  <script>
+    // Canvas 绘图示例
+    const canvas = document.getElementById('myCanvas');
+    if (canvas && canvas.getContext) {
+      const ctx = canvas.getContext('2d');
+      ctx.fillStyle = '#2563eb';
+      ctx.fillRect(20, 20, 100, 50);
+      ctx.fillStyle = '#10b981';
+      ctx.beginPath();
+      ctx.arc(200, 75, 30, 0, Math.PI * 2);
+      ctx.fill();
+      ctx.strokeStyle = '#ef4444';
+      ctx.lineWidth = 2;
+      ctx.strokeText('Hello Canvas', 80, 120);
+    }
+  </script>
+</body>
+</html>

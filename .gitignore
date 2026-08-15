@@ -1,0 +1,135 @@
+# Built application files
+*.apk
+*.aab
+*.ap_
+
+# Gradle files
+.gradle/
+build/
+/local.properties
+
+# IDE files
+/.idea/
+*.iml
+.DS_Store
+.cxx/
+.externalNativeBuild/
+.vscode/
+.trae/
+.zcode/
+.mimocode/
+.kotlin/
+
+# Node dependencies
+node_modules/
+**/node_modules/
+
+# Compiled files
+*.dex
+*.class
+*.o
+*.so
+*.dll
+*.exe
+*.dylib
+*.jar
+*.war
+*.ear
+
+# Log files
+*.log
+log.txt
+build_error.log
+
+# 临时构建与测试日志（防止误提交根目录 .txt 日志文件）
+build-*.txt
+test-*.txt
+core-*-test-*.txt
+core-*-*.txt
+feature-*-test*.txt
+feature-*-*.txt
+editor-stats-test.txt
+all-tests-*.txt
+all-remaining-tests.txt
+build-logic-test*.txt
+clean-result.txt
+
+# Keystore / secrets
+*.keystore
+*.jks
+*.pfx
+*.snk
+.env
+.env.*
+!.env.example
+secrets.properties
+local.properties
+
+# Build artifacts
+out/
+bin/
+obj/
+captures/
+/app/release
+
+# OS / editor cache
+*.cache
+*.pdb
+*.ilk
+*.lib
+*.exp
+*.idb
+
+# ProGuard / R8 mapping files
+mapping.txt
+**/mapping.txt
+
+# Archive: temp files, logs, cloned repos, design assets, old planning docs
+_archive/repos/
+_archive/
+
+# Reference / competitor source repos (research only, not part of project)
+repos/
+
+# ---------------------------------------------------------------------------
+# 图标开发临时文件（仅调试用，不提交）
+# ---------------------------------------------------------------------------
+# Debug images
+*_debug_*.png
+_debug_small_text*.png
+
+# Temporary render files
+_temp_*.png
+_temp_v*_render.png
+
+# Icon preview files
+icon_*_preview.html
+icon_v*_preview.html
+ic_launcher_*_backup.png
+*icon*original*.*
+
+# Icon modification scripts (one-off development tools)
+modify_icon*.py
+analyze_icon*.py
+verify_icon*.py
+generate_v*_preview.py
+regenerate_*.py
+locate_small_text.py
+spot_check_icon.py
+analyze_actual.py
+analyze_backup_structure.py
+
+# Chinese development documents
+DraftPeek 图标修改总结.md
+verify_final_icon.py
+design_system_draft.md
+
+# Additional Chinese markdown files (development notes)
+*.md
+!README.md
+!AGENTS.md
+!SECURITY.md
+!CHANGELOG.md
+
+# Cloned learning repos (research reference only, not part of project)
+references/
