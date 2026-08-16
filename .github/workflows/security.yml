@@ -115,5 +115,8 @@ jobs:
           # 真实源码（app/src、core、feature、server 等）仍全量扫描。
           # trivy-action 声明式输入（README: skip-dirs/skip-files 逗号分隔），
           # 等价于 CLI 的 --skip-dirs/--skip-files，且不影响其余输入语义。
-          skip-dirs: '_archive, build, .gradle, .kotlin, .idea, node_modules, logs, .cxx'
-          skip-files: '*.log'
+          # skip-dirs 为相对路径前缀匹配（非 basename）：'*/build' 才能跳过 app/build
+          # 等嵌套构建目录（2026-08-16 trivy 0.74.0 实测 'build' 不匹配 app/build）；
+          # mapping.txt 为 R8 混淆映射（115MB，含大量 hex），一并跳过。
+          skip-dirs: '_archive, */build, .gradle, .kotlin, .idea, node_modules, logs, .cxx'
+          skip-files: '*.log, mapping.txt'
