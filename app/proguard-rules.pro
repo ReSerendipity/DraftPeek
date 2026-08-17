@@ -133,6 +133,15 @@
     native <methods>;
 }
 
+# ===== LGPL-2.1 合规注记 =====
+# sora-editor / language-textmate / language-treesitter（io.github.rosemoe.*，LGPL-2.1）与
+# android-tree-sitter / tree-sitter-java（com.itsaky.androidide.treesitter.*，LGPL-2.1）为
+# LGPL-2.1 许可组件。以下 -keep 规则保留其类名与成员、禁止重命名与裁剪，依据为
+# LGPL-2.1 第 6 条：再分发方须允许用户以修改后的库版本替换随包版本并重新链接。
+# 请勿删除或弱化以下 keep 规则；若调整混淆策略，须保证上述包名与成员可被替换重新链接。
+# 详见 docs/开源合规说明.md 与 THIRD_PARTY_NOTICES.md 第 5 节。
+# ===== END LGPL-2.1 合规注记 =====
+
 # ===== sora-editor (code editor) =====
 # 正确包名 io.github.rosemoe.sora，旧包名 com.blacksquircle.ui 仅为历史引用。
 # sora-editor 内部使用：
@@ -218,6 +227,7 @@
 -dontwarn org.joni.**
 -dontwarn org.jcodings.**
 
+# 本段 tree-sitter 相关 keep 规则同属 LGPL-2.1 可重链接义务的一部分（见上方 LGPL-2.1 合规注记）。
 # ===== tree-sitter 语法解析 (sora-language-treesitter + android-tree-sitter) =====
 # com.itsaky.androidide.treesitter 是 android-tree-sitter 原生绑定层，
 # 通过 JNI 调用 C 库 libtree-sitter.so，所有类均含 native 方法。

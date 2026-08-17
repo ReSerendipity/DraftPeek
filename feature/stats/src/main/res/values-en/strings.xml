@@ -53,8 +53,10 @@
     <!-- ProfileScreen -->
     <string name="profile_title">Me</string>
     <string name="profile_open_source_license">Open Source Licenses</string>
-    <string name="profile_oss_dialog_text">This app bundles open-source components such as proot (GPL-2.0). The full license text is bundled with the app (assets/licenses/GPL-2.0.txt); source code links are available via the button below.</string>
-    <string name="profile_oss_dialog_source">View proot source</string>
+    <string name="profile_oss_list_intro">This app integrates the following third-party open-source components. Tap an item to view the full license text (bundled under assets/licenses/).</string>
+    <string name="profile_oss_not_bundled">Not bundled</string>
+    <string name="profile_oss_license_load_failed">Failed to load license text</string>
+    <string name="profile_oss_open_source">View source</string>
     <string name="profile_oss_dialog_close">Close</string>
     <string name="profile_section_stats">Stats</string>
     <string name="profile_section_activity">Activity</string>

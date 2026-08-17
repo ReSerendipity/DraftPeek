@@ -12,7 +12,7 @@ DraftPeek 是一款功能强大的 Android 原生文本/代码编辑器，主要
 
 - **多语言语法高亮**：基于 sora-editor (TextMate + Tree-sitter)，支持 40+ 编程语言
 - **Markdown 编辑与预览**：CommonMark 原生解析 + WebView 渲染管线，支持 KaTeX/Mermaid/代码高亮
-- **集成终端**：基于 Proot 的终端模拟器，支持命令执行与会话管理
+- **集成终端**：基于 Proot 架构的终端模拟器（proot 二进制与 rootfs 未随包分发，详见 THIRD_PARTY_NOTICES.md）
 - **文件浏览**：本地/FTP/SFTP 文件系统抽象，支持目录监听、书签、全文搜索
 - **安全加固**：Native C 反调试 + Play Integrity + APK/DEX 校验 + AES-256-GCM 加密
 - **多标签页编辑**：支持同时打开多个文件，快速切换
