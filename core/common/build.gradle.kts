@@ -81,10 +81,13 @@ dependencies {
 
 tasks.withType<Test>().configureEach {
     useJUnitPlatform()
-    finalizedBy(tasks.named("jacocoTestReport"))
 }
 
 // JaCoCo 模块配置
+plugins.withType<com.android.build.gradle.LibraryPlugin> {
+    apply(plugin = "jacoco")
+}
+
 tasks.register<JacocoReport>("jacocoTestReport") {
     group = "verification"
     description = "Generate JaCoCo coverage report for this module"
@@ -92,23 +95,14 @@ tasks.register<JacocoReport>("jacocoTestReport") {
     reports {
         xml.required.set(true)
         html.required.set(true)
-        xml.outputLocation.set(file("$buildDir/reports/jacoco/report.xml"))
-        html.outputLocation.set(file("$buildDir/reports/jacoco/html"))
     }
 
-    val classDirectories = fileTree("$buildDir/intermediates/classes/debug") {
-        exclude("**/R.class", "**/R$*.class", "**/BuildConfig.*", "**/Manifest.*")
+    sourceDirectories.setFrom(files("$projectDir/src/main/java", "$projectDir/src/main/kotlin"))
+    
+    val classDirs = fileTree("$buildDir/intermediates/classes/debug") {
+        exclude("**/R.class", "**/R\$*.class", "**/BuildConfig.*", "**/Manifest.*")
     }
-
-    val sourceDirectories = fileTree("$projectDir/src/main/java")
-
-    val executionData = fileTree("$buildDir/outputs") {
-        include("**/*.exec", "**/*.ec")
-    }
-
-    sourceDirectories.setFrom(sourceDirectories)
-    classDirectories.setFrom(classDirectories)
-    executionData.setFrom(executionData)
-
-    dependsOn(tasks.named("testDebugUnitTest"))
+    classDirectories.setFrom(classDirs)
+    
+    executionData.setFrom(files("$buildDir/outputs/unit_test_code_coverage/debugUnitTest/testDebugUnitTest.exec"))
 }
