@@ -200,7 +200,7 @@ def _extract_client_token(websocket: WebSocketServerProtocol, path: str) -> str:
     return ""
 
 
-async def handle_client(websocket: WebSocketServerProtocol, path: str):
+async def handle_client(websocket: WebSocketServerProtocol, path: str = ""):
     """
     Handle a WebSocket client connection.
 
