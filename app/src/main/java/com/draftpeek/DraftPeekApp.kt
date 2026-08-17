@@ -36,7 +36,7 @@ import com.draftpeek.security.AntiDebug
 import com.draftpeek.security.ApkIntegrityChecker
 import com.draftpeek.security.DexIntegrityChecker
 import com.draftpeek.security.LegalDeterrence
-import com.draftpeek.security.PlayIntegrityChecker
+
 import com.draftpeek.security.SecurityIntegrityChecker
 import dagger.hilt.android.HiltAndroidApp
 import kotlinx.coroutines.CoroutineExceptionHandler
@@ -243,28 +243,6 @@ class DraftPeekApp : Application() {
             // 3. 安全代码完整性自校验（检测安全类是否被篡改）
             val securityCodeResult = SecurityIntegrityChecker.verifyIntegrity(this@DraftPeekApp)
             val securityCodeOk = securityCodeResult is SecurityIntegrityChecker.IntegrityCheckResult.Verified
-
-            // 4. VULN-009: Google Play Integrity API 检查（异步，不阻塞完整性判定）
-            // Play Integrity 检查作为辅助信号，不影响主完整性判定
-            // （完整验证需要后端服务器，此处仅检查 API 可用性）
-            launch {
-                try {
-                    val playResult = PlayIntegrityChecker.requestIntegrityToken(this@DraftPeekApp)
-                    when (playResult) {
-                        is PlayIntegrityChecker.IntegrityCheckResult.Success -> {
-                            // Play 服务可用且 token 获取成功
-                        }
-                        is PlayIntegrityChecker.IntegrityCheckResult.NoPlayServices -> {
-                            // 设备没有 Play 服务（中性信号）
-                        }
-                        is PlayIntegrityChecker.IntegrityCheckResult.Error -> {
-                            // API 请求失败（记录但不影响主流程）
-                        }
-                    }
-                } catch (_: Exception) {
-                    // Play Integrity 检查失败，忽略
-                }
-            }
 
             val verified = signatureOk && dexOk && securityCodeOk
             isIntegrityVerified = verified
