@@ -52,42 +52,18 @@ spotless {
 }
 
 // JaCoCo 代码覆盖率配置
-tasks.register("jacocoTestReport", JacocoReport::class) {
-    group = "verification"
-    description = "Generate JaCoCo code coverage report"
-
-    reports {
-        xml.required.set(true)
-        html.required.set(true)
-        csv.required.set(false)
-        xml.outputLocation.set(file("$buildDir/reports/jacoco/report.xml"))
-        html.outputLocation.set(file("$buildDir/reports/jacoco/html"))
+subprojects {
+    plugins.withType<com.android.build.gradle.LibraryPlugin> {
+        apply(plugin = "jacoco")
+        
+        tasks.withType<JacocoReport> {
+            group = "verification"
+            description = "Generate JaCoCo coverage report"
+            
+            reports {
+                xml.required.set(true)
+                html.required.set(true)
+            }
+        }
     }
-
-    // 收集所有模块的测试任务和源代码
-    val classDirectories = fileTree(projectDir) {
-        include("**/build/intermediates/classes/debug/**")
-        include("**/build/tmp/kotlin-classes/debug/**")
-        exclude("**/R.class", "**/R$*.class", "**/BuildConfig.*", "**/Manifest.*")
-        exclude("**/*_H.class", "**/*_Factory.class", "**/*_MembersInjector.class")
-        exclude("**/*ComposableSingletons*.*", "**/*Preview*.*")
-        exclude("**/build/**", "**/generated/**")
-    }
-
-    val sourceDirectories = fileTree(projectDir) {
-        include("**/src/main/java/**", "**/src/main/kotlin/**")
-        exclude("**/build/**", "**/generated/**")
-    }
-
-    val executionData = fileTree(projectDir) {
-        include("**/build/outputs/unit_test_code_coverage/debugUnitTest/testDebugUnitTest.exec")
-        include("**/build/jacoco/*.exec")
-        include("**/build/outputs/code_coverage/**/*.ec")
-    }
-
-    sourceDirectories.setFrom(sourceDirectories)
-    classDirectories.setFrom(classDirectories)
-    executionData.setFrom(executionData)
-
-    dependsOn("testDebugUnitTest")
 }
