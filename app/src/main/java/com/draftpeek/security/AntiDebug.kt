@@ -24,6 +24,7 @@ import java.net.InetSocketAddress
 import java.net.Socket
 import java.security.SecureRandom
 import java.util.concurrent.atomic.AtomicInteger
+import java.util.concurrent.atomic.AtomicLong
 
 /**
  * 多层反调试与反注入保护系统。
@@ -52,7 +53,34 @@ object AntiDebug {
 
     // ===== 累积威胁分数（跨多次检测累加，使行为更难预测） =====
     // [Review] C4 fix: 使用 AtomicInteger 替代 @Volatile var，保证原子性
+    //
+    // [Fix] AUDIT-2026-08：原实现只增不减，一旦 HOSTILE 永久降级（误报即锁死）。
+    // 增加滑窗衰减：每 SCORE_DECAY_INTERVAL_MS 将累积分减半一次，
+    // 持续性威胁（每次评估都会重新加分）仍会保持高等级，
+    // 瞬态误报（模拟器测试、临时挂调试器）会在数分钟内自动恢复。
     private val threatScore = AtomicInteger(0)
+    private val lastScoreDecayMs = AtomicLong(System.currentTimeMillis())
+
+    private const val SCORE_DECAY_INTERVAL_MS = 60_000L  // 每 60 秒衰减一次
+    private const val SCORE_DECAY_DIVISOR = 2            // 每次衰减为原来的 1/2
+
+    /**
+     * 威胁分数滑窗衰减：超过衰减间隔后把累积分减半。
+     * 由 [assess] 在每次评估前调用，分数只在被观察时变化。
+     */
+    private fun decayThreatScore() {
+        val now = System.currentTimeMillis()
+        val last = lastScoreDecayMs.get()
+        if (now - last < SCORE_DECAY_INTERVAL_MS) return
+        if (lastScoreDecayMs.compareAndSet(last, now)) {
+            var current = threatScore.get()
+            while (current > 0) {
+                val decayed = current / SCORE_DECAY_DIVISOR
+                if (threatScore.compareAndSet(current, decayed)) break
+                current = threatScore.get()
+            }
+        }
+    }
 
     /**
      * 当前安全等级（供外部模块查询以决定是否限制功能）
@@ -446,7 +474,8 @@ object AntiDebug {
 
     /**
      * 执行全量安全检测，返回威胁等级。
-     * 每次调用会累加威胁分数，使行为随时间推移逐渐升级。
+     * 每次调用会累加威胁分数；累积分按时间窗衰减（见 [decayThreatScore]），
+     * 持续性威胁保持高等级，瞬态误报会在数分钟内自动恢复。
      * 
      * [Review] C4 fix: 使用 AtomicInteger.addAndGet() 原子累加，
      * 保证多线程并发调用的正确性。
@@ -497,6 +526,9 @@ object AntiDebug {
         if (nativeThreats and NativeSecurityChecker.THREAT_ZYGISK != 0) {
             currentThreat += 2  // Native Zygisk 检测
         }
+
+        // [Fix] AUDIT-2026-08：累加前先执行滑窗衰减，瞬态误报可自动恢复
+        decayThreatScore()
 
         // [Review] C4 fix: 原子累加
         val total = threatScore.addAndGet(currentThreat)
