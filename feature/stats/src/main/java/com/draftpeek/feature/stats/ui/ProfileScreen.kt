@@ -775,16 +775,7 @@ fun ProfileScreen(
     }
 
     if (showOpenSourceDialog) {
-        OpenSourceLicenseDialog(
-            onViewSource = {
-                try {
-                    context.startActivity(
-                        Intent(Intent.ACTION_VIEW, Uri.parse("https://github.com/proot-me/proot"))
-                    )
-                } catch (e: Exception) {
-                    Toast.makeText(context, "无法打开浏览器", Toast.LENGTH_SHORT).show()
-                }
-            },
+        OpenSourceLicensesDialog(
             onDismiss = { showOpenSourceDialog = false },
         )
     }
@@ -1913,41 +1904,6 @@ sealed class VerifyAppState {
     data class Success(val fingerprint: String) : VerifyAppState()
     data class Failed(val reason: String) : VerifyAppState()
     data class Error(val message: String) : VerifyAppState()
-}
-
-/**
- * 应用验证对话框
- */
-@Composable
-private fun OpenSourceLicenseDialog(
-    onViewSource: () -> Unit,
-    onDismiss: () -> Unit,
-) {
-    BrandDialog(
-        onDismissRequest = onDismiss,
-        title = { Text(stringResource(R.string.profile_open_source_license)) },
-        content = {
-            Column {
-                Text(
-                    text = stringResource(R.string.profile_oss_dialog_text),
-                    style = androidx.compose.material3.MaterialTheme.typography.bodyMedium,
-                    color = PrototypeTokens.fgSoft,
-                )
-            }
-        },
-        confirmButton = {
-            BrandFilledButton(
-                text = stringResource(R.string.profile_oss_dialog_source),
-                onClick = onViewSource,
-            )
-        },
-        dismissButton = {
-            BrandOutlinedButton(
-                text = stringResource(R.string.profile_oss_dialog_close),
-                onClick = onDismiss,
-            )
-        },
-    )
 }
 
 @Composable

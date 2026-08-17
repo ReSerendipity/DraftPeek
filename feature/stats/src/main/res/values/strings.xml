@@ -52,8 +52,10 @@
     <string name="profile_section_appearance">外观</string>
     <string name="profile_section_about">关于</string>
     <string name="profile_open_source_license">开源许可</string>
-    <string name="profile_oss_dialog_text">本应用内置 proot（GPL-2.0）等开源组件。完整许可文本已随包提供（应用资源 assets/licenses/GPL-2.0.txt），相关组件源码可通过下方按钮查看。</string>
-    <string name="profile_oss_dialog_source">查看 proot 源码</string>
+    <string name="profile_oss_list_intro">本应用集成以下第三方开源组件。点击条目查看许可全文（许可文本随包提供于 assets/licenses/）。</string>
+    <string name="profile_oss_not_bundled">未随包分发</string>
+    <string name="profile_oss_license_load_failed">许可文本加载失败</string>
+    <string name="profile_oss_open_source">查看源码</string>
     <string name="profile_oss_dialog_close">关闭</string>
     <string name="profile_section_danger">危险区域</string>
     <string name="profile_stat_edits">编辑</string>
