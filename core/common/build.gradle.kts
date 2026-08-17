@@ -81,4 +81,34 @@ dependencies {
 
 tasks.withType<Test>().configureEach {
     useJUnitPlatform()
+    finalizedBy(tasks.named("jacocoTestReport"))
+}
+
+// JaCoCo 模块配置
+tasks.register<JacocoReport>("jacocoTestReport") {
+    group = "verification"
+    description = "Generate JaCoCo coverage report for this module"
+
+    reports {
+        xml.required.set(true)
+        html.required.set(true)
+        xml.outputLocation.set(file("$buildDir/reports/jacoco/report.xml"))
+        html.outputLocation.set(file("$buildDir/reports/jacoco/html"))
+    }
+
+    val classDirectories = fileTree("$buildDir/intermediates/classes/debug") {
+        exclude("**/R.class", "**/R$*.class", "**/BuildConfig.*", "**/Manifest.*")
+    }
+
+    val sourceDirectories = fileTree("$projectDir/src/main/java")
+
+    val executionData = fileTree("$buildDir/outputs") {
+        include("**/*.exec", "**/*.ec")
+    }
+
+    sourceDirectories.setFrom(sourceDirectories)
+    classDirectories.setFrom(classDirectories)
+    executionData.setFrom(executionData)
+
+    dependsOn(tasks.named("testDebugUnitTest"))
 }

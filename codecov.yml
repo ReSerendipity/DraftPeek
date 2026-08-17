@@ -1,0 +1,117 @@
+# Codecov 配置文件
+# 用于代码覆盖率报告和阈值检查
+
+codecov:
+  require_ci_to_pass: true
+  notify:
+    wait_for_ci: true
+
+# 覆盖率阈值配置
+coverage:
+  # 全局覆盖率要求
+  status:
+    project:
+      default:
+        # 项目整体覆盖率阈值
+        target: 60%
+        # 允许下降的幅度
+        threshold: 2%
+        # 只检查修改的文件
+        only_pulls: false
+        # 如果覆盖率低于阈值，标记为失败
+        if_not_found: success
+        # 信息性检查（不影响 CI 状态）
+        informational: false
+    
+    # 按模块划分的覆盖率要求
+    project:
+      core-common:
+        target: 70%
+        paths:
+          - core/common/src/main/
+        threshold: 1%
+      core-data:
+        target: 75%
+        paths:
+          - core/data/src/main/
+        threshold: 1%
+      core-network:
+        target: 80%
+        paths:
+          - core/network/src/main/
+        threshold: 1%
+      feature-editor:
+        target: 60%
+        paths:
+          - feature/editor/src/main/
+        threshold: 2%
+      feature-browser:
+        target: 60%
+        paths:
+          - feature/browser/src/main/
+        threshold: 2%
+      app:
+        target: 50%
+        paths:
+          - app/src/main/
+        threshold: 3%
+    
+    # Patch 覆盖率（只检查 PR 修改的代码）
+    patch:
+      default:
+        target: 75%
+        threshold: 5%
+        # 只检查修改的行
+        only_pulls: true
+        informational: false
+
+# 解析配置
+parsers:
+  gcov:
+    include:
+      - "**/*.gcov"
+  javac:
+    include:
+      - "**/*.jacoco.xml"
+
+# 忽略的文件和目录
+ignore:
+  - "**/build/**"
+  - "**/generated/**"
+  - "**/*_H.java"  # Dagger 生成的类
+  - "**/*_Factory.java"
+  - "**/*_MembersInjector.java"
+  - "**/R.java"
+  - "**/BR.java"
+  - "**/*Activity.kt"  # UI 活动类通常难以测试
+  - "**/*ComposableSingletons*"
+  - "**/*Preview*"
+  - "app/src/androidTest/**"  # 忽略 UI 测试本身
+  - "**/*Test.kt"  # 忽略测试文件
+  - "**/*Mock*.kt"  # 忽略模拟类
+
+# 覆盖率报告评论配置
+comment:
+  layout: "reach, diff, flags, files"
+  behavior: default
+  require_changes: false
+  require_base: false
+  require_head: true
+  hide_project_coverage: false
+  # 只显示覆盖率低于阈值的文件
+  after_n_builds: 1
+
+# 旗帜配置（用于区分不同类型的测试）
+flags:
+  unit-tests:
+    paths:
+      - "**/src/test/"
+    carryforward: true
+  integration-tests:
+    paths:
+      - "**/src/androidTest/"
+    carryforward: true
+  ui-tests:
+    paths:
+      - "**/src/androidTest/"
+    carryforward: true

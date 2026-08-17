@@ -133,6 +133,80 @@ app/ ──→ feature/* ──→ core/*
 
 **依赖规则**：`app` → `feature/*` → `core/*`。Feature 之间允许跨模块依赖。
 
+## 测试与覆盖率
+
+### 运行测试
+
+```bash
+# 运行所有单元测试
+./gradlew testDebugUnitTest
+
+# 运行特定模块测试
+./gradlew :core:common:testDebugUnitTest
+./gradlew :core:data:testDebugUnitTest
+./gradlew :feature:editor:testDebugUnitTest
+
+# 运行 UI/集成测试（需要模拟器或真机）
+./gradlew connectedAndroidTest
+
+# 运行特定测试类
+./gradlew :core:common:testDebugUnitTest --tests "*GitHubApiContractTest*"
+./gradlew :core:data:testDebugUnitTest --tests "*SnippetRepositoryDaoIntegrationTest*"
+./gradlew :core:common:testDebugUnitTest --tests "*ChaosEngineeringTest*"
+```
+
+### 生成覆盖率报告
+
+```bash
+# Windows
+scripts\coverage.bat
+
+# Linux/macOS
+./scripts/coverage.sh
+
+# 手动生成
+./gradlew jacocoTestReport
+```
+
+报告输出位置：
+- HTML: `build/reports/jacoco/html/index.html`
+- XML: `build/reports/jacoco/report.xml`
+
+### 测试金字塔
+
+DraftPeek 遵循测试金字塔模型：
+
+```
+        /\
+       /  \      UI/E2E 测试 (Android Instrumentation)
+      /----\    - 用户旅程测试
+     /      \   - 可访问性测试
+    /--------\
+   /          \  集成测试
+  /            \ - Repository + Room 集成
+ /--------------\ - 跨模块事件总线
+/                \ - API 契约测试 (MockWebServer)
+------------------
+单元测试 (Unit Tests)
+- 业务逻辑验证
+- 混沌工程测试
+- 工具类测试
+```
+
+### 覆盖率阈值
+
+| 模块 | 覆盖率要求 |
+|------|-----------|
+| 项目整体 | 60% |
+| core-common | 70% |
+| core-data | 75% |
+| core-network | 80% |
+| feature-editor | 60% |
+| feature-browser | 60% |
+| app | 50% |
+
+详见 [`codecov.yml`](codecov.yml) 配置。
+
 ## 技术栈
 
 | 领域 | 技术 |
