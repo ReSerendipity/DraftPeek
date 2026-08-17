@@ -5,10 +5,14 @@
 /**
  * Gradle 任务：生成虚假类 Kotlin 源文件。
  *
- * B 层精选：每次构建随机化 30 个虚假类的方法顺序、常量值、方法内无意义计算循环次数，
- * 额外生成 20 个纯数据类 DecoyModel_001 ~ DecoyModel_020，含假字段，无任何引用。
+ * B 层精选：生成 20 个纯数据类 DecoyModel_001 ~ DecoyModel_020，含假字段，无任何引用。
  *
- * 运行方式：./gradlew generateDecoyClasses
+ * [Fix] AUDIT-2026-08：生成改为固定种子（可复现构建、不破坏增量编译、内容不变不重写文件），
+ * 字段名改为中性占位名，避免 secret-scan 对 apiKey/salt/iv/token 等假字段误报。
+ *
+ * 运行方式：本任务当前未注册进构建脚本（./gradlew generateDecoyClasses 尚不可用）；
+ * 如需启用，在 convention 插件中 tasks.register<GenerateDecoyClassesTask>("generateDecoyClasses")
+ * 并将输出目录接入 sourceSets.main.kotlin.srcDir。
  * 输出目录：app/src/main/java/com/draftpeek/security/decoy/generated/
  *
  * @author DraftPeek Team
@@ -55,24 +59,30 @@ abstract class GenerateDecoyClassesTask : DefaultTask() {
     )
 
     private val fakeFieldNames = listOf(
-        "userId", "licenseToken", "serverNonce", "authToken", "sessionId",
-        "deviceId", "apiKey", "secretHash", "encryptKey", "signKey",
-        "accessToken", "refreshToken", "certificate", "signature", "digest",
-        "salt", "iv", "mac", "tag", "checksum",
+        "placeholderA", "placeholderB", "placeholderC", "placeholderD",
+        "dummyValue", "fillerField", "stubEntry", "noiseBuffer",
+        "paddingData", "junkPayload", "fakeMetric", "obfuscatedField",
+        "sampleText", "testValue", "mockData", "blankRecord",
     )
+
+    // 固定种子：同一次提交的构建产物逐字节一致，不破坏增量编译与可复现构建。
+    // 如需每版本不同的诱饵，可改为基于版本名/commit 哈希派生的种子。
+    private val random = Random(0xDEC0_1CE5)
 
     @TaskAction
     fun generate() {
         val outputDir = project.file("src/main/java/com/draftpeek/security/decoy/generated")
         outputDir.mkdirs()
 
-        // 生成 20 个纯数据类
+        // 生成 20 个纯数据类（固定种子，内容确定）
         for (i in 1..20) {
             val className = "DecoyModel_${i.toString().padStart(3, '0')}"
-            val moralityVariant = moralityVariants[Random.nextInt(moralityVariants.size)]
-            val fields = (0..Random.nextInt(2, 6)).joinToString("\n") {
-                val fieldName = fakeFieldNames[Random.nextInt(fakeFieldNames.size)]
-                val fieldType = listOf("String", "Long", "Int", "ByteArray")[Random.nextInt(4)]
+            val moralityVariant = moralityVariants[random.nextInt(moralityVariants.size)]
+            // 不放回抽样（shuffled + take）：保证字段名唯一，
+            // 避免同名属性导致 Kotlin "Conflicting declarations" 编译错误
+            val fields = fakeFieldNames.shuffled(random).take(random.nextInt(2, 6) + 1).joinToString("\n") {
+                val fieldName = it
+                val fieldType = listOf("String", "Long", "Int", "ByteArray")[random.nextInt(4)]
                 "    val $fieldName: $fieldType? = null"
             }
 
@@ -89,7 +99,11 @@ abstract class GenerateDecoyClassesTask : DefaultTask() {
                 )
             """.trimIndent()
 
-            File(outputDir, "$className.kt").writeText(content)
+            val file = File(outputDir, "$className.kt")
+            // 内容未变化时不重写，避免每次构建都触碰文件 mtime 破坏增量编译
+            if (!file.exists() || file.readText() != content) {
+                file.writeText(content)
+            }
         }
 
         logger.lifecycle("Generated 20 decoy model classes in ${outputDir.absolutePath}")
