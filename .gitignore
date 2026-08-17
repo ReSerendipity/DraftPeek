@@ -134,3 +134,8 @@ design_system_draft.md
 
 # Cloned learning repos (research reference only, not part of project)
 references/
+
+
+# Python
+__pycache__/
+*.py[cod]
