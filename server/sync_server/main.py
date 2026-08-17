@@ -24,6 +24,13 @@ API Endpoints:
     GET    /sync/health          - Health check
 
 References: Joplin Server, Syncthing, Dropbox API
+
+Status note (2026-08-17):
+    This REST file-sync service overlaps the "sync backend" domain with
+    server/crdt_server.py (WebSocket CRDT collaboration, port 8080). Neither
+    server currently has a wired client; keep both only if both product
+    capabilities (file sync AND realtime collaboration) are planned,
+    otherwise archive one.
 """
 
 import base64

@@ -25,6 +25,14 @@ References:
     - Yjs: https://github.com/yjs/yjs
     - ypy: https://github.com/y-crdt/ypy
     - y-websocket protocol: https://github.com/yjs/y-websocket
+
+Protocol note:
+    Message framing follows y-protocols sync:
+      [0, 0, stateVector]  sync step1 (client -> server)
+      [0, 1, update]       sync step2 (server -> client, answer to step1)
+      [0, 2, update]       sync update  (broadcast)
+    On join the server no longer pushes a bare state vector; it waits for the
+    client's sync step1 and answers with sync step2.
 """
 
 import asyncio
@@ -62,6 +70,30 @@ AUTH_TOKEN = os.environ.get("CRDT_TOKEN", "").strip()
 # Room management: each room is a Yjs document shared among connected clients
 rooms: Dict[str, "Room"] = {}
 
+# --- y-protocols sync framing (see module docstring) ---
+MSG_SYNC = 0
+SYNC_STEP1 = 0
+SYNC_STEP2 = 1
+SYNC_UPDATE = 2
+
+
+def encode_sync_step2(update: bytes) -> bytes:
+    """Wrap an update into a sync step2 frame: [0, 1, update]."""
+    return bytes([MSG_SYNC, SYNC_STEP2]) + update
+
+
+def encode_sync_update(update: bytes) -> bytes:
+    """Wrap an update into a sync update frame: [0, 2, update]."""
+    return bytes([MSG_SYNC, SYNC_UPDATE]) + update
+
+
+def decode_sync_payload(message: bytes):
+    """Return (sync_step, payload) for a sync frame, else (None, message)."""
+    if len(message) >= 2 and message[0] == MSG_SYNC:
+        if message[1] in (SYNC_STEP1, SYNC_STEP2, SYNC_UPDATE):
+            return message[1], message[2:]
+    return None, message
+
 
 class Room:
     """Represents a collaborative document room."""
@@ -83,11 +115,9 @@ class Room:
             f"Total clients: {len(self.clients)}"
         )
 
-        # Send current document state to new client
-        if self.doc and YPY_AVAILABLE:
-            # Yjs sync step 1: send state vector to new client
-            state_vector = self.doc.get_state()
-            await websocket.send(state_vector)
+        # 按 y-websocket 协议，服务端不主动推送裸 state vector；
+        # 新客户端发送 sync step1（state vector），由 handle_client 以
+        # sync step2（update）应答，完成 step1/step2 握手。
 
     async def remove_client(self, websocket: WebSocketServerProtocol):
         """Remove a client from the room."""
@@ -96,27 +126,50 @@ class Room:
             f"Client left room '{self.room_id}'. "
             f"Remaining clients: {len(self.clients)}"
         )
-        # Clean up empty rooms
-        if not self.clients:
+        # Clean up empty rooms.
+        # 竞态防护：仅当 rooms 字典仍指向本房间时才删除，避免误删
+        # 在 add_client 挂起期间被新客户端重新引用的房间。
+        if not self.clients and rooms.get(self.room_id) is self:
             del rooms[self.room_id]
             logger.info(f"Room deleted (empty): {self.room_id}")
 
     async def broadcast_update(self, update: bytes, exclude: WebSocketServerProtocol = None):
-        """Broadcast an update to all clients in the room except the sender."""
+        """Broadcast an update to all clients in the room except the sender.
+
+        Outgoing updates are wrapped in a sync update frame ([0, 2, update])
+        per y-protocols.
+        """
         if self.doc and YPY_AVAILABLE:
             self.doc.apply_update(update)
 
+        framed = encode_sync_update(update)
         disconnected = set()
         for client in self.clients:
             if client != exclude:
                 try:
-                    await client.send(update)
+                    await client.send(framed)
                 except websockets.ConnectionClosed:
                     disconnected.add(client)
 
         # Clean up disconnected clients
         for client in disconnected:
             self.clients.discard(client)
+
+
+    async def reply_sync_step2(self, websocket: WebSocketServerProtocol, state_vector: bytes):
+        """Answer a sync step1 with a sync step2 carrying the diff update.
+
+        The update transforms a document whose state equals ``state_vector``
+        into the current server-side document state.
+        """
+        if not (self.doc and YPY_AVAILABLE):
+            logger.warning("ypy not available; cannot answer sync step1 for room '%s'", self.room_id)
+            return
+        try:
+            update = self.doc.get_update(state_vector)
+            await websocket.send(encode_sync_step2(update))
+        except Exception as exc:
+            logger.error("Failed to compute sync step2 for room '%s': %s", self.room_id, exc)
 
 
 def get_or_create_room(room_id: str) -> Room:
@@ -177,12 +230,26 @@ async def handle_client(websocket: WebSocketServerProtocol, path: str):
     room = get_or_create_room(room_id)
     await room.add_client(websocket)
 
+    # 竞态防护：add_client 挂起期间，若最后一个旧客户端离开导致房间被删除，
+    # 本客户端会挂在已脱离 rooms 字典的孤儿房间上；此处校验并重新加入当前房间。
+    if rooms.get(room_id) is not room:
+        await room.remove_client(websocket)
+        room = get_or_create_room(room_id)
+        await room.add_client(websocket)
+
     try:
         async for message in websocket:
-            # Process Yjs protocol messages
             if isinstance(message, bytes):
-                # Binary message: Yjs update
-                await room.broadcast_update(message, exclude=websocket)
+                sync_step, payload = decode_sync_payload(message)
+                if sync_step == SYNC_STEP1:
+                    # sync step1：客户端发来 state vector，服务端应答 step2
+                    await room.reply_sync_step2(websocket, payload)
+                elif sync_step in (SYNC_STEP2, SYNC_UPDATE):
+                    # sync step2 / update：应用到文档并广播给其他客户端
+                    await room.broadcast_update(payload, exclude=websocket)
+                else:
+                    # 未带 sync 帧头的裸二进制：按裸 update 兼容处理
+                    await room.broadcast_update(message, exclude=websocket)
             elif isinstance(message, str):
                 # Text message: could be sync protocol step
                 logger.debug(f"Received text message in room '{room_id}': {message[:100]}")
