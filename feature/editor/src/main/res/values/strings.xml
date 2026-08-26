@@ -243,6 +243,9 @@ graph TD
 
     <!-- Outline -->
     <string name="editor_no_headings">未找到标题</string>
+    <string name="editor_backlinks">反向链接</string>
+    <string name="editor_backlinks_empty">暂无其他文档引用本文档</string>
+    <string name="editor_backlinks_open_failed">无法打开该引用文档</string>
 
     <!-- Diff -->
     <string name="editor_diff_count">%1$d 处差异</string>

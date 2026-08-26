@@ -117,6 +117,88 @@ class TabManagerTest {
     }
 
     @Nested
+    @DisplayName("reorderTab()")
+    inner class ReorderTabTests {
+
+        @Test
+        @DisplayName("将标签页移到列表中间位置")
+        fun moveTab_toMiddle_reorders() {
+            val id1 = tabManager.openTab("content://f1.kt", "f1.kt", "kotlin")
+            val id2 = tabManager.openTab("content://f2.kt", "f2.kt", "kotlin")
+            val id3 = tabManager.openTab("content://f3.kt", "f3.kt", "kotlin")
+
+            // Move first tab to index 2 (end)
+            tabManager.reorderTab(id1, 2)
+
+            val ids = tabManager.tabs.value.map { it.id }
+            assertEquals(listOf(id2, id3, id1), ids)
+        }
+
+        @Test
+        @DisplayName("将中间标签移到开头")
+        fun moveMiddleTab_toFirst_reorders() {
+            val id1 = tabManager.openTab("content://f1.kt", "f1.kt", "kotlin")
+            val id2 = tabManager.openTab("content://f2.kt", "f2.kt", "kotlin")
+            val id3 = tabManager.openTab("content://f3.kt", "f3.kt", "kotlin")
+
+            tabManager.reorderTab(id2, 0)
+
+            val ids = tabManager.tabs.value.map { it.id }
+            assertEquals(listOf(id2, id1, id3), ids)
+        }
+
+        @Test
+        @DisplayName("移到相同的索引时不改变顺序")
+        fun moveToSameIndex_noChange() {
+            val id1 = tabManager.openTab("content://f1.kt", "f1.kt", "kotlin")
+            val id2 = tabManager.openTab("content://f2.kt", "f2.kt", "kotlin")
+
+            tabManager.reorderTab(id1, 0)
+
+            val ids = tabManager.tabs.value.map { it.id }
+            assertEquals(listOf(id1, id2), ids)
+        }
+
+        @Test
+        @DisplayName("索引越界时自动钳制到合法范围")
+        fun outOfBoundsIndex_clamped() {
+            val id1 = tabManager.openTab("content://f1.kt", "f1.kt", "kotlin")
+            val id2 = tabManager.openTab("content://f2.kt", "f2.kt", "kotlin")
+            val id3 = tabManager.openTab("content://f3.kt", "f3.kt", "kotlin")
+
+            tabManager.reorderTab(id1, 99)
+
+            val ids = tabManager.tabs.value.map { it.id }
+            assertEquals(listOf(id2, id3, id1), ids)
+        }
+
+        @Test
+        @DisplayName("移动不存在的标签 ID 时不改变任何状态")
+        fun moveNonExistentId_noEffect() {
+            val id1 = tabManager.openTab("content://f1.kt", "f1.kt", "kotlin")
+            val id2 = tabManager.openTab("content://f2.kt", "f2.kt", "kotlin")
+            val before = tabManager.tabs.value
+
+            tabManager.reorderTab(TabId.generate(), 0)
+
+            assertEquals(before, tabManager.tabs.value)
+            assertEquals(id2, tabManager.activeTabId.value)
+        }
+
+        @Test
+        @DisplayName("重排后重建索引，可通过 URI 查找")
+        fun reorder_rebuildsIndex() {
+            val id1 = tabManager.openTab("content://f1.kt", "f1.kt", "kotlin")
+            val id2 = tabManager.openTab("content://f2.kt", "f2.kt", "kotlin")
+
+            tabManager.reorderTab(id2, 0)
+
+            assertEquals(id2, tabManager.findTabByUri("content://f2.kt")?.id)
+            assertEquals(id1, tabManager.findTabByUri("content://f1.kt")?.id)
+        }
+    }
+
+    @Nested
     @DisplayName("setActiveTab()")
     inner class SetActiveTabTests {
 

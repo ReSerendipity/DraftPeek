@@ -324,6 +324,7 @@ fun EditorScreen(
 
     // Delete file state
     var showDeleteFileDialog by remember { mutableStateOf(false) }
+    var showBacklinksDialog by remember { mutableStateOf(false) }
 
     // Export file state
     val exportLauncher = rememberLauncherForActivityResult(
@@ -1191,6 +1192,22 @@ fun EditorScreen(
                                     showSaveSnippetDialog = true
                                 },
                             )
+                            if ((uiState as? EditorUiState.Success)?.isMarkdownFile == true) {
+                                DropdownMenuItem(
+                                    text = { Text(text = stringResource(R.string.editor_backlinks), color = fg) },
+                                    leadingIcon = {
+                                        StrokeIcon(
+                                            icon = StrokeIcons.Link,
+                                            contentDescription = null,
+                                            tint = fgSoft,
+                                        )
+                                    },
+                                    onClick = {
+                                        showMoreMenu = false
+                                        showBacklinksDialog = true
+                                    },
+                                )
+                            }
                             DropdownMenuItem(
                                 text = { Text(text = stringResource(R.string.editor_insert_snippet), color = fg) },
                                 leadingIcon = {
@@ -1289,6 +1306,9 @@ fun EditorScreen(
                     onNavigateUp()
                 }
             },
+            onTabReorder = { tabId, toIndex ->
+                viewModel.reorderTab(tabId, toIndex)
+            },
         )
 
         // ---- Content Area ----
@@ -1363,6 +1383,34 @@ title = { Text(text = stringResource(R.string.editor_delete_file)) },
                 dismissButton = {
                     BrandOutlinedButton(text = stringResource(R.string.editor_cancel), onClick = { showDeleteFileDialog = false })
                 },
+            )
+        }
+
+        // Backlinks Dialog (当前文档的反向链接)
+        if (showBacklinksDialog) {
+            val backlinks = viewModel.backlinks.collectAsStateWithLifecycle().value
+            val context = LocalContext.current
+            BacklinksDialog(
+                backlinks = backlinks,
+                onBacklinkClick = { source ->
+                    showBacklinksDialog = false
+                    // 用系统打开方式尝试展示引用来源文档（SAF URI 或内部文件路径）
+                    try {
+                        val uri = android.net.Uri.parse(source)
+                        val intent = Intent(Intent.ACTION_VIEW).apply {
+                            setDataAndType(uri, "*/*")
+                            addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION)
+                        }
+                        context.startActivity(intent)
+                    } catch (e: Exception) {
+                        Toast.makeText(
+                            context,
+                            context.getString(R.string.editor_backlinks_open_failed),
+                            Toast.LENGTH_SHORT,
+                        ).show()
+                    }
+                },
+                onDismiss = { showBacklinksDialog = false },
             )
         }
 

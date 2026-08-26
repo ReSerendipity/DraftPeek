@@ -99,6 +99,9 @@ graph TD
     <string name="editor_split_view">分割表示</string>
     <string name="editor_edit">編集</string>
     <string name="editor_outline">アウトライン</string>
+    <string name="editor_backlinks">バックリンク</string>
+    <string name="editor_backlinks_empty">この文書を参照している他の文書はありません</string>
+    <string name="editor_backlinks_open_failed">参照文書を開けませんでした</string>
     <string name="editor_focus_mode">集中モード</string>
     <string name="editor_exit_focus">集中モード解除</string>
     <string name="editor_typewriter_mode">タイプライターモード</string>

@@ -139,6 +139,9 @@ graph TD
     <string name="editor_split_view">Split View</string>
     <string name="editor_edit">Edit</string>
     <string name="editor_outline">Outline</string>
+    <string name="editor_backlinks">Backlinks</string>
+    <string name="editor_backlinks_empty">No other documents reference this file</string>
+    <string name="editor_backlinks_open_failed">Unable to open the referenced document</string>
     <string name="editor_focus_mode">Focus Mode</string>
     <string name="editor_exit_focus">Exit Focus</string>
     <string name="editor_typewriter_mode">Typewriter Mode</string>
