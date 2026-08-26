@@ -22,6 +22,7 @@ import android.content.Context
 import android.util.Log
 import androidx.room.Room
 import com.draftpeek.core.data.dao.BookmarkDao
+import com.draftpeek.core.data.dao.LinkDao
 import com.draftpeek.core.data.dao.RecentFileDao
 import com.draftpeek.core.data.dao.SnippetDao
 import com.draftpeek.core.data.dao.UserActivityDao
@@ -29,6 +30,8 @@ import com.draftpeek.core.data.dao.SecurityEventDao
 import com.draftpeek.core.data.db.AppDatabase
 import com.draftpeek.core.data.repository.BookmarkRepository
 import com.draftpeek.core.data.repository.BookmarkRepositoryImpl
+import com.draftpeek.core.data.repository.LinkRepository
+import com.draftpeek.core.data.repository.LinkRepositoryImpl
 import com.draftpeek.core.data.repository.RecentFilesRepository
 import com.draftpeek.core.data.repository.RecentFilesRepositoryImpl
 import com.draftpeek.core.data.repository.SnippetRepository
@@ -63,6 +66,10 @@ abstract class DataModule {
     @Binds
     @Singleton
     abstract fun bindBookmarkRepository(impl: BookmarkRepositoryImpl): BookmarkRepository
+
+    @Binds
+    @Singleton
+    abstract fun bindLinkRepository(impl: LinkRepositoryImpl): LinkRepository
 
     @Binds
     @Singleton
@@ -151,6 +158,7 @@ abstract class DataModule {
                     AppDatabase.MIGRATION_8_9,
                     AppDatabase.MIGRATION_9_10,
                     AppDatabase.MIGRATION_10_11,
+                    AppDatabase.MIGRATION_11_12,
                 )
                 .fallbackToDestructiveMigrationOnDowngrade(dropAllTables = true)
                 // 不使用 fallbackToDestructiveMigration —— 升级迁移失败时应抛出异常
@@ -173,6 +181,9 @@ abstract class DataModule {
 
         @Provides
         fun provideBookmarkDao(db: AppDatabase): BookmarkDao = db.bookmarkDao()
+
+        @Provides
+        fun provideLinkDao(db: AppDatabase): LinkDao = db.linkDao()
 
         @Provides
         fun provideRecentFileDao(db: AppDatabase): RecentFileDao = db.recentFileDao()
