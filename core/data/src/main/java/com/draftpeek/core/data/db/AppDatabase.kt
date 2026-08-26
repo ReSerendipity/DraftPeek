@@ -28,10 +28,12 @@ import androidx.room.RoomDatabase
 import androidx.room.migration.Migration
 import androidx.sqlite.db.SupportSQLiteDatabase
 import com.draftpeek.core.data.dao.BookmarkDao
+import com.draftpeek.core.data.dao.LinkDao
 import com.draftpeek.core.data.dao.RecentFileDao
 import com.draftpeek.core.data.dao.SnippetDao
 import com.draftpeek.core.data.dao.UserActivityDao
 import com.draftpeek.core.data.entity.BookmarkEntity
+import com.draftpeek.core.data.entity.LinkEntity
 import com.draftpeek.core.data.entity.RecentFile
 import com.draftpeek.core.data.entity.SecurityEventEntity
 import com.draftpeek.core.data.entity.Snippet
@@ -44,13 +46,13 @@ import com.draftpeek.core.data.dao.SecurityEventDao
  *
  * 包含所有数据表定义、DAO 访问接口、数据库迁移逻辑和初始数据填充回调。
  *
- * @property version 当前数据库版本号 = 10
+ * @property version 当前数据库版本号 = 12
  * @property exportSchema 是否导出 schema 到 JSON 文件（用于迁移测试）
  * @property entities 所有数据库实体类列表
  */
 @Database(
-    entities = [BookmarkEntity::class, RecentFile::class, Snippet::class, SnippetFts::class, UserActivity::class, SecurityEventEntity::class],
-    version = 11,
+    entities = [BookmarkEntity::class, LinkEntity::class, RecentFile::class, Snippet::class, SnippetFts::class, UserActivity::class, SecurityEventEntity::class],
+    version = 12,
     exportSchema = true,
 )
 abstract class AppDatabase : RoomDatabase() {
@@ -59,6 +61,12 @@ abstract class AppDatabase : RoomDatabase() {
      * @return [BookmarkDao] 书签表的 DAO 接口
      */
     abstract fun bookmarkDao(): BookmarkDao
+
+    /**
+     * 获取双向链接数据访问对象。
+     * @return [LinkDao] 链接表的 DAO 接口
+     */
+    abstract fun linkDao(): LinkDao
 
     /**
      * 获取最近文件数据访问对象。
@@ -388,6 +396,33 @@ abstract class AppDatabase : RoomDatabase() {
                 )
                 db.execSQL("CREATE INDEX IF NOT EXISTS index_security_events_timestampEpochMs ON security_events(timestampEpochMs)")
                 db.execSQL("CREATE INDEX IF NOT EXISTS index_security_events_eventType ON security_events(eventType)")
+            }
+        }
+
+        /**
+         * 数据库迁移：版本 11 → 12。
+         *
+         * 创建 `links` 双向链接表，存储 Markdown `[[目标标题]]` 双链语法产生的
+         * 单向引用关系（sourceUri → targetTitle）。通过反向查询实现反向链接：
+         * - 唯一索引 (sourceUri, targetTitle)：同一文档对同一目标去重
+         * - 普通索引 targetTitle：反向链接查询（按被引用标题查来源）
+         * - 普通索引 sourceUri：正向链接查询（按来源查目标）
+         */
+        val MIGRATION_11_12 = object : Migration(11, 12) {
+            override fun migrate(db: SupportSQLiteDatabase) {
+                db.execSQL(
+                    """
+                    CREATE TABLE IF NOT EXISTS links (
+                        id INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL,
+                        sourceUri TEXT NOT NULL,
+                        targetTitle TEXT NOT NULL,
+                        updatedAt INTEGER NOT NULL
+                    )
+                    """.trimIndent()
+                )
+                db.execSQL("CREATE UNIQUE INDEX IF NOT EXISTS index_links_sourceUri_targetTitle ON links(sourceUri, targetTitle)")
+                db.execSQL("CREATE INDEX IF NOT EXISTS index_links_targetTitle ON links(targetTitle)")
+                db.execSQL("CREATE INDEX IF NOT EXISTS index_links_sourceUri ON links(sourceUri)")
             }
         }
 
