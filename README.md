@@ -307,48 +307,78 @@ scripts\run-unit-tests.bat
 - [docs/CODE_QUALITY_REPORT.md](docs/CODE_QUALITY_REPORT.md) — 代码质量报告
 - [docs/LARGE_FILE_SUPPORT.md](docs/LARGE_FILE_SUPPORT.md) — 大文件支持方案
 
-## ⚠️ Git 分支使用说明
+## ⚠️ Git 分支与仓库安全策略（🚨 **必读，防止源代码泄露**）
 
-**重要**: 本项目已统一使用 main 作为主分支名称。
+本项目采用 **本地私有主分支 + 远程公开展示分支** 的双分支隔离架构。这是本项目的核心安全机制，所有开发者（包括 AI Assistant）**必须严格遵守**。
 
-- **所有开发工作都应该在 \main\ 分支上进行**
-- **请勿再使用 \public\ 分支进行开发**
-- **所有代码提交应直接到 \main\ 分支**
+### 📋 分支定义
 
-历史背景：该项目之前曾创建过一个名为 public 的 orphan branch 用于潜在的公开目的，但现在该策略已变更，所有开发和版本管理都统一到 main 分支。
+| 分支名称 | 位置 | 用途 | 能否推送到 GitHub | 包含内容 |
+|---------|------|------|------------------|---------|
+| **main** | 仅本地存在 | 日常开发与私有工作的主分支 | ❌ **禁止推送** | 完整源代码、加密密钥、敏感配置、所有功能实现代码 |
+| **public** | 本地 + 远程 (`origin/public`) | GitHub 仓库可见内容（`https://github.com/ReSerendipity/DraftPeek`） | ✅ **唯一允许推送的分支** | README、截图、构建脚本、示例配置、文档（**不包含任何 `.kt/.java` 源代码**） |
 
-如需推送远程仓库，请确保推送到 main 分支：
+### 🛑 绝对禁止的行为（会导致源代码或密钥泄露）
+
+- ❌ `git push origin main` —— **会立即将私有源代码上传到 GitHub！**
+- ❌ 在 `public` 分支提交 `.kt` / `.java` / `.cpp` 等源代码文件
+- ❌ 将 `local.properties`（含签名密钥）、`keystore/` 目录添加到 public 分支
+- ❌ 把 secret/key/password 硬编码提交到 Git 历史中
+
+### 🔒 安全工作流程
+
+#### 日常开发（始终在 main 分支）
+
 ```bash
-git push origin main
+# 1. 确保在 main 分支进行开发
+git checkout main
+
+# 2. 正常开发、提交
+git add .
+git commit -m "feat(editor): 实现 xx 功能"
+
+# ⚠️ 注意：只执行 add+commit，不要执行 git push！
+# 你的代码会保留在本地，不会被上传到 GitHub
 ```
 
-## ⚠️ Git 分支使用说明
+#### 同步公共内容到 GitHub（手动操作，谨慎执行）
 
-**重要**: 本项目采用「本地开发 + 远程公开」双分支策略。
-
-- **main 分支 (本地)**: 日常开发与私有工作的**本地主分支**
-- **public 分支 (远程)**: 用于公开发布的**远程分支**
-
-### 📌 开发规范
-
-1. **开发时在 \main\ 分支上提交代码**
-2. **只推送公共内容到 \public\ 分支，绝不要推送 \main\ 分支到远程**
-
-### 🔒 工作流程
-
-**日常开发：**
 ```bash
-git checkout main      # 切换到本地主分支
-git add .              # 添加文件
-git commit -m "..."
-# 本地提交（不会推送到远程）
+# 1. 切换到 public 分支
+git checkout public
+
+# 2. 清理当前状态（回到远端最新状态）
+git reset --hard origin/public
+
+# 3. 只添加非敏感文件（README、截图、文档、构建脚本等）
+git add README.md docs/screenshots/ .gitignore *.gradle.kts ...
+
+# 4. 选择性 cherry-pick 公共提交（如 AGENTS.md 的公开部分、CHANGELOG 等）
+git cherry-pick <commit-hash>  # 只选择非源代码的提交
+
+# 5. 验证是否包含敏感文件
+git status   # 确认只有非源代码文件被修改
+git diff --stat  # 确认没有源代码变更
+
+# 6. 推送到远程（这是唯一允许的 push 操作）
+git push origin public
+
+# 7. 切回 main 分支继续开发
+git checkout main
 ```
 
-**需要公开发布时（手动合并到 public 分支后推送）：**
-```bash
-git checkout public    # 切换到公开发布分支
-git merge main         # 合并本地开发内容（如有需要，可 cherry-pick 特定提交）
-git push origin public # 推送到远程公开分支
-```
+### 🧪 AI 开发时的安全检查清单
 
-⚠️ **警告**: 绝对不要执行 \git push origin main\，否则会将本地私有代码泄露到远程仓库。
+每次提交前，AI Agent **必须** 确认：
+
+- [ ] **当前分支是 `main`**（日常开发用）
+- [ ] 没有 `.kt` / `.java` / `.cpp` 源代码文件要被推送到 remote
+- [ ] 没有 `local.properties` / `*.jks` / `keystore/` 等敏感文件
+- [ ] **不会执行 `git push origin main`**
+- [ ] 如果要推送到 GitHub，已经先在 `public` 分支上验证过
+
+**如果不确定某个文件是否应该公开 → 默认视为不可公开 → 先问用户！**
+
+### 📖 详细说明文档
+
+更多关于双分支安全策略的详细说明，请参阅 [`AGENTS.md`](AGENTS.md) 的第 8 节「Git / 提交规范 & 分支策略」。

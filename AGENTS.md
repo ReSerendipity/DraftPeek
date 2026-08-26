@@ -245,17 +245,74 @@ androidx-room-ktx = { module = "androidx.room:room-ktx", version.ref = "room" }
 
 ---
 
-## 8. Git / 提交规范 & 分支策略
+## 8. Git / 提交规范 & 分支策略（🚨 安全红线，严禁违反）
 
-### 8.1 分支模型（GitHub Flow）
-```
-main          永远可发布，保护分支，禁止直接 push，必须 PR
-  ↗ feature/xxx  新功能开发（从 main checkout）
-  ↗ fix/xxx      Bug 修复（从 main checkout）
-  ↗ chore/xxx    工程化/依赖升级
+### 8.1 ⚠️ 双分支隔离策略（核心原则）
+
+本项目采用 **本地私有主分支 + 远程公开展示分支** 的双分支隔离架构：
+
+| 分支名称 | 类型 | 用途 | 推送远程 | 包含内容 |
+|---------|------|------|---------|---------|
+| **main** | 本地私有分支 | **日常开发与私有工作的主分支** | ❌ **禁止推送到远程** | 完整源代码、加密密钥、敏感配置、所有功能代码 |
+| **public** | 远程公开分支 | **GitHub 仓库的可见内容** | ✅ 只推送这个分支 | README、截图、构建脚本、示例配置（**不含源代码**） |
+
+#### 🛑 绝对禁止的行为（会导致源代码泄露）
+- ❌ `git push origin main` —— 会将私有源代码泄露到 GitHub
+- ❌ 在 public 分支提交 `.kt` / `.java` 源代码文件
+- ❌ 将 `local.properties`（含签名密钥）、`keystore/` 目录推送到任何远程
+- ❌ 把 secret/key/password 硬编码提交到 Git 历史中
+
+### 8.2 🔒 安全工作流程
+
+#### 日常开发（始终在 main 分支）
+```bash
+# 1. 确保在 main 分支
+git checkout main
+
+# 2. 拉取最新的远程变更（仅同步，不合并代码）
+git fetch origin
+
+# 3. 正常开发、提交
+git add .
+git commit -m "feat(editor): xxx 功能"
+
+# ⚠️ 注意：不要执行 git push origin main！
 ```
 
-### 8.2 Commit Message 格式（Conventional Commits）
+#### 同步公共内容到 GitHub（手动操作，谨慎执行）
+```bash
+# 1. 切换到 public 分支
+git checkout public
+
+# 2. 清理当前状态（清空源代码）
+git reset --hard origin/public  # 回到远端最新状态
+
+# 3. 只添加非敏感文件（README、截图、文档等）
+git add README.md docs/screenshots/ .gitignore *.gradle.kts ...
+
+# 4. 选择性 cherry-pick 公共提交（如 AGENTS.md 的公开部分、CHANGELOG 等）
+git cherry-pick <commit-hash>  # 只选择非源代码的提交
+
+# 5. 推送到远程（这是唯一允许的 push 操作）
+git push origin public
+
+# 6. 切回 main 分支继续开发
+git checkout main
+```
+
+### 8.3 🧪 AI 开发时的 Git 检查清单
+
+每次提交前，AI Agent **必须** 确认以下内容不在本次变更中：
+
+- [ ] 没有 `.kt` / `.java` 源代码文件的增删改（除非明确知道这些是公开 API 接口）
+- [ ] 没有 `local.properties` / `*.jks` / `keystore/` 等敏感文件
+- [ ] 没有数据库 schema 导出文件（包含内部实现细节）
+- [ ] 没有在 commit message 里暴露密钥或密码
+- [ ] **确认当前分支是 `main`（本地私有）** → 只 `add` + `commit`，不要 `push`
+- [ ] **如果要推送到 GitHub，必须先在 `public` 分支上验证不包含敏感内容**
+
+### 8.4 📝 Commit Message 格式（Conventional Commits）
+
 ```
 <type>(<scope>): <subject>
 
@@ -264,6 +321,15 @@ main          永远可发布，保护分支，禁止直接 push，必须 PR
 <footer 可选，Fixes #issue / BREAKING CHANGE:>
 ```
 Type 列表：`feat`、`fix`、`docs`、`style`、`refactor`、`perf`、`test`、`chore`、`ci`
+
+### 8.5 🔍 常见错误及修正方法
+
+| 错误场景 | 解决方法 |
+|---------|---------|
+| 不小心 `git push origin main` | 立即在 GitHub 设置中删除该分支；检查是否有敏感信息泄露；考虑更换相关密钥 |
+| public 分支混入了源代码 | `git reset --hard HEAD~N` 回退到上一个干净的提交；重新 cherry-pick 非代码提交 |
+| 不确定某个文件是否应该公开 | 默认视为 **不可公开**；如有疑问，先问用户再决定是否添加到 public 分支 |
+| 想同步新功能到 public 分支 | public 分支通常**不接受新功能代码**；只维护 README、文档、构建脚本等展示性内容 |
 
 ---
 
@@ -404,6 +470,7 @@ GitHub Actions 配置文件存 `.github/workflows/`，共 2 个：
 | 22 | **Turbine `test` 必须手动 `expectNoEvents()`** | 只 `awaitItem()` 断言了一个 item 就 return | Flow 有新 event 没断言到，测试漏覆盖，后续 bug 回归测试没发现 | Turbine `test { awaitItem() → xxx; expectNoEvents() }` 最后必须加 `expectNoEvents()`，确保 Flow 没有意外的后续事件 | 2026-08-08 |
 | 23 | **JUnit5 注解不能与 Robolectric `@RunWith` 混用** | 在 unit test 里用 `@RunWith(RobolectricTestRunner)` + JUnit5 的 `@Nested`/`@DisplayName`/`org.junit.jupiter.api.Test` | 跑 `:app:testDebugUnitTest` 报 `InvalidTestClassError`；或 JVM 下 `android.os.Build.BRAND` 为 null 导致 NPE | 需要 `Build.*` 有值的测试统一用 **JUnit4 风格**：`@RunWith(RobolectricTestRunner)` + `org.junit.Test@Test` + 扁平方法（禁 `@Nested`/`@DisplayName`）；纯逻辑测试用 JUnit5。见 `AntiDebugTest`/`RouteTest`（2026-08-26 修复范式） | 2026-08-26 |
 | 24 | **Room 加表必须同时更新 schema 迁移 + AndroidTest 校验** | 新增 `links` 双向链接表升 DB version 11→12，只改 Entity/@Database/`MIGRATION_11_12` 却漏注册到 `DataModule.addMigrations` | 升级到 v12 时 `IllegalStateException: Room cannot verify the data integrity` 或 `no migration path 11→12` | Entity + @Database version+1 + MIGRATION + **在 `DataModule.provideAppDatabase().addMigrations(...)` 列表加新迁移**，缺一不可；schema 文件会自动导出到 `core/data/schemas/` | 2026-08-26 |
+| 25 | **main/public 双分支绝对禁止混淆** | AI 在 `git push` 前没有检查当前分支状态；或在 public 分支提交源代码 | ❌ **源代码泄露到 GitHub 仓库**；❌ 敏感密钥被公开 | **日常开发只在 main 分支** → 只做 `add` + `commit`，不要 `push`；**推送到远程前必须先 `git checkout public`** → 验证不包含 `.kt/.java/src/` → `git push origin public` 是唯一允许的 push 操作；详见第 8 节 | 2026-08-26 |
 
 ---
 
@@ -471,6 +538,7 @@ GitHub Actions 配置文件存 `.github/workflows/`，共 2 个：
 |:---------:|------|---------|------------|:------------:|
 | v1.0 | 2026-08-10 | 初始建立自进化协议 | 从 DraftPeek 项目健康度评估报告的建议补齐 AGENTS.md，建立自进化协议（5 条铁律 + 自检清单）+ 版本同步修改清单 + CI/CD Workflow section + R8 混淆规则专项 + 22 条 Known Gotchas + 5 个 SOP | v1.2.0 |
 | v1.1 | 2026-08-26 | 编辑器标签拖拽重排 + 双向链接落地；修复存量测试 | 新增 Known Gotchas #23（JUnit5 与 Robolectric `@RunWith` 混用）、#24（Room 加表须同步 schema 迁移 + DataModule 注册），实现 `TabManager.reorderTab` + TabBar 拖拽 / `links` 表 + `MarkdownLinkParser`（被 AGENTS.md 自进化铁律 #2 记录） | v1.2.0 |
+| **v1.2** | **2026-08-26** | **双分支安全策略澄清** | **新增第 8 节完整双分支隔离策略（main/public）详解；新增 Gotcha #25 防止源代码泄露；重写安全工作流程和常见错误修正方法；更新修订记录表** | v1.2.0 |
 
 <!-- 🔄 下次更新 AGENTS.md 时，在上面表格末尾追加新一行，不要删除历史记录 -->
 
