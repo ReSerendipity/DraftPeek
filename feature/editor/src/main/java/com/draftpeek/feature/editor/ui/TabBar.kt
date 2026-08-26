@@ -14,6 +14,7 @@ import androidx.compose.animation.animateColorAsState
 import androidx.compose.animation.core.tween
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
+import androidx.compose.foundation.gestures.detectDragGesturesAfterLongPress
 import androidx.compose.foundation.horizontalScroll
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -21,12 +22,14 @@ import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.offset
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.ui.hapticfeedback.HapticFeedbackType
+import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.platform.LocalHapticFeedback
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
@@ -43,6 +46,8 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.input.pointer.pointerInput
+import androidx.compose.ui.unit.IntOffset
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
@@ -52,6 +57,7 @@ import androidx.compose.ui.unit.sp
 import kotlinx.coroutines.launch
 import com.draftpeek.core.common.model.TabId
 import com.draftpeek.core.ui.component.ConfirmDialog
+import kotlin.math.roundToInt
 import com.draftpeek.core.ui.icon.StrokeIcon
 import com.draftpeek.core.ui.icon.StrokeIcons
 import com.draftpeek.core.ui.theme.CodeTextStyle
@@ -74,6 +80,7 @@ import com.draftpeek.feature.editor.model.EditorTab
  * @param activeTabId 当前激活标签页的 ID
  * @param onTabClick 标签点击回调（切换到该标签）
  * @param onTabClose 标签关闭按钮点击回调
+ * @param onTabReorder 标签拖拽重排回调（(拖拽的标签 ID, 目标索引)），非空时启用长按拖拽重排
  * @param modifier 修饰符
  */
 @Composable
@@ -82,6 +89,7 @@ fun TabBar(
     activeTabId: TabId?,
     onTabClick: (TabId) -> Unit,
     onTabClose: (TabId) -> Unit,
+    onTabReorder: ((TabId, Int) -> Unit)? = null,
     modifier: Modifier = Modifier,
 ) {
     // State for the close-confirmation dialog on modified tabs.
@@ -92,6 +100,14 @@ fun TabBar(
     val surface = PrototypeTokens.surface
     val border = PrototypeTokens.border
     val haptic = LocalHapticFeedback.current
+
+    // Dragging state for tab reorder (long-press drag).
+    // dragOffsetX accumulates the horizontal drag delta since the last swap so the
+    // dragged item visually follows the finger; on crossing an adjacent tab's midpoint
+    // we perform a single adjacent swap and reset the baseline.
+    var dragTabId by remember { mutableStateOf<TabId?>(null) }
+    var dragStartIndex by remember { mutableStateOf(0) }
+    var dragOffsetX by remember { mutableStateOf(0f) }
 
     val scrollState = rememberScrollState()
     val scope = rememberCoroutineScope()
@@ -108,6 +124,14 @@ fun TabBar(
         scope.launch { scrollState.animateScrollTo(offsetPx) }
     }
 
+    /**
+     * Estimate the pixel width of the given tab, matching the prototype metric.
+     */
+    fun estimatedTabWidthPx(tab: EditorTab): Int {
+        val w = ((tab.fileName.length * 7).dp + 40.dp).coerceIn(80.dp, 200.dp)
+        return with(density) { w.roundToPx() }
+    }
+
     Row(
         modifier = modifier
             .fillMaxWidth()
@@ -116,6 +140,55 @@ fun TabBar(
     ) {
         tabs.forEachIndexed { index, tab ->
             val isActive = tab.id == activeTabId
+            val isDraggingThis = dragTabId == tab.id
+            val currentReorder = onTabReorder
+            // 实时重排阶段需要知道被拖标签的"当前"位置，用于乒乓交换判定。
+            val reorderHandler = currentReorder
+            // 水平偏移仅作用于被拖拽的标签，实现跟随手指的视觉效果。
+            val dragModifier = if (isDraggingThis && dragOffsetX != 0f) {
+                Modifier.offset { IntOffset(dragOffsetX.roundToInt(), 0) }
+            } else {
+                Modifier
+            }
+            val reorderModifier = if (reorderHandler != null && tabs.size > 1) {
+                Modifier.pointerInput(tab.id, tabs, reorderHandler) {
+                    detectDragGesturesAfterLongPress(
+                        onDragStart = {
+                            dragTabId = tab.id
+                            dragStartIndex = tabs.indexOfFirst { it.id == tab.id }.coerceAtLeast(0)
+                            dragOffsetX = 0f
+                            haptic.performHapticFeedback(HapticFeedbackType.LongPress)
+                        },
+                        onDrag = { change, dragAmount ->
+                            change.consume()
+                            dragOffsetX += dragAmount.x
+                            // 乒乓交换：累计位移越过左侧/右侧相邻标签一半宽度即交换一次，并重置参照。
+                            val oldIndex = tabs.indexOfFirst { it.id == tab.id }.coerceAtLeast(0)
+                            val neighborIndex = if (dragOffsetX > 0f) oldIndex + 1 else oldIndex - 1
+                            if (neighborIndex in 0 until tabs.size) {
+                                val neighborWidth = estimatedTabWidthPx(tabs[neighborIndex])
+                                val threshold = neighborWidth / 2f
+                                if (dragOffsetX > threshold || dragOffsetX < -threshold) {
+                                    reorderHandler(tab.id, neighborIndex)
+                                    dragStartIndex = neighborIndex
+                                    dragOffsetX = 0f
+                                    haptic.performHapticFeedback(HapticFeedbackType.TextHandleMove)
+                                }
+                            }
+                        },
+                        onDragEnd = {
+                            dragTabId = null
+                            dragOffsetX = 0f
+                        },
+                        onDragCancel = {
+                            dragTabId = null
+                            dragOffsetX = 0f
+                        },
+                    )
+                }
+            } else {
+                Modifier
+            }
             TabItem(
                 tab = tab,
                 isActive = isActive,
@@ -132,6 +205,7 @@ fun TabBar(
                     }
                 },
                 showRightBorder = index < tabs.lastIndex,
+                modifier = dragModifier.then(reorderModifier),
             )
         }
     }
@@ -166,6 +240,7 @@ fun TabBar(
  * @param onClick 点击回调
  * @param onClose 关闭按钮点击回调
  * @param showRightBorder 是否显示右侧边框分隔线
+ * @param modifier 附加修饰符（拖拽手势、位移等）
  */
 @Composable
 private fun TabItem(
@@ -174,6 +249,7 @@ private fun TabItem(
     onClick: () -> Unit,
     onClose: () -> Unit,
     showRightBorder: Boolean,
+    modifier: Modifier = Modifier,
 ) {
     val isDark = LocalDarkTheme.current
     val bgColor by animateColorAsState(
@@ -195,7 +271,7 @@ private fun TabItem(
     val typeColor = FileTypeColors.forExtension(extension, isDark)
 
     Column(
-        modifier = Modifier
+        modifier = modifier
             .clickable(onClick = onClick)
             .background(bgColor),
     ) {

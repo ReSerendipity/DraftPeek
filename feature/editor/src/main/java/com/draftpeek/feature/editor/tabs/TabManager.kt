@@ -263,6 +263,31 @@ class TabManager @Inject constructor() {
     }
 
     /**
+     * 将标签页重排到目标索引（拖拽重排）。
+     *
+     * 从当前列表移除 [tabId] 并插入到 [toIndex] 位置，重建哈希索引。
+     * 索引以重排前列表为基准进行钳制；若 [tabId] 不存在则不做任何修改。
+     * 标签激活状态保持不变。
+     *
+     * @param tabId 要移动的标签页 ID
+     * @param toIndex 重排后的目标索引（0-based），自动钳制到合法范围
+     */
+    fun reorderTab(tabId: TabId, toIndex: Int) {
+        val currentTabs = _tabs.value
+        val fromIndex = currentTabs.indexOfFirst { it.id == tabId }
+        if (fromIndex < 0) return
+        val targetIndex = toIndex.coerceIn(0, currentTabs.lastIndex)
+        if (fromIndex == targetIndex) return
+
+        val mutable = currentTabs.toMutableList()
+        val removed = mutable.removeAt(fromIndex)
+        mutable.add(targetIndex, removed)
+        val newTabs = mutable.toImmutableList()
+        _tabs.value = newTabs
+        rebuildIndexes(newTabs)
+    }
+
+    /**
      * 更新标签页的修改状态。
      */
     fun updateTabModified(tabId: TabId, isModified: Boolean) {

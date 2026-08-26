@@ -32,6 +32,8 @@ import com.draftpeek.feature.editor.model.OutlineHeading
  * @param headings 从文档解析出的标题列表
  * @param onHeadingClick 标题点击回调，参数为标题所在行的 0-based 索引
  * @param onDismiss 请求关闭抽屉的回调
+ * @param backlinks 当前文档的反向链接来源文件 URI 列表（可为空，为空则不展示该区块）
+ * @param onBacklinkClick 反向链接点击回调（参数为来源文件 URI）
  * @param modifier 可选修饰符
  */
 @OptIn(ExperimentalMaterial3Api::class)
@@ -40,6 +42,8 @@ fun OutlineDrawer(
     headings: List<OutlineHeading>,
     onHeadingClick: (lineIndex: Int) -> Unit,
     onDismiss: () -> Unit,
+    backlinks: List<String> = emptyList(),
+    onBacklinkClick: (String) -> Unit = {},
     modifier: Modifier = Modifier,
 ) {
     ModalBottomSheet(
@@ -89,6 +93,33 @@ fun OutlineDrawer(
                             overflow = TextOverflow.Ellipsis,
                         )
                     }
+                }
+            }
+
+            // 反向链接区块（引用本文档标题的其他文件）
+            if (backlinks.isNotEmpty()) {
+                HorizontalDivider(
+                    modifier = Modifier.padding(vertical = 12.dp),
+                    color = PrototypeTokens.border,
+                )
+                Text(
+                    text = stringResource(R.string.editor_backlinks),
+                    style = MaterialTheme.typography.titleMedium,
+                    color = PrototypeTokens.fg,
+                    modifier = Modifier.padding(bottom = 8.dp),
+                )
+                backlinks.forEach { source ->
+                    Text(
+                        text = source,
+                        style = MaterialTheme.typography.bodyMedium,
+                        color = PrototypeTokens.accent,
+                        maxLines = 1,
+                        overflow = TextOverflow.Ellipsis,
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .clickable { onBacklinkClick(source) }
+                            .padding(vertical = 8.dp),
+                    )
                 }
             }
         }

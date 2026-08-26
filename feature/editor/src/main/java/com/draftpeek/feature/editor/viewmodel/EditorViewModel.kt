@@ -35,6 +35,7 @@ import com.draftpeek.core.common.security.SecurityGate
 import com.draftpeek.core.common.util.DocumentType
 import com.draftpeek.core.common.util.NetworkConnectivityChecker
 import com.draftpeek.core.common.util.PerformanceBenchmark
+import com.draftpeek.core.data.repository.LinkRepository
 import com.draftpeek.core.data.repository.RecentFilesRepository
 import com.draftpeek.core.data.repository.SnippetRepository
 import com.draftpeek.core.data.repository.UserActivityRepository
@@ -55,6 +56,7 @@ import com.draftpeek.feature.editor.tabs.TabManager
 import com.draftpeek.feature.editor.tabs.TabStateManager
 import com.draftpeek.feature.editor.tabs.TabStateManager.SwitchResult
 import com.draftpeek.feature.editor.tabs.SessionManager
+import com.draftpeek.feature.editor.util.MarkdownLinkParser
 import com.draftpeek.feature.editor.diagnostics.DiagnosticItem
 import com.draftpeek.feature.editor.diagnostics.DiagnosticNavigationState
 import com.draftpeek.feature.editor.diagnostics.moveToNext
@@ -81,6 +83,7 @@ import kotlinx.coroutines.flow.SharedFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asSharedFlow
 import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import com.draftpeek.feature.editor.repository.FileReadProgress
@@ -175,6 +178,7 @@ class EditorViewModel @Inject constructor(
     private val networkChecker: NetworkConnectivityChecker,
     private val sessionManager: SessionManager,
     private val appEventBus: AppEventBus,
+    private val linkRepository: LinkRepository,
     val cacheManager: com.draftpeek.feature.editor.data.CacheManager,
     @param:ApplicationContext private val appContext: android.content.Context,
     savedStateHandle: SavedStateHandle,
@@ -185,6 +189,10 @@ class EditorViewModel @Inject constructor(
 
     /** 当前打开文件的 URI 字符串 */
     val currentUriString: String get() = uriString
+
+    private val _backlinks = MutableStateFlow<List<String>>(emptyList())
+    /** 当前文档的反向链接来源文件 URI 列表（引用本文档标题的其他文件） */
+    val backlinks: StateFlow<List<String>> = _backlinks.asStateFlow()
 
     // ------------------------------------------------------------------
     // 委托状态流（来自各 Manager）
@@ -426,6 +434,22 @@ class EditorViewModel @Inject constructor(
         }
 
         return hasTabsLeft
+    }
+
+    /**
+     * 将标签页重排到目标索引（拖拽重排）。
+     *
+     * 顺序变化会自动反映到 HorizontalPager 的 pageCount 与标签栏渲染，
+     * 并触发 [SessionManager.saveSession] 以持久化新的标签顺序。
+     *
+     * @param tabId 要移动的标签页 ID
+     * @param toIndex 目标索引（0-based）
+     */
+    fun reorderTab(tabId: TabId, toIndex: Int) {
+        tabManager.reorderTab(tabId, toIndex)
+        // 保存当前活动标签状态后持久化新顺序（顺序包含在会话 JSON 中）
+        saveActiveTabStateToTabStateManager()
+        sessionManager.saveSession()
     }
 
     /**
@@ -703,6 +727,10 @@ class EditorViewModel @Inject constructor(
                         }
                         _messageEvent.emit(EditorMessage.SaveSuccess)
                         appEventBus.emit(EditorEvent.FileSaved(uriString, editorStateManager.getFileName() ?: ""))
+                        // 双向链接：仅 Markdown 文件需要维护 [[...]] / @提及 索引
+                        if (uriString.isNotBlank() && editorStateManager.isMarkdownFile) {
+                            updateLinkIndex(contentToSave)
+                        }
                     }
                     .onFailure { e ->
                         PerformanceBenchmark.endTimer("file_save", logResult = false)
@@ -1059,6 +1087,10 @@ class EditorViewModel @Inject constructor(
             language = result.language,
             fileSize = result.fileSize,
         )
+        // 双向链接：加载 Markdown 后刷新反向链接展示
+        if (isMarkdownFile) {
+            refreshBacklinks(result.fileName)
+        }
         tabManager.openTab(uriString, result.fileName, result.language)
         recordUserActivity.recordFileOpen()
         resetContentLength(result.content.length)
@@ -1189,6 +1221,49 @@ class EditorViewModel @Inject constructor(
         val activeTab = tabManager.getActiveTab() ?: return
         editorStateManager.saveState()?.let { state ->
             tabStateManager.saveTabState(activeTab.id, state)
+        }
+    }
+
+    /**
+     * 更新当前文档的双向链接索引。
+     *
+     * 解析 [content] 中的 `[[目标标题]]` 双链与 `@提及`，通过 [linkRepository]
+     * 替换式重建当前文档（[uriString]）的链接索引。后台调度到 IO，
+     * 不影响保存主流程。仅在 Markdown 文件保存后由 [saveFile] 调用。
+     *
+     * @param content 已保存的 Markdown 正文
+     */
+    private fun updateLinkIndex(content: String) {
+        val result = MarkdownLinkParser.parse(content)
+        viewModelScope.launch(Dispatchers.IO) {
+            try {
+                linkRepository.replaceLinks(uriString, result.allTargets)
+            } catch (e: Exception) {
+                Log.w(TAG, "updateLinkIndex failed for $uriString", e)
+            }
+        }
+    }
+
+    /**
+     * 刷新当前文档的反向链接列表。
+     *
+     * 以文档文件名（去除扩展名）作为被引用标题，查询引用了该标题的所有来源文件。
+     * 后台调度到 IO，结果写入 [backlinks]。仅在 Markdown 文件加载/保存后调用。
+     *
+     * @param fileName 当前文档文件名（如 "notes.md"）
+     */
+    private fun refreshBacklinks(fileName: String) {
+        val title = fileName.substringBeforeLast('.')
+        if (title.isBlank()) return
+        viewModelScope.launch(Dispatchers.IO) {
+            try {
+                // 收集到列表后一次性写入 state，避免 Flow 每项发射频繁重组
+                val collected = linkRepository.getBacklinks(title).first()
+                _backlinks.value = collected
+            } catch (e: Exception) {
+                Log.w(TAG, "refreshBacklinks failed for $title", e)
+                _backlinks.value = emptyList()
+            }
         }
     }
 

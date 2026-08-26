@@ -136,6 +136,9 @@ graph TD
     <string name="editor_split_view">분할 보기</string>
     <string name="editor_edit">편집</string>
     <string name="editor_outline">개요</string>
+    <string name="editor_backlinks">역링크</string>
+    <string name="editor_backlinks_empty">이 문서를 참조하는 다른 문서가 없습니다</string>
+    <string name="editor_backlinks_open_failed">참조 문서를 열 수 없습니다</string>
     <string name="editor_focus_mode">집중 모드</string>
     <string name="editor_exit_focus">집중 해제</string>
     <string name="editor_typewriter_mode">타자기 모드</string>
