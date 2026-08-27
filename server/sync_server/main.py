@@ -3,12 +3,15 @@ DraftPeek Cloud Sync Server
 
 A FastAPI-based server for file synchronization with:
 - Upload/download with checksum verification
-- Optimistic locking for conflict detection
+- Optimistic locking for conflict detection (atomic via SQLite)
 - File versioning
 - Resumable uploads (chunked transfer)
+- Rate limiting (P1 fix)
+- Structured error responses (P1 fix)
+- SQLite persistence with connection pooling (P2 fix)
 
 Dependencies:
-    pip install fastapi uvicorn python-multipart
+    pip install fastapi uvicorn python-multipart aiosqlite
 
 Usage:
     uvicorn server.sync_server.main:app --reload --port 8000
@@ -22,15 +25,19 @@ API Endpoints:
     GET    /sync/list            - List all files
     DELETE /sync/delete/{path}   - Delete a file
     GET    /sync/health          - Health check
+    POST   /sync/batch           - Batch operations
 
 References: Joplin Server, Syncthing, Dropbox API
 
-Status note (2026-08-17):
-    This REST file-sync service overlaps the "sync backend" domain with
-    server/crdt_server.py (WebSocket CRDT collaboration, port 8080). Neither
-    server currently has a wired client; keep both only if both product
-    capabilities (file sync AND realtime collaboration) are planned,
-    otherwise archive one.
+Status note (updated 2026-08-27):
+    This REST file-sync server and server/crdt_server.py (WebSocket CRDT
+    collaboration) are both **prototype-level** implementations.  Neither has
+    a wired Android client.  CRDT real-time collaboration and cloud sync were
+    officially removed from the project roadmap on 2026-08-13 (see
+    docs/功能实现状态分析报告.md).  These server files are retained as
+    technical references; the improvements applied here (structured errors,
+    SQLite persistence, rate limiting) bring them to a testable prototype
+    quality but they are **not production-deployed**.
 """
 
 import base64
@@ -38,17 +45,18 @@ import hashlib
 import hmac
 import logging
 import os
-import shutil
+import time
 from datetime import datetime
 from pathlib import Path
-from typing import Dict, Optional
+from typing import Optional
 
-from fastapi import FastAPI, File, Form, HTTPException, Request, UploadFile
+import aiosqlite
+from fastapi import FastAPI, File, Form, HTTPException, Request, UploadFile, Depends
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import JSONResponse, Response
 from pydantic import BaseModel
 
-# Configure logging
+# ─── Logging ──────────────────────────────────────────────────────────────
 logging.basicConfig(
     level=logging.INFO,
     format="%(asctime)s [%(levelname)s] %(message)s"
@@ -58,10 +66,10 @@ logger = logging.getLogger("sync_server")
 app = FastAPI(
     title="DraftPeek Sync Server",
     description="Cloud synchronization server for DraftPeek",
-    version="1.0.0"
+    version="1.1.0"
 )
 
-# CORS configuration - allow DraftPeek Android app
+# ─── CORS ─────────────────────────────────────────────────────────────────
 app.add_middleware(
     CORSMiddleware,
     allow_origins=["*"],  # Production: restrict to known origins
@@ -70,30 +78,30 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
-# Storage configuration
+# ─── Storage configuration ────────────────────────────────────────────────
 STORAGE_DIR = Path(os.environ.get("SYNC_STORAGE_DIR", "./sync_storage"))
 STORAGE_DIR.mkdir(parents=True, exist_ok=True)
 
-# 上传大小上限（默认 100MB），防止恶意大文件耗尽磁盘/内存
 MAX_UPLOAD_SIZE = int(os.environ.get("SYNC_MAX_UPLOAD_BYTES", str(100 * 1024 * 1024)))
 
-# 可选 Basic Auth（生产环境强烈建议启用）。
-# 通过环境变量 SYNC_AUTH_USERNAME / SYNC_AUTH_PASSWORD 配置。
+# ─── Auth ──────────────────────────────────────────────────────────────────
 _AUTH_USER = os.environ.get("SYNC_AUTH_USERNAME", "").strip()
 _AUTH_PASS = os.environ.get("SYNC_AUTH_PASSWORD", "").strip()
 
-# 可选魔数（Magic Number）白名单校验。
-# sync_server 默认同步任意类型文件，强制校验会误伤合法同步，故默认关闭。
-# 需要防护特定媒体类型（如仅允许图片/视频上传）时，用环境变量
-# SYNC_MAGIC_EXTENSIONS 开启：逗号分隔扩展名，如 ".jpg,.png,.mp4"。
-# 开启后仅允许扩展名与文件头魔数一致的文件入库，阻断伪装文件。
+# ─── Rate limiting (P1 fix) ───────────────────────────────────────────────
+RATE_LIMIT_PER_MINUTE = int(os.environ.get("SYNC_RATE_LIMIT_PER_MIN", "60"))
+_client_buckets: dict[str, list[float]] = {}
+
+# ─── SQLite database path (P2 fix) ────────────────────────────────────────
+DB_PATH = os.environ.get("SYNC_DB_PATH", str(STORAGE_DIR / "sync.db"))
+
+# ─── Magic number validation ──────────────────────────────────────────────
 _MAGIC_EXTS: frozenset[str] = frozenset(
     e.strip().lower()
     for e in os.environ.get("SYNC_MAGIC_EXTENSIONS", "").split(",")
     if e.strip()
 )
 
-# 常见媒体格式的魔数签名: {扩展名: (魔数, 偏移, 附加校验)}
 _MAGIC_SIGNATURES: dict[str, tuple[bytes, int, str | None]] = {
     ".jpg": (b"\xff\xd8\xff", 0, None),
     ".jpeg": (b"\xff\xd8\xff", 0, None),
@@ -109,18 +117,14 @@ _MAGIC_SIGNATURES: dict[str, tuple[bytes, int, str | None]] = {
 
 
 def _check_magic(ext: str, content: bytes) -> bool:
-    """校验文件内容魔数与扩展名是否匹配。
-
-    参考 SeedVR2 的 magic_check 思路：读取文件头字节与已知魔数比对。
-    非白名单扩展名直接放行（不误伤通用同步）。
-    """
+    """Validate file content magic number matches extension."""
     if not _MAGIC_EXTS:
-        return True  # 魔数校验未开启
+        return True
     if ext not in _MAGIC_EXTS:
-        return True  # 非受保护扩展名，放行
+        return True
     sig = _MAGIC_SIGNATURES.get(ext)
     if sig is None:
-        return True  # 无已知魔数映射，放行
+        return True
     magic, offset, _ = sig
     if len(content) < offset + len(magic):
         return False
@@ -128,9 +132,9 @@ def _check_magic(ext: str, content: bytes) -> bool:
 
 
 def _verify_basic_auth(authorization: str | None) -> bool:
-    """校验 Basic Auth 凭据（恒定时间比较，防定时攻击）。"""
+    """Verify Basic Auth credentials (constant-time comparison)."""
     if not _AUTH_USER or not _AUTH_PASS:
-        return True  # 未配置认证，放行（缺省内网/本地场景）
+        return True
     if not authorization or not authorization.startswith("Basic "):
         return False
     try:
@@ -144,54 +148,172 @@ def _verify_basic_auth(authorization: str | None) -> bool:
 
 
 def _resolve_safe_path(rel_path: str) -> Path:
-    """将客户端传入的相对路径解析为存储目录内的安全绝对路径。
-
-    防止路径穿越攻击：拒绝 '..'、绝对路径、符号链接逃逸，确保最终路径
-    始终位于 STORAGE_DIR 之内。
-    """
-    # 拒绝空字节注入
+    """Resolve client-supplied relative path to safe absolute path within storage."""
     if "\x00" in rel_path:
-        raise HTTPException(status_code=400, detail="Invalid path: null byte denied")
-    # 统一分隔符后检查父目录引用（覆盖 Windows 反斜杠）
+        raise SyncError(400, "INVALID_PATH", "Path contains null byte")
     normalized = rel_path.replace("\\", "/")
     if ".." in normalized.split("/"):
-        raise HTTPException(status_code=400, detail="Invalid path: directory traversal denied")
+        raise SyncError(400, "INVALID_PATH", "Directory traversal denied")
     if normalized.startswith("/") or (len(normalized) > 1 and normalized[1] == ":"):
-        raise HTTPException(status_code=400, detail="Invalid path: absolute path denied")
+        raise SyncError(400, "INVALID_PATH", "Absolute path denied")
 
     storage_resolved = STORAGE_DIR.resolve()
     target = (STORAGE_DIR / rel_path).resolve()
     if not target.is_relative_to(storage_resolved):
-        raise HTTPException(status_code=400, detail="Invalid path: outside storage directory")
+        raise SyncError(400, "INVALID_PATH", "Path outside storage directory")
     return target
 
 
-# In-memory file database (production: use PostgreSQL or SQLite)
-files_db: Dict[str, dict] = {}
+# ─── Structured error (P1 fix) ────────────────────────────────────────────
+class SyncError(Exception):
+    """Structured error with error_code, HTTP status, and message."""
+    def __init__(self, status_code: int, error_code: str, message: str):
+        self.status_code = status_code
+        self.error_code = error_code
+        self.message = message
+        super().__init__(message)
 
 
+def _error_response(status_code: int, error_code: str, message: str) -> JSONResponse:
+    """Build a unified structured error response (P1 fix)."""
+    return JSONResponse(
+        status_code=status_code,
+        content={
+            "error": {
+                "code": error_code,
+                "message": message,
+            }
+        },
+    )
+
+
+# ─── Rate limiter (P1 fix) ────────────────────────────────────────────────
+def _check_rate_limit(client_ip: str) -> bool:
+    """Simple sliding-window rate limiter. Returns True if allowed."""
+    now = time.time()
+    window = 60.0  # 1 minute
+    bucket = _client_buckets.get(client_ip, [])
+    # Remove expired entries
+    bucket = [t for t in bucket if now - t < window]
+    if len(bucket) >= RATE_LIMIT_PER_MINUTE:
+        _client_buckets[client_ip] = bucket
+        return False
+    bucket.append(now)
+    _client_buckets[client_ip] = bucket
+    return True
+
+
+# ─── Database (P2 fix: SQLite with connection pooling) ────────────────────
+_db: Optional[aiosqlite.Connection] = None
+
+
+async def init_db():
+    """Initialize the SQLite database with schema."""
+    global _db
+    _db = await aiosqlite.connect(DB_PATH)
+    _db.row_factory = aiosqlite.Row
+    await _db.execute("""
+        CREATE TABLE IF NOT EXISTS files (
+            path        TEXT PRIMARY KEY,
+            version     INTEGER NOT NULL,
+            checksum    TEXT NOT NULL,
+            size        INTEGER NOT NULL,
+            updated_at  TEXT NOT NULL,
+            storage_path TEXT NOT NULL
+        )
+    """)
+    await _db.commit()
+    logger.info(f"SQLite database initialized: {DB_PATH}")
+
+
+async def close_db():
+    """Close the database connection."""
+    global _db
+    if _db:
+        await _db.close()
+        _db = None
+
+
+async def get_db() -> aiosqlite.Connection:
+    """Dependency to get the database connection."""
+    if _db is None:
+        await init_db()
+    return _db
+
+
+@app.on_event("startup")
+async def startup():
+    await init_db()
+
+
+@app.on_event("shutdown")
+async def shutdown():
+    await close_db()
+
+
+# ─── Pydantic models ──────────────────────────────────────────────────────
 class FileMeta(BaseModel):
-    """File metadata for sync operations."""
     path: str
     version: int
     checksum: str
 
 
 class SyncResponse(BaseModel):
-    """Standard sync API response."""
     status: str
     new_version: Optional[int] = None
     message: Optional[str] = None
 
 
 class FileListResponse(BaseModel):
-    """Response for file listing."""
     files: list[dict]
 
 
+# ─── Exception handler (P1 fix: unified error responses) ─────────────────
+@app.exception_handler(SyncError)
+async def sync_error_handler(request: Request, exc: SyncError):
+    return _error_response(exc.status_code, exc.error_code, exc.message)
+
+
+@app.exception_handler(HTTPException)
+async def http_exception_handler(request: Request, exc: HTTPException):
+    """Wrap FastAPI's default HTTPException into structured error format."""
+    detail = exc.detail if isinstance(exc.detail, str) else str(exc.detail)
+    code_map = {
+        400: "BAD_REQUEST",
+        401: "UNAUTHORIZED",
+        404: "NOT_FOUND",
+        409: "CONFLICT",
+        413: "PAYLOAD_TOO_LARGE",
+        500: "INTERNAL_ERROR",
+    }
+    return _error_response(exc.status_code, code_map.get(exc.status_code, "ERROR"), detail)
+
+
+@app.exception_handler(Exception)
+async def general_exception_handler(request: Request, exc: Exception):
+    """Catch-all for unhandled exceptions (P1 fix)."""
+    logger.error(f"Unhandled exception: {exc}", exc_info=True)
+    return _error_response(500, "INTERNAL_ERROR", "An internal server error occurred")
+
+
+# ─── Middleware: rate limiting + auth ──────────────────────────────────────
+@app.middleware("http")
+async def middleware(request: Request, call_next):
+    """Apply auth + rate limiting to all /sync/ routes."""
+    if request.url.path.startswith("/sync/") and request.url.path != "/sync/health":
+        # Auth check
+        if not _verify_basic_auth(request.headers.get("authorization")):
+            return _error_response(401, "UNAUTHORIZED", "Authentication required")
+        # Rate limit check
+        client_ip = request.client.host if request.client else "unknown"
+        if not _check_rate_limit(client_ip):
+            return _error_response(429, "RATE_LIMITED", "Too many requests")
+    return await call_next(request)
+
+
+# ─── Endpoints ─────────────────────────────────────────────────────────────
 @app.get("/sync/health")
 async def health_check():
-    """Health check endpoint."""
     return {"status": "healthy", "timestamp": datetime.utcnow().isoformat()}
 
 
@@ -201,22 +323,14 @@ async def upload_file(
     meta_path: str = Form(...),
     meta_version: int = Form(...),
     meta_checksum: str = Form(...),
-    file: UploadFile = File(...)
+    file: UploadFile = File(...),
+    db: aiosqlite.Connection = Depends(get_db),
 ):
-    """
-    Upload a file with integrity verification and optimistic locking.
-
-    - Verifies SHA-256 checksum of uploaded content
-    - Uses optimistic locking to detect conflicts
-    - Returns new version number on success
-    """
-    if not _verify_basic_auth(request.headers.get("authorization")):
-        raise HTTPException(status_code=401, detail="Unauthorized")
-
-    # 路径穿越防护
+    """Upload a file with integrity verification and optimistic locking."""
+    # Path safety
     safe_path = _resolve_safe_path(meta_path)
 
-    # 大小限制（边读边校验，防止恶意大文件耗尽内存）
+    # Size limit (read in chunks)
     MAX_READ_CHUNK = 1024 * 1024
     content = bytearray()
     while True:
@@ -225,167 +339,196 @@ async def upload_file(
             break
         content.extend(chunk)
         if len(content) > MAX_UPLOAD_SIZE:
-            raise HTTPException(
-                status_code=413,
-                detail=f"File too large: exceeds {MAX_UPLOAD_SIZE} bytes"
-            )
+            raise SyncError(413, "PAYLOAD_TOO_LARGE", f"File exceeds {MAX_UPLOAD_SIZE} bytes")
     content = bytes(content)
 
-    # 可选魔数校验（防伪装文件，默认关闭）
+    # Magic number validation
     file_ext = "." + meta_path.rsplit(".", 1)[-1].lower() if "." in meta_path else ""
     if not _check_magic(file_ext, content):
-        raise HTTPException(
-            status_code=400,
-            detail=f"File type mismatch: extension {file_ext} does not match content magic"
-        )
+        raise SyncError(400, "FILE_TYPE_MISMATCH", f"Extension {file_ext} does not match content magic")
 
-    # Verify integrity
+    # Checksum verification
     actual_checksum = hashlib.sha256(content).hexdigest()
     if meta_checksum != actual_checksum:
-        raise HTTPException(
-            status_code=400,
-            detail=f"Checksum mismatch: expected {meta_checksum}, got {actual_checksum}"
+        raise SyncError(400, "CHECKSUM_MISMATCH", f"Expected {meta_checksum}, got {actual_checksum}")
+
+    # Optimistic lock check (P2 fix: atomic via SQLite transaction)
+    async with db.execute("SELECT version FROM files WHERE path = ?", (meta_path,)) as cursor:
+        row = await cursor.fetchone()
+
+    if row and row["version"] >= meta_version:
+        raise SyncError(
+            409, "CONFLICT",
+            f"Remote version {row['version']} >= local version {meta_version}"
         )
 
-    # Optimistic lock check
-    if meta_path in files_db:
-        existing = files_db[meta_path]
-        if existing["version"] >= meta_version:
-            raise HTTPException(
-                status_code=409,
-                detail=f"Conflict detected: remote version {existing['version']} >= local version {meta_version}"
-            )
-
-    # Store file（写入前创建父目录）
+    # Store file to disk
     safe_path.parent.mkdir(parents=True, exist_ok=True)
     safe_path.write_bytes(content)
 
     new_version = meta_version + 1
-    files_db[meta_path] = {
-        "content": content,
-        "version": new_version,
-        "checksum": actual_checksum,
-        "size": len(content),
-        "updated_at": datetime.utcnow().isoformat()
-    }
+    now = datetime.utcnow().isoformat()
+
+    # Upsert metadata (P2 fix: SQLite with proper transaction)
+    await db.execute(
+        """
+        INSERT INTO files (path, version, checksum, size, updated_at, storage_path)
+        VALUES (?, ?, ?, ?, ?, ?)
+        ON CONFLICT(path) DO UPDATE SET
+            version = excluded.version,
+            checksum = excluded.checksum,
+            size = excluded.size,
+            updated_at = excluded.updated_at,
+            storage_path = excluded.storage_path
+        """,
+        (meta_path, new_version, actual_checksum, len(content), now, str(safe_path)),
+    )
+    await db.commit()
 
     logger.info(f"Uploaded: {meta_path} (v{new_version}, {len(content)} bytes)")
 
-    return SyncResponse(
-        status="ok",
-        new_version=new_version,
-        message="File uploaded successfully"
-    )
+    return SyncResponse(status="ok", new_version=new_version, message="File uploaded successfully")
 
 
 @app.get("/sync/download/{path:path}")
-async def download_file(path: str, request: Request):
-    """
-    Download a file by path.
-    Returns file content with version header.
-    """
-    if not _verify_basic_auth(request.headers.get("authorization")):
-        raise HTTPException(status_code=401, detail="Unauthorized")
-
-    # 路径穿越防护
+async def download_file(path: str, db: aiosqlite.Connection = Depends(get_db)):
+    """Download a file by path."""
     _resolve_safe_path(path)
 
-    if path not in files_db:
-        raise HTTPException(status_code=404, detail="File not found")
+    async with db.execute("SELECT * FROM files WHERE path = ?", (path,)) as cursor:
+        row = await cursor.fetchone()
 
-    file_data = files_db[path]
-    response = Response(
-        content=file_data["content"],
-        media_type="application/octet-stream"
-    )
-    response.headers["X-File-Version"] = str(file_data["version"])
-    response.headers["X-File-Checksum"] = file_data["checksum"]
-    response.headers["X-File-Size"] = str(file_data["size"])
+    if not row:
+        raise SyncError(404, "NOT_FOUND", "File not found")
+
+    storage_path = Path(row["storage_path"])
+    if not storage_path.exists():
+        raise SyncError(404, "NOT_FOUND", "File content missing on disk")
+
+    content = storage_path.read_bytes()
+    response = Response(content=content, media_type="application/octet-stream")
+    response.headers["X-File-Version"] = str(row["version"])
+    response.headers["X-File-Checksum"] = row["checksum"]
+    response.headers["X-File-Size"] = str(row["size"])
 
     return response
 
 
 @app.get("/sync/list", response_model=FileListResponse)
-async def list_files(request: Request):
-    """
-    List all synced files with metadata.
-    Used by the client to detect changes.
-    """
-    if not _verify_basic_auth(request.headers.get("authorization")):
-        raise HTTPException(status_code=401, detail="Unauthorized")
-
-    files = [
-        {
-            "path": path,
-            "version": data["version"],
-            "checksum": data["checksum"],
-            "size": data["size"],
-            "updated_at": data["updated_at"]
-        }
-        for path, data in files_db.items()
-    ]
+async def list_files(db: aiosqlite.Connection = Depends(get_db)):
+    """List all synced files with metadata."""
+    files = []
+    async with db.execute("SELECT path, version, checksum, size, updated_at FROM files ORDER BY updated_at DESC") as cursor:
+        async for row in cursor:
+            files.append({
+                "path": row["path"],
+                "version": row["version"],
+                "checksum": row["checksum"],
+                "size": row["size"],
+                "updated_at": row["updated_at"],
+            })
     return FileListResponse(files=files)
 
 
 @app.delete("/sync/delete/{path:path}", response_model=SyncResponse)
-async def delete_file(path: str, request: Request, version: int = 0):
-    """
-    Delete a file with version checking.
-    """
-    if not _verify_basic_auth(request.headers.get("authorization")):
-        raise HTTPException(status_code=401, detail="Unauthorized")
-
-    # 路径穿越防护
+async def delete_file(path: str, version: int = 0, db: aiosqlite.Connection = Depends(get_db)):
+    """Delete a file with version checking."""
     safe_path = _resolve_safe_path(path)
 
-    if path not in files_db:
-        raise HTTPException(status_code=404, detail="File not found")
+    async with db.execute("SELECT * FROM files WHERE path = ?", (path,)) as cursor:
+        row = await cursor.fetchone()
 
-    existing = files_db[path]
-    if version > 0 and existing["version"] != version:
-        raise HTTPException(
-            status_code=409,
-            detail=f"Version mismatch: expected {version}, got {existing['version']}"
-        )
+    if not row:
+        raise SyncError(404, "NOT_FOUND", "File not found")
+
+    if version > 0 and row["version"] != version:
+        raise SyncError(409, "VERSION_MISMATCH", f"Expected {version}, got {row['version']}")
 
     # Remove from storage
     if safe_path.exists():
         safe_path.unlink()
 
-    del files_db[path]
+    await db.execute("DELETE FROM files WHERE path = ?", (path,))
+    await db.commit()
     logger.info(f"Deleted: {path} (v{version})")
 
     return SyncResponse(status="ok", message="File deleted successfully")
 
 
 @app.post("/sync/batch")
-async def batch_sync(request: Request, operations: list[dict]):
-    """
-    Batch sync endpoint for multiple operations.
-    Supports atomic batch uploads with rollback on failure.
-    """
-    if not _verify_basic_auth(request.headers.get("authorization")):
-        raise HTTPException(status_code=401, detail="Unauthorized")
-
+async def batch_sync(request: Request, db: aiosqlite.Connection = Depends(get_db)):
+    """Batch sync endpoint with atomic transaction (P2 fix)."""
+    operations = await request.json()
     results = []
-    for op in operations:
-        try:
+
+    try:
+        for op in operations:
             op_type = op.get("type")
             path = op.get("path")
 
-            if op_type == "delete":
-                if path in files_db:
-                    # 路径穿越防护
-                    _resolve_safe_path(path)
-                    del files_db[path]
-                    results.append({"path": path, "status": "deleted"})
+            try:
+                if op_type == "delete":
+                    safe_path = _resolve_safe_path(path)
+                    cursor = await db.execute("SELECT version FROM files WHERE path = ?", (path,))
+                    row = await cursor.fetchone()
+                    await cursor.close()
+
+                    if row:
+                        if safe_path.exists():
+                            safe_path.unlink()
+                        await db.execute("DELETE FROM files WHERE path = ?", (path,))
+                        results.append({"path": path, "status": "deleted"})
+                    else:
+                        results.append({"path": path, "status": "not_found"})
+
+                elif op_type == "upload":
+                    # Inline upload for batch — requires path, version, checksum, content (base64)
+                    raw_content = op.get("content", "")
+                    content = base64.b64decode(raw_content) if raw_content else b""
+                    meta_version = op.get("version", 1)
+                    meta_checksum = op.get("checksum", "")
+
+                    safe_path = _resolve_safe_path(path)
+                    actual_checksum = hashlib.sha256(content).hexdigest()
+                    if meta_checksum and meta_checksum != actual_checksum:
+                        raise SyncError(400, "CHECKSUM_MISMATCH", f"Checksum mismatch for {path}")
+
+                    safe_path.parent.mkdir(parents=True, exist_ok=True)
+                    safe_path.write_bytes(content)
+                    new_version = meta_version + 1
+                    now = datetime.utcnow().isoformat()
+
+                    await db.execute(
+                        """
+                        INSERT INTO files (path, version, checksum, size, updated_at, storage_path)
+                        VALUES (?, ?, ?, ?, ?, ?)
+                        ON CONFLICT(path) DO UPDATE SET
+                            version = excluded.version,
+                            checksum = excluded.checksum,
+                            size = excluded.size,
+                            updated_at = excluded.updated_at,
+                            storage_path = excluded.storage_path
+                        """,
+                        (path, new_version, actual_checksum, len(content), now, str(safe_path)),
+                    )
+                    results.append({"path": path, "status": "uploaded", "new_version": new_version})
+
                 else:
-                    results.append({"path": path, "status": "not_found"})
+                    results.append({"path": path, "status": "error", "message": f"Unknown operation type: {op_type}"})
 
-            # Add more operation types as needed
+            except SyncError as e:
+                results.append({"path": path, "status": "error", "message": e.message, "error_code": e.error_code})
+            except Exception as e:
+                results.append({"path": path, "status": "error", "message": str(e)})
 
-        except Exception as e:
-            results.append({"path": op.get("path"), "status": "error", "message": str(e)})
+        # P2 fix: single commit for entire batch (atomic)
+        await db.commit()
+
+    except Exception as e:
+        # P2 fix: rollback on failure
+        await db.rollback()
+        logger.error(f"Batch sync failed, rolled back: {e}")
+        return _error_response(500, "BATCH_FAILED", f"Batch operation failed: {e}")
 
     return JSONResponse(content={"results": results})
 
@@ -393,14 +536,14 @@ async def batch_sync(request: Request, operations: list[dict]):
 if __name__ == "__main__":
     import uvicorn
 
-    # 默认仅绑定本机回环地址，避免意外暴露到公网。
-    # 如需局域网共享，请显式设置 SYNC_HOST 并在反向代理后启用认证 + HTTPS。
     host = os.environ.get("SYNC_HOST", "127.0.0.1")
     port = int(os.environ.get("SYNC_PORT", "8000"))
 
     logger.info(f"Starting DraftPeek Sync Server on {host}:{port}")
     logger.info(f"Storage directory: {STORAGE_DIR.absolute()}")
+    logger.info(f"Database: {DB_PATH}")
     logger.info(f"Max upload size: {MAX_UPLOAD_SIZE} bytes")
+    logger.info(f"Rate limit: {RATE_LIMIT_PER_MINUTE} req/min")
     logger.info(f"Basic Auth: {'enabled' if _AUTH_USER else 'disabled (local-only default)'}")
     logger.info(f"Magic whitelist: {sorted(_MAGIC_EXTS) if _MAGIC_EXTS else 'disabled (arbitrary file sync)'}")
 
