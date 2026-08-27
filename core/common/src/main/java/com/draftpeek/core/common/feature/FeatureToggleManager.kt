@@ -64,10 +64,14 @@ class FeatureToggleManager @Inject constructor(
     /**
      * 启用或禁用功能开关，立即持久化。
      *
+     * 注意：如果该功能被 [applyKillSwitches] 强制禁用，此调用将被忽略。
+     *
      * @param flag 要设置的功能开关
      * @param enabled 是否启用
      */
     fun setEnabled(flag: FeatureFlag, enabled: Boolean) {
+        // Kill Switch 禁用的功能不可重新启用，调用将被忽略
+        if (flag in activeKillSwitches) return
         prefs.edit().putBoolean(flag.key, enabled).apply()
         _flagStates.value = _flagStates.value.toMutableMap().apply {
             this[flag] = enabled
@@ -93,6 +97,51 @@ class FeatureToggleManager @Inject constructor(
         prefs.edit().clear().apply()
         _flagStates.value = FeatureFlag.entries.associateWith { it.defaultEnabled }
     }
+
+    // ===== Kill Switch 机制 =====
+
+    /**
+     * 已应用的 Kill Switch 集合（不可逆，直到进程重启）。
+     *
+     * 被 Kill Switch 禁用的功能无法通过 [setEnabled] 重新启用，
+     * 确保回滚操作的确定性。
+     */
+    private val activeKillSwitches = mutableSetOf<FeatureFlag>()
+
+    /**
+     * 批量应用 Kill Switch 配置。
+     *
+     * 从 BuildConfig 或远程配置读取需要强制禁用的功能列表，
+     * 立即生效并持久化。被 Kill Switch 禁用的功能无法通过用户设置重新启用。
+     *
+     * @param disabledFlags 需要强制禁用的 FeatureFlag 集合
+     */
+    fun applyKillSwitches(disabledFlags: Set<FeatureFlag>) {
+        val applicable = disabledFlags.filter { it.killSwitch }
+        if (applicable.isEmpty()) return
+
+        activeKillSwitches.addAll(applicable)
+
+        val editor = prefs.edit()
+        applicable.forEach { flag ->
+            editor.putBoolean(flag.key, false)
+        }
+        editor.apply()
+
+        _flagStates.value = _flagStates.value.toMutableMap().apply {
+            applicable.forEach { this[it] = false }
+        }
+    }
+
+    /**
+     * 检查功能是否被 Kill Switch 强制禁用。
+     *
+     * 被 Kill Switch 禁用后，[setEnabled] 调用将被忽略。
+     *
+     * @param flag 要检查的功能开关
+     * @return true 表示该功能被 Kill Switch 强制禁用
+     */
+    fun isKillSwitched(flag: FeatureFlag): Boolean = flag in activeKillSwitches
 
     companion object {
         private const val PREFS_NAME = "draftpeek_feature_flags"
