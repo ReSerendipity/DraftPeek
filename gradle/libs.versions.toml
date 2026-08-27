@@ -66,7 +66,7 @@ pf4j = "3.11.0"
 
 # Remote file systems
 commons-net = "3.11.1"    # FTP/FTPS client
-jsch = "0.2.24"           # SFTP/SSH client (Eclipse maven)
+jsch = "2.28.7"           # SFTP/SSH client (Eclipse maven)
 
 # SECURITY: Google Play Integrity API for device integrity verification (VULN-009)
 play-integrity = "1.3.0"
