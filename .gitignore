@@ -133,3 +133,7 @@ design_system_draft.md
 
 # Cloned learning repos (research reference only, not part of project)
 references/
+
+# AI 规范（仅本地保留，不上传远程，2026-08-27）
+AGENTS.md
+LOCAL_RULES.md
