@@ -140,6 +140,34 @@ jobs:
           hide_comments: orphaned
           test_changes_limit: 10
 
+      # 覆盖率门禁 — 检查项目整体覆盖率是否达到 60% 阈值
+      - name: Check Coverage Threshold
+        run: |
+          REPORT_FILE="app/build/reports/jacoco/jacocoTestReport/jacocoTestReport.xml"
+          if [ ! -f "$REPORT_FILE" ]; then
+            echo "[WARN] JaCoCo report not found at $REPORT_FILE — skipping coverage gate."
+            exit 0
+          fi
+          # 解析 XML 中的覆盖率百分比（instruction coverage）
+          COVERED=$(grep -o 'covered="[0-9]*"' "$REPORT_FILE" | head -1 | grep -o '[0-9]*')
+          MISSED=$(grep -o 'missed="[0-9]*"' "$REPORT_FILE" | head -1 | grep -o '[0-9]*')
+          if [ -z "$COVERED" ] || [ -z "$MISSED" ]; then
+            echo "[WARN] Could not parse coverage from $REPORT_FILE — skipping."
+            exit 0
+          fi
+          TOTAL=$((COVERED + MISSED))
+          if [ "$TOTAL" -eq 0 ]; then
+            echo "[WARN] No coverage data — skipping."
+            exit 0
+          fi
+          PCT=$((COVERED * 100 / TOTAL))
+          echo "Project coverage: ${PCT}% (covered=$COVERED, missed=$MISSED, total=$TOTAL)"
+          if [ "$PCT" -lt 60 ]; then
+            echo "[FAIL] Coverage ${PCT}% is below 60% threshold."
+            exit 1
+          fi
+          echo "[PASS] Coverage ${PCT}% meets 60% threshold."
+
       # Codecov 覆盖率上传 — 可视化覆盖率变化趋势
       - name: Upload Coverage to Codecov
         if: always() && github.event_name == 'pull_request'
