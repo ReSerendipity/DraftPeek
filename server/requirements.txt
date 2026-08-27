@@ -11,5 +11,5 @@ pycrdt>=0.10.0
 
 # Cloud Sync Server (server/sync_server/main.py)
 fastapi>=0.109.0
-python-multipart>=0.0.6
+python-multipart>=0.0.32
 aiosqlite>=0.19.0
