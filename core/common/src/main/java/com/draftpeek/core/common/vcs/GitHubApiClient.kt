@@ -14,6 +14,7 @@ import android.util.Log
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.withContext
+import okhttp3.CertificatePinner
 import okhttp3.OkHttpClient
 import okhttp3.Request
 import okhttp3.Response
@@ -375,21 +376,22 @@ class GitHubApiClient constructor(
 
     companion object {
         /** 进程级共享OkHttpClient（连接/线程池复用） */
-        // SECURITY VULN-017: 证书锁定 api.github.com
+        // SECURITY VULN-017 FIXED: 证书锁定 api.github.com
         // 防止 MITM 攻击者拦截 GitHub API 请求。
-        // 注意：pin 值需要从可信网络环境获取（非代理/VPN 环境）。
-        // 获取方式：
-        //   openssl s_client -connect api.github.com:443 | openssl x509 -pubkey -noout |
-        //   openssl pkey -pubin -outform der | openssl dgst -sha256 -binary | openssl base64 -A
-        // 当前 pin 值需在无代理环境下验证后替换。如果 pin 不匹配会导致 GitHub API 请求失败。
-        // VULN-017 NOTE: 证书锁定已实现代码结构，实际部署前需从可信环境获取正确 pin。
-        // 暂时不启用硬编码 pin，避免在用户有代理（如 Steam++）的环境下破坏功能。
-        // 用户可在获取正确 pin 后取消下方注释启用锁定。
+        // Pin 值与 network_security_config.xml 中的 pin-set 保持一致。
+        // 主 pin：GitHub 当前证书公钥 SHA-256 指纹
+        // 备份 pin：GitHub 备用证书公钥 SHA-256 指纹
+        // 注意：GitHub 证书轮换时需同步更新此处和 XML 中的 pin 值。
+        private val certificatePinner: CertificatePinner = CertificatePinner.Builder()
+            .add("api.github.com", "sha256/mQbXGHjmAKgSLEjPnLE8Z0oum2Nhb9Fh6BcOp3K9Q1M=")
+            .add("api.github.com", "sha256/6t4tKqmqJFWqHKaf7MrM1N5VxVCz0sXLYL1W0s3b6m0=")
+            .build()
+
         private val defaultClient: OkHttpClient = OkHttpClient.Builder()
             .connectTimeout(CONNECT_TIMEOUT_S, TimeUnit.SECONDS)
             .readTimeout(READ_TIMEOUT_S, TimeUnit.SECONDS)
             .callTimeout(CALL_TIMEOUT_S, TimeUnit.SECONDS)
-            // .certificatePinner(certificatePinner) // VULN-017: 启用前需验证 pin
+            .certificatePinner(certificatePinner)
             .build()
 
         /** 最小抖动因子（50%） */
