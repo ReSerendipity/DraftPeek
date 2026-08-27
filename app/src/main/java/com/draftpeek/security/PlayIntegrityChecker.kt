@@ -1,18 +1,18 @@
 /**
  * DraftPeek Google Play Integrity API 集成模块。
  *
- * SECURITY VULN-009: 集成 Google Play Integrity API 进行设备完整性验证。
+ * SECURITY VULN-009 FIXED: 集成 Google Play Integrity API 进行设备完整性验证。
  *
  * Play Integrity API 提供以下验证：
  * - 设备完整性（Device Integrity）：设备是否通过 Google 认证、是否被 Root
  * - 应用完整性（App Integrity）：APP 是否被篡改、是否从官方渠道安装
  * - 账户完整性（Account Details）：账户活动风险
  *
- * 注意：完整的 Play Integrity 验证需要后端服务器解密 token。
- * 本实现作为客户端信号使用：
- * - 如果 API 可用且请求成功 → 设备有 Google Play 服务（正面信号）
- * - 如果 API 不可用 → 中性信号（不是所有设备都有 Play 服务）
- * - 如果请求意外失败 → 可能表示环境异常（可疑信号）
+ * 实现包含完整的客户端→服务端验证流程：
+ * 1. 客户端请求 Play Integrity token（nonce 防重放）
+ * 2. 将 token 发送到 DraftPeek Integrity Server 进行服务端解密验证
+ * 3. 服务端调用 Google Play Integrity API 解密 token 并返回 verdict
+ * 4. 客户端根据 verdict 判断设备是否可信
  *
  * @author DraftPeek Team
  * @since 1.0.24
@@ -24,7 +24,9 @@ import androidx.annotation.WorkerThread
 import com.google.android.play.core.integrity.IntegrityManager
 import com.google.android.play.core.integrity.IntegrityManagerFactory
 import com.google.android.play.core.integrity.IntegrityTokenRequest
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.suspendCancellableCoroutine
+import kotlinx.coroutines.withContext
 import kotlin.coroutines.resume
 
 private const val TAG = "PlayIntegrity"
@@ -32,8 +34,11 @@ private const val TAG = "PlayIntegrity"
 /**
  * Google Play Integrity API 客户端。
  *
- * 提供 Play Integrity token 请求和设备完整性检查功能。
- * 由于完整验证需要后端服务器，本实现仅作为客户端信号使用。
+ * 提供：
+ * 1. Play Integrity token 请求（客户端→Google）
+ * 2. 服务端验证（客户端→DraftPeek Server→Google API→verdict）
+ *
+ * 服务端验证确保 token 不可被伪造（攻击者无法在客户端 mock token）。
  */
 object PlayIntegrityChecker {
 
@@ -49,8 +54,31 @@ object PlayIntegrityChecker {
         data class Error(val message: String) : IntegrityCheckResult()
     }
 
+    /**
+     * 服务端验证结果
+     */
+    sealed class ServerVerificationResult {
+        /** 设备通过服务端验证 */
+        data class Trusted(
+            val deviceIntegrity: String,
+            val appIntegrity: String,
+        ) : ServerVerificationResult()
+        /** 设备未通过验证 */
+        data class NotTrusted(
+            val deviceIntegrity: String,
+            val appIntegrity: String,
+            val reason: String,
+        ) : ServerVerificationResult()
+        /** 服务端不可达或验证失败 */
+        data class Unavailable(val reason: String) : ServerVerificationResult()
+    }
+
     @Volatile
     private var lastResult: IntegrityCheckResult? = null
+
+    /** 上次请求使用的 nonce，供服务端验证时携带 */
+    @Volatile
+    private var lastNonce: String = ""
 
     /**
      * 请求 Play Integrity token。
@@ -122,12 +150,105 @@ object PlayIntegrityChecker {
     }
 
     /**
+     * 执行完整的服务端验证流程：
+     * 1. 请求 Play Integrity token
+     * 2. 将 token 发送到 DraftPeek Integrity Server 进行服务端解密验证
+     * 3. 返回验证结果
+     *
+     * 此方法是 suspend 函数，应在 IO 线程调用。
+     * 如果设备没有 Google Play 服务，返回 [ServerVerificationResult.Unavailable]。
+     *
+     * @param context 应用上下文
+     * @param serverUrl DraftPeek Integrity Server URL（默认为生产环境地址）
+     * @return 服务端验证结果
+     */
+    @WorkerThread
+    suspend fun verifyWithServer(
+        context: Context,
+        serverUrl: String = DEFAULT_SERVER_URL,
+    ): ServerVerificationResult {
+        // Step 1: 获取 token 和 nonce
+        val tokenResult = requestIntegrityToken(context)
+        val token = when (tokenResult) {
+            is IntegrityCheckResult.Success -> tokenResult.token
+            is IntegrityCheckResult.NoPlayServices ->
+                return ServerVerificationResult.Unavailable("No Google Play Services")
+            is IntegrityCheckResult.Error ->
+                return ServerVerificationResult.Unavailable(tokenResult.message)
+        }
+
+        // Step 2: 将 token 发送到服务端验证
+        return sendTokenToServer(token, lastNonce, serverUrl)
+    }
+
+    /**
+     * 将 Play Integrity token 发送到服务端进行验证。
+     */
+    @WorkerThread
+    private suspend fun sendTokenToServer(
+        token: String,
+        nonce: String,
+        serverUrl: String,
+    ): ServerVerificationResult = withContext(Dispatchers.IO) {
+        try {
+            val jsonBody = org.json.JSONObject().apply {
+                put("token", token)
+                put("nonce", nonce)
+                put("package_name", "com.draftpeek")
+            }
+
+            val url = java.net.URL("$serverUrl/integrity/verify")
+            val conn = (url.openConnection() as java.net.HttpURLConnection).apply {
+                requestMethod = "POST"
+                connectTimeout = 10_000
+                readTimeout = 10_000
+                doOutput = true
+                setRequestProperty("Content-Type", "application/json; charset=utf-8")
+            }
+
+            conn.outputStream.use { it.write(jsonBody.toString().toByteArray(Charsets.UTF_8)) }
+
+            val responseCode = conn.responseCode
+            if (responseCode != 200) {
+                conn.disconnect()
+                return@withContext ServerVerificationResult.Unavailable(
+                    "Server returned HTTP $responseCode"
+                )
+            }
+
+            val body = conn.inputStream.bufferedReader().use { it.readText() }
+            conn.disconnect()
+
+            val json = org.json.JSONObject(body)
+            val verified = json.optBoolean("verified", false)
+            val deviceIntegrity = json.optString("device_integrity", "UNKNOWN")
+            val appIntegrity = json.optString("app_integrity", "UNKNOWN")
+
+            if (verified) {
+                ServerVerificationResult.Trusted(deviceIntegrity, appIntegrity)
+            } else {
+                ServerVerificationResult.NotTrusted(
+                    deviceIntegrity, appIntegrity,
+                    "Server verification failed",
+                )
+            }
+        } catch (e: Exception) {
+            ServerVerificationResult.Unavailable(e.message ?: "Network error")
+        }
+    }
+
+    /** DraftPeek Integrity Server 默认地址 */
+    private const val DEFAULT_SERVER_URL = "https://integrity.draftpeek.com"
+
+    /**
      * 生成随机 nonce（32 字节十六进制字符串）。
      * nonce 用于防止重放攻击，每次请求使用不同的 nonce。
      */
     private fun generateNonce(): String {
         val bytes = ByteArray(32)
         java.security.SecureRandom().nextBytes(bytes)
-        return bytes.joinToString("") { "%02x".format(it) }
+        val nonce = bytes.joinToString("") { "%02x".format(it) }
+        lastNonce = nonce
+        return nonce
     }
 }

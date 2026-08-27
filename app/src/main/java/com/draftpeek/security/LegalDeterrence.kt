@@ -141,7 +141,11 @@ object LegalDeterrence {
 
         val title = activity.getString(titleResId)
         val message = com.draftpeek.core.common.security.AiEthicalNotice
-            .LEGAL_CONSEQUENCES_TEXT["zh-CN"] ?: ""
+            .LEGAL_CONSEQUENCES_TEXT[getCurrentLanguageTag()] ?:
+            com.draftpeek.core.common.security.AiEthicalNotice
+                .LEGAL_CONSEQUENCES_TEXT["en-US"] ?:
+            com.draftpeek.core.common.security.AiEthicalNotice
+                .LEGAL_CONSEQUENCES_TEXT["zh-CN"] ?: ""
 
         // 简化实现：通过系统 Notification 展示法律警告
         // 正式版应由 UI 层使用 BrandDialog 渲染
@@ -265,5 +269,33 @@ object LegalDeterrence {
 
         // 使用不同通知 ID 避免与常驻通知冲突
         notificationManager.notify(NOTIFICATION_ID + (severity.ordinal + 1), notification)
+    }
+
+    /**
+     * 获取当前应用语言的 BCP-47 标签。
+     * 跟随系统/应用语言设置，回退到英语。
+     */
+    private fun getCurrentLanguageTag(): String {
+        return try {
+            val currentActivity = currentActivityRef?.get()
+            val context = currentActivity ?: return "en-US"
+            val config = context.resources.configuration
+            val locale = if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.N) {
+                config.locales[0]
+            } else {
+                @Suppress("DEPRECATION")
+                config.locale
+            }
+            val tag = locale.toLanguageTag()
+            // AiEthicalNotice 支持的标签：zh-CN, en-US, ja-JP, ko-KR
+            when {
+                tag.startsWith("zh") -> "zh-CN"
+                tag.startsWith("ja") -> "ja-JP"
+                tag.startsWith("ko") -> "ko-KR"
+                else -> "en-US"
+            }
+        } catch (_: Exception) {
+            "en-US"
+        }
     }
 }
