@@ -9,7 +9,6 @@
  */
 package com.draftpeek.feature.editor.ui
 
-import android.graphics.BitmapFactory
 import android.media.MediaPlayer
 import android.net.Uri
 import android.util.Log
@@ -56,7 +55,6 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.geometry.Offset
-import androidx.compose.ui.graphics.asImageBitmap
 import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.layout.ContentScale
@@ -64,6 +62,8 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.viewinterop.AndroidView
+import coil.compose.AsyncImage
+import coil.request.ImageRequest
 import com.draftpeek.core.common.util.DocumentType
 import com.draftpeek.core.ui.theme.DraftPeekTypography
 import com.draftpeek.core.ui.theme.PrototypeShapes
@@ -120,7 +120,8 @@ fun MediaViewerScreen(
 /**
  * 图片查看器 Composable。
  *
- * 加载并显示图片，支持双指缩放和平移手势，支持从 assets、file://、content:// URI 加载。
+ * 使用 Coil 异步加载图片，支持双指缩放和平移手势，支持从 assets、file://、content:// URI 加载。
+ * Coil 自动管理内存/磁盘缓存，生命周期感知，无需手动释放 Bitmap。
  * 包含加载状态和错误状态显示。
  *
  * @param fileUri 图片文件 URI
@@ -132,92 +133,68 @@ private fun ImageViewer(
     modifier: Modifier = Modifier,
 ) {
     val context = LocalContext.current
-    var bitmap by remember { mutableStateOf<android.graphics.Bitmap?>(null) }
     var loadError by remember { mutableStateOf<String?>(null) }
 
     val errorColor = PrototypeTokens.error
     val fgSoft = PrototypeTokens.fgSoft
 
-    LaunchedEffect(fileUri) {
-        withContext(Dispatchers.IO) {
-            try {
-                val resolvedUri = fileUri.toString()
-                val inputStream = when {
-                    resolvedUri.startsWith("file:///android_asset/") -> {
-                        val assetPath = resolvedUri.removePrefix("file:///android_asset/")
-                        context.assets.open(assetPath)
-                    }
-                    resolvedUri.startsWith("file://") -> {
-                        val file = File(Uri.parse(resolvedUri).path ?: "")
-                        file.inputStream()
-                    }
-                    else -> {
-                        context.contentResolver.openInputStream(fileUri)
-                    }
-                }
-                val bmp = inputStream?.use { BitmapFactory.decodeStream(it) }
-                bitmap = bmp
-                if (bmp == null) loadError = context.getString(R.string.editor_cannot_decode_image)
-            } catch (e: Exception) {
-                loadError = e.message ?: context.getString(R.string.editor_image_load_failed)
-            }
-        }
+    val imageRequest = remember(fileUri) {
+        ImageRequest.Builder(context)
+            .data(fileUri)
+            .crossfade(true)
+            .build()
     }
 
     Box(modifier = modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
-        when {
-            loadError != null -> {
-                Column(horizontalAlignment = Alignment.CenterHorizontally) {
-                    Icon(
-                        imageVector = Icons.Filled.ErrorOutline,
-                        contentDescription = null,
-                        modifier = Modifier.size(48.dp),
-                        tint = errorColor,
-                    )
-                    Spacer(modifier = Modifier.height(12.dp))
-                    Text(
-                        text = stringResource(R.string.editor_image_load_failed),
-                        style = DraftPeekTypography.bodyLarge,
-                        color = errorColor,
-                    )
-                    if (loadError != null) {
-                        Text(
-                            text = loadError ?: "",
-                            style = DraftPeekTypography.bodySmall,
-                            color = fgSoft,
-                            modifier = Modifier.padding(horizontal = 32.dp, vertical = 8.dp),
+        var scale by remember { mutableFloatStateOf(1f) }
+        var offset by remember { mutableStateOf(Offset.Zero) }
+
+        AsyncImage(
+            model = imageRequest,
+            contentDescription = stringResource(R.string.editor_image_preview),
+            contentScale = ContentScale.Fit,
+            modifier = Modifier
+                .fillMaxSize()
+                .graphicsLayer {
+                    scaleX = scale
+                    scaleY = scale
+                    translationX = offset.x
+                    translationY = offset.y
+                }
+                .pointerInput(Unit) {
+                    detectTransformGestures { _, pan, zoom, _ ->
+                        scale = (scale * zoom).coerceIn(0.5f, 5f)
+                        offset = Offset(
+                            x = offset.x + pan.x,
+                            y = offset.y + pan.y,
                         )
                     }
-                }
-            }
-            bitmap == null -> {
-                CircularProgressIndicator()
-            }
-            else -> {
-                var scale by remember { mutableFloatStateOf(1f) }
-                var offset by remember { mutableStateOf(Offset.Zero) }
+                },
+            onError = { state ->
+                loadError = state.result.throwable?.message
+                    ?: context.getString(R.string.editor_image_load_failed)
+            },
+        )
 
-                Image(
-                    bitmap = requireNotNull(bitmap).asImageBitmap(),
-                    contentDescription = stringResource(R.string.editor_image_preview),
-                    contentScale = ContentScale.Fit,
-                    modifier = Modifier
-                        .fillMaxSize()
-                        .graphicsLayer {
-                            scaleX = scale
-                            scaleY = scale
-                            translationX = offset.x
-                            translationY = offset.y
-                        }
-                        .pointerInput(Unit) {
-                            detectTransformGestures { _, pan, zoom, _ ->
-                                scale = (scale * zoom).coerceIn(0.5f, 5f)
-                                offset = Offset(
-                                    x = offset.x + pan.x,
-                                    y = offset.y + pan.y,
-                                )
-                            }
-                        },
+        if (loadError != null) {
+            Column(horizontalAlignment = Alignment.CenterHorizontally) {
+                Icon(
+                    imageVector = Icons.Filled.ErrorOutline,
+                    contentDescription = null,
+                    modifier = Modifier.size(48.dp),
+                    tint = errorColor,
+                )
+                Spacer(modifier = Modifier.height(12.dp))
+                Text(
+                    text = stringResource(R.string.editor_image_load_failed),
+                    style = DraftPeekTypography.bodyLarge,
+                    color = errorColor,
+                )
+                Text(
+                    text = loadError ?: "",
+                    style = DraftPeekTypography.bodySmall,
+                    color = fgSoft,
+                    modifier = Modifier.padding(horizontal = 32.dp, vertical = 8.dp),
                 )
             }
         }

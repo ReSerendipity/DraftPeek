@@ -17,10 +17,12 @@ import androidx.compose.foundation.lazy.grid.items
 import androidx.compose.material3.*
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.draftpeek.core.ui.theme.PrototypeTokens
+import com.draftpeek.feature.editor.R
 
 /**
  * 常用 Emoji 列表，用于快速插入。
@@ -62,7 +64,7 @@ fun EmojiPicker(
                 .padding(bottom = 32.dp),
         ) {
             Text(
-                text = "Emoji",
+                text = stringResource(R.string.editor_emoji_title),
                 style = MaterialTheme.typography.titleMedium,
                 modifier = Modifier.padding(horizontal = 16.dp, vertical = 8.dp),
             )

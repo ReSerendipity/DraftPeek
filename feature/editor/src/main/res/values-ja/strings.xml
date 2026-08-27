@@ -369,4 +369,7 @@ graph TD
     <string name="editor_diff_original">元の</string>
     <string name="editor_diff_modified">変更後</string>
     <string name="editor_encoding_select_title">エンコーディングを選択</string>
+
+    <!-- Emoji Picker -->
+    <string name="editor_emoji_title">絵文字</string>
 </resources>

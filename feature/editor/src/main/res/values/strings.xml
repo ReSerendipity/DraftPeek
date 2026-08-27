@@ -385,5 +385,8 @@ graph TD
     <string name="editor_diff_original">原始</string>
     <string name="editor_diff_modified">修改</string>
     <string name="editor_encoding_select_title">选择编码格式</string>
+
+    <!-- Emoji Picker -->
+    <string name="editor_emoji_title">表情</string>
 </resources>
 

@@ -77,6 +77,7 @@ import java.io.File
 @Composable
 fun TerminalScreen(
     modifier: Modifier = Modifier,
+    initialCwd: String? = null,
     viewModel: TerminalViewModel = hiltViewModel()
 ) {
     val sessions by viewModel.sessions.collectAsState()
@@ -119,10 +120,10 @@ fun TerminalScreen(
         }
     }
 
-    // 消费 pendingCwd 并创建会话（仅首次）
+    // 消费 initialCwd 并创建会话（仅首次）
     LaunchedEffect(Unit) {
         if (!cwdConsumed && sessions.isEmpty()) {
-            val config = viewModel.consumePendingCwd()
+            val config = viewModel.consumePendingCwd(initialCwd)
             viewModel.checkAndSetupProot()
             viewModel.createSession(config)
         }

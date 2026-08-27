@@ -379,4 +379,7 @@ graph TD
     <string name="editor_diff_original">원본</string>
     <string name="editor_diff_modified">수정됨</string>
     <string name="editor_encoding_select_title">인코딩 선택</string>
+
+    <!-- Emoji Picker -->
+    <string name="editor_emoji_title">이모지</string>
 </resources>

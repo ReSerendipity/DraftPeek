@@ -90,6 +90,9 @@ dependencies {
     // Compose Rich Editor (WYSIWYG Markdown editing — Ch6#2 P1)
     implementation(libs.richeditor.compose)
 
+    // Coil (professional image loading with memory/disk caching, lifecycle-aware)
+    implementation(libs.coil.compose)
+
     // Apache POI is provided transitively via :core:common dependency
 
     // Unit test dependencies
