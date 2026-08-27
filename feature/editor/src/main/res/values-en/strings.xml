@@ -379,4 +379,7 @@ graph TD
     <string name="editor_diff_original">Original</string>
     <string name="editor_diff_modified">Modified</string>
     <string name="editor_encoding_select_title">Select encoding</string>
+
+    <!-- Emoji Picker -->
+    <string name="editor_emoji_title">Emoji</string>
 </resources>

@@ -16,7 +16,6 @@ import com.draftpeek.feature.terminal.emulator.ProotSetupState
 import com.draftpeek.feature.terminal.emulator.TerminalKey
 import com.draftpeek.feature.terminal.emulator.TerminalSessionManager
 import com.draftpeek.feature.terminal.model.TerminalConfig
-import com.draftpeek.feature.terminal.model.TerminalNavigationData
 import com.draftpeek.feature.terminal.model.TerminalSession
 import com.draftpeek.feature.terminal.model.TerminalTheme
 import com.draftpeek.feature.terminal.service.TerminalService
@@ -98,22 +97,21 @@ class TerminalViewModel @Inject constructor(
     val cwdConsumed: StateFlow<Boolean> = _cwdConsumed.asStateFlow()
 
     /**
-     * 消费来自入口的 pendingCwd，返回应使用的终端配置。
-     * 如果有 pendingCwd，使用该目录作为工作目录；否则使用默认配置。
-     * 消费后清空 pendingCwd。
+     * 消费从导航参数传入的 initialCwd，返回应使用的终端配置。
+     * 如果有 cwd，使用该目录作为工作目录；否则使用默认配置。
      *
+     * @param initialCwd 从 Navigation Compose 路由参数传入的工作目录，null 表示使用默认目录
      * @return 终端配置
      */
-    fun consumePendingCwd(): TerminalConfig {
-        val cwd = TerminalNavigationData.consumeCwd()
-        _currentCwd.value = cwd
+    fun consumePendingCwd(initialCwd: String? = null): TerminalConfig {
+        _currentCwd.value = initialCwd
         _cwdConsumed.value = true
 
         // 更新快捷命令
-        updateQuickCommands(cwd)
+        updateQuickCommands(initialCwd)
 
-        return if (cwd != null) {
-            TerminalConfig(workingDirectory = cwd)
+        return if (initialCwd != null) {
+            TerminalConfig(workingDirectory = initialCwd)
         } else {
             TerminalConfig()
         }

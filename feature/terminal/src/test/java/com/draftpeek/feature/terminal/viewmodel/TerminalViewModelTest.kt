@@ -6,7 +6,6 @@ import com.draftpeek.feature.terminal.emulator.ProotSetupState
 import com.draftpeek.feature.terminal.emulator.TerminalKey
 import com.draftpeek.feature.terminal.emulator.TerminalSessionManager
 import com.draftpeek.feature.terminal.model.TerminalConfig
-import com.draftpeek.feature.terminal.model.TerminalNavigationData
 import com.draftpeek.feature.terminal.model.TerminalSession
 import com.draftpeek.feature.terminal.model.TerminalTheme
 import io.mockk.every
@@ -47,8 +46,8 @@ class TerminalViewModelTest {
         every { sessionManager.prootManager } returns prootSessionManager
         every { prootSessionManager.setupState } returns prootSetupStateFlow
 
-        // Reset TerminalNavigationData before each test
-        TerminalNavigationData.setCwd(null)
+        // Reset state before each test
+        // (TerminalNavigationData singleton removed — cwd is now passed as parameter)
 
         viewModel = TerminalViewModel(sessionManager, context)
     }
@@ -155,31 +154,30 @@ class TerminalViewModelTest {
     // ---- New tests for integrated terminal ----
 
     @Test
-    @DisplayName("consumePendingCwd returns config with default cwd when no pendingCwd")
+    @DisplayName("consumePendingCwd returns config with default cwd when no initialCwd")
     fun consumePendingCwdDefault() {
-        TerminalNavigationData.setCwd(null)
-        val config = viewModel.consumePendingCwd()
+        val config = viewModel.consumePendingCwd(null)
         assertNotNull(config)
         assertNull(viewModel.currentCwd.value)
         assertTrue(viewModel.cwdConsumed.value)
     }
 
     @Test
-    @DisplayName("consumePendingCwd returns config with cwd when pendingCwd is set")
+    @DisplayName("consumePendingCwd returns config with cwd when initialCwd is provided")
     fun consumePendingCwdWithCwd() {
-        TerminalNavigationData.setCwd("/sdcard/myproject")
-        val config = viewModel.consumePendingCwd()
+        val config = viewModel.consumePendingCwd("/sdcard/myproject")
         assertEquals("/sdcard/myproject", config.workingDirectory)
         assertEquals("/sdcard/myproject", viewModel.currentCwd.value)
     }
 
     @Test
-    @DisplayName("consumePendingCwd clears pendingCwd after consumption")
-    fun consumePendingCwdClearsAfterConsumption() {
-        TerminalNavigationData.setCwd("/sdcard/myproject")
-        viewModel.consumePendingCwd()
-        // Second call should return default config
-        assertNull(TerminalNavigationData.pendingCwd.value)
+    @DisplayName("consumePendingCwd with null initialCwd uses default config")
+    fun consumePendingCwdNullAfterConsumption() {
+        viewModel.consumePendingCwd("/sdcard/myproject")
+        // Second call with null should return default config
+        val config2 = viewModel.consumePendingCwd(null)
+        assertNotNull(config2)
+        assertNull(viewModel.currentCwd.value)
     }
 
     @Test
