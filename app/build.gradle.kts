@@ -25,12 +25,16 @@ android {
         minSdk = libs.versions.minSdk.get().toInt()
         targetSdk = libs.versions.targetSdk.get().toInt()
 
-        // Version management:
+        // Version management: centralized in gradle.properties
         // versionCode: Integer, must increase monotonically with each release
         // versionName: Major.Minor.Patch format
         // Both versionCode and versionName must increment together
-        versionCode = 30
-        versionName = "1.0.30"
+        // To bump: ./gradlew bumpVersion -Pbump=patch (or major/minor)
+        val vMajor = (project.findProperty("draftpeek.version.major") as? String)?.toInt() ?: 1
+        val vMinor = (project.findProperty("draftpeek.version.minor") as? String)?.toInt() ?: 0
+        val vPatch = (project.findProperty("draftpeek.version.patch") as? String)?.toInt() ?: 0
+        versionCode = vMajor * 10000 + vMinor * 100 + vPatch
+        versionName = "$vMajor.$vMinor.$vPatch"
 
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
 
@@ -91,10 +95,21 @@ android {
             // IllegalAccessError 的特定优化，其他优化（内联、死代码删除）正常启用。
             isMinifyEnabled = true
             isShrinkResources = true
+            buildConfigField("boolean", "IS_BETA", "false")
+            buildConfigField("String", "BUILD_CHANNEL", "\"production\"")
             proguardFiles(
                 getDefaultProguardFile("proguard-android-optimize.txt"),
                 "proguard-rules.pro"
             )
+        }
+        create("beta") {
+            // Pre-release build type for beta/rc testing.
+            // Uses debug signing (no release keystore needed for QA builds).
+            // Enables R8 minification to catch proguard issues before production release.
+            initWith(buildTypes.getByName("release"))
+            signingConfig = signingConfigs.getByName("debug")
+            buildConfigField("boolean", "IS_BETA", "true")
+            buildConfigField("String", "BUILD_CHANNEL", "\"beta\"")
         }
     }
 
@@ -324,6 +339,8 @@ fun fetchOfficialSignatureSha256(): String {
     return try {
         val ks = KeyStore.getInstance("JKS")
         ks.load(file(storeFile).inputStream(), storePass.toCharArray())
+        // keyPass is validated here to ensure signing config is complete
+        require(keyPass.isNotEmpty()) { "RELEASE_KEY_PASSWORD must not be empty" }
         val cert = ks.getCertificate(keyAlias) ?: return ""
         val md = MessageDigest.getInstance("SHA-256")
         val hash = md.digest(cert.encoded)
