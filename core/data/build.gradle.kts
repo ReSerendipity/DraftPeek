@@ -53,6 +53,9 @@ dependencies {
     implementation(libs.room.ktx)
     ksp(libs.room.compiler)
 
+    // Room testing (MigrationTestHelper)
+    testImplementation(libs.room.testing)
+
     // SQLCipher for encrypted Room database
     implementation(libs.sqlcipher)
     // SECURITY VULN-016: security-crypto (alpha) removed.

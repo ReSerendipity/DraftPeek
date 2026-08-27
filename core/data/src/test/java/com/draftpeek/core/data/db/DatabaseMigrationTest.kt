@@ -2,6 +2,8 @@ package com.draftpeek.core.data.db
 
 import android.content.Context
 import androidx.room.Room
+import androidx.sqlite.db.SupportSQLiteDatabase
+import androidx.sqlite.db.framework.FrameworkSQLiteOpenHelperFactory
 import androidx.test.core.app.ApplicationProvider
 import com.draftpeek.core.data.entity.BookmarkEntity
 import com.draftpeek.core.data.entity.Snippet
@@ -16,6 +18,15 @@ import org.junit.Test
 import org.junit.runner.RunWith
 import org.robolectric.RobolectricTestRunner
 
+/**
+ * 数据库迁移测试（P1-5 重写）。
+ *
+ * 验证 Migration 对象的 migrate() 方法正确执行 DDL 语句。
+ * 使用 SupportSQLiteOpenHelper 直接创建空数据库（非 Room 管理），
+ * 执行迁移后验证表和索引是否正确创建。
+ *
+ * 注意：本类使用 JUnit4 + Robolectric 风格（遵循 AGENTS.md Gotcha #23）。
+ */
 @RunWith(RobolectricTestRunner::class)
 class DatabaseMigrationTest {
 
@@ -27,6 +38,216 @@ class DatabaseMigrationTest {
             database.close()
         }
     }
+
+    // ===== 迁移 DDL 验证 =====
+    // 使用空 SQLite 数据库执行 Migration.migrate()，验证 DDL 语句正确性
+
+    private fun createEmptyDatabase(): SupportSQLiteDatabase {
+        val context = ApplicationProvider.getApplicationContext<Context>()
+        val config = androidx.sqlite.db.SupportSQLiteOpenHelper.Configuration.builder(context)
+            .name(null) // in-memory
+            .callback(object : androidx.sqlite.db.SupportSQLiteOpenHelper.Callback(1) {
+                override fun onCreate(db: SupportSQLiteDatabase) {
+                    // 空实现：不创建任何表
+                }
+                override fun onUpgrade(db: SupportSQLiteDatabase, oldVersion: Int, newVersion: Int) {}
+            })
+            .build()
+        val factory = FrameworkSQLiteOpenHelperFactory()
+        val helper = factory.create(config)
+        return helper.writableDatabase
+    }
+
+    @Test
+    fun migrate_10_to_11_securityEventsTableCreated() {
+        val db = createEmptyDatabase()
+
+        // 执行迁移 10 → 11
+        AppDatabase.MIGRATION_10_11.migrate(db)
+
+        // 验证 security_events 表已创建
+        val cursor = db.query("SELECT count(*) FROM security_events")
+        cursor.use {
+            assertTrue(it.moveToFirst())
+            assertEquals(0, it.getInt(0))
+        }
+
+        // 验证索引已创建
+        val indexCursor = db.query(
+            "SELECT name FROM sqlite_master WHERE type='index' AND tbl_name='security_events'"
+        )
+        indexCursor.use {
+            val indexNames = mutableListOf<String>()
+            while (it.moveToNext()) {
+                indexNames.add(it.getString(0))
+            }
+            assertTrue("Should have timestamp index",
+                indexNames.any { name -> name.contains("timestampEpochMs") })
+            assertTrue("Should have eventType index",
+                indexNames.any { name -> name.contains("eventType") })
+        }
+
+        // 验证可以插入数据
+        db.execSQL(
+            """INSERT INTO security_events
+            (eventType, threatLevel, signalsMask, responseLevel, timestampEpochMs, anonymizedDeviceId, appVersionCode)
+            VALUES ('DETECTION', 'SUSPICIOUS', 0, 'WARNING', 1000, 'device', 29)"""
+        )
+        val dataCursor = db.query("SELECT eventType FROM security_events WHERE anonymizedDeviceId = 'device'")
+        dataCursor.use {
+            assertTrue(it.moveToFirst())
+            assertEquals("DETECTION", it.getString(0))
+        }
+
+        db.close()
+    }
+
+    @Test
+    fun migrate_11_to_12_linksTableCreated() {
+        val db = createEmptyDatabase()
+
+        // 执行迁移 11 → 12
+        AppDatabase.MIGRATION_11_12.migrate(db)
+
+        // 验证 links 表已创建
+        val cursor = db.query("SELECT count(*) FROM links")
+        cursor.use {
+            assertTrue(it.moveToFirst())
+            assertEquals(0, it.getInt(0))
+        }
+
+        // 验证索引已创建
+        val indexCursor = db.query(
+            "SELECT name FROM sqlite_master WHERE type='index' AND tbl_name='links'"
+        )
+        indexCursor.use {
+            val indexNames = mutableListOf<String>()
+            while (it.moveToNext()) {
+                indexNames.add(it.getString(0))
+            }
+            assertTrue("Should have index_links_sourceUri_targetTitle",
+                indexNames.any { name -> name.contains("sourceUri") && name.contains("targetTitle") })
+            assertTrue("Should have index_links_targetTitle",
+                indexNames.any { name -> name.contains("targetTitle") && !name.contains("sourceUri") })
+            assertTrue("Should have index_links_sourceUri",
+                indexNames.any { name -> name.contains("sourceUri") && !name.contains("targetTitle") })
+        }
+
+        // 验证可以插入数据
+        db.execSQL(
+            """INSERT INTO links (sourceUri, targetTitle, updatedAt)
+            VALUES ('content://test/doc.md', 'Target Title', 1000)"""
+        )
+        val dataCursor = db.query("SELECT targetTitle FROM links WHERE sourceUri = 'content://test/doc.md'")
+        dataCursor.use {
+            assertTrue(it.moveToFirst())
+            assertEquals("Target Title", it.getString(0))
+        }
+
+        db.close()
+    }
+
+    @Test
+    fun migrate_9_10_bookmarksTableCreated() {
+        val db = createEmptyDatabase()
+
+        // 执行迁移 9 → 10
+        AppDatabase.MIGRATION_9_10.migrate(db)
+
+        // 验证 bookmarks 表已创建
+        val cursor = db.query("SELECT count(*) FROM bookmarks")
+        cursor.use {
+            assertTrue(it.moveToFirst())
+            assertEquals(0, it.getInt(0))
+        }
+
+        // 验证索引已创建
+        val indexCursor = db.query(
+            "SELECT name FROM sqlite_master WHERE type='index' AND tbl_name='bookmarks'"
+        )
+        indexCursor.use {
+            val indexNames = mutableListOf<String>()
+            while (it.moveToNext()) {
+                indexNames.add(it.getString(0))
+            }
+            assertTrue("Should have index_bookmarks_uri",
+                indexNames.any { name -> name.contains("uri") && name.contains("bookmarks") })
+            assertTrue("Should have index_bookmarks_directoryUri",
+                indexNames.any { name -> name.contains("directoryUri") })
+        }
+
+        // 验证可以插入数据
+        db.execSQL(
+            """INSERT INTO bookmarks (uri, fileName, directoryUri, addedAt)
+            VALUES ('content://test/doc.md', 'doc.md', 'content://test/', 1000)"""
+        )
+        val dataCursor = db.query("SELECT fileName FROM bookmarks WHERE uri = 'content://test/doc.md'")
+        dataCursor.use {
+            assertTrue(it.moveToFirst())
+            assertEquals("doc.md", it.getString(0))
+        }
+
+        db.close()
+    }
+
+    @Test
+    fun migrate_fullChain_9_to_12_allTablesCreated() {
+        val db = createEmptyDatabase()
+
+        // 执行完整迁移链 9 → 10 → 11 → 12
+        AppDatabase.MIGRATION_9_10.migrate(db)
+        AppDatabase.MIGRATION_10_11.migrate(db)
+        AppDatabase.MIGRATION_11_12.migrate(db)
+
+        // 验证 bookmarks 表存在
+        val bookmarksCursor = db.query("SELECT count(*) FROM bookmarks")
+        bookmarksCursor.use {
+            assertTrue(it.moveToFirst())
+            assertEquals(0, it.getInt(0))
+        }
+
+        // 验证 security_events 表存在
+        val secCursor = db.query("SELECT count(*) FROM security_events")
+        secCursor.use {
+            assertTrue(it.moveToFirst())
+            assertEquals(0, it.getInt(0))
+        }
+
+        // 验证 links 表存在
+        val linksCursor = db.query("SELECT count(*) FROM links")
+        linksCursor.use {
+            assertTrue(it.moveToFirst())
+            assertEquals(0, it.getInt(0))
+        }
+
+        // 验证跨表数据操作不冲突
+        db.execSQL(
+            """INSERT INTO bookmarks (uri, fileName, directoryUri, addedAt)
+            VALUES ('content://test/doc.md', 'doc.md', 'content://test/', 1000)"""
+        )
+        db.execSQL(
+            """INSERT INTO security_events
+            (eventType, threatLevel, signalsMask, responseLevel, timestampEpochMs, anonymizedDeviceId, appVersionCode)
+            VALUES ('DETECTION', 'SAFE', 0, 'NONE', 2000, 'device2', 30)"""
+        )
+        db.execSQL(
+            """INSERT INTO links (sourceUri, targetTitle, updatedAt)
+            VALUES ('content://test/doc.md', 'Target', 3000)"""
+        )
+
+        val allBookmarks = db.query("SELECT count(*) FROM bookmarks")
+        allBookmarks.use { assertTrue(it.moveToFirst()); assertEquals(1, it.getInt(0)) }
+
+        val allSecEvents = db.query("SELECT count(*) FROM security_events")
+        allSecEvents.use { assertTrue(it.moveToFirst()); assertEquals(1, it.getInt(0)) }
+
+        val allLinks = db.query("SELECT count(*) FROM links")
+        allLinks.use { assertTrue(it.moveToFirst()); assertEquals(1, it.getInt(0)) }
+
+        db.close()
+    }
+
+    // ===== DAO 交互验证（inMemoryDatabaseBuilder，保留原有测试） =====
 
     @Test
     fun freshDatabase_allDaosAccessible() = runTest {
