@@ -65,7 +65,7 @@ android-pdf-viewer = "2.0.2"
 pf4j = "3.11.0"
 
 # Remote file systems
-commons-net = "3.11.1"    # FTP/FTPS client
+commons-net = "3.13.0"    # FTP/FTPS client
 jsch = "0.2.24"           # SFTP/SSH client (Eclipse maven)
 
 # SECURITY: Google Play Integrity API for device integrity verification (VULN-009)
