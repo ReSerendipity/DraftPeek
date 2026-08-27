@@ -49,7 +49,9 @@ import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
+import com.draftpeek.core.ui.R
 import com.draftpeek.core.ui.icon.StrokeIcon
 import com.draftpeek.core.ui.layout.LayoutMode
 import com.draftpeek.core.ui.theme.DraftPeekTypography
@@ -313,7 +315,7 @@ private fun ExpandedCustomScaffold(
             ) {
                 // Brand title
                 Text(
-                    text = "DraftPeek",
+                    text = stringResource(R.string.core_ui_brand_title),
                     style = H2Style.copy(color = accent),
                     modifier = Modifier.padding(
                         top = 32.dp,

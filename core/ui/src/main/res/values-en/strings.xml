@@ -25,4 +25,8 @@
     <string name="font_kaiti_desc">Calligraphic style, artistic and elegant</string>
     <string name="font_system_sans_desc">Default system sans-serif, best compatibility</string>
     <string name="font_system_serif_desc">Default system serif, formal and classic</string>
+
+    <!-- Brand component strings -->
+    <string name="core_ui_back">Back</string>
+    <string name="core_ui_brand_title">DraftPeek</string>
 </resources>

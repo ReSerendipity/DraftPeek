@@ -25,4 +25,8 @@
     <string name="font_kaiti_desc">書道スタイル、芸術的でエレガント</string>
     <string name="font_system_sans_desc">システム標準サンセリフ、互換性が最高</string>
     <string name="font_system_serif_desc">システム標準セリフ、フォーマルでクラシック</string>
+
+    <!-- Brand component strings -->
+    <string name="core_ui_back">戻る</string>
+    <string name="core_ui_brand_title">DraftPeek</string>
 </resources>

@@ -21,7 +21,9 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.style.TextOverflow
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
+import com.draftpeek.core.ui.R
 import com.draftpeek.core.ui.icon.StrokeIcon
 import com.draftpeek.core.ui.icon.StrokeIcons
 import com.draftpeek.core.ui.modifier.pressScaleEffect
@@ -66,7 +68,7 @@ fun BrandTopBar(
                 ) {
                     StrokeIcon(
                         icon = StrokeIcons.ChevronLeft,
-                        contentDescription = "Back",
+                        contentDescription = stringResource(R.string.core_ui_back),
                         tint = PrototypeTokens.fgSoft,
                         modifier = Modifier.size(20.dp),
                     )
