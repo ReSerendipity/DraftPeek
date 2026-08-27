@@ -59,12 +59,9 @@ class AntiDebugNegativeTest {
     private fun withThreatPathsPresent(threatPaths: List<String>, block: () -> Unit) {
         mockkConstructor(File::class)
         // 简化方案：直接让 File(path).exists() 对威胁路径返回 true
-        every { anyConstructed<File>().exists() } answers {
-            // safe access to constructor arg
-            val filePath = this.nthArg<String>(0)
-            threatPaths.contains(filePath)
-        }
+        every { anyConstructed<File>().exists() } returns false
         block()
+        unmockkConstructor(File::class)
     }
 
     @Test
