@@ -78,10 +78,14 @@ jobs:
         with:
           languages: ${{ matrix.language }}
           queries: security-and-quality
+          build-mode: manual
 
       # 预编译依赖以保证 CodeQL 能正确分析 Kotlin 代码
-      - name: Autobuild
-        uses: github/codeql-action/autobuild@v3
+      # (AGP 项目 Autobuild 不可靠，改用显式 Gradle 编译)
+      - name: Build with Gradle
+        run: |
+          chmod +x ./gradlew
+          ./gradlew :app:compileDebugKotlin --no-daemon
 
       - name: Perform CodeQL Analysis
         uses: github/codeql-action/analyze@v3
