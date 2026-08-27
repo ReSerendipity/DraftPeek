@@ -131,6 +131,7 @@ design_system_draft.md
 !SECURITY.md
 !CHANGELOG.md
 !TESTING_SUMMARY.md
+!docs/project/ADR-001-CRDT-vs-OT-Selection.md
 
 # Cloned learning repos (research reference only, not part of project)
 references/
