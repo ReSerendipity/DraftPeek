@@ -35,8 +35,9 @@ object AppLogger {
      *
      * @param context 应用上下文。
      * @param isDebug 是否 debug 构建。debug 输出 DEBUG 级到 Logcat；release 仅文件记录 INFO+。
+     * @param versionCode 当前版本号，用于崩溃指标按版本统计。
      */
-    fun init(context: Context, isDebug: Boolean) {
+    fun init(context: Context, isDebug: Boolean, versionCode: Int = 0) {
         if (initialized) return
         synchronized(this) {
             if (initialized) return
@@ -53,7 +54,12 @@ object AppLogger {
                 Timber.plant(ReleaseFileTree(fileTree))
             }
 
-            // 全局崩溃捕获：记录堆栈并写入 error 日志
+            // 崩溃指标初始化（按版本统计会话数和崩溃数）
+            if (versionCode > 0) {
+                CrashMetrics.init(app, versionCode)
+            }
+
+            // 全局崩溃捕获：记录堆栈并写入 error 日志 + 崩溃指标
             Thread.setDefaultUncaughtExceptionHandler(
                 CrashHandler(previous = Thread.getDefaultUncaughtExceptionHandler())
             )
@@ -89,6 +95,9 @@ object AppLogger {
 
         override fun uncaughtException(thread: Thread, throwable: Throwable) {
             try {
+                // 记录崩溃指标（崩溃计数 + 每日记录）
+                CrashMetrics.recordCrash(throwable)
+
                 val sb = StringBuilder()
                 sb.append("========== CRASH ${System.currentTimeMillis()} ==========\n")
                 sb.append("Thread: ${thread.name} (id=${thread.id})\n")
