@@ -132,6 +132,8 @@ design_system_draft.md
 !CHANGELOG.md
 !TESTING_SUMMARY.md
 !docs/project/ADR-001-CRDT-vs-OT-Selection.md
+!docs/VERSIONING.md
+!docs/DATABASE_MIGRATION_STRATEGY.md
 
 # Cloned learning repos (research reference only, not part of project)
 references/
