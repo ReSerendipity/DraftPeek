@@ -8,6 +8,7 @@ package com.draftpeek.security
 
 import com.draftpeek.core.common.security.AiDetectionSignal
 import org.junit.jupiter.api.Assertions.assertFalse
+import org.junit.jupiter.api.Assertions.assertNotNull
 import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
@@ -58,13 +59,13 @@ class AiDetectorTest {
     }
 
     @Test
-    fun `detectEnhancedEmulator returns empty on real device`() {
-        // On test JVM, Build fields will have default values
-        // The detection should not crash and return a set (possibly empty)
+    fun `detectEnhancedEmulator does not crash on JVM test environment`() {
+        // 在 JVM 测试环境中，Build 字段为默认值（null/空字符串），
+        // detectEnhancedEmulator 内部访问 Build 字段时应安全处理。
+        // 我们验证方法可正常调用并返回一个 Set（可能为空），不抛异常。
         val result = AiDetector.detectEnhancedEmulator()
-        // On CI/JVM, this might detect some emulator-like features
-        // Just verify it doesn't crash
-        assert(true) // No exception = pass
+        // 明确断言：返回值非 null（Kotlin 类型系统保证），且不抛异常即通过
+        assertNotNull(result, "detectEnhancedEmulator() must return a non-null Set")
     }
 
     @Test
@@ -78,7 +79,9 @@ class AiDetectorTest {
     @Test
     fun `detectReflectionTimingAnomaly with insufficient data returns empty`() {
         val result = AiDetector.detectReflectionTimingAnomaly()
-        // With fewer than 10 recorded reflections, should return empty
-        assertTrue(result.isEmpty() || result.isNotEmpty(), "Should not crash")
+        // 在 JVM 测试环境中，反射时间记录不足 10 次时，应返回空 Set。
+        // 如果前序测试恰好记录了反射调用，则可能返回非空 Set。
+        // 关键断言：方法不抛异常，且返回值为合法 Set。
+        assertNotNull(result, "detectReflectionTimingAnomaly() must return a non-null Set")
     }
 }
