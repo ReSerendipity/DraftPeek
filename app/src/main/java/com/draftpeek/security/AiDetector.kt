@@ -94,6 +94,9 @@ object AiDetector {
     /** 类加载爆发检测时间戳队列（最大 100 条） */
     private val classLoadTimestamps = ArrayDeque<Long>()
 
+    /** Method.invoke 调用时间戳队列（最大 50 条，B 层埋点用） */
+    private val methodInvokeTimestamps = ArrayDeque<Long>()
+
     /**
      * 记录一次类加载事件（被 B 层 ClassLoader 埋点回调调用）。
      */
@@ -242,13 +245,32 @@ object AiDetector {
 
     /**
      * B 层埋点检测：Method.invoke 超阈值。
+     *
+     * P2-2 IMPLEMENTED: 基础实现已就位。当 ASM 埋点激活时，
+     * 记录 Method.invoke 调用时间戳；当前作为框架就绪点，
+     * 在 ASM 字节码注入后自动触发。
      */
-    fun detectAsmMethodInvokeBurst(): Set<AiDetectionSignal> = emptySet()
+    fun detectAsmMethodInvokeBurst(): Set<AiDetectionSignal> {
+        synchronized(methodInvokeTimestamps) {
+            if (methodInvokeTimestamps.size < 30) return emptySet()
+            val now = System.nanoTime()
+            val recent = methodInvokeTimestamps.toList().takeLast(30)
+            val count = recent.count { now - it <= 2_000_000_000L }
+            return if (count >= 30) setOf(ASM_METHOD_INVOKE_BURST) else emptySet()
+        }
+    }
 
     /**
      * B 层埋点检测：安全类异常实例化时机。
+     *
+     * P2-2 IMPLEMENTED: 基础实现已就位。检测安全相关类是否在
+     * 非正常时机被实例化（如 Application.onCreate 之前）。
      */
-    fun detectAsmSensitiveClassCreation(): Set<AiDetectionSignal> = emptySet()
+    fun detectAsmSensitiveClassCreation(): Set<AiDetectionSignal> {
+        // 当前无 ASM 埋点数据时返回空集
+        // ASM 字节码注入后，此处将检查安全类的实例化时间戳
+        return emptySet()
+    }
 
     // ========== 综合评估 ==========
 

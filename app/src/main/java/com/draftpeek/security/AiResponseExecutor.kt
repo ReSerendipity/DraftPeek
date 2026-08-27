@@ -65,12 +65,25 @@ object AiResponseExecutor {
 
     /**
      * 检查 AI 防护是否启用（回滚开关）。
+     *
+     * 优先从远程策略管理器读取 kill switch 和 aiProtection 开关，
+     * 回退到 BuildConfig 默认值。
      */
     private fun isAiProtectionEnabled(): Boolean {
         return try {
-            // 读取 gradle.properties 中 draftpeek.aiProtection.enabled
-            // 通过 BuildConfig 注入
-            true // 默认启用
+            // 先检查远程 kill switch
+            if (com.draftpeek.core.common.security.RemotePolicyManager.isKillSwitchActive()) {
+                Log.w(TAG, "Remote kill switch is active, AI protection disabled")
+                return false
+            }
+            // 检查远程策略中的 aiProtection 开关
+            val policy = com.draftpeek.core.common.security.RemotePolicyManager.getCurrentPolicy()
+            if (!policy.aiProtectionEnabled) {
+                Log.i(TAG, "AI protection disabled by remote policy")
+                return false
+            }
+            // 默认启用
+            true
         } catch (_: Exception) {
             true
         }
