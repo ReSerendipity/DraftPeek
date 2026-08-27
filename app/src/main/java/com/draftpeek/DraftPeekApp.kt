@@ -112,8 +112,12 @@ class DraftPeekApp : Application() {
         // ════════════════════════════════════════════════════════════════
         // 日志系统初始化（Timber + 文件持久化 + 全局崩溃捕获）
         // ════════════════════════════════════════════════════════════════
-        AppLogger.init(this, isDebug = (applicationInfo.flags and
-            android.content.pm.ApplicationInfo.FLAG_DEBUGGABLE) != 0)
+        AppLogger.init(
+            this,
+            isDebug = (applicationInfo.flags and
+                android.content.pm.ApplicationInfo.FLAG_DEBUGGABLE) != 0,
+            versionCode = BuildConfig.VERSION_CODE,
+        )
 
         // ════════════════════════════════════════════════════════════════
         // AI 对抗防护初始化
