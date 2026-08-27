@@ -30,14 +30,14 @@
 | `reports/` | 测试摘要(TESTING_SUMMARY)等报告 |
 | `_devarchive/` | 历史/一次性产物（icons/ logs/ trae-documents/ qoder/） |
 | `FILEMAP.md` | 文件结构地图 |
-| `开源合规说明.md` 等 | 合规（根目录） |
+| `COMPLIANCE_CHECKLIST.md` 等 | 合规（根目录） |
 
 ## 想找内容？
 - 想改编辑器 → `feature/editor/`
 - 想改统计看板 → `feature/stats/`
 - 想改统一 UI/设计系统 → `core/designsystem/`
 - 想改数据层/数据库 → `core/data/`、`app/src/main/java/.../core/data/db/`
-- 想了解功能范围 → `docs/功能实现状态分析报告.md`
+- 想了解功能范围 → `docs/功能实现状态分析报告.md`（本地文档，未随仓库发布）
 
 > ⚠️ 特别提醒：根目录 `release.jks` 是 **App 签名密钥（敏感，勿删勿外传勿提交）**；
 > `index.html` 是被源码注释引用的 HTML 设计原型，保留。所有改动请遵循 `AGENTS.md` 的归档规则。

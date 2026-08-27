@@ -301,7 +301,7 @@ scripts\run-unit-tests.bat
 ## 相关文档
 
 - [AGENTS.md](AGENTS.md) — AI 辅助开发指南与快速参考
-- [docs/FILEMAP.md](docs/FILEMAP.md) — 完整文件清单
+- [docs/FILEMAP.md（本地文档，未随仓库发布）](docs/FILEMAP.md) — 完整文件清单
 - [CHANGELOG.md](CHANGELOG.md) — 更新日志
 
 ## ⚠️ Git 分支与仓库安全策略（🚨 **必读，防止源代码泄露**）

@@ -8,7 +8,7 @@
 
 | 组件 | 版本 | 用途 | 许可 | 备注 |
 |---|---|---|---|---|
-| sora-editor（Rosemoe） | 0.24.6 | 代码编辑器核心（TextMate + Tree-sitter） | **LGPL-2.1** | 40+ 语言高亮；义务见 docs/开源合规说明.md |
+| sora-editor（Rosemoe） | 0.24.6 | 代码编辑器核心（TextMate + Tree-sitter） | **LGPL-2.1** | 40+ 语言高亮；义务见 docs/COMPLIANCE_CHECKLIST.md（本地文档，未随仓库发布） |
 | language-textmate（Rosemoe） | 0.24.6 | TextMate 语法引擎 | **LGPL-2.1** | 同上 |
 | language-treesitter（Rosemoe） | 0.24.6 | Tree-sitter 语言支持 | **LGPL-2.1** | 同上 |
 | android-tree-sitter（AndroidIDE） | 4.3.2 | Tree-sitter JNI 绑定 | **LGPL-2.1** | 同上 |
@@ -26,7 +26,7 @@
 | LSP4J | — | LSP 协议层 | EPL-2.0（以仓库为准） | |
 | tm4e（含 joni/jcodings 传递依赖） | — | TextMate 语法解析（sora-editor 依赖） | EPL-2.0（以仓库为准） | |
 
-> LGPL-2.1 组件以可替换方式链接，主程序无需开源；再分发须随附许可文本、保留版权声明，并保证用户可用修改后的 LGPL 组件替换重新链接（详见 docs/开源合规说明.md）。
+> LGPL-2.1 组件以可替换方式链接，主程序无需开源；再分发须随附许可文本、保留版权声明，并保证用户可用修改后的 LGPL 组件替换重新链接（详见 docs/COMPLIANCE_CHECKLIST.md（本地文档，未随仓库发布））。
 > Apache/BSD/MIT/EPL 类为宽松许可，与闭源发布兼容；再分发时保留各库的许可文本与版权声明即可。
 
 ## 2. 随包分发的前端资源（Markdown 预览）
@@ -68,7 +68,7 @@ DraftPeek 终端模块实现了基于 proot 的会话管理框架（ProotSession
 ## 5. LGPL-2.1 义务（可重链接）
 
 - R8 keep：`app/proguard-rules.pro` 已为 sora-editor（io.github.rosemoe.**）、tree-sitter（com.itsaky.androidide.treesitter.**、io.github.treesitter.**）及 tm4e/joni/jcodings 保留类名与成员（不重命名、不裁剪），满足 LGPL-2.1 第 6 条"用户可用修改后的库版本替换随包版本并重新链接"的要求；
-- 修改后的 LGPL 库重新构建路径见 docs/开源合规说明.md。
+- 修改后的 LGPL 库重新构建路径见 docs/COMPLIANCE_CHECKLIST.md（本地文档，未随仓库发布）。
 
 ## 6. 调研用源码目录（repos/）
 
