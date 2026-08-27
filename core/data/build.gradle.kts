@@ -78,7 +78,7 @@ dependencies {
     testImplementation(libs.turbine)
     testImplementation(libs.robolectric)
     // AndroidX test core for ApplicationProvider (Robolectric tests)
-    testImplementation("androidx.test:core:1.6.1")
+    testImplementation("androidx.test:core:1.7.0")
     testImplementation("androidx.test.ext:junit:1.2.1")
     // JUnit Vintage engine for JUnit 4 tests (Robolectric @RunWith)
     testRuntimeOnly("org.junit.vintage:junit-vintage-engine:5.11.3")
