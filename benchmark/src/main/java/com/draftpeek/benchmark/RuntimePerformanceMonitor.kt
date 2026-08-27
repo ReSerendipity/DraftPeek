@@ -42,6 +42,9 @@ object RuntimePerformanceMonitor {
     /** 已渲染的总帧数 */
     private var frameCount = 0
 
+    /** 累计帧渲染时间（毫秒），用于计算真实平均帧时间 */
+    private var totalFrameTimeMs = 0.0
+
     /** 上一帧的时间戳 */
     private var lastFrameTime = 0L
 
@@ -206,6 +209,7 @@ object RuntimePerformanceMonitor {
      */
     fun recordFrame(frameTimeMs: Long) {
         frameCount++
+        totalFrameTimeMs += frameTimeMs.toDouble()
         if (frameTimeMs > 16.67) {
             jankCount++
         }
@@ -272,7 +276,7 @@ object RuntimePerformanceMonitor {
                 totalFrames = frameCount.toLong(),
                 jankFrames = jankCount.toLong(),
                 jankPercentage = (jankCount.toDouble() / frameCount) * 100,
-                avgFrameTime = 16.67
+                avgFrameTime = if (frameCount > 0) totalFrameTimeMs / frameCount else 0.0
             )
         } else {
             FrameStats(0, 0, 0.0, 0.0)
@@ -297,6 +301,7 @@ object RuntimePerformanceMonitor {
             memorySnapshots.clear()
         }
         frameCount = 0
+        totalFrameTimeMs = 0.0
         jankCount = 0
         lastFrameTime = 0L
     }
