@@ -25,4 +25,8 @@
     <string name="font_kaiti_desc">書法風格字型，文藝優雅，適合創意內容</string>
     <string name="font_system_sans_desc">系統預設無襯線字型，相容性最佳</string>
     <string name="font_system_serif_desc">系統預設襯線字型，正式莊重</string>
+
+    <!-- Brand component strings -->
+    <string name="core_ui_back">返回</string>
+    <string name="core_ui_brand_title">DraftPeek</string>
 </resources>

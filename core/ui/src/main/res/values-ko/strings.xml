@@ -25,4 +25,8 @@
     <string name="font_kaiti_desc">서예 스타일, 예술적이고 우아함</string>
     <string name="font_system_sans_desc">시스템 기본 산세리프, 최고의 호환성</string>
     <string name="font_system_serif_desc">시스템 기본 세리프, 격식 있고 클래식</string>
+
+    <!-- Brand component strings -->
+    <string name="core_ui_back">뒤로</string>
+    <string name="core_ui_brand_title">DraftPeek</string>
 </resources>
