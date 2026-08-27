@@ -88,3 +88,77 @@ HSPLcom/draftpeek/core/common/error/ErrorEvent;->*()V
 HSPLcom/draftpeek/core/common/util/NetworkConnectivityChecker;->*()V
 HSPLcom/draftpeek/core/common/util/HapticFeedbackHelper;->*()V
 HSPLcom/draftpeek/core/common/util/PerformanceBenchmark;->*()V
+
+# ===== Extended Room DAO coverage =====
+HSPLcom/draftpeek/core/data/dao/RecentFileDao_Impl;->*()V
+HSPLcom/draftpeek/core/data/dao/SnippetDao_Impl;->*()V
+HSPLcom/draftpeek/core/data/dao/UserActivityDao_Impl;->*()V
+HSPLcom/draftpeek/core/data/dao/BookmarkDao_Impl;->*()V
+HSPLcom/draftpeek/core/data/dao/LinkDao_Impl;->*()V
+HSPLcom/draftpeek/core/data/dao/SecurityEventDao_Impl;->*()V
+
+# Room entity classes (reflection-based serialization)
+HSPLcom/draftpeek/core/data/entity/RecentFile;->*()V
+HSPLcom/draftpeek/core/data/entity/Snippet;->*()V
+HSPLcom/draftpeek/core/data/entity/UserActivity;->*()V
+HSPLcom/draftpeek/core/data/entity/Bookmark;->*()V
+HSPLcom/draftpeek/core/data/entity/Link;->*()V
+HSPLcom/draftpeek/core/data/entity/SecurityEvent;->*()V
+
+# ===== Compose rendering pipeline =====
+# Core Compose runtime (critical for first frame)
+HSPLandroidx/compose/runtime/Composer;->*()V
+HSPLandroidx/compose/runtime/ComposerImpl;->*()V
+HSPLandroidx/compose/runtime/CompositionImpl;->*()V
+HSPLandroidx/compose/runtime/Recomposer;->*()V
+
+# Compose UI node tree
+HSPLandroidx/compose/ui/node/ComposeUiNode;->*()V
+HSPLandroidx/compose/ui/node/LayoutNode;->*()V
+HSPLandroidx/compose/ui/node/Owner;->*()V
+HSPLandroidx/compose/ui/platform/AndroidComposeView;->*()V
+
+# Material3 component hot paths
+HSPLandroidx/compose/material3/ScaffoldKt;->*()V
+HSPLandroidx/compose/material3/TextKt;->*()V
+HSPLandroidx/compose/material3/TopAppBarKt;->*()V
+
+# Lazy list rendering (file lists, snippets, etc.)
+HSPLandroidx/compose/foundation/lazy/LazyListKt;->*()V
+HSPLandroidx/compose/foundation/lazy/LazyListItemProviderKt;->*()V
+HSPLandroidx/compose/foundation/lazy/grid/LazyGridKt;->*()V
+HSPLandroidx/compose/foundation/lazy/grid/LazyGridItemProviderKt;->*()V
+
+# ===== Extended Hilt DI hot paths =====
+HSPLcom/draftpeek/core/data/di/DataModule;->provideSnippetDao()V
+HSPLcom/draftpeek/core/data/di/DataModule;->provideUserActivityDao()V
+HSPLcom/draftpeek/core/data/di/DataModule;->provideBookmarkDao()V
+HSPLcom/draftpeek/core/data/di/DataModule;->provideLinkDao()V
+HSPLcom/draftpeek/core/data/di/DataModule;->provideSecurityEventDao()V
+
+# ===== Extended Compose Composable hot paths =====
+HSPLcom/draftpeek/core/ui/component/CustomScaffoldKt;->*()V
+HSPLcom/draftpeek/core/ui/component/CustomTabBarKt;->*()V
+HSPLcom/draftpeek/core/ui/component/BrandTopBarKt;->*()V
+HSPLcom/draftpeek/core/ui/component/BrandFileCardKt;->*()V
+HSPLcom/draftpeek/core/ui/component/BrandFABKt;->*()V
+HSPLcom/draftpeek/core/ui/component/BrandSearchBarKt;->*()V
+HSPLcom/draftpeek/core/ui/component/EmptyStateViewKt;->*()V
+
+# ===== Editor Compose rendering =====
+HSPLcom/draftpeek/feature/editor/ui/TabBarKt;->*()V
+HSPLcom/draftpeek/feature/editor/ui/EditorStatusBarKt;->*()V
+HSPLcom/draftpeek/feature/editor/ui/MarkdownToolbarKt;->*()V
+HSPLcom/draftpeek/feature/editor/ui/OutlineDrawerKt;->*()V
+
+# ===== Browser Compose rendering =====
+HSPLcom/draftpeek/feature/browser/ui/FileBrowserScreenKt;->*()V
+HSPLcom/draftpeek/feature/browser/ui/CreateFileDialogKt;->*()V
+
+# ===== Theme system =====
+HSPLcom/draftpeek/core/designsystem/theme/ThemeKt;->*()V
+HSPLcom/draftpeek/core/designsystem/theme/ColorKt;->*()V
+HSPLcom/draftpeek/core/designsystem/theme/TypeKt;->*()V
+
+# ===== Navigation rendering =====
+HSPLcom/draftpeek/navigation/DraftPeekNavHostKt;->*()V

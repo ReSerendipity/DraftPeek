@@ -81,6 +81,15 @@ sealed class Route(val route: String) {
         fun createRoute(treeUri: String): String = "git/${Uri.encode(treeUri)}"
     }
 
-    /** 内置终端模拟器页面 */
-    data object Terminal : Route("terminal")
+    /** 内置终端模拟器页面，可选参数 `cwd` 为 URL 编码的工作目录路径 */
+    data object Terminal : Route("terminal?cwd={cwd}") {
+        /**
+         * 创建终端页面的导航路由字符串。
+         *
+         * @param cwd 可选的工作目录路径，null 表示使用默认目录
+         * @return 编码后的完整路由路径
+         */
+        fun createRoute(cwd: String? = null): String =
+            if (cwd != null) "terminal?cwd=${Uri.encode(cwd)}" else "terminal"
+    }
 }

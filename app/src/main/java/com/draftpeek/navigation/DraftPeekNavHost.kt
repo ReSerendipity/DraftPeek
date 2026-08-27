@@ -68,7 +68,6 @@ import com.draftpeek.feature.stats.ui.AchievementScreen
 import com.draftpeek.feature.stats.ui.ProfileScreen
 import com.draftpeek.feature.stats.ui.VerifyAppState
 import com.draftpeek.feature.terminal.ui.TerminalScreen
-import com.draftpeek.feature.terminal.model.TerminalNavigationData
 import com.draftpeek.security.ApkIntegrityChecker
 import com.draftpeek.security.DexIntegrityChecker
 import dagger.hilt.android.EntryPointAccessors
@@ -160,8 +159,7 @@ fun DraftPeekNavHost(
                                 navController.navigate(Route.Snippets.route)
                             },
                             onNavigateToTerminal = { cwd ->
-                                TerminalNavigationData.setCwd(cwd)
-                                navController.navigate(Route.Terminal.route)
+                                navController.navigate(Route.Terminal.createRoute(cwd))
                             },
                             layoutMode = layoutMode,
                             foldInfo = foldInfo,
@@ -225,8 +223,7 @@ fun DraftPeekNavHost(
                         navController.navigate(Route.Snippets.route)
                     },
                     onNavigateToTerminal = { cwd ->
-                        TerminalNavigationData.setCwd(cwd)
-                        navController.navigate(Route.Terminal.route)
+                        navController.navigate(Route.Terminal.createRoute(cwd))
                     },
                     layoutMode = layoutMode,
                     foldInfo = foldInfo,
@@ -263,8 +260,7 @@ fun DraftPeekNavHost(
                 darkTheme = darkTheme,
                 fileUri = uri.ifBlank { null },
                 onNavigateToTerminal = { cwd ->
-                    TerminalNavigationData.setCwd(cwd)
-                    navController.navigate(Route.Terminal.route)
+                    navController.navigate(Route.Terminal.createRoute(cwd))
                 },
             )
         }
@@ -452,6 +448,13 @@ fun DraftPeekNavHost(
         // ---- Terminal ---------------------------------------------------
         composable(
             route = Route.Terminal.route,
+            arguments = listOf(
+                navArgument("cwd") {
+                    type = NavType.StringType
+                    nullable = true
+                    defaultValue = null
+                }
+            ),
             enterTransition = DraftPeekTransitions.sharedAxisHorizontalEnter,
             exitTransition = DraftPeekTransitions.sharedAxisHorizontalExit,
             popEnterTransition = DraftPeekTransitions.sharedAxisHorizontalPopEnter,
@@ -471,10 +474,12 @@ fun DraftPeekNavHost(
                 },
                 containerColor = PrototypeTokens.pageBackground,
             ) { innerPadding ->
+                val cwd = it.arguments?.getString("cwd")
                 TerminalScreen(
                     modifier = Modifier
                         .fillMaxSize()
                         .padding(innerPadding),
+                    initialCwd = cwd,
                 )
             }
         }
