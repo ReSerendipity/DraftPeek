@@ -140,3 +140,5 @@ references/
 # Python
 __pycache__/
 *.py[cod]
+.pytest_tmp/
+.pytest_cache/
