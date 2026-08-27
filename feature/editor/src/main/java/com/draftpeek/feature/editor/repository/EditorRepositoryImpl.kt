@@ -101,7 +101,7 @@ class EditorRepositoryImpl @Inject constructor(
          * @param bytes 字节数
          * @return 格式化后的字符串（B/KB/MB/GB）
          */
-        private fun formatFileSize(bytes: Long): String {
+        internal fun formatFileSize(bytes: Long): String {
             if (bytes < 0) return "Unknown"
             if (bytes < 1024) return "$bytes B"
             if (bytes < 1024 * 1024) return "${bytes / 1024} KB"
@@ -117,7 +117,7 @@ class EditorRepositoryImpl @Inject constructor(
          * @param bytes 文件字节数据
          * @return 如果检测到空字节返回 true（可能是二进制文件），否则返回 false
          */
-        private fun isLikelyBinary(bytes: ByteArray): Boolean {
+        internal fun isLikelyBinary(bytes: ByteArray): Boolean {
             val scanLen = bytes.size.coerceAtMost(BINARY_DETECT_SCAN_BYTES)
             for (i in 0 until scanLen) {
                 if (bytes[i] == 0.toByte()) return true
@@ -135,7 +135,7 @@ class EditorRepositoryImpl @Inject constructor(
          * @param expectedSize 预期文件大小，未知时为 -1
          * @return 读取的字节数组
          */
-        private fun readStreamChunked(stream: InputStream, expectedSize: Long = -1L): ByteArray {
+        internal fun readStreamChunked(stream: InputStream, expectedSize: Long = -1L): ByteArray {
             return BufferedInputStream(stream).use { bis ->
                 val buffer = if (expectedSize > 0 && expectedSize <= Int.MAX_VALUE.toLong()) {
                     ByteArrayOutputStream(expectedSize.toInt())
