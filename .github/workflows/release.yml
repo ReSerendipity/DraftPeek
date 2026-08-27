@@ -81,6 +81,36 @@ jobs:
       - name: Build Release APK
         run: ./gradlew assembleRelease --stacktrace
 
+      - name: Build Release AAB
+        run: ./gradlew bundleRelease --stacktrace
+
+      - name: Run Macrobenchmark (Release Variant)
+        # 在 Release 版本上运行基准性能测试，收集性能指标
+        # 注意：AGP 8.7.x Baseline Profile 生成器有已知崩溃（Gotcha #13），仅运行 benchmark
+        uses: reactivecircus/android-emulator-runner@v2
+        with:
+          api-level: 34
+          target: google_apis
+          arch: x86_64
+          profile: pixel_5
+          heap-size: 512M
+          ram-size: 2048M
+          emulator-options: -no-window -gpu swiftshader_indirect -no-snapshot -noaudio -no-boot-anim
+          disable-animations: true
+          script: |
+            ./gradlew :benchmark:connectedBenchmarkAndroidTest --stacktrace
+
+      - name: Upload Benchmark Results
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: release-benchmark-results
+          path: |
+            **/build/outputs/macrobenchmark/**
+            **/build/reports/androidTest/**
+          retention-days: 30
+          if-no-files-found: warn
+
       - name: Extract version from tag
         id: version
         run: echo "VERSION=${GITHUB_REF#refs/tags/}" >> $GITHUB_OUTPUT

@@ -302,3 +302,83 @@ jobs:
           path: app/build/outputs/apk/release/*.apk
           retention-days: 7
           if-no-files-found: warn
+
+  # Macrobenchmark 性能测试 — 在 Android 模拟器上运行启动基准测试和文件读取基准测试
+  # 使用 Release 构建（minified）以获取真实的性能数据
+  # 注意：AGP 8.7.x 有 Baseline Profile 生成器崩溃已知问题（Gotcha #13），
+  #       因此仅运行 benchmark 测试，不生成 Baseline Profile。
+  macrobenchmark:
+    name: Macrobenchmark (API ${{ matrix.api-level }})
+    runs-on: ubuntu-latest
+    timeout-minutes: 45
+    needs: build-and-test
+    if: github.ref == 'refs/heads/main'
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - api-level: 34
+            target: google_apis
+            arch: x86_64
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Set up JDK 17
+        uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: 17
+
+      - name: Set up Gradle
+        uses: gradle/actions/setup-gradle@v4
+        with:
+          cache-read-only: true
+          gradle-home-cache-cleanup: true
+
+      - name: Cache Gradle wrapper
+        uses: actions/cache@v4
+        with:
+          path: |
+            ~/.gradle/caches
+            ~/.gradle/wrapper
+          key: gradle-${{ runner.os }}-${{ hashFiles('**/*.gradle*', 'gradle/libs.versions.toml', 'gradle.properties') }}
+          restore-keys: |
+            gradle-${{ runner.os }}-
+
+      - name: Create local.properties (CI fallback)
+        run: |
+          echo "ci.build=true" > local.properties
+
+      - name: Grant execute permission for gradlew
+        run: chmod +x ./gradlew
+
+      - name: Build Release APK for Benchmark
+        run: ./gradlew :app:assembleRelease --stacktrace
+
+      - name: Run Macrobenchmark Tests
+        uses: reactivecircus/android-emulator-runner@v2
+        with:
+          api-level: ${{ matrix.api-level }}
+          target: ${{ matrix.target }}
+          arch: ${{ matrix.arch }}
+          profile: pixel_5
+          heap-size: 512M
+          ram-size: 2048M
+          emulator-options: -no-window -gpu swiftshader_indirect -no-snapshot -noaudio -no-boot-anim
+          disable-animations: true
+          script: |
+            ./gradlew :benchmark:connectedBenchmarkAndroidTest --stacktrace
+
+      - name: Upload Benchmark Reports
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: benchmark-reports-api-${{ matrix.api-level }}
+          path: |
+            **/build/reports/androidTest/**
+            **/build/outputs/androidTest-results/**
+            **/build/outputs/macrobenchmark/**
+          retention-days: 14
+          if-no-files-found: warn
