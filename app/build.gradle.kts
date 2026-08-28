@@ -25,9 +25,6 @@ android {
         minSdk = libs.versions.minSdk.get().toInt()
         targetSdk = libs.versions.targetSdk.get().toInt()
 
-        // 为缺少 beta 构建类型的依赖模块指定缺失维度策略
-        missingDimensionStrategy("com.android.build.api.attributes.BuildTypeAttr", "debug", "release")
-
         // Version management: centralized in gradle.properties
         // versionCode: Integer, must increase monotonically with each release
         // versionName: Major.Minor.Patch format
@@ -134,6 +131,8 @@ android {
             buildConfigField("boolean", "IS_DEBUG_BUILD", "true")
             buildConfigField("String", "ENVIRONMENT_NAME", "\"dev\"")
             resValue("string", "app_name", "DraftPeek Dev")
+            // 为缺少 beta 构建类型的依赖模块指定缺失维度策略
+            missingDimensionStrategy("BuildTypeAttr", "debug")
         }
         create("staging") {
             dimension = "environment"
@@ -142,6 +141,8 @@ android {
             buildConfigField("boolean", "IS_DEBUG_BUILD", "false")
             buildConfigField("String", "ENVIRONMENT_NAME", "\"staging\"")
             resValue("string", "app_name", "DraftPeek Staging")
+            // 为缺少 beta 构建类型的依赖模块指定缺失维度策略
+            missingDimensionStrategy("BuildTypeAttr", "debug")
         }
         create("production") {
             dimension = "environment"
@@ -149,6 +150,8 @@ android {
             buildConfigField("boolean", "IS_DEBUG_BUILD", "false")
             buildConfigField("String", "ENVIRONMENT_NAME", "\"production\"")
             resValue("string", "app_name", "撰码轻览")
+            // 为缺少 beta 构建类型的依赖模块指定缺失维度策略
+            missingDimensionStrategy("BuildTypeAttr", "debug")
         }
     }
 
