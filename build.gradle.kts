@@ -71,6 +71,16 @@ subprojects {
             }
         }
     }
+
+    // 禁用 MissingTranslation 和 ExtraTranslation lint 检查
+    // 因为默认语言是中文，不需要所有字符串都翻译成所有语言
+    plugins.withId("com.android.library") {
+        configure<com.android.build.gradle.LibraryExtension> {
+            lint {
+                disable += setOf("MissingTranslation", "ExtraTranslation")
+            }
+        }
+    }
 }
 
 // ===== Version Bump Task =====
