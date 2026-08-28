@@ -23,27 +23,27 @@ android {
                 localPropertiesFile.newInputStream().withCloseable { properties.load(it) }
             }
             // SECURITY: [D3] - 凭据从 local.properties 读取，绝不硬编码。
-            // Fail Fast：任一字段缺失立即抛异常，避免延迟到 assembleRelease 才失败。
+            // Fail Fast 延迟到 release 构建时执行：spotless/assembleDebug 等
+            // 非 release 任务不触发凭据校验，避免 CI build-and-test job 因缺
+            // 失签名凭据而失败（CI release-build job 单独生成测试密钥）。
             def storePass = properties.getProperty("RELEASE_STORE_PASSWORD", "")
             def keyPass = properties.getProperty("RELEASE_KEY_PASSWORD", "")
             def alias = properties.getProperty("RELEASE_KEY_ALIAS", "")
-            if (!storePass || !keyPass || !alias) {
-                throw new GradleException(
-                    "Release signing credentials not configured. " +
-                    "Add RELEASE_STORE_FILE, RELEASE_STORE_PASSWORD, RELEASE_KEY_ALIAS, " +
-                    "and RELEASE_KEY_PASSWORD to local.properties"
-                )
+            def storeFile = properties.getProperty("RELEASE_STORE_FILE", "")
+            if (storePass && keyPass && alias && storeFile) {
+                this.storeFile = file(storeFile)
+                this.storePassword = storePass
+                this.keyAlias = alias
+                this.keyPassword = keyPass
+                // SECURITY VULN-010: 启用 APK Signature Scheme v3
+                // v3 支持密钥轮换（key rotation），允许用新密钥更新 APK
+                // 而旧版本 APK 仍可验证。v1 (JAR signing) 和 v2 也保留启用。
+                enableV1Signing = true
+                enableV2Signing = true
+                enableV3Signing = true
             }
-            storeFile = file(properties.getProperty("RELEASE_STORE_FILE", "release.jks"))
-            storePassword = storePass
-            keyAlias = alias
-            keyPassword = keyPass
-            // SECURITY VULN-010: 启用 APK Signature Scheme v3
-            // v3 支持密钥轮换（key rotation），允许用新密钥更新 APK
-            // 而旧版本 APK 仍可验证。v1 (JAR signing) 和 v2 也保留启用。
-            enableV1Signing = true
-            enableV2Signing = true
-            enableV3Signing = true
+            // 注意：缺少凭据时不抛异常；release 构建因 signingConfig 未初始化
+            // 而自然失败，CI release-build job 会提供完整凭据。
         }
     }
 }
