@@ -83,7 +83,7 @@ jobs:
         run: ./gradlew assembleDebug --stacktrace
 
       - name: Run Unit Tests with Coverage
-        run: ./gradlew test jacocoTestReport --stacktrace
+        run: ./gradlew test jacocoTestReport --stacktrace --no-configuration-cache
 
       - name: Upload Debug APK
         if: always()
