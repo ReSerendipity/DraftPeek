@@ -60,8 +60,12 @@ object AntiDebug {
     // 增加滑窗衰减：每 SCORE_DECAY_INTERVAL_MS 将累积分减半一次，
     // 持续性威胁（每次评估都会重新加分）仍会保持高等级，
     // 瞬态误报（模拟器测试、临时挂调试器）会在数分钟内自动恢复。
-    private val threatScore = AtomicInteger(0)
-    private val lastScoreDecayMs = AtomicLong(System.currentTimeMillis())
+    @JvmField
+    @Volatile
+    internal var threatScore = AtomicInteger(0)
+    @JvmField
+    @Volatile
+    internal var lastScoreDecayMs = AtomicLong(System.currentTimeMillis())
 
     private const val SCORE_DECAY_INTERVAL_MS = 60_000L // 每 60 秒衰减一次
     private const val SCORE_DECAY_DIVISOR = 2 // 每次衰减为原来的 1/2
@@ -87,9 +91,9 @@ object AntiDebug {
     /**
      * 当前安全等级（供外部模块查询以决定是否限制功能）
      */
+    @JvmField
     @Volatile
-    var currentLevel: SecurityLevel = SecurityLevel.SAFE
-        private set
+    internal var currentLevel: SecurityLevel = SecurityLevel.SAFE
 
     // =================================================================
     //  检测原语（每个方法独立检测一个维度）
@@ -464,12 +468,14 @@ object AntiDebug {
     //  综合评估
     // =================================================================
 
-    // 安全代码完整性校验结果缓存
-    @Volatile
-    private var integrityChecked = false
+// 安全代码完整性校验结果缓存
+@JvmField
+@Volatile
+internal var integrityChecked = false
 
-    @Volatile
-    private var integrityVerified = false
+@JvmField
+@Volatile
+internal var integrityVerified = false
 
     /**
      * 执行全量安全检测，返回威胁等级。

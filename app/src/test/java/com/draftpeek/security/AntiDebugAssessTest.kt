@@ -26,31 +26,18 @@ import org.robolectric.util.ReflectionHelpers
 class AntiDebugAssessTest {
 
     /**
-     * 通过反射重置 AntiDebug 的内部状态（threatScore、lastScoreDecayMs、
+     * 直接重置 AntiDebug 的内部状态（threatScore、lastScoreDecayMs、
      * integrityChecked、integrityVerified、currentLevel）。
      * 必须在每个测试前调用，确保测试间状态隔离。
      *
-     * 注意：AntiDebug 是 Kotlin object（单例），其字段是 INSTANCE 的实例字段，
-     * 不是静态字段。因此使用 ReflectionHelpers.setField(AntiDebug, ...) 而非 setStaticField。
+     * 注意：AntiDebug 的字段已标记为 @JvmField + internal，可直接访问。
      */
     private fun resetAntiDebugState() {
-        ReflectionHelpers.setField(
-            AntiDebug,
-            "threatScore",
-            java.util.concurrent.atomic.AtomicInteger(0)
-        )
-        ReflectionHelpers.setField(
-            AntiDebug,
-            "lastScoreDecayMs",
-            java.util.concurrent.atomic.AtomicLong(System.currentTimeMillis())
-        )
-        ReflectionHelpers.setField(AntiDebug, "integrityChecked", false)
-        ReflectionHelpers.setField(AntiDebug, "integrityVerified", false)
-        ReflectionHelpers.setField(
-            AntiDebug,
-            "currentLevel",
-            AntiDebug.SecurityLevel.SAFE
-        )
+        AntiDebug.threatScore = java.util.concurrent.atomic.AtomicInteger(0)
+        AntiDebug.lastScoreDecayMs = java.util.concurrent.atomic.AtomicLong(System.currentTimeMillis())
+        AntiDebug.integrityChecked = false
+        AntiDebug.integrityVerified = false
+        AntiDebug.currentLevel = AntiDebug.SecurityLevel.SAFE
     }
 
     /**
