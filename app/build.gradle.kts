@@ -82,6 +82,10 @@ android {
         }
     }
 
+    lint {
+        disable += setOf("MissingTranslation", "ExtraTranslation")
+    }
+
     buildTypes {
         debug {
             resValue("bool", "leak_canary_add_launcher_icon", "false")
