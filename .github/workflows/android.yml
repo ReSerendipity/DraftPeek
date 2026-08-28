@@ -60,9 +60,9 @@ jobs:
           path: |
             ~/.gradle/caches
             ~/.gradle/wrapper
-          key: gradle-${{ runner.os }}-${{ hashFiles('**/*.gradle*', 'gradle/libs.versions.toml', 'gradle.properties') }}
+          key: gradle-v3-${{ runner.os }}-${{ hashFiles('**/*.gradle*', 'gradle/libs.versions.toml', 'gradle.properties') }}
           restore-keys: |
-            gradle-${{ runner.os }}-
+            gradle-v3-${{ runner.os }}-
 
       - name: Create local.properties (CI fallback)
         # CI 环境没有签名凭据，仅 debug 构建可成功。release 构建会因
@@ -225,9 +225,9 @@ jobs:
           path: |
             ~/.gradle/caches
             ~/.gradle/wrapper
-          key: gradle-${{ runner.os }}-${{ hashFiles('**/*.gradle*', 'gradle/libs.versions.toml', 'gradle.properties') }}
+          key: gradle-v3-${{ runner.os }}-${{ hashFiles('**/*.gradle*', 'gradle/libs.versions.toml', 'gradle.properties') }}
           restore-keys: |
-            gradle-${{ runner.os }}-
+            gradle-v3-${{ runner.os }}-
 
       - name: Create local.properties (CI fallback)
         run: |
@@ -290,9 +290,9 @@ jobs:
           path: |
             ~/.gradle/caches
             ~/.gradle/wrapper
-          key: gradle-${{ runner.os }}-${{ hashFiles('**/*.gradle*', 'gradle/libs.versions.toml', 'gradle.properties') }}
+          key: gradle-v3-${{ runner.os }}-${{ hashFiles('**/*.gradle*', 'gradle/libs.versions.toml', 'gradle.properties') }}
           restore-keys: |
-            gradle-${{ runner.os }}-
+            gradle-v3-${{ runner.os }}-
 
       - name: Generate CI test signing keystore
         # 生成 CI 专用的测试签名密钥（非发布密钥），用于验证 release 构建流程。
@@ -371,9 +371,9 @@ jobs:
           path: |
             ~/.gradle/caches
             ~/.gradle/wrapper
-          key: gradle-${{ runner.os }}-${{ hashFiles('**/*.gradle*', 'gradle/libs.versions.toml', 'gradle.properties') }}
+          key: gradle-v3-${{ runner.os }}-${{ hashFiles('**/*.gradle*', 'gradle/libs.versions.toml', 'gradle.properties') }}
           restore-keys: |
-            gradle-${{ runner.os }}-
+            gradle-v3-${{ runner.os }}-
 
       - name: Create local.properties (CI fallback)
         run: |
@@ -410,3 +410,7 @@ jobs:
             **/build/outputs/macrobenchmark/**
           retention-days: 14
           if-no-files-found: warn
+
+
+
+
