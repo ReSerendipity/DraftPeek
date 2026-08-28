@@ -67,8 +67,6 @@ static int scan_file_for_patterns(const char *filepath, const char *patterns[], 
     char buffer[BUFFER_SIZE];
     ssize_t bytes_read;
     int found = 0;
-    /* Offset into the file for the start of the current buffer */
-    off_t file_offset = 0;
     /* Number of valid bytes carried over from the previous chunk for overlap */
     size_t carryover = 0;
 
