@@ -1,8 +1,13 @@
 package com.draftpeek.security
 
+import io.mockk.every
+import io.mockk.mockkObject
+import io.mockk.unmockkObject
+import org.junit.After
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertNotNull
 import org.junit.Assert.assertTrue
+import org.junit.Before
 import org.junit.Test
 import org.junit.runner.RunWith
 import org.robolectric.RobolectricTestRunner
@@ -26,6 +31,22 @@ import org.robolectric.util.ReflectionHelpers
 class AntiDebugAssessTest {
 
     /**
+     * 每个测试前：spy AntiDebug 并 mock isRooted() 返回 false。
+     * CI 环境中 PATH 包含 su（Linux 系统自带），导致 isRooted() 误报。
+     * 使用 spyk 保持其他检测方法真实行为，仅 mock 环境相关方法。
+     */
+    @Before
+    fun setup() {
+        mockkObject(AntiDebug)
+        every { AntiDebug.isRooted() } returns false
+    }
+
+    @After
+    fun teardown() {
+        unmockkObject(AntiDebug)
+    }
+
+    /**
      * 直接重置 AntiDebug 的内部状态（threatScore、lastScoreDecayMs、
      * integrityChecked、integrityVerified、currentLevel）。
      * 必须在每个测试前调用，确保测试间状态隔离。
@@ -35,8 +56,10 @@ class AntiDebugAssessTest {
     private fun resetAntiDebugState() {
         AntiDebug.threatScore = java.util.concurrent.atomic.AtomicInteger(0)
         AntiDebug.lastScoreDecayMs = java.util.concurrent.atomic.AtomicLong(System.currentTimeMillis())
-        AntiDebug.integrityChecked = false
-        AntiDebug.integrityVerified = false
+        // 跳过完整性自校验：Robolectric 下类加载器不同，verifySelfIntegrity() 会失败
+        // 导致 integrityVerified=false，给 currentThreat 加 10 分，干扰测试
+        AntiDebug.integrityChecked = true
+        AntiDebug.integrityVerified = true
         AntiDebug.currentLevel = AntiDebug.SecurityLevel.SAFE
     }
 
