@@ -29,22 +29,25 @@ class AntiDebugAssessTest {
      * 通过反射重置 AntiDebug 的内部状态（threatScore、lastScoreDecayMs、
      * integrityChecked、integrityVerified、currentLevel）。
      * 必须在每个测试前调用，确保测试间状态隔离。
+     *
+     * 注意：AntiDebug 是 Kotlin object（单例），其字段是 INSTANCE 的实例字段，
+     * 不是静态字段。因此使用 ReflectionHelpers.setField(AntiDebug, ...) 而非 setStaticField。
      */
     private fun resetAntiDebugState() {
-        ReflectionHelpers.setStaticField(
-            AntiDebug::class.java,
+        ReflectionHelpers.setField(
+            AntiDebug,
             "threatScore",
             java.util.concurrent.atomic.AtomicInteger(0)
         )
-        ReflectionHelpers.setStaticField(
-            AntiDebug::class.java,
+        ReflectionHelpers.setField(
+            AntiDebug,
             "lastScoreDecayMs",
             java.util.concurrent.atomic.AtomicLong(System.currentTimeMillis())
         )
-        ReflectionHelpers.setStaticField(AntiDebug::class.java, "integrityChecked", false)
-        ReflectionHelpers.setStaticField(AntiDebug::class.java, "integrityVerified", false)
-        ReflectionHelpers.setStaticField(
-            AntiDebug::class.java,
+        ReflectionHelpers.setField(AntiDebug, "integrityChecked", false)
+        ReflectionHelpers.setField(AntiDebug, "integrityVerified", false)
+        ReflectionHelpers.setField(
+            AntiDebug,
             "currentLevel",
             AntiDebug.SecurityLevel.SAFE
         )
