@@ -82,10 +82,11 @@ jobs:
 
       # 预编译依赖以保证 CodeQL 能正确分析 Kotlin 代码
       # (AGP 项目 Autobuild 不可靠，改用显式 Gradle 编译)
+      # 注意：app 模块有多个 product flavor，需要指定具体的构建任务
       - name: Build with Gradle
         run: |
           chmod +x ./gradlew
-          ./gradlew :app:compileDebugKotlin --no-daemon
+          ./gradlew :app:compileDevDebugKotlin --no-daemon
 
       - name: Perform CodeQL Analysis
         uses: github/codeql-action/analyze@v3
