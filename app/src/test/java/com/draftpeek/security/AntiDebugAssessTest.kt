@@ -142,14 +142,15 @@ class AntiDebugAssessTest {
         resetAntiDebugState()
         setRealDeviceBuildFields()
 
-        // 直接设置 threatScore 为 5，验证 currentThreat >= 5 时触发 HOSTILE
-        // 不依赖 isRooted() 的实际返回值，确保测试环境无关
-        AntiDebug.threatScore = java.util.concurrent.atomic.AtomicInteger(5)
+        // 模拟检测到调试器（isDebuggerConnected() 返回 true 时 +5）
+        // 验证 currentThreat >= 5 时立即触发 HOSTILE（即使 threatScore = 0）
+        // 使用 mockkObject 已经 mock 了 isRooted()，现在需要 mock isDebuggerConnected()
+        every { AntiDebug.isDebuggerConnected() } returns true
 
         val level = AntiDebug.assess()
-        // 累积分数 5 >= 5 → HOSTILE
+        // currentThreat = 5（调试器检测）>= 5 → HOSTILE
         assertEquals(
-            "Accumulated threat score >= 5 should be HOSTILE",
+            "Current threat >= 5 should trigger HOSTILE immediately",
             AntiDebug.SecurityLevel.HOSTILE,
             level
         )
