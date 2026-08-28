@@ -59,7 +59,7 @@ class RouteTest {
 
     @Test
     fun `Terminal route is terminal`() {
-        assertEquals("terminal", Route.Terminal.route)
+        assertEquals("terminal?cwd={cwd}", Route.Terminal.route)
     }
 
     // ---- 带参数的路由 ----
