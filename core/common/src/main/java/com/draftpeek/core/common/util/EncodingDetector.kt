@@ -135,7 +135,8 @@ object EncodingDetector {
                 i += 3
             } else if (b in 0xF0..0xF4) {
                 if (i + 3 >= bytes.size) return false
-                if (!isContinuationByte(bytes[i + 1]) || !isContinuationByte(bytes[i + 2]) ||
+                if (!isContinuationByte(bytes[i + 1]) ||
+                    !isContinuationByte(bytes[i + 2]) ||
                     !isContinuationByte(bytes[i + 3])
                 ) {
                     return false
@@ -370,7 +371,8 @@ object EncodingDetector {
     fun decodeWithEncoding(bytes: ByteArray, encoding: String): String {
         if (bytes.isEmpty()) return ""
 
-        if (encoding == "UTF-8" && bytes.size >= 3 &&
+        if (encoding == "UTF-8" &&
+            bytes.size >= 3 &&
             (bytes[0].toInt() and 0xFF) == 0xEF &&
             (bytes[1].toInt() and 0xFF) == 0xBB &&
             (bytes[2].toInt() and 0xFF) == 0xBF
