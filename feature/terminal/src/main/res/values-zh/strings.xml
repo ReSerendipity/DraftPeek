@@ -1,0 +1,33 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!-- Terminal UI -->
+    <string name="terminal_title">终端</string>
+    <string name="terminal_close_session">关闭会话</string>
+    <string name="terminal_new_session">新建会话</string>
+    <string name="terminal_input_hint">输入命令…</string>
+    <string name="terminal_send">发送</string>
+    <string name="terminal_restore">恢复终端</string>
+    <string name="terminal_minimize">最小化</string>
+    <string name="terminal_floating_close">关闭</string>
+
+    <!-- Terminal Service (Ch7#7 P1) -->
+    <string name="terminal_notification_title">终端运行中</string>
+    <string name="terminal_notification_text">DraftPeek 终端会话正在运行</string>
+    <string name="terminal_notification_stop">停止</string>
+    <string name="terminal_notification_channel_name">终端服务</string>
+    <string name="terminal_notification_channel_desc">保持终端会话在后台运行</string>
+
+    <!-- Integrated Terminal -->
+    <string name="terminal_cwd_label">当前目录</string>
+    <string name="terminal_proot_guide_title">首次使用 · 正在准备 Linux 环境</string>
+    <string name="terminal_proot_guide_desc">正在解压 Linux 运行环境（约50MB），完成后可使用完整终端功能。注意：终端可执行任意命令，请仅运行您信任的命令，操作不当可能导致数据丢失</string>
+    <string name="terminal_proot_ready">Linux 环境已就绪</string>
+    <string name="terminal_proot_error">Linux 环境准备失败</string>
+    <string name="terminal_unavailable_hint">该位置无法打开终端</string>
+
+    <!-- Security: Permission for TerminalCommandReceiver (VULN-001) -->
+    <string name="permission_terminal_command_label">Execute Terminal Commands</string>
+    <string name="permission_terminal_command_desc">Allows apps signed with the same key to send terminal commands to DraftPeek</string>
+    <!-- Diff / Encoding dialogs -->
+    <string name="terminal_service_running">命令在后台运行中</string>
+</resources>
