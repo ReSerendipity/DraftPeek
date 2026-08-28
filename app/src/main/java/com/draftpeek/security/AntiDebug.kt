@@ -63,6 +63,7 @@ object AntiDebug {
     @JvmField
     @Volatile
     internal var threatScore = AtomicInteger(0)
+
     @JvmField
     @Volatile
     internal var lastScoreDecayMs = AtomicLong(System.currentTimeMillis())
@@ -468,14 +469,14 @@ object AntiDebug {
     //  综合评估
     // =================================================================
 
-// 安全代码完整性校验结果缓存
-@JvmField
-@Volatile
-internal var integrityChecked = false
+    // 安全代码完整性校验结果缓存
+    @JvmField
+    @Volatile
+    internal var integrityChecked = false
 
-@JvmField
-@Volatile
-internal var integrityVerified = false
+    @JvmField
+    @Volatile
+    internal var integrityVerified = false
 
     /**
      * 执行全量安全检测，返回威胁等级。
