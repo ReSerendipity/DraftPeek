@@ -49,7 +49,6 @@ import androidx.compose.material.icons.filled.EmojiFoodBeverage
 import androidx.compose.material.icons.filled.EventAvailable
 import androidx.compose.material.icons.filled.EventRepeat
 import androidx.compose.material.icons.filled.Flare
-import androidx.compose.material.icons.filled.FreeBreakfast
 import androidx.compose.material.icons.filled.GpsFixed
 import androidx.compose.material.icons.filled.Grade
 import androidx.compose.material.icons.filled.HourglassEmpty
@@ -64,8 +63,8 @@ import androidx.compose.material.icons.filled.Redeem
 import androidx.compose.material.icons.filled.Schedule
 import androidx.compose.material.icons.filled.Stars
 import androidx.compose.material.icons.filled.TextSnippet
-import androidx.compose.material.icons.filled.Timer
 import androidx.compose.material.icons.filled.Timelapse
+import androidx.compose.material.icons.filled.Timer
 import androidx.compose.material.icons.filled.WbSunny
 import androidx.compose.material.icons.filled.WbTwilight
 import androidx.compose.material.icons.filled.Whatshot

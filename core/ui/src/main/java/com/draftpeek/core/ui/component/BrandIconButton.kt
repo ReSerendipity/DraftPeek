@@ -45,7 +45,7 @@ fun BrandIconButton(
     contentDescription: String? = null,
     tint: Color = PrototypeTokens.fgSoft,
     badge: Int? = null,
-    iconSize: Dp = 20.dp,
+    iconSize: Dp = 20.dp
 ) {
     val interactionSource = remember { MutableInteractionSource() }
     Box(
@@ -56,15 +56,15 @@ fun BrandIconButton(
             .clickable(
                 interactionSource = interactionSource,
                 indication = null,
-                onClick = onClick,
+                onClick = onClick
             ),
-        contentAlignment = Alignment.Center,
+        contentAlignment = Alignment.Center
     ) {
         Icon(
             imageVector = icon,
             contentDescription = contentDescription,
             tint = tint,
-            modifier = Modifier.size(iconSize),
+            modifier = Modifier.size(iconSize)
         )
         if (badge != null && badge > 0) {
             Box(
@@ -74,14 +74,14 @@ fun BrandIconButton(
                     .size(16.dp)
                     .clip(CircleShape)
                     .background(PrototypeTokens.accent),
-                contentAlignment = Alignment.Center,
+                contentAlignment = Alignment.Center
             ) {
                 Text(
                     text = if (badge > 99) "99+" else badge.toString(),
                     color = Color.White,
                     fontSize = 9.sp,
                     fontWeight = FontWeight.Bold,
-                    style = MonoLabelStyle.copy(fontSize = 9.sp),
+                    style = MonoLabelStyle.copy(fontSize = 9.sp)
                 )
             }
         }

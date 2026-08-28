@@ -54,7 +54,7 @@ fun SplitScreenLayout(
     modifier: Modifier = Modifier,
     initialSplitRatio: Float = 0.4f,
     minSplitRatio: Float = 0.25f,
-    maxSplitRatio: Float = 0.75f,
+    maxSplitRatio: Float = 0.75f
 ) {
     var splitRatio by rememberSaveable { mutableFloatStateOf(initialSplitRatio) }
     var totalWidthPx by rememberSaveable { mutableIntStateOf(0) }
@@ -87,7 +87,7 @@ fun SplitScreenLayout(
                         splitRatio = newRatio
                     }
                 }
-            },
+            }
         )
 
         Box(

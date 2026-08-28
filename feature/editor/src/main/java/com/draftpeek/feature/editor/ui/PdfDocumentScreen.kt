@@ -14,12 +14,14 @@
  */
 package com.draftpeek.feature.editor.ui
 
-import android.content.Context
 import android.graphics.Bitmap
 import android.graphics.pdf.PdfRenderer
 import android.net.Uri
 import android.os.ParcelFileDescriptor
 import android.util.Log
+import android.widget.ImageView
+import android.widget.LinearLayout
+import android.widget.ScrollView
 import androidx.compose.foundation.background
 import androidx.compose.foundation.gestures.detectTransformGestures
 import androidx.compose.foundation.layout.Arrangement
@@ -30,15 +32,12 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
-import androidx.compose.foundation.rememberScrollState
-import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ErrorOutline
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.Icon
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -48,15 +47,11 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.graphics.asImageBitmap
 import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.viewinterop.AndroidView
-import android.widget.ImageView
-import android.widget.LinearLayout
-import android.widget.ScrollView
 import com.draftpeek.core.ui.theme.DraftPeekTypography
 import com.draftpeek.core.ui.theme.PrototypeTokens
 import java.io.File
@@ -86,10 +81,7 @@ private fun ByteArray.startsWith(prefix: ByteArray): Boolean {
  * @param modifier 修饰符
  */
 @Composable
-fun PdfDocumentScreen(
-    fileUri: Uri,
-    modifier: Modifier = Modifier,
-) {
+fun PdfDocumentScreen(fileUri: Uri, modifier: Modifier = Modifier) {
     val context = LocalContext.current
     var loadError by remember { mutableStateOf<String?>(null) }
     var errorDetail by remember { mutableStateOf<String?>(null) }
@@ -221,25 +213,25 @@ fun PdfDocumentScreen(
     Box(
         modifier = modifier
             .fillMaxSize()
-            .background(pageBg),
+            .background(pageBg)
     ) {
         if (loadError != null) {
             Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
                 Column(
                     horizontalAlignment = Alignment.CenterHorizontally,
-                    verticalArrangement = Arrangement.Center,
+                    verticalArrangement = Arrangement.Center
                 ) {
                     Icon(
                         imageVector = Icons.Filled.ErrorOutline,
                         contentDescription = null,
                         modifier = Modifier.size(48.dp),
-                        tint = errorColor,
+                        tint = errorColor
                     )
                     Spacer(modifier = Modifier.height(16.dp))
                     Text(
                         text = loadError ?: "加载失败",
                         style = DraftPeekTypography.bodyLarge,
-                        color = errorColor,
+                        color = errorColor
                     )
                     if (errorDetail != null) {
                         Spacer(modifier = Modifier.height(8.dp))
@@ -247,7 +239,7 @@ fun PdfDocumentScreen(
                             text = errorDetail ?: "",
                             style = DraftPeekTypography.bodySmall,
                             color = fgSoft,
-                            modifier = Modifier.padding(horizontal = 32.dp),
+                            modifier = Modifier.padding(horizontal = 32.dp)
                         )
                     }
                 }
@@ -264,14 +256,14 @@ fun PdfDocumentScreen(
                     ScrollView(ctx).apply {
                         layoutParams = android.view.ViewGroup.LayoutParams(
                             android.view.ViewGroup.LayoutParams.MATCH_PARENT,
-                            android.view.ViewGroup.LayoutParams.MATCH_PARENT,
+                            android.view.ViewGroup.LayoutParams.MATCH_PARENT
                         )
                         val container = LinearLayout(ctx).apply {
                             orientation = LinearLayout.VERTICAL
                             gravity = android.view.Gravity.CENTER_HORIZONTAL
                             layoutParams = android.view.ViewGroup.LayoutParams(
                                 android.view.ViewGroup.LayoutParams.MATCH_PARENT,
-                                android.view.ViewGroup.LayoutParams.WRAP_CONTENT,
+                                android.view.ViewGroup.LayoutParams.WRAP_CONTENT
                             )
                             setPadding(0, 24, 0, 24)
                         }
@@ -281,7 +273,7 @@ fun PdfDocumentScreen(
                                 adjustViewBounds = true
                                 layoutParams = LinearLayout.LayoutParams(
                                     android.view.ViewGroup.LayoutParams.MATCH_PARENT,
-                                    android.view.ViewGroup.LayoutParams.WRAP_CONTENT,
+                                    android.view.ViewGroup.LayoutParams.WRAP_CONTENT
                                 ).apply {
                                     bottomMargin = 16
                                 }
@@ -302,7 +294,7 @@ fun PdfDocumentScreen(
                                 adjustViewBounds = true
                                 layoutParams = LinearLayout.LayoutParams(
                                     android.view.ViewGroup.LayoutParams.MATCH_PARENT,
-                                    android.view.ViewGroup.LayoutParams.WRAP_CONTENT,
+                                    android.view.ViewGroup.LayoutParams.WRAP_CONTENT
                                 ).apply {
                                     bottomMargin = 16
                                 }
@@ -319,7 +311,7 @@ fun PdfDocumentScreen(
                             offset = if (scale > 1f) {
                                 Offset(
                                     offset.x + pan.x * scale,
-                                    offset.y + pan.y * scale,
+                                    offset.y + pan.y * scale
                                 )
                             } else {
                                 Offset.Zero
@@ -330,8 +322,8 @@ fun PdfDocumentScreen(
                         scaleX = scale,
                         scaleY = scale,
                         translationX = offset.x,
-                        translationY = offset.y,
-                    ),
+                        translationY = offset.y
+                    )
             )
         }
     }

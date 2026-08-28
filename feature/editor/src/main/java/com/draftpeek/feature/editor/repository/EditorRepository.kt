@@ -113,7 +113,7 @@ interface EditorRepository {
         uri: Uri,
         encoding: String? = null,
         cachedContent: String? = null,
-        cachedTimestamp: Long = 0L,
+        cachedTimestamp: Long = 0L
     ): Flow<EditorFileReadOutcome>
 }
 
@@ -145,7 +145,7 @@ data class FileReadResult(
     val fileSizeWarning: String? = null,
     val isBinaryFile: Boolean = false,
     val isTruncated: Boolean = false,
-    val loadMoreUri: Uri? = null,
+    val loadMoreUri: Uri? = null
 )
 
 /**
@@ -158,10 +158,7 @@ sealed class FileReadProgress {
      * @property loadedBytes 已读取字节数
      * @property totalBytes 总字节数，总大小未知时为 -1
      */
-    data class Loading(
-        val loadedBytes: Long,
-        val totalBytes: Long = -1,
-    ) : FileReadProgress() {
+    data class Loading(val loadedBytes: Long, val totalBytes: Long = -1) : FileReadProgress() {
         /** 进度分数 0f..1f，总大小未知时为 -1f */
         val progress: Float
             get() = if (totalBytes > 0) (loadedBytes.toFloat() / totalBytes) else -1f

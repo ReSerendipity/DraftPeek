@@ -135,7 +135,11 @@ object EncodingDetector {
                 i += 3
             } else if (b in 0xF0..0xF4) {
                 if (i + 3 >= bytes.size) return false
-                if (!isContinuationByte(bytes[i + 1]) || !isContinuationByte(bytes[i + 2]) || !isContinuationByte(bytes[i + 3])) return false
+                if (!isContinuationByte(bytes[i + 1]) || !isContinuationByte(bytes[i + 2]) ||
+                    !isContinuationByte(bytes[i + 3])
+                ) {
+                    return false
+                }
                 if (b == 0xF0 && (bytes[i + 1].toInt() and 0xFF) < 0x90) return false
                 i += 4
             } else {
@@ -151,8 +155,7 @@ object EncodingDetector {
      * @param b 待判断的字节
      * @return 如果是续字节返回 `true`
      */
-    private fun isContinuationByte(b: Byte): Boolean =
-        (b.toInt() and 0xC0) == 0x80
+    private fun isContinuationByte(b: Byte): Boolean = (b.toInt() and 0xC0) == 0x80
 
     /**
      * 启发式 GBK/GB2312 检测（保留作为补充手段）。
@@ -241,17 +244,15 @@ object EncodingDetector {
      * @param encoding 检测到的原始编码名称
      * @return 归一化后的编码名称
      */
-    private fun normalizeEncoding(encoding: String): String {
-        return when (encoding.uppercase()) {
-            "GB18030" -> "GB18030"
-            "GB2312", "GBK" -> "GB18030"
-            "BIG5" -> "Big5"
-            "EUC-JP" -> "EUC-JP"
-            "SHIFT_JIS" -> "Shift_JIS"
-            "EUC-KR" -> "EUC-KR"
-            "ISO-2022-JP" -> "ISO-2022-JP"
-            else -> encoding
-        }
+    private fun normalizeEncoding(encoding: String): String = when (encoding.uppercase()) {
+        "GB18030" -> "GB18030"
+        "GB2312", "GBK" -> "GB18030"
+        "BIG5" -> "Big5"
+        "EUC-JP" -> "EUC-JP"
+        "SHIFT_JIS" -> "Shift_JIS"
+        "EUC-KR" -> "EUC-KR"
+        "ISO-2022-JP" -> "ISO-2022-JP"
+        else -> encoding
     }
 
     /**

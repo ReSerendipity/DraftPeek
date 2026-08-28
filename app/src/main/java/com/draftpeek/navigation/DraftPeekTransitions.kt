@@ -16,15 +16,15 @@ package com.draftpeek.navigation
 import androidx.compose.animation.AnimatedContentTransitionScope
 import androidx.compose.animation.EnterTransition
 import androidx.compose.animation.ExitTransition
+import androidx.compose.animation.core.FastOutLinearInEasing
+import androidx.compose.animation.core.FastOutSlowInEasing
+import androidx.compose.animation.core.tween
 import androidx.compose.animation.fadeIn
 import androidx.compose.animation.fadeOut
 import androidx.compose.animation.slideInHorizontally
 import androidx.compose.animation.slideInVertically
 import androidx.compose.animation.slideOutHorizontally
 import androidx.compose.animation.slideOutVertically
-import androidx.compose.animation.core.FastOutLinearInEasing
-import androidx.compose.animation.core.FastOutSlowInEasing
-import androidx.compose.animation.core.tween
 import androidx.navigation.NavBackStackEntry
 
 /**
@@ -54,7 +54,7 @@ object DraftPeekTransitions {
     val sharedAxisHorizontalEnter: AnimatedContentTransitionScope<NavBackStackEntry>.() -> EnterTransition = {
         slideInHorizontally(
             initialOffsetX = { fullWidth -> fullWidth * 30 / 100 },
-            animationSpec = tween(250, easing = FastOutSlowInEasing),
+            animationSpec = tween(250, easing = FastOutSlowInEasing)
         ) + fadeIn(tween(200, easing = FastOutSlowInEasing))
     }
 
@@ -66,7 +66,7 @@ object DraftPeekTransitions {
     val sharedAxisHorizontalExit: AnimatedContentTransitionScope<NavBackStackEntry>.() -> ExitTransition = {
         slideOutHorizontally(
             targetOffsetX = { fullWidth -> -fullWidth * 15 / 100 },
-            animationSpec = tween(150, easing = FastOutLinearInEasing),
+            animationSpec = tween(150, easing = FastOutLinearInEasing)
         ) + fadeOut(tween(150, easing = FastOutLinearInEasing))
     }
 
@@ -78,7 +78,7 @@ object DraftPeekTransitions {
     val sharedAxisHorizontalPopEnter: AnimatedContentTransitionScope<NavBackStackEntry>.() -> EnterTransition = {
         slideInHorizontally(
             initialOffsetX = { fullWidth -> -fullWidth * 15 / 100 },
-            animationSpec = tween(250, easing = FastOutSlowInEasing),
+            animationSpec = tween(250, easing = FastOutSlowInEasing)
         ) + fadeIn(tween(200, easing = FastOutSlowInEasing))
     }
 
@@ -90,7 +90,7 @@ object DraftPeekTransitions {
     val sharedAxisHorizontalPopExit: AnimatedContentTransitionScope<NavBackStackEntry>.() -> ExitTransition = {
         slideOutHorizontally(
             targetOffsetX = { fullWidth -> fullWidth * 30 / 100 },
-            animationSpec = tween(150, easing = FastOutLinearInEasing),
+            animationSpec = tween(150, easing = FastOutLinearInEasing)
         ) + fadeOut(tween(150, easing = FastOutLinearInEasing))
     }
 
@@ -102,7 +102,7 @@ object DraftPeekTransitions {
     val sharedAxisVerticalEnter: AnimatedContentTransitionScope<NavBackStackEntry>.() -> EnterTransition = {
         slideInVertically(
             initialOffsetY = { fullHeight -> fullHeight * 20 / 100 },
-            animationSpec = tween(220, easing = FastOutSlowInEasing),
+            animationSpec = tween(220, easing = FastOutSlowInEasing)
         ) + fadeIn(tween(180, easing = FastOutSlowInEasing))
     }
 
@@ -114,7 +114,7 @@ object DraftPeekTransitions {
     val sharedAxisVerticalExit: AnimatedContentTransitionScope<NavBackStackEntry>.() -> ExitTransition = {
         slideOutVertically(
             targetOffsetY = { fullHeight -> -fullHeight * 10 / 100 },
-            animationSpec = tween(180, easing = FastOutLinearInEasing),
+            animationSpec = tween(180, easing = FastOutLinearInEasing)
         ) + fadeOut(tween(150, easing = FastOutLinearInEasing))
     }
 
@@ -135,7 +135,7 @@ object DraftPeekTransitions {
     val sharedAxisVerticalPopExit: AnimatedContentTransitionScope<NavBackStackEntry>.() -> ExitTransition = {
         slideOutVertically(
             targetOffsetY = { fullHeight -> fullHeight * 25 / 100 },
-            animationSpec = tween(180, easing = FastOutLinearInEasing),
+            animationSpec = tween(180, easing = FastOutLinearInEasing)
         ) + fadeOut(tween(150, easing = FastOutLinearInEasing))
     }
 }

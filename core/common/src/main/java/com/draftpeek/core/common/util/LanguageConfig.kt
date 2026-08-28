@@ -17,12 +17,15 @@ package com.draftpeek.core.common.util
 enum class FilenameValidationError {
     /** 文件名为空 */
     EMPTY,
+
     /** 文件名过长 */
     TOO_LONG,
+
     /** 包含非法字符 */
     ILLEGAL_CHARS,
+
     /** 以数字开头（某些语言不允许） */
-    DIGIT_START,
+    DIGIT_START
 }
 
 /**
@@ -43,11 +46,7 @@ object LanguageConfig {
      * @property extension 文件扩展名（不含点）
      * @property mimeType MIME类型
      */
-    data class LanguageInfo(
-        val displayName: String,
-        val extension: String,
-        val mimeType: String,
-    )
+    data class LanguageInfo(val displayName: String, val extension: String, val mimeType: String)
 
     private val languages = listOf(
         // ── 最常用：Web 前端 + 通用编程语言 ──
@@ -94,7 +93,7 @@ object LanguageConfig {
         LanguageInfo("Vim Script", "vim", "text/x-vim"),
         // ── 特殊 ──
         LanguageInfo("Plain Text", "txt", "text/plain"),
-        LanguageInfo("Encrypted Export", "jenc", "application/octet-stream"),
+        LanguageInfo("Encrypted Export", "jenc", "application/octet-stream")
     )
 
     /**
@@ -290,9 +289,8 @@ object LanguageConfig {
      * @param displayName 语言显示名称
      * @return 文件扩展名（不含点），未找到时返回"txt"
      */
-    fun languageToExtension(displayName: String): String {
-        return languages.find { it.displayName.equals(displayName, ignoreCase = true) }?.extension ?: "txt"
-    }
+    fun languageToExtension(displayName: String): String =
+        languages.find { it.displayName.equals(displayName, ignoreCase = true) }?.extension ?: "txt"
 
     /**
      * 根据文件扩展名获取对应的编辑器语言ID（用于语法高亮）。
@@ -326,9 +324,8 @@ object LanguageConfig {
      * @param displayName 语言显示名称
      * @return MIME类型字符串，未找到时返回"text/plain"
      */
-    fun languageToMimeType(displayName: String): String {
-        return languages.find { it.displayName.equals(displayName, ignoreCase = true) }?.mimeType ?: "text/plain"
-    }
+    fun languageToMimeType(displayName: String): String =
+        languages.find { it.displayName.equals(displayName, ignoreCase = true) }?.mimeType ?: "text/plain"
 
     /**
      * 标识符不能以数字开头的语言集合（C系语言等）。

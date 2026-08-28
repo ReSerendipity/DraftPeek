@@ -32,7 +32,7 @@ object CssThemeManager {
             "--code-text" to "#e36209",
             "--border-color" to "#e1e4e8",
             "--blockquote-border" to "#6a737d",
-            "--blockquote-text" to "#6a737d",
+            "--blockquote-text" to "#6a737d"
         ),
         "dark" to mapOf(
             "--bg-color" to "#0d1117",
@@ -43,7 +43,7 @@ object CssThemeManager {
             "--code-text" to "#79c0ff",
             "--border-color" to "#30363d",
             "--blockquote-border" to "#6e7681",
-            "--blockquote-text" to "#8b949e",
+            "--blockquote-text" to "#8b949e"
         ),
         "academic" to mapOf(
             "--bg-color" to "#fafafa",
@@ -54,7 +54,7 @@ object CssThemeManager {
             "--code-text" to "#c7254e",
             "--border-color" to "#dddddd",
             "--blockquote-border" to "#999999",
-            "--blockquote-text" to "#666666",
+            "--blockquote-text" to "#666666"
         ),
         "night" to mapOf(
             "--bg-color" to "#1e1e2e",
@@ -65,8 +65,8 @@ object CssThemeManager {
             "--code-text" to "#fab387",
             "--border-color" to "#45475a",
             "--blockquote-border" to "#6c7086",
-            "--blockquote-text" to "#a6adc8",
-        ),
+            "--blockquote-text" to "#a6adc8"
+        )
     )
 
     /**

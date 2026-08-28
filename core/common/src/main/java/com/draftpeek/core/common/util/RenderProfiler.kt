@@ -31,7 +31,7 @@ import kotlinx.coroutines.launch
  */
 class MemoryTracker(
     private val sampleIntervalMs: Long = DEFAULT_SAMPLE_INTERVAL_MS,
-    private val warningThresholdBytes: Long = DEFAULT_WARNING_THRESHOLD_BYTES,
+    private val warningThresholdBytes: Long = DEFAULT_WARNING_THRESHOLD_BYTES
 ) {
     private val scope = CoroutineScope(Dispatchers.Default)
     private var sampleJob: Job? = null
@@ -39,13 +39,16 @@ class MemoryTracker(
     private val _samples = mutableListOf<MemorySample>()
     private val _pressureEvents = mutableListOf<MemoryPressureEvent>()
     private val _currentUsage = MutableStateFlow(0L)
+
     /** 当前内存使用量的StateFlow，可用于UI观察 */
     val currentUsage: StateFlow<Long> = _currentUsage.asStateFlow()
 
     companion object {
         private const val TAG = "MemoryTracker"
+
         /** 默认采样间隔：5秒 */
         const val DEFAULT_SAMPLE_INTERVAL_MS = 5000L
+
         /** 默认内存警告阈值：200MB */
         const val DEFAULT_WARNING_THRESHOLD_BYTES = 200 * 1024 * 1024L
     }
@@ -64,7 +67,7 @@ class MemoryTracker(
         val totalMemoryBytes: Long,
         val freeMemoryBytes: Long,
         val usedMemoryBytes: Long,
-        val maxMemoryBytes: Long,
+        val maxMemoryBytes: Long
     )
 
     /**
@@ -81,7 +84,7 @@ class MemoryTracker(
         val usedMemoryBytes: Long,
         val maxMemoryBytes: Long,
         val usagePercent: Float,
-        val message: String,
+        val message: String
     )
 
     /**
@@ -96,7 +99,7 @@ class MemoryTracker(
         val samples: List<MemorySample>,
         val pressureEvents: List<MemoryPressureEvent>,
         val peakUsageBytes: Long,
-        val averageUsageBytes: Long,
+        val averageUsageBytes: Long
     )
 
     /**
@@ -138,7 +141,7 @@ class MemoryTracker(
             totalMemoryBytes = total,
             freeMemoryBytes = free,
             usedMemoryBytes = used,
-            maxMemoryBytes = max,
+            maxMemoryBytes = max
         )
 
         synchronized(_samples) { _samples.add(sample) }
@@ -151,7 +154,7 @@ class MemoryTracker(
                 usedMemoryBytes = used,
                 maxMemoryBytes = max,
                 usagePercent = usagePercent,
-                message = "High memory usage: ${formatBytes(used)} / ${formatBytes(max)} (${usagePercent.toInt()}%)",
+                message = "High memory usage: ${formatBytes(used)} / ${formatBytes(max)} (${usagePercent.toInt()}%)"
             )
             synchronized(_pressureEvents) { _pressureEvents.add(event) }
             Log.w(TAG, event.message)
@@ -172,7 +175,13 @@ class MemoryTracker(
                     samples = _samples.toList(),
                     pressureEvents = _pressureEvents.toList(),
                     peakUsageBytes = _samples.maxOfOrNull { it.usedMemoryBytes } ?: 0,
-                    averageUsageBytes = if (_samples.isEmpty()) 0L else _samples.map { it.usedMemoryBytes }.average().toLong(),
+                    averageUsageBytes = if (_samples.isEmpty()) {
+                        0L
+                    } else {
+                        _samples.map {
+                            it.usedMemoryBytes
+                        }.average().toLong()
+                    }
                 )
             }
         }
@@ -218,11 +227,12 @@ class RenderProfiler {
         var count: Int = 0,
         var totalDurationNs: Long = 0,
         var maxDurationNs: Long = 0,
-        var lastTimestampMs: Long = 0,
+        var lastTimestampMs: Long = 0
     )
 
     companion object {
         private const val TAG = "RenderProfiler"
+
         /** 过度重组警告阈值：重组次数超过此值时输出警告 */
         const val EXCESSIVE_RECOMPOSITION_THRESHOLD = 10
     }
@@ -273,9 +283,7 @@ class RenderProfiler {
      *
      * @return 重组计数器列表
      */
-    fun getStats(): List<RecompositionCounter> {
-        return counters.values.sortedByDescending { it.count }
-    }
+    fun getStats(): List<RecompositionCounter> = counters.values.sortedByDescending { it.count }
 
     /**
      * 获取指定键的重组次数。
@@ -302,8 +310,11 @@ class RenderProfiler {
         Log.d(TAG, "=== Render Profiler Summary ===")
         for (counter in stats) {
             val avgNs = if (counter.count > 0) counter.totalDurationNs / counter.count else 0
-            Log.d(TAG, "  ${counter.key}: ${counter.count} recompositions, " +
-                "avg=${avgNs / 1_000_000.0}ms, max=${counter.maxDurationNs / 1_000_000.0}ms")
+            Log.d(
+                TAG,
+                "  ${counter.key}: ${counter.count} recompositions, " +
+                    "avg=${avgNs / 1_000_000.0}ms, max=${counter.maxDurationNs / 1_000_000.0}ms"
+            )
         }
         val excessive = stats.filter { it.count >= EXCESSIVE_RECOMPOSITION_THRESHOLD }
         if (excessive.isNotEmpty()) {

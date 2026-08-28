@@ -14,7 +14,6 @@ import android.os.Handler
 import android.os.Looper
 import android.util.Log
 import android.view.View
-import android.view.ViewGroup
 import android.webkit.JavascriptInterface
 import android.webkit.WebChromeClient
 import android.webkit.WebResourceRequest
@@ -35,10 +34,9 @@ import androidx.compose.ui.viewinterop.AndroidView
 import com.draftpeek.core.common.util.MarkdownSanitizer
 import com.draftpeek.core.designsystem.theme.PrototypeTokens
 import com.draftpeek.feature.editor.model.MarkdownTheme
-import com.draftpeek.feature.editor.model.MarkdownViewMode
-import kotlinx.coroutines.delay
 import java.io.File
 import java.net.URLEncoder
+import kotlinx.coroutines.delay
 
 private const val TAG = "WysiwYGWebView"
 private const val MAX_CONTENT_SIZE = 500_000
@@ -71,7 +69,7 @@ fun WysiwYGWebViewPreview(
     onContentChanged: ((String) -> Unit)? = null,
     isDarkTheme: Boolean = false,
     theme: MarkdownTheme = MarkdownTheme.DEFAULT,
-    customCss: String? = null,
+    customCss: String? = null
 ) {
     var webView by remember { mutableStateOf<WebView?>(null) }
     var lastRenderedKey by remember { mutableStateOf("") }
@@ -128,145 +126,155 @@ fun WysiwYGWebViewPreview(
     }
 
     if (!rendererCrashed) {
-    AndroidView(
-        factory = { context ->
-            WebView(context).apply {
-                settings.apply {
-                    javaScriptEnabled = true
-                    domStorageEnabled = true
-                    setGeolocationEnabled(false)
-                    mediaPlaybackRequiresUserGesture = false
-                    mixedContentMode = WebSettings.MIXED_CONTENT_NEVER_ALLOW
+        AndroidView(
+            factory = { context ->
+                WebView(context).apply {
+                    settings.apply {
+                        javaScriptEnabled = true
+                        domStorageEnabled = true
+                        setGeolocationEnabled(false)
+                        mediaPlaybackRequiresUserGesture = false
+                        mixedContentMode = WebSettings.MIXED_CONTENT_NEVER_ALLOW
 
-                    @Suppress("DEPRECATION")
-                    allowFileAccessFromFileURLs = true
-                    allowFileAccess = true
-                    allowContentAccess = false
-                }
-                setLayerType(View.LAYER_TYPE_NONE, null)
-                webChromeClient = WebChromeClient()
-                webViewClient = object : WebViewClient() {
-                    override fun onPageFinished(view: WebView?, url: String?) {
-                        super.onPageFinished(view, url)
-                        pageLoaded = true
-                        rendererCrashed = false
-                        pendingFilePath?.let { filePath ->
+                        @Suppress("DEPRECATION")
+                        allowFileAccessFromFileURLs = true
+                        allowFileAccess = true
+                        allowContentAccess = false
+                    }
+                    setLayerType(View.LAYER_TYPE_NONE, null)
+                    webChromeClient = WebChromeClient()
+                    webViewClient = object : WebViewClient() {
+                        override fun onPageFinished(view: WebView?, url: String?) {
+                            super.onPageFinished(view, url)
+                            pageLoaded = true
+                            rendererCrashed = false
+                            pendingFilePath?.let { filePath ->
+                                pendingFilePath = null
+                                val darkParam = if (isDarkTheme) "1" else "0"
+                                val themeParam = theme.name.lowercase()
+                                val encodedUrl = URLEncoder.encode(filePath, "UTF-8")
+                                view?.loadUrl(
+                                    "file:///android_asset/markdown/wysiwg-editor.html?file=$encodedUrl&dark=$darkParam&theme=$themeParam"
+                                )
+                            }
+                        }
+
+                        override fun shouldOverrideUrlLoading(view: WebView?, request: WebResourceRequest?): Boolean {
+                            val url = request?.url?.toString() ?: return true
+                            return !url.startsWith("file:///android_asset/") &&
+                                !url.startsWith("file:///data/")
+                        }
+
+                        override fun onRenderProcessGone(
+                            view: WebView?,
+                            detail: android.webkit.RenderProcessGoneDetail?
+                        ): Boolean {
+                            Log.w(TAG, "WebView renderer crashed (crashed=${detail?.didCrash()})")
+                            rendererCrashed = true
+                            pageLoaded = false
                             pendingFilePath = null
-                            val darkParam = if (isDarkTheme) "1" else "0"
-                            val themeParam = theme.name.lowercase()
-                            val encodedUrl = URLEncoder.encode(filePath, "UTF-8")
-                            view?.loadUrl("file:///android_asset/markdown/wysiwg-editor.html?file=$encodedUrl&dark=$darkParam&theme=$themeParam")
+                            lastRenderedKey = ""
+                            try {
+                                view?.let {
+                                    it.stopLoading()
+                                    it.destroy()
+                                }
+                            } catch (e: Exception) {
+                                Log.w(TAG, "Error destroying crashed WebView", e)
+                            }
+                            return true
                         }
                     }
+                    isHorizontalScrollBarEnabled = false
+                    setBackgroundColor(surfaceColor.toArgb())
+                    addJavascriptInterface(
+                        WysiwYGCallback(
+                            onContentChanged = { newMarkdown ->
+                                isEditing = true
+                                lastEditTime = System.currentTimeMillis()
+                                currentMarkdown = newMarkdown
+                                onContentChanged?.invoke(newMarkdown)
+                                postDelayedSafely(EDITING_RESET_DELAY_MS) {
+                                    if (System.currentTimeMillis() - lastEditTime > EDITING_IDLE_THRESHOLD_MS) {
+                                        isEditing = false
+                                    }
+                                }
+                            },
+                            onFormatApplied = { format ->
+                                Log.d(TAG, "Format applied: $format")
+                            }
+                        ),
+                        "Android"
+                    )
+                    loadUrl("file:///android_asset/markdown/wysiwg-editor.html")
+                    webView = this
+                }
+            },
+            modifier = modifier.fillMaxSize(),
+            update = { view ->
+                view.setBackgroundColor(surfaceColor.toArgb())
 
-                    override fun shouldOverrideUrlLoading(
-                        view: WebView?, request: WebResourceRequest?
-                    ): Boolean {
-                        val url = request?.url?.toString() ?: return true
-                        return !url.startsWith("file:///android_asset/") &&
-                               !url.startsWith("file:///data/")
+                if (isEditing) return@AndroidView
+
+                val key = "$markdownContent\u0000$isDarkTheme\u0000$theme"
+                if (key != lastRenderedKey) {
+                    lastRenderedKey = key
+                    val debounceMs = if (markdownContent.length > LARGE_FILE_THRESHOLD_CHARS) {
+                        LARGE_FILE_DEBOUNCE_MS
+                    } else {
+                        NORMAL_FILE_DEBOUNCE_MS
                     }
 
-                    override fun onRenderProcessGone(
-                        view: WebView?, detail: android.webkit.RenderProcessGoneDetail?
-                    ): Boolean {
-                        Log.w(TAG, "WebView renderer crashed (crashed=${detail?.didCrash()})")
-                        rendererCrashed = true
-                        pageLoaded = false
-                        pendingFilePath = null
-                        lastRenderedKey = ""
+                    pendingRunnables.toList().forEach { mainHandler.removeCallbacks(it) }
+                    pendingRunnables.clear()
+
+                    postDelayedSafely(debounceMs) {
                         try {
-                            view?.let {
-                                it.stopLoading()
-                                it.destroy()
+                            val previewContent = if (markdownContent.length > MAX_CONTENT_SIZE) {
+                                markdownContent.substring(0, MAX_CONTENT_SIZE) +
+                                    "\n\n---\nContent too large for preview"
+                            } else {
+                                markdownContent
+                            }
+
+                            val ctx = view.context
+                            val tmpFile = File(ctx.cacheDir, TEMP_FILE_NAME)
+                            tmpFile.writeText(previewContent)
+                            val fileUrl = "file://${tmpFile.absolutePath}"
+
+                            if (pageLoaded) {
+                                val encodedUrl = URLEncoder.encode(fileUrl, "UTF-8")
+                                val darkParam = if (isDarkTheme) "1" else "0"
+                                val themeParam = theme.name.lowercase()
+                                view.loadUrl(
+                                    "file:///android_asset/markdown/wysiwg-editor.html?file=$encodedUrl&dark=$darkParam&theme=$themeParam"
+                                )
+                            } else {
+                                pendingFilePath = fileUrl
+                            }
+
+                            if (pageLoaded && customCss != null) {
+                                val escapedCss = MarkdownSanitizer.escapeForJsString(
+                                    MarkdownSanitizer.sanitizeCss(customCss)
+                                )
+                                view.evaluateJavascript(
+                                    "(function(){var s=document.getElementById('custom-css');if(!s){s=document.createElement('style');s.id='custom-css';document.head.appendChild(s)}s.textContent=\"$escapedCss\"})();",
+                                    null
+                                )
                             }
                         } catch (e: Exception) {
-                            Log.w(TAG, "Error destroying crashed WebView", e)
+                            Log.w(TAG, "Failed to render markdown in WYSIWYG WebView", e)
                         }
-                        return true
-                    }
-                }
-                isHorizontalScrollBarEnabled = false
-                setBackgroundColor(surfaceColor.toArgb())
-                addJavascriptInterface(WysiwYGCallback(
-                    onContentChanged = { newMarkdown ->
-                        isEditing = true
-                        lastEditTime = System.currentTimeMillis()
-                        currentMarkdown = newMarkdown
-                        onContentChanged?.invoke(newMarkdown)
-                        postDelayedSafely(EDITING_RESET_DELAY_MS) {
-                            if (System.currentTimeMillis() - lastEditTime > EDITING_IDLE_THRESHOLD_MS) {
-                                isEditing = false
-                            }
-                        }
-                    },
-                    onFormatApplied = { format ->
-                        Log.d(TAG, "Format applied: $format")
-                    },
-                ), "Android")
-                loadUrl("file:///android_asset/markdown/wysiwg-editor.html")
-                webView = this
-            }
-        },
-        modifier = modifier.fillMaxSize(),
-        update = { view ->
-            view.setBackgroundColor(surfaceColor.toArgb())
-
-            if (isEditing) return@AndroidView
-
-            val key = "$markdownContent\u0000$isDarkTheme\u0000$theme"
-            if (key != lastRenderedKey) {
-                lastRenderedKey = key
-                val debounceMs = if (markdownContent.length > LARGE_FILE_THRESHOLD_CHARS)
-                    LARGE_FILE_DEBOUNCE_MS else NORMAL_FILE_DEBOUNCE_MS
-
-                pendingRunnables.toList().forEach { mainHandler.removeCallbacks(it) }
-                pendingRunnables.clear()
-
-                postDelayedSafely(debounceMs) {
-                    try {
-                        val previewContent = if (markdownContent.length > MAX_CONTENT_SIZE) {
-                            markdownContent.substring(0, MAX_CONTENT_SIZE) + "\n\n---\nContent too large for preview"
-                        } else {
-                            markdownContent
-                        }
-
-                        val ctx = view.context
-                        val tmpFile = File(ctx.cacheDir, TEMP_FILE_NAME)
-                        tmpFile.writeText(previewContent)
-                        val fileUrl = "file://${tmpFile.absolutePath}"
-
-                        if (pageLoaded) {
-                            val encodedUrl = URLEncoder.encode(fileUrl, "UTF-8")
-                            val darkParam = if (isDarkTheme) "1" else "0"
-                            val themeParam = theme.name.lowercase()
-                            view.loadUrl("file:///android_asset/markdown/wysiwg-editor.html?file=$encodedUrl&dark=$darkParam&theme=$themeParam")
-                        } else {
-                            pendingFilePath = fileUrl
-                        }
-
-                        if (pageLoaded && customCss != null) {
-                            val escapedCss = MarkdownSanitizer.escapeForJsString(
-                                MarkdownSanitizer.sanitizeCss(customCss)
-                            )
-                            view.evaluateJavascript(
-                                "(function(){var s=document.getElementById('custom-css');if(!s){s=document.createElement('style');s.id='custom-css';document.head.appendChild(s)}s.textContent=\"$escapedCss\"})();",
-                                null
-                            )
-                        }
-                    } catch (e: Exception) {
-                        Log.w(TAG, "Failed to render markdown in WYSIWYG WebView", e)
                     }
                 }
             }
-        },
-    )
+        )
     }
 }
 
 private class WysiwYGCallback(
     private val onContentChanged: (String) -> Unit,
-    private val onFormatApplied: (String) -> Unit,
+    private val onFormatApplied: (String) -> Unit
 ) {
     @JavascriptInterface
     fun onContentChanged(newContent: String) {

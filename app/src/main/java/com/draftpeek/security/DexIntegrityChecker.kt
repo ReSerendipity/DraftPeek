@@ -51,8 +51,10 @@ object DexIntegrityChecker {
     sealed class DexResult {
         /** 所有 DEX 文件完整性正常 */
         data object Verified : DexResult()
+
         /** DEX 文件完整性异常 */
         data class Tampered(val details: String) : DexResult()
+
         /** 校验过程出错 */
         data class Error(val exception: Exception) : DexResult()
     }
@@ -60,12 +62,7 @@ object DexIntegrityChecker {
     /**
      * DEX 文件校验信息
      */
-    data class DexFileInfo(
-        val name: String,
-        val crc32: Long,
-        val sha256: String,
-        val size: Long
-    )
+    data class DexFileInfo(val name: String, val crc32: Long, val sha256: String, val size: Long)
 
     /**
      * 执行 DEX 完整性校验
@@ -83,7 +80,7 @@ object DexIntegrityChecker {
             val dexFiles = mutableListOf<DexFileInfo>()
             val issues = mutableListOf<String>()
             val warnings = mutableListOf<String>()
-            
+
             ZipFile(apkFile).use { zip ->
                 val entries = zip.entries()
                 while (entries.hasMoreElements()) {
@@ -108,12 +105,16 @@ object DexIntegrityChecker {
                     // 注意：某些 Android 版本或构建工具（如 zipalign）可能导致 CRC 差异，
                     // 因此 CRC 不匹配只记录警告，不判定为篡改。签名校验才是主要的完整性保障。
                     if (actualCrc != declaredCrc) {
-                        warnings.add("CRC mismatch for $name: declared=0x${declaredCrc.toString(16)}, actual=0x${actualCrc.toString(16)}")
+                        warnings.add(
+                            "CRC mismatch for $name: declared=0x${declaredCrc.toString(
+                                16
+                            )}, actual=0x${actualCrc.toString(16)}"
+                        )
                     }
 
                     // 检查 DEX 文件大小是否合理（至少 1KB，小于 100MB）
                     if (actualSize < 1024) {
-                        issues.add("Suspiciously small DEX file: $name (${actualSize} bytes)")
+                        issues.add("Suspiciously small DEX file: $name ($actualSize bytes)")
                     }
                 }
             }
@@ -127,7 +128,7 @@ object DexIntegrityChecker {
                 if (!hasMainDex) {
                     issues.add("Missing main DEX file (classes.dex)")
                 }
-                
+
                 // 检查 DEX 文件命名是否规范
                 dexFiles.forEach { dex ->
                     if (!dex.name.matches(Regex("^classes\\d*\\.dex$"))) {
@@ -173,15 +174,15 @@ object DexIntegrityChecker {
         return try {
             val apkPath = context.applicationInfo.sourceDir ?: return emptyList()
             val dexFiles = mutableListOf<DexFileInfo>()
-            
+
             ZipFile(File(apkPath)).use { zip ->
                 val entries = zip.entries()
                 while (entries.hasMoreElements()) {
                     val entry = entries.nextElement()
                     val name = entry.name
-                    
+
                     if (!name.matches(Regex("classes\\d*\\.dex"))) continue
-                    
+
                     val sha256 = computeSha256Streaming(zip.getInputStream(entry))
                     dexFiles.add(DexFileInfo(name, entry.crc, sha256, entry.size))
                 }
@@ -193,7 +194,7 @@ object DexIntegrityChecker {
     }
 
     // [Opt] Maintainability: 移除未使用的 computeCrc32(ByteArray)，
-     // 已被流式 computeCrc32Streaming(InputStream) 替代
+    // 已被流式 computeCrc32Streaming(InputStream) 替代
 
     /**
      * 一次性流式计算 InputStream 的 CRC32、字节大小和 SHA-256。

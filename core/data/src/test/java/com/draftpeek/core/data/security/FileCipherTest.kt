@@ -1,18 +1,17 @@
 package com.draftpeek.core.data.security
 
+import java.io.ByteArrayInputStream
+import java.io.ByteArrayOutputStream
+import javax.crypto.AEADBadTagException
 import org.junit.jupiter.api.Assertions.assertArrayEquals
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertFalse
-import org.junit.jupiter.api.Assertions.assertNotEquals
 import org.junit.jupiter.api.Assertions.assertNotNull
 import org.junit.jupiter.api.Assertions.assertThrows
 import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.DisplayName
 import org.junit.jupiter.api.Nested
 import org.junit.jupiter.api.Test
-import java.io.ByteArrayInputStream
-import java.io.ByteArrayOutputStream
-import javax.crypto.AEADBadTagException
 
 /**
  * FileCipher AES-256-GCM 加密模块单元测试。
@@ -173,14 +172,14 @@ class FileCipherTest {
             FileCipher.encryptStream(
                 ByteArrayInputStream(originalData),
                 password,
-                encryptOutput,
+                encryptOutput
             )
 
             val decryptOutput = ByteArrayOutputStream()
             FileCipher.decryptStream(
                 ByteArrayInputStream(encryptOutput.toByteArray()),
                 password,
-                decryptOutput,
+                decryptOutput
             )
 
             assertArrayEquals(originalData, decryptOutput.toByteArray())
@@ -196,14 +195,14 @@ class FileCipherTest {
             FileCipher.encryptStream(
                 ByteArrayInputStream(largeData),
                 password,
-                encryptOutput,
+                encryptOutput
             )
 
             val decryptOutput = ByteArrayOutputStream()
             FileCipher.decryptStream(
                 ByteArrayInputStream(encryptOutput.toByteArray()),
                 password,
-                decryptOutput,
+                decryptOutput
             )
 
             assertArrayEquals(largeData, decryptOutput.toByteArray())

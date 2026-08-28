@@ -18,7 +18,4 @@ package com.draftpeek.core.common.error
  * @property message 需要显示给用户的错误消息文本（已本地化）
  * @property isRetryable 标识该错误是否支持重试操作，默认为false
  */
-data class ErrorEvent(
-    val message: String,
-    val isRetryable: Boolean = false,
-)
+data class ErrorEvent(val message: String, val isRetryable: Boolean = false)

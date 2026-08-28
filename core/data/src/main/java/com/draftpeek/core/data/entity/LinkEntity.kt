@@ -30,12 +30,12 @@ import androidx.room.PrimaryKey
     indices = [
         Index(value = ["sourceUri", "targetTitle"], unique = true),
         Index(value = ["targetTitle"]),
-        Index(value = ["sourceUri"]),
+        Index(value = ["sourceUri"])
     ]
 )
 data class LinkEntity(
     @PrimaryKey(autoGenerate = true) val id: Long = 0,
     val sourceUri: String,
     val targetTitle: String,
-    val updatedAt: Long = System.currentTimeMillis(),
+    val updatedAt: Long = System.currentTimeMillis()
 )

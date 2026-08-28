@@ -27,9 +27,6 @@ interface FileRepository {
  */
 sealed class FileContentResult {
     data class Success(val content: FileContent) : FileContentResult()
-    data class Error(
-        val message: String,
-        val cause: Throwable? = null,
-        val isFileNotFound: Boolean = false,
-    ) : FileContentResult()
+    data class Error(val message: String, val cause: Throwable? = null, val isFileNotFound: Boolean = false) :
+        FileContentResult()
 }

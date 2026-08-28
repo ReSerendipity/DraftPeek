@@ -23,7 +23,6 @@ enum class ColorBlindMode {
     TRITANOPIA;
 
     companion object {
-        fun fromName(name: String?): ColorBlindMode =
-            entries.find { it.name == name } ?: NONE
+        fun fromName(name: String?): ColorBlindMode = entries.find { it.name == name } ?: NONE
     }
 }

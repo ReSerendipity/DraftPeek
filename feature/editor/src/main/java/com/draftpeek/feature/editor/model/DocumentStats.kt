@@ -16,11 +16,7 @@ import androidx.compose.runtime.Immutable
  * @property lineCount 行数
  */
 @Immutable
-data class DocumentStats(
-    val wordCount: Int,
-    val charCount: Int,
-    val lineCount: Int,
-)
+data class DocumentStats(val wordCount: Int, val charCount: Int, val lineCount: Int)
 
 /**
  * 从文本内容计算文档统计数据的工具对象。
@@ -79,7 +75,7 @@ object DocumentStatsCalculator {
         return DocumentStats(
             wordCount = cjkCount + wordCount,
             charCount = chars,
-            lineCount = lines,
+            lineCount = lines
         )
     }
 }

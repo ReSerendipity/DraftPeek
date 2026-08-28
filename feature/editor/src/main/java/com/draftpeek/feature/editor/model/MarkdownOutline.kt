@@ -18,11 +18,7 @@ import androidx.compose.runtime.Immutable
  * @property lineIndex 源文档中基于 0 的行索引，用于点击跳转
  */
 @Immutable
-data class OutlineHeading(
-    val level: Int,
-    val text: String,
-    val lineIndex: Int,
-)
+data class OutlineHeading(val level: Int, val text: String, val lineIndex: Int)
 
 /**
  * 从 Markdown 源文本解析标题的工具对象。

@@ -7,8 +7,8 @@ import io.mockk.coEvery
 import io.mockk.coVerify
 import io.mockk.every
 import io.mockk.mockk
-import kotlinx.coroutines.flow.flowOf
 import kotlinx.coroutines.flow.first
+import kotlinx.coroutines.flow.flowOf
 import kotlinx.coroutines.test.runTest
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.BeforeEach
@@ -175,7 +175,12 @@ class UserActivityRepositoryImplTest {
         fun backfill_noData_backfillsFromRecentFiles() = runTest {
             coEvery { userActivityDao.getActivityCount() } returns 0
             coEvery { recentFileDao.getAllRecentFilesOneShot() } returns listOf(
-                RecentFile(uri = "uri1", fileName = "f1.kt", language = "kotlin", lastOpenedAt = System.currentTimeMillis()),
+                RecentFile(
+                    uri = "uri1",
+                    fileName = "f1.kt",
+                    language = "kotlin",
+                    lastOpenedAt = System.currentTimeMillis()
+                )
             )
 
             repository.backfillFromRecentFiles()

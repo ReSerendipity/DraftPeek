@@ -49,14 +49,14 @@ class RecentFileDaoTest {
         uri: String = "content://test/file.kt",
         fileName: String = "file.kt",
         language: String? = "kotlin",
-        isFavorite: Boolean = false,
+        isFavorite: Boolean = false
     ) = RecentFile(
         uri = uri,
         fileName = fileName,
         language = language,
         lastOpenedAt = System.currentTimeMillis(),
         isFavorite = isFavorite,
-        fileSize = 100L,
+        fileSize = 100L
     )
 
     @Test

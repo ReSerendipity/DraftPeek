@@ -43,10 +43,12 @@ import com.draftpeek.core.ui.theme.SectionLabelStyle
 enum class SectionHeaderStyle {
     /** 设置风格：大写字母，Inter SemiBold 11sp，字间距 1sp，onSurfaceVariant 颜色 */
     SETTINGS,
+
     /** 主标题风格：Inter SemiBold 14sp，主色调，左侧带强调色竖条 */
     PRIMARY,
+
     /** 副标题风格：Inter Medium 13sp，onSurfaceVariant 颜色 */
-    SECONDARY,
+    SECONDARY
 }
 
 /**
@@ -63,7 +65,7 @@ enum class SectionHeaderStyle {
 fun SectionHeader(
     title: String,
     modifier: Modifier = Modifier,
-    style: SectionHeaderStyle = SectionHeaderStyle.SETTINGS,
+    style: SectionHeaderStyle = SectionHeaderStyle.SETTINGS
 ) {
     when (style) {
         SectionHeaderStyle.SETTINGS -> {
@@ -74,7 +76,7 @@ fun SectionHeader(
                     fontWeight = SectionLabelStyle.fontWeight,
                     fontSize = SectionLabelStyle.fontSize,
                     letterSpacing = SectionLabelStyle.letterSpacing,
-                    lineHeight = SectionLabelStyle.lineHeight,
+                    lineHeight = SectionLabelStyle.lineHeight
                 ),
                 color = PrototypeTokens.fgSoft,
                 maxLines = 1,
@@ -83,33 +85,33 @@ fun SectionHeader(
                     start = DraftPeekSpacing.Two,
                     end = DraftPeekSpacing.Two,
                     top = DraftPeekSpacing.Two,
-                    bottom = DraftPeekSpacing.One,
-                ),
+                    bottom = DraftPeekSpacing.One
+                )
             )
         }
         SectionHeaderStyle.PRIMARY -> {
             Row(
                 modifier = modifier.padding(
                     horizontal = DraftPeekSpacing.Two,
-                    vertical = DraftPeekSpacing.One,
-                ),
+                    vertical = DraftPeekSpacing.One
+                )
             ) {
                 Spacer(
                     modifier = Modifier
                         .clip(RoundedCornerShape(2.dp))
                         .background(PrototypeTokens.accent)
                         .width(3.dp)
-                        .padding(top = 2.dp), // optical centering within the text line
+                        .padding(top = 2.dp) // optical centering within the text line
                 )
                 Spacer(Modifier.width(DraftPeekSpacing.Half))
                 Text(
                     text = title,
                     style = MaterialTheme.typography.titleSmall.copy(
-                        fontWeight = FontWeight.SemiBold,
+                        fontWeight = FontWeight.SemiBold
                     ),
                     color = PrototypeTokens.accent,
                     maxLines = 1,
-                    overflow = TextOverflow.Ellipsis,
+                    overflow = TextOverflow.Ellipsis
                 )
             }
         }
@@ -118,7 +120,7 @@ fun SectionHeader(
                 text = title,
                 style = MaterialTheme.typography.bodySmall.copy(
                     fontWeight = FontWeight.Medium,
-                    fontSize = 13.sp,
+                    fontSize = 13.sp
                 ),
                 color = PrototypeTokens.fgSoft,
                 maxLines = 1,
@@ -127,8 +129,8 @@ fun SectionHeader(
                     start = DraftPeekSpacing.Two,
                     end = DraftPeekSpacing.Two,
                     top = DraftPeekSpacing.OneHalf,
-                    bottom = DraftPeekSpacing.Half,
-                ),
+                    bottom = DraftPeekSpacing.Half
+                )
             )
         }
     }

@@ -31,8 +31,8 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.draftpeek.core.ui.theme.*
-import kotlinx.coroutines.delay
 import kotlin.random.Random
+import kotlinx.coroutines.delay
 
 /**
  * 引导页动画风格枚举。
@@ -53,10 +53,10 @@ enum class OnboardingAnimation { InkStamp, PageTurn, MinimalReveal }
  */
 @Composable
 fun OnboardingScreen(onComplete: () -> Unit) {
-    val selectedAnimation = remember { 
-        OnboardingAnimation.values()[Random.nextInt(OnboardingAnimation.values().size)] 
+    val selectedAnimation = remember {
+        OnboardingAnimation.values()[Random.nextInt(OnboardingAnimation.values().size)]
     }
-    
+
     when (selectedAnimation) {
         OnboardingAnimation.InkStamp -> InkStampOnboarding(onComplete)
         OnboardingAnimation.PageTurn -> PageTurnOnboarding(onComplete)
@@ -78,7 +78,7 @@ private fun InkStampOnboarding(onComplete: () -> Unit) {
     val fgSoft = PrototypeTokens.fgSoft
     val border = PrototypeTokens.border
     val surface = PrototypeTokens.surface
-    
+
     Box(
         modifier = Modifier
             .fillMaxSize()
@@ -91,7 +91,7 @@ private fun InkStampOnboarding(onComplete: () -> Unit) {
             2 -> InkStampStep3()
             3 -> InkStampStep4(onComplete = onComplete, onStartOver = { currentStep = 0 })
         }
-        
+
         Row(
             modifier = Modifier
                 .align(Alignment.BottomCenter)
@@ -104,19 +104,22 @@ private fun InkStampOnboarding(onComplete: () -> Unit) {
                         .size(if (i == currentStep) 24.dp else 8.dp, 8.dp)
                         .clip(PrototypeShapes.Pill)
                         .background(
-                            if (i == currentStep) accent
-                            else border
+                            if (i == currentStep) {
+                                accent
+                            } else {
+                                border
+                            }
                         )
                 )
             }
         }
     }
-    
+
     LaunchedEffect(currentStep) {
         delay(3000)
-        if (currentStep < 3) currentStep++ 
+        if (currentStep < 3) currentStep++
     }
-    
+
     Box(
         modifier = Modifier
             .fillMaxSize()
@@ -132,14 +135,14 @@ private fun InkStampStep1() {
     val textScale = remember { Animatable(0.9f) }
     val fg = PrototypeTokens.fg
     val fgSoft = PrototypeTokens.fgSoft
-    
+
     LaunchedEffect(Unit) {
         dropY.animateTo(0f, spring(dampingRatio = 0.6f, stiffness = 400f), initialVelocity = 200f)
         rippleRadius.animateTo(120f, tween(600, easing = EaseOutCubic))
         textOpacity.animateTo(1f, tween(400))
         textScale.animateTo(1f, tween(400))
     }
-    
+
     Column(
         horizontalAlignment = Alignment.CenterHorizontally,
         verticalArrangement = Arrangement.Center
@@ -151,9 +154,9 @@ private fun InkStampStep1() {
                 .clip(CircleShape)
                 .background(fg)
         )
-        
+
         Spacer(Modifier.height(40.dp))
-        
+
         Text(
             text = "DraftPeek",
             color = fg,
@@ -164,9 +167,9 @@ private fun InkStampStep1() {
                 scaleY = textScale.value
             }
         )
-        
+
         Spacer(Modifier.height(12.dp))
-        
+
         Text(
             text = "Clean code reading",
             style = DraftPeekTypography.bodyMedium.copy(color = fgSoft),
@@ -181,12 +184,12 @@ private fun InkStampStep2() {
     val opacity = remember { Animatable(0f) }
     val fg = PrototypeTokens.fg
     val fgSoft = PrototypeTokens.fgSoft
-    
+
     LaunchedEffect(Unit) {
         scale.animateTo(1f, spring(dampingRatio = 0.5f, stiffness = 300f))
         opacity.animateTo(1f, tween(200))
     }
-    
+
     Column(
         horizontalAlignment = Alignment.CenterHorizontally,
         verticalArrangement = Arrangement.Center
@@ -203,17 +206,17 @@ private fun InkStampStep2() {
                 alpha = opacity.value
             }
         )
-        
+
         Spacer(Modifier.height(32.dp))
-        
+
         Text(
             text = "Elegant Preview",
             style = H2Style.copy(color = fg),
             modifier = Modifier.graphicsLayer { alpha = opacity.value }
         )
-        
+
         Spacer(Modifier.height(8.dp))
-        
+
         Text(
             text = "Markdown, code, and more",
             style = DraftPeekTypography.bodyMedium.copy(color = fgSoft),
@@ -231,12 +234,12 @@ private fun InkStampStep3() {
     val border = PrototypeTokens.border
     val pageBg = PrototypeTokens.pageBackground
     val surface = PrototypeTokens.surface
-    
+
     LaunchedEffect(Unit) {
         offset.animateTo(0f, tween(400))
         opacity.animateTo(1f, tween(300, delayMillis = 200))
     }
-    
+
     Column(
         horizontalAlignment = Alignment.CenterHorizontally,
         verticalArrangement = Arrangement.Center
@@ -258,9 +261,9 @@ private fun InkStampStep3() {
                     .background(fg)
             )
         }
-        
+
         Spacer(Modifier.height(32.dp))
-        
+
         Text(
             text = "Light & Dark",
             style = H2Style.copy(color = fg),
@@ -269,9 +272,9 @@ private fun InkStampStep3() {
                 translationY = offset.value
             }
         )
-        
+
         Spacer(Modifier.height(8.dp))
-        
+
         Text(
             text = "Two modes, one experience",
             style = DraftPeekTypography.bodyMedium.copy(color = fgSoft),
@@ -289,11 +292,11 @@ private fun InkStampStep4(onComplete: () -> Unit, onStartOver: () -> Unit) {
     val fg = PrototypeTokens.fg
     val accent = PrototypeTokens.accent
     val onPrimary = PrototypeTokens.surface
-    
+
     LaunchedEffect(Unit) {
         opacity.animateTo(1f, tween(500))
     }
-    
+
     Column(
         horizontalAlignment = Alignment.CenterHorizontally,
         verticalArrangement = Arrangement.Center
@@ -303,9 +306,9 @@ private fun InkStampStep4(onComplete: () -> Unit, onStartOver: () -> Unit) {
             style = H1Style.copy(color = fg),
             modifier = Modifier.graphicsLayer { alpha = opacity.value }
         )
-        
+
         Spacer(Modifier.height(24.dp))
-        
+
         Button(
             onClick = onComplete,
             shape = PrototypeShapes.Pill,
@@ -336,7 +339,7 @@ private fun PageTurnOnboarding(onComplete: () -> Unit) {
     val fg = PrototypeTokens.fg
     val fgSoft = PrototypeTokens.fgSoft
     val border = PrototypeTokens.border
-    
+
     Box(
         modifier = Modifier
             .fillMaxSize()
@@ -350,7 +353,7 @@ private fun PageTurnOnboarding(onComplete: () -> Unit) {
             2 -> PageTurnStep3()
             3 -> PageTurnStep4(onComplete = onComplete, onStartOver = { currentStep = 0 })
         }
-        
+
         Row(
             modifier = Modifier
                 .align(Alignment.BottomCenter)
@@ -363,14 +366,17 @@ private fun PageTurnOnboarding(onComplete: () -> Unit) {
                         .size(if (i == currentStep) 24.dp else 8.dp, 8.dp)
                         .clip(PrototypeShapes.Pill)
                         .background(
-                            if (i == currentStep) accent
-                            else border
+                            if (i == currentStep) {
+                                accent
+                            } else {
+                                border
+                            }
                         )
                 )
             }
         }
     }
-    
+
     LaunchedEffect(currentStep) {
         delay(3000)
         if (currentStep < 3) currentStep++
@@ -385,12 +391,12 @@ private fun PageTurnStep1() {
     val fgSoft = PrototypeTokens.fgSoft
     val accent = PrototypeTokens.accent
     val surface = PrototypeTokens.surface
-    
+
     LaunchedEffect(Unit) {
         cardHeight.animateTo(200f, tween(600, easing = FastOutSlowInEasing))
         opacity.animateTo(1f, tween(400, delayMillis = 200))
     }
-    
+
     Card(
         modifier = Modifier
             .width(280.dp)
@@ -431,7 +437,7 @@ private fun PageTurnStep2() {
     val fgSoft = PrototypeTokens.fgSoft
     val surface = PrototypeTokens.surface
     val elevated = PrototypeTokens.elevated
-    
+
     LaunchedEffect(Unit) {
         cardRotation.animateTo((-90).toFloat(), tween(400))
         delay(400)
@@ -440,7 +446,7 @@ private fun PageTurnStep2() {
         offset.animateTo(0f, tween(300))
         opacity.animateTo(1f, tween(300))
     }
-    
+
     Card(
         modifier = Modifier
             .width(280.dp)
@@ -472,7 +478,7 @@ private fun PageTurnStep2() {
                                 .size(8.dp)
                                 .clip(CircleShape)
                                 .background(
-                                    when(i) {
+                                    when (i) {
                                         0 -> SecondaryLight
                                         1 -> TertiaryLight
                                         else -> Color(0xFFD97706)
@@ -506,12 +512,12 @@ private fun PageTurnStep3() {
     val fgSoft = PrototypeTokens.fgSoft
     val border = PrototypeTokens.border
     val surface = PrototypeTokens.surface
-    
+
     LaunchedEffect(Unit) {
         offset.animateTo(0f, tween(400))
         opacity.animateTo(1f, tween(300, delayMillis = 200))
     }
-    
+
     Column(
         horizontalAlignment = Alignment.CenterHorizontally,
         verticalArrangement = Arrangement.Center
@@ -548,9 +554,9 @@ private fun PageTurnStep3() {
                 )
             }
         }
-        
+
         Spacer(Modifier.height(32.dp))
-        
+
         Text(
             "Dual Themes",
             style = H2Style.copy(color = fg),
@@ -559,9 +565,9 @@ private fun PageTurnStep3() {
                 translationY = offset.value
             }
         )
-        
+
         Spacer(Modifier.height(8.dp))
-        
+
         Text(
             "Switch between light and dark",
             style = DraftPeekTypography.bodyMedium.copy(color = fgSoft),
@@ -579,17 +585,20 @@ private fun PageTurnStep4(onComplete: () -> Unit, onStartOver: () -> Unit) {
     val fg = PrototypeTokens.fg
     val accent = PrototypeTokens.accent
     val onPrimary = PrototypeTokens.surface
-    
+
     LaunchedEffect(Unit) {
         opacity.animateTo(1f, tween(500))
     }
-    
+
     Column(
         horizontalAlignment = Alignment.CenterHorizontally,
         verticalArrangement = Arrangement.Center
     ) {
-        Text("Ready to explore?", style = H1Style.copy(color = fg),
-            modifier = Modifier.graphicsLayer { alpha = opacity.value })
+        Text(
+            "Ready to explore?",
+            style = H1Style.copy(color = fg),
+            modifier = Modifier.graphicsLayer { alpha = opacity.value }
+        )
         Spacer(Modifier.height(24.dp))
         Button(
             onClick = onComplete,
@@ -615,7 +624,7 @@ private fun MinimalRevealOnboarding(onComplete: () -> Unit) {
     val fg = PrototypeTokens.fg
     val fgSoft = PrototypeTokens.fgSoft
     val border = PrototypeTokens.border
-    
+
     Box(
         modifier = Modifier
             .fillMaxSize()
@@ -629,7 +638,7 @@ private fun MinimalRevealOnboarding(onComplete: () -> Unit) {
             2 -> MinimalStep3()
             3 -> MinimalStep4(onComplete = onComplete, onStartOver = { currentStep = 0 })
         }
-        
+
         Row(
             modifier = Modifier
                 .align(Alignment.BottomCenter)
@@ -642,14 +651,17 @@ private fun MinimalRevealOnboarding(onComplete: () -> Unit) {
                         .size(if (i == currentStep) 24.dp else 8.dp, 8.dp)
                         .clip(PrototypeShapes.Pill)
                         .background(
-                            if (i == currentStep) accent
-                            else border
+                            if (i == currentStep) {
+                                accent
+                            } else {
+                                border
+                            }
                         )
                 )
             }
         }
     }
-    
+
     LaunchedEffect(currentStep) {
         delay(3000)
         if (currentStep < 3) currentStep++
@@ -665,7 +677,7 @@ private fun MinimalStep1() {
     val accent = PrototypeTokens.accent
     val fgSoft = PrototypeTokens.fgSoft
     val border = PrototypeTokens.border
-    
+
     LaunchedEffect(Unit) {
         while (displayedLength < text.length) {
             delay(120)
@@ -677,7 +689,7 @@ private fun MinimalStep1() {
             delay(530)
         }
     }
-    
+
     Column(horizontalAlignment = Alignment.CenterHorizontally) {
         Row(verticalAlignment = Alignment.CenterVertically) {
             Text(
@@ -696,30 +708,30 @@ private fun MinimalStep1() {
                 )
             }
         }
-        
+
         Spacer(Modifier.height(16.dp))
-        
+
         val lineWidth = remember { Animatable(0f) }
         LaunchedEffect(Unit) {
             delay(600)
             lineWidth.animateTo(80f, tween(500, easing = EaseOutCubic))
         }
-        
+
         Box(
             modifier = Modifier
                 .width(lineWidth.value.dp)
                 .height(1.dp)
                 .background(border)
         )
-        
+
         Spacer(Modifier.height(12.dp))
-        
+
         val subtitleOpacity = remember { Animatable(0f) }
         LaunchedEffect(Unit) {
             delay(1000)
             subtitleOpacity.animateTo(1f, tween(400))
         }
-        
+
         Text(
             "Clean. Fast. Focused.",
             style = DraftPeekTypography.bodyMedium.copy(color = fgSoft),
@@ -735,13 +747,13 @@ private fun MinimalStep2() {
     val textOpacity = remember { Animatable(0f) }
     val fg = PrototypeTokens.fg
     val fgSoft = PrototypeTokens.fgSoft
-    
+
     LaunchedEffect(Unit) {
         sweep.animateTo(360f, tween(1500, easing = EaseInOutCubic))
         codeOpacity.animateTo(1f, tween(300, delayMillis = 1200))
         textOpacity.animateTo(1f, tween(300, delayMillis = 1400))
     }
-    
+
     Column(
         horizontalAlignment = Alignment.CenterHorizontally,
         verticalArrangement = Arrangement.Center
@@ -759,7 +771,7 @@ private fun MinimalStep2() {
                 size = size
             )
         }
-        
+
         Text(
             "</>",
             color = fg,
@@ -770,17 +782,17 @@ private fun MinimalStep2() {
                 .offset(y = (-62).dp)
                 .graphicsLayer { alpha = codeOpacity.value }
         )
-        
+
         Spacer(Modifier.height(24.dp))
-        
+
         Text(
             "Immersive Reading",
             style = H2Style.copy(color = fg),
             modifier = Modifier.graphicsLayer { alpha = textOpacity.value }
         )
-        
+
         Spacer(Modifier.height(8.dp))
-        
+
         Text(
             "Code and Markdown, beautifully rendered",
             style = DraftPeekTypography.bodyMedium.copy(color = fgSoft),
@@ -796,12 +808,12 @@ private fun MinimalStep3() {
     val fg = PrototypeTokens.fg
     val fgSoft = PrototypeTokens.fgSoft
     val border = PrototypeTokens.border
-    
+
     LaunchedEffect(Unit) {
         opacity.animateTo(1f, tween(300))
         circleOffset.animateTo(20f, tween(600, easing = EaseOutCubic))
     }
-    
+
     Column(
         horizontalAlignment = Alignment.CenterHorizontally,
         verticalArrangement = Arrangement.Center
@@ -821,14 +833,20 @@ private fun MinimalStep3() {
                     .background(border)
             )
         }
-        
+
         Spacer(Modifier.height(32.dp))
-        
-        Text("Two Modes", style = H2Style.copy(color = fg),
-            modifier = Modifier.graphicsLayer { alpha = opacity.value })
+
+        Text(
+            "Two Modes",
+            style = H2Style.copy(color = fg),
+            modifier = Modifier.graphicsLayer { alpha = opacity.value }
+        )
         Spacer(Modifier.height(8.dp))
-        Text("Seamlessly switch between themes", style = DraftPeekTypography.bodyMedium.copy(color = fgSoft),
-            modifier = Modifier.graphicsLayer { alpha = opacity.value })
+        Text(
+            "Seamlessly switch between themes",
+            style = DraftPeekTypography.bodyMedium.copy(color = fgSoft),
+            modifier = Modifier.graphicsLayer { alpha = opacity.value }
+        )
     }
 }
 
@@ -839,17 +857,20 @@ private fun MinimalStep4(onComplete: () -> Unit, onStartOver: () -> Unit) {
     val accent = PrototypeTokens.accent
     val border = PrototypeTokens.border
     val surface = PrototypeTokens.surface
-    
+
     LaunchedEffect(Unit) {
         opacity.animateTo(1f, tween(500))
     }
-    
+
     Column(
         horizontalAlignment = Alignment.CenterHorizontally,
         verticalArrangement = Arrangement.Center
     ) {
-        Text("Ready?", style = H1Style.copy(color = fg),
-            modifier = Modifier.graphicsLayer { alpha = opacity.value })
+        Text(
+            "Ready?",
+            style = H1Style.copy(color = fg),
+            modifier = Modifier.graphicsLayer { alpha = opacity.value }
+        )
         Spacer(Modifier.height(24.dp))
         OutlinedButton(
             onClick = onComplete,

@@ -21,5 +21,5 @@ data class ThemeMetadata(
     val displayName: String,
     val isDark: Boolean,
     val isBundled: Boolean,
-    val filePath: String,
+    val filePath: String
 )

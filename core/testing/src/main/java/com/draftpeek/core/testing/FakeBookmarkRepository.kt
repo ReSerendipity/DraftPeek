@@ -23,8 +23,7 @@ class FakeBookmarkRepository : BookmarkRepository {
     override val allBookmarkUris: Flow<List<String>> =
         MutableStateFlow(_bookmarks.value.map { it.uri }).asStateFlow()
 
-    override suspend fun isBookmarked(uri: String): Boolean =
-        _bookmarks.value.any { it.uri == uri }
+    override suspend fun isBookmarked(uri: String): Boolean = _bookmarks.value.any { it.uri == uri }
 
     override suspend fun addBookmark(uri: String, fileName: String, directoryUri: String) {
         val bookmark = BookmarkEntity(uri = uri, fileName = fileName, directoryUri = directoryUri)

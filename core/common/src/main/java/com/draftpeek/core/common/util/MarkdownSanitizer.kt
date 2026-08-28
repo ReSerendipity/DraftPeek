@@ -13,12 +13,24 @@ package com.draftpeek.core.common.util
  */
 object MarkdownSanitizer {
 
-    private val RE_SCRIPT = "<script[^>]*>.*?</script>".toRegex(setOf(RegexOption.DOT_MATCHES_ALL, RegexOption.IGNORE_CASE))
-    private val RE_STYLE = "<style[^>]*>.*?</style>".toRegex(setOf(RegexOption.DOT_MATCHES_ALL, RegexOption.IGNORE_CASE))
-    private val RE_IFRAME = "<iframe[^>]*>.*?</iframe>".toRegex(setOf(RegexOption.DOT_MATCHES_ALL, RegexOption.IGNORE_CASE))
-    private val RE_OBJECT = "<object[^>]*>.*?</object>".toRegex(setOf(RegexOption.DOT_MATCHES_ALL, RegexOption.IGNORE_CASE))
-    private val RE_EMBED = "<embed[^>]*>.*?</embed>".toRegex(setOf(RegexOption.DOT_MATCHES_ALL, RegexOption.IGNORE_CASE))
-    private val RE_APPLET = "<applet[^>]*>.*?</applet>".toRegex(setOf(RegexOption.DOT_MATCHES_ALL, RegexOption.IGNORE_CASE))
+    private val RE_SCRIPT = "<script[^>]*>.*?</script>".toRegex(
+        setOf(RegexOption.DOT_MATCHES_ALL, RegexOption.IGNORE_CASE)
+    )
+    private val RE_STYLE = "<style[^>]*>.*?</style>".toRegex(
+        setOf(RegexOption.DOT_MATCHES_ALL, RegexOption.IGNORE_CASE)
+    )
+    private val RE_IFRAME = "<iframe[^>]*>.*?</iframe>".toRegex(
+        setOf(RegexOption.DOT_MATCHES_ALL, RegexOption.IGNORE_CASE)
+    )
+    private val RE_OBJECT = "<object[^>]*>.*?</object>".toRegex(
+        setOf(RegexOption.DOT_MATCHES_ALL, RegexOption.IGNORE_CASE)
+    )
+    private val RE_EMBED = "<embed[^>]*>.*?</embed>".toRegex(
+        setOf(RegexOption.DOT_MATCHES_ALL, RegexOption.IGNORE_CASE)
+    )
+    private val RE_APPLET = "<applet[^>]*>.*?</applet>".toRegex(
+        setOf(RegexOption.DOT_MATCHES_ALL, RegexOption.IGNORE_CASE)
+    )
     private val RE_FORM = "<form[^>]*>.*?</form>".toRegex(setOf(RegexOption.DOT_MATCHES_ALL, RegexOption.IGNORE_CASE))
     private val RE_SVG = "<svg[^>]*>.*?</svg>".toRegex(setOf(RegexOption.DOT_MATCHES_ALL, RegexOption.IGNORE_CASE))
     private val RE_MATH = "<math[^>]*>.*?</math>".toRegex(setOf(RegexOption.DOT_MATCHES_ALL, RegexOption.IGNORE_CASE))
@@ -56,47 +68,45 @@ object MarkdownSanitizer {
      * @param content 待清洗的原始Markdown内容
      * @return 可安全用于WebView渲染的清洗后内容
      */
-    fun sanitize(content: String): String {
-        return try {
-            var cleaned = content
-            cleaned = cleaned.replace(RE_SCRIPT, "")
-            cleaned = cleaned.replace(RE_STYLE, "")
-            cleaned = cleaned.replace(RE_IFRAME, "")
-            cleaned = cleaned.replace(RE_OBJECT, "")
-            cleaned = cleaned.replace(RE_EMBED, "")
-            cleaned = cleaned.replace(RE_APPLET, "")
-            cleaned = cleaned.replace(RE_FORM, "")
-            cleaned = cleaned.replace(RE_SVG, "")
-            cleaned = cleaned.replace(RE_MATH, "")
-            cleaned = cleaned.replace(RE_SCRIPT_OPEN, "")
-            cleaned = cleaned.replace(RE_STYLE_OPEN, "")
-            cleaned = cleaned.replace(RE_IFRAME_OPEN, "")
-            cleaned = cleaned.replace(RE_IFRAME_CLOSE, "")
-            cleaned = cleaned.replace(RE_OBJECT_OPEN, "")
-            cleaned = cleaned.replace(RE_OBJECT_CLOSE, "")
-            cleaned = cleaned.replace(RE_EMBED_OPEN, "")
-            cleaned = cleaned.replace(RE_EMBED_CLOSE, "")
-            cleaned = cleaned.replace(RE_APPLET_OPEN, "")
-            cleaned = cleaned.replace(RE_APPLET_CLOSE, "")
-            cleaned = cleaned.replace(RE_BASE, "")
-            cleaned = cleaned.replace(RE_LINK, "")
-            cleaned = cleaned.replace(RE_META, "")
-            cleaned = cleaned.replace(RE_INPUT, "")
-            cleaned = cleaned.replace(RE_TEXTAREA, "")
-            cleaned = cleaned.replace(RE_SELECT, "")
-            cleaned = cleaned.replace(RE_BUTTON, "")
-            cleaned = cleaned.replace(RE_SVG_OPEN, "")
-            cleaned = cleaned.replace(RE_MATH_OPEN, "")
-            cleaned = cleaned.replace(RE_EVENT_HANDLER_DQ, "")
-            cleaned = cleaned.replace(RE_EVENT_HANDLER_SQ, "")
-            cleaned = cleaned.replace(RE_JAVASCRIPT_URI, "")
-            cleaned = cleaned.replace(RE_DATA_URI, "")
-            cleaned = cleaned.replace(RE_SRCDOC_DQ, "")
-            cleaned = cleaned.replace(RE_SRCDOC_SQ, "")
-            cleaned
-        } catch (_: Exception) {
-            content
-        }
+    fun sanitize(content: String): String = try {
+        var cleaned = content
+        cleaned = cleaned.replace(RE_SCRIPT, "")
+        cleaned = cleaned.replace(RE_STYLE, "")
+        cleaned = cleaned.replace(RE_IFRAME, "")
+        cleaned = cleaned.replace(RE_OBJECT, "")
+        cleaned = cleaned.replace(RE_EMBED, "")
+        cleaned = cleaned.replace(RE_APPLET, "")
+        cleaned = cleaned.replace(RE_FORM, "")
+        cleaned = cleaned.replace(RE_SVG, "")
+        cleaned = cleaned.replace(RE_MATH, "")
+        cleaned = cleaned.replace(RE_SCRIPT_OPEN, "")
+        cleaned = cleaned.replace(RE_STYLE_OPEN, "")
+        cleaned = cleaned.replace(RE_IFRAME_OPEN, "")
+        cleaned = cleaned.replace(RE_IFRAME_CLOSE, "")
+        cleaned = cleaned.replace(RE_OBJECT_OPEN, "")
+        cleaned = cleaned.replace(RE_OBJECT_CLOSE, "")
+        cleaned = cleaned.replace(RE_EMBED_OPEN, "")
+        cleaned = cleaned.replace(RE_EMBED_CLOSE, "")
+        cleaned = cleaned.replace(RE_APPLET_OPEN, "")
+        cleaned = cleaned.replace(RE_APPLET_CLOSE, "")
+        cleaned = cleaned.replace(RE_BASE, "")
+        cleaned = cleaned.replace(RE_LINK, "")
+        cleaned = cleaned.replace(RE_META, "")
+        cleaned = cleaned.replace(RE_INPUT, "")
+        cleaned = cleaned.replace(RE_TEXTAREA, "")
+        cleaned = cleaned.replace(RE_SELECT, "")
+        cleaned = cleaned.replace(RE_BUTTON, "")
+        cleaned = cleaned.replace(RE_SVG_OPEN, "")
+        cleaned = cleaned.replace(RE_MATH_OPEN, "")
+        cleaned = cleaned.replace(RE_EVENT_HANDLER_DQ, "")
+        cleaned = cleaned.replace(RE_EVENT_HANDLER_SQ, "")
+        cleaned = cleaned.replace(RE_JAVASCRIPT_URI, "")
+        cleaned = cleaned.replace(RE_DATA_URI, "")
+        cleaned = cleaned.replace(RE_SRCDOC_DQ, "")
+        cleaned = cleaned.replace(RE_SRCDOC_SQ, "")
+        cleaned
+    } catch (_: Exception) {
+        content
     }
 
     /**
@@ -105,36 +115,32 @@ object MarkdownSanitizer {
      * @param css 用户提供的原始 CSS
      * @return 清洗后可安全注入 WebView 的 CSS
      */
-    fun sanitizeCss(css: String): String {
-        return css
-            .replace(RE_SCRIPT, "")
-            .replace(RE_IFRAME_OPEN, "")
-            .replace(RE_IFRAME_CLOSE, "")
-            .replace(RE_OBJECT_OPEN, "")
-            .replace(RE_OBJECT_CLOSE, "")
-            .replace(RE_EMBED_OPEN, "")
-            .replace(RE_EMBED_CLOSE, "")
-            .replace(RE_BASE, "")
-            .replace(RE_JAVASCRIPT_URI, "")
-            .replace(RE_EVENT_HANDLER_DQ, "")
-            .replace(RE_EVENT_HANDLER_SQ, "")
-            .replace(RE_SRCDOC_DQ, "")
-            .replace(RE_SRCDOC_SQ, "")
-            .replace(RE_STYLE, "")
-            .replace(RE_DATA_URI, "")
-    }
+    fun sanitizeCss(css: String): String = css
+        .replace(RE_SCRIPT, "")
+        .replace(RE_IFRAME_OPEN, "")
+        .replace(RE_IFRAME_CLOSE, "")
+        .replace(RE_OBJECT_OPEN, "")
+        .replace(RE_OBJECT_CLOSE, "")
+        .replace(RE_EMBED_OPEN, "")
+        .replace(RE_EMBED_CLOSE, "")
+        .replace(RE_BASE, "")
+        .replace(RE_JAVASCRIPT_URI, "")
+        .replace(RE_EVENT_HANDLER_DQ, "")
+        .replace(RE_EVENT_HANDLER_SQ, "")
+        .replace(RE_SRCDOC_DQ, "")
+        .replace(RE_SRCDOC_SQ, "")
+        .replace(RE_STYLE, "")
+        .replace(RE_DATA_URI, "")
 
     /**
      * 转义特殊字符以便安全嵌入JavaScript字符串字面量。
      */
-    fun escapeForJsString(content: String): String {
-        return content
-            .replace("\\", "\\\\")
-            .replace("`", "\\`")
-            .replace("'", "\\'")
-            .replace("\n", "\\n")
-            .replace("\r", "\\r")
-            .replace("\"", "\\\"")
-            .replace("$", "\\$")
-    }
+    fun escapeForJsString(content: String): String = content
+        .replace("\\", "\\\\")
+        .replace("`", "\\`")
+        .replace("'", "\\'")
+        .replace("\n", "\\n")
+        .replace("\r", "\\r")
+        .replace("\"", "\\\"")
+        .replace("$", "\\$")
 }

@@ -14,8 +14,10 @@ package com.draftpeek.feature.stats.model
 enum class TimeRange {
     /** 全部时间 - 统计所有历史数据 */
     ALL,
+
     /** 最近 30 天 */
     D30,
+
     /** 最近 7 天 */
-    D7,
+    D7
 }

@@ -56,7 +56,7 @@ private val LightColorScheme = lightColorScheme(
     inverseSurface = InverseSurfaceLight,
     inverseOnSurface = InverseOnSurfaceLight,
     inversePrimary = InversePrimaryLight,
-    surfaceTint = SurfaceTintLight,
+    surfaceTint = SurfaceTintLight
 )
 
 private val DarkColorScheme = darkColorScheme(
@@ -87,7 +87,7 @@ private val DarkColorScheme = darkColorScheme(
     inverseSurface = InverseSurfaceDark,
     inverseOnSurface = InverseOnSurfaceDark,
     inversePrimary = InversePrimaryDark,
-    surfaceTint = SurfaceTintDark,
+    surfaceTint = SurfaceTintDark
 )
 
 /**
@@ -125,7 +125,7 @@ private data class TokenColors(
     val infoContainer: Color,
     val onInfoContainer: Color,
     val folder: Color,
-    val folderContainer: Color,
+    val folderContainer: Color
 )
 
 /**
@@ -142,16 +142,14 @@ private fun computeTokenColors(state: AccessibilityState, isDark: Boolean): Toke
     val highContrast = state.highContrastMode
 
     // 辅助：应用色盲变换（如启用）
-    fun Color.blind(): Color = if (colorBlindMode == ColorBlindMode.NONE) this
-        else ColorBlindnessHelper.transform(this, colorBlindMode)
+    fun Color.blind(): Color = if (colorBlindMode == ColorBlindMode.NONE) {
+        this
+    } else {
+        ColorBlindnessHelper.transform(this, colorBlindMode)
+    }
 
     // 常规 token 取色：根据 highContrast + isDark 四选一，再叠加色盲变换
-    fun pick(
-        regularLight: Color,
-        regularDark: Color,
-        hcLight: Color,
-        hcDark: Color,
-    ): Color {
+    fun pick(regularLight: Color, regularDark: Color, hcLight: Color, hcDark: Color): Color {
         val base = if (highContrast) {
             if (isDark) hcDark else hcLight
         } else {
@@ -161,11 +159,7 @@ private fun computeTokenColors(state: AccessibilityState, isDark: Boolean): Toke
     }
 
     // 语义色取色：常规色不区分深浅主题；高对比度模式下区分
-    fun pickSemantic(
-        regular: Color,
-        hcLight: Color,
-        hcDark: Color,
-    ): Color {
+    fun pickSemantic(regular: Color, hcLight: Color, hcDark: Color): Color {
         val base = if (highContrast) {
             if (isDark) hcDark else hcLight
         } else {
@@ -176,89 +170,127 @@ private fun computeTokenColors(state: AccessibilityState, isDark: Boolean): Toke
 
     return TokenColors(
         pageBackground = pick(
-            PageBackgroundLight, PageBackgroundDark,
-            HighContrastScheme.Light.background, HighContrastScheme.Dark.background,
+            PageBackgroundLight,
+            PageBackgroundDark,
+            HighContrastScheme.Light.background,
+            HighContrastScheme.Dark.background
         ),
         accent = pick(
-            PrimaryLight, PrimaryDark,
-            HighContrastScheme.Light.primary, HighContrastScheme.Dark.primary,
+            PrimaryLight,
+            PrimaryDark,
+            HighContrastScheme.Light.primary,
+            HighContrastScheme.Dark.primary
         ),
         accentSoft = pick(
-            AccentSoftLight, AccentSoftDark,
-            HighContrastScheme.Light.primaryContainer, HighContrastScheme.Dark.primaryContainer,
+            AccentSoftLight,
+            AccentSoftDark,
+            HighContrastScheme.Light.primaryContainer,
+            HighContrastScheme.Dark.primaryContainer
         ),
         muted = pick(
-            MutedLight, MutedDark,
-            HighContrastScheme.Light.onSurfaceVariant, HighContrastScheme.Dark.onSurfaceVariant,
+            MutedLight,
+            MutedDark,
+            HighContrastScheme.Light.onSurfaceVariant,
+            HighContrastScheme.Dark.onSurfaceVariant
         ),
         fgSoft = pick(
-            FgSoftLight, FgSoftDark,
-            HighContrastScheme.Light.onSurfaceVariant, HighContrastScheme.Dark.onSurfaceVariant,
+            FgSoftLight,
+            FgSoftDark,
+            HighContrastScheme.Light.onSurfaceVariant,
+            HighContrastScheme.Dark.onSurfaceVariant
         ),
         border = pick(
-            OutlineLight, OutlineDark,
-            HighContrastScheme.Light.outline, HighContrastScheme.Dark.outline,
+            OutlineLight,
+            OutlineDark,
+            HighContrastScheme.Light.outline,
+            HighContrastScheme.Dark.outline
         ),
         elevated = pick(
-            SurfaceVariantLight, SurfaceVariantDark,
-            HighContrastScheme.Light.surfaceVariant, HighContrastScheme.Dark.surfaceVariant,
+            SurfaceVariantLight,
+            SurfaceVariantDark,
+            HighContrastScheme.Light.surfaceVariant,
+            HighContrastScheme.Dark.surfaceVariant
         ),
         bg = pick(
-            BackgroundLight, BackgroundDark,
-            HighContrastScheme.Light.background, HighContrastScheme.Dark.background,
+            BackgroundLight,
+            BackgroundDark,
+            HighContrastScheme.Light.background,
+            HighContrastScheme.Dark.background
         ),
         surface = pick(
-            SurfaceLight, SurfaceDark,
-            HighContrastScheme.Light.surface, HighContrastScheme.Dark.surface,
+            SurfaceLight,
+            SurfaceDark,
+            HighContrastScheme.Light.surface,
+            HighContrastScheme.Dark.surface
         ),
         fg = pick(
-            OnSurfaceLight, OnSurfaceDark,
-            HighContrastScheme.Light.onSurface, HighContrastScheme.Dark.onSurface,
+            OnSurfaceLight,
+            OnSurfaceDark,
+            HighContrastScheme.Light.onSurface,
+            HighContrastScheme.Dark.onSurface
         ),
         success = pickSemantic(
             SemanticColors.Success,
-            HighContrastScheme.Light.tertiary, HighContrastScheme.Dark.tertiary,
+            HighContrastScheme.Light.tertiary,
+            HighContrastScheme.Dark.tertiary
         ),
         error = pickSemantic(
             SemanticColors.Danger,
-            HighContrastScheme.Light.error, HighContrastScheme.Dark.error,
+            HighContrastScheme.Light.error,
+            HighContrastScheme.Dark.error
         ),
         warning = pickSemantic(
             SemanticColors.Warning,
-            Color(0xFFCC6600), Color(0xFFFF9900),
+            Color(0xFFCC6600),
+            Color(0xFFFF9900)
         ),
         info = pickSemantic(
             SemanticColors.Info,
-            HighContrastScheme.Light.secondary, HighContrastScheme.Dark.secondary,
+            HighContrastScheme.Light.secondary,
+            HighContrastScheme.Dark.secondary
         ),
         surfaceHover = pick(
-            SurfaceHoverLight, SurfaceHoverDark,
-            HighContrastScheme.Light.surfaceVariant, HighContrastScheme.Dark.surfaceVariant,
+            SurfaceHoverLight,
+            SurfaceHoverDark,
+            HighContrastScheme.Light.surfaceVariant,
+            HighContrastScheme.Dark.surfaceVariant
         ),
         mutedSoft = pick(
-            MutedSoftLight, MutedSoftDark,
-            HighContrastScheme.Light.outlineVariant, HighContrastScheme.Dark.outlineVariant,
+            MutedSoftLight,
+            MutedSoftDark,
+            HighContrastScheme.Light.outlineVariant,
+            HighContrastScheme.Dark.outlineVariant
         ),
         borderSoft = pick(
-            BorderSoftLight, BorderSoftDark,
-            HighContrastScheme.Light.outlineVariant, HighContrastScheme.Dark.outlineVariant,
+            BorderSoftLight,
+            BorderSoftDark,
+            HighContrastScheme.Light.outlineVariant,
+            HighContrastScheme.Dark.outlineVariant
         ),
         infoContainer = pick(
-            InfoContainerLight, InfoContainerDark,
-            HighContrastScheme.Light.secondaryContainer, HighContrastScheme.Dark.secondaryContainer,
+            InfoContainerLight,
+            InfoContainerDark,
+            HighContrastScheme.Light.secondaryContainer,
+            HighContrastScheme.Dark.secondaryContainer
         ),
         onInfoContainer = pick(
-            OnInfoContainerLight, OnInfoContainerDark,
-            HighContrastScheme.Light.onSecondaryContainer, HighContrastScheme.Dark.onSecondaryContainer,
+            OnInfoContainerLight,
+            OnInfoContainerDark,
+            HighContrastScheme.Light.onSecondaryContainer,
+            HighContrastScheme.Dark.onSecondaryContainer
         ),
         folder = pick(
-            FolderColorLight, FolderColorDark,
-            HighContrastScheme.Light.tertiary, HighContrastScheme.Dark.tertiary,
+            FolderColorLight,
+            FolderColorDark,
+            HighContrastScheme.Light.tertiary,
+            HighContrastScheme.Dark.tertiary
         ),
         folderContainer = pick(
-            FolderContainerLight, FolderContainerDark,
-            HighContrastScheme.Light.tertiaryContainer, HighContrastScheme.Dark.tertiaryContainer,
-        ),
+            FolderContainerLight,
+            FolderContainerDark,
+            HighContrastScheme.Light.tertiaryContainer,
+            HighContrastScheme.Dark.tertiaryContainer
+        )
     )
 }
 
@@ -317,7 +349,7 @@ fun DraftPeekTheme(
     darkTheme: Boolean = isSystemInDarkTheme(),
     accessibilityState: AccessibilityState = AccessibilityState.Default,
     appFonts: AppFonts = AppFonts(),
-    content: @Composable () -> Unit,
+    content: @Composable () -> Unit
 ) {
     val baseScheme = if (darkTheme) DarkColorScheme else LightColorScheme
 
@@ -346,20 +378,20 @@ fun DraftPeekTheme(
     val currentDensity = LocalDensity.current
     val scaledDensity = Density(
         density = currentDensity.density,
-        fontScale = currentDensity.fontScale * accessibilityState.textScale,
+        fontScale = currentDensity.fontScale * accessibilityState.textScale
     )
 
     CompositionLocalProvider(
         LocalDarkTheme provides darkTheme,
         LocalAccessibilityState provides accessibilityState,
         LocalDensity provides scaledDensity,
-        LocalAppFonts provides appFonts,
+        LocalAppFonts provides appFonts
     ) {
         MaterialTheme(
             colorScheme = finalSchemeWithScrim,
             typography = typography,
             shapes = Shapes,
-            content = content,
+            content = content
         )
     }
 }
@@ -369,36 +401,34 @@ fun DraftPeekTheme(
  */
 private fun transformColorScheme(
     scheme: androidx.compose.material3.ColorScheme,
-    mode: ColorBlindMode,
-): androidx.compose.material3.ColorScheme {
-    return scheme.copy(
-        primary = ColorBlindnessHelper.transform(scheme.primary, mode),
-        onPrimary = ColorBlindnessHelper.transform(scheme.onPrimary, mode),
-        primaryContainer = ColorBlindnessHelper.transform(scheme.primaryContainer, mode),
-        onPrimaryContainer = ColorBlindnessHelper.transform(scheme.onPrimaryContainer, mode),
-        secondary = ColorBlindnessHelper.transform(scheme.secondary, mode),
-        onSecondary = ColorBlindnessHelper.transform(scheme.onSecondary, mode),
-        secondaryContainer = ColorBlindnessHelper.transform(scheme.secondaryContainer, mode),
-        onSecondaryContainer = ColorBlindnessHelper.transform(scheme.onSecondaryContainer, mode),
-        tertiary = ColorBlindnessHelper.transform(scheme.tertiary, mode),
-        onTertiary = ColorBlindnessHelper.transform(scheme.onTertiary, mode),
-        tertiaryContainer = ColorBlindnessHelper.transform(scheme.tertiaryContainer, mode),
-        onTertiaryContainer = ColorBlindnessHelper.transform(scheme.onTertiaryContainer, mode),
-        error = ColorBlindnessHelper.transform(scheme.error, mode),
-        onError = ColorBlindnessHelper.transform(scheme.onError, mode),
-        errorContainer = ColorBlindnessHelper.transform(scheme.errorContainer, mode),
-        onErrorContainer = ColorBlindnessHelper.transform(scheme.onErrorContainer, mode),
-        background = ColorBlindnessHelper.transform(scheme.background, mode),
-        onBackground = ColorBlindnessHelper.transform(scheme.onBackground, mode),
-        surface = ColorBlindnessHelper.transform(scheme.surface, mode),
-        onSurface = ColorBlindnessHelper.transform(scheme.onSurface, mode),
-        surfaceVariant = ColorBlindnessHelper.transform(scheme.surfaceVariant, mode),
-        onSurfaceVariant = ColorBlindnessHelper.transform(scheme.onSurfaceVariant, mode),
-        outline = ColorBlindnessHelper.transform(scheme.outline, mode),
-        outlineVariant = ColorBlindnessHelper.transform(scheme.outlineVariant, mode),
-        inverseSurface = ColorBlindnessHelper.transform(scheme.inverseSurface, mode),
-        inverseOnSurface = ColorBlindnessHelper.transform(scheme.inverseOnSurface, mode),
-        inversePrimary = ColorBlindnessHelper.transform(scheme.inversePrimary, mode),
-        surfaceTint = ColorBlindnessHelper.transform(scheme.surfaceTint, mode),
-    )
-}
+    mode: ColorBlindMode
+): androidx.compose.material3.ColorScheme = scheme.copy(
+    primary = ColorBlindnessHelper.transform(scheme.primary, mode),
+    onPrimary = ColorBlindnessHelper.transform(scheme.onPrimary, mode),
+    primaryContainer = ColorBlindnessHelper.transform(scheme.primaryContainer, mode),
+    onPrimaryContainer = ColorBlindnessHelper.transform(scheme.onPrimaryContainer, mode),
+    secondary = ColorBlindnessHelper.transform(scheme.secondary, mode),
+    onSecondary = ColorBlindnessHelper.transform(scheme.onSecondary, mode),
+    secondaryContainer = ColorBlindnessHelper.transform(scheme.secondaryContainer, mode),
+    onSecondaryContainer = ColorBlindnessHelper.transform(scheme.onSecondaryContainer, mode),
+    tertiary = ColorBlindnessHelper.transform(scheme.tertiary, mode),
+    onTertiary = ColorBlindnessHelper.transform(scheme.onTertiary, mode),
+    tertiaryContainer = ColorBlindnessHelper.transform(scheme.tertiaryContainer, mode),
+    onTertiaryContainer = ColorBlindnessHelper.transform(scheme.onTertiaryContainer, mode),
+    error = ColorBlindnessHelper.transform(scheme.error, mode),
+    onError = ColorBlindnessHelper.transform(scheme.onError, mode),
+    errorContainer = ColorBlindnessHelper.transform(scheme.errorContainer, mode),
+    onErrorContainer = ColorBlindnessHelper.transform(scheme.onErrorContainer, mode),
+    background = ColorBlindnessHelper.transform(scheme.background, mode),
+    onBackground = ColorBlindnessHelper.transform(scheme.onBackground, mode),
+    surface = ColorBlindnessHelper.transform(scheme.surface, mode),
+    onSurface = ColorBlindnessHelper.transform(scheme.onSurface, mode),
+    surfaceVariant = ColorBlindnessHelper.transform(scheme.surfaceVariant, mode),
+    onSurfaceVariant = ColorBlindnessHelper.transform(scheme.onSurfaceVariant, mode),
+    outline = ColorBlindnessHelper.transform(scheme.outline, mode),
+    outlineVariant = ColorBlindnessHelper.transform(scheme.outlineVariant, mode),
+    inverseSurface = ColorBlindnessHelper.transform(scheme.inverseSurface, mode),
+    inverseOnSurface = ColorBlindnessHelper.transform(scheme.inverseOnSurface, mode),
+    inversePrimary = ColorBlindnessHelper.transform(scheme.inversePrimary, mode),
+    surfaceTint = ColorBlindnessHelper.transform(scheme.surfaceTint, mode)
+)

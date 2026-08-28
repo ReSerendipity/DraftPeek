@@ -24,7 +24,7 @@ object HighContrastScheme {
 
     /** 高对比度浅色方案 */
     val Light = lightColorScheme(
-        primary = Color(0xFF0000FF),        // 纯蓝，与白色背景对比度极高
+        primary = Color(0xFF0000FF), // 纯蓝，与白色背景对比度极高
         onPrimary = Color(0xFFFFFFFF),
         primaryContainer = Color(0xFFD0D0FF),
         onPrimaryContainer = Color(0xFF000000),
@@ -40,23 +40,23 @@ object HighContrastScheme {
         onError = Color(0xFFFFFFFF),
         errorContainer = Color(0xFFFFD0D0),
         onErrorContainer = Color(0xFF000000),
-        background = Color(0xFFFFFFFF),      // 纯白背景
-        onBackground = Color(0xFF000000),    // 纯黑文字
+        background = Color(0xFFFFFFFF), // 纯白背景
+        onBackground = Color(0xFF000000), // 纯黑文字
         surface = Color(0xFFFFFFFF),
         onSurface = Color(0xFF000000),
         surfaceVariant = Color(0xFFF0F0F0),
         onSurfaceVariant = Color(0xFF000000),
-        outline = Color(0xFF666666),         // 更深的边框线
+        outline = Color(0xFF666666), // 更深的边框线
         outlineVariant = Color(0xFF999999),
         inverseSurface = Color(0xFF000000),
         inverseOnSurface = Color(0xFFFFFFFF),
         inversePrimary = Color(0xFF9999FF),
-        surfaceTint = Color(0xFF0000FF),
+        surfaceTint = Color(0xFF0000FF)
     )
 
     /** 高对比度深色方案 */
     val Dark = darkColorScheme(
-        primary = Color(0xFFFFFF00),        // 纯黄，与黑色背景对比度极高
+        primary = Color(0xFFFFFF00), // 纯黄，与黑色背景对比度极高
         onPrimary = Color(0xFF000000),
         primaryContainer = Color(0xFF555500),
         onPrimaryContainer = Color(0xFFFFFF00),
@@ -72,8 +72,8 @@ object HighContrastScheme {
         onError = Color(0xFF000000),
         errorContainer = Color(0xFF550000),
         onErrorContainer = Color(0xFFFF9999),
-        background = Color(0xFF000000),      // 纯黑背景
-        onBackground = Color(0xFFFFFFFF),    // 纯白文字
+        background = Color(0xFF000000), // 纯黑背景
+        onBackground = Color(0xFFFFFFFF), // 纯白文字
         surface = Color(0xFF000000),
         onSurface = Color(0xFFFFFFFF),
         surfaceVariant = Color(0xFF222222),
@@ -83,12 +83,11 @@ object HighContrastScheme {
         inverseSurface = Color(0xFFFFFFFF),
         inverseOnSurface = Color(0xFF000000),
         inversePrimary = Color(0xFF666600),
-        surfaceTint = Color(0xFFFFFF00),
+        surfaceTint = Color(0xFFFFFF00)
     )
 
     /**
      * 根据是否为暗色主题返回对应的高对比度方案。
      */
-    fun scheme(isDark: Boolean): ColorScheme =
-        if (isDark) Dark else Light
+    fun scheme(isDark: Boolean): ColorScheme = if (isDark) Dark else Light
 }

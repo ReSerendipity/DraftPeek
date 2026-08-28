@@ -7,7 +7,6 @@ import io.github.rosemoe.sora.langs.textmate.registry.ThemeRegistry
 import io.github.rosemoe.sora.langs.textmate.registry.model.ThemeModel
 import io.github.rosemoe.sora.widget.CodeEditor
 import org.eclipse.tm4e.core.registry.IThemeSource
-import org.json.JSONObject
 
 /**
  * Applies a loaded [ThemeLoader.EditorTheme] to a sora-editor [CodeEditor].

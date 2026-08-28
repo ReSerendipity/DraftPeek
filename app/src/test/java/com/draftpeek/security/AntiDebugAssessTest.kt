@@ -31,14 +31,23 @@ class AntiDebugAssessTest {
      * 必须在每个测试前调用，确保测试间状态隔离。
      */
     private fun resetAntiDebugState() {
-        ReflectionHelpers.setStaticField(AntiDebug::class.java, "threatScore",
-            java.util.concurrent.atomic.AtomicInteger(0))
-        ReflectionHelpers.setStaticField(AntiDebug::class.java, "lastScoreDecayMs",
-            java.util.concurrent.atomic.AtomicLong(System.currentTimeMillis()))
+        ReflectionHelpers.setStaticField(
+            AntiDebug::class.java,
+            "threatScore",
+            java.util.concurrent.atomic.AtomicInteger(0)
+        )
+        ReflectionHelpers.setStaticField(
+            AntiDebug::class.java,
+            "lastScoreDecayMs",
+            java.util.concurrent.atomic.AtomicLong(System.currentTimeMillis())
+        )
         ReflectionHelpers.setStaticField(AntiDebug::class.java, "integrityChecked", false)
         ReflectionHelpers.setStaticField(AntiDebug::class.java, "integrityVerified", false)
-        ReflectionHelpers.setStaticField(AntiDebug::class.java, "currentLevel",
-            AntiDebug.SecurityLevel.SAFE)
+        ReflectionHelpers.setStaticField(
+            AntiDebug::class.java,
+            "currentLevel",
+            AntiDebug.SecurityLevel.SAFE
+        )
     }
 
     /**
@@ -47,8 +56,11 @@ class AntiDebugAssessTest {
     private fun setRealDeviceBuildFields() {
         ReflectionHelpers.setStaticField(android.os.Build::class.java, "BRAND", "samsung")
         ReflectionHelpers.setStaticField(android.os.Build::class.java, "DEVICE", "beyond1")
-        ReflectionHelpers.setStaticField(android.os.Build::class.java, "FINGERPRINT",
-            "samsung/beyond1/beyond1:14/UP1A.231005.007:user/release-keys")
+        ReflectionHelpers.setStaticField(
+            android.os.Build::class.java,
+            "FINGERPRINT",
+            "samsung/beyond1/beyond1:14/UP1A.231005.007:user/release-keys"
+        )
         ReflectionHelpers.setStaticField(android.os.Build::class.java, "HARDWARE", "qcom")
         ReflectionHelpers.setStaticField(android.os.Build::class.java, "MODEL", "SM-G973F")
         ReflectionHelpers.setStaticField(android.os.Build::class.java, "MANUFACTURER", "samsung")
@@ -135,7 +147,11 @@ class AntiDebugAssessTest {
         // 设置模拟器字段使 isRunningOnEmulator 返回 true（+3）
         ReflectionHelpers.setStaticField(android.os.Build::class.java, "BRAND", "generic")
         ReflectionHelpers.setStaticField(android.os.Build::class.java, "DEVICE", "generic")
-        ReflectionHelpers.setStaticField(android.os.Build::class.java, "FINGERPRINT", "generic/test/test:14/test/test-keys")
+        ReflectionHelpers.setStaticField(
+            android.os.Build::class.java,
+            "FINGERPRINT",
+            "generic/test/test:14/test/test-keys"
+        )
         ReflectionHelpers.setStaticField(android.os.Build::class.java, "HARDWARE", "goldfish")
         ReflectionHelpers.setStaticField(android.os.Build::class.java, "MODEL", "google_sdk")
         ReflectionHelpers.setStaticField(android.os.Build::class.java, "MANUFACTURER", "unknown")
@@ -214,7 +230,11 @@ class AntiDebugAssessTest {
         // 切换为模拟器 Build 字段
         ReflectionHelpers.setStaticField(android.os.Build::class.java, "BRAND", "generic")
         ReflectionHelpers.setStaticField(android.os.Build::class.java, "DEVICE", "generic")
-        ReflectionHelpers.setStaticField(android.os.Build::class.java, "FINGERPRINT", "generic/test/test:14/test/test-keys")
+        ReflectionHelpers.setStaticField(
+            android.os.Build::class.java,
+            "FINGERPRINT",
+            "generic/test/test:14/test/test-keys"
+        )
         ReflectionHelpers.setStaticField(android.os.Build::class.java, "HARDWARE", "goldfish")
         ReflectionHelpers.setStaticField(android.os.Build::class.java, "MODEL", "google_sdk")
         ReflectionHelpers.setStaticField(android.os.Build::class.java, "MANUFACTURER", "unknown")

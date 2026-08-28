@@ -40,5 +40,5 @@ data class UserActivitySummary(
     val diffCount: Int = 0,
     val usageDurationMinutes: Int = 0,
     val charWriteCount: Long = 0,
-    val fileCreateCount: Int = 0,
+    val fileCreateCount: Int = 0
 )

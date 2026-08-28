@@ -20,7 +20,7 @@ class EditorConfigParserTest {
         fun parsesBasicRootProperties() {
             val content = """
                 root = true
-                
+
                 indent_style = space
                 indent_size = 4
                 end_of_line = lf
@@ -63,11 +63,11 @@ class EditorConfigParserTest {
         fun matchesSectionByExtension() {
             val content = """
                 root = true
-                
+
                 [*]
                 indent_style = space
                 indent_size = 4
-                
+
                 [*.kt]
                 indent_size = 2
             """.trimIndent()
@@ -100,7 +100,7 @@ class EditorConfigParserTest {
                 [*]
                 indent_style = space
                 indent_size = 4
-                
+
                 [*.java]
                 indent_size = 8
             """.trimIndent()
@@ -118,7 +118,7 @@ class EditorConfigParserTest {
                 indent_style = tab
                 indent_size = 4
                 end_of_line = crlf
-                
+
                 [*.md]
                 indent_style = space
                 indent_size = 2
@@ -127,8 +127,8 @@ class EditorConfigParserTest {
             val result = EditorConfigParser.parse(content, "README.md")
 
             assertEquals("space", result.indentStyle) // overridden
-            assertEquals(2, result.indentSize)         // overridden
-            assertEquals("crlf", result.endOfLine)     // inherited from [*]
+            assertEquals(2, result.indentSize) // overridden
+            assertEquals("crlf", result.endOfLine) // inherited from [*]
         }
     }
 
@@ -254,7 +254,7 @@ class EditorConfigParserTest {
             val content = """
                 [*]
                 indent_size = 4
-                
+
                 [?.txt]
                 indent_size = 1
             """.trimIndent()
@@ -270,7 +270,7 @@ class EditorConfigParserTest {
             val content = """
                 [*]
                 indent_size = 4
-                
+
                 [?.txt]
                 indent_size = 1
             """.trimIndent()
@@ -286,7 +286,7 @@ class EditorConfigParserTest {
             val content = """
                 [*]
                 indent_size = 4
-                
+
                 [Test*.kt]
                 indent_size = 2
             """.trimIndent()

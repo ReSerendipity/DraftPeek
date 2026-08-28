@@ -52,16 +52,11 @@ import com.draftpeek.core.ui.theme.PrototypeTokens
  * @param enabled 是否启用
  */
 @Composable
-fun BrandFilledButton(
-    text: String,
-    onClick: () -> Unit,
-    modifier: Modifier = Modifier,
-    enabled: Boolean = true,
-) {
+fun BrandFilledButton(text: String, onClick: () -> Unit, modifier: Modifier = Modifier, enabled: Boolean = true) {
     BrandFilledButton(
         onClick = onClick,
         modifier = modifier,
-        enabled = enabled,
+        enabled = enabled
     ) {
         Text(text = text, style = MaterialTheme.typography.labelLarge)
     }
@@ -83,7 +78,7 @@ fun BrandFilledButton(
     onClick: () -> Unit,
     modifier: Modifier = Modifier,
     enabled: Boolean = true,
-    content: @Composable RowScope.() -> Unit,
+    content: @Composable RowScope.() -> Unit
 ) {
     Button(
         onClick = onClick,
@@ -92,9 +87,9 @@ fun BrandFilledButton(
         shape = RoundedCornerShape(10.dp),
         colors = ButtonDefaults.buttonColors(
             containerColor = PrototypeTokens.accent,
-            contentColor = Color.White,
+            contentColor = Color.White
         ),
-        content = content,
+        content = content
     )
 }
 
@@ -110,16 +105,11 @@ fun BrandFilledButton(
  * @param enabled 是否启用
  */
 @Composable
-fun BrandOutlinedButton(
-    text: String,
-    onClick: () -> Unit,
-    modifier: Modifier = Modifier,
-    enabled: Boolean = true,
-) {
+fun BrandOutlinedButton(text: String, onClick: () -> Unit, modifier: Modifier = Modifier, enabled: Boolean = true) {
     BrandOutlinedButton(
         onClick = onClick,
         modifier = modifier,
-        enabled = enabled,
+        enabled = enabled
     ) {
         Text(text = text, style = MaterialTheme.typography.labelLarge)
     }
@@ -141,7 +131,7 @@ fun BrandOutlinedButton(
     onClick: () -> Unit,
     modifier: Modifier = Modifier,
     enabled: Boolean = true,
-    content: @Composable RowScope.() -> Unit,
+    content: @Composable RowScope.() -> Unit
 ) {
     OutlinedButton(
         onClick = onClick,
@@ -151,9 +141,9 @@ fun BrandOutlinedButton(
         border = BorderStroke(1.dp, PrototypeTokens.border),
         colors = ButtonDefaults.outlinedButtonColors(
             containerColor = Color.Transparent,
-            contentColor = PrototypeTokens.fg,
+            contentColor = PrototypeTokens.fg
         ),
-        content = content,
+        content = content
     )
 }
 
@@ -169,16 +159,11 @@ fun BrandOutlinedButton(
  * @param enabled 是否启用
  */
 @Composable
-fun BrandTonalButton(
-    text: String,
-    onClick: () -> Unit,
-    modifier: Modifier = Modifier,
-    enabled: Boolean = true,
-) {
+fun BrandTonalButton(text: String, onClick: () -> Unit, modifier: Modifier = Modifier, enabled: Boolean = true) {
     BrandTonalButton(
         onClick = onClick,
         modifier = modifier,
-        enabled = enabled,
+        enabled = enabled
     ) {
         Text(text = text, style = MaterialTheme.typography.labelLarge)
     }
@@ -200,7 +185,7 @@ fun BrandTonalButton(
     onClick: () -> Unit,
     modifier: Modifier = Modifier,
     enabled: Boolean = true,
-    content: @Composable RowScope.() -> Unit,
+    content: @Composable RowScope.() -> Unit
 ) {
     FilledTonalButton(
         onClick = onClick,
@@ -209,8 +194,8 @@ fun BrandTonalButton(
         shape = RoundedCornerShape(10.dp),
         colors = ButtonDefaults.filledTonalButtonColors(
             containerColor = PrototypeTokens.accentSoft,
-            contentColor = PrototypeTokens.accent,
+            contentColor = PrototypeTokens.accent
         ),
-        content = content,
+        content = content
     )
 }

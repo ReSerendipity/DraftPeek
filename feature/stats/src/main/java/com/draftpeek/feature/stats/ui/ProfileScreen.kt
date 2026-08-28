@@ -27,12 +27,9 @@ import android.graphics.BitmapFactory
 import android.net.Uri
 import android.util.Log
 import android.widget.Toast
-import androidx.appcompat.app.AppCompatDelegate
-import androidx.core.os.LocaleListCompat
-import com.draftpeek.core.common.security.AiProtectionStateHolder
-import com.draftpeek.core.common.security.AiThreatLevel
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
+import androidx.appcompat.app.AppCompatDelegate
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
@@ -48,6 +45,7 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.heightIn
+import androidx.compose.foundation.layout.offset
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
@@ -58,37 +56,35 @@ import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.automirrored.filled.FormatAlignLeft
+import androidx.compose.material.icons.automirrored.filled.WrapText
 import androidx.compose.material.icons.filled.Accessibility
+import androidx.compose.material.icons.filled.CheckCircle
+import androidx.compose.material.icons.filled.Close
 import androidx.compose.material.icons.filled.Code
 import androidx.compose.material.icons.filled.DarkMode
 import androidx.compose.material.icons.filled.DeleteSweep
 import androidx.compose.material.icons.filled.Edit
 import androidx.compose.material.icons.filled.EmojiEvents
+import androidx.compose.material.icons.filled.Error
 import androidx.compose.material.icons.filled.Feedback
 import androidx.compose.material.icons.filled.Flag
 import androidx.compose.material.icons.filled.FontDownload
 import androidx.compose.material.icons.filled.FormatListNumbered
 import androidx.compose.material.icons.filled.FormatSize
-import androidx.compose.material.icons.automirrored.filled.FormatAlignLeft
 import androidx.compose.material.icons.filled.History
+import androidx.compose.material.icons.filled.Image
 import androidx.compose.material.icons.filled.Info
 import androidx.compose.material.icons.filled.Language
 import androidx.compose.material.icons.filled.Link
+import androidx.compose.material.icons.filled.PushPin
 import androidx.compose.material.icons.filled.Reorder
 import androidx.compose.material.icons.filled.Restore
 import androidx.compose.material.icons.filled.Save
+import androidx.compose.material.icons.filled.Security
 import androidx.compose.material.icons.filled.SpaceBar
 import androidx.compose.material.icons.filled.TextFields
 import androidx.compose.material.icons.filled.Visibility
-import androidx.compose.material.icons.automirrored.filled.WrapText
-import androidx.compose.material.icons.filled.CheckCircle
-import androidx.compose.material.icons.filled.Error
-import androidx.compose.material.icons.filled.PushPin
-import androidx.compose.material.icons.filled.Security
-import androidx.compose.material.icons.filled.Chat
-import androidx.compose.material.icons.filled.Public
-import androidx.compose.material.icons.filled.Close
-import androidx.compose.material.icons.filled.Image
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.FilterChip
 import androidx.compose.material3.FilterChipDefaults
@@ -120,12 +116,12 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import androidx.compose.foundation.layout.offset
+import androidx.core.os.LocaleListCompat
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.draftpeek.core.common.feature.FeatureFlag
-import com.draftpeek.core.common.feature.FeatureToggleManager
-import com.draftpeek.core.ui.composition.LocalFeatureToggle
+import com.draftpeek.core.common.security.AiProtectionStateHolder
+import com.draftpeek.core.common.security.AiThreatLevel
 import com.draftpeek.core.ui.component.BrandDialog
 import com.draftpeek.core.ui.component.BrandFilledButton
 import com.draftpeek.core.ui.component.BrandOutlinedButton
@@ -135,18 +131,19 @@ import com.draftpeek.core.ui.component.BrandSettingRow
 import com.draftpeek.core.ui.component.BrandSwitchSettingRow
 import com.draftpeek.core.ui.component.BrandTopBar
 import com.draftpeek.core.ui.component.accessibilityEnhanced
+import com.draftpeek.core.ui.composition.LocalFeatureToggle
 import com.draftpeek.core.ui.layout.LayoutMode
-import com.draftpeek.core.ui.theme.JetBrainsMonoFontFamily
 import com.draftpeek.core.ui.theme.FontOptions
+import com.draftpeek.core.ui.theme.JetBrainsMonoFontFamily
 import com.draftpeek.core.ui.theme.LocalDarkTheme
 import com.draftpeek.core.ui.theme.MonoLabelStyle
 import com.draftpeek.core.ui.theme.PrototypeShapes
 import com.draftpeek.core.ui.theme.PrototypeSpacing
 import com.draftpeek.core.ui.theme.PrototypeTokens
 import com.draftpeek.core.ui.theme.SemanticColors
+import com.draftpeek.feature.editor.model.MarkdownTheme
 import com.draftpeek.feature.settings.model.AppLanguage
 import com.draftpeek.feature.settings.model.AppTheme
-import com.draftpeek.feature.editor.model.MarkdownTheme
 import com.draftpeek.feature.settings.viewmodel.SettingsViewModel
 import com.draftpeek.feature.stats.R
 import com.draftpeek.feature.stats.ui.component.DayDetailDialog
@@ -184,7 +181,7 @@ fun ProfileScreen(
     onNavigateToAchievements: () -> Unit = {},
     onVerifyApp: (suspend (Context) -> VerifyAppState)? = null,
     viewModel: StatsViewModel = hiltViewModel(),
-    settingsViewModel: SettingsViewModel = hiltViewModel(),
+    settingsViewModel: SettingsViewModel = hiltViewModel()
 ) {
     val featureToggleManager = LocalFeatureToggle.current
     val flagStates by featureToggleManager?.flagStates?.collectAsStateWithLifecycle()
@@ -278,7 +275,9 @@ fun ProfileScreen(
             } catch (_: Exception) {
                 null
             }
-        } else null
+        } else {
+            null
+        }
     }
 
     val pickImageLauncher = rememberLauncherForActivityResult(
@@ -299,7 +298,7 @@ fun ProfileScreen(
         FontSizeDialog(
             currentSize = settings.fontSize,
             onSizeChange = { settingsViewModel.updateFontSize(it) },
-            onDismiss = { showFontSizeDialog = false },
+            onDismiss = { showFontSizeDialog = false }
         )
     }
 
@@ -307,7 +306,7 @@ fun ProfileScreen(
         TabWidthDialog(
             currentTabWidth = settings.tabWidth,
             onTabWidthSelected = { settingsViewModel.updateTabWidth(it) },
-            onDismiss = { showTabWidthDialog = false },
+            onDismiss = { showTabWidthDialog = false }
         )
     }
 
@@ -315,7 +314,7 @@ fun ProfileScreen(
         RecentFilesLimitDialog(
             currentLimit = settings.recentFilesLimit,
             onLimitSelected = { settingsViewModel.updateRecentFilesLimit(it) },
-            onDismiss = { showRecentLimitDialog = false },
+            onDismiss = { showRecentLimitDialog = false }
         )
     }
 
@@ -325,7 +324,7 @@ fun ProfileScreen(
             currentUiFontId = settings.uiFontFamilyId,
             onCodeFontSelected = { settingsViewModel.updateCodeFontFamilyId(it) },
             onUiFontSelected = { settingsViewModel.updateUiFontFamilyId(it) },
-            onDismiss = { showFontSelectionDialog = false },
+            onDismiss = { showFontSelectionDialog = false }
         )
     }
 
@@ -337,7 +336,7 @@ fun ProfileScreen(
                 showThemeDialog = false
                 (context as? Activity)?.recreate()
             },
-            onDismiss = { showThemeDialog = false },
+            onDismiss = { showThemeDialog = false }
         )
     }
 
@@ -349,7 +348,7 @@ fun ProfileScreen(
                 applyLanguage(language)
                 showLanguageDialog = false
             },
-            onDismiss = { showLanguageDialog = false },
+            onDismiss = { showLanguageDialog = false }
         )
     }
 
@@ -359,7 +358,7 @@ fun ProfileScreen(
             onEncodingSelected = { encoding ->
                 settingsViewModel.updateDefaultEncoding(encoding)
             },
-            onDismiss = { showEncodingDialog = false },
+            onDismiss = { showEncodingDialog = false }
         )
     }
 
@@ -395,7 +394,7 @@ fun ProfileScreen(
                 settingsViewModel.updateCustomMarkdownCss("")
                 showResetDialog = false
             },
-            onDismiss = { showResetDialog = false },
+            onDismiss = { showResetDialog = false }
         )
     }
 
@@ -406,7 +405,7 @@ fun ProfileScreen(
             confirmText = stringResource(R.string.profile_dialog_clear_cache_confirm),
             isDanger = true,
             onConfirm = { viewModel.clearCache() },
-            onDismiss = { showClearCacheDialog = false },
+            onDismiss = { showClearCacheDialog = false }
         )
     }
 
@@ -421,7 +420,7 @@ fun ProfileScreen(
                         onValueChange = { editNameText = it },
                         label = { Text(stringResource(R.string.profile_edit_user_name_hint)) },
                         singleLine = true,
-                        modifier = Modifier.fillMaxWidth(),
+                        modifier = Modifier.fillMaxWidth()
                     )
                 }
             },
@@ -438,8 +437,11 @@ fun ProfileScreen(
                 )
             },
             dismissButton = {
-                BrandOutlinedButton(text = stringResource(R.string.profile_dialog_cancel), onClick = { showEditNameDialog = false })
-            },
+                BrandOutlinedButton(text = stringResource(R.string.profile_dialog_cancel), onClick = {
+                    showEditNameDialog =
+                        false
+                })
+            }
         )
     }
 
@@ -454,7 +456,7 @@ fun ProfileScreen(
                         onValueChange = { mirrorUrlText = it },
                         label = { Text(stringResource(R.string.profile_github_mirror_dialog_hint)) },
                         singleLine = true,
-                        modifier = Modifier.fillMaxWidth(),
+                        modifier = Modifier.fillMaxWidth()
                     )
                 }
             },
@@ -464,12 +466,15 @@ fun ProfileScreen(
                     onClick = {
                         settingsViewModel.updateGithubMirrorUrl(mirrorUrlText.trim())
                         showMirrorUrlDialog = false
-                    },
+                    }
                 )
             },
             dismissButton = {
-                BrandOutlinedButton(text = stringResource(R.string.profile_dialog_cancel), onClick = { showMirrorUrlDialog = false })
-            },
+                BrandOutlinedButton(text = stringResource(R.string.profile_dialog_cancel), onClick = {
+                    showMirrorUrlDialog =
+                        false
+                })
+            }
         )
     }
 
@@ -479,7 +484,7 @@ fun ProfileScreen(
             onThemeSelected = { themeName ->
                 settingsViewModel.updateMarkdownThemeName(themeName)
             },
-            onDismiss = { showMarkdownThemeDialog = false },
+            onDismiss = { showMarkdownThemeDialog = false }
         )
     }
 
@@ -495,13 +500,13 @@ fun ProfileScreen(
                         label = { Text(stringResource(R.string.profile_custom_css_dialog_hint)) },
                         minLines = 4,
                         maxLines = 12,
-                        modifier = Modifier.fillMaxWidth(),
+                        modifier = Modifier.fillMaxWidth()
                     )
                     Spacer(modifier = Modifier.height(8.dp))
                     Text(
                         text = stringResource(R.string.profile_custom_css_dialog_description),
                         style = androidx.compose.material3.MaterialTheme.typography.bodySmall,
-                        color = muted,
+                        color = muted
                     )
                 }
             },
@@ -511,12 +516,15 @@ fun ProfileScreen(
                     onClick = {
                         settingsViewModel.updateCustomMarkdownCss(customCssText)
                         showCustomCssDialog = false
-                    },
+                    }
                 )
             },
             dismissButton = {
-                BrandOutlinedButton(text = stringResource(R.string.profile_dialog_cancel), onClick = { showCustomCssDialog = false })
-            },
+                BrandOutlinedButton(text = stringResource(R.string.profile_dialog_cancel), onClick = {
+                    showCustomCssDialog =
+                        false
+                })
+            }
         )
     }
 
@@ -558,15 +566,56 @@ fun ProfileScreen(
         val iconVector: androidx.compose.ui.graphics.vector.ImageVector?,
         val accentColor: Color,
         val packageName: String? = null,
-        val appScheme: String? = null,
+        val appScheme: String? = null
     )
 
     val socialPlatforms = remember {
         listOf(
-            SocialPlatform("B站", "https://space.bilibili.com/499527473", R.drawable.ic_social_bilibili, null, Color(0xFFFB7299), "tv.danmaku.bili", "bilibili://"),
-            SocialPlatform("抖音", "https://v.douyin.com/eJgZfhanu4I/", R.drawable.ic_social_douyin, null, Color(0xFF000000), "com.ss.android.ugc.aweme", "snssdk1128://"),
-            SocialPlatform("小红书", "https://www.xiaohongshu.com/user/profile/6a606c140000000010000801", R.drawable.ic_social_xiaohongshu, null, Color(0xFFFF2442), "com.xingin.xhs", null),
-            SocialPlatform("快手", "https://www.kuaishou.com/profile/3x2sk6hj48i2mhs", R.drawable.ic_social_kuaishou, null, Color(0xFFFF4906), "com.smile.gifmaker", null),
+            SocialPlatform(
+                "GitHub",
+                "https://github.com/ReSerendipity/DraftPeek",
+                R.drawable.ic_social_github,
+                null,
+                Color(0xFF24292E),
+                null,
+                null
+            ),
+            SocialPlatform(
+                "B站",
+                "https://space.bilibili.com/499527473",
+                R.drawable.ic_social_bilibili,
+                null,
+                Color(0xFFFB7299),
+                "tv.danmaku.bili",
+                "bilibili://"
+            ),
+            SocialPlatform(
+                "抖音",
+                "https://www.douyin.com/user/MS4wLjABAAAAcEdOoxVlfk3Ulx_usqR-3PHW4xxp6wYzRmsuRI_-fHBigPETTKLsv4fknIpFq6sP",
+                R.drawable.ic_social_douyin,
+                null,
+                Color(0xFF000000),
+                "com.ss.android.ugc.aweme",
+                "snssdk1128://"
+            ),
+            SocialPlatform(
+                "小红书",
+                "https://www.xiaohongshu.com/user/profile/6a606c140000000010000801",
+                R.drawable.ic_social_xiaohongshu,
+                null,
+                Color(0xFFFF2442),
+                "com.xingin.xhs",
+                null
+            ),
+            SocialPlatform(
+                "快手",
+                "https://www.kuaishou.com/profile/3x2sk6hj48i2mhs",
+                R.drawable.ic_social_kuaishou,
+                null,
+                Color(0xFFFF4906),
+                "com.smile.gifmaker",
+                null
+            )
         )
     }
 
@@ -580,20 +629,18 @@ fun ProfileScreen(
         val httpUri = Uri.parse(platform.url)
         val tag = "SocialUrlLauncher"
 
-        fun tryIntent(intent: Intent, strategyName: String): Boolean {
-            return try {
-                if (intent.resolveActivity(pm) != null) {
-                    context.startActivity(intent)
-                    Log.d(tag, "Successfully opened ${platform.name} via: $strategyName")
-                    true
-                } else {
-                    Log.w(tag, "Failed to open ${platform.name} via $strategyName: no activity resolved")
-                    false
-                }
-            } catch (e: Exception) {
-                Log.w(tag, "Failed to open ${platform.name} via $strategyName", e)
+        fun tryIntent(intent: Intent, strategyName: String): Boolean = try {
+            if (intent.resolveActivity(pm) != null) {
+                context.startActivity(intent)
+                Log.d(tag, "Successfully opened ${platform.name} via: $strategyName")
+                true
+            } else {
+                Log.w(tag, "Failed to open ${platform.name} via $strategyName: no activity resolved")
                 false
             }
+        } catch (e: Exception) {
+            Log.w(tag, "Failed to open ${platform.name} via $strategyName", e)
+            false
         }
 
         try {
@@ -656,17 +703,20 @@ fun ProfileScreen(
                         label = { Text(stringResource(R.string.profile_feedback_description_hint)) },
                         minLines = 3,
                         maxLines = 6,
-                        modifier = Modifier.fillMaxWidth(),
+                        modifier = Modifier.fillMaxWidth()
                     )
                     if (feedbackScreenshots.isNotEmpty()) {
                         Text(
-                            text = stringResource(R.string.profile_feedback_screenshot_attached, feedbackScreenshots.size),
+                            text = stringResource(
+                                R.string.profile_feedback_screenshot_attached,
+                                feedbackScreenshots.size
+                            ),
                             style = MaterialTheme.typography.bodySmall,
-                            color = PrototypeTokens.accent,
+                            color = PrototypeTokens.accent
                         )
                         FlowRow(
                             horizontalArrangement = Arrangement.spacedBy(8.dp),
-                            verticalArrangement = Arrangement.spacedBy(8.dp),
+                            verticalArrangement = Arrangement.spacedBy(8.dp)
                         ) {
                             feedbackScreenshots.forEachIndexed { index, uri ->
                                 Box {
@@ -676,27 +726,29 @@ fun ProfileScreen(
                                             context.contentResolver.openInputStream(uri)?.use {
                                                 BitmapFactory.decodeStream(it)?.asImageBitmap()
                                             }
-                                        } catch (_: Exception) { null }
+                                        } catch (_: Exception) {
+                                            null
+                                        }
                                     }
                                     Box(
                                         modifier = Modifier
                                             .size(72.dp)
                                             .clip(RoundedCornerShape(8.dp))
                                             .background(PrototypeTokens.surface),
-                                        contentAlignment = Alignment.Center,
+                                        contentAlignment = Alignment.Center
                                     ) {
                                         bitmap?.let {
                                             Image(
                                                 bitmap = it,
                                                 contentDescription = null,
                                                 modifier = Modifier.fillMaxSize(),
-                                                contentScale = ContentScale.Crop,
+                                                contentScale = ContentScale.Crop
                                             )
                                         } ?: Icon(
                                             Icons.Filled.Image,
                                             contentDescription = null,
                                             tint = PrototypeTokens.fgSoft,
-                                            modifier = Modifier.size(28.dp),
+                                            modifier = Modifier.size(28.dp)
                                         )
                                     }
                                     Box(
@@ -707,15 +759,18 @@ fun ProfileScreen(
                                             .clip(CircleShape)
                                             .background(Color.Black.copy(alpha = 0.7f))
                                             .clickable {
-                                                feedbackScreenshots = feedbackScreenshots.toMutableList().apply { removeAt(index) }
+                                                feedbackScreenshots =
+                                                    feedbackScreenshots.toMutableList().apply { removeAt(index) }
                                             },
-                                        contentAlignment = Alignment.Center,
+                                        contentAlignment = Alignment.Center
                                     ) {
                                         Icon(
                                             Icons.Filled.Close,
-                                            contentDescription = stringResource(R.string.profile_feedback_screenshot_remove),
+                                            contentDescription = stringResource(
+                                                R.string.profile_feedback_screenshot_remove
+                                            ),
                                             tint = Color.White,
-                                            modifier = Modifier.size(12.dp),
+                                            modifier = Modifier.size(12.dp)
                                         )
                                     }
                                 }
@@ -724,7 +779,7 @@ fun ProfileScreen(
                     }
                     BrandOutlinedButton(
                         onClick = { screenshotPickerLauncher.launch("image/*") },
-                        modifier = Modifier.fillMaxWidth(),
+                        modifier = Modifier.fillMaxWidth()
                     ) {
                         Icon(Icons.Filled.Image, contentDescription = null, modifier = Modifier.size(18.dp))
                         Spacer(modifier = Modifier.width(8.dp))
@@ -733,14 +788,14 @@ fun ProfileScreen(
                     Text(
                         text = stringResource(R.string.profile_feedback_hint),
                         style = MaterialTheme.typography.bodySmall,
-                        color = muted,
+                        color = muted
                     )
                 }
             },
             confirmButton = {
                 BrandFilledButton(
                     text = stringResource(R.string.profile_feedback_submit),
-                    onClick = { sendFeedbackEmail() },
+                    onClick = { sendFeedbackEmail() }
                 )
             },
             dismissButton = {
@@ -748,7 +803,7 @@ fun ProfileScreen(
                     text = stringResource(R.string.profile_dialog_cancel),
                     onClick = { showFeedbackDialog = false }
                 )
-            },
+            }
         )
     }
 
@@ -767,16 +822,16 @@ fun ProfileScreen(
                     }
                 }
             },
-            onDismiss = { 
-                showVerifyAppDialog = false 
+            onDismiss = {
+                showVerifyAppDialog = false
                 verifyAppState = VerifyAppState.Idle
-            },
+            }
         )
     }
 
     if (showOpenSourceDialog) {
         OpenSourceLicensesDialog(
-            onDismiss = { showOpenSourceDialog = false },
+            onDismiss = { showOpenSourceDialog = false }
         )
     }
 
@@ -793,12 +848,12 @@ fun ProfileScreen(
     Box(
         modifier = Modifier
             .fillMaxSize()
-            .background(pageBg),
+            .background(pageBg)
     ) {
         Column(
             modifier = Modifier
                 .fillMaxSize()
-                .verticalScroll(rememberScrollState()),
+                .verticalScroll(rememberScrollState())
         ) {
             BrandTopBar(
                 title = stringResource(R.string.profile_page_title),
@@ -807,19 +862,19 @@ fun ProfileScreen(
                     fontWeight = FontWeight.Bold,
                     fontSize = 20.sp,
                     letterSpacing = 1.2.sp,
-                    lineHeight = 28.sp,
-                ),
+                    lineHeight = 28.sp
+                )
             )
 
             Column(
                 modifier = Modifier
                     .fillMaxWidth()
                     .padding(horizontal = 20.dp, vertical = 24.dp),
-                horizontalAlignment = Alignment.CenterHorizontally,
+                horizontalAlignment = Alignment.CenterHorizontally
             ) {
                 Box(
                     modifier = Modifier.size(PrototypeSpacing.AvatarSize + 8.dp),
-                    contentAlignment = Alignment.BottomEnd,
+                    contentAlignment = Alignment.BottomEnd
                 ) {
                     Box(
                         modifier = Modifier
@@ -830,9 +885,9 @@ fun ProfileScreen(
                                 pickImageLauncher.launch("image/*")
                             }
                             .accessibilityEnhanced(
-                                contentDescription = stringResource(R.string.profile_select_avatar),
+                                contentDescription = stringResource(R.string.profile_select_avatar)
                             ),
-                        contentAlignment = Alignment.Center,
+                        contentAlignment = Alignment.Center
                     ) {
                         if (avatarBitmap != null) {
                             Image(
@@ -841,7 +896,7 @@ fun ProfileScreen(
                                 modifier = Modifier
                                     .size(PrototypeSpacing.AvatarSize)
                                     .clip(CircleShape),
-                                contentScale = ContentScale.Crop,
+                                contentScale = ContentScale.Crop
                             )
                         } else {
                             Text(
@@ -849,7 +904,7 @@ fun ProfileScreen(
                                 fontFamily = JetBrainsMonoFontFamily,
                                 fontWeight = FontWeight.Bold,
                                 fontSize = 22.sp,
-                                color = PrototypeTokens.accent,
+                                color = PrototypeTokens.accent
                             )
                         }
                     }
@@ -861,13 +916,13 @@ fun ProfileScreen(
                             .clickable {
                                 pickImageLauncher.launch("image/*")
                             },
-                        contentAlignment = Alignment.Center,
+                        contentAlignment = Alignment.Center
                     ) {
                         androidx.compose.material3.Icon(
                             imageVector = Icons.Filled.Edit,
                             contentDescription = stringResource(R.string.profile_select_avatar),
                             modifier = Modifier.size(14.dp),
-                            tint = Color.White,
+                            tint = Color.White
                         )
                     }
                 }
@@ -883,14 +938,14 @@ fun ProfileScreen(
                     modifier = Modifier.clickable {
                         editNameText = settings.userName
                         showEditNameDialog = true
-                    },
+                    }
                 )
 
                 Spacer(modifier = Modifier.height(6.dp))
 
                 BrandPill(
                     text = versionName,
-                    dotColor = SemanticColors.Success,
+                    dotColor = SemanticColors.Success
                 )
             }
 
@@ -898,7 +953,7 @@ fun ProfileScreen(
 
             PeriodChipRow(
                 selectedPeriod = selectedPeriod,
-                onPeriodSelected = { viewModel.selectPeriod(it) },
+                onPeriodSelected = { viewModel.selectPeriod(it) }
             )
 
             Spacer(modifier = Modifier.height(16.dp))
@@ -906,7 +961,7 @@ fun ProfileScreen(
             StatCardGrid(
                 stats = periodStats,
                 formatDuration = viewModel::formatDuration,
-                formatNumber = viewModel::formatNumber,
+                formatNumber = viewModel::formatNumber
             )
 
             Spacer(modifier = Modifier.height(20.dp))
@@ -915,7 +970,7 @@ fun ProfileScreen(
                 userName = settings.userName,
                 daysSinceFirstUse = viewModel.getTotalDaysSinceFirstUse(),
                 unlockedAchievements = unlockedAchievements,
-                onAchievementClick = onNavigateToAchievements,
+                onAchievementClick = onNavigateToAchievements
             )
 
             Spacer(modifier = Modifier.height(20.dp))
@@ -929,12 +984,12 @@ fun ProfileScreen(
                     .clip(PrototypeShapes.Card)
                     .background(PrototypeTokens.surface)
                     .border(1.dp, border, PrototypeShapes.Card)
-                    .padding(14.dp),
+                    .padding(14.dp)
             ) {
                 YearHeatmapNew(
                     activities = yearActivities,
                     onDayClick = { date -> viewModel.onDaySelected(date) },
-                    isDark = isDark,
+                    isDark = isDark
                 )
             }
 
@@ -947,21 +1002,21 @@ fun ProfileScreen(
                 label = stringResource(R.string.stats_achievements_title),
                 value = "${unlockedAchievements.size}/${AchievementDefinitions.allAchievements.size}",
                 onClick = onNavigateToAchievements,
-                showDivider = true,
+                showDivider = true
             )
             BrandSettingRow(
                 icon = Icons.Filled.FormatSize,
                 label = stringResource(R.string.profile_setting_font_size),
                 value = "${settings.fontSize}sp",
                 onClick = { showFontSizeDialog = true },
-                showDivider = true,
+                showDivider = true
             )
             BrandSettingRow(
                 icon = Icons.Filled.History,
                 label = stringResource(R.string.profile_setting_recent_files_limit),
                 value = stringResource(R.string.profile_recent_files_limit_count, settings.recentFilesLimit),
                 onClick = { showRecentLimitDialog = true },
-                showDivider = true,
+                showDivider = true
             )
             BrandSettingRow(
                 icon = Icons.Filled.DarkMode,
@@ -972,63 +1027,65 @@ fun ProfileScreen(
                     AppTheme.SYSTEM -> stringResource(R.string.profile_setting_theme_system)
                 },
                 onClick = { showThemeDialog = true },
-                showDivider = true,
+                showDivider = true
             )
             BrandSettingRow(
                 icon = Icons.Filled.FontDownload,
                 label = stringResource(R.string.profile_setting_font_family),
-                value = stringResource(FontOptions.getCodeFontById(settings.codeFontFamilyId).displayNameResId) + " / " + stringResource(FontOptions.getUiFontById(settings.uiFontFamilyId).displayNameResId),
+                value =
+                stringResource(FontOptions.getCodeFontById(settings.codeFontFamilyId).displayNameResId) + " / " +
+                    stringResource(FontOptions.getUiFontById(settings.uiFontFamilyId).displayNameResId),
                 onClick = { showFontSelectionDialog = true },
-                showDivider = true,
+                showDivider = true
             )
             BrandSwitchSettingRow(
                 icon = Icons.AutoMirrored.Filled.WrapText,
                 label = stringResource(R.string.profile_setting_line_wrapping),
                 checked = settings.lineWrapping,
                 onCheckedChange = { settingsViewModel.updateLineWrapping(it) },
-                showDivider = true,
+                showDivider = true
             )
             BrandSwitchSettingRow(
                 icon = Icons.Filled.FormatListNumbered,
                 label = stringResource(R.string.profile_setting_show_line_numbers),
                 checked = settings.showLineNumbers,
                 onCheckedChange = { settingsViewModel.updateShowLineNumbers(it) },
-                showDivider = true,
+                showDivider = true
             )
             BrandSwitchSettingRow(
                 icon = Icons.Filled.Save,
                 label = stringResource(R.string.profile_setting_auto_save),
                 checked = settings.autoSave,
                 onCheckedChange = { settingsViewModel.updateAutoSave(it) },
-                showDivider = true,
+                showDivider = true
             )
             BrandSwitchSettingRow(
                 icon = Icons.Filled.Edit,
                 label = stringResource(R.string.profile_setting_highlight_current_line),
                 checked = settings.highlightCurrentLine,
                 onCheckedChange = { settingsViewModel.updateHighlightCurrentLine(it) },
-                showDivider = true,
+                showDivider = true
             )
             BrandSwitchSettingRow(
                 icon = Icons.AutoMirrored.Filled.FormatAlignLeft,
                 label = stringResource(R.string.profile_setting_auto_indent),
                 checked = settings.autoIndent,
                 onCheckedChange = { settingsViewModel.updateAutoIndent(it) },
-                showDivider = true,
+                showDivider = true
             )
             BrandSettingRow(
                 icon = Icons.Filled.SpaceBar,
                 label = stringResource(R.string.profile_setting_tab_width),
                 value = String.format(stringResource(R.string.profile_tab_width_spaces), settings.tabWidth),
                 onClick = { showTabWidthDialog = true },
-                showDivider = true,
+                showDivider = true
             )
             BrandSettingRow(
                 icon = Icons.Filled.TextFields,
                 label = stringResource(R.string.profile_setting_encoding),
                 value = settings.defaultEncoding,
                 onClick = { showEncodingDialog = true },
-                showDivider = true,
+                showDivider = true
             )
             BrandSettingRow(
                 icon = Icons.Filled.Language,
@@ -1042,21 +1099,21 @@ fun ProfileScreen(
                     AppLanguage.KO -> stringResource(R.string.profile_setting_language_ko)
                 },
                 onClick = { showLanguageDialog = true },
-                showDivider = true,
+                showDivider = true
             )
             BrandSwitchSettingRow(
                 icon = Icons.Filled.Reorder,
                 label = stringResource(R.string.profile_setting_indent_guides),
                 checked = settings.showIndentGuides,
                 onCheckedChange = { settingsViewModel.updateShowIndentGuides(it) },
-                showDivider = true,
+                showDivider = true
             )
             BrandSwitchSettingRow(
                 icon = Icons.Filled.PushPin,
                 label = stringResource(R.string.profile_setting_sticky_scroll),
                 checked = settings.stickyScroll,
                 onCheckedChange = { settingsViewModel.updateStickyScroll(it) },
-                showDivider = true,
+                showDivider = true
             )
             val resolvedMarkdownTheme = try {
                 MarkdownTheme.valueOf(settings.markdownThemeName)
@@ -1068,7 +1125,7 @@ fun ProfileScreen(
                 label = stringResource(R.string.profile_setting_markdown_theme),
                 value = stringResource(resolvedMarkdownTheme.displayNameResId),
                 onClick = { showMarkdownThemeDialog = true },
-                showDivider = true,
+                showDivider = true
             )
             BrandSettingRow(
                 icon = Icons.Filled.Code,
@@ -1078,7 +1135,7 @@ fun ProfileScreen(
                     customCssText = settings.customMarkdownCss
                     showCustomCssDialog = true
                 },
-                showDivider = false,
+                showDivider = false
             )
 
             Spacer(modifier = Modifier.height(8.dp))
@@ -1089,7 +1146,7 @@ fun ProfileScreen(
                 icon = Icons.Filled.Accessibility,
                 label = stringResource(R.string.accessibility_page_title),
                 onClick = onNavigateToAccessibility,
-                showDivider = false,
+                showDivider = false
             )
 
             Spacer(modifier = Modifier.height(8.dp))
@@ -1097,7 +1154,8 @@ fun ProfileScreen(
             SectionHeader(label = stringResource(R.string.stats_feature_flags_section))
 
             // Feature toggle master switch (always shown)
-            val featureToggleEnabled = flagStates[FeatureFlag.FEATURE_TOGGLE] ?: FeatureFlag.FEATURE_TOGGLE.defaultEnabled
+            val featureToggleEnabled =
+                flagStates[FeatureFlag.FEATURE_TOGGLE] ?: FeatureFlag.FEATURE_TOGGLE.defaultEnabled
             val visibleFlags = if (featureToggleEnabled) {
                 FeatureFlag.entries.toList()
             } else {
@@ -1109,7 +1167,7 @@ fun ProfileScreen(
                     label = flag.displayName(),
                     checked = flagStates[flag] ?: flag.defaultEnabled,
                     onCheckedChange = { featureToggleManager?.setEnabled(flag, it) },
-                    showDivider = index < visibleFlags.lastIndex,
+                    showDivider = index < visibleFlags.lastIndex
                 )
             }
 
@@ -1120,13 +1178,15 @@ fun ProfileScreen(
             BrandSettingRow(
                 icon = Icons.Filled.Code,
                 label = stringResource(R.string.profile_setting_github_mirror),
-                value = settings.githubMirrorUrl.ifEmpty { stringResource(R.string.profile_setting_github_mirror_hint) },
+                value = settings.githubMirrorUrl.ifEmpty {
+                    stringResource(R.string.profile_setting_github_mirror_hint)
+                },
                 onClick = {
                     mirrorUrlText = settings.githubMirrorUrl
                     showMirrorUrlDialog = true
                 },
                 showDivider = false,
-                iconPainter = painterResource(id = R.drawable.ic_social_github),
+                iconPainter = painterResource(id = R.drawable.ic_social_github)
             )
 
             Spacer(modifier = Modifier.height(8.dp))
@@ -1137,7 +1197,7 @@ fun ProfileScreen(
                 icon = Icons.Filled.Feedback,
                 label = stringResource(R.string.profile_feedback_title),
                 onClick = { showFeedbackDialog = true },
-                showDivider = false,
+                showDivider = false
             )
 
             Spacer(modifier = Modifier.height(8.dp))
@@ -1151,18 +1211,18 @@ fun ProfileScreen(
                     .clip(PrototypeShapes.Card)
                     .background(PrototypeTokens.surface)
                     .border(1.dp, border, PrototypeShapes.Card)
-                    .padding(vertical = 16.dp),
+                    .padding(vertical = 16.dp)
             ) {
                 Row(
                     modifier = Modifier.fillMaxWidth(),
-                    horizontalArrangement = Arrangement.SpaceEvenly,
+                    horizontalArrangement = Arrangement.SpaceEvenly
                 ) {
                     socialPlatforms.forEach { platform ->
                         SocialPlatformItem(
                             label = platform.name,
                             iconRes = platform.iconRes,
                             iconVector = platform.iconVector,
-                            onClick = { openSocialUrl(platform) },
+                            onClick = { openSocialUrl(platform) }
                         )
                     }
                 }
@@ -1174,26 +1234,34 @@ fun ProfileScreen(
             SectionHeader(label = stringResource(R.string.security_status_section_title))
 
             val aiState = AiProtectionStateHolder.current
-            val isSignatureMismatch = com.draftpeek.core.common.security.AiDetectionSignal.SIGNATURE_MISMATCH in aiState.triggeredSignals
-            val isDexTampered = com.draftpeek.core.common.security.AiDetectionSignal.DEX_TAMPERED in aiState.triggeredSignals
+            val isSignatureMismatch =
+                com.draftpeek.core.common.security.AiDetectionSignal.SIGNATURE_MISMATCH in aiState.triggeredSignals
+            val isDexTampered =
+                com.draftpeek.core.common.security.AiDetectionSignal.DEX_TAMPERED in aiState.triggeredSignals
 
             BrandSettingRow(
                 icon = Icons.Filled.Security,
                 label = stringResource(
-                    if (isSignatureMismatch) R.string.security_status_signature_unverified
-                    else R.string.security_status_signature_verified
+                    if (isSignatureMismatch) {
+                        R.string.security_status_signature_unverified
+                    } else {
+                        R.string.security_status_signature_verified
+                    }
                 ),
                 onClick = {},
-                showDivider = true,
+                showDivider = true
             )
             BrandSettingRow(
                 icon = Icons.Filled.Info,
                 label = stringResource(
-                    if (isDexTampered) R.string.security_status_dex_failed
-                    else R.string.security_status_dex_passed
+                    if (isDexTampered) {
+                        R.string.security_status_dex_failed
+                    } else {
+                        R.string.security_status_dex_passed
+                    }
                 ),
                 onClick = {},
-                showDivider = true,
+                showDivider = true
             )
             BrandSettingRow(
                 icon = Icons.Filled.Security,
@@ -1205,7 +1273,7 @@ fun ProfileScreen(
                     }
                 ),
                 onClick = {},
-                showDivider = true,
+                showDivider = true
             )
             BrandSettingRow(
                 icon = Icons.Filled.Info,
@@ -1214,7 +1282,7 @@ fun ProfileScreen(
                     // Re-verify is handled at app level; this triggers a toast
                     Toast.makeText(context, R.string.security_status_recheck, Toast.LENGTH_SHORT).show()
                 },
-                showDivider = true,
+                showDivider = true
             )
             BrandSettingRow(
                 icon = Icons.Filled.Info,
@@ -1222,7 +1290,7 @@ fun ProfileScreen(
                 onClick = {
                     Toast.makeText(context, R.string.security_status_export_report, Toast.LENGTH_SHORT).show()
                 },
-                showDivider = true,
+                showDivider = true
             )
             BrandSettingRow(
                 icon = Icons.Filled.DeleteSweep,
@@ -1230,7 +1298,7 @@ fun ProfileScreen(
                 onClick = {
                     Toast.makeText(context, R.string.security_status_clear_logs, Toast.LENGTH_SHORT).show()
                 },
-                showDivider = false,
+                showDivider = false
             )
 
             Spacer(modifier = Modifier.height(8.dp))
@@ -1241,20 +1309,20 @@ fun ProfileScreen(
                 icon = Icons.Filled.Security,
                 label = stringResource(R.string.profile_verify_app),
                 onClick = { showVerifyAppDialog = true },
-                showDivider = true,
+                showDivider = true
             )
             BrandSettingRow(
                 icon = Icons.Filled.Info,
                 label = stringResource(R.string.profile_setting_version),
                 value = versionName,
                 onClick = {},
-                showDivider = true,
+                showDivider = true
             )
             BrandSettingRow(
                 icon = Icons.Filled.Link,
                 label = stringResource(R.string.profile_open_source_license),
                 onClick = { showOpenSourceDialog = true },
-                showDivider = false,
+                showDivider = false
             )
 
             Spacer(modifier = Modifier.height(8.dp))
@@ -1266,14 +1334,14 @@ fun ProfileScreen(
                 label = stringResource(R.string.profile_setting_clear_cache),
                 onClick = { showClearCacheDialog = true },
                 isDanger = true,
-                showDivider = true,
+                showDivider = true
             )
             BrandSettingRow(
                 icon = Icons.Filled.Restore,
                 label = stringResource(R.string.profile_setting_reset_settings),
                 onClick = { showResetDialog = true },
                 isDanger = true,
-                showDivider = false,
+                showDivider = false
             )
 
             Spacer(modifier = Modifier.height(32.dp))
@@ -1282,21 +1350,21 @@ fun ProfileScreen(
                 modifier = Modifier
                     .fillMaxWidth()
                     .padding(bottom = 24.dp),
-                horizontalAlignment = Alignment.CenterHorizontally,
+                horizontalAlignment = Alignment.CenterHorizontally
             ) {
                 Text(
                     text = stringResource(R.string.profile_footer_made_with),
                     fontFamily = JetBrainsMonoFontFamily,
                     fontSize = 11.sp,
                     color = muted,
-                    letterSpacing = 0.3.sp,
+                    letterSpacing = 0.3.sp
                 )
                 Spacer(modifier = Modifier.height(4.dp))
                 Text(
                     text = stringResource(R.string.profile_footer_for_devs),
                     fontSize = 11.sp,
                     color = muted.copy(alpha = 0.7f),
-                    letterSpacing = 0.2.sp,
+                    letterSpacing = 0.2.sp
                 )
             }
         }
@@ -1319,10 +1387,10 @@ private fun SectionHeader(label: String, isDanger: Boolean = false) {
         text = label,
         style = MonoLabelStyle.copy(
             fontSize = 10.sp,
-            letterSpacing = 1.2.sp,
+            letterSpacing = 1.2.sp
         ),
         color = if (isDanger) SemanticColors.Danger else PrototypeTokens.muted,
-        modifier = Modifier.padding(start = 20.dp, end = 20.dp, top = 16.dp, bottom = 8.dp),
+        modifier = Modifier.padding(start = 20.dp, end = 20.dp, top = 16.dp, bottom = 8.dp)
     )
 }
 
@@ -1331,40 +1399,40 @@ private fun SocialPlatformItem(
     label: String,
     iconRes: Int?,
     iconVector: androidx.compose.ui.graphics.vector.ImageVector? = null,
-    onClick: () -> Unit,
+    onClick: () -> Unit
 ) {
     Column(
         horizontalAlignment = Alignment.CenterHorizontally,
         modifier = Modifier
             .clip(CircleShape)
             .clickable(onClick = onClick)
-            .padding(8.dp),
+            .padding(8.dp)
     ) {
         Box(
             modifier = Modifier
                 .size(48.dp)
                 .clip(CircleShape)
                 .background(PrototypeTokens.surface),
-            contentAlignment = Alignment.Center,
+            contentAlignment = Alignment.Center
         ) {
             when {
                 iconRes != null -> Icon(
                     painter = painterResource(id = iconRes),
                     contentDescription = label,
                     modifier = Modifier.size(28.dp),
-                    tint = Color.Unspecified,
+                    tint = Color.Unspecified
                 )
                 iconVector != null -> Icon(
                     imageVector = iconVector,
                     contentDescription = label,
                     modifier = Modifier.size(28.dp),
-                    tint = Color.Unspecified,
+                    tint = Color.Unspecified
                 )
                 else -> Icon(
                     imageVector = Icons.Filled.Link,
                     contentDescription = label,
                     modifier = Modifier.size(28.dp),
-                    tint = PrototypeTokens.muted,
+                    tint = PrototypeTokens.muted
                 )
             }
         }
@@ -1373,17 +1441,13 @@ private fun SocialPlatformItem(
             text = label,
             fontSize = 12.sp,
             color = PrototypeTokens.fgSoft,
-            textAlign = TextAlign.Center,
+            textAlign = TextAlign.Center
         )
     }
 }
 
 @Composable
-private fun FontSizeDialog(
-    currentSize: Int,
-    onSizeChange: (Int) -> Unit,
-    onDismiss: () -> Unit,
-) {
+private fun FontSizeDialog(currentSize: Int, onSizeChange: (Int) -> Unit, onDismiss: () -> Unit) {
     var sliderValue by remember { mutableStateOf(currentSize.toFloat()) }
 
     BrandDialog(
@@ -1397,7 +1461,7 @@ private fun FontSizeDialog(
                     fontFamily = JetBrainsMonoFontFamily,
                     fontWeight = FontWeight.Bold,
                     fontSize = 28.sp,
-                    color = PrototypeTokens.accent,
+                    color = PrototypeTokens.accent
                 )
 
                 Spacer(modifier = Modifier.height(12.dp))
@@ -1408,14 +1472,14 @@ private fun FontSizeDialog(
                         .fillMaxWidth()
                         .clip(RoundedCornerShape(12.dp))
                         .background(PrototypeTokens.surface)
-                        .padding(14.dp),
+                        .padding(14.dp)
                 ) {
                     Text(
                         text = "中华人民共和国\n字体大小预览 AaBbCc 123\nThe quick brown fox",
                         fontFamily = FontFamily.SansSerif,
                         fontSize = sliderValue.toInt().sp,
                         color = PrototypeTokens.fg,
-                        lineHeight = (sliderValue.toInt() * 1.5f).sp,
+                        lineHeight = (sliderValue.toInt() * 1.5f).sp
                     )
                 }
 
@@ -1424,12 +1488,12 @@ private fun FontSizeDialog(
                 // Slider 行：最小值标签 + Slider + 最大值标签
                 Row(
                     modifier = Modifier.fillMaxWidth(),
-                    verticalAlignment = Alignment.CenterVertically,
+                    verticalAlignment = Alignment.CenterVertically
                 ) {
                     Text(
                         text = "8",
                         fontSize = 12.sp,
-                        color = PrototypeTokens.muted,
+                        color = PrototypeTokens.muted
                     )
                     Slider(
                         value = sliderValue,
@@ -1443,13 +1507,13 @@ private fun FontSizeDialog(
                         colors = SliderDefaults.colors(
                             activeTrackColor = PrototypeTokens.accent,
                             inactiveTrackColor = PrototypeTokens.accentSoft,
-                            thumbColor = PrototypeTokens.accent,
-                        ),
+                            thumbColor = PrototypeTokens.accent
+                        )
                     )
                     Text(
                         text = "32",
                         fontSize = 12.sp,
-                        color = PrototypeTokens.muted,
+                        color = PrototypeTokens.muted
                     )
                 }
             }
@@ -1459,17 +1523,13 @@ private fun FontSizeDialog(
         },
         dismissButton = {
             BrandOutlinedButton(text = stringResource(R.string.profile_dialog_cancel), onClick = onDismiss)
-        },
+        }
     )
 }
 
 @OptIn(ExperimentalLayoutApi::class)
 @Composable
-private fun TabWidthDialog(
-    currentTabWidth: Int,
-    onTabWidthSelected: (Int) -> Unit,
-    onDismiss: () -> Unit,
-) {
+private fun TabWidthDialog(currentTabWidth: Int, onTabWidthSelected: (Int) -> Unit, onDismiss: () -> Unit) {
     val options = listOf(2, 4, 8)
 
     BrandDialog(
@@ -1484,7 +1544,7 @@ private fun TabWidthDialog(
                         label = { Text(String.format(stringResource(R.string.profile_tab_width_spaces), width)) },
                         colors = FilterChipDefaults.filterChipColors(
                             selectedContainerColor = PrototypeTokens.accentSoft,
-                            selectedLabelColor = PrototypeTokens.fg,
+                            selectedLabelColor = PrototypeTokens.fg
                         ),
                         border = FilterChipDefaults.filterChipBorder(
                             borderColor = PrototypeTokens.border,
@@ -1492,24 +1552,20 @@ private fun TabWidthDialog(
                             borderWidth = 1.dp,
                             selectedBorderWidth = 1.5.dp,
                             enabled = true,
-                            selected = width == currentTabWidth,
-                        ),
+                            selected = width == currentTabWidth
+                        )
                     )
                 }
             }
         },
         confirmButton = {
             BrandFilledButton(text = stringResource(R.string.profile_dialog_confirm), onClick = onDismiss)
-        },
+        }
     )
 }
 
 @Composable
-private fun RecentFilesLimitDialog(
-    currentLimit: Int,
-    onLimitSelected: (Int) -> Unit,
-    onDismiss: () -> Unit,
-) {
+private fun RecentFilesLimitDialog(currentLimit: Int, onLimitSelected: (Int) -> Unit, onDismiss: () -> Unit) {
     var sliderValue by remember { mutableStateOf(currentLimit.toFloat()) }
 
     BrandDialog(
@@ -1521,19 +1577,19 @@ private fun RecentFilesLimitDialog(
                     text = stringResource(R.string.profile_recent_files_limit_count, sliderValue.toInt()),
                     fontWeight = FontWeight.Bold,
                     fontSize = 28.sp,
-                    color = PrototypeTokens.accent,
+                    color = PrototypeTokens.accent
                 )
 
                 Spacer(modifier = Modifier.height(12.dp))
 
                 Row(
                     modifier = Modifier.fillMaxWidth(),
-                    verticalAlignment = Alignment.CenterVertically,
+                    verticalAlignment = Alignment.CenterVertically
                 ) {
                     Text(
                         text = "0",
                         fontSize = 12.sp,
-                        color = PrototypeTokens.muted,
+                        color = PrototypeTokens.muted
                     )
                     Slider(
                         value = sliderValue,
@@ -1547,30 +1603,26 @@ private fun RecentFilesLimitDialog(
                         colors = SliderDefaults.colors(
                             activeTrackColor = PrototypeTokens.accent,
                             inactiveTrackColor = PrototypeTokens.accentSoft,
-                            thumbColor = PrototypeTokens.accent,
-                        ),
+                            thumbColor = PrototypeTokens.accent
+                        )
                     )
                     Text(
                         text = "10",
                         fontSize = 12.sp,
-                        color = PrototypeTokens.muted,
+                        color = PrototypeTokens.muted
                     )
                 }
             }
         },
         confirmButton = {
             BrandFilledButton(text = stringResource(R.string.profile_dialog_confirm), onClick = onDismiss)
-        },
+        }
     )
 }
 
 @OptIn(ExperimentalLayoutApi::class)
 @Composable
-private fun EncodingDialog(
-    currentEncoding: String,
-    onEncodingSelected: (String) -> Unit,
-    onDismiss: () -> Unit,
-) {
+private fun EncodingDialog(currentEncoding: String, onEncodingSelected: (String) -> Unit, onDismiss: () -> Unit) {
     val options = listOf("UTF-8", "UTF-16", "GBK", "GB2312", "ISO-8859-1", "US-ASCII")
 
     BrandDialog(
@@ -1585,7 +1637,7 @@ private fun EncodingDialog(
                         label = { Text(encoding) },
                         colors = FilterChipDefaults.filterChipColors(
                             selectedContainerColor = PrototypeTokens.accentSoft,
-                            selectedLabelColor = PrototypeTokens.fg,
+                            selectedLabelColor = PrototypeTokens.fg
                         ),
                         border = FilterChipDefaults.filterChipBorder(
                             borderColor = PrototypeTokens.border,
@@ -1593,15 +1645,15 @@ private fun EncodingDialog(
                             borderWidth = 1.dp,
                             selectedBorderWidth = 1.5.dp,
                             enabled = true,
-                            selected = encoding == currentEncoding,
-                        ),
+                            selected = encoding == currentEncoding
+                        )
                     )
                 }
             }
         },
         confirmButton = {
             BrandFilledButton(text = stringResource(R.string.profile_dialog_confirm), onClick = onDismiss)
-        },
+        }
     )
 }
 
@@ -1611,7 +1663,7 @@ private fun FontSelectionDialog(
     currentUiFontId: String,
     onCodeFontSelected: (String) -> Unit,
     onUiFontSelected: (String) -> Unit,
-    onDismiss: () -> Unit,
+    onDismiss: () -> Unit
 ) {
     var selectedTab by remember { mutableStateOf(0) }
     val tabs = listOf(
@@ -1628,7 +1680,7 @@ private fun FontSelectionDialog(
                     modifier = Modifier
                         .fillMaxWidth()
                         .padding(bottom = 12.dp),
-                    horizontalArrangement = Arrangement.spacedBy(8.dp),
+                    horizontalArrangement = Arrangement.spacedBy(8.dp)
                 ) {
                     tabs.forEachIndexed { index, title ->
                         val selected = selectedTab == index
@@ -1644,13 +1696,13 @@ private fun FontSelectionDialog(
                                 )
                                 .clickable { selectedTab = index }
                                 .padding(vertical = 10.dp),
-                            contentAlignment = Alignment.Center,
+                            contentAlignment = Alignment.Center
                         ) {
                             Text(
                                 text = title,
                                 fontWeight = if (selected) FontWeight.SemiBold else FontWeight.Normal,
                                 color = if (selected) PrototypeTokens.accent else PrototypeTokens.fg,
-                                fontSize = 14.sp,
+                                fontSize = 14.sp
                             )
                         }
                     }
@@ -1663,7 +1715,7 @@ private fun FontSelectionDialog(
                     modifier = Modifier
                         .fillMaxWidth()
                         .heightIn(max = 400.dp),
-                    verticalArrangement = Arrangement.spacedBy(8.dp),
+                    verticalArrangement = Arrangement.spacedBy(8.dp)
                 ) {
                     items(options) { font ->
                         val isSelected = font.id == currentId
@@ -1684,16 +1736,16 @@ private fun FontSelectionDialog(
                                         onUiFontSelected(font.id)
                                     }
                                 }
-                                .padding(12.dp),
+                                .padding(12.dp)
                         ) {
                             Row(
                                 modifier = Modifier.fillMaxWidth(),
-                                verticalAlignment = Alignment.CenterVertically,
+                                verticalAlignment = Alignment.CenterVertically
                             ) {
                                 RadioButton(
                                     selected = isSelected,
                                     onClick = null,
-                                    colors = RadioButtonDefaults.colors(selectedColor = PrototypeTokens.accent),
+                                    colors = RadioButtonDefaults.colors(selectedColor = PrototypeTokens.accent)
                                 )
                                 Spacer(modifier = Modifier.width(8.dp))
                                 Column(modifier = Modifier.weight(1f)) {
@@ -1701,9 +1753,9 @@ private fun FontSelectionDialog(
                                         text = stringResource(font.displayNameResId),
                                         style = MaterialTheme.typography.bodyLarge.copy(
                                             fontFamily = font.fontFamily,
-                                            fontWeight = FontWeight.SemiBold,
+                                            fontWeight = FontWeight.SemiBold
                                         ),
-                                        color = PrototypeTokens.fg,
+                                        color = PrototypeTokens.fg
                                     )
                                 }
                             }
@@ -1714,20 +1766,16 @@ private fun FontSelectionDialog(
         },
         confirmButton = {
             BrandFilledButton(text = stringResource(R.string.profile_dialog_confirm), onClick = onDismiss)
-        },
+        }
     )
 }
 
 @Composable
-private fun ThemePickerDialog(
-    currentTheme: AppTheme,
-    onThemeSelected: (AppTheme) -> Unit,
-    onDismiss: () -> Unit,
-) {
+private fun ThemePickerDialog(currentTheme: AppTheme, onThemeSelected: (AppTheme) -> Unit, onDismiss: () -> Unit) {
     val options = listOf(
         AppTheme.LIGHT to stringResource(R.string.profile_setting_theme_light),
         AppTheme.DARK to stringResource(R.string.profile_setting_theme_dark),
-        AppTheme.SYSTEM to stringResource(R.string.profile_setting_theme_system),
+        AppTheme.SYSTEM to stringResource(R.string.profile_setting_theme_system)
     )
 
     BrandDialog(
@@ -1748,23 +1796,23 @@ private fun ThemePickerDialog(
                                 RoundedCornerShape(10.dp)
                             )
                             .clickable { onThemeSelected(theme) }
-                            .padding(12.dp),
+                            .padding(12.dp)
                     ) {
                         Row(
                             modifier = Modifier.fillMaxWidth(),
-                            verticalAlignment = Alignment.CenterVertically,
+                            verticalAlignment = Alignment.CenterVertically
                         ) {
                             RadioButton(
                                 selected = selected,
                                 onClick = null,
-                                colors = RadioButtonDefaults.colors(selectedColor = PrototypeTokens.accent),
+                                colors = RadioButtonDefaults.colors(selectedColor = PrototypeTokens.accent)
                             )
                             Spacer(modifier = Modifier.width(8.dp))
                             Text(
                                 text = label,
                                 style = MaterialTheme.typography.bodyLarge,
                                 fontWeight = if (selected) FontWeight.SemiBold else FontWeight.Normal,
-                                color = if (selected) PrototypeTokens.accent else PrototypeTokens.fg,
+                                color = if (selected) PrototypeTokens.accent else PrototypeTokens.fg
                             )
                         }
                     }
@@ -1773,7 +1821,7 @@ private fun ThemePickerDialog(
         },
         confirmButton = {
             BrandFilledButton(text = stringResource(R.string.profile_dialog_confirm), onClick = onDismiss)
-        },
+        }
     )
 }
 
@@ -1781,7 +1829,7 @@ private fun ThemePickerDialog(
 private fun LanguagePickerDialog(
     currentLanguage: AppLanguage,
     onLanguageSelected: (AppLanguage) -> Unit,
-    onDismiss: () -> Unit,
+    onDismiss: () -> Unit
 ) {
     val options = listOf(
         AppLanguage.SYSTEM to stringResource(R.string.profile_setting_language_system),
@@ -1789,7 +1837,7 @@ private fun LanguagePickerDialog(
         AppLanguage.ZH_TW to stringResource(R.string.profile_setting_language_zh_tw),
         AppLanguage.EN to stringResource(R.string.profile_setting_language_en),
         AppLanguage.JA to stringResource(R.string.profile_setting_language_ja),
-        AppLanguage.KO to stringResource(R.string.profile_setting_language_ko),
+        AppLanguage.KO to stringResource(R.string.profile_setting_language_ko)
     )
 
     BrandDialog(
@@ -1810,23 +1858,23 @@ private fun LanguagePickerDialog(
                                 RoundedCornerShape(10.dp)
                             )
                             .clickable { onLanguageSelected(language) }
-                            .padding(12.dp),
+                            .padding(12.dp)
                     ) {
                         Row(
                             modifier = Modifier.fillMaxWidth(),
-                            verticalAlignment = Alignment.CenterVertically,
+                            verticalAlignment = Alignment.CenterVertically
                         ) {
                             RadioButton(
                                 selected = selected,
                                 onClick = null,
-                                colors = RadioButtonDefaults.colors(selectedColor = PrototypeTokens.accent),
+                                colors = RadioButtonDefaults.colors(selectedColor = PrototypeTokens.accent)
                             )
                             Spacer(modifier = Modifier.width(8.dp))
                             Text(
                                 text = label,
                                 style = MaterialTheme.typography.bodyLarge,
                                 fontWeight = if (selected) FontWeight.SemiBold else FontWeight.Normal,
-                                color = if (selected) PrototypeTokens.accent else PrototypeTokens.fg,
+                                color = if (selected) PrototypeTokens.accent else PrototypeTokens.fg
                             )
                         }
                     }
@@ -1835,7 +1883,7 @@ private fun LanguagePickerDialog(
         },
         confirmButton = {
             BrandFilledButton(text = stringResource(R.string.profile_dialog_confirm), onClick = onDismiss)
-        },
+        }
     )
 }
 
@@ -1846,7 +1894,7 @@ private fun ConfirmActionDialog(
     confirmText: String,
     isDanger: Boolean = false,
     onConfirm: () -> Unit,
-    onDismiss: () -> Unit,
+    onDismiss: () -> Unit
 ) {
     BrandDialog(
         onDismissRequest = onDismiss,
@@ -1854,28 +1902,28 @@ private fun ConfirmActionDialog(
             Text(
                 text = title,
                 fontWeight = FontWeight.SemiBold,
-                color = if (isDanger) SemanticColors.Danger else PrototypeTokens.fg,
+                color = if (isDanger) SemanticColors.Danger else PrototypeTokens.fg
             )
         },
         content = {
             Text(
                 text = message,
                 style = MaterialTheme.typography.bodyMedium,
-                color = PrototypeTokens.fgSoft,
+                color = PrototypeTokens.fgSoft
             )
         },
         confirmButton = {
             BrandFilledButton(
                 text = confirmText,
-                onClick = onConfirm,
+                onClick = onConfirm
             )
         },
         dismissButton = {
             BrandOutlinedButton(
                 text = stringResource(R.string.profile_dialog_cancel),
-                onClick = onDismiss,
+                onClick = onDismiss
             )
-        },
+        }
     )
 }
 
@@ -1907,11 +1955,7 @@ sealed class VerifyAppState {
 }
 
 @Composable
-private fun VerifyAppDialog(
-    verifyAppState: VerifyAppState,
-    onVerifyClick: () -> Unit,
-    onDismiss: () -> Unit,
-) {
+private fun VerifyAppDialog(verifyAppState: VerifyAppState, onVerifyClick: () -> Unit, onDismiss: () -> Unit) {
     BrandDialog(
         onDismissRequest = onDismiss,
         title = { Text(stringResource(R.string.profile_verify_app_title)) },
@@ -1920,59 +1964,59 @@ private fun VerifyAppDialog(
                 Text(
                     text = stringResource(R.string.profile_verify_app_description),
                     style = androidx.compose.material3.MaterialTheme.typography.bodyMedium,
-                    color = PrototypeTokens.fgSoft,
+                    color = PrototypeTokens.fgSoft
                 )
-                
+
                 Spacer(modifier = Modifier.height(16.dp))
-                
+
                 when (verifyAppState) {
                     is VerifyAppState.Idle -> {
                         BrandFilledButton(
                             text = stringResource(R.string.profile_verify_app_button),
                             onClick = onVerifyClick,
-                            modifier = Modifier.fillMaxWidth(),
+                            modifier = Modifier.fillMaxWidth()
                         )
                     }
                     is VerifyAppState.Loading -> {
                         Row(
                             modifier = Modifier.fillMaxWidth(),
                             horizontalArrangement = Arrangement.Center,
-                            verticalAlignment = Alignment.CenterVertically,
+                            verticalAlignment = Alignment.CenterVertically
                         ) {
                             androidx.compose.material3.CircularProgressIndicator(
                                 modifier = Modifier.size(24.dp),
-                                color = PrototypeTokens.accent,
+                                color = PrototypeTokens.accent
                             )
                             Spacer(modifier = Modifier.width(8.dp))
                             Text(
                                 text = "验证中...",
-                                color = PrototypeTokens.fg,
+                                color = PrototypeTokens.fg
                             )
                         }
                     }
                     is VerifyAppState.Success -> {
                         Column {
                             Row(
-                                verticalAlignment = Alignment.CenterVertically,
+                                verticalAlignment = Alignment.CenterVertically
                             ) {
                                 Icon(
                                     imageVector = Icons.Filled.CheckCircle,
                                     contentDescription = null,
                                     tint = SemanticColors.Success,
-                                    modifier = Modifier.size(20.dp),
+                                    modifier = Modifier.size(20.dp)
                                 )
                                 Spacer(modifier = Modifier.width(8.dp))
                                 Text(
                                     text = stringResource(R.string.profile_verify_app_success),
                                     color = SemanticColors.Success,
-                                    fontWeight = FontWeight.SemiBold,
+                                    fontWeight = FontWeight.SemiBold
                                 )
                             }
                             Spacer(modifier = Modifier.height(12.dp))
                             Text(
                                 text = stringResource(R.string.profile_verify_fingerprint_label),
                                 style = androidx.compose.material3.MaterialTheme.typography.bodySmall,
-                                color = PrototypeTokens.muted,
+                                color = PrototypeTokens.muted
                             )
                             Spacer(modifier = Modifier.height(4.dp))
                             Text(
@@ -1984,62 +2028,62 @@ private fun VerifyAppDialog(
                                     .fillMaxWidth()
                                     .clip(RoundedCornerShape(8.dp))
                                     .background(PrototypeTokens.surface)
-                                    .padding(8.dp),
+                                    .padding(8.dp)
                             )
                             Spacer(modifier = Modifier.height(8.dp))
                             Text(
                                 text = stringResource(R.string.profile_verify_fingerprint_hint),
                                 style = androidx.compose.material3.MaterialTheme.typography.bodySmall,
-                                color = PrototypeTokens.muted,
+                                color = PrototypeTokens.muted
                             )
                         }
                     }
                     is VerifyAppState.Failed -> {
                         Row(
-                            verticalAlignment = Alignment.CenterVertically,
+                            verticalAlignment = Alignment.CenterVertically
                         ) {
                             Icon(
                                 imageVector = Icons.Filled.Error,
                                 contentDescription = null,
                                 tint = SemanticColors.Danger,
-                                modifier = Modifier.size(20.dp),
+                                modifier = Modifier.size(20.dp)
                             )
                             Spacer(modifier = Modifier.width(8.dp))
                             Text(
                                 text = stringResource(R.string.profile_verify_app_failed),
                                 color = SemanticColors.Danger,
-                                fontWeight = FontWeight.SemiBold,
+                                fontWeight = FontWeight.SemiBold
                             )
                         }
                         Spacer(modifier = Modifier.height(8.dp))
                         Text(
                             text = verifyAppState.reason,
                             style = androidx.compose.material3.MaterialTheme.typography.bodySmall,
-                            color = PrototypeTokens.fgSoft,
+                            color = PrototypeTokens.fgSoft
                         )
                     }
                     is VerifyAppState.Error -> {
                         Row(
-                            verticalAlignment = Alignment.CenterVertically,
+                            verticalAlignment = Alignment.CenterVertically
                         ) {
                             Icon(
                                 imageVector = Icons.Filled.Error,
                                 contentDescription = null,
                                 tint = SemanticColors.Warning,
-                                modifier = Modifier.size(20.dp),
+                                modifier = Modifier.size(20.dp)
                             )
                             Spacer(modifier = Modifier.width(8.dp))
                             Text(
                                 text = stringResource(R.string.profile_verify_app_error),
                                 color = SemanticColors.Warning,
-                                fontWeight = FontWeight.SemiBold,
+                                fontWeight = FontWeight.SemiBold
                             )
                         }
                         Spacer(modifier = Modifier.height(8.dp))
                         Text(
                             text = verifyAppState.message,
                             style = androidx.compose.material3.MaterialTheme.typography.bodySmall,
-                            color = PrototypeTokens.fgSoft,
+                            color = PrototypeTokens.fgSoft
                         )
                     }
                 }
@@ -2048,9 +2092,9 @@ private fun VerifyAppDialog(
         confirmButton = {
             BrandFilledButton(
                 text = stringResource(R.string.profile_dialog_confirm),
-                onClick = onDismiss,
+                onClick = onDismiss
             )
-        },
+        }
     )
 }
 
@@ -2058,9 +2102,13 @@ private fun VerifyAppDialog(
 private fun MarkdownThemePickerDialog(
     currentThemeName: String,
     onThemeSelected: (String) -> Unit,
-    onDismiss: () -> Unit,
+    onDismiss: () -> Unit
 ) {
-    val currentTheme = try { MarkdownTheme.valueOf(currentThemeName) } catch (_: Exception) { MarkdownTheme.DEFAULT }
+    val currentTheme = try {
+        MarkdownTheme.valueOf(currentThemeName)
+    } catch (_: Exception) {
+        MarkdownTheme.DEFAULT
+    }
 
     BrandDialog(
         onDismissRequest = onDismiss,
@@ -2080,23 +2128,23 @@ private fun MarkdownThemePickerDialog(
                                 RoundedCornerShape(10.dp)
                             )
                             .clickable { onThemeSelected(theme.name) }
-                            .padding(12.dp),
+                            .padding(12.dp)
                     ) {
                         Row(
                             modifier = Modifier.fillMaxWidth(),
-                            verticalAlignment = Alignment.CenterVertically,
+                            verticalAlignment = Alignment.CenterVertically
                         ) {
                             RadioButton(
                                 selected = selected,
                                 onClick = null,
-                                colors = RadioButtonDefaults.colors(selectedColor = PrototypeTokens.accent),
+                                colors = RadioButtonDefaults.colors(selectedColor = PrototypeTokens.accent)
                             )
                             Spacer(modifier = Modifier.width(8.dp))
                             Text(
                                 text = stringResource(theme.displayNameResId),
                                 style = MaterialTheme.typography.bodyLarge,
                                 fontWeight = if (selected) FontWeight.SemiBold else FontWeight.Normal,
-                                color = if (selected) PrototypeTokens.accent else PrototypeTokens.fg,
+                                color = if (selected) PrototypeTokens.accent else PrototypeTokens.fg
                             )
                         }
                     }
@@ -2105,6 +2153,6 @@ private fun MarkdownThemePickerDialog(
         },
         confirmButton = {
             BrandFilledButton(text = stringResource(R.string.profile_dialog_confirm), onClick = onDismiss)
-        },
+        }
     )
 }

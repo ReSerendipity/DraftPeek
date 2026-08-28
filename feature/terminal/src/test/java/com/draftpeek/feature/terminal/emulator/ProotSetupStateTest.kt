@@ -2,7 +2,6 @@ package com.draftpeek.feature.terminal.emulator
 
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertFalse
-import org.junit.jupiter.api.Assertions.assertNotNull
 import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.DisplayName
 import org.junit.jupiter.api.Nested
@@ -35,7 +34,7 @@ class ProotSetupStateTest {
             val availability = ProotAvailability(
                 prootBinaryReady = false,
                 rootfsReady = false,
-                needsExtraction = true,
+                needsExtraction = true
             )
             val state = ProotSetupState.NotSetup(availability)
             assertTrue(state is ProotSetupState.NotSetup)
@@ -85,7 +84,7 @@ class ProotSetupStateTest {
                 prootBinaryReady = true,
                 rootfsReady = true,
                 prootPath = "/data/proot",
-                rootfsPath = "/data/rootfs",
+                rootfsPath = "/data/rootfs"
             )
             assertTrue(availability.isReady)
         }
@@ -95,7 +94,7 @@ class ProotSetupStateTest {
         fun notReadyWhenBinaryNotReady() {
             val availability = ProotAvailability(
                 prootBinaryReady = false,
-                rootfsReady = true,
+                rootfsReady = true
             )
             assertFalse(availability.isReady)
         }
@@ -105,7 +104,7 @@ class ProotSetupStateTest {
         fun notReadyWhenRootfsNotReady() {
             val availability = ProotAvailability(
                 prootBinaryReady = true,
-                rootfsReady = false,
+                rootfsReady = false
             )
             assertFalse(availability.isReady)
         }
@@ -115,7 +114,7 @@ class ProotSetupStateTest {
         fun notReadyWhenNeitherReady() {
             val availability = ProotAvailability(
                 prootBinaryReady = false,
-                rootfsReady = false,
+                rootfsReady = false
             )
             assertFalse(availability.isReady)
         }
@@ -126,7 +125,7 @@ class ProotSetupStateTest {
             val availability = ProotAvailability(
                 prootBinaryReady = false,
                 rootfsReady = false,
-                needsExtraction = true,
+                needsExtraction = true
             )
             assertTrue(availability.needsExtraction)
         }

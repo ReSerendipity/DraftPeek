@@ -70,10 +70,7 @@ import com.draftpeek.feature.stats.viewmodel.StatsViewModel
  * @param viewModel 统计 ViewModel
  */
 @Composable
-fun AchievementScreen(
-    onNavigateUp: () -> Unit,
-    viewModel: StatsViewModel = hiltViewModel(),
-) {
+fun AchievementScreen(onNavigateUp: () -> Unit, viewModel: StatsViewModel = hiltViewModel()) {
     val unlockedAchievements by viewModel.unlockedAchievements.collectAsStateWithLifecycle()
     val allAchievements = AchievementDefinitions.allAchievements
     val unlockedIds = unlockedAchievements.map { it.id }.toSet()
@@ -89,15 +86,15 @@ fun AchievementScreen(
     Column(
         modifier = Modifier
             .fillMaxSize()
-            .background(PrototypeTokens.pageBackground),
+            .background(PrototypeTokens.pageBackground)
     ) {
         BrandTopBar(
             title = stringResource(R.string.stats_achievements_title),
-            onBack = onNavigateUp,
+            onBack = onNavigateUp
         )
 
         LazyColumn(
-            modifier = Modifier.fillMaxSize(),
+            modifier = Modifier.fillMaxSize()
         ) {
             item {
                 Spacer(modifier = Modifier.height(16.dp))
@@ -106,22 +103,22 @@ fun AchievementScreen(
                     modifier = Modifier
                         .fillMaxWidth()
                         .padding(horizontal = 20.dp),
-                    horizontalArrangement = Arrangement.spacedBy(10.dp),
+                    horizontalArrangement = Arrangement.spacedBy(10.dp)
                 ) {
                     SummaryCard(
                         value = unlockedCount.toString(),
                         label = stringResource(R.string.stats_achievement_unlocked_count),
-                        modifier = Modifier.weight(1f),
+                        modifier = Modifier.weight(1f)
                     )
                     SummaryCard(
                         value = lockedCount.toString(),
                         label = stringResource(R.string.stats_achievement_locked_count),
-                        modifier = Modifier.weight(1f),
+                        modifier = Modifier.weight(1f)
                     )
                     SummaryCard(
                         value = "$completionPercent%",
                         label = stringResource(R.string.stats_achievement_completion),
-                        modifier = Modifier.weight(1f),
+                        modifier = Modifier.weight(1f)
                     )
                 }
 
@@ -136,7 +133,7 @@ fun AchievementScreen(
                     CategoryHeader(
                         category = category,
                         unlocked = unlockedInCategory,
-                        total = achievements.size,
+                        total = achievements.size
                     )
                 }
 
@@ -149,13 +146,13 @@ fun AchievementScreen(
                             .height(((achievements.size + 1) / 2 * 100).dp),
                         horizontalArrangement = Arrangement.spacedBy(10.dp),
                         verticalArrangement = Arrangement.spacedBy(10.dp),
-                        userScrollEnabled = false,
+                        userScrollEnabled = false
                     ) {
                         items(achievements, key = { it.id }) { achievement ->
                             val isUnlocked = achievement.id in unlockedIds
                             AchievementItem(
                                 achievement = achievement,
-                                isUnlocked = isUnlocked,
+                                isUnlocked = isUnlocked
                             )
                         }
                     }
@@ -183,18 +180,14 @@ fun AchievementScreen(
  * @param modifier 修饰符
  */
 @Composable
-private fun SummaryCard(
-    value: String,
-    label: String,
-    modifier: Modifier = Modifier,
-) {
+private fun SummaryCard(value: String, label: String, modifier: Modifier = Modifier) {
     val shape = RoundedCornerShape(12.dp)
     Box(
         modifier = modifier
             .background(PrototypeTokens.surface, shape)
             .border(1.dp, PrototypeTokens.border, shape)
             .padding(vertical = 16.dp),
-        contentAlignment = Alignment.Center,
+        contentAlignment = Alignment.Center
     ) {
         Column(horizontalAlignment = Alignment.CenterHorizontally) {
             Text(
@@ -202,13 +195,13 @@ private fun SummaryCard(
                 fontFamily = JetBrainsMonoFontFamily,
                 fontWeight = FontWeight.Bold,
                 fontSize = 20.sp,
-                color = PrototypeTokens.fg,
+                color = PrototypeTokens.fg
             )
             Spacer(modifier = Modifier.height(4.dp))
             Text(
                 text = label,
                 fontSize = 11.sp,
-                color = PrototypeTokens.muted,
+                color = PrototypeTokens.muted
             )
         }
     }
@@ -224,11 +217,7 @@ private fun SummaryCard(
  * @param total 该分类成就总数
  */
 @Composable
-private fun CategoryHeader(
-    category: AchievementCategory,
-    unlocked: Int,
-    total: Int,
-) {
+private fun CategoryHeader(category: AchievementCategory, unlocked: Int, total: Int) {
     val icon = when (category) {
         AchievementCategory.READ -> Icons.AutoMirrored.Filled.MenuBook
         AchievementCategory.CREATE -> Icons.AutoMirrored.Filled.NoteAdd
@@ -245,20 +234,20 @@ private fun CategoryHeader(
         modifier = Modifier
             .fillMaxWidth()
             .padding(horizontal = 20.dp, vertical = 10.dp),
-        verticalAlignment = Alignment.CenterVertically,
+        verticalAlignment = Alignment.CenterVertically
     ) {
         Box(
             modifier = Modifier
                 .size(28.dp)
                 .clip(RoundedCornerShape(8.dp))
                 .background(PrototypeTokens.accentSoft),
-            contentAlignment = Alignment.Center,
+            contentAlignment = Alignment.Center
         ) {
             Icon(
                 imageVector = icon,
                 contentDescription = null,
                 tint = PrototypeTokens.accent,
-                modifier = Modifier.size(16.dp),
+                modifier = Modifier.size(16.dp)
             )
         }
 
@@ -269,14 +258,14 @@ private fun CategoryHeader(
             fontWeight = FontWeight.Bold,
             fontSize = 15.sp,
             color = PrototypeTokens.fg,
-            modifier = Modifier.weight(1f),
+            modifier = Modifier.weight(1f)
         )
 
         Text(
             text = "$unlocked/$total",
             fontFamily = JetBrainsMonoFontFamily,
             fontSize = 12.sp,
-            color = PrototypeTokens.muted,
+            color = PrototypeTokens.muted
         )
     }
 }
@@ -291,10 +280,7 @@ private fun CategoryHeader(
  * @param isUnlocked 是否已解锁
  */
 @Composable
-private fun AchievementItem(
-    achievement: Achievement,
-    isUnlocked: Boolean,
-) {
+private fun AchievementItem(achievement: Achievement, isUnlocked: Boolean) {
     val shape = RoundedCornerShape(10.dp)
     val borderColor = if (isUnlocked) {
         PrototypeTokens.accent.copy(alpha = 0.2f)
@@ -317,7 +303,7 @@ private fun AchievementItem(
         modifier = Modifier
             .background(bgColor, shape)
             .border(1.dp, borderColor, shape)
-            .padding(10.dp),
+            .padding(10.dp)
     ) {
         Row {
             Box(
@@ -325,13 +311,13 @@ private fun AchievementItem(
                     .size(32.dp)
                     .clip(RoundedCornerShape(8.dp))
                     .background(PrototypeTokens.accentSoft),
-                contentAlignment = Alignment.Center,
+                contentAlignment = Alignment.Center
             ) {
                 Icon(
                     imageVector = achievement.icon,
                     contentDescription = null,
                     tint = iconTint,
-                    modifier = Modifier.size(18.dp),
+                    modifier = Modifier.size(18.dp)
                 )
             }
 
@@ -343,13 +329,13 @@ private fun AchievementItem(
                     fontWeight = FontWeight.SemiBold,
                     fontSize = 12.sp,
                     color = PrototypeTokens.fg.copy(alpha = alpha),
-                    maxLines = 1,
+                    maxLines = 1
                 )
                 Text(
                     text = achievement.description,
                     fontSize = 10.sp,
                     color = PrototypeTokens.muted.copy(alpha = alpha),
-                    maxLines = 1,
+                    maxLines = 1
                 )
             }
         }
@@ -358,14 +344,14 @@ private fun AchievementItem(
             modifier = Modifier
                 .align(Alignment.TopEnd)
                 .clip(RoundedCornerShape(3.dp))
-                .background(if (isUnlocked) PrototypeTokens.accentSoft else PrototypeTokens.mutedSoft),
+                .background(if (isUnlocked) PrototypeTokens.accentSoft else PrototypeTokens.mutedSoft)
         ) {
             Text(
                 text = "T${achievement.tier}",
                 fontFamily = JetBrainsMonoFontFamily,
                 fontSize = 9.sp,
                 color = if (isUnlocked) PrototypeTokens.accent else PrototypeTokens.muted,
-                modifier = Modifier.padding(horizontal = 4.dp, vertical = 2.dp),
+                modifier = Modifier.padding(horizontal = 4.dp, vertical = 2.dp)
             )
         }
     }

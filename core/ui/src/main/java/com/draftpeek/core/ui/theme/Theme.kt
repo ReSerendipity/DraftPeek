@@ -13,10 +13,16 @@ import androidx.compose.runtime.Composable
  * 包含主题 CompositionLocal 和主题 Composable 函数，用于配置应用的深色/浅色模式、
  * 无障碍状态和字体设置。
  */
-@Deprecated("Use com.draftpeek.core.designsystem.theme.LocalDarkTheme instead", ReplaceWith("LocalDarkTheme", "com.draftpeek.core.designsystem.theme"))
+@Deprecated(
+    "Use com.draftpeek.core.designsystem.theme.LocalDarkTheme instead",
+    ReplaceWith("LocalDarkTheme", "com.draftpeek.core.designsystem.theme")
+)
 val LocalDarkTheme = com.draftpeek.core.designsystem.theme.LocalDarkTheme
 
-@Deprecated("Use com.draftpeek.core.designsystem.theme.PrototypeTokens instead", ReplaceWith("PrototypeTokens", "com.draftpeek.core.designsystem.theme"))
+@Deprecated(
+    "Use com.draftpeek.core.designsystem.theme.PrototypeTokens instead",
+    ReplaceWith("PrototypeTokens", "com.draftpeek.core.designsystem.theme")
+)
 val PrototypeTokens = com.draftpeek.core.designsystem.theme.PrototypeTokens
 
 /**
@@ -38,12 +44,12 @@ fun DraftPeekTheme(
     darkTheme: Boolean = androidx.compose.foundation.isSystemInDarkTheme(),
     accessibilityState: com.draftpeek.core.designsystem.theme.AccessibilityState = com.draftpeek.core.designsystem.theme.AccessibilityState.Default,
     appFonts: com.draftpeek.core.designsystem.theme.AppFonts = com.draftpeek.core.designsystem.theme.AppFonts(),
-    content: @Composable () -> Unit,
+    content: @Composable () -> Unit
 ) {
     com.draftpeek.core.designsystem.theme.DraftPeekTheme(
         darkTheme = darkTheme,
         accessibilityState = accessibilityState,
         appFonts = appFonts,
-        content = content,
+        content = content
     )
 }

@@ -1,11 +1,11 @@
 /**
  * 文件功能：编辑器主界面 ViewModel
- * 
+ *
  * 主要类/数据类：
  * - [EditorSavedState]：编辑器保存状态数据类，用于配置变更或进程死亡后恢复
  * - [OutlineItem]：文件大纲项数据类（函数、类、标题等结构）
  * - [EditorViewModel]：编辑器主 ViewModel，作为协调层委托给各专用管理器
- * 
+ *
  * 模块依赖：
  * - core/common：AppError/ErrorHandler 错误处理、SecurityGate 安全检查、PerformanceBenchmark、NetworkConnectivityChecker 等
  * - core/common/event：AppEventBus 用于跨模块事件通知
@@ -35,6 +35,7 @@ import com.draftpeek.core.common.security.SecurityGate
 import com.draftpeek.core.common.util.DocumentType
 import com.draftpeek.core.common.util.NetworkConnectivityChecker
 import com.draftpeek.core.common.util.PerformanceBenchmark
+import com.draftpeek.core.data.entity.Snippet
 import com.draftpeek.core.data.repository.LinkRepository
 import com.draftpeek.core.data.repository.RecentFilesRepository
 import com.draftpeek.core.data.repository.SnippetRepository
@@ -42,39 +43,40 @@ import com.draftpeek.core.data.repository.UserActivityRepository
 import com.draftpeek.core.data.usecase.AddRecentFileUseCase
 import com.draftpeek.core.data.usecase.ReadingPositionUseCase
 import com.draftpeek.core.domain.usecase.RecordUserActivityUseCase
-import com.draftpeek.core.data.entity.Snippet
 import com.draftpeek.feature.editor.R
+import com.draftpeek.feature.editor.diagnostics.DiagnosticItem
+import com.draftpeek.feature.editor.diagnostics.DiagnosticNavigationState
+import com.draftpeek.feature.editor.diagnostics.SimpleDiagnosticProvider
+import com.draftpeek.feature.editor.diagnostics.fromDiagnostics
+import com.draftpeek.feature.editor.diagnostics.moveToNext
+import com.draftpeek.feature.editor.diagnostics.moveToPrevious
 import com.draftpeek.feature.editor.model.EditorMessage
 import com.draftpeek.feature.editor.model.EditorTab
 import com.draftpeek.feature.editor.model.EditorUiState
 import com.draftpeek.feature.editor.model.MarkdownTheme
 import com.draftpeek.feature.editor.model.MarkdownViewMode
 import com.draftpeek.feature.editor.repository.EditorRepository
+import com.draftpeek.feature.editor.repository.FileReadProgress
 import com.draftpeek.feature.editor.repository.FileReadResult
 import com.draftpeek.feature.editor.tabs.RestoredPosition
+import com.draftpeek.feature.editor.tabs.SessionManager
 import com.draftpeek.feature.editor.tabs.TabManager
 import com.draftpeek.feature.editor.tabs.TabStateManager
 import com.draftpeek.feature.editor.tabs.TabStateManager.SwitchResult
-import com.draftpeek.feature.editor.tabs.SessionManager
-import com.draftpeek.feature.editor.util.MarkdownLinkParser
-import com.draftpeek.feature.editor.diagnostics.DiagnosticItem
-import com.draftpeek.feature.editor.diagnostics.DiagnosticNavigationState
-import com.draftpeek.feature.editor.diagnostics.moveToNext
-import com.draftpeek.feature.editor.diagnostics.moveToPrevious
-import com.draftpeek.feature.editor.diagnostics.SimpleDiagnosticProvider
-import com.draftpeek.feature.editor.diagnostics.fromDiagnostics
 import com.draftpeek.feature.editor.ui.FileSearchResult
+import com.draftpeek.feature.editor.util.MarkdownLinkParser
 import dagger.hilt.android.lifecycle.HiltViewModel
 import dagger.hilt.android.qualifiers.ApplicationContext
+import javax.inject.Inject
 import kotlinx.collections.immutable.ImmutableList
 import kotlinx.collections.immutable.persistentListOf
 import kotlinx.collections.immutable.toImmutableList
-import kotlinx.coroutines.async
-import kotlinx.coroutines.awaitAll
 import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.CoroutineExceptionHandler
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.Job
+import kotlinx.coroutines.async
+import kotlinx.coroutines.awaitAll
 import kotlinx.coroutines.channels.BufferOverflow
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.MutableSharedFlow
@@ -86,14 +88,12 @@ import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
-import com.draftpeek.feature.editor.repository.FileReadProgress
-import javax.inject.Inject
 
 /**
  * 编辑器保存状态
- * 
+ *
  * 用于配置变更（如屏幕旋转）或进程死亡后恢复编辑器状态，包括内容、光标位置、滚动位置等。
- * 
+ *
  * @property content 文件文本内容
  * @property cursorLine 光标行号（1-based）
  * @property cursorColumn 光标列号（1-based）
@@ -113,49 +113,45 @@ data class EditorSavedState(
     val language: String?,
     val fileName: String,
     val isReadOnly: Boolean = false,
-    val documentType: com.draftpeek.core.common.util.DocumentType? = null,
+    val documentType: com.draftpeek.core.common.util.DocumentType? = null
 )
 
 /**
  * 文件大纲项
- * 
+ *
  * 表示文件大纲中的单个条目（函数、类、Markdown 标题等）。
  * 使用 @Immutable 标记，因为所有属性都是 val，允许 Compose 在重新发射相同实例时
  * 跳过重组（利用数据类相等性）。
- * 
+ *
  * @property name 大纲项名称（如函数名、标题文本）
  * @property line 所在行号（1-based）
  * @property type 条目类型（如 "function"、"class"、"h1"、"h2"）
  */
 @Immutable
-data class OutlineItem(
-    val name: String,
-    val line: Int,
-    val type: String,
-)
+data class OutlineItem(val name: String, val line: Int, val type: String)
 
 /**
  * 编辑器主界面 ViewModel
- * 
+ *
  * 作为薄协调层，将具体职责委托给：
  * - [EditorStateManager]：编辑器核心状态（内容、光标、滚动等）
  * - [TabStateManager]：每个标签页的状态持久化
  * - [FavoriteManager]：收藏状态管理
  * - [TabManager]：标签列表管理（MRU 驱逐）
  * - [SessionManager]：会话持久化和恢复
- * 
+ *
  * **状态管理**：
  * - UI 状态通过 StateFlow 暴露给 Compose 层
  * - 一次性消息（如保存成功/失败）通过 SharedFlow 发送
  * - 所有文件 I/O 和 CPU 密集型操作在 Dispatchers.IO/Default 上执行
- * 
+ *
  * **数据流**：
  * 1. 文件打开 → loadFileFromUri → repository.readFileWithProgress → 状态更新
  * 2. 内容变更 → onContentChanged → EditorStateManager（防抖）→ 诊断分析（防抖）
  * 3. 保存 → saveFile → repository.writeFile → 状态更新
  * 4. 标签切换 → switchToTab → TabStateManager 保存/恢复状态
  * 5. 跨文件搜索 → searchInFiles（并发）→ FileSearchResult 列表
- * 
+ *
  * **优化要点**：
  * - 跨文件搜索使用 async + awaitAll 并发执行，总耗时 ≈ max(单文件时间)
  * - 单文件搜索使用流式按行读取，避免将整个文件加载到内存
@@ -181,7 +177,7 @@ class EditorViewModel @Inject constructor(
     private val linkRepository: LinkRepository,
     val cacheManager: com.draftpeek.feature.editor.data.CacheManager,
     @param:ApplicationContext private val appContext: android.content.Context,
-    savedStateHandle: SavedStateHandle,
+    savedStateHandle: SavedStateHandle
 ) : ViewModel() {
 
     @Volatile
@@ -191,6 +187,7 @@ class EditorViewModel @Inject constructor(
     val currentUriString: String get() = uriString
 
     private val _backlinks = MutableStateFlow<List<String>>(emptyList())
+
     /** 当前文档的反向链接来源文件 URI 列表（引用本文档标题的其他文件） */
     val backlinks: StateFlow<List<String>> = _backlinks.asStateFlow()
 
@@ -226,26 +223,31 @@ class EditorViewModel @Inject constructor(
     val activeTabId: StateFlow<TabId?> = tabManager.activeTabId
 
     private val _showEncodingDialog = MutableStateFlow(false)
+
     /** 是否显示编码选择对话框 */
     val showEncodingDialog: StateFlow<Boolean> = _showEncodingDialog.asStateFlow()
 
     private val _detectedEncoding = MutableStateFlow<String?>(null)
+
     /** 自动检测到的文件编码 */
     val detectedEncoding: StateFlow<String?> = _detectedEncoding.asStateFlow()
 
     private val _showSaveEncodingDialog = MutableStateFlow(false)
+
     /** 是否显示保存编码选择对话框 */
     val showSaveEncodingDialog: StateFlow<Boolean> = _showSaveEncodingDialog.asStateFlow()
 
     private val _isSaving = MutableStateFlow(false)
+
     /** 是否正在保存文件 */
     val isSaving: StateFlow<Boolean> = _isSaving.asStateFlow()
 
     private val _messageEvent = MutableSharedFlow<EditorMessage>(
         replay = 0,
         extraBufferCapacity = 1,
-        onBufferOverflow = BufferOverflow.DROP_OLDEST,
+        onBufferOverflow = BufferOverflow.DROP_OLDEST
     )
+
     /** 一次性消息事件流（保存成功/失败、加载失败等） */
     val messageEvent: SharedFlow<EditorMessage> = _messageEvent.asSharedFlow()
 
@@ -268,6 +270,7 @@ class EditorViewModel @Inject constructor(
     @Volatile
     private var usageStartTimeMs: Long = 0L
     private var usageTrackingJob: Job? = null
+
     @Volatile
     private var isUsageTracking = false
 
@@ -356,7 +359,7 @@ class EditorViewModel @Inject constructor(
 
     /**
      * 从指定 URI 加载文件
-     * 
+     *
      * @param uri 文件 URI 字符串
      */
     fun loadFileFromUri(uri: String) {
@@ -374,7 +377,7 @@ class EditorViewModel @Inject constructor(
 
     /**
      * 切换到指定标签页
-     * 
+     *
      * 算法步骤：
      * 1. 保存当前活动标签的状态到 TabStateManager
      * 2. 调用 tabStateManager.switchTab(tabId) 获取切换结果
@@ -382,7 +385,7 @@ class EditorViewModel @Inject constructor(
      *    - RestoreState：从保存的状态恢复（内容已缓存）
      *    - LoadFromDisk：从磁盘重新加载文件
      *    - Noop：标签未找到，不做处理
-     * 
+     *
      * @param tabId 目标标签页 ID
      */
     fun switchToTab(tabId: TabId) {
@@ -416,7 +419,7 @@ class EditorViewModel @Inject constructor(
 
     /**
      * 关闭指定标签页
-     * 
+     *
      * @param tabId 要关闭的标签页 ID
      * @return 关闭后是否还有剩余标签页
      */
@@ -466,7 +469,7 @@ class EditorViewModel @Inject constructor(
 
     /**
      * 编辑器内容变更时调用（由 SoraEditorWrapper 以 150ms 防抖）
-     * 
+     *
      * @param content 新的文本内容
      */
     fun onContentChanged(content: String) {
@@ -491,13 +494,13 @@ class EditorViewModel @Inject constructor(
 
     /**
      * 调度防抖的诊断分析任务
-     * 
+     *
      * 在 [DIAGNOSTIC_DEBOUNCE_MS] 无活动后，在 [Dispatchers.Default] 上运行
      * [SimpleDiagnosticProvider.analyze]，然后更新 [_diagnostics]。
-     * 
+     *
      * 防抖防止快速输入时过度使用 CPU。对于超过 500KB 的超大文件也会跳过分析，
      * 因为正则扫描开销太大。
-     * 
+     *
      * @param content 要分析的文本内容
      */
     private fun scheduleDiagnosticAnalysis(content: String) {
@@ -530,7 +533,7 @@ class EditorViewModel @Inject constructor(
 
     /**
      * 导航到当前文件中的下一个诊断项
-     * 
+     *
      * UI 应调用此方法，然后使用导航状态将编辑器光标跳转到聚焦的诊断位置。
      */
     fun navigateToNextDiagnostic() {
@@ -548,7 +551,7 @@ class EditorViewModel @Inject constructor(
 
     /**
      * 内容长度变化时调用，用于追踪字符写入统计
-     * 
+     *
      * @param newLength 新的内容长度
      */
     fun onContentLengthChanged(newLength: Int) {
@@ -566,7 +569,7 @@ class EditorViewModel @Inject constructor(
 
     /**
      * 重置内容长度追踪（如加载新文件时）
-     * 
+     *
      * @param length 当前内容长度
      */
     fun resetContentLength(length: Int) {
@@ -632,7 +635,7 @@ class EditorViewModel @Inject constructor(
 
     /**
      * 光标位置变化时调用
-     * 
+     *
      * @param line 行号（1-based）
      * @param column 列号（1-based）
      */
@@ -643,7 +646,7 @@ class EditorViewModel @Inject constructor(
 
     /**
      * 滚动位置变化时调用
-     * 
+     *
      * @param scrollX 水平滚动偏移
      * @param scrollY 垂直滚动偏移
      */
@@ -655,7 +658,7 @@ class EditorViewModel @Inject constructor(
 
     /**
      * 大纲项更新时调用
-     * 
+     *
      * @param json JSON 格式的大纲数组
      */
     fun onOutlineItems(json: String) {
@@ -674,7 +677,7 @@ class EditorViewModel @Inject constructor(
 
     /**
      * 设置指定的 Markdown 视图模式
-     * 
+     *
      * @param mode 目标视图模式
      */
     fun setMarkdownViewMode(mode: MarkdownViewMode) {
@@ -683,20 +686,20 @@ class EditorViewModel @Inject constructor(
 
     /** 切换专注模式 */
     fun toggleFocusMode() = editorStateManager.toggleFocusMode()
-    
+
     /** 切换打字机模式 */
     fun toggleTypewriterMode() = editorStateManager.toggleTypewriterMode()
-    
+
     /**
      * 设置 Markdown 预览主题
-     * 
+     *
      * @param theme 要应用的主题
      */
     fun setMarkdownTheme(theme: MarkdownTheme) = editorStateManager.setMarkdownTheme(theme)
 
     /**
      * 保存当前编辑器内容回文件
-     * 
+     *
      * @param content 要保存的内容，为 null 时使用状态管理器的当前内容
      * @param encoding 可选的文件编码，为 null 时默认 UTF-8
      * @throws SecurityException 安全检查不通过时抛出（通过 messageEvent 通知用户）
@@ -754,7 +757,7 @@ class EditorViewModel @Inject constructor(
 
     /**
      * 删除当前文件（仅支持内部应用文件）
-     * 
+     *
      * @return 删除操作已启动返回 true
      */
     fun deleteCurrentFile(): Boolean {
@@ -774,7 +777,7 @@ class EditorViewModel @Inject constructor(
 
     /**
      * 同步内容（外部调用入口，委托给 onContentChanged 触发诊断）
-     * 
+     *
      * @param content 要同步的内容
      */
     fun syncContent(content: String) {
@@ -799,7 +802,7 @@ class EditorViewModel @Inject constructor(
 
     /**
      * 将当前内容保存为代码片段
-     * 
+     *
      * @param title 片段标题
      * @param content 片段内容
      * @param language 编程语言
@@ -819,7 +822,7 @@ class EditorViewModel @Inject constructor(
                     language = language,
                     category = category.ifBlank { DEFAULT_SNIPPET_CATEGORY },
                     createdAt = now,
-                    updatedAt = now,
+                    updatedAt = now
                 )
             )
             recordUserActivity.recordSnippetCreated()
@@ -829,33 +832,39 @@ class EditorViewModel @Inject constructor(
 
     /** 获取所有代码片段的 Flow */
     fun getAllSnippets() = snippetRepository.getAllSnippets()
-    
+
     /**
      * 获取当前文件名
-     * 
+     *
      * @return 文件名
      */
     fun getFileName(): String? = editorStateManager.getFileName()
-    
+
     /**
      * 获取当前语言
-     * 
+     *
      * @return 语言标识符
      */
     fun getLanguage(): String? = editorStateManager.getLanguage()
-    
+
     /** 记录搜索操作 */
-    fun recordSearch() { launchIo { recordUserActivity.recordSearch() } }
-    
+    fun recordSearch() {
+        launchIo { recordUserActivity.recordSearch() }
+    }
+
     /** 记录导出操作 */
-    fun recordExport() { launchIo { recordUserActivity.recordExport() } }
-    
+    fun recordExport() {
+        launchIo { recordUserActivity.recordExport() }
+    }
+
     /** 记录文件管理操作 */
-    fun recordFileManagement() { launchIo { recordUserActivity.recordFileManagement() } }
+    fun recordFileManagement() {
+        launchIo { recordUserActivity.recordFileManagement() }
+    }
 
     /**
      * 将当前 HTML 内容转换为 Markdown 并更新编辑器
-     * 
+     *
      * 使用户可以打开 HTML 文件，转换为 Markdown，编辑 Markdown 源码，然后保存结果。
      * 转换由 HtmlMarkdownConverter 执行，在 [Dispatchers.Default] 上运行以避免大文件阻塞主线程。
      */
@@ -876,7 +885,7 @@ class EditorViewModel @Inject constructor(
                 documentType = null,
                 renderedHtml = null,
                 fileSizeWarning = null,
-                fileSize = markdown.length.toLong(),
+                fileSize = markdown.length.toLong()
             )
         }
     }
@@ -887,14 +896,14 @@ class EditorViewModel @Inject constructor(
 
     /**
      * 保存当前编辑器状态
-     * 
+     *
      * @return 状态快照，UI 状态不是 Success 时返回 null
      */
     fun saveState(): EditorSavedState? = editorStateManager.saveState()
 
     /**
      * 从保存的状态恢复
-     * 
+     *
      * @param savedState 要恢复的状态快照
      */
     fun restoreState(savedState: EditorSavedState) {
@@ -907,20 +916,15 @@ class EditorViewModel @Inject constructor(
 
     /**
      * 防抖保存阅读位置到数据库
-     * 
+     *
      * 等待 [READING_POSITION_DEBOUNCE_MS] 无活动后持久化，避免频繁写数据库。
-     * 
+     *
      * @param line 光标行号
      * @param column 光标列号
      * @param scrollX 水平滚动位置
      * @param scrollY 垂直滚动位置
      */
-    private fun debounceSaveReadingPosition(
-        line: Int = 1,
-        column: Int = 1,
-        scrollX: Int = 0,
-        scrollY: Int = 0,
-    ) {
+    private fun debounceSaveReadingPosition(line: Int = 1, column: Int = 1, scrollX: Int = 0, scrollY: Int = 0) {
         if (uriString.isEmpty()) return
         savePositionJob?.cancel()
         savePositionJob = viewModelScope.launch(Dispatchers.IO + coroutineExceptionHandler) {
@@ -935,13 +939,13 @@ class EditorViewModel @Inject constructor(
 
     /**
      * 加载文件（内部实现）
-     * 
+     *
      * 算法步骤：
      * 1. 验证 URI 不为空
      * 2. 使用 readFileWithProgress 流式加载，实时更新进度条
      * 3. 加载完成后调用 onFileReadComplete 处理后续逻辑
      * 4. 处理各种异常情况：SecurityException（权限过期）、FileNotFoundException（文件不存在）
-     * 
+     *
      * @param encoding 可选的文件编码
      * @param restoredPosition 会话恢复的光标/滚动位置
      */
@@ -960,7 +964,7 @@ class EditorViewModel @Inject constructor(
                             is FileReadProgress.Loading -> {
                                 editorStateManager.setLoadingProgress(
                                     loadedBytes = progress.loadedBytes,
-                                    totalBytes = progress.totalBytes,
+                                    totalBytes = progress.totalBytes
                                 )
                             }
                             is FileReadProgress.Done -> {
@@ -1008,28 +1012,29 @@ class EditorViewModel @Inject constructor(
     }
 
     /** 显示编码选择对话框 */
-    fun showEncodingSelector() { _showEncodingDialog.value = true }
-    
+    fun showEncodingSelector() {
+        _showEncodingDialog.value = true
+    }
+
     /** 隐藏编码选择对话框 */
-    fun dismissEncodingSelector() { _showEncodingDialog.value = false }
+    fun dismissEncodingSelector() {
+        _showEncodingDialog.value = false
+    }
 
     /**
      * 文件读取完成后的处理
-     * 
+     *
      * 算法步骤：
      * 1. 更新检测到的编码
      * 2. 确定要恢复的光标/滚动位置（优先级：会话恢复 > 最近文件记录 > 默认值）
      * 3. 调用 editorStateManager.loadContent 更新 UI 状态
      * 4. 清除并重新调度诊断分析
      * 5. 添加到最近文件记录、打开标签页、记录用户活动
-     * 
+     *
      * @param result 文件读取结果
      * @param restoredPosition 会话恢复的位置，为 null 时从最近文件读取
      */
-    private suspend fun onFileReadComplete(
-        result: FileReadResult,
-        restoredPosition: RestoredPosition? = null,
-    ) {
+    private suspend fun onFileReadComplete(result: FileReadResult, restoredPosition: RestoredPosition? = null) {
         _detectedEncoding.value = result.detectedEncoding
 
         val restoreLine: Int
@@ -1076,7 +1081,7 @@ class EditorViewModel @Inject constructor(
             restoreScrollX = restoreScrollX,
             restoreScrollY = restoreScrollY,
             isBinaryFile = result.isBinaryFile,
-            isTruncated = result.isTruncated,
+            isTruncated = result.isTruncated
         )
 
         clearDiagnostics()
@@ -1085,7 +1090,7 @@ class EditorViewModel @Inject constructor(
             uri = uriString,
             fileName = result.fileName,
             language = result.language,
-            fileSize = result.fileSize,
+            fileSize = result.fileSize
         )
         // 双向链接：加载 Markdown 后刷新反向链接展示
         if (isMarkdownFile) {
@@ -1101,7 +1106,7 @@ class EditorViewModel @Inject constructor(
 
     /**
      * 使用指定编码重新加载文件
-     * 
+     *
      * @param encoding 要使用的文件编码
      */
     fun reloadWithEncoding(encoding: String) {
@@ -1110,14 +1115,18 @@ class EditorViewModel @Inject constructor(
     }
 
     /** 显示保存编码选择对话框 */
-    fun showSaveEncodingSelector() { _showSaveEncodingDialog.value = true }
-    
+    fun showSaveEncodingSelector() {
+        _showSaveEncodingDialog.value = true
+    }
+
     /** 隐藏保存编码选择对话框 */
-    fun dismissSaveEncodingSelector() { _showSaveEncodingDialog.value = false }
+    fun dismissSaveEncodingSelector() {
+        _showSaveEncodingDialog.value = false
+    }
 
     /**
      * 使用指定编码保存文件
-     * 
+     *
      * @param encoding 保存时使用的编码
      */
     fun saveWithEncoding(encoding: String) {
@@ -1127,13 +1136,13 @@ class EditorViewModel @Inject constructor(
 
     /**
      * 在最近打开的文件和当前标签页中搜索查询字符串
-     * 
+     *
      * **算法优化**：
      * - 使用 async + awaitAll 并发扫描多个标签，原实现串行 await 总耗时 = N × 单文件时间，
      *   优化后总耗时 ≈ max(单文件时间)。对 5 个各 50ms 的搜索场景，从 250ms → 50ms（约 5 倍加速）。
      * - 单文件搜索使用流式按行读取，避免将整个文件加载到内存。
      * - 命中达 [MAX_SEARCH_RESULTS_PER_FILE] 即提前退出。
-     * 
+     *
      * @param query 搜索查询字符串
      * @return 匹配的文件搜索结果列表
      */
@@ -1158,20 +1167,16 @@ class EditorViewModel @Inject constructor(
 
     /**
      * 搜索单个文件中的查询字符串，返回结果（无匹配或错误时返回 null）
-     * 
+     *
      * 从 searchInFiles 提取，符合单一职责原则并便于测试。
      * 使用流式按行读取，避免将整个文件作为 String 加载到内存。
-     * 
+     *
      * @param uri 文件 URI
      * @param fileName 文件名
      * @param query 搜索查询（不区分大小写）
      * @return 搜索结果，无匹配或错误时返回 null
      */
-    private suspend fun searchSingleFile(
-        uri: String,
-        fileName: String,
-        query: String,
-    ): FileSearchResult? {
+    private suspend fun searchSingleFile(uri: String, fileName: String, query: String): FileSearchResult? {
         return try {
             val lineNumbers = mutableListOf<Int>()
             val lineSnippets = mutableListOf<String>()
@@ -1214,7 +1219,7 @@ class EditorViewModel @Inject constructor(
 
     /**
      * 将活动标签的编辑器状态保存到 TabStateManager
-     * 
+     *
      * 必须在 [sessionManager.saveSession()] 之前调用，以便光标/滚动位置包含在持久化会话数据中。
      */
     private fun saveActiveTabStateToTabStateManager() {
@@ -1304,10 +1309,13 @@ class EditorViewModel @Inject constructor(
 
         /** 阅读位置保存防抖时长（毫秒） */
         private const val READING_POSITION_DEBOUNCE_MS = 500L
+
         /** 字符写入统计防抖时长（毫秒） */
         private const val CHAR_WRITE_DEBOUNCE_MS = 150L
+
         /** 每个文件最大搜索结果数 */
         private const val MAX_SEARCH_RESULTS_PER_FILE = 100
+
         /** 默认代码片段分类名称 */
         private const val DEFAULT_SNIPPET_CATEGORY = "未分类"
 
@@ -1328,7 +1336,10 @@ class EditorViewModel @Inject constructor(
 
         /** 支持预览的文档类型集合 */
         private val PREVIEWABLE_DOC_TYPES = setOf(
-            DocumentType.PDF, DocumentType.WORD, DocumentType.EXCEL, DocumentType.POWERPOINT
+            DocumentType.PDF,
+            DocumentType.WORD,
+            DocumentType.EXCEL,
+            DocumentType.POWERPOINT
         )
     }
 }

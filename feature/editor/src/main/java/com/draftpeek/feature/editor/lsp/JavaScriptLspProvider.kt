@@ -1,14 +1,14 @@
 /**
  * 文件功能：JavaScript/TypeScript 语言服务器（typescript-language-server）客户端存根实现
- * 
+ *
  * 主要类：[JavaScriptLspProvider] —— JavaScript/TypeScript 语言的 LSP 客户端实现（待完成）
- * 
+ *
  * 模块依赖：
  * - android.content.Context：应用上下文
  * - android.util.Log：日志记录
  * - dagger.hilt.android.qualifiers.ApplicationContext：Hilt 注入应用上下文
  * - javax.inject.Inject：Hilt 注入注解
- * 
+ *
  * 实现路线图（待完成）：
  * 1. 为 Android 捆绑或下载 typescript-language-server
  * 2. 启动服务器进程并通过 stdio JSON-RPC 通信
@@ -18,18 +18,15 @@
 package com.draftpeek.feature.editor.lsp
 
 import android.content.Context
-import android.util.Log
 import dagger.hilt.android.qualifiers.ApplicationContext
 import javax.inject.Inject
 
 /**
  * JavaScript/TypeScript 语言服务器（typescript-language-server）客户端存根
- * 
+ *
  * @property context 应用上下文
  */
-class JavaScriptLspProvider @Inject constructor(
-    @ApplicationContext private val context: Context,
-) : LspClient {
+class JavaScriptLspProvider @Inject constructor(@ApplicationContext private val context: Context) : LspClient {
 
     @Volatile
     private var running = false
@@ -40,15 +37,13 @@ class JavaScriptLspProvider @Inject constructor(
 
     /**
      * 初始化 LSP 服务器
-     * 
+     *
      * @param rootUri 工作区根 URI
      * @return 初始化结果（当前始终返回失败）
      */
-    override suspend fun initialize(rootUri: String): Result<Unit> {
-        return Result.failure(
-            UnsupportedOperationException("JavaScript/TypeScript LSP is not yet implemented")
-        )
-    }
+    override suspend fun initialize(rootUri: String): Result<Unit> = Result.failure(
+        UnsupportedOperationException("JavaScript/TypeScript LSP is not yet implemented")
+    )
 
     /**
      * 打开文档通知
@@ -107,7 +102,12 @@ class JavaScriptLspProvider @Inject constructor(
      * @param includeDeclaration 是否包含声明
      * @return 引用位置列表（当前为空）
      */
-    override suspend fun findReferences(uri: String, line: Int, column: Int, includeDeclaration: Boolean): List<LocationLink> = emptyList()
+    override suspend fun findReferences(
+        uri: String,
+        line: Int,
+        column: Int,
+        includeDeclaration: Boolean
+    ): List<LocationLink> = emptyList()
 
     /**
      * 请求签名帮助
@@ -149,7 +149,11 @@ class JavaScriptLspProvider @Inject constructor(
      * @param diagnostics 诊断列表
      * @return 代码操作列表（当前为空）
      */
-    override suspend fun codeActions(uri: String, range: LspRange, diagnostics: List<LspDiagnostic>): List<CodeActionItem> = emptyList()
+    override suspend fun codeActions(
+        uri: String,
+        range: LspRange,
+        diagnostics: List<LspDiagnostic>
+    ): List<CodeActionItem> = emptyList()
 
     /**
      * 重命名符号

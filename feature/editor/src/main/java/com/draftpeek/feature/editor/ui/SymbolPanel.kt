@@ -13,7 +13,6 @@ import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
-import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.padding
@@ -45,10 +44,7 @@ import com.draftpeek.feature.editor.R
  * @property labelResId 分类显示名称的字符串资源 ID
  * @property symbols 该分类下的符号列表
  */
-private data class SymbolCategory(
-    val labelResId: Int,
-    val symbols: List<String>,
-)
+private data class SymbolCategory(val labelResId: Int, val symbols: List<String>)
 
 /**
  * 预定义的符号分类列表，包含常用、CJK、数学、箭头四类符号。
@@ -56,20 +52,20 @@ private data class SymbolCategory(
 private val SYMBOL_CATEGORIES = listOf(
     SymbolCategory(
         labelResId = R.string.editor_symbol_panel_common,
-        symbols = listOf("→", "←", "↑", "↓", "⇒", "⇐", "⇑", "⇓", "≠", "≈", "≤", "≥", "∞", "±", "÷", "×", "∑", "∏", "√", "∫"),
+        symbols = listOf("→", "←", "↑", "↓", "⇒", "⇐", "⇑", "⇓", "≠", "≈", "≤", "≥", "∞", "±", "÷", "×", "∑", "∏", "√", "∫")
     ),
     SymbolCategory(
         labelResId = R.string.editor_symbol_panel_cjk,
-        symbols = listOf("①", "②", "③", "④", "⑤", "⑥", "⑦", "⑧", "⑨", "⑩", "Ⅰ", "Ⅱ", "Ⅲ", "Ⅳ", "Ⅴ", "★", "☆", "○", "●", "◎"),
+        symbols = listOf("①", "②", "③", "④", "⑤", "⑥", "⑦", "⑧", "⑨", "⑩", "Ⅰ", "Ⅱ", "Ⅲ", "Ⅳ", "Ⅴ", "★", "☆", "○", "●", "◎")
     ),
     SymbolCategory(
         labelResId = R.string.editor_symbol_panel_math,
-        symbols = listOf("α", "β", "γ", "δ", "ε", "θ", "λ", "μ", "π", "σ", "φ", "ω", "∂", "∇", "∈", "∉", "⊂", "⊃", "∪", "∩"),
+        symbols = listOf("α", "β", "γ", "δ", "ε", "θ", "λ", "μ", "π", "σ", "φ", "ω", "∂", "∇", "∈", "∉", "⊂", "⊃", "∪", "∩")
     ),
     SymbolCategory(
         labelResId = R.string.editor_symbol_panel_arrows,
-        symbols = listOf("←", "→", "↑", "↓", "↔", "↕", "⇐", "⇒", "⇑", "⇓", "⇔", "⇕", "➜", "➡", "⬅", "⬆", "⬇", "⟵", "⟶", "⟷"),
-    ),
+        symbols = listOf("←", "→", "↑", "↓", "↔", "↕", "⇐", "⇒", "⇑", "⇓", "⇔", "⇕", "➜", "➡", "⬅", "⬆", "⬇", "⟵", "⟶", "⟷")
+    )
 )
 
 /**
@@ -85,32 +81,28 @@ private val SYMBOL_CATEGORIES = listOf(
  */
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun SymbolPanel(
-    onSymbolClick: (String) -> Unit,
-    onDismiss: () -> Unit,
-    modifier: Modifier = Modifier,
-) {
+fun SymbolPanel(onSymbolClick: (String) -> Unit, onDismiss: () -> Unit, modifier: Modifier = Modifier) {
     var selectedTab by remember { mutableIntStateOf(0) }
 
     ModalBottomSheet(
         onDismissRequest = onDismiss,
         modifier = modifier,
-        containerColor = PrototypeTokens.surface,
+        containerColor = PrototypeTokens.surface
     ) {
         Column(
             modifier = Modifier
                 .fillMaxWidth()
-                .padding(bottom = 32.dp),
+                .padding(bottom = 32.dp)
         ) {
             Text(
                 text = stringResource(R.string.editor_symbol_panel_title),
                 style = MaterialTheme.typography.titleMedium,
-                modifier = Modifier.padding(horizontal = 16.dp, vertical = 8.dp),
+                modifier = Modifier.padding(horizontal = 16.dp, vertical = 8.dp)
             )
 
             PrimaryTabRow(
                 selectedTabIndex = selectedTab,
-                modifier = Modifier.fillMaxWidth(),
+                modifier = Modifier.fillMaxWidth()
             ) {
                 SYMBOL_CATEGORIES.forEachIndexed { index, category ->
                     Tab(
@@ -119,9 +111,9 @@ fun SymbolPanel(
                         text = {
                             Text(
                                 text = stringResource(category.labelResId),
-                                style = MaterialTheme.typography.labelMedium,
+                                style = MaterialTheme.typography.labelMedium
                             )
-                        },
+                        }
                     )
                 }
             }
@@ -134,7 +126,7 @@ fun SymbolPanel(
                     .heightIn(max = 240.dp)
                     .padding(horizontal = 8.dp),
                 horizontalArrangement = Arrangement.Center,
-                contentPadding = PaddingValues(vertical = 8.dp),
+                contentPadding = PaddingValues(vertical = 8.dp)
             ) {
                 items(currentSymbols, key = { "${selectedTab}_$it" }) { symbol ->
                     Text(
@@ -143,7 +135,7 @@ fun SymbolPanel(
                         textAlign = TextAlign.Center,
                         modifier = Modifier
                             .clickable { onSymbolClick(symbol) }
-                            .padding(4.dp),
+                            .padding(4.dp)
                     )
                 }
             }

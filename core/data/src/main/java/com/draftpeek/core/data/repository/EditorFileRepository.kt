@@ -95,7 +95,7 @@ sealed class EditorFileReadOutcome {
         val message: String,
         val cause: Throwable? = null,
         val isFileNotFound: Boolean = false,
-        val isSecurityException: Boolean = false,
+        val isSecurityException: Boolean = false
     ) : EditorFileReadOutcome()
 }
 
@@ -127,5 +127,5 @@ data class EditorFileReadResult(
     val renderedHtml: String? = null,
     val fileSizeWarning: String? = null,
     val isBinaryFile: Boolean = false,
-    val isTruncated: Boolean = false,
+    val isTruncated: Boolean = false
 )

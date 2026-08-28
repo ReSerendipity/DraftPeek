@@ -18,9 +18,7 @@ import javax.inject.Inject
  *
  * @property repository 编辑器文件仓库实例
  */
-class SaveFileUseCase @Inject constructor(
-    private val repository: EditorFileRepository,
-) {
+class SaveFileUseCase @Inject constructor(private val repository: EditorFileRepository) {
     /**
      * 将内容写入指定 URI 的文件。
      * @param uri 目标文件 URI
@@ -28,9 +26,6 @@ class SaveFileUseCase @Inject constructor(
      * @param encoding 可选的文件编码，为 null 时使用 UTF-8
      * @return 成功返回 Unit，失败返回带异常的 Result
      */
-    suspend operator fun invoke(
-        uri: Uri,
-        content: String,
-        encoding: String? = null,
-    ): Result<Unit> = repository.writeFile(uri, content, encoding)
+    suspend operator fun invoke(uri: Uri, content: String, encoding: String? = null): Result<Unit> =
+        repository.writeFile(uri, content, encoding)
 }

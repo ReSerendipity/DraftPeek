@@ -63,12 +63,10 @@ object NativeSecurityChecker {
      * @return true 如果检测到 Frida 痕迹
      */
     @WorkerThread
-    fun isFridaDetectedNative(): Boolean {
-        return try {
-            nativeCheckFridaInMaps()
-        } catch (_: UnsatisfiedLinkError) {
-            false // 库未加载，降级处理
-        }
+    fun isFridaDetectedNative(): Boolean = try {
+        nativeCheckFridaInMaps()
+    } catch (_: UnsatisfiedLinkError) {
+        false // 库未加载，降级处理
     }
 
     /**
@@ -79,12 +77,10 @@ object NativeSecurityChecker {
      * @return true 如果进程正在被跟踪
      */
     @WorkerThread
-    fun isTracedNative(): Boolean {
-        return try {
-            nativeCheckTracerPid()
-        } catch (_: UnsatisfiedLinkError) {
-            false
-        }
+    fun isTracedNative(): Boolean = try {
+        nativeCheckTracerPid()
+    } catch (_: UnsatisfiedLinkError) {
+        false
     }
 
     /**
@@ -93,12 +89,10 @@ object NativeSecurityChecker {
      * @return true 如果检测到 Zygisk/Magisk 注入
      */
     @WorkerThread
-    fun isZygiskDetectedNative(): Boolean {
-        return try {
-            nativeCheckZygiskInMaps()
-        } catch (_: UnsatisfiedLinkError) {
-            false
-        }
+    fun isZygiskDetectedNative(): Boolean = try {
+        nativeCheckZygiskInMaps()
+    } catch (_: UnsatisfiedLinkError) {
+        false
     }
 
     /**
@@ -109,12 +103,10 @@ object NativeSecurityChecker {
      * @return 威胁掩码（0 = 全部正常，非零值表示检测到威胁）
      */
     @WorkerThread
-    fun performSecurityCheck(): Int {
-        return try {
-            nativePerformSecurityCheck()
-        } catch (_: UnsatisfiedLinkError) {
-            0 // 库未加载，返回 0（降级处理）
-        }
+    fun performSecurityCheck(): Int = try {
+        nativePerformSecurityCheck()
+    } catch (_: UnsatisfiedLinkError) {
+        0 // 库未加载，返回 0（降级处理）
     }
 
     // ===== JNI Native 方法声明 =====

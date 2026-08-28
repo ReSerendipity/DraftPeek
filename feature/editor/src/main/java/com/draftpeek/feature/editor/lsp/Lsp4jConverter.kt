@@ -17,9 +17,7 @@
 package com.draftpeek.feature.editor.lsp
 
 import org.eclipse.lsp4j.CompletionItem as Lsp4jCompletionItem
-import org.eclipse.lsp4j.CompletionItemKind
 import org.eclipse.lsp4j.Diagnostic as Lsp4jDiagnostic
-import org.eclipse.lsp4j.DiagnosticSeverity
 import org.eclipse.lsp4j.Hover as Lsp4jHover
 import org.eclipse.lsp4j.MarkupContent
 import org.eclipse.lsp4j.Position as Lsp4jPosition
@@ -39,65 +37,59 @@ object Lsp4jConverter {
     /**
      * 将 LSP4J [Lsp4jPosition] 转换为自研 [LspPosition]。
      */
-    fun toLspPosition(pos: Lsp4jPosition): LspPosition =
-        LspPosition(line = pos.line, column = pos.character)
+    fun toLspPosition(pos: Lsp4jPosition): LspPosition = LspPosition(line = pos.line, column = pos.character)
 
     /**
      * 将 LSP4J [Lsp4jRange] 转换为自研 [LspRange]。
      */
-    fun toLspRange(range: Lsp4jRange): LspRange =
-        LspRange(
-            start = toLspPosition(range.start),
-            end = toLspPosition(range.end),
-        )
+    fun toLspRange(range: Lsp4jRange): LspRange = LspRange(
+        start = toLspPosition(range.start),
+        end = toLspPosition(range.end)
+    )
 
     // ── Completion ────────────────────────────────────────────────────────
 
     /**
      * 将 LSP4J [Lsp4jCompletionItem] 转换为自研 [CompletionItem]。
      */
-    fun toCompletionItem(item: Lsp4jCompletionItem): CompletionItem =
-        CompletionItem(
-            label = item.label ?: "",
-            kind = item.kind?.value ?: 0,
-            detail = item.detail,
-            documentation = item.documentation?.let { doc ->
-                when (doc) {
-                    is String -> doc
-                    is MarkupContent -> doc.value
-                    else -> null
-                }
-            },
-            insertText = item.insertText,
-        )
+    fun toCompletionItem(item: Lsp4jCompletionItem): CompletionItem = CompletionItem(
+        label = item.label ?: "",
+        kind = item.kind?.value ?: 0,
+        detail = item.detail,
+        documentation = item.documentation?.let { doc ->
+            when (doc) {
+                is String -> doc
+                is MarkupContent -> doc.value
+                else -> null
+            }
+        },
+        insertText = item.insertText
+    )
 
     /**
      * 批量转换 LSP4J 补全项列表。
      */
-    fun toCompletionItems(items: List<Lsp4jCompletionItem>): List<CompletionItem> =
-        items.map { toCompletionItem(it) }
+    fun toCompletionItems(items: List<Lsp4jCompletionItem>): List<CompletionItem> = items.map { toCompletionItem(it) }
 
     // ── Diagnostics ───────────────────────────────────────────────────────
 
     /**
      * 将 LSP4J [Lsp4jDiagnostic] 转换为自研 [LspDiagnostic]。
      */
-    fun toLspDiagnostic(diag: Lsp4jDiagnostic): LspDiagnostic =
-        LspDiagnostic(
-            line = diag.range?.start?.line ?: 0,
-            column = diag.range?.start?.character ?: 0,
-            endLine = diag.range?.end?.line ?: 0,
-            endColumn = diag.range?.end?.character ?: 0,
-            severity = diag.severity?.value ?: LspDiagnostic.SEVERITY_ERROR,
-            message = diag.message ?: "",
-            source = diag.source,
-        )
+    fun toLspDiagnostic(diag: Lsp4jDiagnostic): LspDiagnostic = LspDiagnostic(
+        line = diag.range?.start?.line ?: 0,
+        column = diag.range?.start?.character ?: 0,
+        endLine = diag.range?.end?.line ?: 0,
+        endColumn = diag.range?.end?.character ?: 0,
+        severity = diag.severity?.value ?: LspDiagnostic.SEVERITY_ERROR,
+        message = diag.message ?: "",
+        source = diag.source
+    )
 
     /**
      * 批量转换 LSP4J 诊断列表。
      */
-    fun toLspDiagnostics(diags: List<Lsp4jDiagnostic>): List<LspDiagnostic> =
-        diags.map { toLspDiagnostic(it) }
+    fun toLspDiagnostics(diags: List<Lsp4jDiagnostic>): List<LspDiagnostic> = diags.map { toLspDiagnostic(it) }
 
     // ── Hover ─────────────────────────────────────────────────────────────
 
@@ -114,7 +106,7 @@ object Lsp4jConverter {
         } ?: ""
         return HoverResult(
             contents = contents,
-            range = hover.range?.let { toLspRange(it) },
+            range = hover.range?.let { toLspRange(it) }
         )
     }
 
@@ -123,32 +115,28 @@ object Lsp4jConverter {
     /**
      * 将 LSP4J [Lsp4jTextEdit] 转换为自研 [TextEdit]。
      */
-    fun toTextEdit(edit: Lsp4jTextEdit): TextEdit =
-        TextEdit(
-            range = toLspRange(edit.range),
-            newText = edit.newText ?: "",
-        )
+    fun toTextEdit(edit: Lsp4jTextEdit): TextEdit = TextEdit(
+        range = toLspRange(edit.range),
+        newText = edit.newText ?: ""
+    )
 
     /**
      * 批量转换 LSP4J 文本编辑列表。
      */
-    fun toTextEdits(edits: List<Lsp4jTextEdit>): List<TextEdit> =
-        edits.map { toTextEdit(it) }
+    fun toTextEdits(edits: List<Lsp4jTextEdit>): List<TextEdit> = edits.map { toTextEdit(it) }
 
     // ── Reverse conversions (for sending requests to LSP server) ──────────
 
     /**
      * 将自研 [LspPosition] 转换为 LSP4J [Lsp4jPosition]。
      */
-    fun fromLspPosition(pos: LspPosition): Lsp4jPosition =
-        Lsp4jPosition(pos.line, pos.column)
+    fun fromLspPosition(pos: LspPosition): Lsp4jPosition = Lsp4jPosition(pos.line, pos.column)
 
     /**
      * 将自研 [LspRange] 转换为 LSP4J [Lsp4jRange]。
      */
-    fun fromLspRange(range: LspRange): Lsp4jRange =
-        Lsp4jRange(
-            fromLspPosition(range.start),
-            fromLspPosition(range.end),
-        )
+    fun fromLspRange(range: LspRange): Lsp4jRange = Lsp4jRange(
+        fromLspPosition(range.start),
+        fromLspPosition(range.end)
+    )
 }

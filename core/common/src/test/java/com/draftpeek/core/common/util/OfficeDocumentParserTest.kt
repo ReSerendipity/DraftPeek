@@ -1,11 +1,11 @@
 package com.draftpeek.core.common.util
 
+import java.io.ByteArrayInputStream
 import org.junit.jupiter.api.Assertions.assertNotNull
 import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.DisplayName
 import org.junit.jupiter.api.Nested
 import org.junit.jupiter.api.Test
-import java.io.ByteArrayInputStream
 
 @DisplayName("OfficeDocumentParser")
 class OfficeDocumentParserTest {
@@ -41,7 +41,7 @@ class OfficeDocumentParserTest {
             val bytes = byteArrayOf(
                 0x11, 0x22, 0x33, 0x44, 0x55, 0x66, 0x77, 0x88.toByte(),
                 0x99.toByte(), 0xAA.toByte(), 0xBB.toByte(), 0xCC.toByte(),
-                0xDD.toByte(), 0xEE.toByte(), 0xFF.toByte(), 0x00,
+                0xDD.toByte(), 0xEE.toByte(), 0xFF.toByte(), 0x00
             )
             val html = OfficeDocumentParser.parseWord(ByteArrayInputStream(bytes))
 
@@ -55,8 +55,10 @@ class OfficeDocumentParserTest {
             // Try a few pathological inputs that previously could crash
             // the parser chain (e.g. truncated OOXML).
             val truncated = byteArrayOf(
-                0x50, 0x4B, // ZIP signature "PK"
-                0x03, 0x04, // local file header signature
+                0x50,
+                0x4B, // ZIP signature "PK"
+                0x03,
+                0x04 // local file header signature
             )
             val html = OfficeDocumentParser.parseWord(ByteArrayInputStream(truncated))
 

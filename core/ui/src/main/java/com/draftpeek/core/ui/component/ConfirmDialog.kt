@@ -52,11 +52,11 @@ fun ConfirmDialog(
     confirmLabel: String = "确认",
     isDestructive: Boolean = false,
     onConfirm: () -> Unit,
-    onDismiss: () -> Unit,
+    onDismiss: () -> Unit
 ) {
     Dialog(
         onDismissRequest = onDismiss,
-        properties = DialogProperties(usePlatformDefaultWidth = false),
+        properties = DialogProperties(usePlatformDefaultWidth = false)
     ) {
         Surface(
             shape = RoundedCornerShape(18.dp),
@@ -64,7 +64,7 @@ fun ConfirmDialog(
             contentColor = PrototypeTokens.fg,
             modifier = Modifier
                 .fillMaxWidth()
-                .padding(horizontal = 24.dp),
+                .padding(horizontal = 24.dp)
         ) {
             Column(
                 modifier = Modifier
@@ -73,13 +73,13 @@ fun ConfirmDialog(
                         start = 20.dp,
                         end = 20.dp,
                         top = 24.dp,
-                        bottom = 16.dp,
-                    ),
+                        bottom = 16.dp
+                    )
             ) {
                 Text(
                     text = title,
                     style = MaterialTheme.typography.titleMedium,
-                    color = PrototypeTokens.fg,
+                    color = PrototypeTokens.fg
                 )
 
                 Spacer(modifier = Modifier.height(16.dp))
@@ -87,7 +87,7 @@ fun ConfirmDialog(
                 Text(
                     text = message,
                     style = DialogBodyStyle,
-                    color = PrototypeTokens.fgSoft,
+                    color = PrototypeTokens.fgSoft
                 )
 
                 Spacer(modifier = Modifier.height(24.dp))
@@ -95,15 +95,15 @@ fun ConfirmDialog(
                 Row(
                     modifier = Modifier.fillMaxWidth(),
                     horizontalArrangement = Arrangement.spacedBy(8.dp, Alignment.End),
-                    verticalAlignment = Alignment.CenterVertically,
+                    verticalAlignment = Alignment.CenterVertically
                 ) {
                     BrandOutlinedButton(
                         text = "取消",
-                        onClick = onDismiss,
+                        onClick = onDismiss
                     )
                     BrandFilledButton(
                         text = confirmLabel,
-                        onClick = onConfirm,
+                        onClick = onConfirm
                     )
                 }
             }

@@ -41,11 +41,11 @@ class BookmarkDaoTest {
     private fun createBookmark(
         uri: String = "content://test/file.kt",
         fileName: String = "file.kt",
-        directoryUri: String = "content://test/",
+        directoryUri: String = "content://test/"
     ) = BookmarkEntity(
         uri = uri,
         fileName = fileName,
-        directoryUri = directoryUri,
+        directoryUri = directoryUri
     )
 
     @Test

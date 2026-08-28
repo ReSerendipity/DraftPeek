@@ -11,6 +11,11 @@
 package com.draftpeek.core.common.vcs
 
 import android.util.Log
+import java.io.IOException
+import java.net.URLEncoder
+import java.util.Date
+import java.util.concurrent.TimeUnit
+import kotlin.random.Random
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.withContext
@@ -20,47 +25,54 @@ import okhttp3.Request
 import okhttp3.Response
 import org.json.JSONArray
 import org.json.JSONObject
-import java.io.IOException
-import java.net.URLEncoder
-import java.util.Date
-import java.util.concurrent.TimeUnit
-import kotlin.random.Random
 
 private const val TAG = "GitHubApiClient"
 
 /** 最大重试次数 */
 private const val MAX_RETRIES = 3
+
 /** 初始重试延迟（毫秒） */
 private const val INITIAL_RETRY_DELAY_MS = 1000L
+
 /** 最大重试延迟（毫秒） */
 private const val MAX_RETRY_DELAY_MS = 8_000L
 
 /** 连接超时（秒） */
 private const val CONNECT_TIMEOUT_S = 15L
+
 /** 读取超时（秒） */
 private const val READ_TIMEOUT_S = 15L
+
 /** 调用总超时（秒） */
 private const val CALL_TIMEOUT_S = 30L
+
 /** Accept请求头名称 */
 private const val HEADER_ACCEPT = "Accept"
+
 /** GitHub API v3 Accept头值 */
 private const val ACCEPT_VALUE = "application/vnd.github.v3+json"
+
 /** 速率限制剩余次数响应头 */
 private const val HEADER_RATE_LIMIT_REMAINING = "X-RateLimit-Remaining"
+
 /** 速率限制重置时间响应头 */
 private const val HEADER_RATE_LIMIT_RESET = "X-RateLimit-Reset"
 
 /** GitHub API基础URL */
 private const val API_BASE = "https://api.github.com"
+
 /** 默认分支名称 */
 private const val DEFAULT_BRANCH = "main"
+
 /** 备用分支名称（传统默认） */
 private const val FALLBACK_BRANCH = "master"
 
 /** 网络错误用户提示消息 */
 private const val MSG_NETWORK_ERROR = "网络错误，请检查网络连接后重试"
+
 /** 解析错误用户提示消息 */
 private const val MSG_PARSE_ERROR = "无法解析仓库数据，请稍后重试"
+
 /** 空响应用户提示消息 */
 private const val MSG_EMPTY_BODY = "服务器返回空响应"
 
@@ -70,10 +82,7 @@ private const val MSG_EMPTY_BODY = "服务器返回空响应"
  * @property path 文件相对路径
  * @property type 条目类型（"blob"表示文件，"tree"表示目录）
  */
-data class GitHubFileEntry(
-    val path: String,
-    val type: String,
-)
+data class GitHubFileEntry(val path: String, val type: String)
 
 /**
  * 获取GitHub仓库文件树结果的密封类。
@@ -118,9 +127,7 @@ sealed class GitHubTreeResult {
  *
  * @property client 用于HTTP请求的OkHttpClient实例
  */
-class GitHubApiClient constructor(
-    private val client: OkHttpClient,
-) {
+class GitHubApiClient constructor(private val client: OkHttpClient) {
 
     /**
      * 解析GitHub URL以提取所有者和仓库名称。
@@ -187,8 +194,11 @@ class GitHubApiClient constructor(
                         is FetchOutcome.Done -> return@withContext outcome.result
                         is FetchOutcome.Retry -> {
                             lastException = outcome.cause
-                            Log.w(TAG, "GitHub API transient failure (attempt $attempt/$MAX_RETRIES)" +
-                                (outcome.detail?.let { ": $it" } ?: ""))
+                            Log.w(
+                                TAG,
+                                "GitHub API transient failure (attempt $attempt/$MAX_RETRIES)" +
+                                    (outcome.detail?.let { ": $it" } ?: "")
+                            )
                         }
                     }
                 } catch (e: IOException) {
@@ -273,26 +283,24 @@ class GitHubApiClient constructor(
      * @param body JSON响应体字符串
      * @return 解析后的文件树结果
      */
-    internal fun parseTreeJson(body: String): GitHubTreeResult {
-        return try {
-            val json = JSONObject(body)
-            val treeArray: JSONArray = json.optJSONArray("tree") ?: JSONArray()
-            val isTruncated = json.optBoolean("truncated", false)
+    internal fun parseTreeJson(body: String): GitHubTreeResult = try {
+        val json = JSONObject(body)
+        val treeArray: JSONArray = json.optJSONArray("tree") ?: JSONArray()
+        val isTruncated = json.optBoolean("truncated", false)
 
-            val files = mutableListOf<GitHubFileEntry>()
-            for (i in 0 until treeArray.length()) {
-                val entry = treeArray.getJSONObject(i)
-                val path = entry.getString("path")
-                val type = entry.getString("type")
-                if (type == "blob" && !path.startsWith(".git")) {
-                    files.add(GitHubFileEntry(path = path, type = type))
-                }
+        val files = mutableListOf<GitHubFileEntry>()
+        for (i in 0 until treeArray.length()) {
+            val entry = treeArray.getJSONObject(i)
+            val path = entry.getString("path")
+            val type = entry.getString("type")
+            if (type == "blob" && !path.startsWith(".git")) {
+                files.add(GitHubFileEntry(path = path, type = type))
             }
-            GitHubTreeResult.Success(files, truncated = isTruncated)
-        } catch (e: Exception) {
-            Log.w(TAG, "Failed to parse GitHub tree JSON", e)
-            GitHubTreeResult.Error(MSG_PARSE_ERROR)
         }
+        GitHubTreeResult.Success(files, truncated = isTruncated)
+    } catch (e: Exception) {
+        Log.w(TAG, "Failed to parse GitHub tree JSON", e)
+        GitHubTreeResult.Error(MSG_PARSE_ERROR)
     }
 
     /**
@@ -345,7 +353,7 @@ class GitHubApiClient constructor(
         }
         return RateLimitInfo(
             exhausted = true,
-            message = "GitHub API rate limit exceeded$resetMessage. Try again later or use a GitHub token.",
+            message = "GitHub API rate limit exceeded$resetMessage. Try again later or use a GitHub token."
         )
     }
 
@@ -356,15 +364,14 @@ class GitHubApiClient constructor(
      * @param code HTTP状态码
      * @return 对应的错误结果
      */
-    private fun mapHttpError(code: Int): GitHubTreeResult =
-        GitHubTreeResult.Error(
-            when (code) {
-                404 -> "仓库或分支不存在，请检查链接是否正确"
-                403 -> "访问被拒绝，可能需要授权"
-                in 400..499 -> "请求无效 (HTTP $code)"
-                else -> "GitHub 服务器错误 (HTTP $code)"
-            },
-        )
+    private fun mapHttpError(code: Int): GitHubTreeResult = GitHubTreeResult.Error(
+        when (code) {
+            404 -> "仓库或分支不存在，请检查链接是否正确"
+            403 -> "访问被拒绝，可能需要授权"
+            in 400..499 -> "请求无效 (HTTP $code)"
+            else -> "GitHub 服务器错误 (HTTP $code)"
+        }
+    )
 
     /**
      * 速率限制信息内部数据类。

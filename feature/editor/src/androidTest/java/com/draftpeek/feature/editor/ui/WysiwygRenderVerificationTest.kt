@@ -1,6 +1,5 @@
 package com.draftpeek.feature.editor.ui
 
-import androidx.compose.ui.test.assertIsDisplayed
 import androidx.compose.ui.test.junit4.createComposeRule
 import androidx.compose.ui.test.onNodeWithTag
 import androidx.compose.ui.test.onNodeWithText
@@ -63,7 +62,7 @@ class WysiwygRenderVerificationTest {
                 MarkdownPreview(
                     markdownContent = basicMarkdown,
                     viewMode = MarkdownViewMode.EDIT,
-                    isDarkTheme = false,
+                    isDarkTheme = false
                 )
             }
         }
@@ -80,7 +79,7 @@ class WysiwygRenderVerificationTest {
                 MarkdownPreview(
                     markdownContent = basicMarkdown,
                     viewMode = MarkdownViewMode.PREVIEW,
-                    isDarkTheme = false,
+                    isDarkTheme = false
                 )
             }
         }
@@ -95,7 +94,7 @@ class WysiwygRenderVerificationTest {
                 MarkdownPreview(
                     markdownContent = basicMarkdown,
                     viewMode = MarkdownViewMode.SPLIT,
-                    isDarkTheme = false,
+                    isDarkTheme = false
                 )
             }
         }
@@ -111,7 +110,7 @@ class WysiwygRenderVerificationTest {
                 MarkdownPreview(
                     markdownContent = basicMarkdown,
                     viewMode = MarkdownViewMode.WYSIWYG,
-                    isDarkTheme = false,
+                    isDarkTheme = false
                 )
             }
         }
@@ -129,7 +128,7 @@ class WysiwygRenderVerificationTest {
             DraftPeekTheme {
                 MarkdownRichEditor(
                     markdownContent = largeContent,
-                    isDarkTheme = false,
+                    isDarkTheme = false
                 )
             }
         }
@@ -145,7 +144,7 @@ class WysiwygRenderVerificationTest {
                 MarkdownPreview(
                     markdownContent = basicMarkdown,
                     viewMode = MarkdownViewMode.EDIT,
-                    isDarkTheme = true,
+                    isDarkTheme = true
                 )
             }
         }
@@ -160,7 +159,7 @@ class WysiwygRenderVerificationTest {
                 MarkdownPreview(
                     markdownContent = "",
                     viewMode = MarkdownViewMode.EDIT,
-                    isDarkTheme = false,
+                    isDarkTheme = false
                 )
             }
         }
@@ -188,7 +187,7 @@ class WysiwygRenderVerificationTest {
                 MarkdownPreview(
                     markdownContent = specialContent,
                     viewMode = MarkdownViewMode.EDIT,
-                    isDarkTheme = false,
+                    isDarkTheme = false
                 )
             }
         }

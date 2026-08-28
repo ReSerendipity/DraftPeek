@@ -37,7 +37,7 @@ import kotlinx.coroutines.launch
  */
 class DeferredCommandQueue(
     private val scope: CoroutineScope = CoroutineScope(SupervisorJob() + Dispatchers.Main),
-    private val debounceMs: Long = DEFAULT_DEBOUNCE_MS,
+    private val debounceMs: Long = DEFAULT_DEBOUNCE_MS
 ) {
     private val pendingCommands = mutableListOf<() -> Unit>()
     private val _pendingCount = MutableStateFlow(0)
@@ -47,8 +47,10 @@ class DeferredCommandQueue(
 
     companion object {
         private const val TAG = "DeferredCommandQueue"
+
         /** Default debounce window in milliseconds. */
         const val DEFAULT_DEBOUNCE_MS = 50L
+
         /** Maximum queued commands before forcing an immediate flush. */
         const val MAX_QUEUED_COMMANDS = 256
     }

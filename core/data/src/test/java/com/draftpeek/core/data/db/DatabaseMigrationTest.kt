@@ -81,10 +81,14 @@ class DatabaseMigrationTest {
             while (it.moveToNext()) {
                 indexNames.add(it.getString(0))
             }
-            assertTrue("Should have timestamp index",
-                indexNames.any { name -> name.contains("timestampEpochMs") })
-            assertTrue("Should have eventType index",
-                indexNames.any { name -> name.contains("eventType") })
+            assertTrue(
+                "Should have timestamp index",
+                indexNames.any { name -> name.contains("timestampEpochMs") }
+            )
+            assertTrue(
+                "Should have eventType index",
+                indexNames.any { name -> name.contains("eventType") }
+            )
         }
 
         // 验证可以插入数据
@@ -125,12 +129,18 @@ class DatabaseMigrationTest {
             while (it.moveToNext()) {
                 indexNames.add(it.getString(0))
             }
-            assertTrue("Should have index_links_sourceUri_targetTitle",
-                indexNames.any { name -> name.contains("sourceUri") && name.contains("targetTitle") })
-            assertTrue("Should have index_links_targetTitle",
-                indexNames.any { name -> name.contains("targetTitle") && !name.contains("sourceUri") })
-            assertTrue("Should have index_links_sourceUri",
-                indexNames.any { name -> name.contains("sourceUri") && !name.contains("targetTitle") })
+            assertTrue(
+                "Should have index_links_sourceUri_targetTitle",
+                indexNames.any { name -> name.contains("sourceUri") && name.contains("targetTitle") }
+            )
+            assertTrue(
+                "Should have index_links_targetTitle",
+                indexNames.any { name -> name.contains("targetTitle") && !name.contains("sourceUri") }
+            )
+            assertTrue(
+                "Should have index_links_sourceUri",
+                indexNames.any { name -> name.contains("sourceUri") && !name.contains("targetTitle") }
+            )
         }
 
         // 验证可以插入数据
@@ -170,10 +180,14 @@ class DatabaseMigrationTest {
             while (it.moveToNext()) {
                 indexNames.add(it.getString(0))
             }
-            assertTrue("Should have index_bookmarks_uri",
-                indexNames.any { name -> name.contains("uri") && name.contains("bookmarks") })
-            assertTrue("Should have index_bookmarks_directoryUri",
-                indexNames.any { name -> name.contains("directoryUri") })
+            assertTrue(
+                "Should have index_bookmarks_uri",
+                indexNames.any { name -> name.contains("uri") && name.contains("bookmarks") }
+            )
+            assertTrue(
+                "Should have index_bookmarks_directoryUri",
+                indexNames.any { name -> name.contains("directoryUri") }
+            )
         }
 
         // 验证可以插入数据
@@ -236,13 +250,22 @@ class DatabaseMigrationTest {
         )
 
         val allBookmarks = db.query("SELECT count(*) FROM bookmarks")
-        allBookmarks.use { assertTrue(it.moveToFirst()); assertEquals(1, it.getInt(0)) }
+        allBookmarks.use {
+            assertTrue(it.moveToFirst())
+            assertEquals(1, it.getInt(0))
+        }
 
         val allSecEvents = db.query("SELECT count(*) FROM security_events")
-        allSecEvents.use { assertTrue(it.moveToFirst()); assertEquals(1, it.getInt(0)) }
+        allSecEvents.use {
+            assertTrue(it.moveToFirst())
+            assertEquals(1, it.getInt(0))
+        }
 
         val allLinks = db.query("SELECT count(*) FROM links")
-        allLinks.use { assertTrue(it.moveToFirst()); assertEquals(1, it.getInt(0)) }
+        allLinks.use {
+            assertTrue(it.moveToFirst())
+            assertEquals(1, it.getInt(0))
+        }
 
         db.close()
     }
@@ -275,7 +298,7 @@ class DatabaseMigrationTest {
             BookmarkEntity(
                 uri = "content://test/migration.kt",
                 fileName = "migration.kt",
-                directoryUri = "content://test/",
+                directoryUri = "content://test/"
             )
         )
 
@@ -300,7 +323,7 @@ class DatabaseMigrationTest {
                 responseLevel = "WARNING",
                 timestampEpochMs = System.currentTimeMillis(),
                 anonymizedDeviceId = "test-device",
-                appVersionCode = 29,
+                appVersionCode = 29
             )
         )
 
@@ -348,7 +371,7 @@ class DatabaseMigrationTest {
                 diffCount = 2,
                 usageDurationMinutes = 60,
                 charWriteCount = 1000,
-                fileCreateCount = 0,
+                fileCreateCount = 0
             )
         )
 
@@ -379,7 +402,7 @@ class DatabaseMigrationTest {
                 language = "kotlin",
                 category = "Kotlin",
                 createdAt = System.currentTimeMillis(),
-                updatedAt = System.currentTimeMillis(),
+                updatedAt = System.currentTimeMillis()
             )
         )
         assertTrue(snippetId > 0)
@@ -397,7 +420,7 @@ class DatabaseMigrationTest {
                 responseLevel = "NONE",
                 timestampEpochMs = System.currentTimeMillis(),
                 anonymizedDeviceId = "device",
-                appVersionCode = 29,
+                appVersionCode = 29
             )
         )
         assertEquals(1, securityDao.getEventCount())

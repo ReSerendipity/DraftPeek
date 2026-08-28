@@ -2,16 +2,25 @@ package com.draftpeek.feature.editor.sora
 
 import android.content.Context
 import android.graphics.Typeface
+import android.os.Handler
+import android.os.Looper
 import android.util.Log
 import androidx.annotation.UiThread
-import io.github.rosemoe.sora.widget.CodeEditor
-import io.github.rosemoe.sora.widget.SymbolPairMatch
+import com.draftpeek.feature.editor.data.CacheManager
+import com.draftpeek.feature.editor.diagnostics.DiagnosticItem
+import com.draftpeek.feature.editor.diagnostics.DiagnosticNavigationState
+import com.draftpeek.feature.editor.diagnostics.moveToNext
+import com.draftpeek.feature.editor.diagnostics.moveToPrevious
+import com.draftpeek.feature.editor.ui.MarkdownFormatAction
 import io.github.rosemoe.sora.event.ContentChangeEvent
 import io.github.rosemoe.sora.event.ScrollEvent
 import io.github.rosemoe.sora.event.SelectionChangeEvent
+import io.github.rosemoe.sora.lang.diagnostic.DiagnosticDetail
+import io.github.rosemoe.sora.lang.diagnostic.DiagnosticRegion
+import io.github.rosemoe.sora.lang.diagnostic.DiagnosticsContainer
 import io.github.rosemoe.sora.text.Content
-import android.os.Handler
-import android.os.Looper
+import io.github.rosemoe.sora.widget.CodeEditor
+import io.github.rosemoe.sora.widget.SymbolPairMatch
 import kotlinx.coroutines.CoroutineExceptionHandler
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
@@ -22,15 +31,6 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.launch
-import com.draftpeek.feature.editor.ui.MarkdownFormatAction
-import com.draftpeek.feature.editor.diagnostics.DiagnosticItem
-import com.draftpeek.feature.editor.diagnostics.DiagnosticNavigationState
-import com.draftpeek.feature.editor.diagnostics.moveToNext
-import com.draftpeek.feature.editor.diagnostics.moveToPrevious
-import com.draftpeek.feature.editor.data.CacheManager
-import io.github.rosemoe.sora.lang.diagnostic.DiagnosticDetail
-import io.github.rosemoe.sora.lang.diagnostic.DiagnosticRegion
-import io.github.rosemoe.sora.lang.diagnostic.DiagnosticsContainer
 
 /**
  * Facade for the sora-editor ([CodeEditor]) that manages editor lifecycle, content loading,
@@ -159,7 +159,7 @@ class SoraEditorWrapper(context: Context) {
     private val searchManager: SoraSearchManager by lazy {
         SoraSearchManager(
             editorProvider = { if (_released) null else _editor },
-            isReleased = { _released },
+            isReleased = { _released }
         )
     }
 
@@ -184,7 +184,7 @@ class SoraEditorWrapper(context: Context) {
                 appContext = appContext,
                 editorProvider = { if (_released) null else _editor },
                 isReleased = { _released },
-                initScope = initScope,
+                initScope = initScope
             )
 
             try {
@@ -213,7 +213,8 @@ class SoraEditorWrapper(context: Context) {
                         props.highlightMatchingDelimiters = true
                         props.deleteEmptyLineFast = true
                         props.deleteMultiSpaces = -1 // follow tab size
-                        props.cursorLineBgOverlapBehavior = io.github.rosemoe.sora.widget.DirectAccessProps.CURSOR_LINE_BG_OVERLAP_MIXED
+                        props.cursorLineBgOverlapBehavior =
+                            io.github.rosemoe.sora.widget.DirectAccessProps.CURSOR_LINE_BG_OVERLAP_MIXED
                         // Hard-wrap guide at column 120 (matches long-line diagnostic threshold).
                         props.hardwrapColumn = 120
                         // Better scroll behavior: single-axis fling/drag prevents diagonal scrolling
@@ -224,7 +225,8 @@ class SoraEditorWrapper(context: Context) {
                         props.mouseWheelScrollFactor = 1.2f
                         props.fastScrollSensitivity = 5f
                         // Line number click places cursor at line start
-                        props.actionWhenLineNumberClicked = io.github.rosemoe.sora.widget.DirectAccessProps.LN_ACTION_PLACE_SELECTION_HOME
+                        props.actionWhenLineNumberClicked =
+                            io.github.rosemoe.sora.widget.DirectAccessProps.LN_ACTION_PLACE_SELECTION_HOME
                     } catch (e: Exception) {
                         Log.w(TAG, "Failed to set default editor props", e)
                     }
@@ -246,11 +248,17 @@ class SoraEditorWrapper(context: Context) {
                                 else -> "UNKNOWN(${event.action})"
                             }
                             if (newLength == 0) {
-                                Log.w(TAG, "ContentChangeEvent: action=$action, content became EMPTY! (changedLength=${event.changedText.length})")
+                                Log.w(
+                                    TAG,
+                                    "ContentChangeEvent: action=$action, content became EMPTY! (changedLength=${event.changedText.length})"
+                                )
                             } else {
                                 val elapsed = System.currentTimeMillis() - _lastLoadStartMs
                                 if (elapsed < 3000) {
-                                    Log.d(TAG, "ContentChangeEvent: action=$action, newLength=$newLength (elapsed=${elapsed}ms after load)")
+                                    Log.d(
+                                        TAG,
+                                        "ContentChangeEvent: action=$action, newLength=$newLength (elapsed=${elapsed}ms after load)"
+                                    )
                                 }
                             }
                         } catch (_: Throwable) {}
@@ -336,7 +344,10 @@ class SoraEditorWrapper(context: Context) {
 
         val fileSizeBytes = content.length.toLong()
         val effectiveLanguage = if (fileSizeBytes > LARGE_FILE_THRESHOLD_BYTES) {
-            Log.w(TAG, "Large file detected (${fileSizeBytes / 1024}KB > ${LARGE_FILE_THRESHOLD_BYTES / 1024}KB), disabling syntax highlighting")
+            Log.w(
+                TAG,
+                "Large file detected (${fileSizeBytes / 1024}KB > ${LARGE_FILE_THRESHOLD_BYTES / 1024}KB), disabling syntax highlighting"
+            )
             null
         } else {
             language
@@ -345,30 +356,34 @@ class SoraEditorWrapper(context: Context) {
         val expectedContent = content
         _lastLoadStartMs = System.currentTimeMillis()
 
-        fun verifyAndRestoreContent(phase: String): Boolean {
-            return try {
-                val currentText = editor.text?.toString()
-                val currentLen = currentText?.length ?: -1
-                val expectedLen = expectedContent.length
-                if (currentText == null || (currentText.isEmpty() && expectedContent.isNotEmpty())) {
-                    Log.w(TAG, "[$phase] Content EMPTY! (currentLength=$currentLen, expectedLength=$expectedLen), restoring...")
-                    editor.setText(expectedContent)
-                    postLayoutAndInvalidate()
-                    false
-                } else if (currentLen != expectedLen) {
-                    Log.w(TAG, "[$phase] Content length mismatch: current=$currentLen, expected=$expectedLen (not restoring)")
-                    true
-                } else {
-                    val elapsed = System.currentTimeMillis() - _lastLoadStartMs
-                    if (elapsed < 3000) {
-                        Log.d(TAG, "[$phase] Content OK: length=$currentLen (elapsed=${elapsed}ms)")
-                    }
-                    true
-                }
-            } catch (t: Throwable) {
-                Log.e(TAG, "[$phase] Failed to verify content integrity", t)
+        fun verifyAndRestoreContent(phase: String): Boolean = try {
+            val currentText = editor.text?.toString()
+            val currentLen = currentText?.length ?: -1
+            val expectedLen = expectedContent.length
+            if (currentText == null || (currentText.isEmpty() && expectedContent.isNotEmpty())) {
+                Log.w(
+                    TAG,
+                    "[$phase] Content EMPTY! (currentLength=$currentLen, expectedLength=$expectedLen), restoring..."
+                )
+                editor.setText(expectedContent)
+                postLayoutAndInvalidate()
                 false
+            } else if (currentLen != expectedLen) {
+                Log.w(
+                    TAG,
+                    "[$phase] Content length mismatch: current=$currentLen, expected=$expectedLen (not restoring)"
+                )
+                true
+            } else {
+                val elapsed = System.currentTimeMillis() - _lastLoadStartMs
+                if (elapsed < 3000) {
+                    Log.d(TAG, "[$phase] Content OK: length=$currentLen (elapsed=${elapsed}ms)")
+                }
+                true
             }
+        } catch (t: Throwable) {
+            Log.e(TAG, "[$phase] Failed to verify content integrity", t)
+            false
         }
 
         fun scheduleContentGuard(delayMs: Long) {
@@ -426,10 +441,10 @@ class SoraEditorWrapper(context: Context) {
             initScope.launch {
                 themeManager.awaitInitAndApplyLanguage(
                     effectiveLanguage = effectiveLanguage,
-onReady = {
-postLayoutAndInvalidate()
-try {
-themeManager.applyColorScheme()
+                    onReady = {
+                        postLayoutAndInvalidate()
+                        try {
+                            themeManager.applyColorScheme()
                         } catch (t: Throwable) {
                             Log.e(TAG, "applyColorScheme failed after TextMate init", t)
                         }
@@ -447,19 +462,21 @@ themeManager.applyColorScheme()
                         scheduleContentGuard(200)
                         scheduleContentGuard(500)
                         restoreCursorToLine(restoreLine)
-                    },
+                    }
                 )
             }
         } else {
             try {
-themeManager.setLanguageForContent(effectiveLanguage)
-postLayoutAndInvalidate()
-} catch (t: Throwable) {
-Log.w(TAG, "setLanguageForContent failed", t)
-try { editor.setEditorLanguage(null) } catch (_: Throwable) {}
-}
-try {
-themeManager.applyColorScheme()
+                themeManager.setLanguageForContent(effectiveLanguage)
+                postLayoutAndInvalidate()
+            } catch (t: Throwable) {
+                Log.w(TAG, "setLanguageForContent failed", t)
+                try {
+                    editor.setEditorLanguage(null)
+                } catch (_: Throwable) {}
+            }
+            try {
+                themeManager.applyColorScheme()
             } catch (t: Throwable) {
                 Log.e(TAG, "applyColorScheme failed after setLanguage (2nd call)", t)
             }
@@ -698,27 +715,36 @@ themeManager.applyColorScheme()
                 overridePairs.putPair('{', SymbolPairMatch.SymbolPair("{", "}"))
                 overridePairs.putPair('(', SymbolPairMatch.SymbolPair("(", ")"))
                 overridePairs.putPair('[', SymbolPairMatch.SymbolPair("[", "]"))
-                overridePairs.putPair('"', SymbolPairMatch.SymbolPair("\"", "\"",
-                    object : SymbolPairMatch.SymbolPair.SymbolPairEx {
-                        override fun shouldDoAutoSurround(content: Content): Boolean {
-                            return content.cursor.isSelected
+                overridePairs.putPair(
+                    '"',
+                    SymbolPairMatch.SymbolPair(
+                        "\"",
+                        "\"",
+                        object : SymbolPairMatch.SymbolPair.SymbolPairEx {
+                            override fun shouldDoAutoSurround(content: Content): Boolean = content.cursor.isSelected
                         }
-                    }
-                ))
-                overridePairs.putPair('\'', SymbolPairMatch.SymbolPair("'", "'",
-                    object : SymbolPairMatch.SymbolPair.SymbolPairEx {
-                        override fun shouldDoAutoSurround(content: Content): Boolean {
-                            return content.cursor.isSelected
+                    )
+                )
+                overridePairs.putPair(
+                    '\'',
+                    SymbolPairMatch.SymbolPair(
+                        "'",
+                        "'",
+                        object : SymbolPairMatch.SymbolPair.SymbolPairEx {
+                            override fun shouldDoAutoSurround(content: Content): Boolean = content.cursor.isSelected
                         }
-                    }
-                ))
-                overridePairs.putPair('`', SymbolPairMatch.SymbolPair("`", "`",
-                    object : SymbolPairMatch.SymbolPair.SymbolPairEx {
-                        override fun shouldDoAutoSurround(content: Content): Boolean {
-                            return content.cursor.isSelected
+                    )
+                )
+                overridePairs.putPair(
+                    '`',
+                    SymbolPairMatch.SymbolPair(
+                        "`",
+                        "`",
+                        object : SymbolPairMatch.SymbolPair.SymbolPairEx {
+                            override fun shouldDoAutoSurround(content: Content): Boolean = content.cursor.isSelected
                         }
-                    }
-                ))
+                    )
+                )
                 editor.props.symbolPairAutoCompletion = true
                 Log.d(TAG, "Auto pair completion enabled")
             } else {
@@ -1060,9 +1086,8 @@ themeManager.applyColorScheme()
      * @return true 表示搜索成功启动
      */
     @UiThread
-    fun search(query: String, regex: Boolean = false, matchCase: Boolean = false, wholeWord: Boolean = false): Boolean {
-        return searchManager.search(query, regex, matchCase, wholeWord)
-    }
+    fun search(query: String, regex: Boolean = false, matchCase: Boolean = false, wholeWord: Boolean = false): Boolean =
+        searchManager.search(query, regex, matchCase, wholeWord)
 
     /**
      * 替换当前搜索匹配项。必须在主线程调用。
@@ -1076,7 +1101,13 @@ themeManager.applyColorScheme()
      * 替换所有搜索匹配项。必须在主线程调用。
      */
     @UiThread
-    fun replaceAll(query: String, replacement: String, regex: Boolean = false, matchCase: Boolean = false, wholeWord: Boolean = false) {
+    fun replaceAll(
+        query: String,
+        replacement: String,
+        regex: Boolean = false,
+        matchCase: Boolean = false,
+        wholeWord: Boolean = false
+    ) {
         searchManager.replaceAll(query, replacement, regex, matchCase, wholeWord)
     }
 
@@ -1091,18 +1122,14 @@ themeManager.applyColorScheme()
      * @return true if successfully moved to next match, false if no matches or at end
      */
     @UiThread
-    fun gotoNext(): Boolean {
-        return searchManager.gotoNext()
-    }
+    fun gotoNext(): Boolean = searchManager.gotoNext()
 
     /**
      * Jump to the previous search match.
      * @return true if successfully moved to previous match, false if no matches or at start
      */
     @UiThread
-    fun gotoPrevious(): Boolean {
-        return searchManager.gotoPrevious()
-    }
+    fun gotoPrevious(): Boolean = searchManager.gotoPrevious()
 
     // ------------------------------------------------------------------
     // Word highlight — delegates to [SoraSearchManager]
@@ -1139,9 +1166,7 @@ themeManager.applyColorScheme()
      * Must be called on the UI thread.
      */
     @UiThread
-    fun getWordAtCursor(): String? {
-        return searchManager.getWordAtCursor()
-    }
+    fun getWordAtCursor(): String? = searchManager.getWordAtCursor()
 
     /** 全选编辑器内容。必须在主线程调用。 */
     @UiThread
@@ -1158,13 +1183,11 @@ themeManager.applyColorScheme()
      * Must be called on the UI thread.
      */
     @UiThread
-    fun getScrollPosition(): Pair<Int, Int> {
-        return try {
-            (editor.scrollX to editor.scrollY)
-        } catch (e: Exception) {
-            Log.w(TAG, "getScrollPosition failed", e)
-            (0 to 0)
-        }
+    fun getScrollPosition(): Pair<Int, Int> = try {
+        (editor.scrollX to editor.scrollY)
+    } catch (e: Exception) {
+        Log.w(TAG, "getScrollPosition failed", e)
+        (0 to 0)
     }
 
     /**
@@ -1198,13 +1221,11 @@ themeManager.applyColorScheme()
 
     /** 获取编辑器总行数。必须在主线程调用。 */
     @UiThread
-    fun getTotalLines(): Int {
-        return try {
-            editor.text?.lineCount ?: 1
-        } catch (e: Exception) {
-            Log.w(TAG, "getTotalLines failed", e)
-            1
-        }
+    fun getTotalLines(): Int = try {
+        editor.text?.lineCount ?: 1
+    } catch (e: Exception) {
+        Log.w(TAG, "getTotalLines failed", e)
+        1
     }
 
     /**
@@ -1377,13 +1398,17 @@ themeManager.applyColorScheme()
 
     companion object {
         private const val TAG = "SoraEditorWrapper"
+
         /** P0-6: Size-based undo stack limit (512 KB). Approximate tracking via content length. */
         private const val UNDO_SIZE_LIMIT_BYTES = 512L * 1024 // 512 KB
+
         /** P0-6: Approximate overhead factor per undo operation (content + metadata). */
         private const val UNDO_OVERHEAD_FACTOR = 1.5
+
         /** P0-6: Maximum number of undo operations (fallback cap). */
         private const val UNDO_MAX_OPERATIONS = 1000
         private const val CONTENT_CHANGE_DEBOUNCE_MS = 150L
+
         /** File size threshold for disabling syntax highlighting (1 MB). */
         private const val LARGE_FILE_THRESHOLD_BYTES = 1_000_000L
     }

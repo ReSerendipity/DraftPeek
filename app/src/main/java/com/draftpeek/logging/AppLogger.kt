@@ -71,8 +71,7 @@ object AppLogger {
         if (::errorLogFile.isInitialized) errorLogFile.parentFile?.resolve("draftpeek.log") else null
 
     /** 当前错误日志文件。 */
-    fun currentErrorLogFile(): File? =
-        if (::errorLogFile.isInitialized) errorLogFile else null
+    fun currentErrorLogFile(): File? = if (::errorLogFile.isInitialized) errorLogFile else null
 
     /**
      * 生产环境文件树：仅记录 INFO 及以上级别到文件，避免敏感调试日志落盘。

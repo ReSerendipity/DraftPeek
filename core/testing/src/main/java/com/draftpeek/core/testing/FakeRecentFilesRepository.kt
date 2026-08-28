@@ -26,7 +26,8 @@ class FakeRecentFilesRepository : RecentFilesRepository {
 
     override suspend fun addRecentFile(uri: String, fileName: String, language: String?, fileSize: Long) {
         val now = System.currentTimeMillis()
-        val newFile = RecentFile(uri = uri, fileName = fileName, language = language, lastOpenedAt = now, fileSize = fileSize)
+        val newFile =
+            RecentFile(uri = uri, fileName = fileName, language = language, lastOpenedAt = now, fileSize = fileSize)
         _recentFiles.value = (_recentFiles.value.filterNot { it.uri == uri } + newFile)
             .sortedByDescending { it.lastOpenedAt }
     }
@@ -54,10 +55,15 @@ class FakeRecentFilesRepository : RecentFilesRepository {
 
     override suspend fun saveReadingPosition(uri: String, line: Int, column: Int, scrollX: Int, scrollY: Int) {
         _recentFiles.value = _recentFiles.value.map { file ->
-            if (file.uri == uri) file.copy(cursorLine = line, cursorColumn = column, scrollX = scrollX, scrollY = scrollY) else file
+            if (file.uri ==
+                uri
+            ) {
+                file.copy(cursorLine = line, cursorColumn = column, scrollX = scrollX, scrollY = scrollY)
+            } else {
+                file
+            }
         }
     }
 
-    override suspend fun getReadingPosition(uri: String): RecentFile? =
-        _recentFiles.value.find { it.uri == uri }
+    override suspend fun getReadingPosition(uri: String): RecentFile? = _recentFiles.value.find { it.uri == uri }
 }

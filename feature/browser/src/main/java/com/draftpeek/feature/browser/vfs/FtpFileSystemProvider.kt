@@ -4,6 +4,7 @@ import android.net.Uri
 import android.util.Log
 import com.draftpeek.feature.browser.model.FileContent
 import com.draftpeek.feature.browser.model.FileItem
+import java.io.ByteArrayOutputStream
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.flow
@@ -12,7 +13,6 @@ import kotlinx.coroutines.withContext
 import org.apache.commons.net.ftp.FTP
 import org.apache.commons.net.ftp.FTPClient
 import org.apache.commons.net.ftp.FTPReply
-import java.io.ByteArrayOutputStream
 
 /**
  * FTP/FTPS 文件系统提供者，使用 Apache Commons Net 实现
@@ -38,9 +38,7 @@ import java.io.ByteArrayOutputStream
  * - 文件未找到映射为 [FileSystemResult.ErrorCode.NOT_FOUND]
  * - 权限问题映射为 [FileSystemResult.ErrorCode.PERMISSION_DENIED]
  */
-class FtpFileSystemProvider(
-    private val config: RemoteFileSystemConfig,
-) : FileSystemProvider {
+class FtpFileSystemProvider(private val config: RemoteFileSystemConfig) : FileSystemProvider {
 
     override val scheme: String = "ftp"
     override val displayName: String = "FTP — ${config.host}"
@@ -121,8 +119,7 @@ class FtpFileSystemProvider(
         ftpClient = null
     }
 
-    override fun supportsUri(uri: String): Boolean =
-        uri.startsWith("ftp://") || uri.startsWith("ftps://")
+    override fun supportsUri(uri: String): Boolean = uri.startsWith("ftp://") || uri.startsWith("ftps://")
 
     override fun listFiles(uri: String): Flow<List<FileItem>> = flow {
         val ftp = ensureConnected()
@@ -138,130 +135,125 @@ class FtpFileSystemProvider(
                 uri = Uri.parse("ftp://${config.host}$remotePath/$name"),
                 isDirectory = ftpFile.isDirectory,
                 size = ftpFile.size,
-                lastModified = ftpFile.timestamp.timeInMillis,
+                lastModified = ftpFile.timestamp.timeInMillis
             )
         }.sortedWith(compareBy({ !it.isDirectory }, { it.name.lowercase() }))
 
         emit(files)
     }.flowOn(Dispatchers.IO)
 
-    override suspend fun readFile(uri: String): FileSystemResult<FileContent> =
-        withContext(Dispatchers.IO) {
-            try {
-                val ftp = ensureConnected()
-                val remotePath = extractPath(uri)
-                val outputStream = ByteArrayOutputStream()
-
-                val success = ftp.retrieveFile(remotePath, outputStream)
-                if (!success) {
-                    return@withContext FileSystemResult.Error(
-                        message = "FTP 文件获取失败: ${ftp.replyString}",
-                        errorCode = FileSystemResult.ErrorCode.NOT_FOUND,
-                    )
-                }
-
-                val content = outputStream.toString("UTF-8")
-
-                FileSystemResult.Success(
-                    FileContent(
-                        content = content,
-                    ),
-                )
-            } catch (e: Exception) {
-                Log.e(TAG, "FTP 读取失败: $uri", e)
-                FileSystemResult.Error(
-                    message = "读取文件失败: ${e.message}",
-                    cause = e,
-                    errorCode = FileSystemResult.ErrorCode.NETWORK_ERROR,
-                )
-            }
-        }
-
-    override suspend fun writeFile(uri: String, content: String): FileSystemResult<Unit> =
-        withContext(Dispatchers.IO) {
-            try {
-                val ftp = ensureConnected()
-                val remotePath = extractPath(uri)
-                val inputStream = content.byteInputStream(Charsets.UTF_8)
-
-                val success = ftp.storeFile(remotePath, inputStream)
-                if (!success) {
-                    return@withContext FileSystemResult.Error(
-                        message = "FTP 文件存储失败: ${ftp.replyString}",
-                        errorCode = FileSystemResult.ErrorCode.PERMISSION_DENIED,
-                    )
-                }
-
-                FileSystemResult.Success(Unit)
-            } catch (e: Exception) {
-                Log.e(TAG, "FTP 写入失败: $uri", e)
-                FileSystemResult.Error(
-                    message = "写入文件失败: ${e.message}",
-                    cause = e,
-                    errorCode = FileSystemResult.ErrorCode.NETWORK_ERROR,
-                )
-            }
-        }
-
-    override suspend fun createDirectory(
-        parentUri: String,
-        dirName: String,
-    ): FileSystemResult<String> = withContext(Dispatchers.IO) {
+    override suspend fun readFile(uri: String): FileSystemResult<FileContent> = withContext(Dispatchers.IO) {
         try {
             val ftp = ensureConnected()
-            val parentPath = extractPath(parentUri)
-            val newPath = "$parentPath/$dirName"
+            val remotePath = extractPath(uri)
+            val outputStream = ByteArrayOutputStream()
 
-            val success = ftp.makeDirectory(newPath)
+            val success = ftp.retrieveFile(remotePath, outputStream)
             if (!success) {
-                val reply = ftp.replyCode
-                return@withContext if (reply == 550) {
-                    FileSystemResult.Error(
-                        message = "目录已存在或权限被拒绝",
-                        errorCode = FileSystemResult.ErrorCode.ALREADY_EXISTS,
-                    )
-                } else {
-                    FileSystemResult.Error(
-                        message = "FTP 创建目录失败: ${ftp.replyString}",
-                    )
-                }
+                return@withContext FileSystemResult.Error(
+                    message = "FTP 文件获取失败: ${ftp.replyString}",
+                    errorCode = FileSystemResult.ErrorCode.NOT_FOUND
+                )
             }
 
-            FileSystemResult.Success("ftp://${config.host}$newPath")
+            val content = outputStream.toString("UTF-8")
+
+            FileSystemResult.Success(
+                FileContent(
+                    content = content
+                )
+            )
         } catch (e: Exception) {
+            Log.e(TAG, "FTP 读取失败: $uri", e)
             FileSystemResult.Error(
-                message = "创建目录失败: ${e.message}",
+                message = "读取文件失败: ${e.message}",
                 cause = e,
+                errorCode = FileSystemResult.ErrorCode.NETWORK_ERROR
             )
         }
     }
 
-    override suspend fun delete(uri: String): FileSystemResult<Unit> =
+    override suspend fun writeFile(uri: String, content: String): FileSystemResult<Unit> = withContext(Dispatchers.IO) {
+        try {
+            val ftp = ensureConnected()
+            val remotePath = extractPath(uri)
+            val inputStream = content.byteInputStream(Charsets.UTF_8)
+
+            val success = ftp.storeFile(remotePath, inputStream)
+            if (!success) {
+                return@withContext FileSystemResult.Error(
+                    message = "FTP 文件存储失败: ${ftp.replyString}",
+                    errorCode = FileSystemResult.ErrorCode.PERMISSION_DENIED
+                )
+            }
+
+            FileSystemResult.Success(Unit)
+        } catch (e: Exception) {
+            Log.e(TAG, "FTP 写入失败: $uri", e)
+            FileSystemResult.Error(
+                message = "写入文件失败: ${e.message}",
+                cause = e,
+                errorCode = FileSystemResult.ErrorCode.NETWORK_ERROR
+            )
+        }
+    }
+
+    override suspend fun createDirectory(parentUri: String, dirName: String): FileSystemResult<String> =
         withContext(Dispatchers.IO) {
             try {
                 val ftp = ensureConnected()
-                val remotePath = extractPath(uri)
+                val parentPath = extractPath(parentUri)
+                val newPath = "$parentPath/$dirName"
 
-                var success = ftp.deleteFile(remotePath)
+                val success = ftp.makeDirectory(newPath)
                 if (!success) {
-                    success = ftp.removeDirectory(remotePath)
+                    val reply = ftp.replyCode
+                    return@withContext if (reply == 550) {
+                        FileSystemResult.Error(
+                            message = "目录已存在或权限被拒绝",
+                            errorCode = FileSystemResult.ErrorCode.ALREADY_EXISTS
+                        )
+                    } else {
+                        FileSystemResult.Error(
+                            message = "FTP 创建目录失败: ${ftp.replyString}"
+                        )
+                    }
                 }
 
-                if (!success) {
-                    return@withContext FileSystemResult.Error(
-                        message = "FTP 删除失败: ${ftp.replyString}",
-                        errorCode = FileSystemResult.ErrorCode.NOT_FOUND,
-                    )
-                }
-
-                FileSystemResult.Success(Unit)
+                FileSystemResult.Success("ftp://${config.host}$newPath")
             } catch (e: Exception) {
                 FileSystemResult.Error(
-                    message = "删除失败: ${e.message}",
-                    cause = e,
+                    message = "创建目录失败: ${e.message}",
+                    cause = e
                 )
             }
         }
+
+    override suspend fun delete(uri: String): FileSystemResult<Unit> = withContext(Dispatchers.IO) {
+        try {
+            val ftp = ensureConnected()
+            val remotePath = extractPath(uri)
+
+            var success = ftp.deleteFile(remotePath)
+            if (!success) {
+                success = ftp.removeDirectory(remotePath)
+            }
+
+            if (!success) {
+                return@withContext FileSystemResult.Error(
+                    message = "FTP 删除失败: ${ftp.replyString}",
+                    errorCode = FileSystemResult.ErrorCode.NOT_FOUND
+                )
+            }
+
+            FileSystemResult.Success(Unit)
+        } catch (e: Exception) {
+            FileSystemResult.Error(
+                message = "删除失败: ${e.message}",
+                cause = e
+            )
+        }
+    }
 
     override suspend fun exists(uri: String): Boolean = withContext(Dispatchers.IO) {
         try {
@@ -274,52 +266,51 @@ class FtpFileSystemProvider(
         }
     }
 
-    override suspend fun getFileInfo(uri: String): FileSystemResult<FileItem> =
-        withContext(Dispatchers.IO) {
-            try {
-                val ftp = ensureConnected()
-                val remotePath = extractPath(uri)
-                val fileName = remotePath.substringAfterLast('/')
+    override suspend fun getFileInfo(uri: String): FileSystemResult<FileItem> = withContext(Dispatchers.IO) {
+        try {
+            val ftp = ensureConnected()
+            val remotePath = extractPath(uri)
+            val fileName = remotePath.substringAfterLast('/')
 
-                val mlsdFile = ftp.mlistFile(remotePath)
-                if (mlsdFile != null) {
-                    return@withContext FileSystemResult.Success(
-                        FileItem(
-                            name = fileName,
-                            uri = Uri.parse(uri),
-                            isDirectory = mlsdFile.isDirectory,
-                            size = mlsdFile.size,
-                            lastModified = mlsdFile.timestamp.timeInMillis,
-                        ),
+            val mlsdFile = ftp.mlistFile(remotePath)
+            if (mlsdFile != null) {
+                return@withContext FileSystemResult.Success(
+                    FileItem(
+                        name = fileName,
+                        uri = Uri.parse(uri),
+                        isDirectory = mlsdFile.isDirectory,
+                        size = mlsdFile.size,
+                        lastModified = mlsdFile.timestamp.timeInMillis
                     )
-                }
-
-                val parentPath = remotePath.substringBeforeLast('/')
-                val files = ftp.listFiles(parentPath)
-                val match = files.find { it.name == fileName }
-                if (match != null) {
-                    return@withContext FileSystemResult.Success(
-                        FileItem(
-                            name = fileName,
-                            uri = Uri.parse(uri),
-                            isDirectory = match.isDirectory,
-                            size = match.size,
-                            lastModified = match.timestamp.timeInMillis,
-                        ),
-                    )
-                }
-
-                FileSystemResult.Error(
-                    message = "文件未找到: $remotePath",
-                    errorCode = FileSystemResult.ErrorCode.NOT_FOUND,
-                )
-            } catch (e: Exception) {
-                FileSystemResult.Error(
-                    message = "获取文件信息失败: ${e.message}",
-                    cause = e,
                 )
             }
+
+            val parentPath = remotePath.substringBeforeLast('/')
+            val files = ftp.listFiles(parentPath)
+            val match = files.find { it.name == fileName }
+            if (match != null) {
+                return@withContext FileSystemResult.Success(
+                    FileItem(
+                        name = fileName,
+                        uri = Uri.parse(uri),
+                        isDirectory = match.isDirectory,
+                        size = match.size,
+                        lastModified = match.timestamp.timeInMillis
+                    )
+                )
+            }
+
+            FileSystemResult.Error(
+                message = "文件未找到: $remotePath",
+                errorCode = FileSystemResult.ErrorCode.NOT_FOUND
+            )
+        } catch (e: Exception) {
+            FileSystemResult.Error(
+                message = "获取文件信息失败: ${e.message}",
+                cause = e
+            )
         }
+    }
 
     override suspend fun testConnection(): Boolean = withContext(Dispatchers.IO) {
         try {

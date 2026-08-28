@@ -16,20 +16,28 @@ package com.draftpeek.feature.stats.model
 enum class AchievementCategory(val displayName: String) {
     /** 阅读文件类成就 - 统计打开/阅读文件数量 */
     READ("阅读文件"),
+
     /** 创建文件类成就 - 统计创建新文件数量 */
     CREATE("创建文件"),
+
     /** 使用时长类成就 - 统计累计应用使用时长 */
     DURATION("使用时长"),
+
     /** 书写字符类成就 - 统计累计输入字符数 */
     CHARS("书写字符"),
+
     /** 连续天数类成就 - 统计连续使用天数 */
     STREAK("连续天数"),
+
     /** 时间段类成就 - 统计特定时段活跃天数 */
     TIME_PERIOD("时间段"),
+
     /** 考勤类成就 - 统计完美周/完美月等 */
     ATTENDANCE("考勤"),
+
     /** 里程碑类成就 - 统计总使用天数等长期目标 */
     MILESTONE("里程碑"),
+
     /** 节假日类成就 - 在特定节假日使用应用 */
     HOLIDAY("节假日")
 }

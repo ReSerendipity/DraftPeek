@@ -9,6 +9,7 @@
  *       所有 @Deprecated 注解指向新的替代方案，未来验证运行时无引用后可安全删除。
  * 创建: 2024
  */
+
 package com.draftpeek.feature.stats.ui.style
 
 import androidx.compose.runtime.Composable
@@ -20,7 +21,6 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.draftpeek.core.ui.theme.BackgroundDark
-import com.draftpeek.core.ui.theme.BackgroundLight
 import com.draftpeek.core.ui.theme.LocalDarkTheme
 import com.draftpeek.core.ui.theme.PageBackgroundLight
 import com.draftpeek.core.ui.theme.SurfaceDark
@@ -45,8 +45,8 @@ import com.draftpeek.core.ui.theme.SurfaceVariantLight
     message = "Use MaterialTheme.colorScheme instead of StatsColors",
     replaceWith = ReplaceWith(
         expression = "MaterialTheme.colorScheme",
-        imports = ["androidx.compose.material3.MaterialTheme"],
-    ),
+        imports = ["androidx.compose.material3.MaterialTheme"]
+    )
 )
 @Immutable
 data class StatsColors(
@@ -77,7 +77,7 @@ data class StatsColors(
     /** 空状态图标颜色 */
     val emptyStateIcon: Color,
     /** 屏幕背景色 */
-    val screenBackground: Color,
+    val screenBackground: Color
 ) {
     companion object {
         /** 亮色主题颜色配置 */
@@ -95,7 +95,7 @@ data class StatsColors(
             yearButtonBackground = Color(0xFFDBE3F6),
             yearButtonLabel = Color(0xFF3178C6),
             emptyStateIcon = Color(0xFFB0BEC5),
-            screenBackground = PageBackgroundLight,
+            screenBackground = PageBackgroundLight
         )
 
         /** 暗色主题颜色配置 */
@@ -113,7 +113,7 @@ data class StatsColors(
             yearButtonBackground = Color(0xFF1B3A5C),
             yearButtonLabel = Color(0xFF5A9BD5),
             emptyStateIcon = Color(0xFF6E7681),
-            screenBackground = BackgroundDark,
+            screenBackground = BackgroundDark
         )
     }
 }
@@ -127,8 +127,8 @@ data class StatsColors(
     message = "Use MaterialTheme.typography instead of StatsTypography",
     replaceWith = ReplaceWith(
         expression = "MaterialTheme.typography",
-        imports = ["androidx.compose.material3.MaterialTheme"],
-    ),
+        imports = ["androidx.compose.material3.MaterialTheme"]
+    )
 )
 @Immutable
 data class StatsTypography(
@@ -143,7 +143,7 @@ data class StatsTypography(
     val dayLabel: TextStyle,
     val caption: TextStyle,
     val yearButton: TextStyle,
-    val contributionTitle: TextStyle,
+    val contributionTitle: TextStyle
 ) {
     companion object {
         /** 默认排版配置 */
@@ -151,63 +151,63 @@ data class StatsTypography(
             sectionTitle = TextStyle(
                 fontSize = 22.sp,
                 fontWeight = FontWeight.Bold,
-                lineHeight = 28.sp,
+                lineHeight = 28.sp
             ),
             tabLabel = TextStyle(
                 fontSize = 15.sp,
                 fontWeight = FontWeight.Normal,
-                lineHeight = 20.sp,
+                lineHeight = 20.sp
             ),
             tabLabelSelected = TextStyle(
                 fontSize = 15.sp,
                 fontWeight = FontWeight.Medium,
-                lineHeight = 20.sp,
+                lineHeight = 20.sp
             ),
             chipLabel = TextStyle(
                 fontSize = 13.sp,
                 fontWeight = FontWeight.Medium,
-                lineHeight = 18.sp,
+                lineHeight = 18.sp
             ),
             chipLabelSelected = TextStyle(
                 fontSize = 13.sp,
                 fontWeight = FontWeight.Medium,
-                lineHeight = 18.sp,
+                lineHeight = 18.sp
             ),
             statTitle = TextStyle(
                 fontSize = 12.sp,
                 fontWeight = FontWeight.Normal,
-                lineHeight = 16.sp,
+                lineHeight = 16.sp
             ),
             statValue = TextStyle(
                 fontSize = 20.sp,
                 fontWeight = FontWeight.Bold,
-                lineHeight = 26.sp,
+                lineHeight = 26.sp
             ),
             monthLabel = TextStyle(
                 fontSize = 10.sp,
                 fontWeight = FontWeight.Normal,
-                lineHeight = 14.sp,
+                lineHeight = 14.sp
             ),
             dayLabel = TextStyle(
                 fontSize = 10.sp,
                 fontWeight = FontWeight.Normal,
-                lineHeight = 14.sp,
+                lineHeight = 14.sp
             ),
             caption = TextStyle(
                 fontSize = 11.sp,
                 fontWeight = FontWeight.Normal,
-                lineHeight = 16.sp,
+                lineHeight = 16.sp
             ),
             yearButton = TextStyle(
                 fontSize = 14.sp,
                 fontWeight = FontWeight.Medium,
-                lineHeight = 20.sp,
+                lineHeight = 20.sp
             ),
             contributionTitle = TextStyle(
                 fontSize = 14.sp,
                 fontWeight = FontWeight.Medium,
-                lineHeight = 20.sp,
-            ),
+                lineHeight = 20.sp
+            )
         )
     }
 }
@@ -221,8 +221,8 @@ data class StatsTypography(
     message = "Use DraftPeekSpacing from core/ui/theme instead of StatsSpacing",
     replaceWith = ReplaceWith(
         expression = "DraftPeekSpacing",
-        imports = ["com.draftpeek.core.ui.theme.DraftPeekSpacing"],
-    ),
+        imports = ["com.draftpeek.core.ui.theme.DraftPeekSpacing"]
+    )
 )
 object StatsSpacing {
     val cardPadding = 16.dp
@@ -244,8 +244,8 @@ object StatsSpacing {
     message = "Use BrandShapes from core/ui/theme instead of StatsRadius",
     replaceWith = ReplaceWith(
         expression = "BrandShapes",
-        imports = ["com.draftpeek.core.ui.theme.BrandShapes"],
-    ),
+        imports = ["com.draftpeek.core.ui.theme.BrandShapes"]
+    )
 )
 object StatsRadius {
     val card = 12.dp
@@ -281,8 +281,8 @@ val LocalStatsTypography = staticCompositionLocalOf { StatsTypography.Default }
     message = "Use MaterialTheme.colorScheme instead of statsColors()",
     replaceWith = ReplaceWith(
         expression = "MaterialTheme.colorScheme",
-        imports = ["androidx.compose.material3.MaterialTheme"],
-    ),
+        imports = ["androidx.compose.material3.MaterialTheme"]
+    )
 )
 @Composable
 fun statsColors(): StatsColors {
@@ -299,8 +299,8 @@ fun statsColors(): StatsColors {
     message = "Use MaterialTheme.typography instead of statsTypography()",
     replaceWith = ReplaceWith(
         expression = "MaterialTheme.typography",
-        imports = ["androidx.compose.material3.MaterialTheme"],
-    ),
+        imports = ["androidx.compose.material3.MaterialTheme"]
+    )
 )
 @Composable
 fun statsTypography(): StatsTypography = LocalStatsTypography.current

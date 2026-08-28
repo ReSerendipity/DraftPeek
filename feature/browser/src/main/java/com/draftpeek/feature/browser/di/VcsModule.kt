@@ -20,10 +20,8 @@ object VcsModule {
 
     @Provides
     @ViewModelScoped
-    fun provideGitManager(
-        @ApplicationContext context: Context,
-        credentialProvider: CredentialProvider,
-    ): GitManager = GitManager(context, credentialProvider)
+    fun provideGitManager(@ApplicationContext context: Context, credentialProvider: CredentialProvider): GitManager =
+        GitManager(context, credentialProvider)
 
     @Provides
     fun provideGitHubApiClient(): GitHubApiClient = GitHubApiClient.create()

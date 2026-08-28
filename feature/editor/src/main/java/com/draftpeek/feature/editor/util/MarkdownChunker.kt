@@ -15,8 +15,8 @@
  */
 package com.draftpeek.feature.editor.util
 
-import com.draftpeek.feature.editor.model.MarkdownBlockType
 import com.draftpeek.feature.editor.model.MarkdownBlock
+import com.draftpeek.feature.editor.model.MarkdownBlockType
 
 /**
  * 将 Markdown 文本切分为语义块列表。
@@ -54,7 +54,7 @@ fun chunkMarkdown(content: String): List<MarkdownBlock> {
                         type = type,
                         startIndex = blockStartIndex,
                         endIndex = blockStartIndex + blockContent.length,
-                        estimatedHeightDp = MarkdownBlock.estimateHeight(blockContent, type),
+                        estimatedHeightDp = MarkdownBlock.estimateHeight(blockContent, type)
                     )
                 )
             }
@@ -134,15 +134,26 @@ private fun determineMarkdownBlockType(content: String): MarkdownBlockType {
     return when {
         firstLine.startsWith("#") -> MarkdownBlockType.HEADING
         firstLine.startsWith("```") || firstLine.startsWith("~~~") -> MarkdownBlockType.CODE_BLOCK
-        firstLine.startsWith("- [ ]") || firstLine.startsWith("- [x]") ||
-            firstLine.startsWith("- [X]") || firstLine.startsWith("* [ ]") ||
-            firstLine.startsWith("* [x]") || firstLine.startsWith("+ [ ]") ||
+        firstLine.startsWith("- [ ]") ||
+            firstLine.startsWith("- [x]") ||
+            firstLine.startsWith("- [X]") ||
+            firstLine.startsWith("* [ ]") ||
+            firstLine.startsWith("* [x]") ||
+            firstLine.startsWith("+ [ ]") ||
             firstLine.startsWith("+ [x]") -> MarkdownBlockType.TASK_LIST
-        firstLine.startsWith("- ") || firstLine.startsWith("* ") || firstLine.startsWith("+ ") -> MarkdownBlockType.UNORDERED_LIST
+        firstLine.startsWith(
+            "- "
+        ) ||
+            firstLine.startsWith("* ") ||
+            firstLine.startsWith("+ ") -> MarkdownBlockType.UNORDERED_LIST
         Regex("^\\d+\\.\\s").containsMatchIn(firstLine) -> MarkdownBlockType.ORDERED_LIST
         firstLine.startsWith(">") -> MarkdownBlockType.BLOCKQUOTE
         firstLine.startsWith("|") -> MarkdownBlockType.TABLE
-        firstLine.startsWith("---") || firstLine.startsWith("***") || firstLine.startsWith("___") -> MarkdownBlockType.HORIZONTAL_RULE
+        firstLine.startsWith(
+            "---"
+        ) ||
+            firstLine.startsWith("***") ||
+            firstLine.startsWith("___") -> MarkdownBlockType.HORIZONTAL_RULE
         else -> MarkdownBlockType.PARAGRAPH
     }
 }

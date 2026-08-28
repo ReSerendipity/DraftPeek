@@ -49,8 +49,10 @@ object SecurityIntegrityChecker {
     sealed class IntegrityCheckResult {
         /** 所有完整性检查通过 */
         data object Verified : IntegrityCheckResult()
+
         /** 检测到代码被篡改 */
         data class Tampered(val details: String) : IntegrityCheckResult()
+
         /** 校验过程出错 */
         data class Error(val exception: Exception) : IntegrityCheckResult()
     }
@@ -69,41 +71,39 @@ object SecurityIntegrityChecker {
      * @return 校验结果
      */
     @WorkerThread
-    fun verifyIntegrity(context: Context): IntegrityCheckResult {
-        return try {
-            val issues = mutableListOf<String>()
+    fun verifyIntegrity(context: Context): IntegrityCheckResult = try {
+        val issues = mutableListOf<String>()
 
-            // ===== 检查 1：DEX 文件完整性 =====
-            val dexResult = DexIntegrityChecker.verify(context)
-            if (dexResult is DexIntegrityChecker.DexResult.Tampered) {
-                issues.add("DEX integrity failed: ${dexResult.details}")
-            }
-
-            // ===== 检查 2：行为验证 —— 关键安全方法存在性 =====
-            val behaviorIssues = verifyCriticalMethods()
-            issues.addAll(behaviorIssues)
-
-            // ===== 检查 3：类加载验证 —— 确认安全类可正常加载 =====
-            val classIssues = verifySecurityClasses()
-            issues.addAll(classIssues)
-
-            if (issues.isEmpty()) {
-                isVerified = true
-                IntegrityCheckResult.Verified
-            } else {
-                isVerified = false
-                IntegrityCheckResult.Tampered(issues.joinToString("; "))
-            }
-        } catch (e: Exception) {
-            isVerified = false
-            IntegrityCheckResult.Error(e)
+        // ===== 检查 1：DEX 文件完整性 =====
+        val dexResult = DexIntegrityChecker.verify(context)
+        if (dexResult is DexIntegrityChecker.DexResult.Tampered) {
+            issues.add("DEX integrity failed: ${dexResult.details}")
         }
+
+        // ===== 检查 2：行为验证 —— 关键安全方法存在性 =====
+        val behaviorIssues = verifyCriticalMethods()
+        issues.addAll(behaviorIssues)
+
+        // ===== 检查 3：类加载验证 —— 确认安全类可正常加载 =====
+        val classIssues = verifySecurityClasses()
+        issues.addAll(classIssues)
+
+        if (issues.isEmpty()) {
+            isVerified = true
+            IntegrityCheckResult.Verified
+        } else {
+            isVerified = false
+            IntegrityCheckResult.Tampered(issues.joinToString("; "))
+        }
+    } catch (e: Exception) {
+        isVerified = false
+        IntegrityCheckResult.Error(e)
     }
 
     /**
      * 轻量级快速校验 —— 验证安全类自身完整性，无需 Context。
      * 通过行为验证（反射检查方法签名）检测代码是否被篡改。
-     * 
+     *
      * 此方法设计为无 IO 操作，可在任何线程安全调用。
      *
      * SECURITY VULN-003: 使用 Kotlin 类引用替代硬编码字符串类名，
@@ -166,8 +166,8 @@ object SecurityIntegrityChecker {
             "isXposedDetected" to emptyArray<Class<*>>(),
             "isRooted" to emptyArray<Class<*>>(),
             "isHookFrameworkDetected" to emptyArray<Class<*>>(),
-            "isZygiskDetected" to emptyArray<Class<*>>(),  // VULN-014: Zygisk 检测
-            "quickCheck" to emptyArray<Class<*>>(),
+            "isZygiskDetected" to emptyArray<Class<*>>(), // VULN-014: Zygisk 检测
+            "quickCheck" to emptyArray<Class<*>>()
         )
 
         for ((methodName, paramTypes) in antiDebugMethods) {
@@ -281,7 +281,7 @@ object SecurityIntegrityChecker {
                 "isXposedDetected",
                 "isRooted",
                 "isHookFrameworkDetected",
-                "isZygiskDetected"  // VULN-014: Zygisk 检测
+                "isZygiskDetected" // VULN-014: Zygisk 检测
             )
 
             for (methodName in detectionMethods) {

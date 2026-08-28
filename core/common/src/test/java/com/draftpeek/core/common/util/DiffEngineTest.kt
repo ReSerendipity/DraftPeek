@@ -68,11 +68,11 @@ class DiffEngineTest {
             val rightTypes = result.rightLines.map { it.type }
             assertTrue(
                 leftTypes.contains(DiffType.MODIFY) || leftTypes.contains(DiffType.DELETE),
-                "Expected MODIFY/DELETE in left, got $leftTypes",
+                "Expected MODIFY/DELETE in left, got $leftTypes"
             )
             assertTrue(
                 rightTypes.contains(DiffType.MODIFY) || rightTypes.contains(DiffType.INSERT),
-                "Expected MODIFY/INSERT in right, got $rightTypes",
+                "Expected MODIFY/INSERT in right, got $rightTypes"
             )
         }
 
@@ -81,7 +81,7 @@ class DiffEngineTest {
         fun pureInsertAndDelete() {
             val result = DiffEngine.diff(
                 "common\na_only\nshared",
-                "common\nshared\nb_only",
+                "common\nshared\nb_only"
             )
 
             assertTrue(result.leftLines.any { it.type == DiffType.DELETE })
@@ -164,7 +164,7 @@ class DiffEngineTest {
         fun interleavedEdits() {
             val result = DiffEngine.diff(
                 "a\nb\nc\nd",
-                "a\nx\nc\ny",
+                "a\nx\nc\ny"
             )
 
             assertEquals(result.leftLines.size, result.rightLines.size)

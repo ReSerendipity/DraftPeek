@@ -38,11 +38,7 @@ import com.draftpeek.feature.editor.R
  * @param onDismiss 关闭对话框回调
  */
 @Composable
-fun BacklinksDialog(
-    backlinks: List<String>,
-    onBacklinkClick: (String) -> Unit,
-    onDismiss: () -> Unit,
-) {
+fun BacklinksDialog(backlinks: List<String>, onBacklinkClick: (String) -> Unit, onDismiss: () -> Unit) {
     AlertDialog(
         onDismissRequest = onDismiss,
         containerColor = PrototypeTokens.surface,
@@ -55,7 +51,7 @@ fun BacklinksDialog(
                     Text(
                         text = stringResource(R.string.editor_backlinks_empty),
                         style = MaterialTheme.typography.bodyMedium,
-                        color = PrototypeTokens.fgSoft,
+                        color = PrototypeTokens.fgSoft
                     )
                 } else {
                     backlinks.forEachIndexed { index, source ->
@@ -64,14 +60,14 @@ fun BacklinksDialog(
                                 .fillMaxWidth()
                                 .clickable { onBacklinkClick(source) }
                                 .padding(vertical = 10.dp),
-                            horizontalArrangement = Arrangement.spacedBy(8.dp),
+                            horizontalArrangement = Arrangement.spacedBy(8.dp)
                         ) {
                             Text(
                                 text = source,
                                 style = MaterialTheme.typography.bodyMedium,
                                 color = PrototypeTokens.accent,
                                 maxLines = 1,
-                                overflow = TextOverflow.Ellipsis,
+                                overflow = TextOverflow.Ellipsis
                             )
                         }
                         if (index < backlinks.lastIndex) {
@@ -85,6 +81,6 @@ fun BacklinksDialog(
             TextButton(onClick = onDismiss) {
                 Text(text = stringResource(android.R.string.ok), color = PrototypeTokens.accent)
             }
-        },
+        }
     )
 }

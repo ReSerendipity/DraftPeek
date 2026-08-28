@@ -43,7 +43,7 @@ fun StrokeIcon(
     icon: StrokeIconDef,
     modifier: Modifier = Modifier,
     tint: Color = LocalContentColor.current,
-    contentDescription: String? = null,
+    contentDescription: String? = null
 ) {
     val semanticsModifier = if (contentDescription != null) {
         Modifier.semantics {
@@ -77,20 +77,20 @@ fun StrokeIcon(
                         style = Stroke(
                             width = item.width * s,
                             cap = StrokeCap.Round,
-                            join = StrokeJoin.Round,
-                        ),
+                            join = StrokeJoin.Round
+                        )
                     )
                 }
                 is StrokeItem.CircleFill -> drawCircle(
                     color = tint,
                     radius = item.radius * s,
-                    center = Offset(item.center.x * s, item.center.y * s),
+                    center = Offset(item.center.x * s, item.center.y * s)
                 )
                 is StrokeItem.CircleStroke -> drawCircle(
                     color = tint,
                     radius = item.radius * s,
                     center = Offset(item.center.x * s, item.center.y * s),
-                    style = Stroke(width = item.width * s),
+                    style = Stroke(width = item.width * s)
                 )
                 is StrokeItem.PathFill -> {
                     val scaled = Path().apply {

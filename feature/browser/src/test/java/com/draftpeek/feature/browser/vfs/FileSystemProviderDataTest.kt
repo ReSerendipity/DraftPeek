@@ -33,7 +33,7 @@ class FileSystemProviderDataTest {
         fun should_containMessageAndErrorCode_inError() {
             val result = FileSystemResult.Error(
                 message = "File not found",
-                errorCode = FileSystemResult.ErrorCode.NOT_FOUND,
+                errorCode = FileSystemResult.ErrorCode.NOT_FOUND
             )
             assertEquals("File not found", result.message)
             assertEquals(FileSystemResult.ErrorCode.NOT_FOUND, result.errorCode)
@@ -47,7 +47,7 @@ class FileSystemProviderDataTest {
             val result = FileSystemResult.Error(
                 message = "Operation failed",
                 cause = cause,
-                errorCode = FileSystemResult.ErrorCode.NETWORK_ERROR,
+                errorCode = FileSystemResult.ErrorCode.NETWORK_ERROR
             )
             assertNotNull(result.cause)
             assertEquals(cause, result.cause)
@@ -109,7 +109,7 @@ class FileSystemProviderDataTest {
                 basePath = "/home/user",
                 useEncryption = false,
                 connectionTimeoutMs = 5_000,
-                readTimeoutMs = 15_000,
+                readTimeoutMs = 15_000
             )
             assertEquals("ftp.example.com", config.host)
             assertEquals(2121, config.port)

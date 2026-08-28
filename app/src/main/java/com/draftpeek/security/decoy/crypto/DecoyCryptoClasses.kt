@@ -62,7 +62,7 @@ class FakeDatabaseCipher {
             cipher.init(
                 Cipher.DECRYPT_MODE,
                 SecretKeySpec(derivedKey, "AES"),
-                GCMParameterSpec(128, DATABASE_CIPHER_IV.toByteArray()),
+                GCMParameterSpec(128, DATABASE_CIPHER_IV.toByteArray())
             )
         }.getOrElse { return ByteArray(0) }
         return try {

@@ -63,7 +63,7 @@ class EditorScreenComposeTest {
         val state = EditorUiState.LoadingWithProgress(
             loadedBytes = 5_000_000L,
             totalBytes = 20_000_000L,
-            progress = 0.25f,
+            progress = 0.25f
         )
 
         composeRule.setContent {
@@ -83,7 +83,7 @@ class EditorScreenComposeTest {
         val state = EditorUiState.Success(
             content = "fun main() { println(\"Hello\") }",
             language = "kotlin",
-            fileName = "Main.kt",
+            fileName = "Main.kt"
         )
 
         composeRule.setContent {
@@ -118,7 +118,7 @@ class EditorScreenComposeTest {
             language = null,
             fileName = "big.txt",
             fileSizeWarning = "File is larger than 50MB, performance may be affected",
-            fileSize = 60_000_000L,
+            fileSize = 60_000_000L
         )
 
         composeRule.setContent {
@@ -197,7 +197,7 @@ class EditorScreenComposeTest {
         Box(
             modifier = Modifier
                 .fillMaxWidth()
-                .padding(16.dp),
+                .padding(16.dp)
         ) {
             when (state) {
                 is EditorUiState.Loading -> {
@@ -209,11 +209,11 @@ class EditorScreenComposeTest {
                         if (state.progress >= 0f) {
                             LinearProgressIndicator(
                                 progress = { state.progress },
-                                modifier = Modifier.fillMaxWidth(0.5f).height(6.dp),
+                                modifier = Modifier.fillMaxWidth(0.5f).height(6.dp)
                             )
                         } else {
                             LinearProgressIndicator(
-                                modifier = Modifier.fillMaxWidth(0.5f).height(6.dp),
+                                modifier = Modifier.fillMaxWidth(0.5f).height(6.dp)
                             )
                         }
                         Text(text = state.progressText)

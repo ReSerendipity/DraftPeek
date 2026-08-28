@@ -4,8 +4,8 @@ import com.draftpeek.core.data.entity.Snippet
 import com.draftpeek.core.data.repository.SnippetRepository
 import io.mockk.every
 import io.mockk.mockk
-import kotlinx.coroutines.flow.flowOf
 import kotlinx.coroutines.flow.first
+import kotlinx.coroutines.flow.flowOf
 import kotlinx.coroutines.test.runTest
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.BeforeEach
@@ -26,7 +26,7 @@ class SearchSnippetsUseCaseTest {
         language = "kotlin",
         category = "Kotlin",
         createdAt = 0L,
-        updatedAt = 0L,
+        updatedAt = 0L
     )
 
     @BeforeEach

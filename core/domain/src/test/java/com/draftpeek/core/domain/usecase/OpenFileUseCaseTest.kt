@@ -2,8 +2,8 @@ package com.draftpeek.core.domain.usecase
 
 import android.net.Uri
 import com.draftpeek.core.data.repository.EditorFileReadOutcome
-import com.draftpeek.core.data.repository.EditorFileRepository
 import com.draftpeek.core.data.repository.EditorFileReadResult
+import com.draftpeek.core.data.repository.EditorFileRepository
 import io.mockk.coEvery
 import io.mockk.coVerify
 import io.mockk.every
@@ -39,7 +39,7 @@ class OpenFileUseCaseTest {
             val expectedResult = EditorFileReadResult(
                 content = "fun main()",
                 language = "kotlin",
-                fileName = "main.kt",
+                fileName = "main.kt"
             )
             coEvery { repository.readFile(uri, null) } returns EditorFileReadOutcome.Success(expectedResult)
 
@@ -55,7 +55,7 @@ class OpenFileUseCaseTest {
             val uri = mockk<Uri>()
             coEvery { repository.readFile(uri, null) } returns EditorFileReadOutcome.Error(
                 message = "File not found",
-                isFileNotFound = true,
+                isFileNotFound = true
             )
 
             val result = useCase(uri)

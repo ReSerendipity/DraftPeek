@@ -20,10 +20,7 @@ package com.draftpeek.feature.editor.util
  * @property linkedTitles `[[...]]` 双链提取出的目标标题列表
  * @property mentions `@提及` 提取出的目标列表
  */
-data class MarkdownLinkParseResult(
-    val linkedTitles: List<String>,
-    val mentions: List<String>,
-) {
+data class MarkdownLinkParseResult(val linkedTitles: List<String>, val mentions: List<String>) {
     /** 去重合并后的全部引用目标（双链 + 提及） */
     val allTargets: List<String>
         get() = (linkedTitles + mentions).distinct()
@@ -73,7 +70,7 @@ object MarkdownLinkParser {
 
         return MarkdownLinkParseResult(
             linkedTitles = wikilinks.distinct(),
-            mentions = mentions.distinct(),
+            mentions = mentions.distinct()
         )
     }
 

@@ -82,10 +82,8 @@ object DatabaseKeyManager {
      * 当数据库因 Keystore 失效而无法解密时抛出。
      * 调用方应捕获并向用户解释数据已不可恢复，引导重建数据库。
      */
-    class DatabaseLockedException(
-        val reason: Reason,
-        cause: Throwable? = null,
-    ) : RuntimeException("Database inaccessible: $reason", cause) {
+    class DatabaseLockedException(val reason: Reason, cause: Throwable? = null) :
+        RuntimeException("Database inaccessible: $reason", cause) {
         enum class Reason { KEY_INVALIDATED, DECRYPT_FAILED, KEYSTORE_UNAVAILABLE }
     }
 
@@ -115,14 +113,21 @@ object DatabaseKeyManager {
             } catch (e: Exception) {
                 // SECURITY: 不静默回退。passphrase 文件存在意味着 DB 已用此 passphrase 加密，
                 // 任何其他派生路径都会产生不匹配的密钥 → 永久性数据丢失。
-                Log.e(TAG, "Keystore key invalid while passphrase file exists. " +
-                    "DB is permanently locked; refusing to fall back silently.", e)
+                Log.e(
+                    TAG,
+                    "Keystore key invalid while passphrase file exists. " +
+                        "DB is permanently locked; refusing to fall back silently.",
+                    e
+                )
                 usingKeystore = false
                 keystoreInvalidated = true
                 throw DatabaseLockedException(
-                    reason = if (isKeyInvalidatedException(e)) DatabaseLockedException.Reason.KEY_INVALIDATED
-                             else DatabaseLockedException.Reason.DECRYPT_FAILED,
-                    cause = e,
+                    reason = if (isKeyInvalidatedException(e)) {
+                        DatabaseLockedException.Reason.KEY_INVALIDATED
+                    } else {
+                        DatabaseLockedException.Reason.DECRYPT_FAILED
+                    },
+                    cause = e
                 )
             }
         }
@@ -135,8 +140,12 @@ object DatabaseKeyManager {
             passphrase
         } catch (e: Exception) {
             // SECURITY: 全新设备无 DB，回退 PBKDF2 不会破坏既有数据
-            Log.w(TAG, "Keystore unavailable on fresh install, falling back to PBKDF2. " +
-                "Sensitive features should be disabled.", e)
+            Log.w(
+                TAG,
+                "Keystore unavailable on fresh install, falling back to PBKDF2. " +
+                    "Sensitive features should be disabled.",
+                e
+            )
             usingKeystore = false
             generateFallbackPassphrase(context)
         }

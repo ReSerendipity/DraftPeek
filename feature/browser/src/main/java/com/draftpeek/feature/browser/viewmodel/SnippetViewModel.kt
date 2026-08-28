@@ -50,24 +50,24 @@ import com.draftpeek.core.data.entity.Snippet
 import com.draftpeek.core.data.repository.SnippetRepository
 import com.draftpeek.core.data.repository.UserActivityRepository
 import com.draftpeek.core.data.usecase.RecordUserActivityUseCase
-import com.draftpeek.core.domain.usecase.SearchSnippetsUseCase
 import com.draftpeek.core.data.util.FtsQueryBuilder
+import com.draftpeek.core.domain.usecase.SearchSnippetsUseCase
 import com.draftpeek.feature.browser.R
 import dagger.hilt.android.lifecycle.HiltViewModel
 import dagger.hilt.android.qualifiers.ApplicationContext
+import javax.inject.Inject
 import kotlinx.coroutines.channels.BufferOverflow
 import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.SharedFlow
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
-import kotlinx.coroutines.flow.SharedFlow
 import kotlinx.coroutines.flow.asSharedFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
-import javax.inject.Inject
 
 /**
  * 创建外部文件（SAF）所需的信息
@@ -93,11 +93,7 @@ data class FileCreateInfo(
  * @property language 编程语言标识符
  * @property initialContent 文件初始内容
  */
-data class InternalFileInfo(
-    val file: java.io.File,
-    val language: String,
-    val initialContent: String = ""
-)
+data class InternalFileInfo(val file: java.io.File, val language: String, val initialContent: String = "")
 
 @HiltViewModel
 class SnippetViewModel @Inject constructor(
@@ -105,7 +101,7 @@ class SnippetViewModel @Inject constructor(
     private val userActivityRepository: UserActivityRepository,
     private val searchSnippets: SearchSnippetsUseCase,
     private val recordUserActivity: RecordUserActivityUseCase,
-    @param:ApplicationContext private val appContext: Context,
+    @param:ApplicationContext private val appContext: Context
 ) : ViewModel() {
 
     /**
@@ -123,22 +119,27 @@ class SnippetViewModel @Inject constructor(
         .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5_000), emptyList())
 
     private val _searchQuery = MutableStateFlow("")
+
     /** 当前搜索关键词 */
     val searchQuery: StateFlow<String> = _searchQuery.asStateFlow()
 
     private val _selectedCategory = MutableStateFlow<String?>(null)
+
     /** 当前选中的分类过滤（null 表示不过滤） */
     val selectedCategory: StateFlow<String?> = _selectedCategory.asStateFlow()
 
     private val _exportEvent = MutableSharedFlow<Snippet>()
+
     /** 导出片段事件（消费后触发 SAF 创建文档 Intent） */
     val exportEvent: SharedFlow<Snippet> = _exportEvent.asSharedFlow()
 
     private val _createFileEvent = MutableSharedFlow<FileCreateInfo>()
+
     /** 创建外部文件事件（消费后触发 SAF 创建文档 Intent） */
     val createFileEvent: SharedFlow<FileCreateInfo> = _createFileEvent.asSharedFlow()
 
     private val _createInternalFileEvent = MutableSharedFlow<InternalFileInfo>()
+
     /** 创建内部文件事件 */
     val createInternalFileEvent: SharedFlow<InternalFileInfo> = _createInternalFileEvent.asSharedFlow()
 
@@ -150,7 +151,7 @@ class SnippetViewModel @Inject constructor(
     private val _errorEvent = MutableSharedFlow<ErrorEvent>(
         replay = 0,
         extraBufferCapacity = 1,
-        onBufferOverflow = BufferOverflow.DROP_OLDEST,
+        onBufferOverflow = BufferOverflow.DROP_OLDEST
     )
     val errorEvent: SharedFlow<ErrorEvent> = _errorEvent.asSharedFlow()
 
@@ -166,15 +167,17 @@ class SnippetViewModel @Inject constructor(
          * 使用 [FtsQueryBuilder] 解析原始输入，支持 AND/OR/NOT/精确短语等高级语法
          */
         SMART,
+
         /**
          * 子串匹配模式
          *
          * 使用 SQL LIKE 做降级匹配，支持部分单词但无法利用 FTS 索引，速度较慢
          */
-        SUBSTRING,
+        SUBSTRING
     }
 
     private val _searchMode = MutableStateFlow(SearchMode.SMART)
+
     /** 当前搜索模式 */
     val searchMode: StateFlow<SearchMode> = _searchMode.asStateFlow()
 
@@ -194,7 +197,7 @@ class SnippetViewModel @Inject constructor(
     val searchResults: StateFlow<List<Snippet>> = combine(
         _searchQuery,
         _selectedCategory,
-        _searchMode,
+        _searchMode
     ) { query, category, mode ->
         Triple(query, category, mode)
     }.combine(repository.getAllSnippets()) { (query, category, mode), allSnippets ->
@@ -260,9 +263,11 @@ class SnippetViewModel @Inject constructor(
     fun requestExport(snippet: Snippet) {
         if (!SecurityGate.isOperationAllowed()) {
             viewModelScope.launch {
-                _errorEvent.emit(ErrorEvent(
-                    message = appContext.getString(R.string.security_operation_restricted),
-                ))
+                _errorEvent.emit(
+                    ErrorEvent(
+                        message = appContext.getString(R.string.security_operation_restricted)
+                    )
+                )
             }
             return
         }
@@ -301,9 +306,11 @@ class SnippetViewModel @Inject constructor(
     fun createFileInInternalStorage(filename: String, language: String, initialContent: String = "") {
         if (!SecurityGate.isOperationAllowed()) {
             viewModelScope.launch {
-                _errorEvent.emit(ErrorEvent(
-                    message = appContext.getString(R.string.security_operation_restricted),
-                ))
+                _errorEvent.emit(
+                    ErrorEvent(
+                        message = appContext.getString(R.string.security_operation_restricted)
+                    )
+                )
             }
             return
         }
@@ -329,9 +336,11 @@ class SnippetViewModel @Inject constructor(
     fun addSnippet(title: String, content: String, language: String?, category: String) {
         if (!SecurityGate.isOperationAllowed()) {
             viewModelScope.launch {
-                _errorEvent.emit(ErrorEvent(
-                    message = appContext.getString(R.string.security_operation_restricted),
-                ))
+                _errorEvent.emit(
+                    ErrorEvent(
+                        message = appContext.getString(R.string.security_operation_restricted)
+                    )
+                )
             }
             return
         }
@@ -343,19 +352,23 @@ class SnippetViewModel @Inject constructor(
                         title = title,
                         content = content,
                         language = language,
-                        category = category.ifBlank { appContext.getString(R.string.browser_snippet_category_uncategorized) },
+                        category = category.ifBlank {
+                            appContext.getString(R.string.browser_snippet_category_uncategorized)
+                        },
                         createdAt = now,
-                        updatedAt = now,
+                        updatedAt = now
                     )
                 )
                 recordUserActivity.recordSnippetCreated()
                 recordUserActivity.recordFileCreate()
             } catch (e: Exception) {
                 val appError = ErrorHandler.fromException(e, appContext)
-                _errorEvent.emit(ErrorEvent(
-                    message = ErrorHandler.getUserMessage(appError, appContext),
-                    isRetryable = ErrorHandler.getRetryAction(appError),
-                ))
+                _errorEvent.emit(
+                    ErrorEvent(
+                        message = ErrorHandler.getUserMessage(appError, appContext),
+                        isRetryable = ErrorHandler.getRetryAction(appError)
+                    )
+                )
             }
         }
     }
@@ -370,9 +383,11 @@ class SnippetViewModel @Inject constructor(
     fun updateSnippet(snippet: Snippet) {
         if (!SecurityGate.isOperationAllowed()) {
             viewModelScope.launch {
-                _errorEvent.emit(ErrorEvent(
-                    message = appContext.getString(R.string.security_operation_restricted),
-                ))
+                _errorEvent.emit(
+                    ErrorEvent(
+                        message = appContext.getString(R.string.security_operation_restricted)
+                    )
+                )
             }
             return
         }
@@ -381,10 +396,12 @@ class SnippetViewModel @Inject constructor(
                 repository.updateSnippet(snippet.copy(updatedAt = System.currentTimeMillis()))
             } catch (e: Exception) {
                 val appError = ErrorHandler.fromException(e, appContext)
-                _errorEvent.emit(ErrorEvent(
-                    message = ErrorHandler.getUserMessage(appError, appContext),
-                    isRetryable = ErrorHandler.getRetryAction(appError),
-                ))
+                _errorEvent.emit(
+                    ErrorEvent(
+                        message = ErrorHandler.getUserMessage(appError, appContext),
+                        isRetryable = ErrorHandler.getRetryAction(appError)
+                    )
+                )
             }
         }
     }
@@ -397,9 +414,11 @@ class SnippetViewModel @Inject constructor(
     fun deleteSnippet(snippet: Snippet) {
         if (!SecurityGate.isOperationAllowed()) {
             viewModelScope.launch {
-                _errorEvent.emit(ErrorEvent(
-                    message = appContext.getString(R.string.security_operation_restricted),
-                ))
+                _errorEvent.emit(
+                    ErrorEvent(
+                        message = appContext.getString(R.string.security_operation_restricted)
+                    )
+                )
             }
             return
         }
@@ -408,10 +427,12 @@ class SnippetViewModel @Inject constructor(
                 repository.deleteSnippet(snippet)
             } catch (e: Exception) {
                 val appError = ErrorHandler.fromException(e, appContext)
-                _errorEvent.emit(ErrorEvent(
-                    message = ErrorHandler.getUserMessage(appError, appContext),
-                    isRetryable = ErrorHandler.getRetryAction(appError),
-                ))
+                _errorEvent.emit(
+                    ErrorEvent(
+                        message = ErrorHandler.getUserMessage(appError, appContext),
+                        isRetryable = ErrorHandler.getRetryAction(appError)
+                    )
+                )
             }
         }
     }
@@ -437,7 +458,7 @@ class SnippetViewModel @Inject constructor(
         fun createExportIntent(snippet: Snippet): Intent {
             val mimeType = LanguageConfig.languageToMimeType(snippet.language ?: "")
             val extension = LanguageConfig.languageToExtension(snippet.language ?: "")
-            val fileName = "${snippet.title}.${extension}"
+            val fileName = "${snippet.title}.$extension"
             return Intent(Intent.ACTION_CREATE_DOCUMENT).apply {
                 addCategory(Intent.CATEGORY_OPENABLE)
                 type = mimeType
@@ -451,12 +472,10 @@ class SnippetViewModel @Inject constructor(
          * @param info 文件创建信息
          * @return ACTION_CREATE_DOCUMENT Intent
          */
-        fun createFileIntent(info: FileCreateInfo): Intent {
-            return Intent(Intent.ACTION_CREATE_DOCUMENT).apply {
-                addCategory(Intent.CATEGORY_OPENABLE)
-                type = info.mimeType
-                putExtra(Intent.EXTRA_TITLE, "${info.filename}.${info.extension}")
-            }
+        fun createFileIntent(info: FileCreateInfo): Intent = Intent(Intent.ACTION_CREATE_DOCUMENT).apply {
+            addCategory(Intent.CATEGORY_OPENABLE)
+            type = info.mimeType
+            putExtra(Intent.EXTRA_TITLE, "${info.filename}.${info.extension}")
         }
     }
 }

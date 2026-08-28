@@ -1,12 +1,12 @@
 /**
  * 文件功能：HTML ↔ Markdown 双向转换器（轻量级实现）
- * 
+ *
  * 主要对象：
  * - [HtmlMarkdownConverter]：转换器单例对象，处理常见 HTML 元素与 Markdown 的互转
- * 
+ *
  * 模块依赖：
  * - 无外部依赖，仅使用 Kotlin 标准库正则表达式
- * 
+ *
  * 支持的 HTML 元素：h1-h6、strong/b、em/i、code、pre>code、a、img、li、blockquote、hr、p、br。
  * 对于复杂 HTML，建议使用 flexmark-java 等专用库。
  */
@@ -14,7 +14,7 @@ package com.draftpeek.feature.editor.util
 
 /**
  * HTML ↔ Markdown 双向转换器（单例对象）
- * 
+ *
  * 轻量级转换器，处理最常见的 HTML 元素。
  * 转换顺序很重要：从最具体的标签（code）到最通用的标签（p）。
  */
@@ -22,7 +22,7 @@ object HtmlMarkdownConverter {
 
     /**
      * 将 HTML 字符串转换为 Markdown
-     * 
+     *
      * 转换顺序：
      * 1. 标题 h1-h6 → #...######
      * 2. 粗体 strong/b → **...**
@@ -40,7 +40,7 @@ object HtmlMarkdownConverter {
      * 14. 剥离剩余 HTML 标签
      * 15. 解码 HTML 实体
      * 16. 清理过多空行
-     * 
+     *
      * @param html 输入 HTML 字符串
      * @return 转换后的 Markdown 字符串
      */
@@ -48,12 +48,30 @@ object HtmlMarkdownConverter {
         var md = html
 
         // 标题
-        md = md.replace(Regex("<h1[^>]*>(.*?)</h1>", setOf(RegexOption.DOT_MATCHES_ALL))) { "# ${it.groupValues[1].trim()}" }
-        md = md.replace(Regex("<h2[^>]*>(.*?)</h2>", setOf(RegexOption.DOT_MATCHES_ALL))) { "## ${it.groupValues[1].trim()}" }
-        md = md.replace(Regex("<h3[^>]*>(.*?)</h3>", setOf(RegexOption.DOT_MATCHES_ALL))) { "### ${it.groupValues[1].trim()}" }
-        md = md.replace(Regex("<h4[^>]*>(.*?)</h4>", setOf(RegexOption.DOT_MATCHES_ALL))) { "#### ${it.groupValues[1].trim()}" }
-        md = md.replace(Regex("<h5[^>]*>(.*?)</h5>", setOf(RegexOption.DOT_MATCHES_ALL))) { "##### ${it.groupValues[1].trim()}" }
-        md = md.replace(Regex("<h6[^>]*>(.*?)</h6>", setOf(RegexOption.DOT_MATCHES_ALL))) { "###### ${it.groupValues[1].trim()}" }
+        md =
+            md.replace(Regex("<h1[^>]*>(.*?)</h1>", setOf(RegexOption.DOT_MATCHES_ALL))) {
+                "# ${it.groupValues[1].trim()}"
+            }
+        md =
+            md.replace(Regex("<h2[^>]*>(.*?)</h2>", setOf(RegexOption.DOT_MATCHES_ALL))) {
+                "## ${it.groupValues[1].trim()}"
+            }
+        md =
+            md.replace(Regex("<h3[^>]*>(.*?)</h3>", setOf(RegexOption.DOT_MATCHES_ALL))) {
+                "### ${it.groupValues[1].trim()}"
+            }
+        md =
+            md.replace(Regex("<h4[^>]*>(.*?)</h4>", setOf(RegexOption.DOT_MATCHES_ALL))) {
+                "#### ${it.groupValues[1].trim()}"
+            }
+        md =
+            md.replace(Regex("<h5[^>]*>(.*?)</h5>", setOf(RegexOption.DOT_MATCHES_ALL))) {
+                "##### ${it.groupValues[1].trim()}"
+            }
+        md =
+            md.replace(Regex("<h6[^>]*>(.*?)</h6>", setOf(RegexOption.DOT_MATCHES_ALL))) {
+                "###### ${it.groupValues[1].trim()}"
+            }
 
         // 粗体
         md = md.replace(Regex("<(strong|b)>(.*?)</\\1>", setOf(RegexOption.DOT_MATCHES_ALL))) {
@@ -129,10 +147,10 @@ object HtmlMarkdownConverter {
 
     /**
      * 将 Markdown 字符串转换为 HTML 文档
-     * 
+     *
      * 转义 Markdown 源中的 HTML 特殊字符并包装在基本 HTML 骨架中。
      * 注意：这是一个简单的转义包装，不是完整渲染。完整渲染应使用基于 WebView 的 Markdown 预览。
-     * 
+     *
      * @param markdown 输入 Markdown 字符串
      * @return 基本 HTML 文档字符串
      */
@@ -152,10 +170,10 @@ object HtmlMarkdownConverter {
 
     /**
      * 解码给定文本中的常见 HTML 实体
-     * 
+     *
      * 支持的实体：&amp; &lt; &gt; &quot; &#39; &#x27; &#x2F; &nbsp;
      * 以及任何数字字符引用（&#NNN; 和 &#xHHH;）。
-     * 
+     *
      * @param text 输入文本
      * @return 解码后的文本
      */
@@ -182,11 +200,9 @@ object HtmlMarkdownConverter {
 
     /**
      * 从给定字符串中移除所有 HTML 标签，仅保留文本内容
-     * 
+     *
      * @param html 输入 HTML 字符串
      * @return 纯文本字符串
      */
-    fun stripHtmlTags(html: String): String {
-        return html.replace(Regex("<[^>]+>"), "")
-    }
+    fun stripHtmlTags(html: String): String = html.replace(Regex("<[^>]+>"), "")
 }

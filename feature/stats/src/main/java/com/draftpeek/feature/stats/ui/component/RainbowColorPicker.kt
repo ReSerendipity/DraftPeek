@@ -17,7 +17,6 @@ import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.shape.CircleShape
@@ -51,34 +50,34 @@ import com.draftpeek.core.ui.theme.RainbowColor
 fun RainbowColorPicker(
     selectedColor: RainbowColor,
     onColorSelected: (RainbowColor) -> Unit,
-    modifier: Modifier = Modifier,
+    modifier: Modifier = Modifier
 ) {
     val isDark = LocalDarkTheme.current
 
     Row(
         modifier = modifier.fillMaxWidth(),
         horizontalArrangement = Arrangement.Center,
-        verticalAlignment = Alignment.CenterVertically,
+        verticalAlignment = Alignment.CenterVertically
     ) {
         Text(
             text = "主题色",
             style = MaterialTheme.typography.labelLarge,
-            color = PrototypeTokens.fgSoft,
+            color = PrototypeTokens.fgSoft
         )
         Spacer(modifier = Modifier.width(16.dp))
         RainbowColor.entries.forEach { color ->
             val isSelected = color == selectedColor
             val size = animateDpAsState(
                 targetValue = if (isSelected) 32.dp else 28.dp,
-                label = "colorSize",
+                label = "colorSize"
             )
             val borderWidth = animateDpAsState(
                 targetValue = if (isSelected) 3.dp else 0.dp,
-                label = "colorBorder",
+                label = "colorBorder"
             )
             val scale by animateFloatAsState(
                 targetValue = if (isSelected) 1.1f else 1f,
-                label = "colorScale",
+                label = "colorScale"
             )
 
             Box(
@@ -90,16 +89,16 @@ fun RainbowColorPicker(
                     .border(
                         width = borderWidth.value,
                         color = PrototypeTokens.fg,
-                        shape = CircleShape,
+                        shape = CircleShape
                     )
                     .clickable(
                         interactionSource = remember { MutableInteractionSource() },
                         indication = null,
-                        onClick = { onColorSelected(color) },
+                        onClick = { onColorSelected(color) }
                     )
                     .semantics {
                         contentDescription = color.displayName
-                    },
+                    }
             )
             Spacer(modifier = Modifier.width(12.dp))
         }

@@ -14,10 +14,12 @@ package com.draftpeek.feature.stats.model
 enum class UserEngagementLevel {
     /** 高活跃度：最近 7 天内有 4 天及以上活跃 */
     HIGH,
+
     /** 中等活跃度：最近 7 天内有 1-3 天活跃 */
     MEDIUM,
+
     /** 休眠状态：最近 14 天内无任何活动 */
-    DORMANT,
+    DORMANT
 }
 
 /**
@@ -34,5 +36,5 @@ data class UserEngagement(
     val level: UserEngagementLevel,
     val weeklyActiveDays: Int,
     val totalSessions: Int,
-    val daysSinceLastActivity: Int,
+    val daysSinceLastActivity: Int
 )

@@ -36,10 +36,10 @@ import java.io.FileNotFoundException
 import java.io.InputStream
 import java.io.OutputStreamWriter
 import java.nio.charset.Charset
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.withContext
 import javax.inject.Inject
 import javax.inject.Singleton
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.withContext
 
 /**
  * Implementation of [EditorFileRepository] for reading and writing files.
@@ -61,9 +61,8 @@ import javax.inject.Singleton
  * - A6: readStreamChunked extracted as single-responsibility helper
  */
 @Singleton
-class EditorFileRepositoryImpl @Inject constructor(
-    @param:ApplicationContext private val context: Context,
-) : EditorFileRepository {
+class EditorFileRepositoryImpl @Inject constructor(@param:ApplicationContext private val context: Context) :
+    EditorFileRepository {
 
     private val contentResolver: ContentResolver
         get() = context.contentResolver
@@ -76,15 +75,18 @@ class EditorFileRepositoryImpl @Inject constructor(
         private const val BINARY_DETECT_SCAN_BYTES = 8192
         private const val OFFICE_SIZE_LIMIT = 30L * 1024 * 1024 // 30 MB
         private const val READ_CHUNK_SIZE = 8 * 1024 // 8 KB
+
         /** Maximum file size for full in-memory loading (100 MB). Beyond this, use streaming read. */
         private const val STREAMING_THRESHOLD = 100L * 1024 * 1024 // 100 MB
+
         /** Number of lines to read in streaming mode for preview (first N lines). */
         private const val STREAMING_PREVIEW_LINES = 50_000
 
         // A4/M3: Set constants for document type lookups (avoids per-call List allocation)
         private val MEDIA_DOC_TYPES = setOf(DocumentType.IMAGE, DocumentType.AUDIO, DocumentType.VIDEO)
         private val OFFICE_DOC_TYPES = setOf(DocumentType.WORD, DocumentType.EXCEL, DocumentType.POWERPOINT)
-        private val NON_TEXT_DOC_TYPES = setOf(DocumentType.PDF, DocumentType.IMAGE, DocumentType.AUDIO, DocumentType.VIDEO)
+        private val NON_TEXT_DOC_TYPES =
+            setOf(DocumentType.PDF, DocumentType.IMAGE, DocumentType.AUDIO, DocumentType.VIDEO)
 
         /**
          * Formats file size into human-readable string.
@@ -117,8 +119,8 @@ class EditorFileRepositoryImpl @Inject constructor(
          * C2: Pre-allocates buffer when expected size is known.
          * E7: Uses BufferedInputStream with use{} for guaranteed cleanup.
          */
-        private fun readStreamChunked(stream: InputStream, expectedSize: Long = -1L): ByteArray {
-            return BufferedInputStream(stream).use { bis ->
+        private fun readStreamChunked(stream: InputStream, expectedSize: Long = -1L): ByteArray =
+            BufferedInputStream(stream).use { bis ->
                 val buffer = if (expectedSize > 0 && expectedSize <= Int.MAX_VALUE.toLong()) {
                     ByteArrayOutputStream(expectedSize.toInt())
                 } else {
@@ -132,7 +134,6 @@ class EditorFileRepositoryImpl @Inject constructor(
                 }
                 buffer.toByteArray()
             }
-        }
 
         /**
          * Streaming read for very large files (>100MB).
@@ -140,8 +141,8 @@ class EditorFileRepositoryImpl @Inject constructor(
          * appending a notice about truncation. This allows the user to view
          * the beginning of very large files without crashing.
          */
-        private fun readStreamPreview(stream: InputStream, expectedSize: Long): String {
-            return BufferedInputStream(stream).use { bis ->
+        private fun readStreamPreview(stream: InputStream, expectedSize: Long): String =
+            BufferedInputStream(stream).use { bis ->
                 val sb = StringBuilder()
                 var lineCount = 0
                 val bufferedReader = bis.bufferedReader(Charsets.UTF_8)
@@ -154,36 +155,38 @@ class EditorFileRepositoryImpl @Inject constructor(
                 }
                 if (lineCount >= STREAMING_PREVIEW_LINES) {
                     sb.append("\n\n--- \n")
-                    sb.append("[File truncated: showing first $STREAMING_PREVIEW_LINES lines of ${formatFileSize(expectedSize)}]")
+                    sb.append(
+                        "[File truncated: showing first $STREAMING_PREVIEW_LINES lines of ${formatFileSize(
+                            expectedSize
+                        )}]"
+                    )
                 }
                 sb.toString()
             }
-        }
     }
 
-    override suspend fun readFile(uri: Uri, encoding: String?): EditorFileReadOutcome =
-        withContext(Dispatchers.IO) {
-            try {
-                readFileInternal(uri, encoding)
-            } catch (e: SecurityException) {
-                EditorFileReadOutcome.Error(
-                    message = e.message ?: "Permission expired or revoked",
-                    isSecurityException = true,
-                    cause = e,
-                )
-            } catch (e: FileNotFoundException) {
-                EditorFileReadOutcome.Error(
-                    message = e.message ?: "File not found",
-                    isFileNotFound = true,
-                    cause = e,
-                )
-            } catch (e: Exception) {
-                EditorFileReadOutcome.Error(
-                    message = e.message ?: "Failed to read file",
-                    cause = e,
-                )
-            }
+    override suspend fun readFile(uri: Uri, encoding: String?): EditorFileReadOutcome = withContext(Dispatchers.IO) {
+        try {
+            readFileInternal(uri, encoding)
+        } catch (e: SecurityException) {
+            EditorFileReadOutcome.Error(
+                message = e.message ?: "Permission expired or revoked",
+                isSecurityException = true,
+                cause = e
+            )
+        } catch (e: FileNotFoundException) {
+            EditorFileReadOutcome.Error(
+                message = e.message ?: "File not found",
+                isFileNotFound = true,
+                cause = e
+            )
+        } catch (e: Exception) {
+            EditorFileReadOutcome.Error(
+                message = e.message ?: "Failed to read file",
+                cause = e
+            )
         }
+    }
 
     private suspend fun readFileInternal(uri: Uri, encoding: String?): EditorFileReadOutcome =
         withContext(Dispatchers.IO) {
@@ -198,17 +201,19 @@ class EditorFileRepositoryImpl @Inject constructor(
                     val fileSize = docFile?.length() ?: -1L
                     if (fileSize > SIZE_READONLY_THRESHOLD) {
                         val fileName = docFile?.name ?: uri.lastPathSegment?.substringAfterLast('/') ?: "Unknown"
-                        return@withContext EditorFileReadOutcome.Success(EditorFileReadResult(
-                            content = "",
-                            language = null,
-                            fileName = fileName,
-                            fileSize = fileSize,
-                            isReadOnly = true,
-                            detectedEncoding = "binary",
-                            documentType = null,
-                            fileSizeWarning = "File is too large (${formatFileSize(fileSize)}) and is read-only",
-                            isBinaryFile = true,
-                        ))
+                        return@withContext EditorFileReadOutcome.Success(
+                            EditorFileReadResult(
+                                content = "",
+                                language = null,
+                                fileName = fileName,
+                                fileSize = fileSize,
+                                isReadOnly = true,
+                                detectedEncoding = "binary",
+                                documentType = null,
+                                fileSizeWarning = "File is too large (${formatFileSize(fileSize)}) and is read-only",
+                                isBinaryFile = true
+                            )
+                        )
                     }
                 } catch (_: Exception) {
                     // DocumentFile.length() may throw, continue with normal read
@@ -230,17 +235,21 @@ class EditorFileRepositoryImpl @Inject constructor(
                     val file = AppFileManager.getInternalFileFromUri(context, uriString)
                         ?: throw FileNotFoundException("Cannot find internal file: $uriString")
                     if (file.length() > SIZE_READONLY_THRESHOLD) {
-                        return@withContext EditorFileReadOutcome.Success(EditorFileReadResult(
-                            content = "",
-                            language = null,
-                            fileName = file.name,
-                            fileSize = file.length(),
-                            isReadOnly = true,
-                            detectedEncoding = "binary",
-                            documentType = null,
-                            fileSizeWarning = "File is too large (${formatFileSize(file.length())}) and is read-only",
-                            isBinaryFile = true,
-                        ))
+                        return@withContext EditorFileReadOutcome.Success(
+                            EditorFileReadResult(
+                                content = "",
+                                language = null,
+                                fileName = file.name,
+                                fileSize = file.length(),
+                                isReadOnly = true,
+                                detectedEncoding = "binary",
+                                documentType = null,
+                                fileSizeWarning = "File is too large (${formatFileSize(
+                                    file.length()
+                                )}) and is read-only",
+                                isBinaryFile = true
+                            )
+                        )
                     }
                     // Streaming read for very large files to reduce memory pressure
                     val content: ByteArray = if (file.length() > STREAMING_THRESHOLD) {
@@ -299,43 +308,49 @@ class EditorFileRepositoryImpl @Inject constructor(
             }
 
             if (documentType == DocumentType.PDF) {
-                return@withContext EditorFileReadOutcome.Success(EditorFileReadResult(
-                    content = "",
-                    language = null,
-                    fileName = fileName,
-                    fileSize = fileSize,
-                    isReadOnly = true,
-                    detectedEncoding = "binary",
-                    documentType = DocumentType.PDF,
-                    fileSizeWarning = fileSizeWarning,
-                ))
+                return@withContext EditorFileReadOutcome.Success(
+                    EditorFileReadResult(
+                        content = "",
+                        language = null,
+                        fileName = fileName,
+                        fileSize = fileSize,
+                        isReadOnly = true,
+                        detectedEncoding = "binary",
+                        documentType = DocumentType.PDF,
+                        fileSizeWarning = fileSizeWarning
+                    )
+                )
             }
 
             if (documentType in MEDIA_DOC_TYPES) {
-                return@withContext EditorFileReadOutcome.Success(EditorFileReadResult(
-                    content = "",
-                    language = null,
-                    fileName = fileName,
-                    fileSize = fileSize,
-                    isReadOnly = true,
-                    detectedEncoding = "binary",
-                    documentType = documentType,
-                    fileSizeWarning = fileSizeWarning,
-                ))
+                return@withContext EditorFileReadOutcome.Success(
+                    EditorFileReadResult(
+                        content = "",
+                        language = null,
+                        fileName = fileName,
+                        fileSize = fileSize,
+                        isReadOnly = true,
+                        detectedEncoding = "binary",
+                        documentType = documentType,
+                        fileSizeWarning = fileSizeWarning
+                    )
+                )
             }
 
             // D7/E3: Office document size limit to prevent ZIP bomb / OOM
             if (documentType in OFFICE_DOC_TYPES && fileSize > OFFICE_SIZE_LIMIT) {
-                return@withContext EditorFileReadOutcome.Success(EditorFileReadResult(
-                    content = "",
-                    language = null,
-                    fileName = fileName,
-                    fileSize = fileSize,
-                    isReadOnly = true,
-                    detectedEncoding = "binary",
-                    documentType = documentType,
-                    fileSizeWarning = "File is too large (${formatFileSize(fileSize)}) and is read-only",
-                ))
+                return@withContext EditorFileReadOutcome.Success(
+                    EditorFileReadResult(
+                        content = "",
+                        language = null,
+                        fileName = fileName,
+                        fileSize = fileSize,
+                        isReadOnly = true,
+                        detectedEncoding = "binary",
+                        documentType = documentType,
+                        fileSizeWarning = "File is too large (${formatFileSize(fileSize)}) and is read-only"
+                    )
+                )
             }
 
             if (documentType != null && documentType !in NON_TEXT_DOC_TYPES) {
@@ -345,32 +360,36 @@ class EditorFileRepositoryImpl @Inject constructor(
                     DocumentType.POWERPOINT -> OfficeDocumentParser.parsePowerPoint(bytes.inputStream())
                     else -> ""
                 }
-                return@withContext EditorFileReadOutcome.Success(EditorFileReadResult(
-                    content = "",
-                    language = null,
-                    fileName = fileName,
-                    fileSize = fileSize,
-                    isReadOnly = true,
-                    detectedEncoding = "binary",
-                    documentType = documentType,
-                    renderedHtml = html,
-                    fileSizeWarning = fileSizeWarning,
-                ))
+                return@withContext EditorFileReadOutcome.Success(
+                    EditorFileReadResult(
+                        content = "",
+                        language = null,
+                        fileName = fileName,
+                        fileSize = fileSize,
+                        isReadOnly = true,
+                        detectedEncoding = "binary",
+                        documentType = documentType,
+                        renderedHtml = html,
+                        fileSizeWarning = fileSizeWarning
+                    )
+                )
             }
 
             // Binary detection: extension-based + null-byte scan
             if (DocumentTypeHelper.isNonTextExtension(fileName) || isLikelyBinary(bytes)) {
-                return@withContext EditorFileReadOutcome.Success(EditorFileReadResult(
-                    content = "",
-                    language = null,
-                    fileName = fileName,
-                    fileSize = fileSize,
-                    isReadOnly = true,
-                    detectedEncoding = "binary",
-                    documentType = null,
-                    fileSizeWarning = fileSizeWarning,
-                    isBinaryFile = true,
-                ))
+                return@withContext EditorFileReadOutcome.Success(
+                    EditorFileReadResult(
+                        content = "",
+                        language = null,
+                        fileName = fileName,
+                        fileSize = fileSize,
+                        isReadOnly = true,
+                        detectedEncoding = "binary",
+                        documentType = null,
+                        fileSizeWarning = fileSizeWarning,
+                        isBinaryFile = true
+                    )
+                )
             }
 
             // OPTIMIZE: [C-01] - 修复三次重复扫描：原实现 decodeBytes 内部检测 (1x) +
@@ -386,15 +405,17 @@ class EditorFileRepositoryImpl @Inject constructor(
             val extension = fileName.substringAfterLast('.', "")
             val language = LanguageConfig.extensionToLanguage(extension)
 
-            EditorFileReadOutcome.Success(EditorFileReadResult(
-                content = content,
-                language = if (highlightDisabled) null else language,
-                fileName = fileName,
-                fileSize = fileSize,
-                isReadOnly = forcedReadOnly,
-                detectedEncoding = detectedEncodingName,
-                fileSizeWarning = fileSizeWarning,
-            ))
+            EditorFileReadOutcome.Success(
+                EditorFileReadResult(
+                    content = content,
+                    language = if (highlightDisabled) null else language,
+                    fileName = fileName,
+                    fileSize = fileSize,
+                    isReadOnly = forcedReadOnly,
+                    detectedEncoding = detectedEncodingName,
+                    fileSizeWarning = fileSizeWarning
+                )
+            )
         }
 
     override suspend fun writeFile(uri: Uri, content: String, encoding: String?): Result<Unit> =
@@ -418,19 +439,16 @@ class EditorFileRepositoryImpl @Inject constructor(
             }
         }
 
-    override fun isInternalFile(uriString: String): Boolean {
-        return AppFileManager.isInternalUri(uriString) &&
-            !uriString.startsWith("file:///android_asset/")
-    }
+    override fun isInternalFile(uriString: String): Boolean = AppFileManager.isInternalUri(uriString) &&
+        !uriString.startsWith("file:///android_asset/")
 
-    override suspend fun deleteInternalFile(uriString: String): Boolean =
-        withContext(Dispatchers.IO) {
-            if (!isInternalFile(uriString)) return@withContext false
-            val file = AppFileManager.getInternalFileFromUri(context, uriString)
-                ?: return@withContext false
-            AppFileManager.deleteUserFile(file)
-            true
-        }
+    override suspend fun deleteInternalFile(uriString: String): Boolean = withContext(Dispatchers.IO) {
+        if (!isInternalFile(uriString)) return@withContext false
+        val file = AppFileManager.getInternalFileFromUri(context, uriString)
+            ?: return@withContext false
+        AppFileManager.deleteUserFile(file)
+        true
+    }
 
     /**
      * C-01: 流式打开文件用于全文搜索，避免将整个文件加载到内存。
@@ -443,29 +461,28 @@ class EditorFileRepositoryImpl @Inject constructor(
      * 返回 null 的情形：URI 失效、文件不存在、权限过期、asset 路径越界。
      * 调用方负责在使用后关闭流。
      */
-    override suspend fun openInputStreamForSearch(uri: Uri): InputStream? =
-        withContext(Dispatchers.IO) {
-            val uriString = uri.toString()
-            try {
-                when {
-                    uriString.startsWith("file:///android_asset/") -> {
-                        val assetPath = uriString.removePrefix("file:///android_asset/")
-                        // D7: 防 asset 路径遍历
-                        if (assetPath.contains("..")) return@withContext null
-                        context.assets.open(assetPath)
-                    }
-                    isInternalFile(uriString) -> {
-                        val file = AppFileManager.getInternalFileFromUri(context, uriString)
-                            ?: return@withContext null
-                        file.inputStream()
-                    }
-                    else -> {
-                        contentResolver.openInputStream(uri)
-                    }
+    override suspend fun openInputStreamForSearch(uri: Uri): InputStream? = withContext(Dispatchers.IO) {
+        val uriString = uri.toString()
+        try {
+            when {
+                uriString.startsWith("file:///android_asset/") -> {
+                    val assetPath = uriString.removePrefix("file:///android_asset/")
+                    // D7: 防 asset 路径遍历
+                    if (assetPath.contains("..")) return@withContext null
+                    context.assets.open(assetPath)
                 }
-            } catch (e: Exception) {
-                // E1: 文件不存在 / 权限过期 / IO 错误统一返回 null，调用方优雅跳过
-                null
+                isInternalFile(uriString) -> {
+                    val file = AppFileManager.getInternalFileFromUri(context, uriString)
+                        ?: return@withContext null
+                    file.inputStream()
+                }
+                else -> {
+                    contentResolver.openInputStream(uri)
+                }
             }
+        } catch (e: Exception) {
+            // E1: 文件不存在 / 权限过期 / IO 错误统一返回 null，调用方优雅跳过
+            null
         }
+    }
 }

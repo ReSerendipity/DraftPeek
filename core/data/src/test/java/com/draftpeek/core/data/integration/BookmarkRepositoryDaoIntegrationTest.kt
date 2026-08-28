@@ -5,7 +5,6 @@ import androidx.room.Room
 import androidx.test.core.app.ApplicationProvider
 import com.draftpeek.core.data.dao.BookmarkDao
 import com.draftpeek.core.data.db.AppDatabase
-import com.draftpeek.core.data.entity.BookmarkEntity
 import com.draftpeek.core.data.repository.BookmarkRepositoryImpl
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.test.runTest

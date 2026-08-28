@@ -24,6 +24,7 @@ import android.os.Handler
 import android.os.Looper
 import android.os.Process
 import android.util.Log
+import com.draftpeek.DraftPeekAppGlobals
 import com.draftpeek.core.common.event.BrowserEvent
 import com.draftpeek.core.common.event.EditorEvent
 import com.draftpeek.core.common.event.SecurityEvent
@@ -31,7 +32,6 @@ import com.draftpeek.core.common.security.AiProtectionState
 import com.draftpeek.core.common.security.AiProtectionState.ResponseLevel.*
 import com.draftpeek.core.common.security.SecurityEventRecorder
 import com.draftpeek.core.common.security.SecurityGate
-import com.draftpeek.DraftPeekAppGlobals
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 
@@ -94,7 +94,7 @@ object AiResponseExecutor {
     private fun triggerWarning(state: AiProtectionState) {
         LegalDeterrence.showLegalWarningDialog(
             reason = state.triggeredSignals.joinToString(),
-            severity = LegalDeterrence.Severity.WARNING,
+            severity = LegalDeterrence.Severity.WARNING
         )
     }
 
@@ -104,7 +104,7 @@ object AiResponseExecutor {
         // 1. 法律警告弹窗（强制，可关闭但功能仍锁定）
         LegalDeterrence.showLegalWarningDialog(
             reason = state.triggeredSignals.joinToString(),
-            severity = LegalDeterrence.Severity.LOCKED,
+            severity = LegalDeterrence.Severity.LOCKED
         )
 
         // 2. 通过 AppEventBus 发事件要求各模块锁定功能
@@ -115,7 +115,7 @@ object AiResponseExecutor {
             bus.emit(
                 EditorEvent.LockEditor(
                     locked = true,
-                    reason = "security_ai_threat_detected",
+                    reason = "security_ai_threat_detected"
                 )
             )
             // 2b. 终端模块禁用
@@ -123,7 +123,7 @@ object AiResponseExecutor {
             // 2c. 广播敏感缓存清空
             bus.emit(
                 SecurityEvent.ClearAllSensitiveCaches(
-                    preservePersistentFiles = true,
+                    preservePersistentFiles = true
                 )
             )
         }
@@ -137,7 +137,7 @@ object AiResponseExecutor {
         // 1. 先弹窗展示法律警告 + 二次打包风险
         LegalDeterrence.showLegalWarningDialog(
             reason = state.triggeredSignals.joinToString(),
-            severity = LegalDeterrence.Severity.TAMPERED_APK,
+            severity = LegalDeterrence.Severity.TAMPERED_APK
         )
 
         // 2. 3 秒后清空内存敏感缓存 + 发送 ClearAllSensitiveCaches 事件
@@ -147,7 +147,7 @@ object AiResponseExecutor {
             appScope.launch {
                 bus.emit(
                     SecurityEvent.ClearAllSensitiveCaches(
-                        preservePersistentFiles = true,
+                        preservePersistentFiles = true
                     )
                 )
             }

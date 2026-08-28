@@ -11,23 +11,19 @@ package com.draftpeek.core.data.repository
 
 import com.draftpeek.core.data.dao.LinkDao
 import com.draftpeek.core.data.entity.LinkEntity
-import kotlinx.coroutines.flow.Flow
 import javax.inject.Inject
+import kotlinx.coroutines.flow.Flow
 
 /**
  * [LinkRepository] 的 Room 实现。
  *
  * @property dao 链接 DAO 实例，由 Hilt 注入
  */
-class LinkRepositoryImpl @Inject constructor(
-    private val dao: LinkDao,
-) : LinkRepository {
+class LinkRepositoryImpl @Inject constructor(private val dao: LinkDao) : LinkRepository {
 
-    override fun getOutgoingTitles(sourceUri: String): Flow<List<String>> =
-        dao.getOutgoingTitles(sourceUri)
+    override fun getOutgoingTitles(sourceUri: String): Flow<List<String>> = dao.getOutgoingTitles(sourceUri)
 
-    override fun getBacklinks(targetTitle: String): Flow<List<String>> =
-        dao.getBacklinks(targetTitle)
+    override fun getBacklinks(targetTitle: String): Flow<List<String>> = dao.getBacklinks(targetTitle)
 
     override suspend fun replaceLinks(sourceUri: String, targetTitles: List<String>) {
         val now = System.currentTimeMillis()

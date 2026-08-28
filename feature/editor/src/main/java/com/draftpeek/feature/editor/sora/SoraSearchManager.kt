@@ -15,10 +15,7 @@ import io.github.rosemoe.sora.widget.EditorSearcher
  * @param editorProvider Returns the current [CodeEditor] instance, or null if not available.
  * @param isReleased Returns true if the wrapper has been released (resources freed).
  */
-internal class SoraSearchManager(
-    private val editorProvider: () -> CodeEditor?,
-    private val isReleased: () -> Boolean,
-) {
+internal class SoraSearchManager(private val editorProvider: () -> CodeEditor?, private val isReleased: () -> Boolean) {
 
     /**
      * Search for [query] in the editor.
@@ -57,7 +54,13 @@ internal class SoraSearchManager(
 
     /** Replace all search matches. Must be called on the main thread. */
     @UiThread
-    fun replaceAll(query: String, replacement: String, regex: Boolean = false, matchCase: Boolean = false, wholeWord: Boolean = false) {
+    fun replaceAll(
+        query: String,
+        replacement: String,
+        regex: Boolean = false,
+        matchCase: Boolean = false,
+        wholeWord: Boolean = false
+    ) {
         try {
             if (query.isBlank()) return
             val editor = editorProvider() ?: return
@@ -127,7 +130,7 @@ internal class SoraSearchManager(
             val editor = editorProvider() ?: return
             val options = EditorSearcher.SearchOptions(
                 EditorSearcher.SearchOptions.TYPE_WHOLE_WORD,
-                true, // caseInsensitive
+                true // caseInsensitive
             )
             val escapedQuery = InputValidator.escapeRegexSpecialChars(word)
             editor.searcher.search(escapedQuery, options)
@@ -203,7 +206,11 @@ internal class SoraSearchManager(
      * When regex and wholeWord are both enabled, regex takes precedence and the caller
      * is responsible for wrapping the pattern with `\b` word boundaries in [buildSearchQuery].
      */
-    private fun buildSearchOptions(regex: Boolean, matchCase: Boolean, wholeWord: Boolean): EditorSearcher.SearchOptions {
+    private fun buildSearchOptions(
+        regex: Boolean,
+        matchCase: Boolean,
+        wholeWord: Boolean
+    ): EditorSearcher.SearchOptions {
         val caseInsensitive = !matchCase
         val type = when {
             regex -> EditorSearcher.SearchOptions.TYPE_REGULAR_EXPRESSION
@@ -221,12 +228,10 @@ internal class SoraSearchManager(
      * - Regex, non-whole-word: use raw query as regex
      * - Regex, whole-word: wrap the raw regex with `\b` word boundaries
      */
-    private fun buildSearchQuery(query: String, regex: Boolean, wholeWord: Boolean): String {
-        return when {
-            regex && wholeWord -> "\\b(?:$query)\\b"
-            regex -> query
-            else -> InputValidator.escapeRegexSpecialChars(query)
-        }
+    private fun buildSearchQuery(query: String, regex: Boolean, wholeWord: Boolean): String = when {
+        regex && wholeWord -> "\\b(?:$query)\\b"
+        regex -> query
+        else -> InputValidator.escapeRegexSpecialChars(query)
     }
 
     companion object {

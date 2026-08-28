@@ -73,11 +73,7 @@ class RecentFilesWidget : GlanceAppWidget() {
      * @property fileName 文件名
      * @property language 编程语言标识，可为 null
      */
-    internal data class RecentFileInfo(
-        val uri: String,
-        val fileName: String,
-        val language: String?,
-    )
+    internal data class RecentFileInfo(val uri: String, val fileName: String, val language: String?)
 
     /**
      * 从 SharedPreferences 加载最近文件列表。
@@ -94,9 +90,11 @@ class RecentFilesWidget : GlanceAppWidget() {
                 RecentFileInfo(
                     uri = parts[0],
                     fileName = parts[1],
-                    language = parts.getOrNull(2),
+                    language = parts.getOrNull(2)
                 )
-            } else null
+            } else {
+                null
+            }
         }.sortedByDescending { it.fileName }
     }
 }
@@ -110,10 +108,7 @@ class RecentFilesWidget : GlanceAppWidget() {
  * @param recentFiles 要显示的最近文件列表
  */
 @Composable
-private fun WidgetContent(
-    context: Context,
-    recentFiles: List<RecentFilesWidget.RecentFileInfo>,
-) {
+private fun WidgetContent(context: Context, recentFiles: List<RecentFilesWidget.RecentFileInfo>) {
     GlanceTheme {
         Column(
             modifier = GlanceModifier
@@ -122,14 +117,14 @@ private fun WidgetContent(
                 .background(GlanceTheme.colors.surface)
                 .padding(16.dp),
             verticalAlignment = Alignment.Top,
-            horizontalAlignment = Alignment.Start,
+            horizontalAlignment = Alignment.Start
         ) {
             Text(
                 text = context.getString(R.string.widget_recent_files_title),
                 style = TextStyle(
                     color = GlanceTheme.colors.onSurface,
-                    fontWeight = FontWeight.Bold,
-                ),
+                    fontWeight = FontWeight.Bold
+                )
             )
             Spacer(modifier = GlanceModifier.height(8.dp))
 
@@ -137,8 +132,8 @@ private fun WidgetContent(
                 Text(
                     text = context.getString(R.string.widget_no_recent_files),
                     style = TextStyle(
-                        color = GlanceTheme.colors.onSurfaceVariant,
-                    ),
+                        color = GlanceTheme.colors.onSurfaceVariant
+                    )
                 )
             } else {
                 recentFiles.take(RecentFilesWidget.MAX_FILES).forEach { file ->
@@ -146,22 +141,22 @@ private fun WidgetContent(
                         modifier = GlanceModifier
                             .fillMaxWidth()
                             .padding(vertical = 4.dp),
-                        verticalAlignment = Alignment.CenterVertically,
+                        verticalAlignment = Alignment.CenterVertically
                     ) {
                         Text(
                             text = file.fileName,
                             style = TextStyle(
                                 color = GlanceTheme.colors.onSurface,
-                                fontWeight = FontWeight.Medium,
+                                fontWeight = FontWeight.Medium
                             ),
-                            modifier = GlanceModifier.defaultWeight(),
+                            modifier = GlanceModifier.defaultWeight()
                         )
                         if (!file.language.isNullOrBlank()) {
                             Text(
                                 text = file.language,
                                 style = TextStyle(
-                                    color = GlanceTheme.colors.onSurfaceVariant,
-                                ),
+                                    color = GlanceTheme.colors.onSurfaceVariant
+                                )
                             )
                         }
                     }

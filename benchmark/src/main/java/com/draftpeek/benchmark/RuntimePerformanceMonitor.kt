@@ -142,9 +142,7 @@ object RuntimePerformanceMonitor {
      * @param operation 要计时的操作名称
      * @return 用于停止计时的令牌对象
      */
-    fun startTiming(operation: String): TimingToken {
-        return TimingToken(operation, SystemClock.elapsedRealtime())
-    }
+    fun startTiming(operation: String): TimingToken = TimingToken(operation, SystemClock.elapsedRealtime())
 
     /**
      * 停止计时并记录结果。
@@ -222,9 +220,7 @@ object RuntimePerformanceMonitor {
      * @param frameTimeMs 帧渲染耗时（毫秒）
      * @return 如果帧渲染时间超过 16.67ms（60fps 阈值）则返回 true
      */
-    fun isJankFrame(frameTimeMs: Long): Boolean {
-        return frameTimeMs > 16.67
-    }
+    fun isJankFrame(frameTimeMs: Long): Boolean = frameTimeMs > 16.67
 
     /**
      * 生成性能报告。
@@ -316,14 +312,23 @@ object RuntimePerformanceMonitor {
         Log.i(TAG, "=== 性能报告 ===")
         Log.i(TAG, "操作数量：${report.operationTimings.size}")
         report.operationTimings.forEach { (operation, stats) ->
-            Log.i(TAG, "$operation：次数=${stats.count}, 平均=${String.format("%.2f", stats.avgMs)}ms, " +
-                    "最小=${stats.minMs}ms, 最大=${stats.maxMs}ms, P50=${stats.p50Ms}ms, P90=${stats.p90Ms}ms")
+            Log.i(
+                TAG,
+                "$operation：次数=${stats.count}, 平均=${String.format("%.2f", stats.avgMs)}ms, " +
+                    "最小=${stats.minMs}ms, 最大=${stats.maxMs}ms, P50=${stats.p50Ms}ms, P90=${stats.p90Ms}ms"
+            )
         }
-        Log.i(TAG, "内存：平均堆=${report.memoryStats.avgUsedHeap / 1024 / 1024}MB, " +
+        Log.i(
+            TAG,
+            "内存：平均堆=${report.memoryStats.avgUsedHeap / 1024 / 1024}MB, " +
                 "最大堆=${report.memoryStats.maxUsedHeap / 1024 / 1024}MB, " +
-                "平均Native=${report.memoryStats.avgNativeHeap / 1024 / 1024}MB")
-        Log.i(TAG, "帧：总数=${report.frameStats.totalFrames}, 卡顿=${report.frameStats.jankFrames}, " +
-                "卡顿率=${String.format("%.2f", report.frameStats.jankPercentage)}%")
+                "平均Native=${report.memoryStats.avgNativeHeap / 1024 / 1024}MB"
+        )
+        Log.i(
+            TAG,
+            "帧：总数=${report.frameStats.totalFrames}, 卡顿=${report.frameStats.jankFrames}, " +
+                "卡顿率=${String.format("%.2f", report.frameStats.jankPercentage)}%"
+        )
     }
 
     /**
@@ -334,8 +339,5 @@ object RuntimePerformanceMonitor {
      * @property operation 操作名称
      * @property startTime 开始时间（elapsedRealtime）
      */
-    class TimingToken internal constructor(
-        val operation: String,
-        internal val startTime: Long
-    )
+    class TimingToken internal constructor(val operation: String, internal val startTime: Long)
 }

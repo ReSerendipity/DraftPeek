@@ -27,7 +27,6 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.painter.Painter
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.unit.dp
-import com.draftpeek.core.ui.modifier.pressScaleEffect
 import com.draftpeek.core.ui.theme.BrandShapes
 import com.draftpeek.core.ui.theme.PrototypeSpacing
 import com.draftpeek.core.ui.theme.PrototypeTokens
@@ -54,7 +53,7 @@ fun BrandSettingRow(
     isDanger: Boolean = false,
     showDivider: Boolean = true,
     trailing: @Composable (() -> Unit)? = null,
-    iconPainter: Painter? = null,
+    iconPainter: Painter? = null
 ) {
     val labelColor = if (isDanger) SemanticColors.Danger else PrototypeTokens.fg
     Column(modifier = modifier.fillMaxWidth()) {
@@ -65,11 +64,11 @@ fun BrandSettingRow(
                 .clickable(
                     interactionSource = remember { MutableInteractionSource() },
                     indication = null,
-                    onClick = onClick,
+                    onClick = onClick
                 )
                 .padding(horizontal = 20.dp),
             verticalAlignment = Alignment.CenterVertically,
-            horizontalArrangement = Arrangement.Start,
+            horizontalArrangement = Arrangement.Start
         ) {
             // Icon container (32x32 rounded tile)
             Box(
@@ -77,21 +76,21 @@ fun BrandSettingRow(
                     .size(PrototypeSpacing.SettingIconSize)
                     .clip(BrandShapes.SettingIcon)
                     .background(iconBackgroundColor),
-                contentAlignment = Alignment.Center,
+                contentAlignment = Alignment.Center
             ) {
                 if (iconPainter != null) {
                     Icon(
                         painter = iconPainter,
                         contentDescription = null,
                         tint = Color.Unspecified,
-                        modifier = Modifier.size(18.dp),
+                        modifier = Modifier.size(18.dp)
                     )
                 } else {
                     Icon(
                         imageVector = icon,
                         contentDescription = null,
                         tint = iconTint,
-                        modifier = Modifier.size(18.dp),
+                        modifier = Modifier.size(18.dp)
                     )
                 }
             }
@@ -101,7 +100,7 @@ fun BrandSettingRow(
                 text = label,
                 style = SettingNameStyle,
                 color = labelColor,
-                modifier = Modifier.weight(1f),
+                modifier = Modifier.weight(1f)
             )
             // Trailing slot or value + chevron
             if (trailing != null) {
@@ -112,14 +111,14 @@ fun BrandSettingRow(
                         text = value,
                         style = SettingValueStyle,
                         color = PrototypeTokens.muted,
-                        modifier = Modifier.padding(end = 6.dp),
+                        modifier = Modifier.padding(end = 6.dp)
                     )
                 }
                 Icon(
                     imageVector = Icons.Filled.ChevronRight,
                     contentDescription = null,
                     tint = PrototypeTokens.mutedSoft,
-                    modifier = Modifier.size(14.dp),
+                    modifier = Modifier.size(14.dp)
                 )
             }
         }
@@ -127,7 +126,7 @@ fun BrandSettingRow(
             HorizontalDivider(
                 thickness = 1.dp,
                 color = PrototypeTokens.borderSoft,
-                modifier = Modifier.padding(horizontal = 20.dp),
+                modifier = Modifier.padding(horizontal = 20.dp)
             )
         }
     }
@@ -146,7 +145,7 @@ fun BrandSwitchSettingRow(
     modifier: Modifier = Modifier,
     iconBackgroundColor: Color = PrototypeTokens.accentSoft,
     iconTint: Color = PrototypeTokens.accent,
-    showDivider: Boolean = true,
+    showDivider: Boolean = true
 ) {
     BrandSettingRow(
         icon = icon,
@@ -159,8 +158,8 @@ fun BrandSwitchSettingRow(
         trailing = {
             BrandSwitch(
                 checked = checked,
-                onCheckedChange = onCheckedChange,
+                onCheckedChange = onCheckedChange
             )
-        },
+        }
     )
 }

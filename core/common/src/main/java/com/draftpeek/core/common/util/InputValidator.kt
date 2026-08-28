@@ -48,8 +48,11 @@ object InputValidator {
     )
 
     @JvmStatic val MSG_TOO_LONG = com.draftpeek.core.common.R.string.error_url_too_long
+
     @JvmStatic val MSG_EMPTY = com.draftpeek.core.common.R.string.error_url_empty
+
     @JvmStatic val MSG_INVALID_CHARS = com.draftpeek.core.common.R.string.error_url_invalid_chars
+
     @JvmStatic val MSG_INVALID_URL = com.draftpeek.core.common.R.string.error_url_invalid_format
 
     /**

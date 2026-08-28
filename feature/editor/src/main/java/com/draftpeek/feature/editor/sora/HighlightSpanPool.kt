@@ -26,10 +26,7 @@ import java.util.concurrent.ConcurrentLinkedQueue
  * @param maxSize Maximum number of objects to keep in the pool.
  *                Excess objects passed to [recycle] are dropped for GC.
  */
-class HighlightSpanPool<T>(
-    private val maxSize: Int = DEFAULT_MAX_SIZE,
-    private val reset: ((T) -> Unit)? = null,
-) {
+class HighlightSpanPool<T>(private val maxSize: Int = DEFAULT_MAX_SIZE, private val reset: ((T) -> Unit)? = null) {
     private val pool = ConcurrentLinkedQueue<T>()
 
     @Volatile
@@ -103,15 +100,17 @@ class HighlightSpanPool<T>(
  */
 class HighlightLoopGuard(
     private val maxIterations: Int = DEFAULT_MAX_ITERATIONS,
-    private val maxConsecutiveTimeMs: Long = DEFAULT_MAX_TIME_MS,
+    private val maxConsecutiveTimeMs: Long = DEFAULT_MAX_TIME_MS
 ) {
     private var iterationCount = 0
     private var startTimeMs = 0L
 
     companion object {
         private const val TAG = "HighlightLoopGuard"
+
         /** Maximum number of iterations before aborting. */
         const val DEFAULT_MAX_ITERATIONS = 100_000
+
         /** Maximum wall-clock time (ms) before aborting. */
         const val DEFAULT_MAX_TIME_MS = 500L
     }

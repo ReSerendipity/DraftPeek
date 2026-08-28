@@ -34,11 +34,7 @@ object DeferredInitializer {
      * @property name 任务名称（可选）
      * @property deferred 任务的CompletableDeferred句柄
      */
-    data class InitTask(
-        val tag: String,
-        val name: String?,
-        val deferred: CompletableDeferred<Unit>,
-    )
+    data class InitTask(val tag: String, val name: String?, val deferred: CompletableDeferred<Unit>)
 
     private val scope = CoroutineScope(SupervisorJob() + Dispatchers.Default)
     private val tasks = mutableMapOf<String, MutableList<InitTask>>()

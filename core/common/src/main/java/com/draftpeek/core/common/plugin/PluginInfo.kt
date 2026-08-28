@@ -30,7 +30,7 @@ data class PluginInfo(
     val description: String = "",
     val author: String = "",
     val minAppVersion: String? = null,
-    val extensionPoints: List<ExtensionPoint> = emptyList(),
+    val extensionPoints: List<ExtensionPoint> = emptyList()
 )
 
 /**
@@ -42,16 +42,22 @@ data class PluginInfo(
 enum class ExtensionPoint {
     /** 贡献新的编程语言/语法高亮支持 */
     LANGUAGE,
+
     /** 向命令面板贡献命令 */
     COMMAND,
+
     /** 贡献侧边栏面板或工具窗口 */
     PANEL,
+
     /** 贡献主题（配色方案） */
     THEME,
+
     /** 贡献文件导出/转换处理器 */
     EXPORT_HANDLER,
+
     /** 贡献自定义编辑器操作（工具栏按钮、快捷键绑定） */
     EDITOR_ACTION,
+
     /** 贡献语言服务器协议（LSP）提供者 */
-    LSP_PROVIDER,
+    LSP_PROVIDER
 }

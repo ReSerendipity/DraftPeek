@@ -135,7 +135,7 @@ class RouteTest {
             Route.Accessibility.route,
             Route.Achievements.route,
             Route.Git.route,
-            Route.Terminal.route,
+            Route.Terminal.route
         )
         assertEquals(11, routes.size)
     }

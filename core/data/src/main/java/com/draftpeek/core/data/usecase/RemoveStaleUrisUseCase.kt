@@ -17,9 +17,7 @@ import javax.inject.Inject
  *
  * @property repository 最近文件仓库实例
  */
-class RemoveStaleUrisUseCase @Inject constructor(
-    private val repository: RecentFilesRepository,
-) {
+class RemoveStaleUrisUseCase @Inject constructor(private val repository: RecentFilesRepository) {
     /**
      * 执行清理操作。
      *

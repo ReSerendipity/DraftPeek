@@ -42,11 +42,8 @@ sealed class EditorUiState {
      * @property progress 进度分数 0f..1f，总大小未知时为 -1f
      */
     @Immutable
-    data class LoadingWithProgress(
-        val loadedBytes: Long = 0,
-        val totalBytes: Long = -1,
-        val progress: Float = -1f,
-    ) : EditorUiState() {
+    data class LoadingWithProgress(val loadedBytes: Long = 0, val totalBytes: Long = -1, val progress: Float = -1f) :
+        EditorUiState() {
         /**
          * 人类可读的进度文本，例如 "12.4 MB / 50 MB"。
          */
@@ -108,7 +105,7 @@ sealed class EditorUiState {
         val fileSizeWarning: String? = null,
         val fileSize: Long = 0,
         val isBinaryFile: Boolean = false,
-        val isTruncated: Boolean = false,
+        val isTruncated: Boolean = false
     ) : EditorUiState() {
 
         private val lowerFileName: String get() = fileName.lowercase()
@@ -146,27 +143,47 @@ sealed class EditorUiState {
          */
         val isOfficeDocument: Boolean
             get() = documentType in listOf(
-                DocumentType.WORD, DocumentType.EXCEL, DocumentType.POWERPOINT,
-            ) || lowerFileName.let {
-                it.endsWith(".doc") || it.endsWith(".docx") ||
-                it.endsWith(".xls") || it.endsWith(".xlsx") ||
-                it.endsWith(".ppt") || it.endsWith(".pptx")
-            }
+                DocumentType.WORD,
+                DocumentType.EXCEL,
+                DocumentType.POWERPOINT
+            ) ||
+                lowerFileName.let {
+                    it.endsWith(".doc") ||
+                        it.endsWith(".docx") ||
+                        it.endsWith(".xls") ||
+                        it.endsWith(".xlsx") ||
+                        it.endsWith(".ppt") ||
+                        it.endsWith(".pptx")
+                }
 
         /**
          * 是否为媒体文件（图片、音频或视频）。
          */
         val isMediaFile: Boolean
             get() = documentType in listOf(
-                DocumentType.IMAGE, DocumentType.AUDIO, DocumentType.VIDEO,
-            ) || lowerFileName.let {
-                it.endsWith(".png") || it.endsWith(".jpg") || it.endsWith(".jpeg") ||
-                it.endsWith(".gif") || it.endsWith(".webp") || it.endsWith(".bmp") ||
-                it.endsWith(".mp3") || it.endsWith(".wav") || it.endsWith(".ogg") ||
-                it.endsWith(".flac") || it.endsWith(".aac") || it.endsWith(".m4a") ||
-                it.endsWith(".mp4") || it.endsWith(".mkv") || it.endsWith(".webm") ||
-                it.endsWith(".avi") || it.endsWith(".mov")
-            }
+                DocumentType.IMAGE,
+                DocumentType.AUDIO,
+                DocumentType.VIDEO
+            ) ||
+                lowerFileName.let {
+                    it.endsWith(".png") ||
+                        it.endsWith(".jpg") ||
+                        it.endsWith(".jpeg") ||
+                        it.endsWith(".gif") ||
+                        it.endsWith(".webp") ||
+                        it.endsWith(".bmp") ||
+                        it.endsWith(".mp3") ||
+                        it.endsWith(".wav") ||
+                        it.endsWith(".ogg") ||
+                        it.endsWith(".flac") ||
+                        it.endsWith(".aac") ||
+                        it.endsWith(".m4a") ||
+                        it.endsWith(".mp4") ||
+                        it.endsWith(".mkv") ||
+                        it.endsWith(".webm") ||
+                        it.endsWith(".avi") ||
+                        it.endsWith(".mov")
+                }
 
         /**
          * 是否应显示"无法显示"消息而非编辑器。

@@ -32,16 +32,14 @@ import androidx.compose.ui.unit.dp
  *
  * @param radius 模糊半径（Dp），X 和 Y 轴应用相同值，默认为 12dp
  */
-fun Modifier.applyBlurIfSupported(
-    radius: Dp = 12.dp,
-): Modifier = this.then(
+fun Modifier.applyBlurIfSupported(radius: Dp = 12.dp): Modifier = this.then(
     if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
         Modifier.graphicsLayer {
             val radiusPx = radius.toPx()
             renderEffect = android.graphics.RenderEffect.createBlurEffect(
                 radiusPx,
                 radiusPx,
-                android.graphics.Shader.TileMode.CLAMP,
+                android.graphics.Shader.TileMode.CLAMP
             ).asComposeRenderEffect()
         }
     } else {

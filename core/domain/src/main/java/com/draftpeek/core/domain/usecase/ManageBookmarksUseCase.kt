@@ -10,8 +10,8 @@ package com.draftpeek.core.domain.usecase
 
 import com.draftpeek.core.data.entity.BookmarkEntity
 import com.draftpeek.core.data.repository.BookmarkRepository
-import kotlinx.coroutines.flow.Flow
 import javax.inject.Inject
+import kotlinx.coroutines.flow.Flow
 
 /**
  * 管理文件书签的用例。
@@ -19,9 +19,7 @@ import javax.inject.Inject
  * 提供书签CRUD操作的统一API，
  * 保持ViewModel与BookmarkRepository解耦。
  */
-class ManageBookmarksUseCase @Inject constructor(
-    private val repository: BookmarkRepository,
-) {
+class ManageBookmarksUseCase @Inject constructor(private val repository: BookmarkRepository) {
     /**
      * 获取所有书签的Flow。
      * @return 书签实体列表的Flow流

@@ -123,11 +123,8 @@ sealed class FileSystemResult<out T> {
      * @property cause 原始异常（可选）
      * @property errorCode 错误代码
      */
-    data class Error(
-        val message: String,
-        val cause: Throwable? = null,
-        val errorCode: ErrorCode = ErrorCode.UNKNOWN,
-    ) : FileSystemResult<Nothing>()
+    data class Error(val message: String, val cause: Throwable? = null, val errorCode: ErrorCode = ErrorCode.UNKNOWN) :
+        FileSystemResult<Nothing>()
 
     /**
      * 文件系统操作错误码枚举
@@ -135,18 +132,24 @@ sealed class FileSystemResult<out T> {
     enum class ErrorCode {
         /** 文件或目录未找到 */
         NOT_FOUND,
+
         /** 认证失败（凭据错误、令牌过期） */
         AUTH_FAILED,
+
         /** 网络不可达或连接超时 */
         NETWORK_ERROR,
+
         /** 权限被拒绝（只读文件系统、权限不足） */
         PERMISSION_DENIED,
+
         /** 文件已存在（用于创建操作） */
         ALREADY_EXISTS,
+
         /** 此提供者不支持该操作 */
         NOT_SUPPORTED,
+
         /** 未知错误 */
-        UNKNOWN,
+        UNKNOWN
     }
 }
 
@@ -170,5 +173,5 @@ data class RemoteFileSystemConfig(
     val basePath: String = "/",
     val useEncryption: Boolean = true,
     val connectionTimeoutMs: Long = 10_000,
-    val readTimeoutMs: Long = 30_000,
+    val readTimeoutMs: Long = 30_000
 )

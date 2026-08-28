@@ -78,10 +78,10 @@ object ApkIntegrityChecker {
     // VULN-006: 多段滚动密钥 — 4 个不同的 XOR 密钥，运行时通过算术派生
     // 避免字节码中出现连续的密钥字面量
     private val ROLLING_KEYS = intArrayOf(
-        (0x2D + 0x2D),  // 0x5A — 段 0
-        (0x1E + 0x1E),  // 0x3C — 段 1
-        (0x3F + 0x3F),  // 0x7E — 段 2
-        (0x14 + 0x15)   // 0x29 — 段 3
+        (0x2D + 0x2D), // 0x5A — 段 0
+        (0x1E + 0x1E), // 0x3C — 段 1
+        (0x3F + 0x3F), // 0x7E — 段 2
+        (0x14 + 0x15) // 0x29 — 段 3
     )
     private val SEGMENT_SIZE = ENCODED_FINGERPRINT.size / ROLLING_KEYS.size
 
@@ -92,11 +92,9 @@ object ApkIntegrityChecker {
      *
      * VULN-006: 使用多段滚动密钥解码，每个段使用不同的 XOR 密钥。
      */
-    private fun decodeFingerprintBytes(): ByteArray {
-        return ByteArray(ENCODED_FINGERPRINT.size) { i ->
-            val keyIndex = i / SEGMENT_SIZE
-            (ENCODED_FINGERPRINT[i].toInt() xor ROLLING_KEYS[keyIndex]).toByte()
-        }
+    private fun decodeFingerprintBytes(): ByteArray = ByteArray(ENCODED_FINGERPRINT.size) { i ->
+        val keyIndex = i / SEGMENT_SIZE
+        (ENCODED_FINGERPRINT[i].toInt() xor ROLLING_KEYS[keyIndex]).toByte()
     }
 
     /**
@@ -112,8 +110,10 @@ object ApkIntegrityChecker {
     sealed class IntegrityResult {
         /** 校验通过：签名一致 */
         data object Verified : IntegrityResult()
+
         /** 校验失败：签名不一致，可能被篡改 */
         data class Tampered(val currentHash: String) : IntegrityResult()
+
         /** 校验异常：无法读取签名信息 */
         data class Error(val exception: Exception) : IntegrityResult()
     }
@@ -130,7 +130,8 @@ object ApkIntegrityChecker {
             // ===== 增强 1：Debuggable 标志独立检测 =====
             // 不依赖 BuildConfig.DEBUG（可被攻击者修改），直接检查 ApplicationInfo 标志
             val appInfo = context.packageManager.getPackageInfo(
-                context.packageName, 0
+                context.packageName,
+                0
             ).applicationInfo
             if (appInfo != null && (appInfo.flags and ApplicationInfo.FLAG_DEBUGGABLE) != 0) {
                 isVerified = false
@@ -170,7 +171,8 @@ object ApkIntegrityChecker {
             // ===== 增强 4：安装来源验证 =====
             val installerPkg = getInstallerPackageName(context)
             val suspiciousInstallers = setOf(
-                "com.android.r8", "de.robv.android.xposed.installer",
+                "com.android.r8",
+                "de.robv.android.xposed.installer",
                 "com.android.shellms"
             )
             if (installerPkg != null && installerPkg in suspiciousInstallers) {
@@ -252,21 +254,19 @@ object ApkIntegrityChecker {
      *
      * 增强：检测可疑安装来源（Xposed、R8 等），增加重打包检测维度。
      */
-    private fun getInstallerPackageName(context: Context): String? {
-        return try {
-            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R) {
-                context.packageManager.getInstallSourceInfo(
-                    context.packageName
-                ).installingPackageName
-            } else {
-                @Suppress("DEPRECATION")
-                context.packageManager.getInstallerPackageName(
-                    context.packageName
-                )
-            }
-        } catch (e: Exception) {
-            Log.w(TAG, "Failed to get installer package name", e)
-            null
+    private fun getInstallerPackageName(context: Context): String? = try {
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R) {
+            context.packageManager.getInstallSourceInfo(
+                context.packageName
+            ).installingPackageName
+        } else {
+            @Suppress("DEPRECATION")
+            context.packageManager.getInstallerPackageName(
+                context.packageName
+            )
         }
+    } catch (e: Exception) {
+        Log.w(TAG, "Failed to get installer package name", e)
+        null
     }
 }

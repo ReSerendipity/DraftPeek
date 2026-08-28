@@ -6,7 +6,6 @@
  */
 package com.draftpeek.feature.stats.ui.component
 
-import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.KeyboardArrowDown
 import androidx.compose.material3.Button
@@ -35,11 +34,7 @@ import com.draftpeek.core.ui.theme.PrototypeTokens
  * @param modifier 修饰符
  */
 @Composable
-fun YearSelector(
-    selectedYear: Int,
-    onYearSelected: (Int) -> Unit,
-    modifier: Modifier = Modifier,
-) {
+fun YearSelector(selectedYear: Int, onYearSelected: (Int) -> Unit, modifier: Modifier = Modifier) {
     val typography = MaterialTheme.typography
     var expanded by remember { mutableStateOf(false) }
     val currentYear = java.time.LocalDate.now().year
@@ -51,23 +46,23 @@ fun YearSelector(
         shape = BrandShapes.Card,
         colors = ButtonDefaults.buttonColors(
             containerColor = PrototypeTokens.accentSoft,
-            contentColor = PrototypeTokens.accent,
-        ),
+            contentColor = PrototypeTokens.accent
+        )
     ) {
         Text(
             text = "$selectedYear",
-            style = typography.labelLarge,
+            style = typography.labelLarge
         )
         Icon(
             imageVector = Icons.Default.KeyboardArrowDown,
-            contentDescription = null,
+            contentDescription = null
         )
     }
 
     DropdownMenu(
         expanded = expanded,
         onDismissRequest = { expanded = false },
-        containerColor = MaterialTheme.colorScheme.surface,
+        containerColor = MaterialTheme.colorScheme.surface
     ) {
         years.forEach { year ->
             DropdownMenuItem(
@@ -75,13 +70,13 @@ fun YearSelector(
                     Text(
                         text = "$year",
                         style = typography.labelLarge,
-                        color = PrototypeTokens.fg,
+                        color = PrototypeTokens.fg
                     )
                 },
                 onClick = {
                     onYearSelected(year)
                     expanded = false
-                },
+                }
             )
         }
     }

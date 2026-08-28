@@ -30,12 +30,12 @@ import java.io.FileNotFoundException
 import java.io.InputStream
 import java.io.OutputStreamWriter
 import java.nio.charset.Charset
+import javax.inject.Inject
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.channelFlow
 import kotlinx.coroutines.flow.flow
 import kotlinx.coroutines.withContext
-import javax.inject.Inject
 
 /**
  * 编辑器文件读写仓库实现类。
@@ -57,9 +57,8 @@ import javax.inject.Inject
  *
  * @property context 应用上下文，使用 @ApplicationContext 避免内存泄漏
  */
-class EditorRepositoryImpl @Inject constructor(
-    @param:ApplicationContext private val context: Context,
-) : EditorRepository {
+class EditorRepositoryImpl @Inject constructor(@param:ApplicationContext private val context: Context) :
+    EditorRepository {
 
     private val contentResolver: ContentResolver
         get() = context.contentResolver
@@ -67,31 +66,43 @@ class EditorRepositoryImpl @Inject constructor(
     companion object {
         /** 文件大小警告阈值（10 MB），超过此大小显示性能警告 */
         private const val SIZE_WARN_THRESHOLD = 10L * 1024 * 1024
+
         /** 文件只读阈值（50 MB），超过此大小强制只读模式 */
         private const val SIZE_READONLY_THRESHOLD = 50L * 1024 * 1024
+
         /** 语法高亮禁用阈值（1 MB），超过此大小禁用语法高亮提升性能 */
         private const val HIGHLIGHT_DISABLE_THRESHOLD = 1024L * 1024
+
         /** 二进制文件检测扫描字节数（8 KB），扫描前 N 字节查找空字节判断是否为二进制 */
         private const val BINARY_DETECT_SCAN_BYTES = 8192
+
         /** Office 文档大小限制（30 MB），防止 ZIP 炸弹/OOM */
         private const val OFFICE_SIZE_LIMIT = 30L * 1024 * 1024
+
         /** 分块读取缓冲区大小（8 KB） */
         private const val READ_CHUNK_SIZE = 8 * 1024
+
         /** 全内存加载最大文件大小（2 MB），超过此大小使用流式预览 */
         private const val STREAMING_THRESHOLD = 2L * 1024 * 1024
+
         /** 流式预览读取行数（前 10000 行），超大文件只读取前 N 行预览 */
         private const val STREAMING_PREVIEW_LINES = 10_000
+
         /** 分块进度加载阈值（5 MB），超过此大小启用进度跟踪加载 */
         private const val CHUNKED_LOADING_THRESHOLD = 5L * 1024 * 1024
+
         /** 进度发射间隔（1 MB），避免 Flow 事件泛滥 */
         private const val PROGRESS_EMIT_INTERVAL = 1024L * 1024
 
         /** 媒体文档类型集合，避免每次调用创建 List 分配 */
         private val MEDIA_DOC_TYPES = setOf(DocumentType.IMAGE, DocumentType.AUDIO, DocumentType.VIDEO)
+
         /** Office 文档类型集合 */
         private val OFFICE_DOC_TYPES = setOf(DocumentType.WORD, DocumentType.EXCEL, DocumentType.POWERPOINT)
+
         /** 非文本文档类型集合 */
-        private val NON_TEXT_DOC_TYPES = setOf(DocumentType.PDF, DocumentType.IMAGE, DocumentType.AUDIO, DocumentType.VIDEO)
+        private val NON_TEXT_DOC_TYPES =
+            setOf(DocumentType.PDF, DocumentType.IMAGE, DocumentType.AUDIO, DocumentType.VIDEO)
 
         /**
          * 格式化文件大小为人类可读字符串。
@@ -135,8 +146,8 @@ class EditorRepositoryImpl @Inject constructor(
          * @param expectedSize 预期文件大小，未知时为 -1
          * @return 读取的字节数组
          */
-        internal fun readStreamChunked(stream: InputStream, expectedSize: Long = -1L): ByteArray {
-            return BufferedInputStream(stream).use { bis ->
+        internal fun readStreamChunked(stream: InputStream, expectedSize: Long = -1L): ByteArray =
+            BufferedInputStream(stream).use { bis ->
                 val buffer = if (expectedSize > 0 && expectedSize <= Int.MAX_VALUE.toLong()) {
                     ByteArrayOutputStream(expectedSize.toInt())
                 } else {
@@ -150,7 +161,6 @@ class EditorRepositoryImpl @Inject constructor(
                 }
                 buffer.toByteArray()
             }
-        }
 
         /**
          * 带进度发射的分块读取 InputStream。
@@ -166,38 +176,36 @@ class EditorRepositoryImpl @Inject constructor(
         private suspend fun readStreamChunkedWithProgress(
             stream: InputStream,
             expectedSize: Long,
-            emitProgress: suspend (FileReadProgress.Loading) -> Unit,
-        ): ByteArray {
-            return BufferedInputStream(stream).use { bis ->
-                val buffer = if (expectedSize > 0 && expectedSize <= Int.MAX_VALUE.toLong()) {
-                    ByteArrayOutputStream(expectedSize.toInt())
-                } else {
-                    ByteArrayOutputStream()
-                }
-                val chunk = ByteArray(READ_CHUNK_SIZE)
-                var totalRead = 0L
-                var lastEmitAt = 0L
-
-                while (true) {
-                    val read = bis.read(chunk)
-                    if (read == -1) break
-                    buffer.write(chunk, 0, read)
-                    totalRead += read
-
-                    // 按间隔发射进度，避免 Flow 泛滥
-                    if (totalRead - lastEmitAt >= PROGRESS_EMIT_INTERVAL) {
-                        emitProgress(FileReadProgress.Loading(totalRead, expectedSize))
-                        lastEmitAt = totalRead
-                    }
-                }
-
-                // 最后一次进度发射报告完成
-                if (totalRead > 0 && totalRead != lastEmitAt) {
-                    emitProgress(FileReadProgress.Loading(totalRead, expectedSize))
-                }
-
-                buffer.toByteArray()
+            emitProgress: suspend (FileReadProgress.Loading) -> Unit
+        ): ByteArray = BufferedInputStream(stream).use { bis ->
+            val buffer = if (expectedSize > 0 && expectedSize <= Int.MAX_VALUE.toLong()) {
+                ByteArrayOutputStream(expectedSize.toInt())
+            } else {
+                ByteArrayOutputStream()
             }
+            val chunk = ByteArray(READ_CHUNK_SIZE)
+            var totalRead = 0L
+            var lastEmitAt = 0L
+
+            while (true) {
+                val read = bis.read(chunk)
+                if (read == -1) break
+                buffer.write(chunk, 0, read)
+                totalRead += read
+
+                // 按间隔发射进度，避免 Flow 泛滥
+                if (totalRead - lastEmitAt >= PROGRESS_EMIT_INTERVAL) {
+                    emitProgress(FileReadProgress.Loading(totalRead, expectedSize))
+                    lastEmitAt = totalRead
+                }
+            }
+
+            // 最后一次进度发射报告完成
+            if (totalRead > 0 && totalRead != lastEmitAt) {
+                emitProgress(FileReadProgress.Loading(totalRead, expectedSize))
+            }
+
+            buffer.toByteArray()
         }
 
         /**
@@ -210,8 +218,8 @@ class EditorRepositoryImpl @Inject constructor(
          * @param expectedSize 预期文件大小（用于提示文本）
          * @return 前 N 行文本 + 截断提示
          */
-        private fun readStreamPreview(stream: InputStream, expectedSize: Long): String {
-            return BufferedInputStream(stream).use { bis ->
+        private fun readStreamPreview(stream: InputStream, expectedSize: Long): String =
+            BufferedInputStream(stream).use { bis ->
                 val sb = StringBuilder()
                 var lineCount = 0
                 val bufferedReader = bis.bufferedReader(Charsets.UTF_8)
@@ -224,29 +232,30 @@ class EditorRepositoryImpl @Inject constructor(
                 }
                 if (lineCount >= STREAMING_PREVIEW_LINES) {
                     sb.append("\n\n--- \n")
-                    sb.append("[File truncated: showing first $STREAMING_PREVIEW_LINES lines of ${formatFileSize(expectedSize)}]")
+                    sb.append(
+                        "[File truncated: showing first $STREAMING_PREVIEW_LINES lines of ${formatFileSize(
+                            expectedSize
+                        )}]"
+                    )
                 }
                 sb.toString()
             }
-        }
     }
 
     /**
      * 构建"文件过大只读"结果，消除 SAF 预检查和内部文件检查中的重复代码。
      */
-    private fun createTooLargeResult(fileName: String, fileSize: Long): FileReadResult {
-        return FileReadResult(
-            content = "",
-            language = null,
-            fileName = fileName,
-            fileSize = fileSize,
-            isReadOnly = true,
-            detectedEncoding = "binary",
-            documentType = null,
-            fileSizeWarning = context.getString(R.string.editor_file_too_large_readonly, formatFileSize(fileSize)),
-            isBinaryFile = true,
-        )
-    }
+    private fun createTooLargeResult(fileName: String, fileSize: Long): FileReadResult = FileReadResult(
+        content = "",
+        language = null,
+        fileName = fileName,
+        fileSize = fileSize,
+        isReadOnly = true,
+        detectedEncoding = "binary",
+        documentType = null,
+        fileSizeWarning = context.getString(R.string.editor_file_too_large_readonly, formatFileSize(fileSize)),
+        isBinaryFile = true
+    )
 
     /**
      * 字节读取后的通用处理逻辑：文件大小检查、文档类型检测、编码检测、语言映射等。
@@ -266,7 +275,7 @@ class EditorRepositoryImpl @Inject constructor(
         fileName: String,
         isReadOnly: Boolean,
         encoding: String?,
-        onProgress: suspend (FileReadProgress) -> Unit = {},
+        onProgress: suspend (FileReadProgress) -> Unit = {}
     ): FileReadResult {
         val fileSize = bytes.size.toLong()
         val highlightDisabled = fileSize >= HIGHLIGHT_DISABLE_THRESHOLD
@@ -300,7 +309,7 @@ class EditorRepositoryImpl @Inject constructor(
                 isReadOnly = true,
                 detectedEncoding = "binary",
                 documentType = DocumentType.PDF,
-                fileSizeWarning = fileSizeWarning,
+                fileSizeWarning = fileSizeWarning
             )
         }
 
@@ -313,7 +322,7 @@ class EditorRepositoryImpl @Inject constructor(
                 isReadOnly = true,
                 detectedEncoding = "binary",
                 documentType = documentType,
-                fileSizeWarning = fileSizeWarning,
+                fileSizeWarning = fileSizeWarning
             )
         }
 
@@ -327,7 +336,7 @@ class EditorRepositoryImpl @Inject constructor(
                 isReadOnly = true,
                 detectedEncoding = "binary",
                 documentType = documentType,
-                fileSizeWarning = context.getString(R.string.editor_file_too_large_readonly, formatFileSize(fileSize)),
+                fileSizeWarning = context.getString(R.string.editor_file_too_large_readonly, formatFileSize(fileSize))
             )
         }
 
@@ -347,7 +356,7 @@ class EditorRepositoryImpl @Inject constructor(
                 detectedEncoding = "binary",
                 documentType = documentType,
                 renderedHtml = html,
-                fileSizeWarning = fileSizeWarning,
+                fileSizeWarning = fileSizeWarning
             )
         }
 
@@ -362,7 +371,7 @@ class EditorRepositoryImpl @Inject constructor(
                 detectedEncoding = "binary",
                 documentType = null,
                 fileSizeWarning = fileSizeWarning,
-                isBinaryFile = true,
+                isBinaryFile = true
             )
         }
 
@@ -384,7 +393,7 @@ class EditorRepositoryImpl @Inject constructor(
             fileSize = fileSize,
             isReadOnly = forcedReadOnly,
             detectedEncoding = detectedEncodingName,
-            fileSizeWarning = fileSizeWarning,
+            fileSizeWarning = fileSizeWarning
         )
     }
 
@@ -404,79 +413,78 @@ class EditorRepositoryImpl @Inject constructor(
      * @throws SecurityException 权限过期时抛出
      * @throws FileNotFoundException 文件不存在时抛出
      */
-    override suspend fun readFile(uri: Uri, encoding: String?): FileReadResult =
-        withContext(Dispatchers.IO) {
-            val uriString = uri.toString()
-            val isAssetUri = uriString.startsWith("file:///android_asset/")
-            val isInternalFile = AppFileManager.isInternalUri(uriString) && !isAssetUri
+    override suspend fun readFile(uri: Uri, encoding: String?): FileReadResult = withContext(Dispatchers.IO) {
+        val uriString = uri.toString()
+        val isAssetUri = uriString.startsWith("file:///android_asset/")
+        val isInternalFile = AppFileManager.isInternalUri(uriString) && !isAssetUri
 
-            // SAF URI 预检查文件大小
-            if (!isAssetUri && !isInternalFile) {
-                try {
-                    val docFile = DocumentFile.fromSingleUri(context, uri)
-                    val fileSize = docFile?.length() ?: -1L
-                    if (fileSize > SIZE_READONLY_THRESHOLD) {
-                        val fileName = docFile?.name ?: uri.lastPathSegment?.substringAfterLast('/') ?: "Unknown"
-                        return@withContext createTooLargeResult(fileName, fileSize)
-                    }
-                } catch (_: Exception) {
-                    // DocumentFile.length() 可能抛异常，继续正常读取
+        // SAF URI 预检查文件大小
+        if (!isAssetUri && !isInternalFile) {
+            try {
+                val docFile = DocumentFile.fromSingleUri(context, uri)
+                val fileSize = docFile?.length() ?: -1L
+                if (fileSize > SIZE_READONLY_THRESHOLD) {
+                    val fileName = docFile?.name ?: uri.lastPathSegment?.substringAfterLast('/') ?: "Unknown"
+                    return@withContext createTooLargeResult(fileName, fileSize)
                 }
+            } catch (_: Exception) {
+                // DocumentFile.length() 可能抛异常，继续正常读取
             }
-
-            val (bytes, fileName, isReadOnly) = when {
-                isAssetUri -> {
-                    val assetPath = uriString.removePrefix("file:///android_asset/")
-                    // 验证 asset 路径防止遍历攻击
-                    if (assetPath.contains("..")) {
-                        throw SecurityException("Invalid asset path")
-                    }
-                    val name = assetPath.substringAfterLast('/')
-                    val content = context.assets.open(assetPath).use { readStreamChunked(it) }
-                    Triple(content, name, true)
-                }
-                isInternalFile -> {
-                    val file = AppFileManager.getInternalFileFromUri(context, uriString)
-                        ?: throw FileNotFoundException("Cannot find internal file: $uriString")
-                    if (file.length() > SIZE_READONLY_THRESHOLD) {
-                        return@withContext createTooLargeResult(file.name, file.length())
-                    }
-                    // 超大文件使用流式读取降低内存压力
-                    val content = if (file.length() > STREAMING_THRESHOLD) {
-                        file.inputStream().use { readStreamPreview(it, file.length()).toByteArray(Charsets.UTF_8) }
-                    } else {
-                        file.inputStream().use { readStreamChunked(it, file.length()) }
-                    }
-                    Triple(content, file.name, false)
-                }
-                else -> {
-                    val docFile = DocumentFile.fromSingleUri(context, uri)
-                    val name = docFile?.name ?: uri.lastPathSegment?.substringAfterLast('/') ?: "Unknown"
-                    val expectedSize = docFile?.length() ?: -1L
-                    val content = try {
-                        contentResolver.openInputStream(uri)
-                    } catch (e: SecurityException) {
-                        throw SecurityException(
-                            context.getString(R.string.editor_error_permission_expired)
-                        )
-                    } catch (e: FileNotFoundException) {
-                        throw FileNotFoundException(
-                            context.getString(R.string.editor_error_external_file_not_found)
-                        )
-                    }?.use {
-                        // 超大文件使用流式预览
-                        if (expectedSize > STREAMING_THRESHOLD) {
-                            readStreamPreview(it, expectedSize).toByteArray(Charsets.UTF_8)
-                        } else {
-                            readStreamChunked(it, expectedSize)
-                        }
-                    } ?: throw IllegalStateException("Cannot open input stream for URI: $uri")
-                    Triple(content, name, false)
-                }
-            }
-
-            buildFileReadResult(bytes, fileName, isReadOnly, encoding)
         }
+
+        val (bytes, fileName, isReadOnly) = when {
+            isAssetUri -> {
+                val assetPath = uriString.removePrefix("file:///android_asset/")
+                // 验证 asset 路径防止遍历攻击
+                if (assetPath.contains("..")) {
+                    throw SecurityException("Invalid asset path")
+                }
+                val name = assetPath.substringAfterLast('/')
+                val content = context.assets.open(assetPath).use { readStreamChunked(it) }
+                Triple(content, name, true)
+            }
+            isInternalFile -> {
+                val file = AppFileManager.getInternalFileFromUri(context, uriString)
+                    ?: throw FileNotFoundException("Cannot find internal file: $uriString")
+                if (file.length() > SIZE_READONLY_THRESHOLD) {
+                    return@withContext createTooLargeResult(file.name, file.length())
+                }
+                // 超大文件使用流式读取降低内存压力
+                val content = if (file.length() > STREAMING_THRESHOLD) {
+                    file.inputStream().use { readStreamPreview(it, file.length()).toByteArray(Charsets.UTF_8) }
+                } else {
+                    file.inputStream().use { readStreamChunked(it, file.length()) }
+                }
+                Triple(content, file.name, false)
+            }
+            else -> {
+                val docFile = DocumentFile.fromSingleUri(context, uri)
+                val name = docFile?.name ?: uri.lastPathSegment?.substringAfterLast('/') ?: "Unknown"
+                val expectedSize = docFile?.length() ?: -1L
+                val content = try {
+                    contentResolver.openInputStream(uri)
+                } catch (e: SecurityException) {
+                    throw SecurityException(
+                        context.getString(R.string.editor_error_permission_expired)
+                    )
+                } catch (e: FileNotFoundException) {
+                    throw FileNotFoundException(
+                        context.getString(R.string.editor_error_external_file_not_found)
+                    )
+                }?.use {
+                    // 超大文件使用流式预览
+                    if (expectedSize > STREAMING_THRESHOLD) {
+                        readStreamPreview(it, expectedSize).toByteArray(Charsets.UTF_8)
+                    } else {
+                        readStreamChunked(it, expectedSize)
+                    }
+                } ?: throw IllegalStateException("Cannot open input stream for URI: $uri")
+                Triple(content, name, false)
+            }
+        }
+
+        buildFileReadResult(bytes, fileName, isReadOnly, encoding)
+    }
 
     /**
      * 将文本内容写入指定 URI 的文件。
@@ -513,10 +521,8 @@ class EditorRepositoryImpl @Inject constructor(
      * @param uriString URI 字符串
      * @return 如果是内部可读写文件返回 true，否则返回 false
      */
-    override fun isInternalFile(uriString: String): Boolean {
-        return AppFileManager.isInternalUri(uriString) &&
-            !uriString.startsWith("file:///android_asset/")
-    }
+    override fun isInternalFile(uriString: String): Boolean = AppFileManager.isInternalUri(uriString) &&
+        !uriString.startsWith("file:///android_asset/")
 
     /**
      * 删除 URI 字符串引用的内部文件。
@@ -524,14 +530,13 @@ class EditorRepositoryImpl @Inject constructor(
      * @param uriString 内部文件 URI 字符串
      * @return 删除成功返回 true，如果不是内部文件或删除失败返回 false
      */
-    override suspend fun deleteInternalFile(uriString: String): Boolean =
-        withContext(Dispatchers.IO) {
-            if (!isInternalFile(uriString)) return@withContext false
-            val file = AppFileManager.getInternalFileFromUri(context, uriString)
-                ?: return@withContext false
-            AppFileManager.deleteUserFile(file)
-            true
-        }
+    override suspend fun deleteInternalFile(uriString: String): Boolean = withContext(Dispatchers.IO) {
+        if (!isInternalFile(uriString)) return@withContext false
+        val file = AppFileManager.getInternalFileFromUri(context, uriString)
+            ?: return@withContext false
+        AppFileManager.deleteUserFile(file)
+        true
+    }
 
     /**
      * 流式打开文件输入流用于全文搜索，避免将整个文件加载到内存。
@@ -591,97 +596,100 @@ class EditorRepositoryImpl @Inject constructor(
      * @param encoding 可选编码覆盖
      * @return 进度事件 Flow
      */
-    override fun readFileWithProgress(uri: Uri, encoding: String?): Flow<FileReadProgress> =
-        channelFlow {
-            withContext(Dispatchers.IO) {
-                val uriString = uri.toString()
-                val isAssetUri = uriString.startsWith("file:///android_asset/")
-                val isInternalFile = AppFileManager.isInternalUri(uriString) && !isAssetUri
+    override fun readFileWithProgress(uri: Uri, encoding: String?): Flow<FileReadProgress> = channelFlow {
+        withContext(Dispatchers.IO) {
+            val uriString = uri.toString()
+            val isAssetUri = uriString.startsWith("file:///android_asset/")
+            val isInternalFile = AppFileManager.isInternalUri(uriString) && !isAssetUri
 
-                // SAF URI 预检查文件大小（与 readFile 相同）
-                if (!isAssetUri && !isInternalFile) {
-                    try {
-                        val docFile = DocumentFile.fromSingleUri(context, uri)
-                        val fileSize = docFile?.length() ?: -1L
-                        if (fileSize > SIZE_READONLY_THRESHOLD) {
-                            val fileName = docFile?.name ?: uri.lastPathSegment?.substringAfterLast('/') ?: "Unknown"
-                            send(FileReadProgress.Done(createTooLargeResult(fileName, fileSize)))
-                            return@withContext
-                        }
-                    } catch (_: Exception) {
-                        // DocumentFile.length() 可能抛异常，继续正常读取
+            // SAF URI 预检查文件大小（与 readFile 相同）
+            if (!isAssetUri && !isInternalFile) {
+                try {
+                    val docFile = DocumentFile.fromSingleUri(context, uri)
+                    val fileSize = docFile?.length() ?: -1L
+                    if (fileSize > SIZE_READONLY_THRESHOLD) {
+                        val fileName = docFile?.name ?: uri.lastPathSegment?.substringAfterLast('/') ?: "Unknown"
+                        send(FileReadProgress.Done(createTooLargeResult(fileName, fileSize)))
+                        return@withContext
                     }
+                } catch (_: Exception) {
+                    // DocumentFile.length() 可能抛异常，继续正常读取
                 }
+            }
 
-                // 带进度跟踪读取字节
-                val (bytes, fileName, isReadOnly) = when {
-                    isAssetUri -> {
-                        val assetPath = uriString.removePrefix("file:///android_asset/")
-                        if (assetPath.contains("..")) throw SecurityException("Invalid asset path")
-                        val name = assetPath.substringAfterLast('/')
-                        val content = context.assets.open(assetPath).use {
-                            readStreamChunkedWithProgress(it, -1L) { progress ->
+            // 带进度跟踪读取字节
+            val (bytes, fileName, isReadOnly) = when {
+                isAssetUri -> {
+                    val assetPath = uriString.removePrefix("file:///android_asset/")
+                    if (assetPath.contains("..")) throw SecurityException("Invalid asset path")
+                    val name = assetPath.substringAfterLast('/')
+                    val content = context.assets.open(assetPath).use {
+                        readStreamChunkedWithProgress(it, -1L) { progress ->
+                            send(progress)
+                        }
+                    }
+                    Triple(content, name, true)
+                }
+                isInternalFile -> {
+                    val file = AppFileManager.getInternalFileFromUri(context, uriString)
+                        ?: throw FileNotFoundException("Cannot find internal file: $uriString")
+                    if (file.length() > SIZE_READONLY_THRESHOLD) {
+                        send(FileReadProgress.Done(createTooLargeResult(file.name, file.length())))
+                        return@withContext
+                    }
+                    val content = if (file.length() > STREAMING_THRESHOLD) {
+                        file.inputStream().use { readStreamPreview(it, file.length()).toByteArray(Charsets.UTF_8) }
+                    } else {
+                        file.inputStream().use {
+                            readStreamChunkedWithProgress(it, file.length()) { progress ->
                                 send(progress)
                             }
                         }
-                        Triple(content, name, true)
                     }
-                    isInternalFile -> {
-                        val file = AppFileManager.getInternalFileFromUri(context, uriString)
-                            ?: throw FileNotFoundException("Cannot find internal file: $uriString")
-                        if (file.length() > SIZE_READONLY_THRESHOLD) {
-                            send(FileReadProgress.Done(createTooLargeResult(file.name, file.length())))
-                            return@withContext
-                        }
-                        val content = if (file.length() > STREAMING_THRESHOLD) {
-                            file.inputStream().use { readStreamPreview(it, file.length()).toByteArray(Charsets.UTF_8) }
+                    Triple(content, file.name, false)
+                }
+                else -> {
+                    val docFile = DocumentFile.fromSingleUri(context, uri)
+                    val name = docFile?.name ?: uri.lastPathSegment?.substringAfterLast('/') ?: "Unknown"
+                    val expectedSize = docFile?.length() ?: -1L
+                    val content = try {
+                        contentResolver.openInputStream(uri)
+                    } catch (e: SecurityException) {
+                        throw SecurityException(context.getString(R.string.editor_error_permission_expired))
+                    } catch (e: FileNotFoundException) {
+                        throw FileNotFoundException(
+                            context.getString(R.string.editor_error_external_file_not_found)
+                        )
+                    }?.use {
+                        if (expectedSize > STREAMING_THRESHOLD) {
+                            readStreamPreview(it, expectedSize).toByteArray(Charsets.UTF_8)
                         } else {
-                            file.inputStream().use {
-                                readStreamChunkedWithProgress(it, file.length()) { progress ->
-                                    send(progress)
-                                }
+                            readStreamChunkedWithProgress(it, expectedSize) { progress ->
+                                send(progress)
                             }
                         }
-                        Triple(content, file.name, false)
-                    }
-                    else -> {
-                        val docFile = DocumentFile.fromSingleUri(context, uri)
-                        val name = docFile?.name ?: uri.lastPathSegment?.substringAfterLast('/') ?: "Unknown"
-                        val expectedSize = docFile?.length() ?: -1L
-                        val content = try {
-                            contentResolver.openInputStream(uri)
-                        } catch (e: SecurityException) {
-                            throw SecurityException(context.getString(R.string.editor_error_permission_expired))
-                        } catch (e: FileNotFoundException) {
-                            throw FileNotFoundException(context.getString(R.string.editor_error_external_file_not_found))
-                        }?.use {
-                            if (expectedSize > STREAMING_THRESHOLD) {
-                                readStreamPreview(it, expectedSize).toByteArray(Charsets.UTF_8)
-                            } else {
-                                readStreamChunkedWithProgress(it, expectedSize) { progress ->
-                                    send(progress)
-                                }
-                            }
-                        } ?: throw IllegalStateException("Cannot open input stream for URI: $uri")
-                        Triple(content, name, false)
-                    }
+                    } ?: throw IllegalStateException("Cannot open input stream for URI: $uri")
+                    Triple(content, name, false)
                 }
+            }
 
-                val result = buildFileReadResult(bytes, fileName, isReadOnly, encoding) { progress ->
-                    send(progress)
-                }
+            val result = buildFileReadResult(bytes, fileName, isReadOnly, encoding) { progress ->
+                send(progress)
+            }
 
-                val fileSize = bytes.size.toLong()
-                val isTruncated = fileSize > STREAMING_THRESHOLD
+            val fileSize = bytes.size.toLong()
+            val isTruncated = fileSize > STREAMING_THRESHOLD
 
-                send(FileReadProgress.Done(
+            send(
+                FileReadProgress.Done(
                     result.copy(
                         isTruncated = isTruncated,
-                        loadMoreUri = if (isTruncated) uri else null,
-                    ),
-                ))
-            }
+                        loadMoreUri = if (isTruncated) uri else null
+                    )
+                )
+            )
         }
+    }
 
     /**
      * 离线优先文件读取（Ch5#3）。
@@ -702,7 +710,7 @@ class EditorRepositoryImpl @Inject constructor(
         uri: Uri,
         encoding: String?,
         cachedContent: String?,
-        cachedTimestamp: Long,
+        cachedTimestamp: Long
     ): Flow<EditorFileReadOutcome> = flow {
         // 步骤1：如果有缓存，立即发射缓存内容
         if (cachedContent != null) {
@@ -721,10 +729,10 @@ class EditorRepositoryImpl @Inject constructor(
                         language = language,
                         fileName = fileName,
                         fileSize = cachedContent.length.toLong(),
-                        detectedEncoding = encoding ?: "UTF-8",
+                        detectedEncoding = encoding ?: "UTF-8"
                     ),
-                    ageMs = ageMs.coerceAtLeast(-1L),
-                ),
+                    ageMs = ageMs.coerceAtLeast(-1L)
+                )
             )
         }
 
@@ -737,8 +745,8 @@ class EditorRepositoryImpl @Inject constructor(
                 emit(
                     EditorFileReadOutcome.Unavailable(
                         error = e,
-                        message = e.message ?: "Failed to read file",
-                    ),
+                        message = e.message ?: "Failed to read file"
+                    )
                 )
             }
         }

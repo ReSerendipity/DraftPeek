@@ -31,12 +31,12 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
-import com.draftpeek.feature.editor.R
 import com.draftpeek.core.ui.component.BrandDialog
 import com.draftpeek.core.ui.component.BrandFilledButton
 import com.draftpeek.core.ui.component.BrandOutlinedButton
 import com.draftpeek.core.ui.theme.DraftPeekTypography
 import com.draftpeek.core.ui.theme.PrototypeTokens
+import com.draftpeek.feature.editor.R
 
 /**
  * 用户可选择的常用编码列表。
@@ -51,7 +51,7 @@ val COMMON_ENCODINGS = listOf(
     "ISO-8859-1",
     "Big5",
     "Shift_JIS",
-    "EUC-KR",
+    "EUC-KR"
 )
 
 /**
@@ -69,7 +69,7 @@ fun EncodingSelectorDialog(
     encodings: List<String> = COMMON_ENCODINGS,
     defaultEncoding: String = "UTF-8",
     onDismissRequest: () -> Unit,
-    onEncodingSelected: (String) -> Unit,
+    onEncodingSelected: (String) -> Unit
 ) {
     var selectedEncoding by rememberSaveable { mutableStateOf(defaultEncoding) }
 
@@ -77,7 +77,12 @@ fun EncodingSelectorDialog(
     val muted = PrototypeTokens.muted
     BrandDialog(
         onDismissRequest = onDismissRequest,
-        title = { Text(stringResource(R.string.editor_encoding_select_title), style = DraftPeekTypography.titleLarge.copy(color = fg)) },
+        title = {
+            Text(
+                stringResource(R.string.editor_encoding_select_title),
+                style = DraftPeekTypography.titleLarge.copy(color = fg)
+            )
+        },
         content = {
             Column(
                 modifier = Modifier
@@ -87,13 +92,13 @@ fun EncodingSelectorDialog(
                 Text(
                     text = "文件编码检测失败或需要手动指定编码。请选择正确的编码格式重新打开文件。",
                     style = DraftPeekTypography.bodyMedium,
-                    color = muted,
+                    color = muted
                 )
                 Spacer(modifier = Modifier.height(16.dp))
                 Text(
                     text = "可用编码：",
                     style = DraftPeekTypography.labelMedium,
-                    color = fg,
+                    color = fg
                 )
                 Spacer(modifier = Modifier.height(8.dp))
                 encodings.forEach { encoding ->
@@ -102,18 +107,18 @@ fun EncodingSelectorDialog(
                             .fillMaxWidth()
                             .clickable { selectedEncoding = encoding }
                             .padding(vertical = 8.dp),
-                        verticalAlignment = Alignment.CenterVertically,
+                        verticalAlignment = Alignment.CenterVertically
                     ) {
                         RadioButton(
                             selected = selectedEncoding == encoding,
                             onClick = { selectedEncoding = encoding },
-                            colors = RadioButtonDefaults.colors(selectedColor = PrototypeTokens.accent),
+                            colors = RadioButtonDefaults.colors(selectedColor = PrototypeTokens.accent)
                         )
                         Spacer(modifier = Modifier.width(8.dp))
                         Text(
                             text = encoding,
                             style = DraftPeekTypography.bodyLarge,
-                            color = fg,
+                            color = fg
                         )
                     }
                 }
@@ -124,7 +129,7 @@ fun EncodingSelectorDialog(
         },
         dismissButton = {
             BrandOutlinedButton(text = "取消", onClick = onDismissRequest)
-        },
+        }
     )
 }
 
@@ -141,13 +146,13 @@ fun EncodingSelectorDialog(
 fun QuickEncodingSelector(
     defaultEncoding: String = "UTF-8",
     onDismissRequest: () -> Unit,
-    onEncodingSelected: (String) -> Unit,
+    onEncodingSelected: (String) -> Unit
 ) {
     val quickEncodings = listOf("UTF-8", "GB18030", "GBK", "GB2312", "UTF-16BE", "UTF-16LE", "ISO-8859-1")
     EncodingSelectorDialog(
         encodings = quickEncodings,
         defaultEncoding = defaultEncoding,
         onDismissRequest = onDismissRequest,
-        onEncodingSelected = onEncodingSelected,
+        onEncodingSelected = onEncodingSelected
     )
 }

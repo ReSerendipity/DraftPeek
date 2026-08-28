@@ -123,7 +123,9 @@ interface RecentFileDao {
      * @param scrollX 水平滚动偏移像素
      * @param scrollY 垂直滚动偏移像素
      */
-    @Query("UPDATE recent_files SET cursorLine = :line, cursorColumn = :column, scrollX = :scrollX, scrollY = :scrollY WHERE uri = :uri")
+    @Query(
+        "UPDATE recent_files SET cursorLine = :line, cursorColumn = :column, scrollX = :scrollX, scrollY = :scrollY WHERE uri = :uri"
+    )
     suspend fun updateReadingPosition(uri: String, line: Int, column: Int, scrollX: Int, scrollY: Int)
 
     /**

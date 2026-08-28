@@ -20,6 +20,7 @@
  *
  * 创建: 2024
  */
+
 package com.draftpeek.feature.stats.viewmodel
 
 import android.content.Context
@@ -39,6 +40,12 @@ import com.draftpeek.feature.stats.util.AchievementCalculator
 import com.draftpeek.feature.stats.util.AchievementDefinitions
 import dagger.hilt.android.lifecycle.HiltViewModel
 import dagger.hilt.android.qualifiers.ApplicationContext
+import java.time.Instant
+import java.time.LocalDate
+import java.time.ZoneId
+import java.time.format.DateTimeFormatter
+import java.time.temporal.ChronoUnit
+import javax.inject.Inject
 import kotlinx.collections.immutable.ImmutableList
 import kotlinx.collections.immutable.persistentListOf
 import kotlinx.collections.immutable.toImmutableList
@@ -57,12 +64,6 @@ import kotlinx.coroutines.flow.flatMapLatest
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
-import java.time.Instant
-import java.time.LocalDate
-import java.time.ZoneId
-import java.time.format.DateTimeFormatter
-import java.time.temporal.ChronoUnit
-import javax.inject.Inject
 
 /**
  * 统计时间周期枚举。
@@ -72,14 +73,19 @@ import javax.inject.Inject
 enum class StatsPeriod {
     /** 摘要 - 显示全部历史数据汇总 */
     SUMMARY,
+
     /** 本年 - 显示本年度 1月1日至今的数据 */
     YEAR,
+
     /** 本月 - 显示本月 1日至今的数据 */
     MONTH,
+
     /** 最近7天 - 显示最近 7 天（含今天）的数据 */
     WEEK,
+
     /** 今日 - 仅显示今天的数据 */
     TODAY,
+
     /** 昨日 - 仅显示昨天的数据 */
     YESTERDAY
 }
@@ -123,7 +129,7 @@ data class DayDetail(
     val fileCreateCount: Int,
     val dayOfWeek: String,
     val summary: String,
-    val activeTimePeriods: List<String>,
+    val activeTimePeriods: List<String>
 )
 
 /**
@@ -134,6 +140,7 @@ data class DayDetail(
 sealed class StatsMessage {
     /** 缓存清理成功事件 */
     data object CacheCleared : StatsMessage()
+
     /**
      * 缓存清理失败事件
      * @param error 错误信息
@@ -159,14 +166,14 @@ class StatsViewModel @Inject constructor(
     private val userActivityRepository: UserActivityRepository,
     private val recentFilesRepository: RecentFilesRepository,
     private val getRecentFiles: GetRecentFilesUseCase,
-    private val settingsRepository: SettingsRepository,
+    private val settingsRepository: SettingsRepository
 ) : ViewModel() {
 
     /** 一次性消息事件流，用于向 UI 发送 Toast 等通知 */
     private val _messageEvent = MutableSharedFlow<StatsMessage>(
         replay = 0,
         extraBufferCapacity = 1,
-        onBufferOverflow = BufferOverflow.DROP_OLDEST,
+        onBufferOverflow = BufferOverflow.DROP_OLDEST
     )
     val messageEvent: SharedFlow<StatsMessage> = _messageEvent.asSharedFlow()
 
@@ -181,10 +188,13 @@ class StatsViewModel @Inject constructor(
 
     /** ISO 日期格式化器（yyyy-MM-dd） */
     private val dateFormatter = DateTimeFormatter.ISO_LOCAL_DATE
+
     /** 系统默认时区 */
     private val systemZone: ZoneId = ZoneId.systemDefault()
+
     /** 当前日期（动态获取，避免应用长时间运行跨天导致日期错误） */
     private val today: LocalDate get() = LocalDate.now(systemZone)
+
     /** 两年前的日期，用于加载历史活动数据（动态计算） */
     private val twoYearsAgo: LocalDate get() = today.minusYears(2)
 
@@ -356,12 +366,10 @@ class StatsViewModel @Inject constructor(
      * @param dateStr ISO 格式日期字符串（yyyy-MM-dd）
      * @return LocalDate 对象，解析失败返回 null
      */
-    private fun parseDate(dateStr: String): LocalDate? {
-        return try {
-            LocalDate.parse(dateStr, dateFormatter)
-        } catch (e: Exception) {
-            null
-        }
+    private fun parseDate(dateStr: String): LocalDate? = try {
+        LocalDate.parse(dateStr, dateFormatter)
+    } catch (e: Exception) {
+        null
     }
 
     /**
@@ -395,7 +403,7 @@ class StatsViewModel @Inject constructor(
 
         val dayOfWeekLabel = date.dayOfWeek.getDisplayName(
             java.time.format.TextStyle.FULL,
-            java.util.Locale.CHINA,
+            java.util.Locale.CHINA
         )
 
         val summary = when {
@@ -429,7 +437,7 @@ class StatsViewModel @Inject constructor(
             fileCreateCount = activity.fileCreateCount,
             dayOfWeek = dayOfWeekLabel,
             summary = summary,
-            activeTimePeriods = activePeriods,
+            activeTimePeriods = activePeriods
         )
     }
 
@@ -443,12 +451,10 @@ class StatsViewModel @Inject constructor(
      * @param minutes 时长（分钟）
      * @return 格式化后的时长字符串
      */
-    fun formatDuration(minutes: Long): String {
-        return when {
-            minutes < 60 -> "${minutes}min"
-            minutes < 600 -> "%.1fh".format(minutes / 60f)
-            else -> "${minutes / 60}h"
-        }
+    fun formatDuration(minutes: Long): String = when {
+        minutes < 60 -> "${minutes}min"
+        minutes < 600 -> "%.1fh".format(minutes / 60f)
+        else -> "${minutes / 60}h"
     }
 
     /**
@@ -457,9 +463,7 @@ class StatsViewModel @Inject constructor(
      * @param n 要格式化的数字
      * @return 带千位分隔符的数字字符串（如 "1,234,567"）
      */
-    fun formatNumber(n: Long): String {
-        return "%,d".format(n)
-    }
+    fun formatNumber(n: Long): String = "%,d".format(n)
 
     /**
      * 获取自首次使用以来的总天数。
@@ -523,10 +527,7 @@ class StatsViewModel @Inject constructor(
      * @property selectedColor 当前选中的热力图主题颜色
      * @property selectedDay 当前选中查看详情的日期，null 表示未选中
      */
-    data class StatsUiState(
-        val selectedColor: RainbowColor = RainbowColor.RED,
-        val selectedDay: LocalDate? = null,
-    )
+    data class StatsUiState(val selectedColor: RainbowColor = RainbowColor.RED, val selectedDay: LocalDate? = null)
 
     companion object {
         private const val TAG = "StatsViewModel"

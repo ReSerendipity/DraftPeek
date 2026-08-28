@@ -19,13 +19,12 @@ package com.draftpeek.core.ui.layout
 import androidx.compose.foundation.gestures.detectHorizontalDragGestures
 import androidx.compose.foundation.gestures.detectVerticalDragGestures
 import androidx.compose.foundation.layout.Box
-import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxHeight
-import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.width
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableFloatStateOf
@@ -38,7 +37,6 @@ import androidx.compose.ui.layout.onSizeChanged
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
-import androidx.window.core.layout.WindowSizeClass
 
 /**
  * 分割方向枚举。
@@ -46,6 +44,7 @@ import androidx.window.core.layout.WindowSizeClass
 enum class SplitOrientation {
     /** 水平方向：左右并排 */
     Horizontal,
+
     /** 垂直方向：上下堆叠 */
     Vertical
 }
@@ -74,7 +73,7 @@ fun SplitPane(
     maxRatio: Float = 0.8f,
     dividerWidth: Dp = 4.dp,
     first: @Composable () -> Unit,
-    second: @Composable () -> Unit,
+    second: @Composable () -> Unit
 ) {
     // Use rememberSaveable to persist split ratio across orientation changes
     var ratio by rememberSaveable {

@@ -26,12 +26,7 @@ interface SecurityEventRepository {
      * @param signalsMask 信号 bitmask
      * @param responseLevel 响应级别
      */
-    suspend fun record(
-        eventType: String,
-        threatLevel: String,
-        signalsMask: Int,
-        responseLevel: String,
-    )
+    suspend fun record(eventType: String, threatLevel: String, signalsMask: Int, responseLevel: String)
 
     /**
      * 获取最近 N 条安全事件。

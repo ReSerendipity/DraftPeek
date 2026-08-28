@@ -45,8 +45,10 @@ object AntiDebug {
     enum class SecurityLevel {
         /** 环境安全 */
         SAFE,
+
         /** 存在可疑迹象，功能应降级 */
         SUSPICIOUS,
+
         /** 确认处于敌对环境，应终止或严格限制 */
         HOSTILE
     }
@@ -61,8 +63,8 @@ object AntiDebug {
     private val threatScore = AtomicInteger(0)
     private val lastScoreDecayMs = AtomicLong(System.currentTimeMillis())
 
-    private const val SCORE_DECAY_INTERVAL_MS = 60_000L  // 每 60 秒衰减一次
-    private const val SCORE_DECAY_DIVISOR = 2            // 每次衰减为原来的 1/2
+    private const val SCORE_DECAY_INTERVAL_MS = 60_000L // 每 60 秒衰减一次
+    private const val SCORE_DECAY_DIVISOR = 2 // 每次衰减为原来的 1/2
 
     /**
      * 威胁分数滑窗衰减：超过衰减间隔后把累积分减半。
@@ -96,50 +98,46 @@ object AntiDebug {
     /**
      * 检测是否处于被调试状态
      */
-    fun isDebuggerConnected(): Boolean {
-        return Debug.isDebuggerConnected() || Debug.waitingForDebugger()
-    }
+    fun isDebuggerConnected(): Boolean = Debug.isDebuggerConnected() || Debug.waitingForDebugger()
 
     /**
      * 检测是否运行在常见模拟器环境中
      */
-    fun isRunningOnEmulator(): Boolean {
-        return (Build.BRAND.startsWith("generic") && Build.DEVICE.startsWith("generic"))
-                || Build.FINGERPRINT.startsWith("generic")
-                || Build.FINGERPRINT.startsWith("unknown")
-                || Build.HARDWARE.contains("goldfish")
-                || Build.HARDWARE.contains("ranchu")
-                || Build.MODEL.contains("google_sdk")
-                || Build.MODEL.contains("Emulator")
-                || Build.MODEL.contains("Android SDK built for x86")
-                || Build.MANUFACTURER.contains("Genymotion")
-                || Build.PRODUCT.contains("sdk_google")
-                || Build.PRODUCT.contains("vbox86p")
-                || Build.PRODUCT.contains("emulator")
-                || Build.PRODUCT.contains("simulator")
-    }
+    fun isRunningOnEmulator(): Boolean = (Build.BRAND.startsWith("generic") && Build.DEVICE.startsWith("generic")) ||
+        Build.FINGERPRINT.startsWith("generic") ||
+        Build.FINGERPRINT.startsWith("unknown") ||
+        Build.HARDWARE.contains("goldfish") ||
+        Build.HARDWARE.contains("ranchu") ||
+        Build.MODEL.contains("google_sdk") ||
+        Build.MODEL.contains("Emulator") ||
+        Build.MODEL.contains("Android SDK built for x86") ||
+        Build.MANUFACTURER.contains("Genymotion") ||
+        Build.PRODUCT.contains("sdk_google") ||
+        Build.PRODUCT.contains("vbox86p") ||
+        Build.PRODUCT.contains("emulator") ||
+        Build.PRODUCT.contains("simulator")
 
     /**
      * 检测是否被 ptrace 附加（通过 /proc/self/status 的 TracerPid 字段）
      */
-    fun isTraced(): Boolean {
-        return try {
-            val statusFile = File("/proc/self/status")
-            if (statusFile.exists()) {
-                val tracerPidLine = statusFile.useLines { lines ->
-                    lines.find { it.startsWith("TracerPid:") }
-                }
-                val pid = tracerPidLine?.split("\\s+".toRegex())?.getOrNull(1)?.toIntOrNull() ?: 0
-                pid != 0
-            } else false
-        } catch (_: Exception) {
+    fun isTraced(): Boolean = try {
+        val statusFile = File("/proc/self/status")
+        if (statusFile.exists()) {
+            val tracerPidLine = statusFile.useLines { lines ->
+                lines.find { it.startsWith("TracerPid:") }
+            }
+            val pid = tracerPidLine?.split("\\s+".toRegex())?.getOrNull(1)?.toIntOrNull() ?: 0
+            pid != 0
+        } else {
             false
         }
+    } catch (_: Exception) {
+        false
     }
 
     /**
      * 检测 Frida 动态注入框架（多端口 + 进程 + 文件 + maps 扫描 + 库特征检测）
-     * 
+     *
      * [Review] C3 fix: 添加 @WorkerThread 注解 —— Socket 连接 + readText 会阻塞调用线程，
      * 禁止从主线程调用，否则可能导致 ANR。
      */
@@ -167,14 +165,14 @@ object AntiDebug {
                 if (maps.exists()) {
                     // 增强的 Frida 特征模式列表
                     val fridaPatterns = listOf(
-                        "frida",                    // Frida 核心
-                        "gum-js-loop",              // Frida GUM 引擎
-                        "gmain",                    // Frida GLib 主循环
-                        "linjector",                // Frida 注入器
-                        "frida-gadget",             // Frida Gadget 库
-                        "frida-agent",              // Frida Agent
-                        "libfrida",                 // Frida 原生库
-                        "re.frida.server"           // Frida Server
+                        "frida", // Frida 核心
+                        "gum-js-loop", // Frida GUM 引擎
+                        "gmain", // Frida GLib 主循环
+                        "linjector", // Frida 注入器
+                        "frida-gadget", // Frida Gadget 库
+                        "frida-agent", // Frida Agent
+                        "libfrida", // Frida 原生库
+                        "re.frida.server" // Frida Server
                     )
                     val found = maps.useLines { lines ->
                         lines.any { line ->
@@ -219,13 +217,13 @@ object AntiDebug {
         return try {
             // 检测多种 Xposed 变体的特征类
             val xposedClasses = listOf(
-                "de.robv.android.xposed.XposedBridge",         // 原始 Xposed
-                "de.robv.android.xposed.XposedHelpers",        // Xposed Helpers
+                "de.robv.android.xposed.XposedBridge", // 原始 Xposed
+                "de.robv.android.xposed.XposedHelpers", // Xposed Helpers
                 "com.swift.sandhook.xposedcompat.XposedCompat", // SandHook (EdXposed)
-                "me.weishu.epic.art.EpicNative",               // Epic (VirtualXposed)
-                "org.lsposed.lspd.nativebridge.NativeAPI",     // LSPosed
-                "io.github.lsposed.lspd.NativeAPI",             // LSPosed 变体
-                "de.robv.android.xposed.XC_MethodHook",        // Xposed 方法 Hook
+                "me.weishu.epic.art.EpicNative", // Epic (VirtualXposed)
+                "org.lsposed.lspd.nativebridge.NativeAPI", // LSPosed
+                "io.github.lsposed.lspd.NativeAPI", // LSPosed 变体
+                "de.robv.android.xposed.XC_MethodHook", // Xposed 方法 Hook
                 "de.robv.android.xposed.callbacks.XC_LoadPackage" // Xposed 包加载回调
             )
             val classDetected = xposedClasses.any { className ->
@@ -364,8 +362,8 @@ object AntiDebug {
                         "frida-agent",
                         "libfrida",
                         "xposed",
-                        "substrate",              // Cydia Substrate
-                        "lib substrate",          // Substrate 原生库
+                        "substrate", // Cydia Substrate
+                        "lib substrate", // Substrate 原生库
                         "TweakInject",
                         "SSLHook"
                     )
@@ -404,16 +402,16 @@ object AntiDebug {
                 val maps = File("/proc/self/maps")
                 if (maps.exists()) {
                     val zygiskPatterns = listOf(
-                        "zygisk",                   // Zygisk 核心库
-                        "libzygisk",                // Zygisk 原生库
-                        "zygisk_",                  // Zygisk 模块前缀
-                        "magiskzygisk",             // Magisk Zygisk
-                        "riru",                     // Riru (Zygisk 前身)
-                        "libriru",                  // Riru 原生库
-                        "shamiko",                  // Shamiko (DenyList 模块)
-                        "zygisk_next",              // Zygisk Next (替代实现)
-                        "dobby",                    // Dobby hook 框架 (Zygisk 依赖)
-                        "ndk_translation"           // 某些 Zygisk 模块依赖
+                        "zygisk", // Zygisk 核心库
+                        "libzygisk", // Zygisk 原生库
+                        "zygisk_", // Zygisk 模块前缀
+                        "magiskzygisk", // Magisk Zygisk
+                        "riru", // Riru (Zygisk 前身)
+                        "libriru", // Riru 原生库
+                        "shamiko", // Shamiko (DenyList 模块)
+                        "zygisk_next", // Zygisk Next (替代实现)
+                        "dobby", // Dobby hook 框架 (Zygisk 依赖)
+                        "ndk_translation" // 某些 Zygisk 模块依赖
                     )
                     val found = maps.useLines { lines ->
                         lines.any { line ->
@@ -428,27 +426,27 @@ object AntiDebug {
 
             // 检测 Zygisk 特征文件和目录
             val zygiskPaths = listOf(
-                "/data/adb/modules/zygisksu",          // Zygisk - SU
-                "/data/adb/modules/zygisk",             // Zygisk 模块目录
-                "/data/adb/modules/shamiko",            // Shamiko 模块
-                "/data/adb/.zygisk",                    // Zygisk 隐藏目录
-                "/debug_ramdisk/zygisk",                // Zygisk 在 debug ramdisk
-                "/system/bin/wrap.sh",                  // Wrap.sh 调试包装器
-                "/system/xbin/wrap.sh",                 // Wrap.sh 备用路径
-                "/debug_ramdisk/wrap.sh",               // Wrap.sh 在 debug ramdisk
-                "/data/local/tmp/wrap.sh",              // Wrap.sh 临时路径
-                "/data/adb/modules/riru",               // Riru 模块目录
-                "/data/adb/riru",                       // Riru 核心目录
-                "/data/adb/modules/zygisk_next"         // Zygisk Next 模块
+                "/data/adb/modules/zygisksu", // Zygisk - SU
+                "/data/adb/modules/zygisk", // Zygisk 模块目录
+                "/data/adb/modules/shamiko", // Shamiko 模块
+                "/data/adb/.zygisk", // Zygisk 隐藏目录
+                "/debug_ramdisk/zygisk", // Zygisk 在 debug ramdisk
+                "/system/bin/wrap.sh", // Wrap.sh 调试包装器
+                "/system/xbin/wrap.sh", // Wrap.sh 备用路径
+                "/debug_ramdisk/wrap.sh", // Wrap.sh 在 debug ramdisk
+                "/data/local/tmp/wrap.sh", // Wrap.sh 临时路径
+                "/data/adb/modules/riru", // Riru 模块目录
+                "/data/adb/riru", // Riru 核心目录
+                "/data/adb/modules/zygisk_next" // Zygisk Next 模块
             )
             if (zygiskPaths.any { File(it).exists() }) return true
 
             // 检测 Magisk DenyList (Shamiko) 配置
             val denyListPaths = listOf(
-                "/data/adb/shamiko",                    // Shamiko 配置
-                "/data/adb/modules/.zygisk_shamiko",    // Shamiko 隐藏标记
-                "/data/adb/magisk/denylist",            // Magisk DenyList 配置
-                "/cache/.disable_magisk"                // Magisk 禁用标记（可能表示隐藏模式）
+                "/data/adb/shamiko", // Shamiko 配置
+                "/data/adb/modules/.zygisk_shamiko", // Shamiko 隐藏标记
+                "/data/adb/magisk/denylist", // Magisk DenyList 配置
+                "/cache/.disable_magisk" // Magisk 禁用标记（可能表示隐藏模式）
             )
             if (denyListPaths.any { File(it).exists() }) return true
 
@@ -469,6 +467,7 @@ object AntiDebug {
     // 安全代码完整性校验结果缓存
     @Volatile
     private var integrityChecked = false
+
     @Volatile
     private var integrityVerified = false
 
@@ -476,10 +475,10 @@ object AntiDebug {
      * 执行全量安全检测，返回威胁等级。
      * 每次调用会累加威胁分数；累积分按时间窗衰减（见 [decayThreatScore]），
      * 持续性威胁保持高等级，瞬态误报会在数分钟内自动恢复。
-     * 
+     *
      * [Review] C4 fix: 使用 AtomicInteger.addAndGet() 原子累加，
      * 保证多线程并发调用的正确性。
-     * 
+     *
      * [Code Integrity] 添加安全代码完整性自校验，检测安全类是否被篡改。
      */
     @WorkerThread
@@ -501,7 +500,7 @@ object AntiDebug {
         }
         // 如果完整性校验失败，显著增加威胁分数
         if (integrityChecked && !integrityVerified) {
-            currentThreat += 10  // 高威胁：安全代码可能被篡改
+            currentThreat += 10 // 高威胁：安全代码可能被篡改
         }
 
         if (isDebuggerConnected()) currentThreat += 5
@@ -511,20 +510,20 @@ object AntiDebug {
         if (isXposedDetected()) currentThreat += 4
         if (isRooted()) currentThreat += 2
         if (isHookFrameworkDetected()) currentThreat += 4
-        if (isZygiskDetected()) currentThreat += 3  // VULN-014: Zygisk 检测
+        if (isZygiskDetected()) currentThreat += 3 // VULN-014: Zygisk 检测
 
         // VULN-005: Native C 层反检测（更难被 Frida hook 绕过）
         // Native 检测作为 Java 层检测的补充，如果 Java 层检测被 hook 绕过，
         // Native 层检测仍然可以发现威胁。
         val nativeThreats = NativeSecurityChecker.performSecurityCheck()
         if (nativeThreats and NativeSecurityChecker.THREAT_FRIDA != 0) {
-            currentThreat += 3  // Native Frida 检测（分数较低因为 Java 层已有检测）
+            currentThreat += 3 // Native Frida 检测（分数较低因为 Java 层已有检测）
         }
         if (nativeThreats and NativeSecurityChecker.THREAT_TRACED != 0) {
-            currentThreat += 2  // Native TracerPid 检测
+            currentThreat += 2 // Native TracerPid 检测
         }
         if (nativeThreats and NativeSecurityChecker.THREAT_ZYGISK != 0) {
-            currentThreat += 2  // Native Zygisk 检测
+            currentThreat += 2 // Native Zygisk 检测
         }
 
         // [Fix] AUDIT-2026-08：累加前先执行滑窗衰减，瞬态误报可自动恢复
@@ -582,7 +581,7 @@ object AntiDebug {
      */
     fun nextCheckIntervalMs(): Long {
         val secureRandom = SecureRandom()
-        return (3000 + secureRandom.nextInt(12001)).toLong()  // 3000..15000
+        return (3000 + secureRandom.nextInt(12001)).toLong() // 3000..15000
     }
 
     /**
@@ -592,6 +591,6 @@ object AntiDebug {
      */
     fun initialDelayMs(): Long {
         val secureRandom = SecureRandom()
-        return (1000 + secureRandom.nextInt(4001)).toLong()  // 1000..5000
+        return (1000 + secureRandom.nextInt(4001)).toLong() // 1000..5000
     }
 }

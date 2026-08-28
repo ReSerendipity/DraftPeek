@@ -52,13 +52,13 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.unit.dp
+import com.draftpeek.core.common.util.RequestCanceller
 import com.draftpeek.core.ui.theme.DraftPeekTypography
 import com.draftpeek.core.ui.theme.H2Style
 import com.draftpeek.core.ui.theme.PrototypeShapes
 import com.draftpeek.core.ui.theme.PrototypeSpacing
 import com.draftpeek.core.ui.theme.PrototypeTokens
 import com.draftpeek.core.ui.theme.SearchBarHintStyle
-import com.draftpeek.core.common.util.RequestCanceller
 import com.draftpeek.feature.editor.R
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
@@ -76,7 +76,7 @@ data class FileSearchResult(
     val fileName: String,
     val filePath: String,
     val lineNumbers: List<Int>,
-    val lineSnippets: List<String>,
+    val lineSnippets: List<String>
 )
 
 /**
@@ -95,7 +95,7 @@ fun CrossFileSearchScreen(
     onBack: () -> Unit,
     onFileClick: (String) -> Unit,
     searchInFiles: suspend (String) -> List<FileSearchResult>,
-    modifier: Modifier = Modifier,
+    modifier: Modifier = Modifier
 ) {
     var query by remember { mutableStateOf("") }
     var results by remember { mutableStateOf<List<FileSearchResult>>(emptyList()) }
@@ -139,18 +139,18 @@ fun CrossFileSearchScreen(
     Box(
         modifier = modifier
             .fillMaxSize()
-            .background(pageBg),
+            .background(pageBg)
     ) {
         Column(
             modifier = Modifier
                 .fillMaxSize()
-                .padding(horizontal = PrototypeSpacing.ScreenHorizontal),
+                .padding(horizontal = PrototypeSpacing.ScreenHorizontal)
         ) {
             Spacer(modifier = Modifier.height(8.dp))
 
             Row(
                 modifier = Modifier.fillMaxWidth(),
-                verticalAlignment = Alignment.CenterVertically,
+                verticalAlignment = Alignment.CenterVertically
             ) {
                 Box(
                     modifier = Modifier
@@ -159,19 +159,19 @@ fun CrossFileSearchScreen(
                         .border(1.dp, border, PrototypeShapes.Medium)
                         .background(surface)
                         .clickable { onBack() },
-                    contentAlignment = Alignment.Center,
+                    contentAlignment = Alignment.Center
                 ) {
                     Icon(
                         imageVector = Icons.AutoMirrored.Filled.ArrowBack,
                         contentDescription = stringResource(R.string.editor_back),
                         tint = fgSoft,
-                        modifier = Modifier.size(16.dp),
+                        modifier = Modifier.size(16.dp)
                     )
                 }
                 Spacer(modifier = Modifier.width(12.dp))
                 Text(
                     text = stringResource(R.string.editor_cross_file_search),
-                    style = H2Style.copy(color = fg),
+                    style = H2Style.copy(color = fg)
                 )
             }
 
@@ -185,13 +185,13 @@ fun CrossFileSearchScreen(
                     .background(surface)
                     .border(1.dp, border, PrototypeShapes.InputField)
                     .padding(horizontal = PrototypeSpacing.InputFieldPaddingH),
-                verticalAlignment = Alignment.CenterVertically,
+                verticalAlignment = Alignment.CenterVertically
             ) {
                 Icon(
                     imageVector = Icons.Filled.Search,
                     contentDescription = stringResource(R.string.editor_find),
                     tint = muted,
-                    modifier = Modifier.size(18.dp),
+                    modifier = Modifier.size(18.dp)
                 )
                 Spacer(modifier = Modifier.width(8.dp))
                 BasicTextField(
@@ -202,7 +202,7 @@ fun CrossFileSearchScreen(
                     cursorBrush = SolidColor(accent),
                     keyboardOptions = KeyboardOptions(imeAction = ImeAction.Search),
                     keyboardActions = KeyboardActions(
-                        onSearch = { performSearch() },
+                        onSearch = { performSearch() }
                     ),
                     modifier = Modifier
                         .weight(1f)
@@ -211,11 +211,11 @@ fun CrossFileSearchScreen(
                         if (query.isEmpty()) {
                             Text(
                                 text = stringResource(R.string.editor_search_content),
-                                style = SearchBarHintStyle.copy(color = muted),
+                                style = SearchBarHintStyle.copy(color = muted)
                             )
                         }
                         innerTextField()
-                    },
+                    }
                 )
                 if (query.isNotBlank()) {
                     Spacer(modifier = Modifier.width(8.dp))
@@ -226,21 +226,21 @@ fun CrossFileSearchScreen(
                             .background(accent)
                             .clickable(enabled = !isSearching) { performSearch() }
                             .padding(horizontal = 12.dp),
-                        contentAlignment = Alignment.Center,
+                        contentAlignment = Alignment.Center
                     ) {
                         if (isSearching) {
                             CircularProgressIndicator(
                                 modifier = Modifier.size(14.dp),
                                 color = surface,
-                                strokeWidth = 2.dp,
+                                strokeWidth = 2.dp
                             )
                         } else {
                             Text(
                                 text = stringResource(R.string.editor_search),
                                 style = DraftPeekTypography.labelMedium.copy(
                                     color = surface,
-                                    fontWeight = FontWeight.SemiBold,
-                                ),
+                                    fontWeight = FontWeight.SemiBold
+                                )
                             )
                         }
                     }
@@ -254,7 +254,7 @@ fun CrossFileSearchScreen(
                     isSearching -> {
                         Box(
                             modifier = Modifier.fillMaxSize(),
-                            contentAlignment = Alignment.Center,
+                            contentAlignment = Alignment.Center
                         ) {
                             CircularProgressIndicator(color = accent)
                         }
@@ -262,12 +262,12 @@ fun CrossFileSearchScreen(
                     hasSearched && results.isEmpty() -> {
                         Box(
                             modifier = Modifier.fillMaxSize(),
-                            contentAlignment = Alignment.Center,
+                            contentAlignment = Alignment.Center
                         ) {
                             Column(horizontalAlignment = Alignment.CenterHorizontally) {
                                 Text(
                                     text = stringResource(R.string.editor_no_match_found),
-                                    style = DraftPeekTypography.bodyMedium.copy(color = muted),
+                                    style = DraftPeekTypography.bodyMedium.copy(color = muted)
                                 )
                             }
                         }
@@ -275,7 +275,7 @@ fun CrossFileSearchScreen(
                     else -> {
                         LazyColumn(
                             modifier = Modifier.fillMaxSize(),
-                            verticalArrangement = Arrangement.spacedBy(4.dp),
+                            verticalArrangement = Arrangement.spacedBy(4.dp)
                         ) {
                             // OPTIMIZE: [F4] - 使用 filePath 作为稳定 key，避免并发搜索结果
                             // （C-05 改造后 awaitAll 顺序受调度影响）顺序变化导致的：
@@ -285,7 +285,7 @@ fun CrossFileSearchScreen(
                             items(results, key = { it.filePath }) { result ->
                                 FileSearchResultItem(
                                     result = result,
-                                    onClick = { onFileClick(result.filePath) },
+                                    onClick = { onFileClick(result.filePath) }
                                 )
                             }
                         }
@@ -307,10 +307,7 @@ fun CrossFileSearchScreen(
  * @param onClick 点击回调
  */
 @Composable
-private fun FileSearchResultItem(
-    result: FileSearchResult,
-    onClick: () -> Unit,
-) {
+private fun FileSearchResultItem(result: FileSearchResult, onClick: () -> Unit) {
     val surface = PrototypeTokens.surface
     val fg = PrototypeTokens.fg
     val fgSoft = PrototypeTokens.fgSoft
@@ -324,14 +321,14 @@ private fun FileSearchResultItem(
             .background(surface)
             .border(1.dp, border, PrototypeShapes.Card)
             .clickable(onClick = onClick)
-            .padding(horizontal = 14.dp, vertical = 10.dp),
+            .padding(horizontal = 14.dp, vertical = 10.dp)
     ) {
         Text(
             text = result.fileName,
             style = DraftPeekTypography.bodyMedium.copy(
                 color = fg,
-                fontWeight = FontWeight.SemiBold,
-            ),
+                fontWeight = FontWeight.SemiBold
+            )
         )
         Spacer(modifier = Modifier.height(4.dp))
         result.lineSnippets.take(3).forEachIndexed { idx, snippet ->
@@ -339,10 +336,10 @@ private fun FileSearchResultItem(
                 text = stringResource(
                     R.string.editor_line_snippet,
                     (result.lineNumbers.getOrNull(idx) ?: "").toString(),
-                    snippet.take(80),
+                    snippet.take(80)
                 ),
                 style = DraftPeekTypography.bodySmall.copy(color = muted),
-                maxLines = 1,
+                maxLines = 1
             )
         }
     }

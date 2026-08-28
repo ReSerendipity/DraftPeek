@@ -14,7 +14,6 @@ package com.draftpeek.feature.terminal.ui
 import android.annotation.SuppressLint
 import android.content.Context
 import android.graphics.PixelFormat
-import android.os.Build
 import android.util.Log
 import android.view.Gravity
 import android.view.MotionEvent
@@ -22,7 +21,6 @@ import android.view.ScaleGestureDetector
 import android.view.View
 import android.view.WindowManager
 import androidx.compose.foundation.background
-import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
@@ -144,28 +142,31 @@ class FloatingTerminalManager(private val context: Context) {
         val composeView = createComposeView()
 
         // ScaleGestureDetector用于双指捏合缩放终端字体大小
-        val scaleDetector = ScaleGestureDetector(context, object : ScaleGestureDetector.SimpleOnScaleGestureListener() {
-            override fun onScale(detector: ScaleGestureDetector): Boolean {
-                fontScale = (fontScale * detector.scaleFactor).coerceIn(MIN_FONT_SCALE, MAX_FONT_SCALE)
-                // 用新字体缩放重新渲染
-                try {
-                    composeView.setContent {
-                        FloatingTerminalContent(
-                            isMinimized = isMinimized,
-                            fontScale = fontScale,
-                            onMinimize = { minimize() },
-                            onRestore = { restore() },
-                            onClose = { hide() },
-                        )
-                    }
-                } catch (_: Exception) { }
-                return true
-            }
+        val scaleDetector = ScaleGestureDetector(
+            context,
+            object : ScaleGestureDetector.SimpleOnScaleGestureListener() {
+                override fun onScale(detector: ScaleGestureDetector): Boolean {
+                    fontScale = (fontScale * detector.scaleFactor).coerceIn(MIN_FONT_SCALE, MAX_FONT_SCALE)
+                    // 用新字体缩放重新渲染
+                    try {
+                        composeView.setContent {
+                            FloatingTerminalContent(
+                                isMinimized = isMinimized,
+                                fontScale = fontScale,
+                                onMinimize = { minimize() },
+                                onRestore = { restore() },
+                                onClose = { hide() }
+                            )
+                        }
+                    } catch (_: Exception) { }
+                    return true
+                }
 
-            override fun onScaleEnd(detector: ScaleGestureDetector) {
-                persistWindowState()
+                override fun onScaleEnd(detector: ScaleGestureDetector) {
+                    persistWindowState()
+                }
             }
-        })
+        )
 
         // 设置带手势检测的拖拽处理
         var initialX = 0
@@ -277,20 +278,18 @@ class FloatingTerminalManager(private val context: Context) {
     }
 
     /** 创建完整窗口的布局参数 */
-    private fun createLayoutParams(): WindowManager.LayoutParams {
-        return WindowManager.LayoutParams(
-            windowWidth.coerceAtLeast(MIN_WIDTH),
-            windowHeight.coerceAtLeast(MIN_HEIGHT),
-            // minSdk 26（O）起 TYPE_APPLICATION_OVERLAY 一直可用
-            WindowManager.LayoutParams.TYPE_APPLICATION_OVERLAY,
-            WindowManager.LayoutParams.FLAG_NOT_FOCUSABLE or
-                WindowManager.LayoutParams.FLAG_WATCH_OUTSIDE_TOUCH,
-            PixelFormat.TRANSLUCENT,
-        ).apply {
-            gravity = Gravity.TOP or Gravity.START
-            x = windowX
-            y = windowY
-        }
+    private fun createLayoutParams(): WindowManager.LayoutParams = WindowManager.LayoutParams(
+        windowWidth.coerceAtLeast(MIN_WIDTH),
+        windowHeight.coerceAtLeast(MIN_HEIGHT),
+        // minSdk 26（O）起 TYPE_APPLICATION_OVERLAY 一直可用
+        WindowManager.LayoutParams.TYPE_APPLICATION_OVERLAY,
+        WindowManager.LayoutParams.FLAG_NOT_FOCUSABLE or
+            WindowManager.LayoutParams.FLAG_WATCH_OUTSIDE_TOUCH,
+        PixelFormat.TRANSLUCENT
+    ).apply {
+        gravity = Gravity.TOP or Gravity.START
+        x = windowX
+        y = windowY
     }
 
     /** 创建最小化气泡的布局参数 */
@@ -303,7 +302,7 @@ class FloatingTerminalManager(private val context: Context) {
             WindowManager.LayoutParams.TYPE_APPLICATION_OVERLAY,
             WindowManager.LayoutParams.FLAG_NOT_FOCUSABLE or
                 WindowManager.LayoutParams.FLAG_WATCH_OUTSIDE_TOUCH,
-            PixelFormat.TRANSLUCENT,
+            PixelFormat.TRANSLUCENT
         ).apply {
             gravity = Gravity.TOP or Gravity.START
             x = windowX
@@ -326,7 +325,7 @@ class FloatingTerminalManager(private val context: Context) {
                 fontScale = fontScale,
                 onMinimize = { minimize() },
                 onRestore = { restore() },
-                onClose = { hide() },
+                onClose = { hide() }
             )
         }
 
@@ -347,7 +346,7 @@ class FloatingTerminalManager(private val context: Context) {
                 .putBoolean(KEY_IS_MINIMIZED, isMinimized)
                 .putFloat(KEY_FONT_SCALE, fontScale)
                 .apply()
-            Log.d(TAG, "窗口状态已持久化: pos=($windowX,$windowY) size=${windowWidth}x${windowHeight} fontScale=$fontScale")
+            Log.d(TAG, "窗口状态已持久化: pos=($windowX,$windowY) size=${windowWidth}x$windowHeight fontScale=$fontScale")
         } catch (e: Exception) {
             Log.w(TAG, "持久化窗口状态失败", e)
         }
@@ -365,7 +364,7 @@ class FloatingTerminalManager(private val context: Context) {
             windowHeight = prefs.getInt(KEY_WINDOW_HEIGHT, 600)
             isMinimized = prefs.getBoolean(KEY_IS_MINIMIZED, false)
             fontScale = prefs.getFloat(KEY_FONT_SCALE, 1.0f)
-            Log.d(TAG, "窗口状态已恢复: pos=($windowX,$windowY) size=${windowWidth}x${windowHeight} fontScale=$fontScale")
+            Log.d(TAG, "窗口状态已恢复: pos=($windowX,$windowY) size=${windowWidth}x$windowHeight fontScale=$fontScale")
         } catch (e: Exception) {
             Log.w(TAG, "恢复窗口状态失败，使用默认值", e)
         }
@@ -374,7 +373,9 @@ class FloatingTerminalManager(private val context: Context) {
     /**
      * 浮动ComposeView的简单LifecycleOwner实现。
      */
-    private class FloatingLifecycleOwner : LifecycleOwner, SavedStateRegistryOwner {
+    private class FloatingLifecycleOwner :
+        LifecycleOwner,
+        SavedStateRegistryOwner {
         private val lifecycleRegistry = LifecycleRegistry(this)
         private val savedStateRegistryController = SavedStateRegistryController.create(this)
 
@@ -406,7 +407,7 @@ private fun FloatingTerminalContent(
     fontScale: Float = 1.0f,
     onMinimize: () -> Unit,
     onRestore: () -> Unit,
-    onClose: () -> Unit,
+    onClose: () -> Unit
 ) {
     if (isMinimized) {
         // 气泡视图
@@ -414,14 +415,14 @@ private fun FloatingTerminalContent(
             modifier = Modifier.size(56.dp),
             shape = MaterialTheme.shapes.extraLarge,
             color = MaterialTheme.colorScheme.primary,
-            onClick = onRestore,
+            onClick = onRestore
         ) {
             Box(contentAlignment = Alignment.Center) {
                 Icon(
                     imageVector = Icons.Default.OpenInFull,
                     contentDescription = stringResource(R.string.terminal_restore),
                     tint = MaterialTheme.colorScheme.onPrimary,
-                    modifier = Modifier.size(24.dp),
+                    modifier = Modifier.size(24.dp)
                 )
             }
         }
@@ -430,36 +431,36 @@ private fun FloatingTerminalContent(
         Surface(
             modifier = Modifier.fillMaxSize(),
             color = MaterialTheme.colorScheme.surface,
-            shape = MaterialTheme.shapes.medium,
+            shape = MaterialTheme.shapes.medium
         ) {
             Column {
                 // 带拖拽手柄和控件的标题栏
                 Surface(
                     modifier = Modifier.fillMaxWidth(),
-                    color = MaterialTheme.colorScheme.surfaceVariant,
+                    color = MaterialTheme.colorScheme.surfaceVariant
                 ) {
                     Row(
                         modifier = Modifier.padding(horizontal = 8.dp, vertical = 4.dp),
-                        verticalAlignment = Alignment.CenterVertically,
+                        verticalAlignment = Alignment.CenterVertically
                     ) {
                         Text(
                             text = stringResource(R.string.terminal_title),
                             style = MaterialTheme.typography.labelMedium,
-                            color = MaterialTheme.colorScheme.onSurfaceVariant,
+                            color = MaterialTheme.colorScheme.onSurfaceVariant
                         )
                         Spacer(modifier = Modifier.weight(1f))
                         IconButton(onClick = onMinimize, modifier = Modifier.size(32.dp)) {
                             Icon(
                                 Icons.Default.Minimize,
                                 contentDescription = stringResource(R.string.terminal_minimize),
-                                modifier = Modifier.size(16.dp),
+                                modifier = Modifier.size(16.dp)
                             )
                         }
                         IconButton(onClick = onClose, modifier = Modifier.size(32.dp)) {
                             Icon(
                                 Icons.Default.Close,
                                 contentDescription = stringResource(R.string.terminal_floating_close),
-                                modifier = Modifier.size(16.dp),
+                                modifier = Modifier.size(16.dp)
                             )
                         }
                     }
@@ -470,13 +471,13 @@ private fun FloatingTerminalContent(
                     modifier = Modifier
                         .fillMaxSize()
                         .background(Color.Black)
-                        .padding(8.dp),
+                        .padding(8.dp)
                 ) {
                     Text(
                         text = "$ ",
                         color = Color.Green,
                         fontSize = (13f * fontScale).sp,
-                        fontFamily = androidx.compose.ui.text.font.FontFamily.Monospace,
+                        fontFamily = androidx.compose.ui.text.font.FontFamily.Monospace
                     )
                 }
             }

@@ -11,24 +11,21 @@ package com.draftpeek.core.data.usecase
 
 import com.draftpeek.core.data.entity.Snippet
 import com.draftpeek.core.data.repository.SnippetRepository
-import kotlinx.coroutines.flow.Flow
 import javax.inject.Inject
+import kotlinx.coroutines.flow.Flow
 
 /**
  * 代码片段搜索用例。
  *
  * @property repository 代码片段仓库实例
  */
-class SearchSnippetsUseCase @Inject constructor(
-    private val repository: SnippetRepository,
-) {
+class SearchSnippetsUseCase @Inject constructor(private val repository: SnippetRepository) {
     /**
      * 使用 FTS4 进行全文搜索。
      * @param query 搜索关键词
      * @return 匹配的片段列表流
      */
-    operator fun invoke(query: String): Flow<List<Snippet>> =
-        repository.searchSnippets(query)
+    operator fun invoke(query: String): Flow<List<Snippet>> = repository.searchSnippets(query)
 
     /**
      * 限定编程语言的 FTS4 搜索。
@@ -50,6 +47,5 @@ class SearchSnippetsUseCase @Inject constructor(
      * LIKE 子串匹配回退，用于部分单词匹配。
      * @param query 搜索子串
      */
-    fun substring(query: String): Flow<List<Snippet>> =
-        repository.searchSnippetsSubstring(query)
+    fun substring(query: String): Flow<List<Snippet>> = repository.searchSnippetsSubstring(query)
 }

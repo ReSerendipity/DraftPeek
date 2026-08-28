@@ -9,13 +9,13 @@
  */
 package com.draftpeek.core.data.repository
 
+import android.content.Context
 import com.draftpeek.core.common.util.AppFileManager
 import com.draftpeek.core.data.dao.RecentFileDao
 import com.draftpeek.core.data.entity.RecentFile
-import android.content.Context
 import dagger.hilt.android.qualifiers.ApplicationContext
-import kotlinx.coroutines.flow.Flow
 import javax.inject.Inject
+import kotlinx.coroutines.flow.Flow
 
 /**
  * [RecentFilesRepository] 的 Room 实现。
@@ -25,7 +25,7 @@ import javax.inject.Inject
  */
 class RecentFilesRepositoryImpl @Inject constructor(
     private val dao: RecentFileDao,
-    @param:ApplicationContext private val context: Context,
+    @param:ApplicationContext private val context: Context
 ) : RecentFilesRepository {
 
     companion object {
@@ -39,12 +39,7 @@ class RecentFilesRepositoryImpl @Inject constructor(
 
     override fun getRecentFile(uri: String): Flow<RecentFile?> = dao.getRecentFile(uri)
 
-    override suspend fun addRecentFile(
-        uri: String,
-        fileName: String,
-        language: String?,
-        fileSize: Long,
-    ) {
+    override suspend fun addRecentFile(uri: String, fileName: String, language: String?, fileSize: Long) {
         val now = System.currentTimeMillis()
         // 三步操作（插入 / 更新时间 / 修剪）在单个事务内原子执行，避免并发中间态。
         dao.addRecentFileAtomic(
@@ -53,10 +48,10 @@ class RecentFilesRepositoryImpl @Inject constructor(
                 fileName = fileName,
                 language = language,
                 lastOpenedAt = now,
-                fileSize = fileSize,
+                fileSize = fileSize
             ),
             now = now,
-            maxRecentFiles = MAX_RECENT_FILES,
+            maxRecentFiles = MAX_RECENT_FILES
         )
     }
 
@@ -88,17 +83,9 @@ class RecentFilesRepositoryImpl @Inject constructor(
         }
     }
 
-    override suspend fun saveReadingPosition(
-        uri: String,
-        line: Int,
-        column: Int,
-        scrollX: Int,
-        scrollY: Int,
-    ) {
+    override suspend fun saveReadingPosition(uri: String, line: Int, column: Int, scrollX: Int, scrollY: Int) {
         dao.updateReadingPosition(uri, line, column, scrollX, scrollY)
     }
 
-    override suspend fun getReadingPosition(uri: String): RecentFile? {
-        return dao.getReadingPosition(uri)
-    }
+    override suspend fun getReadingPosition(uri: String): RecentFile? = dao.getReadingPosition(uri)
 }

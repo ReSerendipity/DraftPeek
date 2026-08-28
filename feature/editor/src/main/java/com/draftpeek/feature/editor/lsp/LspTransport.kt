@@ -106,16 +106,14 @@ abstract class StdioLspTransport : LspTransport {
      */
     abstract suspend fun startProcess(): Process
 
-    override suspend fun connect(): Result<Unit> {
-        return try {
-            val proc = startProcess()
-            process = proc
-            running = true
-            startReaderThread()
-            Result.success(Unit)
-        } catch (e: Exception) {
-            Result.failure(e)
-        }
+    override suspend fun connect(): Result<Unit> = try {
+        val proc = startProcess()
+        process = proc
+        running = true
+        startReaderThread()
+        Result.success(Unit)
+    } catch (e: Exception) {
+        Result.failure(e)
     }
 
     override suspend fun disconnect() {

@@ -18,9 +18,7 @@ import javax.inject.Inject
  * 封装将文件记录为最近打开的业务逻辑，包括当列表超过
  * 最大容量（50个文件）时自动修剪旧条目。
  */
-class AddRecentFileUseCase @Inject constructor(
-    private val repository: RecentFilesRepository,
-) {
+class AddRecentFileUseCase @Inject constructor(private val repository: RecentFilesRepository) {
     /**
      * 执行添加最近文件操作。
      * @param uri 文件URI字符串
@@ -28,12 +26,7 @@ class AddRecentFileUseCase @Inject constructor(
      * @param language 编程语言标识（可为null）
      * @param fileSize 文件大小（字节）
      */
-    suspend operator fun invoke(
-        uri: String,
-        fileName: String,
-        language: String?,
-        fileSize: Long,
-    ) {
+    suspend operator fun invoke(uri: String, fileName: String, language: String?, fileSize: Long) {
         repository.addRecentFile(uri, fileName, language, fileSize)
     }
 }

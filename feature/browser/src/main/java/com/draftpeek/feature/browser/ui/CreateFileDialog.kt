@@ -18,9 +18,6 @@ import androidx.compose.foundation.lazy.grid.items
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.ModalBottomSheet
-import com.draftpeek.core.ui.component.BrandFilledButton
-import com.draftpeek.core.ui.component.BrandOutlinedButton
-import com.draftpeek.core.ui.component.BrandOutlinedTextField
 import androidx.compose.material3.Text
 import androidx.compose.material3.rememberModalBottomSheetState
 import androidx.compose.runtime.Composable
@@ -37,6 +34,9 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.draftpeek.core.common.util.LanguageConfig
+import com.draftpeek.core.ui.component.BrandFilledButton
+import com.draftpeek.core.ui.component.BrandOutlinedButton
+import com.draftpeek.core.ui.component.BrandOutlinedTextField
 import com.draftpeek.core.ui.component.FileTypeIcon
 import com.draftpeek.core.ui.theme.CodeTextStyle
 import com.draftpeek.core.ui.theme.DraftPeekTypography
@@ -60,7 +60,7 @@ import com.draftpeek.feature.browser.util.FileTemplateProvider
 @Composable
 fun CreateFileDialog(
     onDismiss: () -> Unit,
-    onCreate: (filename: String, language: String, initialContent: String) -> Unit,
+    onCreate: (filename: String, language: String, initialContent: String) -> Unit
 ) {
     val sheetState = rememberModalBottomSheetState(skipPartiallyExpanded = true)
     val surface = PrototypeTokens.surface
@@ -82,9 +82,18 @@ fun CreateFileDialog(
 
     val templateContent = remember(selectedLanguage, extension, selectedTemplateType) {
         when (selectedTemplateType) {
-            FileTemplateProvider.TemplateType.EMPTY -> FileTemplateProvider.getEmptyTemplate(selectedLanguage, extension)
-            FileTemplateProvider.TemplateType.HELLO_WORLD -> FileTemplateProvider.getHelloWorldTemplate(selectedLanguage, extension)
-            FileTemplateProvider.TemplateType.CLASS -> FileTemplateProvider.getClassTemplate(selectedLanguage, extension)
+            FileTemplateProvider.TemplateType.EMPTY -> FileTemplateProvider.getEmptyTemplate(
+                selectedLanguage,
+                extension
+            )
+            FileTemplateProvider.TemplateType.HELLO_WORLD -> FileTemplateProvider.getHelloWorldTemplate(
+                selectedLanguage,
+                extension
+            )
+            FileTemplateProvider.TemplateType.CLASS -> FileTemplateProvider.getClassTemplate(
+                selectedLanguage,
+                extension
+            )
         }
     }
 
@@ -94,50 +103,52 @@ fun CreateFileDialog(
         onDismissRequest = onDismiss,
         sheetState = sheetState,
         containerColor = surface,
-        shape = RoundedCornerShape(topStart = 20.dp, topEnd = 20.dp),
+        shape = RoundedCornerShape(topStart = 20.dp, topEnd = 20.dp)
     ) {
         Column(
             modifier = Modifier
                 .fillMaxWidth()
                 .padding(horizontal = 20.dp)
-                .padding(bottom = 20.dp),
+                .padding(bottom = 20.dp)
         ) {
             Text(
                 text = stringResource(R.string.browser_dialog_new_file_title),
                 style = DraftPeekTypography.titleMedium.copy(
                     color = fg,
                     fontWeight = FontWeight.SemiBold,
-                    fontSize = 16.sp,
-                ),
+                    fontSize = 16.sp
+                )
             )
 
             Spacer(modifier = Modifier.height(16.dp))
 
             Text(
                 text = stringResource(R.string.browser_label_filename),
-                style = MetaStyle.copy(color = muted),
+                style = MetaStyle.copy(color = muted)
             )
             Spacer(modifier = Modifier.height(6.dp))
             BrandOutlinedTextField(
                 value = filename,
                 onValueChange = { filename = it },
                 modifier = Modifier.fillMaxWidth(),
-                placeholder = { Text(text = defaultFilename, style = DraftPeekTypography.bodyMedium.copy(color = muted)) },
+                placeholder = {
+                    Text(text = defaultFilename, style = DraftPeekTypography.bodyMedium.copy(color = muted))
+                },
                 suffix = { Text(text = ".$extension", style = CodeTextStyle.copy(color = muted)) },
                 singleLine = true,
-                shape = PrototypeShapes.Small,
+                shape = PrototypeShapes.Small
             )
             Spacer(modifier = Modifier.height(4.dp))
             Text(
                 text = stringResource(R.string.browser_hint_extension_auto),
-                style = CodeTextStyle.copy(color = muted, fontSize = 11.sp),
+                style = CodeTextStyle.copy(color = muted, fontSize = 11.sp)
             )
 
             Spacer(modifier = Modifier.height(16.dp))
 
             Text(
                 text = stringResource(R.string.browser_label_language),
-                style = MetaStyle.copy(color = muted),
+                style = MetaStyle.copy(color = muted)
             )
             Spacer(modifier = Modifier.height(8.dp))
 
@@ -149,7 +160,7 @@ fun CreateFileDialog(
                     .fillMaxWidth()
                     .height(280.dp),
                 horizontalArrangement = Arrangement.spacedBy(8.dp),
-                verticalArrangement = Arrangement.spacedBy(8.dp),
+                verticalArrangement = Arrangement.spacedBy(8.dp)
             ) {
                 items(allLanguages) { langInfo ->
                     val isSelected = langInfo.displayName == selectedLanguage
@@ -162,7 +173,7 @@ fun CreateFileDialog(
                         border = border,
                         muted = muted,
                         fg = fg,
-                        onClick = { selectedLanguage = langInfo.displayName },
+                        onClick = { selectedLanguage = langInfo.displayName }
                     )
                 }
             }
@@ -171,11 +182,11 @@ fun CreateFileDialog(
 
             Text(
                 text = stringResource(R.string.browser_label_template),
-                style = MetaStyle.copy(color = muted),
+                style = MetaStyle.copy(color = muted)
             )
             Spacer(modifier = Modifier.height(8.dp))
             Row(
-                horizontalArrangement = Arrangement.spacedBy(8.dp),
+                horizontalArrangement = Arrangement.spacedBy(8.dp)
             ) {
                 TemplateChip(
                     text = stringResource(R.string.browser_template_empty),
@@ -184,7 +195,7 @@ fun CreateFileDialog(
                     accentSoft = accentSoft,
                     elevated = elevated,
                     muted = muted,
-                    onClick = { selectedTemplateType = FileTemplateProvider.TemplateType.EMPTY },
+                    onClick = { selectedTemplateType = FileTemplateProvider.TemplateType.EMPTY }
                 )
                 TemplateChip(
                     text = stringResource(R.string.browser_template_hello_world),
@@ -193,7 +204,7 @@ fun CreateFileDialog(
                     accentSoft = accentSoft,
                     elevated = elevated,
                     muted = muted,
-                    onClick = { selectedTemplateType = FileTemplateProvider.TemplateType.HELLO_WORLD },
+                    onClick = { selectedTemplateType = FileTemplateProvider.TemplateType.HELLO_WORLD }
                 )
                 TemplateChip(
                     text = stringResource(R.string.browser_template_class),
@@ -202,7 +213,7 @@ fun CreateFileDialog(
                     accentSoft = accentSoft,
                     elevated = elevated,
                     muted = muted,
-                    onClick = { selectedTemplateType = FileTemplateProvider.TemplateType.CLASS },
+                    onClick = { selectedTemplateType = FileTemplateProvider.TemplateType.CLASS }
                 )
             }
 
@@ -210,12 +221,12 @@ fun CreateFileDialog(
 
             Row(
                 modifier = Modifier.fillMaxWidth(),
-                horizontalArrangement = Arrangement.spacedBy(10.dp),
+                horizontalArrangement = Arrangement.spacedBy(10.dp)
             ) {
                 BrandOutlinedButton(
                     text = stringResource(R.string.browser_action_cancel),
                     onClick = onDismiss,
-                    modifier = Modifier.weight(1f),
+                    modifier = Modifier.weight(1f)
                 )
                 BrandFilledButton(
                     text = stringResource(R.string.browser_action_create_open),
@@ -225,7 +236,7 @@ fun CreateFileDialog(
                         }
                     },
                     modifier = Modifier.weight(2f),
-                    enabled = isFilenameValid,
+                    enabled = isFilenameValid
                 )
             }
         }
@@ -251,14 +262,14 @@ private fun TemplateChip(
     accentSoft: Color,
     elevated: Color,
     muted: Color,
-    onClick: () -> Unit,
+    onClick: () -> Unit
 ) {
     Box(
         modifier = Modifier
             .clip(PrototypeShapes.Pill)
             .background(if (isSelected) accentSoft else elevated)
             .clickable { onClick() }
-            .padding(horizontal = 12.dp, vertical = 8.dp),
+            .padding(horizontal = 12.dp, vertical = 8.dp)
     ) {
         Text(
             text = text,
@@ -266,8 +277,8 @@ private fun TemplateChip(
                 color = if (isSelected) accent else muted,
                 fontSize = 12.sp,
                 fontWeight = FontWeight.SemiBold,
-                letterSpacing = 0.04.sp,
-            ),
+                letterSpacing = 0.04.sp
+            )
         )
     }
 }
@@ -297,7 +308,7 @@ private fun LangItem(
     border: Color,
     muted: Color,
     fg: Color,
-    onClick: () -> Unit,
+    onClick: () -> Unit
 ) {
     Column(
         modifier = Modifier
@@ -305,17 +316,17 @@ private fun LangItem(
             .border(
                 1.dp,
                 if (isSelected) accent else border,
-                PrototypeShapes.Small,
+                PrototypeShapes.Small
             )
             .background(if (isSelected) accentSoft else Color.Transparent)
             .clickable(onClick = onClick)
             .padding(vertical = 10.dp, horizontal = 4.dp),
-        horizontalAlignment = Alignment.CenterHorizontally,
+        horizontalAlignment = Alignment.CenterHorizontally
     ) {
         FileTypeIcon(
             extension = extension,
             modifier = Modifier.size(24.dp),
-            showExtension = true,
+            showExtension = true
         )
         Spacer(modifier = Modifier.height(4.dp))
         Text(
@@ -323,8 +334,8 @@ private fun LangItem(
             style = DraftPeekTypography.labelSmall.copy(
                 color = if (isSelected) accent else muted,
                 fontWeight = FontWeight.Medium,
-                fontSize = 10.sp,
-            ),
+                fontSize = 10.sp
+            )
         )
     }
 }

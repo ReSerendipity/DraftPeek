@@ -23,7 +23,6 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -39,8 +38,8 @@ import androidx.compose.ui.unit.sp
 import com.draftpeek.core.ui.icon.StrokeIcon
 import com.draftpeek.core.ui.icon.StrokeIcons
 import com.draftpeek.core.ui.theme.DraftPeekTypography
-import com.draftpeek.core.ui.theme.PrototypeTokens
 import com.draftpeek.core.ui.theme.PrototypeShapes
+import com.draftpeek.core.ui.theme.PrototypeTokens
 import com.draftpeek.feature.editor.R
 
 /**
@@ -60,70 +59,94 @@ import com.draftpeek.feature.editor.R
 fun MarkdownContextBar(
     visible: Boolean,
     onFormatAction: (MarkdownFormatAction) -> Unit,
-    modifier: Modifier = Modifier,
+    modifier: Modifier = Modifier
 ) {
     AnimatedVisibility(
         visible = visible,
         enter = slideInVertically(initialOffsetY = { it }),
         exit = slideOutVertically(targetOffsetY = { it }),
-        modifier = modifier,
+        modifier = modifier
     ) {
         Box(
             modifier = Modifier
                 .fillMaxWidth()
                 .background(PrototypeTokens.elevated)
-                .border(1.dp, PrototypeTokens.border, PrototypeShapes.Medium),
+                .border(1.dp, PrototypeTokens.border, PrototypeShapes.Medium)
         ) {
             Row(
                 modifier = Modifier
                     .padding(horizontal = 4.dp, vertical = 4.dp),
                 horizontalArrangement = Arrangement.SpaceEvenly,
-                verticalAlignment = Alignment.CenterVertically,
+                verticalAlignment = Alignment.CenterVertically
             ) {
                 // Inline formatting group（与 MarkdownToolbar 一致的文本/描边样式）
                 ContextBarLabelButton(
                     label = "B",
                     contentDescription = stringResource(R.string.editor_action_bold),
                     fontWeight = FontWeight.Bold,
-                    onClick = { onFormatAction(MarkdownFormatAction.Wrap("**", "**", "")) },
+                    onClick = { onFormatAction(MarkdownFormatAction.Wrap("**", "**", "")) }
                 )
                 ContextBarLabelButton(
                     label = "I",
                     contentDescription = stringResource(R.string.editor_action_italic),
                     fontStyle = FontStyle.Italic,
-                    onClick = { onFormatAction(MarkdownFormatAction.Wrap("*", "*", "")) },
+                    onClick = { onFormatAction(MarkdownFormatAction.Wrap("*", "*", "")) }
                 )
                 ContextBarLabelButton(
                     label = "S",
                     contentDescription = stringResource(R.string.editor_action_strikethrough),
                     textDecoration = TextDecoration.LineThrough,
-                    onClick = { onFormatAction(MarkdownFormatAction.Wrap("~~", "~~", "")) },
+                    onClick = { onFormatAction(MarkdownFormatAction.Wrap("~~", "~~", "")) }
                 )
-                IconButton(onClick = { onFormatAction(MarkdownFormatAction.Wrap("==", "==", "")) }, modifier = Modifier.size(36.dp)) {
-                    StrokeIcon(icon = StrokeIcons.Highlighter, contentDescription = stringResource(R.string.editor_action_highlight), modifier = Modifier.size(18.dp))
+                IconButton(onClick = {
+                    onFormatAction(MarkdownFormatAction.Wrap("==", "==", ""))
+                }, modifier = Modifier.size(36.dp)) {
+                    StrokeIcon(
+                        icon = StrokeIcons.Highlighter,
+                        contentDescription = stringResource(R.string.editor_action_highlight),
+                        modifier = Modifier.size(18.dp)
+                    )
                 }
-                IconButton(onClick = { onFormatAction(MarkdownFormatAction.Wrap("`", "`", "")) }, modifier = Modifier.size(36.dp)) {
-                    StrokeIcon(icon = StrokeIcons.Code, contentDescription = stringResource(R.string.editor_action_inline_code), modifier = Modifier.size(18.dp))
+                IconButton(onClick = {
+                    onFormatAction(MarkdownFormatAction.Wrap("`", "`", ""))
+                }, modifier = Modifier.size(36.dp)) {
+                    StrokeIcon(
+                        icon = StrokeIcons.Code,
+                        contentDescription = stringResource(R.string.editor_action_inline_code),
+                        modifier = Modifier.size(18.dp)
+                    )
                 }
 
                 // Structure group
-                IconButton(onClick = { onFormatAction(MarkdownFormatAction.LinePrefix("> ")) }, modifier = Modifier.size(36.dp)) {
-                    StrokeIcon(icon = StrokeIcons.Quote, contentDescription = stringResource(R.string.editor_action_blockquote), modifier = Modifier.size(18.dp))
+                IconButton(onClick = {
+                    onFormatAction(MarkdownFormatAction.LinePrefix("> "))
+                }, modifier = Modifier.size(36.dp)) {
+                    StrokeIcon(
+                        icon = StrokeIcons.Quote,
+                        contentDescription = stringResource(R.string.editor_action_blockquote),
+                        modifier = Modifier.size(18.dp)
+                    )
                 }
-                IconButton(onClick = { onFormatAction(MarkdownFormatAction.Insert("[", 1)) }, modifier = Modifier.size(36.dp)) {
-                    StrokeIcon(icon = StrokeIcons.Link, contentDescription = stringResource(R.string.editor_action_link), modifier = Modifier.size(18.dp))
+                IconButton(onClick = {
+                    onFormatAction(MarkdownFormatAction.Insert("[", 1))
+                }, modifier = Modifier.size(36.dp)) {
+                    StrokeIcon(
+                        icon = StrokeIcons.Link,
+                        contentDescription = stringResource(R.string.editor_action_link),
+                        modifier = Modifier.size(18.dp)
+                    )
                 }
 
                 // Script group (using text labels since Superscript/Subscript icons require material-icons-extended)
                 ContextBarLabelButton(
                     label = "X\u00B2",
                     contentDescription = stringResource(R.string.editor_action_superscript),
-                    onClick = { onFormatAction(MarkdownFormatAction.Wrap("^", "^", "")) },
+                    onClick = { onFormatAction(MarkdownFormatAction.Wrap("^", "^", "")) }
                 )
                 ContextBarLabelButton(
                     label = "X\u2082",
                     contentDescription = stringResource(R.string.editor_action_subscript),
-                    onClick = { onFormatAction(MarkdownFormatAction.Wrap("~", "~", "")) },
+                    onClick = { onFormatAction(MarkdownFormatAction.Wrap("~", "~", "")) }
                 )
             }
         }
@@ -146,14 +169,14 @@ private fun ContextBarLabelButton(
     fontWeight: FontWeight = FontWeight.SemiBold,
     fontStyle: FontStyle = FontStyle.Normal,
     textDecoration: TextDecoration? = null,
-    onClick: () -> Unit,
+    onClick: () -> Unit
 ) {
     Box(
         modifier = Modifier
             .size(36.dp)
             .clip(RoundedCornerShape(8.dp))
             .clickable { onClick() },
-        contentAlignment = Alignment.Center,
+        contentAlignment = Alignment.Center
     ) {
         Text(
             text = label,
@@ -162,8 +185,8 @@ private fun ContextBarLabelButton(
                 fontStyle = fontStyle,
                 textDecoration = textDecoration,
                 fontSize = 14.sp,
-                color = PrototypeTokens.fg,
-            ),
+                color = PrototypeTokens.fg
+            )
         )
     }
 }

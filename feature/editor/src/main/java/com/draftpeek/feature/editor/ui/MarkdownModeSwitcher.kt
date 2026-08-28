@@ -54,7 +54,7 @@ fun MarkdownModeSwitcher(
     showWysiwyg: Boolean,
     onSelect: (MarkdownViewMode) -> Unit,
     modifier: Modifier = Modifier,
-    compact: Boolean = false,
+    compact: Boolean = false
 ) {
     val options = buildList {
         add(MarkdownViewMode.EDIT to stringResource(R.string.editor_edit))
@@ -73,7 +73,7 @@ fun MarkdownModeSwitcher(
 
     Row(
         modifier = modifier.padding(horizontal = outerPadding, vertical = outerVertical),
-        verticalAlignment = Alignment.CenterVertically,
+        verticalAlignment = Alignment.CenterVertically
     ) {
         Row(
             modifier = Modifier
@@ -81,7 +81,7 @@ fun MarkdownModeSwitcher(
                 .background(PrototypeTokens.bg)
                 .padding(2.dp),
             horizontalArrangement = Arrangement.spacedBy(2.dp),
-            verticalAlignment = Alignment.CenterVertically,
+            verticalAlignment = Alignment.CenterVertically
         ) {
             options.forEach { (mode, label) ->
                 val isSelected = mode == currentMode
@@ -96,15 +96,15 @@ fun MarkdownModeSwitcher(
                             contentDescription = label
                             selected = isSelected
                         },
-                    contentAlignment = Alignment.Center,
+                    contentAlignment = Alignment.Center
                 ) {
                     Text(
                         text = label,
                         style = DraftPeekTypography.labelMedium.copy(
                             fontSize = fontSize,
                             fontWeight = FontWeight.SemiBold,
-                            color = if (isSelected) PrototypeTokens.accent else PrototypeTokens.muted,
-                        ),
+                            color = if (isSelected) PrototypeTokens.accent else PrototypeTokens.muted
+                        )
                     )
                 }
             }

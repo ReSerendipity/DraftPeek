@@ -26,7 +26,6 @@ import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.lazy.items
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.automirrored.filled.KeyboardArrowRight
 import androidx.compose.material.icons.filled.Code
 import androidx.compose.material3.Icon
@@ -80,7 +79,7 @@ private val SNIPPET_LANGUAGES = listOf(
     "XML",
     "JSON",
     "SQL",
-    "Bash",
+    "Bash"
 )
 
 // 将显示名称/别名映射到规范键，用于计数和筛选
@@ -92,7 +91,7 @@ private val LANGUAGE_ALIASES: Map<String, Set<String>> = mapOf(
     "XML" to setOf("xml", "html", "xhtml"),
     "JSON" to setOf("json"),
     "SQL" to setOf("sql"),
-    "Bash" to setOf("bash", "sh", "shell", "zsh"),
+    "Bash" to setOf("bash", "sh", "shell", "zsh")
 )
 
 /**
@@ -109,7 +108,7 @@ private val LANGUAGE_ALIASES: Map<String, Set<String>> = mapOf(
 fun SnippetScreen(
     onInsertSnippet: ((Snippet) -> Unit)? = null,
     viewModel: SnippetViewModel = hiltViewModel(),
-    navController: NavController,
+    navController: NavController
 ) {
     val snippets by viewModel.searchResults.collectAsStateWithLifecycle()
     val categories by viewModel.categories.collectAsStateWithLifecycle()
@@ -163,7 +162,7 @@ fun SnippetScreen(
     val pageBg = PrototypeTokens.pageBackground
 
     val exportLauncher = rememberLauncherForActivityResult(
-        contract = ActivityResultContracts.StartActivityForResult(),
+        contract = ActivityResultContracts.StartActivityForResult()
     ) { result ->
         if (result.resultCode == Activity.RESULT_OK) {
             result.data?.data?.let { uri ->
@@ -249,7 +248,7 @@ fun SnippetScreen(
                 viewModel.addSnippet(title, content, language, category)
                 showAddDialog = false
             },
-            categories = categories,
+            categories = categories
         )
     }
 
@@ -263,13 +262,13 @@ fun SnippetScreen(
                         title = title,
                         content = content,
                         language = language,
-                        category = category,
+                        category = category
                     )
                 )
                 editingSnippet = null
             },
             onExport = { viewModel.requestExport(snippet) },
-            categories = categories,
+            categories = categories
         )
     }
 
@@ -284,7 +283,7 @@ fun SnippetScreen(
                 viewModel.deleteSnippet(snippet)
                 showDeleteDialog = null
             },
-            onDismiss = { showDeleteDialog = null },
+            onDismiss = { showDeleteDialog = null }
         )
     }
 
@@ -292,19 +291,19 @@ fun SnippetScreen(
     Box(
         modifier = Modifier
             .fillMaxSize()
-            .background(pageBg),
+            .background(pageBg)
     ) {
         Column(modifier = Modifier.fillMaxSize()) {
             // Top bar — root level (no back button), mono uppercase title
             BrandTopBar(
                 title = "SNIPPETS",
-                titleStyle = MonoUppercaseTitleStyle,
+                titleStyle = MonoUppercaseTitleStyle
             )
 
             Column(
                 modifier = Modifier
                     .fillMaxSize()
-                    .padding(horizontal = PrototypeSpacing.ScreenHorizontal),
+                    .padding(horizontal = PrototypeSpacing.ScreenHorizontal)
             ) {
                 Spacer(modifier = Modifier.height(12.dp))
 
@@ -312,24 +311,24 @@ fun SnippetScreen(
                 BrandSearchBar(
                     value = searchQuery,
                     onValueChange = { viewModel.search(it) },
-                    placeholder = "Search snippets...",
+                    placeholder = "Search snippets..."
                 )
 
                 Spacer(modifier = Modifier.height(8.dp))
 
                 // Search mode toggle: SMART (FTS4 AND/OR/NOT/phrase) vs SUBSTRING (LIKE fallback)
                 Row(
-                    horizontalArrangement = Arrangement.spacedBy(6.dp),
+                    horizontalArrangement = Arrangement.spacedBy(6.dp)
                 ) {
                     BrandChip(
                         text = "FTS4",
                         selected = searchMode == SnippetViewModel.SearchMode.SMART,
-                        onClick = { viewModel.setSearchMode(SnippetViewModel.SearchMode.SMART) },
+                        onClick = { viewModel.setSearchMode(SnippetViewModel.SearchMode.SMART) }
                     )
                     BrandChip(
                         text = "Substring",
                         selected = searchMode == SnippetViewModel.SearchMode.SUBSTRING,
-                        onClick = { viewModel.setSearchMode(SnippetViewModel.SearchMode.SUBSTRING) },
+                        onClick = { viewModel.setSearchMode(SnippetViewModel.SearchMode.SUBSTRING) }
                     )
                 }
 
@@ -338,7 +337,7 @@ fun SnippetScreen(
                 // Language filter chips — horizontally scrollable
                 LazyRow(
                     horizontalArrangement = Arrangement.spacedBy(8.dp),
-                    contentPadding = PaddingValues(end = 20.dp),
+                    contentPadding = PaddingValues(end = 20.dp)
                 ) {
                     items(SNIPPET_LANGUAGES, key = { it }) { lang ->
                         val count = languageCounts[lang] ?: 0
@@ -346,7 +345,7 @@ fun SnippetScreen(
                         BrandChip(
                             text = label,
                             selected = selectedLanguage == lang,
-                            onClick = { selectedLanguage = lang },
+                            onClick = { selectedLanguage = lang }
                         )
                     }
                 }
@@ -357,17 +356,17 @@ fun SnippetScreen(
                 Box(modifier = Modifier.weight(1f)) {
                     if (filteredSnippets.isEmpty()) {
                         SnippetEmptyState(
-                            hasSearchQuery = searchQuery.isNotBlank() || selectedLanguage != "All",
+                            hasSearchQuery = searchQuery.isNotBlank() || selectedLanguage != "All"
                         )
                     } else {
                         LazyColumn(
                             modifier = Modifier.fillMaxSize(),
                             contentPadding = PaddingValues(vertical = 4.dp),
-                            verticalArrangement = Arrangement.spacedBy(8.dp),
+                            verticalArrangement = Arrangement.spacedBy(8.dp)
                         ) {
                             items(
                                 items = filteredSnippets,
-                                key = { it.id },
+                                key = { it.id }
                             ) { snippet ->
                                 SnippetCard(
                                     snippet = snippet,
@@ -382,7 +381,7 @@ fun SnippetScreen(
                                         if (onInsertSnippet == null) {
                                             showDeleteDialog = snippet
                                         }
-                                    },
+                                    }
                                 )
                             }
                         }
@@ -398,15 +397,15 @@ fun SnippetScreen(
                     FABMenuItem(
                         icon = StrokeIcons.Plus,
                         label = "New Snippet",
-                        onClick = { showAddDialog = true },
+                        onClick = { showAddDialog = true }
                     )
                 ),
                 modifier = Modifier
                     .align(Alignment.BottomEnd)
                     .padding(
                         end = PrototypeSpacing.FABRight,
-                        bottom = PrototypeSpacing.FABBottom,
-                    ),
+                        bottom = PrototypeSpacing.FABBottom
+                    )
             )
         }
     }
@@ -424,11 +423,7 @@ fun SnippetScreen(
  */
 @OptIn(androidx.compose.foundation.ExperimentalFoundationApi::class)
 @Composable
-private fun SnippetCard(
-    snippet: Snippet,
-    onClick: () -> Unit,
-    onLongClick: () -> Unit,
-) {
+private fun SnippetCard(snippet: Snippet, onClick: () -> Unit, onLongClick: () -> Unit) {
     val fg = PrototypeTokens.fg
     val fgSoft = PrototypeTokens.fgSoft
     val muted = PrototypeTokens.muted
@@ -448,7 +443,7 @@ private fun SnippetCard(
         DateUtils.getRelativeTimeSpanString(
             snippet.updatedAt,
             System.currentTimeMillis(),
-            DateUtils.MINUTE_IN_MILLIS,
+            DateUtils.MINUTE_IN_MILLIS
         ).toString()
     }
 
@@ -462,33 +457,33 @@ private fun SnippetCard(
                 interactionSource = remember { MutableInteractionSource() },
                 indication = null,
                 onClick = onClick,
-                onLongClick = onLongClick,
+                onLongClick = onLongClick
             )
-            .padding(PrototypeSpacing.FileCardPadding),
+            .padding(PrototypeSpacing.FileCardPadding)
     ) {
         Row(
             modifier = Modifier.fillMaxWidth(),
-            verticalAlignment = Alignment.CenterVertically,
+            verticalAlignment = Alignment.CenterVertically
         ) {
             // Left: file type icon (28dp)
             FileTypeIcon(
                 extension = extension,
                 modifier = Modifier.size(PrototypeSpacing.FileTypeBadgeSize),
-                showExtension = true,
+                showExtension = true
             )
 
             Spacer(modifier = Modifier.width(12.dp))
 
             // Middle: title, preview, meta
             Column(
-                modifier = Modifier.weight(1f),
+                modifier = Modifier.weight(1f)
             ) {
                 Text(
                     text = snippet.title,
                     style = MonoFileNameStyle,
                     color = fg,
                     maxLines = 1,
-                    overflow = TextOverflow.Ellipsis,
+                    overflow = TextOverflow.Ellipsis
                 )
                 Spacer(modifier = Modifier.height(2.dp))
                 Text(
@@ -496,11 +491,11 @@ private fun SnippetCard(
                     style = FileMetaStyle.copy(fontSize = 12.sp),
                     color = muted,
                     maxLines = 1,
-                    overflow = TextOverflow.Ellipsis,
+                    overflow = TextOverflow.Ellipsis
                 )
                 Spacer(modifier = Modifier.height(4.dp))
                 Row(
-                    verticalAlignment = Alignment.CenterVertically,
+                    verticalAlignment = Alignment.CenterVertically
                 ) {
                     val hasLang = snippet.language != null
                     val hasCategory = snippet.category.isNotBlank()
@@ -509,7 +504,7 @@ private fun SnippetCard(
                             text = lang,
                             style = MonoLabelStyle,
                             color = accent,
-                            maxLines = 1,
+                            maxLines = 1
                         )
                     }
                     if (hasLang && hasCategory) {
@@ -517,7 +512,7 @@ private fun SnippetCard(
                         Text(
                             text = "·",
                             style = ChipTextStyle,
-                            color = muted,
+                            color = muted
                         )
                         Spacer(modifier = Modifier.width(6.dp))
                     } else if (hasLang) {
@@ -525,7 +520,7 @@ private fun SnippetCard(
                         Text(
                             text = "·",
                             style = ChipTextStyle,
-                            color = muted,
+                            color = muted
                         )
                         Spacer(modifier = Modifier.width(6.dp))
                     }
@@ -535,13 +530,13 @@ private fun SnippetCard(
                             style = FileMetaStyle,
                             color = fgSoft,
                             maxLines = 1,
-                            overflow = TextOverflow.Ellipsis,
+                            overflow = TextOverflow.Ellipsis
                         )
                         Spacer(modifier = Modifier.width(6.dp))
                         Text(
                             text = "·",
                             style = ChipTextStyle,
-                            color = muted,
+                            color = muted
                         )
                         Spacer(modifier = Modifier.width(6.dp))
                     }
@@ -549,7 +544,7 @@ private fun SnippetCard(
                         text = relativeTime,
                         style = FileMetaStyle,
                         color = muted,
-                        maxLines = 1,
+                        maxLines = 1
                     )
                 }
             }
@@ -561,7 +556,7 @@ private fun SnippetCard(
                 imageVector = Icons.AutoMirrored.Filled.KeyboardArrowRight,
                 contentDescription = null,
                 tint = muted,
-                modifier = Modifier.size(18.dp),
+                modifier = Modifier.size(18.dp)
             )
         }
     }
@@ -571,9 +566,7 @@ private fun SnippetCard(
  * Empty state for the snippets screen. Shows a large code icon and helper text.
  */
 @Composable
-private fun SnippetEmptyState(
-    hasSearchQuery: Boolean,
-) {
+private fun SnippetEmptyState(hasSearchQuery: Boolean) {
     val muted = PrototypeTokens.muted
     val fgSoft = PrototypeTokens.fgSoft
 
@@ -582,19 +575,19 @@ private fun SnippetEmptyState(
             .fillMaxSize()
             .padding(32.dp),
         horizontalAlignment = Alignment.CenterHorizontally,
-        verticalArrangement = Arrangement.Center,
+        verticalArrangement = Arrangement.Center
     ) {
         Icon(
             imageVector = Icons.Filled.Code,
             contentDescription = null,
             tint = muted,
-            modifier = Modifier.size(64.dp),
+            modifier = Modifier.size(64.dp)
         )
         Spacer(modifier = Modifier.height(16.dp))
         Text(
             text = if (hasSearchQuery) "No matching snippets" else "No snippets yet",
             style = MonoUppercaseTitleStyle.copy(fontSize = 16.sp),
-            color = fgSoft,
+            color = fgSoft
         )
         Spacer(modifier = Modifier.height(6.dp))
         Text(
@@ -604,7 +597,7 @@ private fun SnippetEmptyState(
                 "Save code snippets for quick reuse"
             },
             style = FileMetaStyle.copy(fontSize = 12.sp),
-            color = muted,
+            color = muted
         )
     }
 }

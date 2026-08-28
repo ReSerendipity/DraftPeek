@@ -13,7 +13,7 @@ import kotlinx.coroutines.*
 class OutputThrottler(
     private val scope: CoroutineScope,
     private val onOutput: (String) -> Unit,
-    private val throttleMs: Long = 16L,
+    private val throttleMs: Long = 16L
 ) {
     private val buffer = StringBuilder()
     private var flushJob: Job? = null
@@ -76,9 +76,7 @@ class OutputThrottler(
  *
  * 当快速输入（如代码补全、搜索框）时，只处理最新的请求，旧的未完成请求被取消。
  */
-class RequestCanceller(
-    private val scope: CoroutineScope,
-) {
+class RequestCanceller(private val scope: CoroutineScope) {
     @Volatile
     private var currentJob: Job? = null
 
@@ -89,10 +87,7 @@ class RequestCanceller(
      * @param block 请求执行体
      * @return 新请求的Job
      */
-    fun launch(
-        dispatcher: CoroutineDispatcher = Dispatchers.Default,
-        block: suspend CoroutineScope.() -> Unit,
-    ): Job {
+    fun launch(dispatcher: CoroutineDispatcher = Dispatchers.Default, block: suspend CoroutineScope.() -> Unit): Job {
         currentJob?.cancel()
         val newJob = scope.launch(dispatcher, block = block)
         currentJob = newJob

@@ -26,11 +26,11 @@ object TestFixtures {
     fun bookmark(
         uri: String = "content://test/file.kt",
         fileName: String = "file.kt",
-        directoryUri: String = "content://test/",
+        directoryUri: String = "content://test/"
     ) = BookmarkEntity(
         uri = uri,
         fileName = fileName,
-        directoryUri = directoryUri,
+        directoryUri = directoryUri
     )
 
     // ===== RecentFile =====
@@ -39,12 +39,12 @@ object TestFixtures {
         uri: String = "content://test/file.kt",
         fileName: String = "file.kt",
         language: String? = "kotlin",
-        lastOpenedAt: Long = System.currentTimeMillis(),
+        lastOpenedAt: Long = System.currentTimeMillis()
     ) = RecentFile(
         uri = uri,
         fileName = fileName,
         language = language,
-        lastOpenedAt = lastOpenedAt,
+        lastOpenedAt = lastOpenedAt
     )
 
     // ===== Snippet =====
@@ -55,14 +55,14 @@ object TestFixtures {
         language: String = "kotlin",
         category: String = "Kotlin",
         createdAt: Long = System.currentTimeMillis(),
-        updatedAt: Long = System.currentTimeMillis(),
+        updatedAt: Long = System.currentTimeMillis()
     ) = Snippet(
         title = title,
         content = content,
         language = language,
         category = category,
         createdAt = createdAt,
-        updatedAt = updatedAt,
+        updatedAt = updatedAt
     )
 
     // ===== UserActivity =====
@@ -79,7 +79,7 @@ object TestFixtures {
         diffCount: Int = 0,
         usageDurationMinutes: Int = 0,
         charWriteCount: Int = 0,
-        fileCreateCount: Int = 0,
+        fileCreateCount: Int = 0
     ) = UserActivity(
         date = date,
         fileOpenCount = fileOpenCount,
@@ -92,24 +92,22 @@ object TestFixtures {
         diffCount = diffCount,
         usageDurationMinutes = usageDurationMinutes,
         charWriteCount = charWriteCount,
-        fileCreateCount = fileCreateCount,
+        fileCreateCount = fileCreateCount
     )
 
     // ===== Batch generators =====
 
-    fun bookmarks(count: Int, prefix: String = "file"): List<BookmarkEntity> =
-        (1..count).map {
-            bookmark(
-                uri = "content://test/${prefix}_$it.kt",
-                fileName = "${prefix}_$it.kt",
-            )
-        }
+    fun bookmarks(count: Int, prefix: String = "file"): List<BookmarkEntity> = (1..count).map {
+        bookmark(
+            uri = "content://test/${prefix}_$it.kt",
+            fileName = "${prefix}_$it.kt"
+        )
+    }
 
-    fun recentFiles(count: Int, prefix: String = "file"): List<RecentFile> =
-        (1..count).map {
-            recentFile(
-                uri = "content://test/${prefix}_$it.kt",
-                fileName = "${prefix}_$it.kt",
-            )
-        }
+    fun recentFiles(count: Int, prefix: String = "file"): List<RecentFile> = (1..count).map {
+        recentFile(
+            uri = "content://test/${prefix}_$it.kt",
+            fileName = "${prefix}_$it.kt"
+        )
+    }
 }

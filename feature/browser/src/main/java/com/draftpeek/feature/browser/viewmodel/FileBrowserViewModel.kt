@@ -17,34 +17,35 @@ import android.util.Log
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.draftpeek.core.common.event.AppEventBus
-import com.draftpeek.core.common.event.BrowserEvent
 import com.draftpeek.core.common.event.EditorEvent
 import com.draftpeek.core.common.util.AppFileManager
 import com.draftpeek.core.common.util.OutputThrottler
 import com.draftpeek.core.common.vcs.CloneResult
 import com.draftpeek.core.common.vcs.GitFileStatus
-import com.draftpeek.core.common.vcs.GitStatus
 import com.draftpeek.core.common.vcs.GitHubApiClient
 import com.draftpeek.core.common.vcs.GitHubTreeResult
 import com.draftpeek.core.common.vcs.GitManager
 import com.draftpeek.core.common.vcs.GitRepoInfo
 import com.draftpeek.core.common.vcs.GitRepository
+import com.draftpeek.core.common.vcs.GitStatus
+import com.draftpeek.core.data.repository.BookmarkRepository
+import com.draftpeek.core.data.repository.UserActivityRepository
+import com.draftpeek.core.data.usecase.ManageBookmarksUseCase
+import com.draftpeek.core.domain.usecase.RecordUserActivityUseCase
+import com.draftpeek.feature.browser.R
 import com.draftpeek.feature.browser.model.BrowserUiState
 import com.draftpeek.feature.browser.model.FileItem
 import com.draftpeek.feature.browser.model.FileSortOption
 import com.draftpeek.feature.browser.model.GitHubImportState
 import com.draftpeek.feature.browser.model.sortFiles
-import com.draftpeek.feature.browser.R
 import com.draftpeek.feature.browser.observer.DirectoryObserver
 import com.draftpeek.feature.browser.repository.FileContentResult
 import com.draftpeek.feature.browser.repository.FileRepository
 import com.draftpeek.feature.settings.repository.SettingsRepository
-import com.draftpeek.core.data.repository.BookmarkRepository
-import com.draftpeek.core.data.repository.UserActivityRepository
-import com.draftpeek.core.data.usecase.ManageBookmarksUseCase
-import com.draftpeek.core.domain.usecase.RecordUserActivityUseCase
 import dagger.hilt.android.lifecycle.HiltViewModel
 import dagger.hilt.android.qualifiers.ApplicationContext
+import java.io.File
+import javax.inject.Inject
 import kotlinx.collections.immutable.ImmutableList
 import kotlinx.collections.immutable.persistentListOf
 import kotlinx.collections.immutable.toImmutableList
@@ -65,8 +66,6 @@ import kotlinx.coroutines.launch
 import kotlinx.coroutines.sync.Mutex
 import kotlinx.coroutines.sync.withLock
 import kotlinx.coroutines.withContext
-import java.io.File
-import javax.inject.Inject
 
 private const val TAG = "FileBrowserVM"
 
@@ -140,59 +139,72 @@ class FileBrowserViewModel @Inject constructor(
     private val gitManager: GitManager,
     private val gitHubApiClient: GitHubApiClient,
     private val directoryObserver: DirectoryObserver,
-    @param:ApplicationContext private val context: Context,
+    @param:ApplicationContext private val context: Context
 ) : ViewModel() {
 
     private val _uiState = MutableStateFlow<BrowserUiState>(BrowserUiState.Idle)
+
     /** 浏览器主 UI 状态流 */
     val uiState: StateFlow<BrowserUiState> = _uiState.asStateFlow()
 
     private val _currentTreeUri = MutableStateFlow<Uri?>(null)
+
     /** 当前浏览的目录 SAF URI */
     val currentTreeUri: StateFlow<Uri?> = _currentTreeUri.asStateFlow()
 
     private val _gitRepoInfo = MutableStateFlow<GitRepoInfo?>(null)
+
     /** Git 仓库信息（分支、远程、最后提交） */
     val gitRepoInfo: StateFlow<GitRepoInfo?> = _gitRepoInfo.asStateFlow()
 
     private val _gitFileStatuses = MutableStateFlow<ImmutableList<GitFileStatus>>(persistentListOf())
+
     /** Git 文件状态不可变列表 */
     val gitFileStatuses: StateFlow<ImmutableList<GitFileStatus>> = _gitFileStatuses.asStateFlow()
 
     private val _isGitRepo = MutableStateFlow(false)
+
     /** 当前目录是否为 Git 仓库 */
     val isGitRepo: StateFlow<Boolean> = _isGitRepo.asStateFlow()
 
     private val _internalFiles = MutableStateFlow<ImmutableList<FileItem>>(persistentListOf())
+
     /** 应用内部存储文件列表 */
     val internalFiles: StateFlow<ImmutableList<FileItem>> = _internalFiles.asStateFlow()
 
     private val _currentSortOption = MutableStateFlow(FileSortOption.NAME_ASC)
+
     /** 当前文件排序选项 */
     val currentSortOption: StateFlow<FileSortOption> = _currentSortOption.asStateFlow()
 
     private val _pinnedFiles = MutableStateFlow<Set<String>>(emptySet())
+
     /** 置顶文件 URI 字符串集合 */
     val pinnedFiles: StateFlow<Set<String>> = _pinnedFiles.asStateFlow()
 
     private val _bookmarkedUris = MutableStateFlow<Set<String>>(emptySet())
+
     /** 收藏文件 URI 字符串集合 */
     val bookmarkedUris: StateFlow<Set<String>> = _bookmarkedUris.asStateFlow()
 
     // ===== 首页文件列表自定义顺序 =====
     private val _pinnedOrder = MutableStateFlow<List<String>>(emptyList())
+
     /** 置顶/收藏（Pinned）文件自定义排序 URI 列表 */
     val pinnedOrder: StateFlow<List<String>> = _pinnedOrder.asStateFlow()
 
     private val _recentOrder = MutableStateFlow<List<String>>(emptyList())
+
     /** 最近文件自定义排序 URI 列表 */
     val recentOrder: StateFlow<List<String>> = _recentOrder.asStateFlow()
 
     private val _internalFilesOrder = MutableStateFlow<List<String>>(emptyList())
+
     /** 内部存储文件自定义排序 URI 列表 */
     val internalFilesOrder: StateFlow<List<String>> = _internalFilesOrder.asStateFlow()
 
     private val _bookmarkOrder = MutableStateFlow<List<String>>(emptyList())
+
     /** 书签文件自定义排序 URI 列表 */
     val bookmarkOrder: StateFlow<List<String>> = _bookmarkOrder.asStateFlow()
 
@@ -202,23 +214,28 @@ class FileBrowserViewModel @Inject constructor(
         .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5_000), 3)
 
     private val _navigationStack = MutableStateFlow<List<Uri>>(emptyList())
+
     /** 导航栈（内部使用） */
     private val navigationStack: List<Uri> get() = _navigationStack.value
 
     private val _navigationDisplayPath = MutableStateFlow<String>("")
+
     /** 面包屑导航显示路径 */
     val navigationDisplayPath: StateFlow<String> = _navigationDisplayPath.asStateFlow()
 
     @Volatile
     private var currentGitRepo: GitRepository? = null
+
     /** Git 仓库访问互斥锁，防止 JGit 并发问题 */
     private val gitRepoMutex = Mutex()
 
     private val _gitHubImportState = MutableStateFlow<GitHubImportState>(GitHubImportState.Idle)
+
     /** GitHub 导入流程状态 */
     val gitHubImportState: StateFlow<GitHubImportState> = _gitHubImportState.asStateFlow()
 
     private val _gitHubSelectedFiles = MutableStateFlow<Set<String>>(emptySet())
+
     /** GitHub 导入中用户选中的文件路径集合 */
     val gitHubSelectedFiles: StateFlow<Set<String>> = _gitHubSelectedFiles.asStateFlow()
 
@@ -383,7 +400,7 @@ class FileBrowserViewModel @Inject constructor(
                     isPinned = pinned.contains(uri),
                     extension = file.name.substringAfterLast('.', ""),
                     isReadOnly = !file.canWrite(),
-                    isBookmarked = bookmarked.contains(uri),
+                    isBookmarked = bookmarked.contains(uri)
                 )
             }.sortFiles(_currentSortOption.value)
                 .applyCustomOrder(order) { it.uri.toString() }
@@ -394,17 +411,16 @@ class FileBrowserViewModel @Inject constructor(
     /**
      * 对列表应用自定义顺序：出现在 order 中的元素按 order 的索引排到前面，其余保持原顺序。
      */
-    private fun <T> List<T>.applyCustomOrder(
-        order: List<String>,
-        keyOf: (T) -> String,
-    ): List<T> {
+    private fun <T> List<T>.applyCustomOrder(order: List<String>, keyOf: (T) -> String): List<T> {
         if (order.isEmpty()) return this
         val orderMap = order.withIndex().associate { it.value to it.index }
         return this.sortedBy { t -> orderMap[keyOf(t)] ?: Int.MAX_VALUE }
     }
 
     /** 刷新内部存储文件列表 */
-    fun refreshInternalFiles() { loadInternalFiles() }
+    fun refreshInternalFiles() {
+        loadInternalFiles()
+    }
 
     /**
      * 用户通过 SAF 选择目录后的入口
@@ -480,11 +496,13 @@ class FileBrowserViewModel @Inject constructor(
                     isPinned = pinned.contains(fileUri),
                     extension = file.name.substringAfterLast('.', ""),
                     isReadOnly = !file.canWrite(),
-                    isBookmarked = bookmarked.contains(fileUri),
+                    isBookmarked = bookmarked.contains(fileUri)
                 )
             }?.sortFiles(_currentSortOption.value)?.toImmutableList() ?: persistentListOf()
             val displayPath = _navigationDisplayPath.value.ifEmpty {
-                dir.absolutePath.substringAfterLast("/user_files/").ifEmpty { context.getString(R.string.browser_internal_storage) }
+                dir.absolutePath.substringAfterLast("/user_files/").ifEmpty {
+                    context.getString(R.string.browser_internal_storage)
+                }
             }
             _uiState.value = BrowserUiState.Success(files = fileItems, currentPath = displayPath)
             registerFileObserver(dirUri)
@@ -534,9 +552,14 @@ class FileBrowserViewModel @Inject constructor(
     }
 
     /** 记录文件打开用户活动 */
-    fun recordFileOpen() { launchIo { recordUserActivity.recordFileOpen() } }
+    fun recordFileOpen() {
+        launchIo { recordUserActivity.recordFileOpen() }
+    }
+
     /** 记录其他操作用户活动 */
-    fun recordOtherOperation() { launchIo { recordUserActivity.recordFileManagement() } }
+    fun recordOtherOperation() {
+        launchIo { recordUserActivity.recordFileManagement() }
+    }
 
     /**
      * 加载 SAF 目录的文件列表
@@ -561,7 +584,7 @@ class FileBrowserViewModel @Inject constructor(
                 val enrichedFiles = files.map { file ->
                     val withPinnedAndBookmark = file.copy(
                         isPinned = pinned.contains(file.uri.toString()),
-                        isBookmarked = bookmarked.contains(file.uri.toString()),
+                        isBookmarked = bookmarked.contains(file.uri.toString())
                     )
                     enrichWithGitStatus(withPinnedAndBookmark, gitStatusMap)
                 }
@@ -632,7 +655,9 @@ class FileBrowserViewModel @Inject constructor(
      */
     private suspend fun applyDirectorySortPreference(directoryUri: Uri) {
         settingsRepository.getDirectorySortOption(directoryUri.toString()).first()?.let { savedName ->
-            try { _currentSortOption.value = FileSortOption.valueOf(savedName) } catch (_: IllegalArgumentException) { }
+            try {
+                _currentSortOption.value = FileSortOption.valueOf(savedName)
+            } catch (_: IllegalArgumentException) { }
         }
     }
 
@@ -747,7 +772,9 @@ class FileBrowserViewModel @Inject constructor(
 
         if (AppFileManager.isInternalUri(uriString)) {
             val path = treeUri.path ?: return context.getString(R.string.browser_internal_storage)
-            return path.substringAfterLast("/user_files/").ifEmpty { context.getString(R.string.browser_internal_storage) }
+            return path.substringAfterLast("/user_files/").ifEmpty {
+                context.getString(R.string.browser_internal_storage)
+            }
         }
 
         if (uriString.startsWith("content://com.android.externalstorage.documents")) {
@@ -837,7 +864,7 @@ class FileBrowserViewModel @Inject constructor(
         directoryObserver.startWatching(
             uri = treeUri,
             scope = viewModelScope,
-            pathResolver = { safUriToFilePath(it) },
+            pathResolver = { safUriToFilePath(it) }
         )
     }
 
@@ -1060,9 +1087,11 @@ class FileBrowserViewModel @Inject constructor(
                     _gitHubImportState.update { current ->
                         if (current is GitHubImportState.Cloning) {
                             current.copy(progressMessage = message)
-                        } else current
+                        } else {
+                            current
+                        }
                     }
-                },
+                }
             )
 
             val result = gitManager.cloneRepository(
@@ -1070,7 +1099,7 @@ class FileBrowserViewModel @Inject constructor(
                 targetDirectory = targetDir,
                 depth = 1,
                 sparsePaths = selectedPaths.toList(),
-                onProgress = { message -> throttler.append(message) },
+                onProgress = { message -> throttler.append(message) }
             )
 
             throttler.flushNow()
@@ -1127,8 +1156,11 @@ class FileBrowserViewModel @Inject constructor(
                     counter++
                 }
                 if (dest.exists()) {
-                    Log.w(TAG, "Filename collision exhausted after $MAX_NAME_COLLISION_RETRIES attempts " +
-                        "for ${item.name}; aborting save to prevent overwrite")
+                    Log.w(
+                        TAG,
+                        "Filename collision exhausted after $MAX_NAME_COLLISION_RETRIES attempts " +
+                            "for ${item.name}; aborting save to prevent overwrite"
+                    )
                     return@runCatching null
                 }
                 val inputStream = context.contentResolver.openInputStream(item.uri)
@@ -1177,33 +1209,27 @@ class FileBrowserViewModel @Inject constructor(
     }
 
     // ===== 文件夹创建 =====
-    fun createFolder(folderName: String): Boolean {
-        return try {
-            val folder = AppFileManager.createUserFolder(context, folderName)
-            refreshInternalFiles()
-            folder.exists()
-        } catch (e: Exception) {
-            Log.e(TAG, "Failed to create folder: $folderName", e)
-            false
-        }
+    fun createFolder(folderName: String): Boolean = try {
+        val folder = AppFileManager.createUserFolder(context, folderName)
+        refreshInternalFiles()
+        folder.exists()
+    } catch (e: Exception) {
+        Log.e(TAG, "Failed to create folder: $folderName", e)
+        false
     }
 
-    fun getInternalFolders(): List<File> {
-        return AppFileManager.listUserFolders(context)
-    }
+    fun getInternalFolders(): List<File> = AppFileManager.listUserFolders(context)
 
     // ===== 文件移动 =====
-    fun moveFile(sourceUri: String, targetDirUri: String): Boolean {
-        return try {
-            val moved = AppFileManager.moveInternalFile(context, sourceUri, targetDirUri)
-            if (moved) {
-                refreshInternalFiles()
-            }
-            moved
-        } catch (e: Exception) {
-            Log.e(TAG, "Failed to move file", e)
-            false
+    fun moveFile(sourceUri: String, targetDirUri: String): Boolean = try {
+        val moved = AppFileManager.moveInternalFile(context, sourceUri, targetDirUri)
+        if (moved) {
+            refreshInternalFiles()
         }
+        moved
+    } catch (e: Exception) {
+        Log.e(TAG, "Failed to move file", e)
+        false
     }
 
     fun moveSelectedFiles(targetDirUri: String): Int {
@@ -1328,10 +1354,18 @@ class FileBrowserViewModel @Inject constructor(
             return uri.lastPathSegment?.substringAfterLast('/') ?: "imported_file"
         }
         return try {
-            context.contentResolver.query(uri, arrayOf(android.provider.OpenableColumns.DISPLAY_NAME), null, null, null)?.use { cursor ->
+            context.contentResolver.query(
+                uri,
+                arrayOf(android.provider.OpenableColumns.DISPLAY_NAME),
+                null,
+                null,
+                null
+            )?.use { cursor ->
                 if (cursor.moveToFirst()) {
                     cursor.getString(0)
-                } else null
+                } else {
+                    null
+                }
             } ?: uri.lastPathSegment?.substringAfterLast('/') ?: "imported_file"
         } catch (_: Exception) {
             uri.lastPathSegment?.substringAfterLast('/') ?: "imported_file"

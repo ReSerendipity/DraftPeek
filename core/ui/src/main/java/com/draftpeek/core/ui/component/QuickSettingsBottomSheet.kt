@@ -52,16 +52,13 @@ import com.draftpeek.core.ui.theme.PrototypeTokens
  * @param content 表单主体内容，在 [ColumnScope] 中布局
  */
 @Composable
-fun QuickSettingsBottomSheet(
-    onDismiss: () -> Unit,
-    content: @Composable ColumnScope.() -> Unit,
-) {
+fun QuickSettingsBottomSheet(onDismiss: () -> Unit, content: @Composable ColumnScope.() -> Unit) {
     Dialog(
         onDismissRequest = onDismiss,
         properties = DialogProperties(
             usePlatformDefaultWidth = false,
-            decorFitsSystemWindows = true,
-        ),
+            decorFitsSystemWindows = true
+        )
     ) {
         Box(
             modifier = Modifier
@@ -70,9 +67,9 @@ fun QuickSettingsBottomSheet(
                 .clickable(
                     interactionSource = remember { MutableInteractionSource() },
                     indication = null,
-                    onClick = onDismiss,
+                    onClick = onDismiss
                 ),
-            contentAlignment = Alignment.BottomCenter,
+            contentAlignment = Alignment.BottomCenter
         ) {
             Surface(
                 modifier = Modifier
@@ -80,20 +77,20 @@ fun QuickSettingsBottomSheet(
                     .clickable(
                         interactionSource = remember { MutableInteractionSource() },
                         indication = null,
-                        onClick = { /* consume clicks so taps inside don't dismiss */ },
+                        onClick = { /* consume clicks so taps inside don't dismiss */ }
                     ),
                 shape = RoundedCornerShape(
                     topStart = PrototypeSpacing.BottomSheetTopRadius,
-                    topEnd = PrototypeSpacing.BottomSheetTopRadius,
+                    topEnd = PrototypeSpacing.BottomSheetTopRadius
                 ),
                 color = PrototypeTokens.surface,
-                shadowElevation = 0.dp,
+                shadowElevation = 0.dp
             ) {
                 Column(
                     modifier = Modifier
                         .fillMaxWidth()
                         .navigationBarsPadding()
-                        .padding(top = 8.dp, bottom = 32.dp),
+                        .padding(top = 8.dp, bottom = 32.dp)
                 ) {
                     Box(
                         modifier = Modifier
@@ -101,7 +98,7 @@ fun QuickSettingsBottomSheet(
                             .height(PrototypeSpacing.SheetHandleHeight)
                             .clip(RoundedCornerShape(999.dp))
                             .background(PrototypeTokens.border)
-                            .align(Alignment.CenterHorizontally),
+                            .align(Alignment.CenterHorizontally)
                     )
                     Spacer(modifier = Modifier.height(16.dp))
                     Text(
@@ -111,12 +108,12 @@ fun QuickSettingsBottomSheet(
                         color = PrototypeTokens.fg,
                         modifier = Modifier
                             .align(Alignment.CenterHorizontally)
-                            .padding(bottom = 8.dp),
+                            .padding(bottom = 8.dp)
                     )
                     HorizontalDivider(
                         thickness = 1.dp,
                         color = PrototypeTokens.borderSoft,
-                        modifier = Modifier.padding(bottom = 4.dp),
+                        modifier = Modifier.padding(bottom = 4.dp)
                     )
                     content()
                 }

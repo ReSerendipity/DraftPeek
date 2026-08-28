@@ -9,7 +9,6 @@ package com.draftpeek.feature.stats.ui.component
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.MaterialTheme
@@ -30,32 +29,28 @@ import com.draftpeek.core.ui.theme.PrototypeTokens
  * @param modifier 修饰符
  */
 @Composable
-fun StatCard(
-    title: String,
-    value: String,
-    modifier: Modifier = Modifier,
-) {
+fun StatCard(title: String, value: String, modifier: Modifier = Modifier) {
     val typography = MaterialTheme.typography
 
     Card(
         modifier = modifier.fillMaxWidth(),
         shape = BrandShapes.Card,
         colors = CardDefaults.cardColors(
-            containerColor = PrototypeTokens.elevated,
-        ),
+            containerColor = PrototypeTokens.elevated
+        )
     ) {
         Column(
-            modifier = Modifier.padding(horizontal = 12.dp, vertical = 10.dp),
+            modifier = Modifier.padding(horizontal = 12.dp, vertical = 10.dp)
         ) {
             Text(
                 text = title,
                 style = typography.labelMedium,
-                color = PrototypeTokens.fgSoft,
+                color = PrototypeTokens.fgSoft
             )
             Text(
                 text = value,
                 style = typography.headlineSmall,
-                color = PrototypeTokens.fg,
+                color = PrototypeTokens.fg
             )
         }
     }

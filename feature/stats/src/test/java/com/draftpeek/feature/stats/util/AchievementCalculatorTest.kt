@@ -1,25 +1,22 @@
 package com.draftpeek.feature.stats.util
 
 import com.draftpeek.core.data.entity.UserActivity
+import java.time.LocalDate
+import java.time.format.DateTimeFormatter
 import org.junit.jupiter.api.Assertions.assertEquals
-import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.DisplayName
 import org.junit.jupiter.api.Nested
 import org.junit.jupiter.api.Test
-import java.time.LocalDate
-import java.time.format.DateTimeFormatter
 
 @DisplayName("AchievementCalculator")
 class AchievementCalculatorTest {
 
     private val dateFormatter = DateTimeFormatter.ISO_LOCAL_DATE
 
-    private fun activityFor(date: LocalDate, fileOpen: Int = 1): UserActivity {
-        return UserActivity(
-            date = date.format(dateFormatter),
-            fileOpenCount = fileOpen,
-        )
-    }
+    private fun activityFor(date: LocalDate, fileOpen: Int = 1): UserActivity = UserActivity(
+        date = date.format(dateFormatter),
+        fileOpenCount = fileOpen
+    )
 
     @Nested
     @DisplayName("calculate() — empty input")
@@ -57,7 +54,7 @@ class AchievementCalculatorTest {
             val yesterday = today.minusDays(1)
             val map = mapOf(
                 today.format(dateFormatter) to activityFor(today, fileOpen = 5),
-                yesterday.format(dateFormatter) to activityFor(yesterday, fileOpen = 3),
+                yesterday.format(dateFormatter) to activityFor(yesterday, fileOpen = 3)
             )
 
             val stats = AchievementCalculator.calculate(map)
@@ -71,7 +68,7 @@ class AchievementCalculatorTest {
             val activity = UserActivity(
                 date = today.format(dateFormatter),
                 fileOpenCount = 1,
-                fileCreateCount = 4,
+                fileCreateCount = 4
             )
 
             val stats = AchievementCalculator.calculate(mapOf(activity.date to activity))
@@ -87,13 +84,13 @@ class AchievementCalculatorTest {
                 today.format(dateFormatter) to UserActivity(
                     date = today.format(dateFormatter),
                     fileOpenCount = 1,
-                    usageDurationMinutes = 30,
+                    usageDurationMinutes = 30
                 ),
                 yesterday.format(dateFormatter) to UserActivity(
                     date = yesterday.format(dateFormatter),
                     fileOpenCount = 1,
-                    usageDurationMinutes = 60,
-                ),
+                    usageDurationMinutes = 60
+                )
             )
 
             val stats = AchievementCalculator.calculate(map)
@@ -107,7 +104,7 @@ class AchievementCalculatorTest {
             val activity = UserActivity(
                 date = today.format(dateFormatter),
                 fileOpenCount = 1,
-                charWriteCount = 500,
+                charWriteCount = 500
             )
 
             val stats = AchievementCalculator.calculate(mapOf(activity.date to activity))

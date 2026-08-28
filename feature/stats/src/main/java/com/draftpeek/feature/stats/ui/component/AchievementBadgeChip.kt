@@ -10,7 +10,6 @@ import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.layout.Arrangement
-import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
@@ -40,39 +39,34 @@ import com.draftpeek.core.ui.theme.PrototypeTokens
  * @param modifier 修饰符
  */
 @Composable
-fun AchievementBadgeChip(
-    icon: ImageVector,
-    name: String,
-    onClick: () -> Unit,
-    modifier: Modifier = Modifier,
-) {
+fun AchievementBadgeChip(icon: ImageVector, name: String, onClick: () -> Unit, modifier: Modifier = Modifier) {
     Row(
         modifier = modifier
             .pressScaleEffect()
             .background(
                 color = PrototypeTokens.accentSoft,
-                shape = RoundedCornerShape(14.dp),
+                shape = RoundedCornerShape(14.dp)
             )
             .clickable(
                 interactionSource = remember { MutableInteractionSource() },
                 indication = null,
-                onClick = onClick,
+                onClick = onClick
             )
             .padding(horizontal = 10.dp, vertical = 6.dp),
         verticalAlignment = Alignment.CenterVertically,
-        horizontalArrangement = Arrangement.spacedBy(5.dp),
+        horizontalArrangement = Arrangement.spacedBy(5.dp)
     ) {
         Icon(
             imageVector = icon,
             contentDescription = null,
             tint = PrototypeTokens.accent,
-            modifier = Modifier.size(14.dp),
+            modifier = Modifier.size(14.dp)
         )
         Text(
             text = name,
             fontSize = 11.sp,
             fontWeight = FontWeight.Medium,
-            color = PrototypeTokens.accent,
+            color = PrototypeTokens.accent
         )
     }
 }

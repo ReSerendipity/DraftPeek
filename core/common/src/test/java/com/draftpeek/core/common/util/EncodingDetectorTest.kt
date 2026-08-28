@@ -1,12 +1,11 @@
 package com.draftpeek.core.common.util
 
+import java.nio.charset.Charset
 import org.junit.jupiter.api.Assertions.assertEquals
-import org.junit.jupiter.api.Assertions.assertFalse
 import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.DisplayName
 import org.junit.jupiter.api.Nested
 import org.junit.jupiter.api.Test
-import java.nio.charset.Charset
 
 @DisplayName("EncodingDetector")
 class EncodingDetectorTest {
@@ -19,8 +18,11 @@ class EncodingDetectorTest {
         @DisplayName("UTF-8 BOM (EF BB BF) → UTF-8")
         fun utf8Bom() {
             val bytes = byteArrayOf(
-                0xEF.toByte(), 0xBB.toByte(), 0xBF.toByte(),
-                'a'.code.toByte(), 'b'.code.toByte(),
+                0xEF.toByte(),
+                0xBB.toByte(),
+                0xBF.toByte(),
+                'a'.code.toByte(),
+                'b'.code.toByte()
             )
             assertEquals("UTF-8", EncodingDetector.detectEncoding(bytes))
         }
@@ -108,7 +110,7 @@ class EncodingDetectorTest {
             val result = EncodingDetector.detectEncoding(bytes)
             assertTrue(
                 result.isNotEmpty(),
-                "Detection should return a non-empty encoding name",
+                "Detection should return a non-empty encoding name"
             )
         }
 
@@ -134,8 +136,11 @@ class EncodingDetectorTest {
         @DisplayName("Stage 1: BOM is authoritative, bypasses juniversalchardet")
         fun stage1BomAuthoritative() {
             val bytes = byteArrayOf(
-                0xEF.toByte(), 0xBB.toByte(), 0xBF.toByte(),
-                'h'.code.toByte(), 'i'.code.toByte(),
+                0xEF.toByte(),
+                0xBB.toByte(),
+                0xBF.toByte(),
+                'h'.code.toByte(),
+                'i'.code.toByte()
             )
             assertEquals("UTF-8", EncodingDetector.detectEncoding(bytes))
         }
@@ -198,8 +203,10 @@ class EncodingDetectorTest {
         @DisplayName("BOM wins over extension hint")
         fun bomWinsOverExtension() {
             val bytes = byteArrayOf(
-                0xFF.toByte(), 0xFE.toByte(),
-                'a'.code.toByte(), 0x00,
+                0xFF.toByte(),
+                0xFE.toByte(),
+                'a'.code.toByte(),
+                0x00
             )
             // .kt would default to UTF-8, but BOM says UTF-16LE
             assertEquals("UTF-16LE", EncodingDetector.detectEncoding(bytes, "Foo.kt"))
@@ -255,7 +262,9 @@ class EncodingDetectorTest {
         fun decodesUtf8Bom() {
             val payload = "hello world"
             val withBom = byteArrayOf(
-                0xEF.toByte(), 0xBB.toByte(), 0xBF.toByte(),
+                0xEF.toByte(),
+                0xBB.toByte(),
+                0xBF.toByte()
             ) + payload.toByteArray(Charsets.UTF_8)
             val decoded = EncodingDetector.decodeBytes(withBom)
             assertEquals(payload, decoded)

@@ -22,25 +22,19 @@ import javax.inject.Inject
  *
  * @property repository 编辑器文件仓库实例
  */
-class OpenFileUseCase @Inject constructor(
-    private val repository: EditorFileRepository,
-) {
+class OpenFileUseCase @Inject constructor(private val repository: EditorFileRepository) {
     /**
      * 读取指定 URI 的文件内容。
      * @param uri 文件 URI
      * @param encoding 可选的文件编码，为 null 时自动检测
      * @return 文件读取结果（成功或失败）
      */
-    suspend operator fun invoke(
-        uri: Uri,
-        encoding: String? = null,
-    ): EditorFileReadOutcome = repository.readFile(uri, encoding)
+    suspend operator fun invoke(uri: Uri, encoding: String? = null): EditorFileReadOutcome =
+        repository.readFile(uri, encoding)
 
     /** 判断 URI 是否指向应用内部文件。 */
-    fun isInternalFile(uriString: String): Boolean =
-        repository.isInternalFile(uriString)
+    fun isInternalFile(uriString: String): Boolean = repository.isInternalFile(uriString)
 
     /** 删除内部存储的文件。 */
-    suspend fun deleteInternalFile(uriString: String): Boolean =
-        repository.deleteInternalFile(uriString)
+    suspend fun deleteInternalFile(uriString: String): Boolean = repository.deleteInternalFile(uriString)
 }

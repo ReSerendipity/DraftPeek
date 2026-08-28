@@ -58,6 +58,7 @@ class TerminalService : Service() {
 
         /** 执行模式：前台 */
         const val MODE_FOREGROUND = "foreground"
+
         /** 执行模式：后台 */
         const val MODE_BACKGROUND = "background"
 
@@ -116,7 +117,7 @@ class TerminalService : Service() {
             context: Context,
             command: String,
             workingDirectory: String? = null,
-            envVars: Map<String, String>? = null,
+            envVars: Map<String, String>? = null
         ) {
             val intent = Intent(context, TerminalService::class.java).apply {
                 action = ACTION_EXECUTE_COMMAND
@@ -292,7 +293,7 @@ class TerminalService : Service() {
                 this,
                 0,
                 it,
-                PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE,
+                PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE
             )
         }
 
@@ -303,7 +304,7 @@ class TerminalService : Service() {
             this,
             1,
             stopIntent,
-            PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE,
+            PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE
         )
 
         return Notification.Builder(this, CHANNEL_ID)
@@ -315,7 +316,7 @@ class TerminalService : Service() {
             .addAction(
                 android.R.drawable.ic_menu_close_clear_cancel,
                 getString(R.string.terminal_notification_stop),
-                stopPendingIntent,
+                stopPendingIntent
             )
             .build()
     }
@@ -331,7 +332,7 @@ class TerminalService : Service() {
                 this,
                 0,
                 it,
-                PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE,
+                PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE
             )
         }
 
@@ -342,7 +343,7 @@ class TerminalService : Service() {
             this,
             2,
             stopIntent,
-            PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE,
+            PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE
         )
 
         val foregroundIntent = Intent(this, TerminalService::class.java).apply {
@@ -353,7 +354,7 @@ class TerminalService : Service() {
             this,
             3,
             foregroundIntent,
-            PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE,
+            PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE
         )
 
         return Notification.Builder(this, CHANNEL_ID)
@@ -365,12 +366,12 @@ class TerminalService : Service() {
             .addAction(
                 android.R.drawable.ic_media_play,
                 "显示终端",
-                foregroundPendingIntent,
+                foregroundPendingIntent
             )
             .addAction(
                 android.R.drawable.ic_menu_close_clear_cancel,
                 getString(R.string.terminal_notification_stop),
-                stopPendingIntent,
+                stopPendingIntent
             )
             .build()
     }
@@ -382,7 +383,7 @@ class TerminalService : Service() {
         val channel = NotificationChannel(
             CHANNEL_ID,
             getString(R.string.terminal_notification_channel_name),
-            NotificationManager.IMPORTANCE_LOW,
+            NotificationManager.IMPORTANCE_LOW
         ).apply {
             description = getString(R.string.terminal_notification_channel_desc)
             setShowBadge(false)

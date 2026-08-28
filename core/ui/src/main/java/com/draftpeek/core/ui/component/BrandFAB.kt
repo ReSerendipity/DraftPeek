@@ -14,7 +14,6 @@ import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
@@ -35,7 +34,6 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.draw.rotate
 import androidx.compose.ui.draw.shadow
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
@@ -53,11 +51,7 @@ import com.draftpeek.core.ui.theme.PrototypeTokens
  * @param label   Text label displayed in the bubble next to the icon button.
  * @param onClick Called when the user taps the item; the FAB automatically collapses.
  */
-data class FABMenuItem(
-    val icon: StrokeIconDef,
-    val label: String,
-    val onClick: () -> Unit,
-)
+data class FABMenuItem(val icon: StrokeIconDef, val label: String, val onClick: () -> Unit)
 
 /**
  * A branded Floating Action Button with an expandable speed-dial menu.
@@ -77,16 +71,12 @@ data class FABMenuItem(
  *                  selecting a menu item).
  */
 @Composable
-fun BrandFAB(
-    items: List<FABMenuItem>,
-    modifier: Modifier = Modifier,
-    onDismiss: (() -> Unit)? = null,
-) {
+fun BrandFAB(items: List<FABMenuItem>, modifier: Modifier = Modifier, onDismiss: (() -> Unit)? = null) {
     var expanded by remember { mutableStateOf(false) }
     val rotation by animateFloatAsState(
         targetValue = if (expanded) 45f else 0f,
         animationSpec = tween(durationMillis = 200),
-        label = "fabRotation",
+        label = "fabRotation"
     )
 
     fun collapse() {
@@ -97,7 +87,7 @@ fun BrandFAB(
     Column(
         modifier = modifier,
         horizontalAlignment = Alignment.End,
-        verticalArrangement = Arrangement.spacedBy(8.dp),
+        verticalArrangement = Arrangement.spacedBy(8.dp)
     ) {
         // Menu items: reversed so first-defined item is at the top (farthest from FAB),
         // which matches the HTML prototype stacking order.
@@ -109,13 +99,13 @@ fun BrandFAB(
                 enter = fadeIn(tween(durationMillis = 150, delayMillis = delayMs)) +
                     scaleIn(
                         animationSpec = tween(durationMillis = 200, delayMillis = delayMs),
-                        initialScale = 0.98f,
+                        initialScale = 0.98f
                     ),
-                exit = fadeOut(tween(durationMillis = 100)),
+                exit = fadeOut(tween(durationMillis = 100))
             ) {
                 Row(
                     verticalAlignment = Alignment.CenterVertically,
-                    horizontalArrangement = Arrangement.spacedBy(8.dp),
+                    horizontalArrangement = Arrangement.spacedBy(8.dp)
                 ) {
                     // Label bubble (surface-colored pill with border)
                     Box(
@@ -125,15 +115,15 @@ fun BrandFAB(
                             .border(
                                 width = 1.dp,
                                 color = PrototypeTokens.border,
-                                shape = RoundedCornerShape(10.dp),
+                                shape = RoundedCornerShape(10.dp)
                             )
-                            .padding(horizontal = 12.dp, vertical = 8.dp),
+                            .padding(horizontal = 12.dp, vertical = 8.dp)
                     ) {
                         Text(
                             text = item.label,
                             fontSize = 13.sp,
                             fontWeight = FontWeight.Normal,
-                            color = PrototypeTokens.fg,
+                            color = PrototypeTokens.fg
                         )
                     }
                     // Mini icon button
@@ -145,7 +135,7 @@ fun BrandFAB(
                             .border(
                                 width = 1.dp,
                                 color = PrototypeTokens.border,
-                                shape = BrandShapes.IconButton,
+                                shape = BrandShapes.IconButton
                             )
                             .clickable(
                                 interactionSource = remember { MutableInteractionSource() },
@@ -153,15 +143,15 @@ fun BrandFAB(
                                 onClick = {
                                     collapse()
                                     item.onClick()
-                                },
+                                }
                             ),
-                        contentAlignment = Alignment.Center,
+                        contentAlignment = Alignment.Center
                     ) {
                         StrokeIcon(
                             icon = item.icon,
                             contentDescription = item.label,
                             tint = PrototypeTokens.accent,
-                            modifier = Modifier.size(18.dp),
+                            modifier = Modifier.size(18.dp)
                         )
                     }
                 }
@@ -176,7 +166,7 @@ fun BrandFAB(
                     elevation = 6.dp,
                     shape = BrandShapes.FAB,
                     ambientColor = Color.Black.copy(alpha = 0.12f),
-                    spotColor = Color.Black.copy(alpha = 0.08f),
+                    spotColor = Color.Black.copy(alpha = 0.08f)
                 )
                 .clip(BrandShapes.FAB)
                 .background(PrototypeTokens.accent)
@@ -184,9 +174,9 @@ fun BrandFAB(
                 .clickable(
                     interactionSource = remember { MutableInteractionSource() },
                     indication = null,
-                    onClick = { expanded = !expanded },
+                    onClick = { expanded = !expanded }
                 ),
-            contentAlignment = Alignment.Center,
+            contentAlignment = Alignment.Center
         ) {
             Icon(
                 imageVector = if (expanded) Icons.Filled.Close else Icons.Filled.Add,
@@ -194,7 +184,7 @@ fun BrandFAB(
                 tint = Color.White,
                 modifier = Modifier
                     .size(24.dp)
-                    .rotate(rotation),
+                    .rotate(rotation)
             )
         }
     }

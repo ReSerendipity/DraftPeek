@@ -34,7 +34,7 @@ import androidx.room.PrimaryKey
     tableName = "recent_files",
     indices = [
         Index(value = ["isFavorite", "lastOpenedAt"]),
-        Index(value = ["lastOpenedAt"]),
+        Index(value = ["lastOpenedAt"])
     ]
 )
 data class RecentFile(
@@ -47,5 +47,5 @@ data class RecentFile(
     val cursorLine: Int = 1,
     val cursorColumn: Int = 1,
     val scrollX: Int = 0,
-    val scrollY: Int = 0,
+    val scrollY: Int = 0
 )

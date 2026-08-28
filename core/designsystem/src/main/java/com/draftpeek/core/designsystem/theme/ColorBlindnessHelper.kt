@@ -43,7 +43,7 @@ object ColorBlindnessHelper {
                 Triple(
                     0.152286f * r + 1.052583f * g - 0.204868f * b,
                     0.114503f * r + 0.786281f * g + 0.099216f * b,
-                    -0.003882f * r - 0.048116f * g + 1.051998f * b,
+                    -0.003882f * r - 0.048116f * g + 1.051998f * b
                 )
             }
             ColorBlindMode.DEUTERANOPIA -> {
@@ -51,7 +51,7 @@ object ColorBlindnessHelper {
                 Triple(
                     0.367322f * r + 0.860646f * g - 0.227968f * b,
                     0.280085f * r + 0.672501f * g + 0.047413f * b,
-                    -0.011820f * r - 0.042940f * g + 1.054760f * b,
+                    -0.011820f * r - 0.042940f * g + 1.054760f * b
                 )
             }
             ColorBlindMode.TRITANOPIA -> {
@@ -59,7 +59,7 @@ object ColorBlindnessHelper {
                 Triple(
                     1.255528f * r - 0.076749f * g - 0.178779f * b,
                     -0.078411f * r + 0.930809f * g + 0.147602f * b,
-                    0.004733f * r + 0.691367f * g + 0.303900f * b,
+                    0.004733f * r + 0.691367f * g + 0.303900f * b
                 )
             }
             else -> Triple(r, g, b)
@@ -69,15 +69,14 @@ object ColorBlindnessHelper {
             red = nr.coerceIn(0f, 1f),
             green = ng.coerceIn(0f, 1f),
             blue = nb.coerceIn(0f, 1f),
-            alpha = color.alpha,
+            alpha = color.alpha
         )
     }
 
     /**
      * 批量转换颜色列表。
      */
-    fun transformAll(colors: List<Color>, mode: ColorBlindMode): List<Color> =
-        colors.map { transform(it, mode) }
+    fun transformAll(colors: List<Color>, mode: ColorBlindMode): List<Color> = colors.map { transform(it, mode) }
 }
 
 /**
@@ -111,13 +110,11 @@ object ColorBlindSafePalette {
         "css" to Color(0xFF56B4E9),
         "json" to Color(0xFFCC79A7),
         "markdown" to Color(0xFFD55E00),
-        "default" to Color(0xFF0072B2),
+        "default" to Color(0xFF0072B2)
     )
 
     /**
      * 根据文件扩展名获取色盲安全颜色。
      */
-    fun colorForExtension(ext: String): Color {
-        return safeFileColors[ext.lowercase()] ?: safeFileColors["default"]!!
-    }
+    fun colorForExtension(ext: String): Color = safeFileColors[ext.lowercase()] ?: safeFileColors["default"]!!
 }

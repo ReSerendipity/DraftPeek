@@ -36,10 +36,7 @@ import kotlinx.coroutines.delay
  * @param message  The text to show in the toast.
  * @param duration How long (in milliseconds) the toast stays visible before auto-dismissing.
  */
-data class ToastData(
-    val message: String,
-    val duration: Long = 2500L,
-)
+data class ToastData(val message: String, val duration: Long = 2500L)
 
 /**
  * CompositionLocal providing a function that enqueues a toast message.
@@ -70,10 +67,7 @@ val LocalToastHost = compositionLocalOf<(String) -> Unit> { {} }
  * `LocalToastHost.current("message")` from any descendant.
  */
 @Composable
-fun BrandToastHost(
-    modifier: Modifier = Modifier,
-    content: @Composable () -> Unit,
-) {
+fun BrandToastHost(modifier: Modifier = Modifier, content: @Composable () -> Unit) {
     var toastData by remember { mutableStateOf<ToastData?>(null) }
 
     // Auto-dismiss timer: whenever a new toast arrives, the key changes and the
@@ -98,15 +92,15 @@ fun BrandToastHost(
         AnimatedVisibility(
             visible = toastData != null,
             enter = slideInVertically(
-                initialOffsetY = { fullHeight -> fullHeight / 4 },
+                initialOffsetY = { fullHeight -> fullHeight / 4 }
             ) + fadeIn(),
             exit = slideOutVertically(
-                targetOffsetY = { fullHeight -> fullHeight / 4 },
+                targetOffsetY = { fullHeight -> fullHeight / 4 }
             ) + fadeOut(),
             modifier = Modifier
                 .align(Alignment.BottomCenter)
                 .navigationBarsPadding()
-                .padding(bottom = 96.dp),
+                .padding(bottom = 96.dp)
         ) {
             toastData?.let { data ->
                 val bgColor = Color(0xFF15151A).copy(alpha = 0.95f)
@@ -115,7 +109,7 @@ fun BrandToastHost(
                     modifier = Modifier
                         .clip(RoundedCornerShape(10.dp))
                         .background(bgColor)
-                        .padding(horizontal = 20.dp, vertical = 12.dp),
+                        .padding(horizontal = 20.dp, vertical = 12.dp)
                 ) {
                     Text(
                         text = data.message,
@@ -124,8 +118,8 @@ fun BrandToastHost(
                         fontWeight = FontWeight.Medium,
                         style = SettingNameStyle.copy(
                             color = textColor,
-                            fontSize = 13.sp,
-                        ),
+                            fontSize = 13.sp
+                        )
                     )
                 }
             }

@@ -87,9 +87,7 @@ object FileUtils {
      * @param threshold 阈值（字节数），默认50MB
      * @return 如果文件大小超过阈值返回 `true`
      */
-    fun isLargeFile(size: Long, threshold: Long = 50 * 1024 * 1024): Boolean {
-        return size > threshold
-    }
+    fun isLargeFile(size: Long, threshold: Long = 50 * 1024 * 1024): Boolean = size > threshold
 
     /**
      * 将 URI 字符串解析为真实本地文件系统路径。

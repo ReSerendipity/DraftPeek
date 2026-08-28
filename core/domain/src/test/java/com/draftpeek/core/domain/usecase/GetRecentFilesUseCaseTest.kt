@@ -4,9 +4,8 @@ import com.draftpeek.core.data.entity.RecentFile
 import com.draftpeek.core.data.repository.RecentFilesRepository
 import io.mockk.every
 import io.mockk.mockk
-import io.mockk.verify
-import kotlinx.coroutines.flow.flowOf
 import kotlinx.coroutines.flow.first
+import kotlinx.coroutines.flow.flowOf
 import kotlinx.coroutines.test.runTest
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.BeforeEach
@@ -49,7 +48,10 @@ class GetRecentFilesUseCaseTest {
         @Test
         @DisplayName("返回 repository.favorites 流")
         fun favorites_returnsFavoritesFlow() = runTest {
-            val favs = listOf(RecentFile(uri = "fav1", fileName = "fav.kt", language = null, lastOpenedAt = 0L, isFavorite = true))
+            val favs =
+                listOf(
+                    RecentFile(uri = "fav1", fileName = "fav.kt", language = null, lastOpenedAt = 0L, isFavorite = true)
+                )
             every { repository.favorites } returns flowOf(favs)
 
             val result = useCase.favorites().first()

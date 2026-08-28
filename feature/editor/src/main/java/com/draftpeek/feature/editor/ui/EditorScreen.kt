@@ -17,11 +17,6 @@ import android.widget.Toast
 import androidx.activity.compose.BackHandler
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
-import com.draftpeek.core.common.security.SecurityGate
-import com.draftpeek.core.common.feature.FeatureFlag
-import com.draftpeek.core.common.model.TabId
-import com.draftpeek.core.ui.composition.isFeatureEnabled
-import com.draftpeek.feature.editor.treesitter.TreeSitterLanguageProvider
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.gestures.awaitEachGesture
@@ -34,50 +29,39 @@ import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
-import androidx.compose.foundation.layout.fillMaxHeight
-import androidx.compose.foundation.pager.HorizontalPager
-import androidx.compose.foundation.pager.rememberPagerState
 import androidx.compose.foundation.layout.fillMaxSize
-import com.draftpeek.feature.editor.R
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.pager.HorizontalPager
+import androidx.compose.foundation.pager.rememberPagerState
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
-import androidx.compose.ui.draw.clip
-import androidx.compose.ui.graphics.Color
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.MoreVert
 import androidx.compose.material.icons.automirrored.filled.Redo
+import androidx.compose.material.icons.automirrored.filled.Undo
+import androidx.compose.material.icons.filled.Close
+import androidx.compose.material.icons.filled.Code
+import androidx.compose.material.icons.filled.Error
+import androidx.compose.material.icons.filled.MoreVert
 import androidx.compose.material.icons.filled.Refresh
 import androidx.compose.material.icons.filled.Save
 import androidx.compose.material.icons.filled.Search
 import androidx.compose.material.icons.filled.Settings
-import androidx.compose.material.icons.automirrored.filled.Undo
-import androidx.compose.material.icons.filled.Visibility
-import androidx.compose.material.icons.filled.Close
-import androidx.compose.material.icons.filled.Code
-import androidx.compose.material.icons.filled.Edit
-import androidx.compose.material.icons.filled.Error
-import androidx.compose.material.icons.filled.FindReplace
-import androidx.compose.material.icons.filled.Numbers
-import androidx.compose.material.icons.filled.VisibilityOff
-import androidx.compose.material.icons.filled.ViewColumn
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.CircularProgressIndicator
-import androidx.compose.material3.LinearProgressIndicator
 import androidx.compose.material3.DropdownMenu
 import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
+import androidx.compose.material3.LinearProgressIndicator
 import androidx.compose.material3.MaterialTheme
-import com.draftpeek.core.ui.component.BrandOutlinedTextField
 import androidx.compose.material3.PlainTooltip
 import androidx.compose.material3.SliderDefaults
 import androidx.compose.material3.Text
@@ -86,9 +70,9 @@ import androidx.compose.material3.TooltipBox
 import androidx.compose.material3.TooltipDefaults
 import androidx.compose.material3.rememberTooltipState
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.derivedStateOf
 import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.derivedStateOf
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.key
 import androidx.compose.runtime.mutableIntStateOf
@@ -99,59 +83,65 @@ import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.hapticfeedback.HapticFeedbackType
 import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.platform.LocalHapticFeedback
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.semantics.Role
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
-import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.viewinterop.AndroidView
 import androidx.hilt.navigation.compose.hiltViewModel
-import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.compose.LocalLifecycleOwner
-import androidx.lifecycle.repeatOnLifecycle
-import com.draftpeek.core.data.entity.Snippet
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import com.draftpeek.core.common.feature.FeatureFlag
+import com.draftpeek.core.common.model.TabId
+import com.draftpeek.core.common.security.SecurityGate
 import com.draftpeek.core.common.util.AppFileManager
 import com.draftpeek.core.common.util.DocumentType
 import com.draftpeek.core.common.util.FileUtils
+import com.draftpeek.core.data.entity.Snippet
 import com.draftpeek.core.ui.component.BrandDialog
 import com.draftpeek.core.ui.component.BrandFilledButton
 import com.draftpeek.core.ui.component.BrandFilterChip
-import com.draftpeek.core.ui.component.BrandIconButton
 import com.draftpeek.core.ui.component.BrandOutlinedButton
+import com.draftpeek.core.ui.component.BrandOutlinedTextField
 import com.draftpeek.core.ui.component.BrandSwitch
 import com.draftpeek.core.ui.component.BrandTopBar
 import com.draftpeek.core.ui.component.accessibilityEnhanced
+import com.draftpeek.core.ui.component.rememberHapticController
+import com.draftpeek.core.ui.composition.isFeatureEnabled
 import com.draftpeek.core.ui.icon.StrokeIcon
 import com.draftpeek.core.ui.icon.StrokeIcons
-import com.draftpeek.core.ui.component.rememberHapticController
 import com.draftpeek.core.ui.layout.FoldInfo
+import com.draftpeek.core.ui.layout.LayoutMode
 import com.draftpeek.core.ui.layout.SplitOrientation
 import com.draftpeek.core.ui.layout.SplitPane
-import com.draftpeek.core.ui.layout.LayoutMode
-import com.draftpeek.feature.editor.input.KeyboardShortcutHandler
-import com.draftpeek.feature.editor.model.EditorTab
-import com.draftpeek.feature.editor.model.EditorUiState
-import com.draftpeek.feature.editor.model.EditorMessage
-import com.draftpeek.feature.editor.model.MarkdownTheme
-import com.draftpeek.feature.editor.model.MarkdownViewMode
-import com.draftpeek.feature.editor.diagnostics.DiagnosticItem
-import com.draftpeek.feature.editor.sora.SoraEditorWrapper
-import com.draftpeek.feature.editor.viewmodel.CursorPosition
-import com.draftpeek.feature.editor.viewmodel.EditorViewModel
 import com.draftpeek.core.ui.theme.DraftPeekTypography
 import com.draftpeek.core.ui.theme.EditorStatusBarStyle
+import com.draftpeek.core.ui.theme.FontOptions
 import com.draftpeek.core.ui.theme.H2Style
 import com.draftpeek.core.ui.theme.MonoFileNameStyle
 import com.draftpeek.core.ui.theme.PrototypeShapes
 import com.draftpeek.core.ui.theme.PrototypeSpacing
 import com.draftpeek.core.ui.theme.PrototypeTokens
-import com.draftpeek.core.ui.theme.FontOptions
+import com.draftpeek.feature.editor.R
+import com.draftpeek.feature.editor.input.KeyboardShortcutHandler
+import com.draftpeek.feature.editor.model.EditorMessage
+import com.draftpeek.feature.editor.model.EditorTab
+import com.draftpeek.feature.editor.model.EditorUiState
+import com.draftpeek.feature.editor.model.MarkdownTheme
+import com.draftpeek.feature.editor.model.MarkdownViewMode
+import com.draftpeek.feature.editor.sora.SoraEditorWrapper
+import com.draftpeek.feature.editor.treesitter.TreeSitterLanguageProvider
+import com.draftpeek.feature.editor.viewmodel.CursorPosition
+import com.draftpeek.feature.editor.viewmodel.EditorViewModel
 import com.draftpeek.feature.settings.model.EditorSettings
 import com.draftpeek.feature.settings.viewmodel.SettingsViewModel
 import kotlinx.coroutines.launch
@@ -205,7 +195,7 @@ fun EditorScreen(
     fileUri: String? = null,
     onNavigateToTerminal: (String?) -> Unit = {},
     viewModel: EditorViewModel = hiltViewModel(),
-    settingsViewModel: SettingsViewModel = hiltViewModel(),
+    settingsViewModel: SettingsViewModel = hiltViewModel()
 ) {
     val context = LocalContext.current
     var retryKey by remember { mutableIntStateOf(0) }
@@ -333,16 +323,28 @@ fun EditorScreen(
         if (result.resultCode == Activity.RESULT_OK) {
             result.data?.data?.let { uri ->
                 if (!SecurityGate.isOperationAllowed()) {
-                    Toast.makeText(context, context.getString(R.string.security_operation_restricted), Toast.LENGTH_SHORT).show()
+                    Toast.makeText(
+                        context,
+                        context.getString(R.string.security_operation_restricted),
+                        Toast.LENGTH_SHORT
+                    ).show()
                     return@let
                 }
                 try {
                     context.contentResolver.openOutputStream(uri)?.use { outputStream ->
                         outputStream.write(wrapper.getContent().toByteArray(Charsets.UTF_8))
                     }
-                    Toast.makeText(context, context.getString(R.string.editor_export_success), Toast.LENGTH_SHORT).show()
+                    Toast.makeText(
+                        context,
+                        context.getString(R.string.editor_export_success),
+                        Toast.LENGTH_SHORT
+                    ).show()
                 } catch (e: Exception) {
-                    Toast.makeText(context, context.getString(R.string.editor_export_failed, e.message), Toast.LENGTH_SHORT).show()
+                    Toast.makeText(
+                        context,
+                        context.getString(R.string.editor_export_failed, e.message),
+                        Toast.LENGTH_SHORT
+                    ).show()
                 }
             }
         }
@@ -368,14 +370,14 @@ fun EditorScreen(
             onOpenCommandPalette = { showCommandPalette = true },
             onGoToLastEditLocation = { if (wrapper.isUsable()) wrapper.goToLastEditLocation() },
             onFindNext = { if (wrapper.isUsable()) wrapper.gotoNext() },
-            onFindPrevious = { if (wrapper.isUsable()) wrapper.gotoPrevious() },
+            onFindPrevious = { if (wrapper.isUsable()) wrapper.gotoPrevious() }
         )
     }
 
     // Pager state for HorizontalPager tab switching
     val pagerState = rememberPagerState(
         initialPage = tabs.indexOfFirst { it.id == activeTabId }.coerceAtLeast(0),
-        pageCount = { tabs.size.coerceAtLeast(1) },
+        pageCount = { tabs.size.coerceAtLeast(1) }
     )
     val pagerScope = rememberCoroutineScope()
 
@@ -419,7 +421,7 @@ fun EditorScreen(
         EditorInitErrorScreen(
             error = wrapperError!!,
             onNavigateUp = onNavigateUp,
-            onRetry = { retryKey++ },
+            onRetry = { retryKey++ }
         )
         return
     }
@@ -454,7 +456,9 @@ fun EditorScreen(
     // Sync theme with the app — guarded by isUsable() to avoid crashes during init failure.
     LaunchedEffect(darkTheme) {
         if (wrapper.isUsable()) {
-            try { wrapper.setTheme(darkTheme) } catch (_: Exception) {}
+            try {
+                wrapper.setTheme(darkTheme)
+            } catch (_: Exception) {}
         }
     }
 
@@ -502,9 +506,18 @@ fun EditorScreen(
             viewModel.onScrollChanged(scrollX, scrollY)
         }
         // 3. Auto-switch to DOCUMENT mode when opening Office/PDF/Media files
-        val isNonTextFile = successState.isPdf || successState.isOfficeDocument || successState.isMediaFile
-            || successState.fileName.lowercase().let { it.endsWith(".pdf") || it.endsWith(".doc") || it.endsWith(".docx")
-                    || it.endsWith(".xls") || it.endsWith(".xlsx") || it.endsWith(".ppt") || it.endsWith(".pptx") }
+        val isNonTextFile = successState.isPdf ||
+            successState.isOfficeDocument ||
+            successState.isMediaFile ||
+            successState.fileName.lowercase().let {
+                it.endsWith(".pdf") ||
+                    it.endsWith(".doc") ||
+                    it.endsWith(".docx") ||
+                    it.endsWith(".xls") ||
+                    it.endsWith(".xlsx") ||
+                    it.endsWith(".ppt") ||
+                    it.endsWith(".pptx")
+            }
         if (isNonTextFile) {
             editorMode = EditorMode.DOCUMENT
         } else {
@@ -520,7 +533,9 @@ fun EditorScreen(
                     // Restore scroll position (uses editor.post internally to run after layout pass,
                     // overriding the initial scroll-to-(0,0) triggered by setText).
                     if (restoreScrollY > 0 || restoreScrollX > 0) {
-                        try { wrapper.restoreScrollPosition(restoreScrollX, restoreScrollY) } catch (_: Exception) {}
+                        try {
+                            wrapper.restoreScrollPosition(restoreScrollX, restoreScrollY)
+                        } catch (_: Exception) {}
                     }
                 }
                 loadedFileKey = key
@@ -532,7 +547,9 @@ fun EditorScreen(
     val diagnosticItems by viewModel.diagnostics.collectAsStateWithLifecycle()
     LaunchedEffect(diagnosticItems) {
         if (wrapper.isUsable()) {
-            try { wrapper.setDiagnostics(diagnosticItems) } catch (_: Exception) {}
+            try {
+                wrapper.setDiagnostics(diagnosticItems)
+            } catch (_: Exception) {}
         }
     }
 
@@ -550,13 +567,17 @@ fun EditorScreen(
                 Lifecycle.Event.ON_PAUSE -> {
                     val uri = viewModel.currentUriString
                     if (uri.isNotEmpty() && wrapper.isUsable()) {
-                        try { wrapper.saveUndoState(viewModel.cacheManager, uri) } catch (_: Exception) {}
+                        try {
+                            wrapper.saveUndoState(viewModel.cacheManager, uri)
+                        } catch (_: Exception) {}
                     }
                 }
                 Lifecycle.Event.ON_RESUME -> {
                     val uri = viewModel.currentUriString
                     if (uri.isNotEmpty() && wrapper.isUsable()) {
-                        try { wrapper.restoreUndoState(viewModel.cacheManager, uri) } catch (_: Exception) {}
+                        try {
+                            wrapper.restoreUndoState(viewModel.cacheManager, uri)
+                        } catch (_: Exception) {}
                     }
                 }
                 else -> {}
@@ -582,7 +603,8 @@ fun EditorScreen(
             val cursor = wrapper.editor.cursor
             if (cursor != null && cursor.isSelected) {
                 val selectedText = wrapper.editor.text?.substring(
-                    cursor.left, cursor.right
+                    cursor.left,
+                    cursor.right
                 )?.toString()
                 if (!selectedText.isNullOrBlank() && selectedText.all { it.isLetterOrDigit() || it == '_' }) {
                     if (selectedText != highlightedWord) {
@@ -635,7 +657,13 @@ fun EditorScreen(
             },
             confirmButton = {
                 BrandFilledButton(
-                    text = if (isSaving) stringResource(R.string.editor_wait_save) else stringResource(R.string.editor_discard_changes),
+                    text = if (isSaving) {
+                        stringResource(
+                            R.string.editor_wait_save
+                        )
+                    } else {
+                        stringResource(R.string.editor_discard_changes)
+                    },
                     onClick = {
                         if (isSaving) {
                             // Wait for save to complete then exit
@@ -655,14 +683,17 @@ fun EditorScreen(
                             }
                         }
                     },
-                    enabled = !isSaving,
+                    enabled = !isSaving
                 )
             },
             dismissButton = {
                 if (!isSaving) {
-                    BrandOutlinedButton(text = stringResource(R.string.editor_cancel), onClick = { showExitDialog = false })
+                    BrandOutlinedButton(text = stringResource(R.string.editor_cancel), onClick = {
+                        showExitDialog =
+                            false
+                    })
                 }
-            },
+            }
         )
     }
 
@@ -695,7 +726,7 @@ fun EditorScreen(
             goToLineInput = goToLineInput,
             onGoToLineInputChange = { goToLineInput = it.filter { c -> c.isDigit() } },
             wrapper = wrapper,
-            context = context,
+            context = context
         )
     }
 
@@ -716,14 +747,14 @@ fun EditorScreen(
             content = {
                 Column(
                     modifier = Modifier.fillMaxWidth(),
-                    verticalArrangement = Arrangement.spacedBy(12.dp),
+                    verticalArrangement = Arrangement.spacedBy(12.dp)
                 ) {
                     BrandOutlinedTextField(
                         value = snippetTitle,
                         onValueChange = { snippetTitle = it },
                         label = { Text(text = stringResource(R.string.editor_snippet_title)) },
                         singleLine = true,
-                        modifier = Modifier.fillMaxWidth(),
+                        modifier = Modifier.fillMaxWidth()
                     )
                     BrandOutlinedTextField(
                         value = snippetContent,
@@ -731,14 +762,14 @@ fun EditorScreen(
                         label = { Text(text = stringResource(R.string.editor_snippet_content)) },
                         minLines = 3,
                         maxLines = 8,
-                        modifier = Modifier.fillMaxWidth(),
+                        modifier = Modifier.fillMaxWidth()
                     )
                     BrandOutlinedTextField(
                         value = snippetCategory,
                         onValueChange = { snippetCategory = it },
                         label = { Text(text = stringResource(R.string.editor_snippet_category)) },
                         singleLine = true,
-                        modifier = Modifier.fillMaxWidth(),
+                        modifier = Modifier.fillMaxWidth()
                     )
                 }
             },
@@ -751,17 +782,20 @@ fun EditorScreen(
                                 snippetTitle.trim(),
                                 snippetContent,
                                 viewModel.getLanguage(),
-                                snippetCategory.ifBlank { uncategorizedLabel },
+                                snippetCategory.ifBlank { uncategorizedLabel }
                             )
                         }
                         showSaveSnippetDialog = false
                     },
-                    enabled = snippetTitle.isNotBlank() && snippetContent.isNotBlank(),
+                    enabled = snippetTitle.isNotBlank() && snippetContent.isNotBlank()
                 )
             },
             dismissButton = {
-                BrandOutlinedButton(text = stringResource(R.string.editor_cancel), onClick = { showSaveSnippetDialog = false })
-            },
+                BrandOutlinedButton(text = stringResource(R.string.editor_cancel), onClick = {
+                    showSaveSnippetDialog =
+                        false
+                })
+            }
         )
     }
 
@@ -782,7 +816,7 @@ fun EditorScreen(
                             .fillMaxWidth()
                             .height(300.dp)
                             .verticalScroll(rememberScrollState()),
-                        verticalArrangement = Arrangement.spacedBy(8.dp),
+                        verticalArrangement = Arrangement.spacedBy(8.dp)
                     ) {
                         snippetList.forEach { snippet ->
                             Card(
@@ -793,28 +827,28 @@ fun EditorScreen(
                                         val newContent = currentContent + "\n" + snippet.content
                                         wrapper.loadContent(
                                             newContent,
-                                            (uiState as? EditorUiState.Success)?.language,
+                                            (uiState as? EditorUiState.Success)?.language
                                         )
                                         showInsertSnippetDialog = false
                                     },
                                 colors = CardDefaults.cardColors(
-                                    containerColor = PrototypeTokens.elevated,
-                                ),
+                                    containerColor = PrototypeTokens.elevated
+                                )
                             ) {
                                 Column(modifier = Modifier.padding(12.dp)) {
                                     Row(
                                         modifier = Modifier.fillMaxWidth(),
-                                        horizontalArrangement = Arrangement.SpaceBetween,
+                                        horizontalArrangement = Arrangement.SpaceBetween
                                     ) {
                                         Text(
                                             text = snippet.title,
-                                            style = DraftPeekTypography.titleSmall.copy(color = PrototypeTokens.fg),
+                                            style = DraftPeekTypography.titleSmall.copy(color = PrototypeTokens.fg)
                                         )
                                         snippet.language?.let { lang ->
                                             Text(
                                                 text = lang,
                                                 style = DraftPeekTypography.labelSmall,
-                                                color = PrototypeTokens.accent,
+                                                color = PrototypeTokens.accent
                                             )
                                         }
                                     }
@@ -824,7 +858,7 @@ fun EditorScreen(
                                         style = DraftPeekTypography.bodySmall,
                                         color = PrototypeTokens.muted,
                                         maxLines = 2,
-                                        overflow = TextOverflow.Ellipsis,
+                                        overflow = TextOverflow.Ellipsis
                                     )
                                 }
                             }
@@ -833,8 +867,11 @@ fun EditorScreen(
                 }
             },
             confirmButton = {
-                BrandFilledButton(text = stringResource(R.string.editor_close), onClick = { showInsertSnippetDialog = false })
-            },
+                BrandFilledButton(text = stringResource(R.string.editor_close), onClick = {
+                    showInsertSnippetDialog =
+                        false
+                })
+            }
         )
     }
 
@@ -856,15 +893,24 @@ fun EditorScreen(
             },
             onUndo = { if (wrapper.isUsable()) wrapper.undo() },
             onRedo = { if (wrapper.isUsable()) wrapper.redo() },
-            onFind = { showCommandPalette = false; searchPanelMode = SearchPanelMode.FIND },
-            onReplace = { showCommandPalette = false; searchPanelMode = SearchPanelMode.REPLACE },
+            onFind = {
+                showCommandPalette = false
+                searchPanelMode = SearchPanelMode.FIND
+            },
+            onReplace = {
+                showCommandPalette = false
+                searchPanelMode = SearchPanelMode.REPLACE
+            },
             onSelectAll = { if (wrapper.isUsable()) wrapper.selectAll() },
             onTogglePreview = { viewModel.togglePreviewMode() },
             onToggleFocusMode = { /* focus mode toggle */ },
             onToggleLineNumbers = { settingsViewModel.updateShowLineNumbers(!settings.showLineNumbers) },
             onToggleWordWrap = { settingsViewModel.updateLineWrapping(!settings.lineWrapping) },
             onToggleStickyScroll = { settingsViewModel.updateStickyScroll(!settings.stickyScroll) },
-            onGoToLine = { showCommandPalette = false; searchPanelMode = SearchPanelMode.GOTO },
+            onGoToLine = {
+                showCommandPalette = false
+                searchPanelMode = SearchPanelMode.GOTO
+            },
             onToggleOutline = { /* outline toggle */ },
             onNextTab = {
                 val idx = tabs.indexOfFirst { it.id == activeTabId }
@@ -883,7 +929,10 @@ fun EditorScreen(
                 }
             },
             onDiff = { /* diff toggle */ },
-            onSnippet = { showCommandPalette = false; showInsertSnippetDialog = true },
+            onSnippet = {
+                showCommandPalette = false
+                showInsertSnippetDialog = true
+            },
             onToggleTheme = { /* theme toggle handled at app level */ },
             onCloseTab = {
                 val currentTabId = activeTabId ?: return@EditorCommandActions
@@ -906,19 +955,19 @@ fun EditorScreen(
             onShowMarkdownCheatSheet = {
                 showCommandPalette = false
                 showMarkdownCheatSheet = true
-            },
+            }
         )
         val commands = buildEditorCommands(commandActions)
         CommandPalette(
             commands = commands,
-            onDismiss = { showCommandPalette = false },
+            onDismiss = { showCommandPalette = false }
         )
     }
 
     // Ch6 Item 16 (P3): Markdown Cheat Sheet
     if (showMarkdownCheatSheet) {
         MarkdownCheatSheet(
-            onDismiss = { showMarkdownCheatSheet = false },
+            onDismiss = { showMarkdownCheatSheet = false }
         )
     }
 
@@ -959,7 +1008,7 @@ fun EditorScreen(
                         }
                     }
                 }
-            },
+            }
     ) {
         Column(modifier = Modifier.fillMaxSize()) {
             // ---- Top App Bar (BrandTopBar sub-page variant with mono filename) ----
@@ -979,7 +1028,7 @@ fun EditorScreen(
             BrandTopBar(
                 onBack = onNavigateUp,
                 title = displayTitle,
-                titleStyle = MonoFileNameStyle.copy(color = fg),
+                titleStyle = MonoFileNameStyle.copy(color = fg)
             ) {
                 // Modified indicator dot
                 if (isModified) {
@@ -988,29 +1037,43 @@ fun EditorScreen(
                             .padding(horizontal = 4.dp)
                             .size(PrototypeSpacing.EditorModifiedDot)
                             .clip(PrototypeShapes.StatusCircle)
-                            .background(accent),
+                            .background(accent)
                     )
                 }
 
                 // Mode switch button (CODE / DOCUMENT) for PDF/Office/Media
-                if (successState != null && (successState.isPdf || successState.isOfficeDocument || successState.isMediaFile)) {
+                if (successState != null &&
+                    (successState.isPdf || successState.isOfficeDocument || successState.isMediaFile)
+                ) {
                     TooltipIconButton(
-                        tooltip = if (editorMode == EditorMode.CODE) stringResource(R.string.editor_document_mode) else stringResource(R.string.editor_code_mode),
+                        tooltip = if (editorMode ==
+                            EditorMode.CODE
+                        ) {
+                            stringResource(R.string.editor_document_mode)
+                        } else {
+                            stringResource(R.string.editor_code_mode)
+                        },
                         onClick = {
-                            editorMode = if (editorMode == EditorMode.CODE)
-                                EditorMode.DOCUMENT else EditorMode.CODE
+                            editorMode = if (editorMode == EditorMode.CODE) {
+                                EditorMode.DOCUMENT
+                            } else {
+                                EditorMode.CODE
+                            }
                         },
                         modifier = Modifier.accessibilityEnhanced(
                             role = Role.Button,
                             contentDescription = stringResource(R.string.editor_mode_switch),
-                            stateDescription = if (editorMode == EditorMode.CODE) "代码模式" else "文档模式",
-                        ),
+                            stateDescription = if (editorMode == EditorMode.CODE) "代码模式" else "文档模式"
+                        )
                     ) {
                         StrokeIcon(
-                            icon = if (editorMode == EditorMode.CODE)
-                                StrokeIcons.Eye else StrokeIcons.Code,
+                            icon = if (editorMode == EditorMode.CODE) {
+                                StrokeIcons.Eye
+                            } else {
+                                StrokeIcons.Code
+                            },
                             contentDescription = stringResource(R.string.editor_mode_switch),
-                            tint = fgSoft,
+                            tint = fgSoft
                         )
                     }
                 }
@@ -1020,7 +1083,7 @@ fun EditorScreen(
                         currentMode = markdownViewMode,
                         showWysiwyg = !isLargeMarkdownFile,
                         onSelect = { viewModel.setMarkdownViewMode(it) },
-                        compact = true,
+                        compact = true
                     )
                 }
                 // 保存按钮 — 仅内容变更时显示，紧贴三点左侧（§3.8）
@@ -1031,13 +1094,13 @@ fun EditorScreen(
                         modifier = Modifier.accessibilityEnhanced(
                             role = Role.Button,
                             contentDescription = stringResource(R.string.editor_save),
-                            stateDescription = "有未保存更改",
-                        ),
+                            stateDescription = "有未保存更改"
+                        )
                     ) {
                         StrokeIcon(
                             icon = StrokeIcons.Save,
                             contentDescription = stringResource(R.string.editor_save),
-                            tint = accent,
+                            tint = accent
                         )
                     }
                 }
@@ -1049,19 +1112,19 @@ fun EditorScreen(
                             modifier = Modifier.accessibilityEnhanced(
                                 role = Role.Button,
                                 contentDescription = stringResource(R.string.editor_more_actions),
-                                stateDescription = if (showMoreMenu) "菜单已展开" else "更多操作",
-                            ),
+                                stateDescription = if (showMoreMenu) "菜单已展开" else "更多操作"
+                            )
                         ) {
                             StrokeIcon(
                                 icon = StrokeIcons.MoreVert,
                                 contentDescription = stringResource(R.string.editor_more_actions),
-                                tint = fgSoft,
+                                tint = fgSoft
                             )
                         }
                         DropdownMenu(
                             expanded = showMoreMenu,
                             onDismissRequest = { showMoreMenu = false },
-                            containerColor = MaterialTheme.colorScheme.surface,
+                            containerColor = MaterialTheme.colorScheme.surface
                         ) {
                             DropdownMenuItem(
                                 text = { Text(text = stringResource(R.string.editor_quick_settings), color = fg) },
@@ -1069,13 +1132,13 @@ fun EditorScreen(
                                     StrokeIcon(
                                         icon = StrokeIcons.Settings,
                                         contentDescription = null,
-                                        tint = fgSoft,
+                                        tint = fgSoft
                                     )
                                 },
                                 onClick = {
                                     showMoreMenu = false
                                     showQuickSettings = true
-                                },
+                                }
                             )
                             // Undo (with subtitle)
                             DropdownMenuItem(
@@ -1085,7 +1148,7 @@ fun EditorScreen(
                                         Text(
                                             text = stringResource(R.string.editor_menu_undo_desc),
                                             style = DraftPeekTypography.labelSmall,
-                                            color = muted,
+                                            color = muted
                                         )
                                     }
                                 },
@@ -1093,13 +1156,13 @@ fun EditorScreen(
                                     StrokeIcon(
                                         icon = StrokeIcons.Undo,
                                         contentDescription = null,
-                                        tint = fgSoft,
+                                        tint = fgSoft
                                     )
                                 },
                                 onClick = {
                                     showMoreMenu = false
                                     if (wrapper.isUsable()) wrapper.undo()
-                                },
+                                }
                             )
                             // Redo (with subtitle)
                             DropdownMenuItem(
@@ -1109,7 +1172,7 @@ fun EditorScreen(
                                         Text(
                                             text = stringResource(R.string.editor_menu_redo_desc),
                                             style = DraftPeekTypography.labelSmall,
-                                            color = muted,
+                                            color = muted
                                         )
                                     }
                                 },
@@ -1117,13 +1180,13 @@ fun EditorScreen(
                                     StrokeIcon(
                                         icon = StrokeIcons.Redo,
                                         contentDescription = null,
-                                        tint = fgSoft,
+                                        tint = fgSoft
                                     )
                                 },
                                 onClick = {
                                     showMoreMenu = false
                                     if (wrapper.isUsable()) wrapper.redo()
-                                },
+                                }
                             )
                             // Search (with subtitle, opens search panel)
                             DropdownMenuItem(
@@ -1133,7 +1196,7 @@ fun EditorScreen(
                                         Text(
                                             text = stringResource(R.string.editor_menu_search_desc),
                                             style = DraftPeekTypography.labelSmall,
-                                            color = muted,
+                                            color = muted
                                         )
                                     }
                                 },
@@ -1141,13 +1204,13 @@ fun EditorScreen(
                                     StrokeIcon(
                                         icon = StrokeIcons.Search,
                                         contentDescription = null,
-                                        tint = fgSoft,
+                                        tint = fgSoft
                                     )
                                 },
                                 onClick = {
                                     showMoreMenu = false
                                     searchPanelMode = SearchPanelMode.FIND
-                                },
+                                }
                             )
                             // Terminal (always shown, with subtitle)
                             DropdownMenuItem(
@@ -1157,7 +1220,7 @@ fun EditorScreen(
                                         Text(
                                             text = stringResource(R.string.editor_menu_terminal_desc),
                                             style = DraftPeekTypography.labelSmall,
-                                            color = muted,
+                                            color = muted
                                         )
                                     }
                                 },
@@ -1165,7 +1228,7 @@ fun EditorScreen(
                                     StrokeIcon(
                                         icon = StrokeIcons.Terminal,
                                         contentDescription = null,
-                                        tint = fgSoft,
+                                        tint = fgSoft
                                     )
                                 },
                                 onClick = {
@@ -1176,7 +1239,7 @@ fun EditorScreen(
                                         }
                                     }
                                     onNavigateToTerminal(terminalCwd)
-                                },
+                                }
                             )
                             DropdownMenuItem(
                                 text = { Text(text = stringResource(R.string.editor_save_as_snippet), color = fg) },
@@ -1184,13 +1247,13 @@ fun EditorScreen(
                                     StrokeIcon(
                                         icon = StrokeIcons.Save,
                                         contentDescription = null,
-                                        tint = fgSoft,
+                                        tint = fgSoft
                                     )
                                 },
                                 onClick = {
                                     showMoreMenu = false
                                     showSaveSnippetDialog = true
-                                },
+                                }
                             )
                             if ((uiState as? EditorUiState.Success)?.isMarkdownFile == true) {
                                 DropdownMenuItem(
@@ -1199,13 +1262,13 @@ fun EditorScreen(
                                         StrokeIcon(
                                             icon = StrokeIcons.Link,
                                             contentDescription = null,
-                                            tint = fgSoft,
+                                            tint = fgSoft
                                         )
                                     },
                                     onClick = {
                                         showMoreMenu = false
                                         showBacklinksDialog = true
-                                    },
+                                    }
                                 )
                             }
                             DropdownMenuItem(
@@ -1214,42 +1277,46 @@ fun EditorScreen(
                                     StrokeIcon(
                                         icon = StrokeIcons.Code,
                                         contentDescription = null,
-                                        tint = fgSoft,
+                                        tint = fgSoft
                                     )
                                 },
                                 onClick = {
                                     showMoreMenu = false
                                     showInsertSnippetDialog = true
-                                },
+                                }
                             )
                             DropdownMenuItem(
-                                text = { Text(text = stringResource(R.string.editor_reopen_with_encoding), color = fg) },
+                                text = {
+                                    Text(text = stringResource(R.string.editor_reopen_with_encoding), color = fg)
+                                },
                                 leadingIcon = {
                                     StrokeIcon(
                                         icon = StrokeIcons.Refresh,
                                         contentDescription = null,
-                                        tint = fgSoft,
+                                        tint = fgSoft
                                     )
                                 },
                                 onClick = {
                                     showMoreMenu = false
                                     viewModel.showEncodingSelector()
-                                },
+                                }
                             )
                             if (isInternalFile) {
                                 DropdownMenuItem(
-                                    text = { Text(text = stringResource(R.string.editor_save_with_encoding), color = fg) },
+                                    text = {
+                                        Text(text = stringResource(R.string.editor_save_with_encoding), color = fg)
+                                    },
                                     leadingIcon = {
                                         StrokeIcon(
                                             icon = StrokeIcons.Save,
                                             contentDescription = null,
-                                            tint = fgSoft,
+                                            tint = fgSoft
                                         )
                                     },
                                     onClick = {
                                         showMoreMenu = false
                                         viewModel.showSaveEncodingSelector()
-                                    },
+                                    }
                                 )
                             }
                             if (isInternalFile) {
@@ -1265,15 +1332,20 @@ fun EditorScreen(
                                             putExtra(Intent.EXTRA_TITLE, fileName2)
                                         }
                                         exportLauncher.launch(intent)
-                                    },
+                                    }
                                 )
                                 HorizontalDivider(thickness = 1.dp, color = border)
                                 DropdownMenuItem(
-                                    text = { Text(text = stringResource(R.string.editor_delete_file), color = PrototypeTokens.error) },
+                                    text = {
+                                        Text(
+                                            text = stringResource(R.string.editor_delete_file),
+                                            color = PrototypeTokens.error
+                                        )
+                                    },
                                     onClick = {
                                         showMoreMenu = false
                                         showDeleteFileDialog = true
-                                    },
+                                    }
                                 )
                             }
                         }
@@ -1281,198 +1353,209 @@ fun EditorScreen(
                 }
             }
 
-        // ---- Tab Bar (visible when 2+ tabs are open) ----
-        TabBar(
-            tabs = tabs,
-            activeTabId = activeTabId,
-            onTabClick = { tabId ->
-                if (tabId != activeTabId) {
-                    loadedFileKey = null
-                    // Force-sync content before switching to capture any unsaved edits
-                    if (wrapper.isUsable()) {
-                        wrapper.forceSyncContent()
-                    }
-                    val targetPage = tabs.indexOfFirst { it.id == tabId }
-                    if (targetPage >= 0) {
-                        pagerScope.launch { pagerState.animateScrollToPage(targetPage) }
-                    }
-                }
-            },
-            onTabClose = { tabId ->
-                val hasTabsLeft = viewModel.closeTab(tabId)
-                if (hasTabsLeft) {
-                    loadedFileKey = null
-                } else {
-                    onNavigateUp()
-                }
-            },
-            onTabReorder = { tabId, toIndex ->
-                viewModel.reorderTab(tabId, toIndex)
-            },
-        )
-
-        // ---- Content Area ----
-        EditorContentArea(
-            uiState = uiState,
-            tabs = tabs,
-            activeTabId = activeTabId,
-            pagerState = pagerState,
-            wrapper = wrapper,
-            viewModel = viewModel,
-            darkTheme = darkTheme,
-            editorMode = editorMode,
-            markdownViewMode = markdownViewMode,
-            isPreviewMode = isPreviewMode,
-            isLargeMarkdownFile = isLargeMarkdownFile,
-            shortcutHandler = shortcutHandler,
-            onNavigateUp = onNavigateUp,
-            settings = settings,
-            modifier = Modifier
-                .fillMaxWidth()
-                .weight(1f),
-        )
-
-        // ---- Bottom Status Bar ----
-        EditorBottomStatusBar(
-            cursorPosition = cursorPosition,
-            detectedEncoding = detectedEncoding,
-            uiState = uiState,
-            isModified = isModified,
-            tabWidth = settings.tabWidth,
-            selectionCount = selectionCount,
-            isReadOnlyOverride = isReadOnlyOverride,
-            onLanguageClick = {
-                val lang = (uiState as? EditorUiState.Success)?.language ?: "TEXT"
-                val displayLang = if (lang.equals("markdown", ignoreCase = true)) "Markdown" else lang.uppercase()
-                Toast.makeText(context, context.getString(R.string.editor_status_language_switch, displayLang), Toast.LENGTH_SHORT).show()
-            },
-            onReadOnlyToggle = {
-                isReadOnlyOverride = !isReadOnlyOverride
-                wrapper.setReadOnly(isReadOnlyOverride || (uiState as? EditorUiState.Success)?.isReadOnly == true)
-            },
-            onLineEndingClick = {
-                val currentContent = (uiState as? EditorUiState.Success)?.content ?: ""
-                val currentEnding = lineEndingOverride ?: when {
-                    currentContent.contains("\r\n") -> "CRLF"
-                    currentContent.contains("\n") -> "LF"
-                    else -> "LF"
-                }
-                lineEndingOverride = if (currentEnding == "LF") "CRLF" else "LF"
-                Toast.makeText(context, lineEndingOverride, Toast.LENGTH_SHORT).show()
-            },
-        )
-
-        // Delete File Confirmation Dialog
-        if (showDeleteFileDialog) {
-            val successState = uiState as? EditorUiState.Success
-            BrandDialog(
-                onDismissRequest = { showDeleteFileDialog = false },
-title = { Text(text = stringResource(R.string.editor_delete_file)) },
-            content = { Text(text = stringResource(R.string.editor_delete_confirm_message, successState?.fileName ?: "")) },
-                confirmButton = {
-                    BrandFilledButton(
-                        text = stringResource(R.string.editor_delete),
-                        onClick = {
-                            hapticController.longPress()
-                            viewModel.deleteCurrentFile()
-                            showDeleteFileDialog = false
-                            onNavigateUp()
-                        },
-                    )
-                },
-                dismissButton = {
-                    BrandOutlinedButton(text = stringResource(R.string.editor_cancel), onClick = { showDeleteFileDialog = false })
-                },
-            )
-        }
-
-        // Backlinks Dialog (当前文档的反向链接)
-        if (showBacklinksDialog) {
-            val backlinks = viewModel.backlinks.collectAsStateWithLifecycle().value
-            val context = LocalContext.current
-            BacklinksDialog(
-                backlinks = backlinks,
-                onBacklinkClick = { source ->
-                    showBacklinksDialog = false
-                    // 用系统打开方式尝试展示引用来源文档（SAF URI 或内部文件路径）
-                    try {
-                        val uri = android.net.Uri.parse(source)
-                        val intent = Intent(Intent.ACTION_VIEW).apply {
-                            setDataAndType(uri, "*/*")
-                            addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION)
+            // ---- Tab Bar (visible when 2+ tabs are open) ----
+            TabBar(
+                tabs = tabs,
+                activeTabId = activeTabId,
+                onTabClick = { tabId ->
+                    if (tabId != activeTabId) {
+                        loadedFileKey = null
+                        // Force-sync content before switching to capture any unsaved edits
+                        if (wrapper.isUsable()) {
+                            wrapper.forceSyncContent()
                         }
-                        context.startActivity(intent)
-                    } catch (e: Exception) {
-                        Toast.makeText(
-                            context,
-                            context.getString(R.string.editor_backlinks_open_failed),
-                            Toast.LENGTH_SHORT,
-                        ).show()
+                        val targetPage = tabs.indexOfFirst { it.id == tabId }
+                        if (targetPage >= 0) {
+                            pagerScope.launch { pagerState.animateScrollToPage(targetPage) }
+                        }
                     }
                 },
-                onDismiss = { showBacklinksDialog = false },
-            )
-        }
-
-        // Encoding Selector Dialog
-        if (showEncodingDialog) {
-            EncodingSelectorDialog(
-                defaultEncoding = detectedEncoding ?: "UTF-8",
-                onDismissRequest = { viewModel.dismissEncodingSelector() },
-                onEncodingSelected = { encoding ->
-                    viewModel.reloadWithEncoding(encoding)
+                onTabClose = { tabId ->
+                    val hasTabsLeft = viewModel.closeTab(tabId)
+                    if (hasTabsLeft) {
+                        loadedFileKey = null
+                    } else {
+                        onNavigateUp()
+                    }
                 },
+                onTabReorder = { tabId, toIndex ->
+                    viewModel.reorderTab(tabId, toIndex)
+                }
             )
-        }
 
-        // Save Encoding Selector Dialog
-        if (showSaveEncodingDialog) {
-            EncodingSelectorDialog(
-                defaultEncoding = detectedEncoding ?: "UTF-8",
-                onDismissRequest = { viewModel.dismissSaveEncodingSelector() },
-                onEncodingSelected = { encoding ->
-                    viewModel.saveWithEncoding(encoding)
+            // ---- Content Area ----
+            EditorContentArea(
+                uiState = uiState,
+                tabs = tabs,
+                activeTabId = activeTabId,
+                pagerState = pagerState,
+                wrapper = wrapper,
+                viewModel = viewModel,
+                darkTheme = darkTheme,
+                editorMode = editorMode,
+                markdownViewMode = markdownViewMode,
+                isPreviewMode = isPreviewMode,
+                isLargeMarkdownFile = isLargeMarkdownFile,
+                shortcutHandler = shortcutHandler,
+                onNavigateUp = onNavigateUp,
+                settings = settings,
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .weight(1f)
+            )
+
+            // ---- Bottom Status Bar ----
+            EditorBottomStatusBar(
+                cursorPosition = cursorPosition,
+                detectedEncoding = detectedEncoding,
+                uiState = uiState,
+                isModified = isModified,
+                tabWidth = settings.tabWidth,
+                selectionCount = selectionCount,
+                isReadOnlyOverride = isReadOnlyOverride,
+                onLanguageClick = {
+                    val lang = (uiState as? EditorUiState.Success)?.language ?: "TEXT"
+                    val displayLang = if (lang.equals("markdown", ignoreCase = true)) "Markdown" else lang.uppercase()
+                    Toast.makeText(
+                        context,
+                        context.getString(R.string.editor_status_language_switch, displayLang),
+                        Toast.LENGTH_SHORT
+                    ).show()
                 },
+                onReadOnlyToggle = {
+                    isReadOnlyOverride = !isReadOnlyOverride
+                    wrapper.setReadOnly(isReadOnlyOverride || (uiState as? EditorUiState.Success)?.isReadOnly == true)
+                },
+                onLineEndingClick = {
+                    val currentContent = (uiState as? EditorUiState.Success)?.content ?: ""
+                    val currentEnding = lineEndingOverride ?: when {
+                        currentContent.contains("\r\n") -> "CRLF"
+                        currentContent.contains("\n") -> "LF"
+                        else -> "LF"
+                    }
+                    lineEndingOverride = if (currentEnding == "LF") "CRLF" else "LF"
+                    Toast.makeText(context, lineEndingOverride, Toast.LENGTH_SHORT).show()
+                }
             )
-        }
 
-        // Quick Settings Bottom Sheet
-        if (showQuickSettings) {
-            androidx.compose.material3.ModalBottomSheet(
-                onDismissRequest = { showQuickSettings = false },
-                sheetState = quickSettingsState,
-                containerColor = surface,
-            ) {
-                QuickSettingsPanel(
-                    settings = settings,
-                    onFontSizeChange = { settingsViewModel.updateFontSize(it) },
-                    onWordWrapChange = { settingsViewModel.updateLineWrapping(it) },
-                    onLineNumbersChange = { settingsViewModel.updateShowLineNumbers(it) },
-                    onTabWidthChange = { settingsViewModel.updateTabWidth(it) }
+            // Delete File Confirmation Dialog
+            if (showDeleteFileDialog) {
+                val successState = uiState as? EditorUiState.Success
+                BrandDialog(
+                    onDismissRequest = { showDeleteFileDialog = false },
+                    title = { Text(text = stringResource(R.string.editor_delete_file)) },
+                    content = {
+                        Text(
+                            text = stringResource(R.string.editor_delete_confirm_message, successState?.fileName ?: "")
+                        )
+                    },
+                    confirmButton = {
+                        BrandFilledButton(
+                            text = stringResource(R.string.editor_delete),
+                            onClick = {
+                                hapticController.longPress()
+                                viewModel.deleteCurrentFile()
+                                showDeleteFileDialog = false
+                                onNavigateUp()
+                            }
+                        )
+                    },
+                    dismissButton = {
+                        BrandOutlinedButton(text = stringResource(R.string.editor_cancel), onClick = {
+                            showDeleteFileDialog =
+                                false
+                        })
+                    }
+                )
+            }
+
+            // Backlinks Dialog (当前文档的反向链接)
+            if (showBacklinksDialog) {
+                val backlinks = viewModel.backlinks.collectAsStateWithLifecycle().value
+                val context = LocalContext.current
+                BacklinksDialog(
+                    backlinks = backlinks,
+                    onBacklinkClick = { source ->
+                        showBacklinksDialog = false
+                        // 用系统打开方式尝试展示引用来源文档（SAF URI 或内部文件路径）
+                        try {
+                            val uri = android.net.Uri.parse(source)
+                            val intent = Intent(Intent.ACTION_VIEW).apply {
+                                setDataAndType(uri, "*/*")
+                                addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION)
+                            }
+                            context.startActivity(intent)
+                        } catch (e: Exception) {
+                            Toast.makeText(
+                                context,
+                                context.getString(R.string.editor_backlinks_open_failed),
+                                Toast.LENGTH_SHORT
+                            ).show()
+                        }
+                    },
+                    onDismiss = { showBacklinksDialog = false }
+                )
+            }
+
+            // Encoding Selector Dialog
+            if (showEncodingDialog) {
+                EncodingSelectorDialog(
+                    defaultEncoding = detectedEncoding ?: "UTF-8",
+                    onDismissRequest = { viewModel.dismissEncodingSelector() },
+                    onEncodingSelected = { encoding ->
+                        viewModel.reloadWithEncoding(encoding)
+                    }
+                )
+            }
+
+            // Save Encoding Selector Dialog
+            if (showSaveEncodingDialog) {
+                EncodingSelectorDialog(
+                    defaultEncoding = detectedEncoding ?: "UTF-8",
+                    onDismissRequest = { viewModel.dismissSaveEncodingSelector() },
+                    onEncodingSelected = { encoding ->
+                        viewModel.saveWithEncoding(encoding)
+                    }
+                )
+            }
+
+            // Quick Settings Bottom Sheet
+            if (showQuickSettings) {
+                androidx.compose.material3.ModalBottomSheet(
+                    onDismissRequest = { showQuickSettings = false },
+                    sheetState = quickSettingsState,
+                    containerColor = surface
+                ) {
+                    QuickSettingsPanel(
+                        settings = settings,
+                        onFontSizeChange = { settingsViewModel.updateFontSize(it) },
+                        onWordWrapChange = { settingsViewModel.updateLineWrapping(it) },
+                        onLineNumbersChange = { settingsViewModel.updateShowLineNumbers(it) },
+                        onTabWidthChange = { settingsViewModel.updateTabWidth(it) }
+                    )
+                }
+            }
+
+            // Ch1 Item 19 (P3): Symbol Panel Bottom Sheet
+            if (showSymbolPanel) {
+                SymbolPanel(
+                    onSymbolClick = { symbol ->
+                        try {
+                            if (wrapper.isUsable()) {
+                                val cursor = wrapper.editor.cursor
+                                if (cursor != null) {
+                                    val left = cursor.left
+                                    wrapper.editor.insertText(symbol, left)
+                                    wrapper.editor.setSelection(left + symbol.length, left + symbol.length)
+                                }
+                            }
+                        } catch (_: Exception) {}
+                        showSymbolPanel = false
+                    },
+                    onDismiss = { showSymbolPanel = false }
                 )
             }
         }
-
-        // Ch1 Item 19 (P3): Symbol Panel Bottom Sheet
-        if (showSymbolPanel) {
-            SymbolPanel(
-                onSymbolClick = { symbol ->
-                    try {
-                        if (wrapper.isUsable()) {
-                            val cursor = wrapper.editor.cursor
-                            if (cursor != null) {
-                                val left = cursor.left
-                                wrapper.editor.insertText(symbol, left)
-                                wrapper.editor.setSelection(left + symbol.length, left + symbol.length)
-                            }
-                        }
-                    } catch (_: Exception) {}
-                    showSymbolPanel = false
-                },
-                onDismiss = { showSymbolPanel = false },
-            )
-        }
-    }
     }
 }
 
@@ -1512,7 +1595,10 @@ private fun QuickSettingsPanel(
         )
 
         // Font size slider
-        Text(stringResource(R.string.editor_font_size, settings.fontSize), style = DraftPeekTypography.bodyMedium.copy(color = fg))
+        Text(
+            stringResource(R.string.editor_font_size, settings.fontSize),
+            style = DraftPeekTypography.bodyMedium.copy(color = fg)
+        )
         androidx.compose.material3.Slider(
             value = settings.fontSize.toFloat(),
             onValueChange = { onFontSizeChange(it.toInt()) },
@@ -1520,8 +1606,8 @@ private fun QuickSettingsPanel(
             steps = 13,
             colors = SliderDefaults.colors(
                 activeTrackColor = PrototypeTokens.accent,
-                thumbColor = PrototypeTokens.accent,
-            ),
+                thumbColor = PrototypeTokens.accent
+            )
         )
 
         Spacer(modifier = Modifier.height(16.dp))
@@ -1547,7 +1633,10 @@ private fun QuickSettingsPanel(
             horizontalArrangement = Arrangement.SpaceBetween,
             verticalAlignment = Alignment.CenterVertically
         ) {
-            Text(stringResource(R.string.editor_show_line_numbers), style = DraftPeekTypography.bodyMedium.copy(color = fg))
+            Text(
+                stringResource(R.string.editor_show_line_numbers),
+                style = DraftPeekTypography.bodyMedium.copy(color = fg)
+            )
             BrandSwitch(
                 checked = settings.showLineNumbers,
                 onCheckedChange = onLineNumbersChange
@@ -1586,27 +1675,23 @@ private fun QuickSettingsPanel(
  * @param onDismiss 关闭横幅的回调
  */
 @Composable
-private fun FileSizeWarningBanner(
-    message: String,
-    modifier: Modifier = Modifier,
-    onDismiss: () -> Unit = {},
-) {
+private fun FileSizeWarningBanner(message: String, modifier: Modifier = Modifier, onDismiss: () -> Unit = {}) {
     val warning = PrototypeTokens.warning
     val warningContainer = warning.copy(alpha = 0.1f)
     Box(
         modifier = modifier
             .fillMaxWidth()
-            .background(warningContainer),
+            .background(warningContainer)
     ) {
         Row(
             modifier = Modifier.padding(horizontal = 16.dp, vertical = 10.dp),
-            verticalAlignment = Alignment.CenterVertically,
+            verticalAlignment = Alignment.CenterVertically
         ) {
             Text(
                 text = message,
                 style = DraftPeekTypography.bodyMedium,
                 color = warning,
-                modifier = Modifier.weight(1f),
+                modifier = Modifier.weight(1f)
             )
         }
     }
@@ -1622,37 +1707,34 @@ private fun FileSizeWarningBanner(
  * @param modifier 修饰符
  */
 @Composable
-private fun LargeFilePreviewHintBanner(
-    onPreviewClick: () -> Unit,
-    modifier: Modifier = Modifier,
-) {
+private fun LargeFilePreviewHintBanner(onPreviewClick: () -> Unit, modifier: Modifier = Modifier) {
     val accent = PrototypeTokens.accent
     val accentContainer = accent.copy(alpha = 0.1f)
     val fg = PrototypeTokens.fg
     Box(
         modifier = modifier
             .fillMaxWidth()
-            .background(accentContainer),
+            .background(accentContainer)
     ) {
         Row(
             modifier = Modifier.padding(horizontal = 16.dp, vertical = 10.dp),
-            verticalAlignment = Alignment.CenterVertically,
+            verticalAlignment = Alignment.CenterVertically
         ) {
             Text(
                 text = stringResource(R.string.editor_large_file_preview_hint),
                 style = DraftPeekTypography.bodyMedium,
                 color = fg,
-                modifier = Modifier.weight(1f),
+                modifier = Modifier.weight(1f)
             )
             TextButton(
                 onClick = onPreviewClick,
-                contentPadding = PaddingValues(horizontal = 12.dp, vertical = 4.dp),
+                contentPadding = PaddingValues(horizontal = 12.dp, vertical = 4.dp)
             ) {
                 Text(
                     text = stringResource(R.string.editor_preview),
                     style = DraftPeekTypography.labelMedium,
                     color = accent,
-                    fontWeight = FontWeight.Bold,
+                    fontWeight = FontWeight.Bold
                 )
             }
         }
@@ -1669,27 +1751,24 @@ private fun LargeFilePreviewHintBanner(
  * @param onDismiss 关闭横幅的回调
  */
 @Composable
-private fun ReadOnlyBanner(
-    modifier: Modifier = Modifier,
-    onDismiss: () -> Unit = {},
-) {
+private fun ReadOnlyBanner(modifier: Modifier = Modifier, onDismiss: () -> Unit = {}) {
     val info = PrototypeTokens.info
     val infoContainer = info.copy(alpha = 0.1f)
     val fg = PrototypeTokens.fg
     Box(
         modifier = modifier
             .fillMaxWidth()
-            .background(infoContainer),
+            .background(infoContainer)
     ) {
         Row(
             modifier = Modifier.padding(horizontal = 16.dp, vertical = 10.dp),
-            verticalAlignment = Alignment.CenterVertically,
+            verticalAlignment = Alignment.CenterVertically
         ) {
             Text(
                 text = "此文件为只读，不能修改。\n如需编辑，请复制内容后新建文件。",
                 style = DraftPeekTypography.bodyMedium,
                 color = fg,
-                modifier = Modifier.weight(1f),
+                modifier = Modifier.weight(1f)
             )
             Box(
                 modifier = Modifier
@@ -1698,15 +1777,15 @@ private fun ReadOnlyBanner(
                     .clickable(
                         interactionSource = remember { MutableInteractionSource() },
                         indication = null,
-                        onClick = onDismiss,
+                        onClick = onDismiss
                     ),
-                contentAlignment = Alignment.Center,
+                contentAlignment = Alignment.Center
             ) {
                 StrokeIcon(
                     icon = StrokeIcons.Close,
                     contentDescription = stringResource(R.string.editor_close_hint),
                     tint = fg,
-                    modifier = Modifier.size(16.dp),
+                    modifier = Modifier.size(16.dp)
                 )
             }
         }
@@ -1730,12 +1809,12 @@ private fun TooltipIconButton(
     tooltip: String,
     onClick: () -> Unit,
     modifier: Modifier = Modifier,
-    content: @Composable () -> Unit,
+    content: @Composable () -> Unit
 ) {
     TooltipBox(
         positionProvider = TooltipDefaults.rememberPlainTooltipPositionProvider(),
         tooltip = { PlainTooltip { Text(tooltip) } },
-        state = rememberTooltipState(),
+        state = rememberTooltipState()
     ) {
         IconButton(onClick = onClick, modifier = modifier) {
             content()
@@ -1767,7 +1846,7 @@ private fun EditorSearchPanel(
     goToLineInput: String,
     onGoToLineInputChange: (String) -> Unit,
     wrapper: SoraEditorWrapper,
-    context: android.content.Context,
+    context: android.content.Context
 ) {
     // Shared state for go-to-line error (must be visible in both content and confirmButton)
     var goToLineError by remember { mutableStateOf("") }
@@ -1776,7 +1855,12 @@ private fun EditorSearchPanel(
     LaunchedEffect(searchQuery, searchRegex, searchMatchCase, searchWholeWord, mode) {
         if (mode == SearchPanelMode.FIND || mode == SearchPanelMode.REPLACE) {
             if (searchQuery.isNotBlank()) {
-                wrapper.search(searchQuery, regex = searchRegex, matchCase = searchMatchCase, wholeWord = searchWholeWord)
+                wrapper.search(
+                    searchQuery,
+                    regex = searchRegex,
+                    matchCase = searchMatchCase,
+                    wholeWord = searchWholeWord
+                )
             }
         }
     }
@@ -1784,7 +1868,7 @@ private fun EditorSearchPanel(
     val tabs = listOf(
         SearchPanelMode.FIND to stringResource(R.string.editor_search_tab_find),
         SearchPanelMode.REPLACE to stringResource(R.string.editor_search_tab_replace),
-        SearchPanelMode.GOTO to stringResource(R.string.editor_search_tab_goto_line),
+        SearchPanelMode.GOTO to stringResource(R.string.editor_search_tab_goto_line)
     )
 
     BrandDialog(
@@ -1792,7 +1876,7 @@ private fun EditorSearchPanel(
         title = {
             Row(
                 modifier = Modifier.fillMaxWidth(),
-                horizontalArrangement = Arrangement.spacedBy(2.dp),
+                horizontalArrangement = Arrangement.spacedBy(2.dp)
             ) {
                 tabs.forEach { (tabMode, tabLabel) ->
                     val isSelected = tabMode == mode
@@ -1802,14 +1886,14 @@ private fun EditorSearchPanel(
                             .background(if (isSelected) PrototypeTokens.surface else Color.Transparent)
                             .clickable { onModeChange(tabMode) }
                             .padding(horizontal = 12.dp, vertical = 6.dp),
-                        contentAlignment = Alignment.Center,
+                        contentAlignment = Alignment.Center
                     ) {
                         Text(
                             text = tabLabel,
                             style = DraftPeekTypography.labelMedium.copy(
                                 fontWeight = FontWeight.SemiBold,
-                                color = if (isSelected) PrototypeTokens.accent else PrototypeTokens.muted,
-                            ),
+                                color = if (isSelected) PrototypeTokens.accent else PrototypeTokens.muted
+                            )
                         )
                     }
                 }
@@ -1823,26 +1907,26 @@ private fun EditorSearchPanel(
                             value = searchQuery,
                             onValueChange = onSearchQueryChange,
                             label = { Text(text = stringResource(R.string.editor_find_content)) },
-                            singleLine = true,
+                            singleLine = true
                         )
                         Row(
                             horizontalArrangement = Arrangement.spacedBy(8.dp),
-                            verticalAlignment = Alignment.CenterVertically,
+                            verticalAlignment = Alignment.CenterVertically
                         ) {
                             BrandFilterChip(
                                 text = stringResource(R.string.editor_regex),
                                 selected = searchRegex,
-                                onClick = { onSearchRegexChange(!searchRegex) },
+                                onClick = { onSearchRegexChange(!searchRegex) }
                             )
                             BrandFilterChip(
                                 text = stringResource(R.string.editor_match_case),
                                 selected = searchMatchCase,
-                                onClick = { onSearchMatchCaseChange(!searchMatchCase) },
+                                onClick = { onSearchMatchCaseChange(!searchMatchCase) }
                             )
                             BrandFilterChip(
                                 text = stringResource(R.string.editor_whole_word),
                                 selected = searchWholeWord,
-                                onClick = { onSearchWholeWordChange(!searchWholeWord) },
+                                onClick = { onSearchWholeWordChange(!searchWholeWord) }
                             )
                         }
                     }
@@ -1853,33 +1937,33 @@ private fun EditorSearchPanel(
                             value = searchQuery,
                             onValueChange = onSearchQueryChange,
                             label = { Text(text = stringResource(R.string.editor_find_content)) },
-                            singleLine = true,
+                            singleLine = true
                         )
                         Row(
                             horizontalArrangement = Arrangement.spacedBy(8.dp),
-                            verticalAlignment = Alignment.CenterVertically,
+                            verticalAlignment = Alignment.CenterVertically
                         ) {
                             BrandFilterChip(
                                 text = stringResource(R.string.editor_regex),
                                 selected = searchRegex,
-                                onClick = { onSearchRegexChange(!searchRegex) },
+                                onClick = { onSearchRegexChange(!searchRegex) }
                             )
                             BrandFilterChip(
                                 text = stringResource(R.string.editor_match_case),
                                 selected = searchMatchCase,
-                                onClick = { onSearchMatchCaseChange(!searchMatchCase) },
+                                onClick = { onSearchMatchCaseChange(!searchMatchCase) }
                             )
                             BrandFilterChip(
                                 text = stringResource(R.string.editor_whole_word),
                                 selected = searchWholeWord,
-                                onClick = { onSearchWholeWordChange(!searchWholeWord) },
+                                onClick = { onSearchWholeWordChange(!searchWholeWord) }
                             )
                         }
                         BrandOutlinedTextField(
                             value = replaceText,
                             onValueChange = onReplaceTextChange,
                             label = { Text(text = stringResource(R.string.editor_replace_with)) },
-                            singleLine = true,
+                            singleLine = true
                         )
                     }
                 }
@@ -1897,7 +1981,9 @@ private fun EditorSearchPanel(
                             isError = goToLineError.isNotEmpty(),
                             supportingText = if (goToLineError.isNotEmpty()) {
                                 { Text(text = goToLineError) }
-                            } else null,
+                            } else {
+                                null
+                            }
                         )
                     }
                 }
@@ -1918,7 +2004,13 @@ private fun EditorSearchPanel(
                             }
                         })
                         BrandFilledButton(text = stringResource(R.string.editor_replace_all), onClick = {
-                            wrapper.replaceAll(searchQuery, replaceText, regex = searchRegex, matchCase = searchMatchCase, wholeWord = searchWholeWord)
+                            wrapper.replaceAll(
+                                searchQuery,
+                                replaceText,
+                                regex = searchRegex,
+                                matchCase = searchMatchCase,
+                                wholeWord = searchWholeWord
+                            )
                             onDismiss()
                         })
                     }
@@ -1948,7 +2040,7 @@ private fun EditorSearchPanel(
         },
         dismissButton = {
             BrandOutlinedButton(text = stringResource(R.string.editor_cancel), onClick = onDismiss)
-        },
+        }
     )
 }
 
@@ -1981,7 +2073,7 @@ private fun EditorBottomStatusBar(
     onLanguageClick: () -> Unit = {},
     onReadOnlyToggle: () -> Unit = {},
     onLineEndingClick: () -> Unit = {},
-    modifier: Modifier = Modifier,
+    modifier: Modifier = Modifier
 ) {
     val surface = PrototypeTokens.surface
     val border = PrototypeTokens.border
@@ -2014,11 +2106,14 @@ private fun EditorBottomStatusBar(
             .background(surface)
             .padding(horizontal = PrototypeSpacing.EditorStatusBarPadding, vertical = 4.dp),
         verticalAlignment = Alignment.CenterVertically,
-        horizontalArrangement = Arrangement.End,
+        horizontalArrangement = Arrangement.End
     ) {
         // Read-only / Edit toggle (clickable)
-        val readOnlyLabel = if (effectiveReadOnly) stringResource(R.string.editor_read_only)
-            else stringResource(R.string.editor_status_editable)
+        val readOnlyLabel = if (effectiveReadOnly) {
+            stringResource(R.string.editor_read_only)
+        } else {
+            stringResource(R.string.editor_status_editable)
+        }
         Text(
             text = readOnlyLabel,
             style = EditorStatusBarStyle,
@@ -2026,8 +2121,8 @@ private fun EditorBottomStatusBar(
             modifier = Modifier.clickable(
                 interactionSource = remember { MutableInteractionSource() },
                 indication = null,
-                onClick = onReadOnlyToggle,
-            ),
+                onClick = onReadOnlyToggle
+            )
         )
         Spacer(modifier = Modifier.width(14.dp))
         // Modified indicator
@@ -2037,13 +2132,13 @@ private fun EditorBottomStatusBar(
                     modifier = Modifier
                         .size(PrototypeSpacing.EditorModifiedDot)
                         .clip(PrototypeShapes.StatusCircle)
-                        .background(accent),
+                        .background(accent)
                 )
                 Spacer(modifier = Modifier.width(5.dp))
                 Text(
                     text = stringResource(R.string.editor_modified),
                     style = EditorStatusBarStyle,
-                    color = accent,
+                    color = accent
                 )
             }
             Spacer(modifier = Modifier.width(14.dp))
@@ -2053,7 +2148,7 @@ private fun EditorBottomStatusBar(
             Text(
                 text = stringResource(R.string.editor_status_selection_count, selectionCount),
                 style = EditorStatusBarStyle,
-                color = muted,
+                color = muted
             )
             Spacer(modifier = Modifier.width(14.dp))
         }
@@ -2069,8 +2164,8 @@ private fun EditorBottomStatusBar(
                     modifier = Modifier.clickable(
                         interactionSource = remember { MutableInteractionSource() },
                         indication = null,
-                        onClick = onLanguageClick,
-                    ),
+                        onClick = onLanguageClick
+                    )
                 )
                 Spacer(modifier = Modifier.width(14.dp))
             }
@@ -2079,14 +2174,14 @@ private fun EditorBottomStatusBar(
         Text(
             text = indentText,
             style = EditorStatusBarStyle,
-            color = muted,
+            color = muted
         )
         Spacer(modifier = Modifier.width(14.dp))
         // Encoding (UTF-8, etc.)
         Text(
             text = encodingText,
             style = EditorStatusBarStyle,
-            color = muted,
+            color = muted
         )
         Spacer(modifier = Modifier.width(14.dp))
         // Line ending (LF / CRLF) — clickable
@@ -2097,15 +2192,15 @@ private fun EditorBottomStatusBar(
             modifier = Modifier.clickable(
                 interactionSource = remember { MutableInteractionSource() },
                 indication = null,
-                onClick = onLineEndingClick,
-            ),
+                onClick = onLineEndingClick
+            )
         )
         Spacer(modifier = Modifier.width(14.dp))
         // Cursor position (Ln X, Col Y) — rightmost in VSCode style
         Text(
             text = positionText,
             style = EditorStatusBarStyle,
-            color = muted,
+            color = muted
         )
     }
 }
@@ -2120,9 +2215,9 @@ private fun StatusPill(text: String, color: androidx.compose.ui.graphics.Color) 
         modifier = Modifier
             .background(
                 PrototypeTokens.elevated,
-                PrototypeShapes.Small,
+                PrototypeShapes.Small
             )
-            .padding(horizontal = 6.dp, vertical = 2.dp),
+            .padding(horizontal = 6.dp, vertical = 2.dp)
     )
 }
 
@@ -2164,7 +2259,7 @@ private fun EditorContentArea(
     shortcutHandler: KeyboardShortcutHandler,
     onNavigateUp: () -> Unit,
     modifier: Modifier = Modifier,
-    settings: EditorSettings = EditorSettings(),
+    settings: EditorSettings = EditorSettings()
 ) {
     val context = LocalContext.current
     var hasScrolledPastThreshold by remember { mutableStateOf(false) }
@@ -2173,7 +2268,7 @@ private fun EditorContentArea(
         // No tabs open — show loading/empty state
         Box(
             modifier = modifier,
-            contentAlignment = Alignment.Center,
+            contentAlignment = Alignment.Center
         ) {
             when (uiState) {
                 is EditorUiState.Loading -> CircularProgressIndicator()
@@ -2182,18 +2277,18 @@ private fun EditorContentArea(
                         if (uiState.progress >= 0f) {
                             LinearProgressIndicator(
                                 progress = { uiState.progress },
-                                modifier = Modifier.fillMaxWidth(0.5f).height(6.dp),
+                                modifier = Modifier.fillMaxWidth(0.5f).height(6.dp)
                             )
                         } else {
                             LinearProgressIndicator(
-                                modifier = Modifier.fillMaxWidth(0.5f).height(6.dp),
+                                modifier = Modifier.fillMaxWidth(0.5f).height(6.dp)
                             )
                         }
                         Spacer(modifier = Modifier.height(8.dp))
                         Text(
                             text = uiState.progressText,
                             style = DraftPeekTypography.bodySmall,
-                            color = PrototypeTokens.muted,
+                            color = PrototypeTokens.muted
                         )
                     }
                 }
@@ -2201,13 +2296,13 @@ private fun EditorContentArea(
                     Column(horizontalAlignment = Alignment.CenterHorizontally) {
                         Text(
                             text = stringResource(R.string.editor_load_failed),
-                            style = DraftPeekTypography.headlineMedium.copy(color = PrototypeTokens.error),
+                            style = DraftPeekTypography.headlineMedium.copy(color = PrototypeTokens.error)
                         )
                         Spacer(modifier = Modifier.height(8.dp))
                         Text(
                             text = uiState.message,
                             style = DraftPeekTypography.bodyMedium,
-                            color = PrototypeTokens.muted,
+                            color = PrototypeTokens.muted
                         )
                         Spacer(modifier = Modifier.height(16.dp))
                         BrandFilledButton(text = stringResource(R.string.editor_back), onClick = onNavigateUp)
@@ -2224,7 +2319,7 @@ private fun EditorContentArea(
         modifier = modifier,
         userScrollEnabled = false,
         beyondViewportPageCount = 1,
-        key = { page -> tabs[page].id.value },
+        key = { page -> tabs[page].id.value }
     ) { page ->
         val tab = tabs[page]
         // Only render the active tab's content; others show a placeholder to keep alive
@@ -2234,11 +2329,11 @@ private fun EditorContentArea(
             // Inactive tab — lightweight placeholder to keep pager slot alive
             Box(
                 modifier = Modifier.fillMaxSize(),
-                contentAlignment = Alignment.Center,
+                contentAlignment = Alignment.Center
             ) {
                 Text(
                     text = tab.fileName,
-                    style = DraftPeekTypography.bodyMedium.copy(color = PrototypeTokens.muted),
+                    style = DraftPeekTypography.bodyMedium.copy(color = PrototypeTokens.muted)
                 )
             }
             return@HorizontalPager
@@ -2248,7 +2343,7 @@ private fun EditorContentArea(
             is EditorUiState.Loading -> {
                 Box(
                     modifier = Modifier.fillMaxSize(),
-                    contentAlignment = Alignment.Center,
+                    contentAlignment = Alignment.Center
                 ) {
                     CircularProgressIndicator()
                 }
@@ -2258,32 +2353,32 @@ private fun EditorContentArea(
                 // P1-14: Show loading progress for large files
                 Box(
                     modifier = Modifier.fillMaxSize(),
-                    contentAlignment = Alignment.Center,
+                    contentAlignment = Alignment.Center
                 ) {
                     Column(
                         horizontalAlignment = Alignment.CenterHorizontally,
-                        modifier = Modifier.padding(32.dp),
+                        modifier = Modifier.padding(32.dp)
                     ) {
                         if (uiState.progress >= 0f) {
                             LinearProgressIndicator(
                                 progress = { uiState.progress },
                                 modifier = Modifier
                                     .fillMaxWidth(0.7f)
-                                    .height(8.dp),
+                                    .height(8.dp)
                             )
                         } else {
                             // Unknown total size: show indeterminate bar
                             LinearProgressIndicator(
                                 modifier = Modifier
                                     .fillMaxWidth(0.7f)
-                                    .height(8.dp),
+                                    .height(8.dp)
                             )
                         }
                         Spacer(modifier = Modifier.height(16.dp))
                         Text(
                             text = uiState.progressText,
                             style = MaterialTheme.typography.bodyMedium,
-                            color = MaterialTheme.colorScheme.onSurfaceVariant,
+                            color = MaterialTheme.colorScheme.onSurfaceVariant
                         )
                         val percentage = uiState.percentageText
                         if (percentage != null) {
@@ -2291,7 +2386,7 @@ private fun EditorContentArea(
                             Text(
                                 text = percentage,
                                 style = MaterialTheme.typography.headlineSmall,
-                                color = MaterialTheme.colorScheme.primary,
+                                color = MaterialTheme.colorScheme.primary
                             )
                         }
                     }
@@ -2301,10 +2396,13 @@ private fun EditorContentArea(
             is EditorUiState.Success -> {
                 val successState = uiState
                 val liveContent by viewModel.liveContent.collectAsStateWithLifecycle()
-                val prefs = remember { context.getSharedPreferences("draftpeek_prefs", android.content.Context.MODE_PRIVATE) }
-                var bannerDismissed by rememberSaveable { mutableStateOf(prefs.getBoolean("sample_banner_dismissed", false)) }
+                val prefs =
+                    remember { context.getSharedPreferences("draftpeek_prefs", android.content.Context.MODE_PRIVATE) }
+                var bannerDismissed by rememberSaveable {
+                    mutableStateOf(prefs.getBoolean("sample_banner_dismissed", false))
+                }
                 Column(
-                    modifier = Modifier.fillMaxSize(),
+                    modifier = Modifier.fillMaxSize()
                 ) {
                     if (successState.isReadOnly && !bannerDismissed) {
                         ReadOnlyBanner(onDismiss = {
@@ -2315,40 +2413,40 @@ private fun EditorContentArea(
                     if (successState.fileSizeWarning != null) {
                         FileSizeWarningBanner(
                             message = successState.fileSizeWarning,
-                            onDismiss = {},
+                            onDismiss = {}
                         )
                     }
                     // Stage 2: 大 Markdown 文件在编辑模式下提示预览
                     if (isLargeMarkdownFile && markdownViewMode == MarkdownViewMode.EDIT) {
                         LargeFilePreviewHintBanner(
-                            onPreviewClick = { viewModel.setMarkdownViewMode(MarkdownViewMode.PREVIEW) },
+                            onPreviewClick = { viewModel.setMarkdownViewMode(MarkdownViewMode.PREVIEW) }
                         )
                     }
                     Box(
                         modifier = Modifier
                             .fillMaxWidth()
-                            .weight(1f),
+                            .weight(1f)
                     ) {
                         val resolvedCss: String? = if (settings.customMarkdownCss.isBlank()) null else settings.customMarkdownCss
                         when {
                             successState.isPdf || successState.fileName.lowercase().endsWith(".pdf") -> {
                                 PdfDocumentScreen(
                                     fileUri = Uri.parse(viewModel.currentUriString),
-                                    modifier = Modifier.fillMaxSize(),
+                                    modifier = Modifier.fillMaxSize()
                                 )
                             }
                             successState.isBinaryFile -> {
                                 BinaryFilePlaceholder(
                                     fileName = successState.fileName,
                                     fileSize = successState.fileSize,
-                                    modifier = Modifier.fillMaxSize(),
+                                    modifier = Modifier.fillMaxSize()
                                 )
                             }
                             successState.isMediaFile -> {
                                 MediaViewerScreen(
                                     fileUri = Uri.parse(viewModel.currentUriString),
                                     documentType = successState.documentType ?: DocumentType.IMAGE,
-                                    modifier = Modifier.fillMaxSize(),
+                                    modifier = Modifier.fillMaxSize()
                                 )
                             }
                             successState.isOfficeDocument && editorMode == EditorMode.DOCUMENT -> {
@@ -2356,11 +2454,13 @@ private fun EditorContentArea(
                                     htmlContent = successState.renderedHtml ?: "",
                                     documentType = successState.documentType ?: DocumentType.WORD,
                                     darkTheme = darkTheme,
-                                    modifier = Modifier.fillMaxSize(),
+                                    modifier = Modifier.fillMaxSize()
                                 )
                             }
                             // Stage 3: 流式预览——超大 Markdown 文件使用 LazyMarkdownPreview
-                            markdownViewMode == MarkdownViewMode.SPLIT && successState.isMarkdownFile && viewModel.needsStreamingPreview -> {
+                            markdownViewMode == MarkdownViewMode.SPLIT &&
+                                successState.isMarkdownFile &&
+                                viewModel.needsStreamingPreview -> {
                                 SplitPane(
                                     modifier = Modifier.fillMaxSize(),
                                     orientation = SplitOrientation.Horizontal,
@@ -2371,34 +2471,40 @@ private fun EditorContentArea(
                                         Box(modifier = Modifier.fillMaxSize()) {
                                             if (wrapper.isUsable()) {
                                                 AndroidView(
-                                            factory = { ctx ->
-                                                try {
-                                                    wrapper.editor.apply {
-                                                        (parent as? android.view.ViewGroup)?.removeView(this)
-                                                        setOnKeyListener { _, keyCode, event ->
-                                                            shortcutHandler.handleKeyEvent(event)
+                                                    factory = { ctx ->
+                                                        try {
+                                                            wrapper.editor.apply {
+                                                                (parent as? android.view.ViewGroup)?.removeView(this)
+                                                                setOnKeyListener { _, keyCode, event ->
+                                                                    shortcutHandler.handleKeyEvent(event)
+                                                                }
+                                                                layoutParams = android.view.ViewGroup.LayoutParams(
+                                                                    android.view.ViewGroup.LayoutParams.MATCH_PARENT,
+                                                                    android.view.ViewGroup.LayoutParams.MATCH_PARENT
+                                                                )
+                                                            }
+                                                        } catch (e: Exception) {
+                                                            Log.e(
+                                                                TAG,
+                                                                "AndroidView factory configuration failed (split-stream)",
+                                                                e
+                                                            )
+                                                            try {
+                                                                wrapper.editor
+                                                            } catch (_: Exception) {
+                                                                android.view.View(ctx)
+                                                            }
                                                         }
-                                                        layoutParams = android.view.ViewGroup.LayoutParams(
-                                                            android.view.ViewGroup.LayoutParams.MATCH_PARENT,
-                                                            android.view.ViewGroup.LayoutParams.MATCH_PARENT
-                                                        )
+                                                    },
+                                                    modifier = Modifier.fillMaxSize(),
+                                                    update = { view ->
+                                                        hasScrolledPastThreshold = try {
+                                                            wrapper.isUsable() && wrapper.editor.firstVisibleLine > 5
+                                                        } catch (_: Exception) {
+                                                            false
+                                                        }
                                                     }
-                                                } catch (e: Exception) {
-                                                    Log.e(TAG, "AndroidView factory configuration failed (split-stream)", e)
-                                                    try {
-                                                        wrapper.editor
-                                                    } catch (_: Exception) {
-                                                        android.view.View(ctx)
-                                                    }
-                                                }
-                                            },
-                                            modifier = Modifier.fillMaxSize(),
-                                            update = { view ->
-                                                hasScrolledPastThreshold = try {
-                                                    wrapper.isUsable() && wrapper.editor.firstVisibleLine > 5
-                                                } catch (_: Exception) { false }
-                                            },
-                                        )
+                                                )
                                             }
                                         }
                                     },
@@ -2406,26 +2512,28 @@ private fun EditorContentArea(
                                         LazyMarkdownPreview(
                                             markdownContent = liveContent,
                                             isDarkTheme = darkTheme,
-                                            modifier = Modifier.fillMaxSize(),
+                                            modifier = Modifier.fillMaxSize()
                                         )
-                                    },
+                                    }
                                 )
                             }
                             isPreviewMode && successState.isMarkdownFile && viewModel.needsStreamingPreview -> {
                                 LazyMarkdownPreview(
                                     markdownContent = liveContent,
                                     isDarkTheme = darkTheme,
-                                    modifier = Modifier.fillMaxSize(),
+                                    modifier = Modifier.fillMaxSize()
                                 )
                             }
-                            markdownViewMode == MarkdownViewMode.WYSIWYG && successState.isMarkdownFile && !isLargeMarkdownFile -> {
+                            markdownViewMode == MarkdownViewMode.WYSIWYG &&
+                                successState.isMarkdownFile &&
+                                !isLargeMarkdownFile -> {
                                 MarkdownRichEditor(
                                     markdownContent = successState.content,
                                     onContentChanged = { newContent ->
                                         viewModel.onContentChanged(newContent)
                                     },
                                     isDarkTheme = darkTheme,
-                                    modifier = Modifier.fillMaxSize(),
+                                    modifier = Modifier.fillMaxSize()
                                 )
                             }
                             markdownViewMode == MarkdownViewMode.SPLIT && successState.isMarkdownFile -> {
@@ -2439,34 +2547,40 @@ private fun EditorContentArea(
                                         Box(modifier = Modifier.fillMaxSize()) {
                                             if (wrapper.isUsable()) {
                                                 AndroidView(
-                                            factory = { ctx ->
-                                                try {
-                                                    wrapper.editor.apply {
-                                                        (parent as? android.view.ViewGroup)?.removeView(this)
-                                                        setOnKeyListener { _, keyCode, event ->
-                                                            shortcutHandler.handleKeyEvent(event)
+                                                    factory = { ctx ->
+                                                        try {
+                                                            wrapper.editor.apply {
+                                                                (parent as? android.view.ViewGroup)?.removeView(this)
+                                                                setOnKeyListener { _, keyCode, event ->
+                                                                    shortcutHandler.handleKeyEvent(event)
+                                                                }
+                                                                layoutParams = android.view.ViewGroup.LayoutParams(
+                                                                    android.view.ViewGroup.LayoutParams.MATCH_PARENT,
+                                                                    android.view.ViewGroup.LayoutParams.MATCH_PARENT
+                                                                )
+                                                            }
+                                                        } catch (e: Exception) {
+                                                            Log.e(
+                                                                TAG,
+                                                                "AndroidView factory configuration failed (split)",
+                                                                e
+                                                            )
+                                                            try {
+                                                                wrapper.editor
+                                                            } catch (_: Exception) {
+                                                                android.view.View(ctx)
+                                                            }
                                                         }
-                                                        layoutParams = android.view.ViewGroup.LayoutParams(
-                                                            android.view.ViewGroup.LayoutParams.MATCH_PARENT,
-                                                            android.view.ViewGroup.LayoutParams.MATCH_PARENT
-                                                        )
+                                                    },
+                                                    modifier = Modifier.fillMaxSize(),
+                                                    update = { view ->
+                                                        hasScrolledPastThreshold = try {
+                                                            wrapper.isUsable() && wrapper.editor.firstVisibleLine > 5
+                                                        } catch (_: Exception) {
+                                                            false
+                                                        }
                                                     }
-                                                } catch (e: Exception) {
-                                                    Log.e(TAG, "AndroidView factory configuration failed (split)", e)
-                                                    try {
-                                                        wrapper.editor
-                                                    } catch (_: Exception) {
-                                                        android.view.View(ctx)
-                                                    }
-                                                }
-                                            },
-                                            modifier = Modifier.fillMaxSize(),
-                                            update = { view ->
-                                                hasScrolledPastThreshold = try {
-                                                    wrapper.isUsable() && wrapper.editor.firstVisibleLine > 5
-                                                } catch (_: Exception) { false }
-                                            },
-                                        )
+                                                )
                                             }
                                         }
                                     },
@@ -2474,29 +2588,49 @@ private fun EditorContentArea(
                                         MarkdownWebViewPreview(
                                             markdownContent = liveContent,
                                             isDarkTheme = darkTheme,
-                                            theme = try { MarkdownTheme.valueOf(settings.markdownThemeName) } catch (_: Exception) { MarkdownTheme.DEFAULT },
+                                            theme = try {
+                                                MarkdownTheme.valueOf(settings.markdownThemeName)
+                                            } catch (
+                                                _: Exception
+                                            ) {
+                                                MarkdownTheme.DEFAULT
+                                            },
                                             customCss = resolvedCss,
                                             onHeadingClick = { lineIndex ->
-                                                try { if (wrapper.isUsable()) wrapper.goToLine(lineIndex + 1) } catch (_: Exception) {}
+                                                try {
+                                                    if (wrapper.isUsable()) wrapper.goToLine(lineIndex + 1)
+                                                } catch (
+                                                    _: Exception
+                                                ) {}
                                             },
-                                            modifier = Modifier.fillMaxSize(),
+                                            modifier = Modifier.fillMaxSize()
                                         )
-                                    },
+                                    }
                                 )
                             }
                             isPreviewMode && successState.isMarkdownFile -> {
                                 MarkdownWebViewPreview(
                                     markdownContent = liveContent,
                                     isDarkTheme = darkTheme,
-                                    theme = try { MarkdownTheme.valueOf(settings.markdownThemeName) } catch (_: Exception) { MarkdownTheme.DEFAULT },
+                                    theme = try {
+                                        MarkdownTheme.valueOf(settings.markdownThemeName)
+                                    } catch (
+                                        _: Exception
+                                    ) {
+                                        MarkdownTheme.DEFAULT
+                                    },
                                     customCss = resolvedCss,
                                     onHeadingClick = { lineIndex ->
                                         if (markdownViewMode == MarkdownViewMode.PREVIEW) {
                                             viewModel.setMarkdownViewMode(MarkdownViewMode.SPLIT)
                                         }
-                                        try { if (wrapper.isUsable()) wrapper.goToLine(lineIndex + 1) } catch (_: Exception) {}
+                                        try {
+                                            if (wrapper.isUsable()) wrapper.goToLine(lineIndex + 1)
+                                        } catch (
+                                            _: Exception
+                                        ) {}
                                     },
-                                    modifier = Modifier.fillMaxSize(),
+                                    modifier = Modifier.fillMaxSize()
                                 )
                             }
                             isPreviewMode && successState.isHtmlFile -> {
@@ -2504,7 +2638,7 @@ private fun EditorContentArea(
                                     htmlContent = successState.content,
                                     darkTheme = darkTheme,
                                     onConvertToMarkdown = { viewModel.convertHtmlToMarkdown() },
-                                    modifier = Modifier.fillMaxSize(),
+                                    modifier = Modifier.fillMaxSize()
                                 )
                             }
                             else -> {
@@ -2536,16 +2670,18 @@ private fun EditorContentArea(
                                             update = { view ->
                                                 hasScrolledPastThreshold = try {
                                                     wrapper.isUsable() && wrapper.editor.firstVisibleLine > 5
-                                                } catch (_: Exception) { false }
-                                            },
+                                                } catch (_: Exception) {
+                                                    false
+                                                }
+                                            }
                                         )
                                         ScrollToTopButton(
-                                                editor = wrapper.editor,
-                                                hasScrolled = hasScrolledPastThreshold,
-                                                modifier = Modifier
-                                                    .align(Alignment.BottomEnd)
-                                                    .padding(16.dp),
-                                            )
+                                            editor = wrapper.editor,
+                                            hasScrolled = hasScrolledPastThreshold,
+                                            modifier = Modifier
+                                                .align(Alignment.BottomEnd)
+                                                .padding(16.dp)
+                                        )
                                     }
                                 }
                             }
@@ -2557,18 +2693,18 @@ private fun EditorContentArea(
             is EditorUiState.Error -> {
                 Box(
                     modifier = Modifier.fillMaxSize(),
-                    contentAlignment = Alignment.Center,
+                    contentAlignment = Alignment.Center
                 ) {
                     Column(horizontalAlignment = Alignment.CenterHorizontally) {
                         Text(
                             text = stringResource(R.string.editor_load_failed),
-                            style = DraftPeekTypography.headlineMedium.copy(color = PrototypeTokens.error),
+                            style = DraftPeekTypography.headlineMedium.copy(color = PrototypeTokens.error)
                         )
                         Spacer(modifier = Modifier.height(8.dp))
                         Text(
                             text = uiState.message,
                             style = DraftPeekTypography.bodyMedium,
-                            color = PrototypeTokens.muted,
+                            color = PrototypeTokens.muted
                         )
                         Spacer(modifier = Modifier.height(16.dp))
                         BrandFilledButton(text = stringResource(R.string.editor_back), onClick = onNavigateUp)
@@ -2589,50 +2725,46 @@ private fun EditorContentArea(
  * @param onRetry 重试初始化编辑器的回调
  */
 @Composable
-private fun EditorInitErrorScreen(
-    error: Throwable,
-    onNavigateUp: () -> Unit,
-    onRetry: () -> Unit,
-) {
+private fun EditorInitErrorScreen(error: Throwable, onNavigateUp: () -> Unit, onRetry: () -> Unit) {
     Box(
         modifier = Modifier
             .fillMaxSize()
             .background(PrototypeTokens.pageBackground),
-        contentAlignment = Alignment.Center,
+        contentAlignment = Alignment.Center
     ) {
         Column(
             horizontalAlignment = Alignment.CenterHorizontally,
-            modifier = Modifier.padding(32.dp),
+            modifier = Modifier.padding(32.dp)
         ) {
             Icon(
                 imageVector = Icons.Filled.Error,
                 contentDescription = null,
                 tint = PrototypeTokens.error,
-                modifier = Modifier.size(64.dp),
+                modifier = Modifier.size(64.dp)
             )
             Spacer(modifier = Modifier.height(16.dp))
             Text(
                 text = stringResource(R.string.editor_init_failed),
                 style = DraftPeekTypography.headlineMedium,
-                color = PrototypeTokens.error,
+                color = PrototypeTokens.error
             )
             Spacer(modifier = Modifier.height(8.dp))
             Text(
                 text = error.message ?: stringResource(R.string.editor_load_failed),
                 style = DraftPeekTypography.bodyMedium,
-                color = PrototypeTokens.muted,
+                color = PrototypeTokens.muted
             )
             Spacer(modifier = Modifier.height(24.dp))
             Row(
-                horizontalArrangement = Arrangement.spacedBy(12.dp),
+                horizontalArrangement = Arrangement.spacedBy(12.dp)
             ) {
                 BrandOutlinedButton(
                     text = stringResource(R.string.editor_back),
-                    onClick = onNavigateUp,
+                    onClick = onNavigateUp
                 )
                 BrandFilledButton(
                     text = stringResource(R.string.editor_retry),
-                    onClick = onRetry,
+                    onClick = onRetry
                 )
             }
         }

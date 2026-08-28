@@ -11,8 +11,4 @@ package com.draftpeek.feature.browser.model
  * @property encoding 文件编码格式，默认为 "UTF-8"
  * @property language 编程语言标识符（如 "kotlin"、"java"、"python"），默认为空字符串
  */
-data class FileContent(
-    val content: String,
-    val encoding: String = "UTF-8",
-    val language: String = ""
-)
+data class FileContent(val content: String, val encoding: String = "UTF-8", val language: String = "")

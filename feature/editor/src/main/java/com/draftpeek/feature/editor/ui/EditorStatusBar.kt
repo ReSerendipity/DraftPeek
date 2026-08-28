@@ -19,11 +19,9 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
-import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.derivedStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -59,7 +57,7 @@ fun EditorStatusBar(
     isModified: Boolean,
     modifier: Modifier = Modifier,
     isReadOnly: Boolean = false,
-    words: Int? = null,
+    words: Int? = null
 ) {
     val surface = PrototypeTokens.surface
     val muted = PrototypeTokens.muted
@@ -78,7 +76,7 @@ fun EditorStatusBar(
                 .height(28.dp)
                 .background(surface)
                 .padding(horizontal = PrototypeSpacing.EditorStatusBarPadding),
-            verticalAlignment = Alignment.CenterVertically,
+            verticalAlignment = Alignment.CenterVertically
         ) {
             // Read-only indicator (leftmost, gray)
             if (isReadOnly) {
@@ -98,7 +96,7 @@ fun EditorStatusBar(
             Spacer(modifier = Modifier.width(8.dp))
             Text(
                 language,
-                style = EditorStatusBarStyle.copy(color = PrototypeTokens.accent, fontWeight = FontWeight.SemiBold),
+                style = EditorStatusBarStyle.copy(color = PrototypeTokens.accent, fontWeight = FontWeight.SemiBold)
             )
 
             Spacer(modifier = Modifier.weight(1f))
@@ -115,12 +113,12 @@ fun EditorStatusBar(
                     modifier = Modifier
                         .size(PrototypeSpacing.EditorModifiedDot)
                         .clip(PrototypeShapes.StatusCircle)
-                        .background(indicatorColor),
+                        .background(indicatorColor)
                 )
                 Spacer(modifier = Modifier.width(4.dp))
                 Text(
                     text = if (isModified) "Modified" else "Saved",
-                    style = EditorStatusBarStyle.copy(color = indicatorColor),
+                    style = EditorStatusBarStyle.copy(color = indicatorColor)
                 )
             }
         }

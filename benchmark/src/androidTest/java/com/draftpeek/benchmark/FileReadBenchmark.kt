@@ -21,13 +21,13 @@ import androidx.test.platform.app.InstrumentationRegistry
 import com.draftpeek.core.data.repository.EditorFileRepository
 import dagger.hilt.android.testing.HiltAndroidRule
 import dagger.hilt.android.testing.HiltAndroidTest
+import java.io.File
+import javax.inject.Inject
 import kotlinx.coroutines.runBlocking
 import org.junit.Before
 import org.junit.Rule
 import org.junit.Test
 import org.junit.runner.RunWith
-import java.io.File
-import javax.inject.Inject
 
 /**
  * 文件读取操作基准测试类。

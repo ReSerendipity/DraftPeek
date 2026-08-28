@@ -18,7 +18,6 @@ import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.material3.Divider
 import androidx.compose.runtime.Composable
@@ -47,7 +46,7 @@ fun MarkdownPreview(
     modifier: Modifier = Modifier,
     onContentChanged: ((String) -> Unit)? = null,
     viewMode: MarkdownViewMode = MarkdownViewMode.EDIT,
-    isDarkTheme: Boolean = LocalDarkTheme.current,
+    isDarkTheme: Boolean = LocalDarkTheme.current
 ) {
     val pageBg = PrototypeTokens.pageBackground
     val surfaceColor = PrototypeTokens.surface
@@ -59,7 +58,7 @@ fun MarkdownPreview(
             MarkdownWebViewPreview(
                 markdownContent = markdownContent,
                 isDarkTheme = isDarkTheme,
-                modifier = modifier.fillMaxSize(),
+                modifier = modifier.fillMaxSize()
             )
         }
 
@@ -68,7 +67,7 @@ fun MarkdownPreview(
             MarkdownWebViewPreview(
                 markdownContent = markdownContent,
                 isDarkTheme = isDarkTheme,
-                modifier = modifier.fillMaxSize(),
+                modifier = modifier.fillMaxSize()
             )
         }
 
@@ -77,19 +76,19 @@ fun MarkdownPreview(
             Row(
                 modifier = modifier
                     .fillMaxSize()
-                    .background(pageBg),
+                    .background(pageBg)
             ) {
                 // Edit pane (plain text)
                 Box(
                     modifier = Modifier
                         .weight(1f)
                         .fillMaxSize()
-                        .background(surfaceColor),
+                        .background(surfaceColor)
                 ) {
                     MarkdownWebViewPreview(
                         markdownContent = markdownContent,
                         isDarkTheme = isDarkTheme,
-                        modifier = Modifier.fillMaxSize(),
+                        modifier = Modifier.fillMaxSize()
                     )
                 }
 
@@ -98,7 +97,7 @@ fun MarkdownPreview(
                     modifier = Modifier
                         .height(48.dp)
                         .weight(0.01f),
-                    color = onSurfaceColor.copy(alpha = 0.2f),
+                    color = onSurfaceColor.copy(alpha = 0.2f)
                 )
 
                 // Preview pane
@@ -106,12 +105,12 @@ fun MarkdownPreview(
                     modifier = Modifier
                         .weight(1f)
                         .fillMaxSize()
-                        .background(pageBg),
+                        .background(pageBg)
                 ) {
                     MarkdownWebViewPreview(
                         markdownContent = markdownContent,
                         isDarkTheme = isDarkTheme,
-                        modifier = Modifier.fillMaxSize(),
+                        modifier = Modifier.fillMaxSize()
                     )
                 }
             }
@@ -123,7 +122,7 @@ fun MarkdownPreview(
                 markdownContent = markdownContent,
                 onContentChanged = onContentChanged,
                 isDarkTheme = isDarkTheme,
-                modifier = modifier,
+                modifier = modifier
             )
         }
     }

@@ -22,10 +22,12 @@ import androidx.compose.material3.windowsizeclass.WindowWidthSizeClass
 enum class LayoutMode {
     /** 手机竖屏 — 宽度 < 600dp */
     COMPACT,
+
     /** 手机横屏 / 折叠屏展开 — 600dp ≤ 宽度 < 840dp */
     MEDIUM,
+
     /** 平板 / 桌面 — 宽度 ≥ 840dp */
-    EXPANDED,
+    EXPANDED
 }
 
 /**
@@ -33,11 +35,9 @@ enum class LayoutMode {
  *
  * @return 对应的 [LayoutMode] 布局模式
  */
-fun WindowSizeClass.layoutMode(): LayoutMode {
-    return when (widthSizeClass) {
-        WindowWidthSizeClass.Compact -> LayoutMode.COMPACT
-        WindowWidthSizeClass.Medium -> LayoutMode.MEDIUM
-        WindowWidthSizeClass.Expanded -> LayoutMode.EXPANDED
-        else -> LayoutMode.COMPACT
-    }
+fun WindowSizeClass.layoutMode(): LayoutMode = when (widthSizeClass) {
+    WindowWidthSizeClass.Compact -> LayoutMode.COMPACT
+    WindowWidthSizeClass.Medium -> LayoutMode.MEDIUM
+    WindowWidthSizeClass.Expanded -> LayoutMode.EXPANDED
+    else -> LayoutMode.COMPACT
 }

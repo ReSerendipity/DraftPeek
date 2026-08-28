@@ -19,9 +19,7 @@ import javax.inject.Inject
  *
  * @property repository 用户活动仓库实例
  */
-class RecordUserActivityUseCase @Inject constructor(
-    private val repository: UserActivityRepository,
-) {
+class RecordUserActivityUseCase @Inject constructor(private val repository: UserActivityRepository) {
     /** 记录文件打开事件。 */
     suspend fun recordFileOpen() = repository.recordFileOpen()
 
@@ -50,15 +48,13 @@ class RecordUserActivityUseCase @Inject constructor(
      * 记录使用时长。
      * @param minutes 使用时长（分钟）
      */
-    suspend fun recordUsageDuration(minutes: Int) =
-        repository.recordUsageDuration(minutes)
+    suspend fun recordUsageDuration(minutes: Int) = repository.recordUsageDuration(minutes)
 
     /**
      * 记录字符写入数量。
      * @param count 写入的字符数
      */
-    suspend fun recordCharWrite(count: Int) =
-        repository.recordCharWrite(count)
+    suspend fun recordCharWrite(count: Int) = repository.recordCharWrite(count)
 
     /** 记录文件创建事件。 */
     suspend fun recordFileCreate() = repository.recordFileCreate()

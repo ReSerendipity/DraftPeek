@@ -29,12 +29,12 @@ android {
             def storePass = properties.getProperty("RELEASE_STORE_PASSWORD", "")
             def keyPass = properties.getProperty("RELEASE_KEY_PASSWORD", "")
             def alias = properties.getProperty("RELEASE_KEY_ALIAS", "")
-            def storeFile = properties.getProperty("RELEASE_STORE_FILE", "")
-            if (storePass && keyPass && alias && storeFile) {
-                this.storeFile = file(storeFile)
-                this.storePassword = storePass
-                this.keyAlias = alias
-                this.keyPassword = keyPass
+            def storeFilePath = properties.getProperty("RELEASE_STORE_FILE", "")
+            if (storePass && keyPass && alias && storeFilePath) {
+                storeFile = file(storeFilePath)
+                storePassword = storePass
+                keyAlias = alias
+                keyPassword = keyPass
                 // SECURITY VULN-010: 启用 APK Signature Scheme v3
                 // v3 支持密钥轮换（key rotation），允许用新密钥更新 APK
                 // 而旧版本 APK 仍可验证。v1 (JAR signing) 和 v2 也保留启用。

@@ -27,10 +27,12 @@ import androidx.window.layout.WindowInfoTracker
 enum class FoldableState {
     /** 设备完全展开（平板模式）— 使用双窗格布局 */
     FLAT,
+
     /** 设备半开（桌面/笔记本模式）— 使用分屏布局 */
     HALF_OPENED,
+
     /** 设备完全闭合或非折叠设备 — 使用单窗格布局 */
-    CLOSED,
+    CLOSED
 }
 
 /**
@@ -45,7 +47,7 @@ data class FoldInfo(
     val state: FoldableState = FoldableState.CLOSED,
     val isSeparating: Boolean = false,
     val orientation: FoldingFeature.Orientation = FoldingFeature.Orientation.VERTICAL,
-    val bounds: android.graphics.Rect = android.graphics.Rect(),
+    val bounds: android.graphics.Rect = android.graphics.Rect()
 )
 
 /**
@@ -74,7 +76,7 @@ fun rememberFoldableState(): State<FoldInfo> {
                     },
                     isSeparating = foldingFeature.isSeparating,
                     orientation = foldingFeature.orientation,
-                    bounds = foldingFeature.bounds,
+                    bounds = foldingFeature.bounds
                 )
             } else {
                 FoldInfo()
@@ -91,14 +93,12 @@ fun rememberFoldableState(): State<FoldInfo> {
  * @param foldInfo 当前折叠信息
  * @return 应用了避让内边距的 Modifier
  */
-fun Modifier.hingeAvoidancePadding(foldInfo: FoldInfo): Modifier {
-    return if (foldInfo.isSeparating) {
-        val hingePadding = 32.dp
-        when (foldInfo.orientation) {
-            FoldingFeature.Orientation.HORIZONTAL -> this.padding(top = hingePadding, bottom = hingePadding)
-            else -> this.padding(start = hingePadding, end = hingePadding)
-        }
-    } else {
-        this
+fun Modifier.hingeAvoidancePadding(foldInfo: FoldInfo): Modifier = if (foldInfo.isSeparating) {
+    val hingePadding = 32.dp
+    when (foldInfo.orientation) {
+        FoldingFeature.Orientation.HORIZONTAL -> this.padding(top = hingePadding, bottom = hingePadding)
+        else -> this.padding(start = hingePadding, end = hingePadding)
     }
+} else {
+    this
 }

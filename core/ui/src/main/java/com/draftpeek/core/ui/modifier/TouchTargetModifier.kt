@@ -19,5 +19,4 @@ import androidx.compose.ui.unit.dp
  * 小于 48dp 的视觉元素将透明地扩展其可点击区域。
  * 请在任何 `clickable()` Modifier 之前应用此 Modifier。
  */
-fun Modifier.minimumTouchTarget(): Modifier =
-    this.sizeIn(minWidth = 48.dp, minHeight = 48.dp)
+fun Modifier.minimumTouchTarget(): Modifier = this.sizeIn(minWidth = 48.dp, minHeight = 48.dp)

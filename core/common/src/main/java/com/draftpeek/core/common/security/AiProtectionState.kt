@@ -22,7 +22,7 @@ enum class AiThreatLevel {
     SUSPICIOUS,
 
     /** 明确 AI 逆向行为（触发中/高级响应） */
-    HOSTILE,
+    HOSTILE
 }
 
 /**
@@ -61,7 +61,7 @@ enum class AiDetectionSignal {
     ASM_METHOD_INVOKE_BURST,
 
     /** B 层埋点检测到安全类异常实例化时机 */
-    ASM_SENSITIVE_CLASS_CREATION,
+    ASM_SENSITIVE_CLASS_CREATION
 }
 
 /**
@@ -74,7 +74,7 @@ enum class AiDetectionSignal {
 data class AiProtectionState(
     val threatLevel: AiThreatLevel = AiThreatLevel.SAFE,
     val triggeredSignals: Set<AiDetectionSignal> = emptySet(),
-    val responseLevel: ResponseLevel = ResponseLevel.NONE,
+    val responseLevel: ResponseLevel = ResponseLevel.NONE
 ) {
     /**
      * 响应级别枚举。
@@ -90,7 +90,7 @@ data class AiProtectionState(
         LOCKED,
 
         /** 高级：自保护 */
-        SELF_DEFEND,
+        SELF_DEFEND
     }
 
     /**

@@ -33,7 +33,7 @@ enum class FeatureFlag(
     val key: String,
     val defaultEnabled: Boolean,
     val description: String,
-    val killSwitch: Boolean = false,
+    val killSwitch: Boolean = false
 ) {
     LSP_CLIENT("lsp_client", false, "Language Server Protocol client for code intelligence", killSwitch = true),
     TERMINAL("terminal", false, "Built-in terminal emulator", killSwitch = true),
@@ -42,5 +42,5 @@ enum class FeatureFlag(
     MARKDOWN_EDITOR("markdown_editor", true, "Markdown editing toolbar and formatting"),
     GIT_UI("git_ui", true, "Git operations UI", killSwitch = true),
     COMMONMARK_PARSER("commonmark_parser", true, "CommonMark native Markdown parser"),
-    FEATURE_TOGGLE("feature_toggle", true, "Feature toggle system for runtime feature control"),
+    FEATURE_TOGGLE("feature_toggle", true, "Feature toggle system for runtime feature control")
 }

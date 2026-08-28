@@ -36,7 +36,7 @@ class FileBrowserViewModelTest {
                 fileItem("zebra.kt", isDir = false),
                 fileItem("src", isDir = true),
                 fileItem("apple.md", isDir = false),
-                fileItem("build", isDir = true),
+                fileItem("build", isDir = true)
             )
 
             val sorted = files.sortFiles(FileSortOption.NAME_ASC)
@@ -54,7 +54,7 @@ class FileBrowserViewModelTest {
                 fileItem("zebra.kt", isDir = false),
                 fileItem("src", isDir = true),
                 fileItem("apple.md", isDir = false),
-                fileItem("build", isDir = true),
+                fileItem("build", isDir = true)
             )
 
             val sorted = files.sortFiles(FileSortOption.NAME_DESC)
@@ -77,7 +77,7 @@ class FileBrowserViewModelTest {
             val files = listOf(
                 fileItem("old.txt", isDir = false, lastModified = now - 10000),
                 fileItem("new.txt", isDir = false, lastModified = now),
-                fileItem("mid.txt", isDir = false, lastModified = now - 5000),
+                fileItem("mid.txt", isDir = false, lastModified = now - 5000)
             )
 
             val sorted = files.sortFiles(FileSortOption.MODIFIED_DESC)
@@ -94,7 +94,7 @@ class FileBrowserViewModelTest {
             val files = listOf(
                 fileItem("old.txt", isDir = false, lastModified = now - 10000),
                 fileItem("new.txt", isDir = false, lastModified = now),
-                fileItem("mid.txt", isDir = false, lastModified = now - 5000),
+                fileItem("mid.txt", isDir = false, lastModified = now - 5000)
             )
 
             val sorted = files.sortFiles(FileSortOption.MODIFIED_ASC)
@@ -110,7 +110,7 @@ class FileBrowserViewModelTest {
             val now = System.currentTimeMillis()
             val files = listOf(
                 fileItem("file.txt", isDir = false, lastModified = now),
-                fileItem("folder", isDir = true, lastModified = now - 1000),
+                fileItem("folder", isDir = true, lastModified = now - 1000)
             )
 
             val sorted = files.sortFiles(FileSortOption.MODIFIED_DESC)
@@ -136,7 +136,7 @@ class FileBrowserViewModelTest {
                 fileItem("build.gradle.kts", isDir = false),
                 fileItem("MainFragment.kt", isDir = false),
                 fileItem("settings.json", isDir = false),
-                fileItem("src", isDir = true),
+                fileItem("src", isDir = true)
             )
 
             val filtered = files.filter { it.name.contains("Main", ignoreCase = true) }
@@ -152,7 +152,7 @@ class FileBrowserViewModelTest {
                 fileItem("MainActivity.kt", isDir = false, extension = "kt"),
                 fileItem("build.gradle.kts", isDir = false, extension = "kts"),
                 fileItem("Main.java", isDir = false, extension = "java"),
-                fileItem("config.json", isDir = false, extension = "json"),
+                fileItem("config.json", isDir = false, extension = "json")
             )
 
             val filtered = files.filter { it.extension == "kt" }
@@ -166,7 +166,7 @@ class FileBrowserViewModelTest {
         fun filterEmptyKeyword_returnsAllFiles() {
             val files = listOf(
                 fileItem("a.kt", isDir = false),
-                fileItem("b.java", isDir = false),
+                fileItem("b.java", isDir = false)
             )
 
             val filtered = files.filter { it.name.contains("", ignoreCase = true) }
@@ -189,7 +189,7 @@ class FileBrowserViewModelTest {
             val files = listOf(
                 fileItem("small.txt", isDir = false, size = 100),
                 fileItem("large.bin", isDir = false, size = 10000),
-                fileItem("medium.log", isDir = false, size = 1000),
+                fileItem("medium.log", isDir = false, size = 1000)
             )
 
             val sorted = files.sortFiles(FileSortOption.SIZE_DESC)
@@ -205,7 +205,7 @@ class FileBrowserViewModelTest {
             val files = listOf(
                 fileItem("small.txt", isDir = false, size = 100),
                 fileItem("large.bin", isDir = false, size = 10000),
-                fileItem("medium.log", isDir = false, size = 1000),
+                fileItem("medium.log", isDir = false, size = 1000)
             )
 
             val sorted = files.sortFiles(FileSortOption.SIZE_ASC)
@@ -231,7 +231,7 @@ class FileBrowserViewModelTest {
                 fileItem("main.py", isDir = false, extension = "py"),
                 fileItem("src", isDir = true, extension = ""),
                 fileItem("app.kt", isDir = false, extension = "kt"),
-                fileItem("readme.md", isDir = false, extension = "md"),
+                fileItem("readme.md", isDir = false, extension = "md")
             )
 
             val sorted = files.sortFiles(FileSortOption.TYPE_ASC)
@@ -257,7 +257,7 @@ class FileBrowserViewModelTest {
             val statuses = listOf(
                 GitFileStatus("Main.kt", GitStatus.MODIFIED),
                 GitFileStatus("new_file.txt", GitStatus.ADDED),
-                GitFileStatus("deleted.txt", GitStatus.DELETED),
+                GitFileStatus("deleted.txt", GitStatus.DELETED)
             )
 
             // Simulate the enrichment logic from FileBrowserViewModel
@@ -271,7 +271,7 @@ class FileBrowserViewModelTest {
         @DisplayName("不在 Git 状态列表中的文件 gitStatus 为 null")
         fun gitFileStatus_notTracked_returnsNull() {
             val statuses = listOf(
-                GitFileStatus("Main.kt", GitStatus.MODIFIED),
+                GitFileStatus("Main.kt", GitStatus.MODIFIED)
             )
 
             val file = fileItem("OtherFile.java", isDir = false)
@@ -290,15 +290,13 @@ class FileBrowserViewModelTest {
         isDir: Boolean,
         size: Long = 0,
         lastModified: Long = 0,
-        extension: String = name.substringAfterLast(".", ""),
-    ): FileItem {
-        return FileItem(
-            name = name,
-            uri = mockk(),
-            isDirectory = isDir,
-            size = size,
-            lastModified = lastModified,
-            extension = extension,
-        )
-    }
+        extension: String = name.substringAfterLast(".", "")
+    ): FileItem = FileItem(
+        name = name,
+        uri = mockk(),
+        isDirectory = isDir,
+        size = size,
+        lastModified = lastModified,
+        extension = extension
+    )
 }

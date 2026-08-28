@@ -12,13 +12,13 @@ package com.draftpeek.core.common.feature
 import android.content.Context
 import android.content.SharedPreferences
 import dagger.hilt.android.qualifiers.ApplicationContext
+import javax.inject.Inject
+import javax.inject.Singleton
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.map
-import javax.inject.Inject
-import javax.inject.Singleton
 
 /**
  * 功能开关管理器类（单例）。
@@ -27,9 +27,7 @@ import javax.inject.Singleton
  * 响应式Flow观察（isEnabledFlow）两种访问方式。状态变更立即持久化到SharedPreferences。
  */
 @Singleton
-class FeatureToggleManager @Inject constructor(
-    @ApplicationContext private val context: Context,
-) {
+class FeatureToggleManager @Inject constructor(@ApplicationContext private val context: Context) {
     private val prefs: SharedPreferences by lazy {
         context.getSharedPreferences(PREFS_NAME, Context.MODE_PRIVATE)
     }
@@ -49,8 +47,7 @@ class FeatureToggleManager @Inject constructor(
      * @param flag 要检查的功能开关
      * @return 是否启用
      */
-    fun isEnabled(flag: FeatureFlag): Boolean =
-        _flagStates.value[flag] ?: flag.defaultEnabled
+    fun isEnabled(flag: FeatureFlag): Boolean = _flagStates.value[flag] ?: flag.defaultEnabled
 
     /**
      * 以Flow形式观察单个功能开关状态。
@@ -58,8 +55,7 @@ class FeatureToggleManager @Inject constructor(
      * @param flag 要观察的功能开关
      * @return 开关状态的Flow
      */
-    fun isEnabledFlow(flag: FeatureFlag): Flow<Boolean> =
-        _flagStates.map { it[flag] ?: flag.defaultEnabled }
+    fun isEnabledFlow(flag: FeatureFlag): Flow<Boolean> = _flagStates.map { it[flag] ?: flag.defaultEnabled }
 
     /**
      * 启用或禁用功能开关，立即持久化。

@@ -22,9 +22,7 @@ sealed class BrowserEvent : AppEvent {
      *
      * @property directoryUri 新目录的URI
      */
-    data class DirectoryChanged(
-        val directoryUri: String,
-    ) : BrowserEvent()
+    data class DirectoryChanged(val directoryUri: String) : BrowserEvent()
 
     /**
      * 从浏览器创建新文件时发出的事件。
@@ -32,19 +30,14 @@ sealed class BrowserEvent : AppEvent {
      * @property uri 新创建文件的URI
      * @property fileName 新文件的名称
      */
-    data class FileCreated(
-        val uri: String,
-        val fileName: String,
-    ) : BrowserEvent()
+    data class FileCreated(val uri: String, val fileName: String) : BrowserEvent()
 
     /**
      * 从浏览器删除文件时发出的事件。
      *
      * @property uri 被删除文件的URI
      */
-    data class FileDeleted(
-        val uri: String,
-    ) : BrowserEvent()
+    data class FileDeleted(val uri: String) : BrowserEvent()
 
     /**
      * Git操作完成时发出的事件。
@@ -53,11 +46,8 @@ sealed class BrowserEvent : AppEvent {
      * @property success 操作是否成功
      * @property message 可选的状态或错误消息
      */
-    data class GitOperationCompleted(
-        val operation: String,
-        val success: Boolean,
-        val message: String? = null,
-    ) : BrowserEvent()
+    data class GitOperationCompleted(val operation: String, val success: Boolean, val message: String? = null) :
+        BrowserEvent()
 
     /**
      * 安全响应要求禁用 / 恢复终端模块。
@@ -66,7 +56,5 @@ sealed class BrowserEvent : AppEvent {
      *
      * @property disabled true 表示禁用终端，false 表示恢复
      */
-    data class TerminalDisabled(
-        val disabled: Boolean,
-    ) : BrowserEvent()
+    data class TerminalDisabled(val disabled: Boolean) : BrowserEvent()
 }

@@ -19,56 +19,51 @@ object TestDataFactory {
         language: String? = "kotlin",
         isFavorite: Boolean = false,
         fileSize: Long = 100L,
-        lastOpenedAt: Long = System.currentTimeMillis(),
+        lastOpenedAt: Long = System.currentTimeMillis()
     ) = RecentFile(
         uri = uri,
         fileName = fileName,
         language = language,
         lastOpenedAt = lastOpenedAt,
         isFavorite = isFavorite,
-        fileSize = fileSize,
+        fileSize = fileSize
     )
 
     fun createBookmark(
         uri: String = "content://test/file.kt",
         fileName: String = "file.kt",
-        directoryUri: String = "content://test/",
+        directoryUri: String = "content://test/"
     ) = BookmarkEntity(
         uri = uri,
         fileName = fileName,
-        directoryUri = directoryUri,
+        directoryUri = directoryUri
     )
 
     fun createSnippet(
         title: String = "Test Snippet",
         content: String = "fun test() { }",
         language: String? = "kotlin",
-        category: String = "Kotlin",
+        category: String = "Kotlin"
     ) = Snippet(
         title = title,
         content = content,
         language = language,
         category = category,
         createdAt = System.currentTimeMillis(),
-        updatedAt = System.currentTimeMillis(),
+        updatedAt = System.currentTimeMillis()
     )
 
-    fun createUserActivity(
-        date: String = "2026-01-01",
-        fileOpenCount: Int = 0,
-        textEditCount: Int = 0,
-    ) = UserActivity(
+    fun createUserActivity(date: String = "2026-01-01", fileOpenCount: Int = 0, textEditCount: Int = 0) = UserActivity(
         date = date,
         fileOpenCount = fileOpenCount,
-        textEditCount = textEditCount,
+        textEditCount = textEditCount
     )
 
-    fun createRecentFileList(count: Int): List<RecentFile> =
-        (1..count).map { i ->
-            createRecentFile(
-                uri = "content://test/file$i.kt",
-                fileName = "file$i.kt",
-                lastOpenedAt = System.currentTimeMillis() - i * 1000L,
-            )
-        }
+    fun createRecentFileList(count: Int): List<RecentFile> = (1..count).map { i ->
+        createRecentFile(
+            uri = "content://test/file$i.kt",
+            fileName = "file$i.kt",
+            lastOpenedAt = System.currentTimeMillis() - i * 1000L
+        )
+    }
 }

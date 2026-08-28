@@ -30,7 +30,7 @@ data class EditorConfig(
     val charset: String? = null,
     val trimTrailingWhitespace: Boolean? = null,
     val insertFinalNewline: Boolean? = null,
-    val maxLineLength: Int? = null,
+    val maxLineLength: Int? = null
 )
 
 /**
@@ -110,7 +110,7 @@ object EditorConfigParser {
             charset = matchingProps["charset"],
             trimTrailingWhitespace = matchingProps["trim_trailing_whitespace"]?.toBooleanStrictOrNull(),
             insertFinalNewline = matchingProps["insert_final_newline"]?.toBooleanStrictOrNull(),
-            maxLineLength = matchingProps["max_line_length"]?.toIntOrNull(),
+            maxLineLength = matchingProps["max_line_length"]?.toIntOrNull()
         )
     }
 

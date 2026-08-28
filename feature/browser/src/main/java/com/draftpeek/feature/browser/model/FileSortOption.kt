@@ -26,7 +26,7 @@ enum class FileSortOption {
     MODIFIED_ASC,
 
     /** 按类型排序（按扩展名，然后按名称） */
-    TYPE_ASC,
+    TYPE_ASC
 }
 
 /**
@@ -40,38 +40,36 @@ enum class FileSortOption {
  * @param sortOption 排序选项
  * @return 排序后的文件列表
  */
-fun List<FileItem>.sortFiles(sortOption: FileSortOption): List<FileItem> {
-    return when (sortOption) {
-        FileSortOption.NAME_ASC -> sortedWith(
-            compareBy<FileItem> { !it.isPinned }.thenBy { !it.isDirectory }.thenBy { it.name.lowercase() }
+fun List<FileItem>.sortFiles(sortOption: FileSortOption): List<FileItem> = when (sortOption) {
+    FileSortOption.NAME_ASC -> sortedWith(
+        compareBy<FileItem> { !it.isPinned }.thenBy { !it.isDirectory }.thenBy { it.name.lowercase() }
+    )
+    FileSortOption.NAME_DESC -> sortedWith(
+        compareBy<FileItem> { !it.isPinned }.thenBy { !it.isDirectory }.thenByDescending { it.name.lowercase() }
+    )
+    FileSortOption.SIZE_DESC -> sortedWith(
+        compareBy<FileItem> { !it.isPinned }.thenBy { !it.isDirectory }.then(
+            compareByDescending<FileItem> { it.size }.thenBy { it.name.lowercase() }
         )
-        FileSortOption.NAME_DESC -> sortedWith(
-            compareBy<FileItem> { !it.isPinned }.thenBy { !it.isDirectory }.thenByDescending { it.name.lowercase() }
+    )
+    FileSortOption.SIZE_ASC -> sortedWith(
+        compareBy<FileItem> { !it.isPinned }.thenBy { !it.isDirectory }.then(
+            compareBy<FileItem> { it.size }.thenBy { it.name.lowercase() }
         )
-        FileSortOption.SIZE_DESC -> sortedWith(
-            compareBy<FileItem> { !it.isPinned }.thenBy { !it.isDirectory }.then(
-                compareByDescending<FileItem> { it.size }.thenBy { it.name.lowercase() }
-            )
+    )
+    FileSortOption.MODIFIED_DESC -> sortedWith(
+        compareBy<FileItem> { !it.isPinned }.thenBy { !it.isDirectory }.then(
+            compareByDescending<FileItem> { it.lastModified }.thenBy { it.name.lowercase() }
         )
-        FileSortOption.SIZE_ASC -> sortedWith(
-            compareBy<FileItem> { !it.isPinned }.thenBy { !it.isDirectory }.then(
-                compareBy<FileItem> { it.size }.thenBy { it.name.lowercase() }
-            )
+    )
+    FileSortOption.MODIFIED_ASC -> sortedWith(
+        compareBy<FileItem> { !it.isPinned }.thenBy { !it.isDirectory }.then(
+            compareBy<FileItem> { it.lastModified }.thenBy { it.name.lowercase() }
         )
-        FileSortOption.MODIFIED_DESC -> sortedWith(
-            compareBy<FileItem> { !it.isPinned }.thenBy { !it.isDirectory }.then(
-                compareByDescending<FileItem> { it.lastModified }.thenBy { it.name.lowercase() }
-            )
+    )
+    FileSortOption.TYPE_ASC -> sortedWith(
+        compareBy<FileItem> { !it.isPinned }.thenBy { !it.isDirectory }.then(
+            compareBy<FileItem> { it.extension.lowercase() }.thenBy { it.name.lowercase() }
         )
-        FileSortOption.MODIFIED_ASC -> sortedWith(
-            compareBy<FileItem> { !it.isPinned }.thenBy { !it.isDirectory }.then(
-                compareBy<FileItem> { it.lastModified }.thenBy { it.name.lowercase() }
-            )
-        )
-        FileSortOption.TYPE_ASC -> sortedWith(
-            compareBy<FileItem> { !it.isPinned }.thenBy { !it.isDirectory }.then(
-                compareBy<FileItem> { it.extension.lowercase() }.thenBy { it.name.lowercase() }
-            )
-        )
-    }
+    )
 }

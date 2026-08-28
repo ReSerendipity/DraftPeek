@@ -32,7 +32,7 @@ class AddRecentFileUseCaseTest {
                 uri = "content://test/file.kt",
                 fileName = "file.kt",
                 language = "kotlin",
-                fileSize = 1024L,
+                fileSize = 1024L
             )
 
             coVerify {
@@ -47,7 +47,7 @@ class AddRecentFileUseCaseTest {
                 uri = "content://test/file.txt",
                 fileName = "file.txt",
                 language = null,
-                fileSize = 0L,
+                fileSize = 0L
             )
 
             coVerify {

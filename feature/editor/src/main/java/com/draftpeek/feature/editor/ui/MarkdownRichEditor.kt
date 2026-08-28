@@ -80,7 +80,7 @@ fun MarkdownRichEditor(
     markdownContent: String,
     modifier: Modifier = Modifier,
     onContentChanged: ((String) -> Unit)? = null,
-    isDarkTheme: Boolean = false,
+    isDarkTheme: Boolean = false
 ) {
     // 硬性内容大小守卫：超大内容绝不加载到 RichTextState，防止 Constraints 溢出崩溃。
     // 这是最终防线——无论此 Composable 如何进入组合（导航转场动画、状态竞争等），
@@ -88,7 +88,7 @@ fun MarkdownRichEditor(
     if (markdownContent.length > MAX_SAFE_CONTENT_SIZE) {
         LargeContentFallback(
             contentLength = markdownContent.length,
-            modifier = modifier,
+            modifier = modifier
         )
         return
     }
@@ -148,12 +148,12 @@ fun MarkdownRichEditor(
             richTextState = richTextState,
             modifier = Modifier
                 .fillMaxWidth()
-                .padding(horizontal = 8.dp, vertical = 4.dp),
+                .padding(horizontal = 8.dp, vertical = 4.dp)
         )
 
         HorizontalDivider(
             thickness = 1.dp,
-            color = fgSoftColor.copy(alpha = 0.2f),
+            color = fgSoftColor.copy(alpha = 0.2f)
         )
 
         // Rich text editor - use Box to constrain height and prevent overflow
@@ -169,8 +169,8 @@ fun MarkdownRichEditor(
                     .verticalScroll(rememberScrollState())
                     .padding(horizontal = 16.dp, vertical = 8.dp),
                 textStyle = MaterialTheme.typography.bodyLarge.copy(
-                    color = fgColor,
-                ),
+                    color = fgColor
+                )
             )
         }
     }
@@ -186,21 +186,18 @@ fun MarkdownRichEditor(
  * @param modifier 修饰符
  */
 @Composable
-private fun LargeContentFallback(
-    contentLength: Int,
-    modifier: Modifier = Modifier,
-) {
+private fun LargeContentFallback(contentLength: Int, modifier: Modifier = Modifier) {
     val fgSoftColor = PrototypeTokens.fgSoft
     val accentColor = PrototypeTokens.accent
     Box(
         modifier = modifier.fillMaxSize(),
-        contentAlignment = Alignment.Center,
+        contentAlignment = Alignment.Center
     ) {
         Text(
             text = "内容过大（${contentLength / 1000}K 字符），WYSIWYG 模式不可用。\n请使用编辑模式或预览模式。",
             style = MaterialTheme.typography.bodyMedium,
             color = fgSoftColor,
-            modifier = Modifier.padding(24.dp),
+            modifier = Modifier.padding(24.dp)
         )
     }
 }
@@ -244,16 +241,13 @@ private fun safeSetMarkdown(state: RichTextState, markdown: String) {
  * @param modifier 修饰符
  */
 @Composable
-private fun MarkdownRichEditorToolbar(
-    richTextState: RichTextState,
-    modifier: Modifier = Modifier,
-) {
+private fun MarkdownRichEditorToolbar(richTextState: RichTextState, modifier: Modifier = Modifier) {
     val fgSoftColor = PrototypeTokens.fgSoft
     val accentColor = PrototypeTokens.accent
 
     Row(
         modifier = modifier,
-        horizontalArrangement = Arrangement.spacedBy(2.dp),
+        horizontalArrangement = Arrangement.spacedBy(2.dp)
     ) {
         // Bold
         ToolbarButton(
@@ -261,7 +255,7 @@ private fun MarkdownRichEditorToolbar(
             isActive = richTextState.currentSpanStyle.fontWeight == FontWeight.Bold,
             onClick = {
                 richTextState.toggleSpanStyle(SpanStyle(fontWeight = FontWeight.Bold))
-            },
+            }
         )
         // Italic
         ToolbarButton(
@@ -269,7 +263,7 @@ private fun MarkdownRichEditorToolbar(
             isActive = richTextState.currentSpanStyle.fontStyle == FontStyle.Italic,
             onClick = {
                 richTextState.toggleSpanStyle(SpanStyle(fontStyle = FontStyle.Italic))
-            },
+            }
         )
         // Strikethrough
         ToolbarButton(
@@ -278,27 +272,27 @@ private fun MarkdownRichEditorToolbar(
                 ?.contains(TextDecoration.LineThrough) == true,
             onClick = {
                 richTextState.toggleSpanStyle(
-                    SpanStyle(textDecoration = TextDecoration.LineThrough),
+                    SpanStyle(textDecoration = TextDecoration.LineThrough)
                 )
-            },
+            }
         )
         // Code span
         ToolbarButton(
             label = stringResource(R.string.editor_rich_editor_code),
             isActive = richTextState.isCodeSpan,
-            onClick = { richTextState.toggleCodeSpan() },
+            onClick = { richTextState.toggleCodeSpan() }
         )
         // Unordered list
         ToolbarButton(
             label = stringResource(R.string.editor_rich_editor_unordered_list),
             isActive = richTextState.isUnorderedList,
-            onClick = { richTextState.toggleUnorderedList() },
+            onClick = { richTextState.toggleUnorderedList() }
         )
         // Ordered list
         ToolbarButton(
             label = stringResource(R.string.editor_rich_editor_ordered_list),
             isActive = richTextState.isOrderedList,
-            onClick = { richTextState.toggleOrderedList() },
+            onClick = { richTextState.toggleOrderedList() }
         )
     }
 }
@@ -313,25 +307,21 @@ private fun MarkdownRichEditorToolbar(
  * @param onClick 点击回调
  */
 @Composable
-private fun ToolbarButton(
-    label: String,
-    isActive: Boolean,
-    onClick: () -> Unit,
-) {
+private fun ToolbarButton(label: String, isActive: Boolean, onClick: () -> Unit) {
     val fgSoftColor = PrototypeTokens.fgSoft
     val accentColor = PrototypeTokens.accent
 
     TextButton(
         onClick = onClick,
         modifier = Modifier.padding(0.dp),
-        contentPadding = PaddingValues(horizontal = 8.dp, vertical = 2.dp),
+        contentPadding = PaddingValues(horizontal = 8.dp, vertical = 2.dp)
     ) {
         Text(
             text = label,
             style = MaterialTheme.typography.labelMedium.copy(
-                fontWeight = if (isActive) FontWeight.Bold else FontWeight.Normal,
+                fontWeight = if (isActive) FontWeight.Bold else FontWeight.Normal
             ),
-            color = if (isActive) accentColor else fgSoftColor,
+            color = if (isActive) accentColor else fgSoftColor
         )
     }
 }

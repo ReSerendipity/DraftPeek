@@ -45,7 +45,7 @@ data class TerminalSession(
     val config: TerminalConfig,
     val isActive: Boolean = true,
     val title: String = "Shell",
-    val workingDirectory: String = config.workingDirectory,
+    val workingDirectory: String = config.workingDirectory
 )
 
 /**
@@ -54,10 +54,7 @@ data class TerminalSession(
  * @property text 行文本内容
  * @property spans ANSI样式跨度列表
  */
-data class TerminalLine(
-    val text: String,
-    val spans: List<AnsiSpan> = emptyList()
-)
+data class TerminalLine(val text: String, val spans: List<AnsiSpan> = emptyList())
 
 /**
  * 终端行内的样式跨度（ANSI颜色/样式）。
@@ -87,10 +84,22 @@ data class AnsiSpan(
  */
 enum class AnsiColor(val code: Int) {
     DEFAULT(-1),
-    BLACK(0), RED(1), GREEN(2), YELLOW(3),
-    BLUE(4), MAGENTA(5), CYAN(6), WHITE(7),
-    BRIGHT_BLACK(8), BRIGHT_RED(9), BRIGHT_GREEN(10), BRIGHT_YELLOW(11),
-    BRIGHT_BLUE(12), BRIGHT_MAGENTA(13), BRIGHT_CYAN(14), BRIGHT_WHITE(15);
+    BLACK(0),
+    RED(1),
+    GREEN(2),
+    YELLOW(3),
+    BLUE(4),
+    MAGENTA(5),
+    CYAN(6),
+    WHITE(7),
+    BRIGHT_BLACK(8),
+    BRIGHT_RED(9),
+    BRIGHT_GREEN(10),
+    BRIGHT_YELLOW(11),
+    BRIGHT_BLUE(12),
+    BRIGHT_MAGENTA(13),
+    BRIGHT_CYAN(14),
+    BRIGHT_WHITE(15);
 
     companion object {
         /**
@@ -115,9 +124,9 @@ enum class AnsiColor(val code: Int) {
  * @property colors 16色ANSI调色板
  */
 data class TerminalTheme(
-    val background: Long = 0xFF1E1E2E,     // Dark background
-    val foreground: Long = 0xFFCDD6F4,     // Light text
-    val cursor: Long = 0xFFF5E0DC,         // Cursor color
+    val background: Long = 0xFF1E1E2E, // Dark background
+    val foreground: Long = 0xFFCDD6F4, // Light text
+    val cursor: Long = 0xFFF5E0DC, // Cursor color
     val selectionBackground: Long = 0xFF45475A,
     val colors: List<Long> = listOf(
         0xFF1E1E2E, 0xFFF38BA8, 0xFFA6E3A1, 0xFFF9E2AF,

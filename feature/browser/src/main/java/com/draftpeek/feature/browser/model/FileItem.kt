@@ -24,7 +24,7 @@ data class FileItem(
     /** true if this file/directory is not writable (read-only). */
     val isReadOnly: Boolean = false,
     /** true if this file/directory is bookmarked. */
-    val isBookmarked: Boolean = false,
+    val isBookmarked: Boolean = false
 ) {
     val isExternal: Boolean get() = uri.scheme == "content"
 }

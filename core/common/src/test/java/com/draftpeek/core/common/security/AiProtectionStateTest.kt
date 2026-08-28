@@ -20,7 +20,7 @@ class AiProtectionStateTest {
     @Test
     fun `single signal mask roundtrip`() {
         val state = AiProtectionState(
-            triggeredSignals = setOf(AiDetectionSignal.SIGNATURE_MISMATCH),
+            triggeredSignals = setOf(AiDetectionSignal.SIGNATURE_MISMATCH)
         )
         val mask = state.signalsToMask()
         val restored = AiProtectionState.maskToSignals(mask)
@@ -33,7 +33,7 @@ class AiProtectionStateTest {
             AiDetectionSignal.SIGNATURE_MISMATCH,
             AiDetectionSignal.DEX_TAMPERED,
             AiDetectionSignal.HOSTILE_FRIDA_XPOSED,
-            AiDetectionSignal.EMULATOR_ENHANCED_FINGERPRINT,
+            AiDetectionSignal.EMULATOR_ENHANCED_FINGERPRINT
         )
         val state = AiProtectionState(triggeredSignals = signals)
         val mask = state.signalsToMask()
@@ -63,7 +63,7 @@ class AiProtectionStateTest {
         val state = AiProtectionState(
             threatLevel = AiThreatLevel.HOSTILE,
             triggeredSignals = setOf(AiDetectionSignal.SIGNATURE_MISMATCH),
-            responseLevel = AiProtectionState.ResponseLevel.SELF_DEFEND,
+            responseLevel = AiProtectionState.ResponseLevel.SELF_DEFEND
         )
         assertEquals(AiProtectionState.ResponseLevel.SELF_DEFEND, state.responseLevel)
     }

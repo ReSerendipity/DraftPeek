@@ -33,9 +33,7 @@ object LanguageMapper {
      * @param extension 文件扩展名（不含点号，如 "kt"、"py"）
      * @return 语言标识符字符串，无法识别时返回 null
      */
-    fun fromExtension(extension: String): String? {
-        return LanguageConfig.extensionToLanguage(extension)
-    }
+    fun fromExtension(extension: String): String? = LanguageConfig.extensionToLanguage(extension)
 
     /**
      * 便捷重载方法，接受完整文件名（如 "Main.kt"）并返回语言标识符。
@@ -58,7 +56,5 @@ object LanguageMapper {
      * @param languageId 语言ID（如 "kotlin"、"java"）
      * @return TextMate scope name（如 "source.kotlin"），无法识别时返回 null
      */
-    fun toScopeName(languageId: String?): String? {
-        return LanguageConfig.languageToScopeName(languageId)
-    }
+    fun toScopeName(languageId: String?): String? = LanguageConfig.languageToScopeName(languageId)
 }

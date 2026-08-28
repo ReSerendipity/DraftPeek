@@ -117,7 +117,7 @@ object FpsMonitor {
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R) {
             val displayManager =
                 context.getSystemService(Context.DISPLAY_SERVICE)
-                        as? android.hardware.display.DisplayManager
+                    as? android.hardware.display.DisplayManager
                     ?: return 0
             val defaultDisplay = displayManager.getDisplay(Display.DEFAULT_DISPLAY)
             val modes = defaultDisplay.supportedModes

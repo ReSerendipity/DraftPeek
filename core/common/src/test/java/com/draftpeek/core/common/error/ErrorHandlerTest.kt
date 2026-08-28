@@ -7,6 +7,11 @@ import android.net.NetworkCapabilities
 import com.draftpeek.core.common.R
 import io.mockk.every
 import io.mockk.mockk
+import java.io.FileNotFoundException
+import java.io.IOException
+import java.net.SocketTimeoutException
+import java.net.UnknownHostException
+import java.nio.charset.UnsupportedCharsetException
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertFalse
 import org.junit.jupiter.api.Assertions.assertTrue
@@ -14,11 +19,6 @@ import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.DisplayName
 import org.junit.jupiter.api.Nested
 import org.junit.jupiter.api.Test
-import java.io.FileNotFoundException
-import java.io.IOException
-import java.net.SocketTimeoutException
-import java.net.UnknownHostException
-import java.nio.charset.UnsupportedCharsetException
 
 @DisplayName("ErrorHandler")
 class ErrorHandlerTest {

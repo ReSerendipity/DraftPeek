@@ -19,7 +19,6 @@ object AiProtectionStateHolder {
     @Volatile
     var current: AiProtectionState = AiProtectionState()
 
-
     /**
      * 更新当前状态并联动 SecurityGate + 记录事件。
      */

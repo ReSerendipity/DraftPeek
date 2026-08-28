@@ -18,9 +18,7 @@ import javax.inject.Inject
  * 扫描最近文件中指向磁盘上已不存在的内部文件的URI，并删除它们。
  * 这是一个应定期调用的维护操作（例如应用启动时）。
  */
-class RemoveStaleUrisUseCase @Inject constructor(
-    private val repository: RecentFilesRepository,
-) {
+class RemoveStaleUrisUseCase @Inject constructor(private val repository: RecentFilesRepository) {
     /**
      * 执行清理过期URI操作。
      * 获取所有过期URI，如果存在则批量删除。

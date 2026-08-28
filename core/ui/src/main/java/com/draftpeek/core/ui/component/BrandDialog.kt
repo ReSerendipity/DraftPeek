@@ -55,11 +55,11 @@ fun BrandDialog(
     content: @Composable (() -> Unit)? = null,
     confirmButton: @Composable (() -> Unit),
     dismissButton: @Composable (() -> Unit)? = null,
-    shape: RoundedCornerShape = BrandShapes.Dialog,
+    shape: RoundedCornerShape = BrandShapes.Dialog
 ) {
     Dialog(
         onDismissRequest = onDismissRequest,
-        properties = DialogProperties(usePlatformDefaultWidth = false),
+        properties = DialogProperties(usePlatformDefaultWidth = false)
     ) {
         Surface(
             shape = shape,
@@ -67,7 +67,7 @@ fun BrandDialog(
             contentColor = PrototypeTokens.fg,
             modifier = Modifier
                 .fillMaxWidth()
-                .padding(horizontal = 24.dp),
+                .padding(horizontal = 24.dp)
         ) {
             Column(
                 modifier = Modifier
@@ -76,8 +76,8 @@ fun BrandDialog(
                         start = 20.dp,
                         end = 20.dp,
                         top = 24.dp,
-                        bottom = 16.dp,
-                    ),
+                        bottom = 16.dp
+                    )
             ) {
                 title()
 
@@ -90,7 +90,7 @@ fun BrandDialog(
                 Row(
                     modifier = Modifier.fillMaxWidth(),
                     horizontalArrangement = Arrangement.spacedBy(8.dp, Alignment.End),
-                    verticalAlignment = Alignment.CenterVertically,
+                    verticalAlignment = Alignment.CenterVertically
                 ) {
                     if (dismissButton != null) {
                         dismissButton()
@@ -125,7 +125,7 @@ fun BrandDialog(
     confirmLabel: String = "确认",
     isDestructive: Boolean = false,
     onConfirm: () -> Unit,
-    onDismiss: () -> Unit,
+    onDismiss: () -> Unit
 ) {
     BrandDialog(
         onDismissRequest = onDismissRequest,
@@ -133,29 +133,29 @@ fun BrandDialog(
             Text(
                 text = title,
                 style = MaterialTheme.typography.titleMedium.copy(
-                    fontWeight = FontWeight.SemiBold,
+                    fontWeight = FontWeight.SemiBold
                 ),
-                color = PrototypeTokens.fg,
+                color = PrototypeTokens.fg
             )
         },
         content = {
             Text(
                 text = message,
                 style = DialogBodyStyle,
-                color = PrototypeTokens.fgSoft,
+                color = PrototypeTokens.fgSoft
             )
         },
         confirmButton = {
             BrandFilledButton(
                 text = confirmLabel,
-                onClick = onConfirm,
+                onClick = onConfirm
             )
         },
         dismissButton = {
             BrandOutlinedButton(
                 text = "取消",
-                onClick = onDismiss,
+                onClick = onDismiss
             )
-        },
+        }
     )
 }

@@ -13,23 +13,26 @@ package com.draftpeek.core.common.update
 
 import android.content.Context
 import android.util.Log
+import java.io.IOException
+import java.util.concurrent.TimeUnit
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.withContext
 import okhttp3.OkHttpClient
 import okhttp3.Request
 import org.json.JSONObject
-import java.io.IOException
-import java.util.concurrent.TimeUnit
 
 private const val TAG = "UpdateChecker"
 
 /** 连接超时（秒） */
 private const val CONNECT_TIMEOUT_S = 10L
+
 /** 读取超时（秒） */
 private const val READ_TIMEOUT_S = 10L
+
 /** 最大重试次数 */
 private const val MAX_RETRIES = 2
+
 /** 初始重试延迟（毫秒） */
 private const val INITIAL_RETRY_DELAY_MS = 2000L
 
@@ -45,7 +48,7 @@ sealed class UpdateResult {
         val latestVersion: String,
         val downloadUrl: String?,
         val releaseNotes: String,
-        val htmlUrl: String,
+        val htmlUrl: String
     ) : UpdateResult()
 
     /** 当前版本已是最新。 */
@@ -109,7 +112,7 @@ object UpdateChecker {
         owner: String,
         repo: String,
         currentVersion: String,
-        forceRefresh: Boolean = false,
+        forceRefresh: Boolean = false
     ): UpdateResult = withContext(Dispatchers.IO) {
         // 检查缓存
         if (!forceRefresh) {
@@ -217,7 +220,7 @@ object UpdateChecker {
         currentVersion: String,
         downloadUrl: String?,
         htmlUrl: String?,
-        releaseNotes: String = "",
+        releaseNotes: String = ""
     ): UpdateResult {
         val comparison = compareVersions(latestVersion, currentVersion)
         return if (comparison > 0) {
@@ -225,7 +228,7 @@ object UpdateChecker {
                 latestVersion = latestVersion,
                 downloadUrl = downloadUrl,
                 releaseNotes = releaseNotes,
-                htmlUrl = htmlUrl ?: "",
+                htmlUrl = htmlUrl ?: ""
             )
         } else {
             UpdateResult.UpToDate

@@ -5,14 +5,12 @@ import com.draftpeek.feature.terminal.emulator.ProotSessionManager
 import com.draftpeek.feature.terminal.emulator.ProotSetupState
 import com.draftpeek.feature.terminal.emulator.TerminalKey
 import com.draftpeek.feature.terminal.emulator.TerminalSessionManager
-import com.draftpeek.feature.terminal.model.TerminalConfig
 import com.draftpeek.feature.terminal.model.TerminalSession
 import com.draftpeek.feature.terminal.model.TerminalTheme
 import io.mockk.every
 import io.mockk.mockk
 import io.mockk.verify
 import kotlinx.coroutines.flow.MutableStateFlow
-import kotlinx.coroutines.test.runTest
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertFalse
 import org.junit.jupiter.api.Assertions.assertNotNull
@@ -118,7 +116,7 @@ class TerminalViewModelTest {
     fun setThemeUpdatesState() {
         val newTheme = TerminalTheme(
             background = 0xFF000000,
-            foreground = 0xFFFFFFFF,
+            foreground = 0xFFFFFFFF
         )
         viewModel.setTheme(newTheme)
         assertEquals(0xFF000000, viewModel.theme.value.background)

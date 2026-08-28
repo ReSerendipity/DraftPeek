@@ -19,7 +19,6 @@ import java.util.concurrent.ConcurrentHashMap
 import java.util.concurrent.atomic.AtomicInteger
 import kotlin.math.max
 import kotlin.math.min
-import kotlin.system.measureNanoTime
 
 private const val TAG = "PerfBenchmark"
 
@@ -46,11 +45,7 @@ object PerformanceBenchmark {
      * @property durationNanos 耗时（纳秒）
      * @property timestamp 时间戳（毫秒）
      */
-    data class Measurement(
-        val name: String,
-        val durationNanos: Long,
-        val timestamp: Long,
-    )
+    data class Measurement(val name: String, val durationNanos: Long, val timestamp: Long)
 
     /**
      * 内存快照数据类，捕获某一时刻的堆内存使用情况。
@@ -66,12 +61,14 @@ object PerformanceBenchmark {
         val heapUsedBytes: Long,
         val heapMaxBytes: Long,
         val nativeHeapBytes: Long,
-        val timestamp: Long,
+        val timestamp: Long
     ) {
         /** 已使用堆内存（MB） */
         val heapUsedMB: Float get() = heapUsedBytes / (1024f * 1024f)
+
         /** 最大堆内存（MB） */
         val heapMaxMB: Float get() = heapMaxBytes / (1024f * 1024f)
+
         /** 原生堆内存（MB） */
         val nativeHeapMB: Float get() = nativeHeapBytes / (1024f * 1024f)
     }
@@ -90,7 +87,7 @@ object PerformanceBenchmark {
         val currentMs: Long,
         val baselineMs: Long,
         val regressionPercent: Double,
-        val timestamp: Long,
+        val timestamp: Long
     )
 
     /**
@@ -148,10 +145,7 @@ object PerformanceBenchmark {
      * @param block 要测量的挂起代码块
      * @return 代码块的返回值和执行时间（毫秒）的Pair
      */
-    inline suspend fun <T> measureSuspend(
-        name: String,
-        crossinline block: suspend () -> T,
-    ): Pair<T, Long> {
+    suspend inline fun <T> measureSuspend(name: String, crossinline block: suspend () -> T): Pair<T, Long> {
         startTimer(name)
         val result = block()
         val elapsed = endTimer(name)
@@ -198,7 +192,7 @@ object PerformanceBenchmark {
             val errors = errorCounts[name]?.get() ?: 0
             val successes = successCounts[name]?.get() ?: 0
             val total = errors + successes
-            val errorRate = if (total > 0) "errors=$errors (${"%.1f".format(errors.toDouble()/total*100)}%)" else ""
+            val errorRate = if (total > 0) "errors=$errors (${"%.1f".format(errors.toDouble() / total * 100)}%)" else ""
             Log.i(
                 TAG,
                 "[$name] avg=${avg}ms, max=${maxVal}ms, min=${minVal}ms (n=${measurements.size}) $errorRate"
@@ -304,7 +298,7 @@ object PerformanceBenchmark {
         "search_in_files" to 3000,
         "diagnostic_analysis" to 1000,
         "markdown_render" to 500,
-        "diff_compute" to 2000,
+        "diff_compute" to 2000
     )
 
     /**
@@ -313,12 +307,10 @@ object PerformanceBenchmark {
      * @param context 应用上下文
      * @return 设备信息字符串
      */
-    fun getDeviceInfo(context: android.content.Context): String {
-        return buildString {
-            append("Build.MODEL=").append(Build.MODEL).append(", ")
-            append("SDK_INT=").append(Build.VERSION.SDK_INT).append(", ")
-            append("maxRefreshRate=").append(FpsMonitor.getMaxRefreshRate(context)).append("Hz")
-        }
+    fun getDeviceInfo(context: android.content.Context): String = buildString {
+        append("Build.MODEL=").append(Build.MODEL).append(", ")
+        append("SDK_INT=").append(Build.VERSION.SDK_INT).append(", ")
+        append("maxRefreshRate=").append(FpsMonitor.getMaxRefreshRate(context)).append("Hz")
     }
 
     /**
@@ -339,11 +331,14 @@ object PerformanceBenchmark {
             heapUsedBytes = heapUsed,
             heapMaxBytes = heapMax,
             nativeHeapBytes = nativeHeap,
-            timestamp = System.currentTimeMillis(),
+            timestamp = System.currentTimeMillis()
         )
 
         memorySnapshots.computeIfAbsent(tag) { mutableListOf() }.add(snapshot)
-        Log.d(TAG, "[Memory:$tag] heap=${snapshot.heapUsedMB}MB/${snapshot.heapMaxMB}MB, native=${snapshot.nativeHeapMB}MB")
+        Log.d(
+            TAG,
+            "[Memory:$tag] heap=${snapshot.heapUsedMB}MB/${snapshot.heapMaxMB}MB, native=${snapshot.nativeHeapMB}MB"
+        )
         return snapshot
     }
 
@@ -390,7 +385,7 @@ object PerformanceBenchmark {
         val throughputBytesPerSec = totalBytes / (avgDurationNanos / 1_000_000_000.0)
         val throughputMBps = throughputBytesPerSec / (1024.0 * 1024.0)
 
-        Log.d(TAG, "[IO:Read] ${file.name}: ${"%.1f".format(throughputMBps)}MB/s (${iterations} iterations)")
+        Log.d(TAG, "[IO:Read] ${file.name}: ${"%.1f".format(throughputMBps)}MB/s ($iterations iterations)")
         return throughputMBps
     }
 
@@ -419,7 +414,7 @@ object PerformanceBenchmark {
         val throughputBytesPerSec = totalBytes / (avgDurationNanos / 1_000_000_000.0)
         val throughputMBps = throughputBytesPerSec / (1024.0 * 1024.0)
 
-        Log.d(TAG, "[IO:Write] ${file.name}: ${"%.1f".format(throughputMBps)}MB/s (${iterations} iterations)")
+        Log.d(TAG, "[IO:Write] ${file.name}: ${"%.1f".format(throughputMBps)}MB/s ($iterations iterations)")
         return throughputMBps
     }
 
@@ -443,10 +438,13 @@ object PerformanceBenchmark {
                 currentMs = avgMs,
                 baselineMs = baselineMs,
                 regressionPercent = regressionPercent,
-                timestamp = System.currentTimeMillis(),
+                timestamp = System.currentTimeMillis()
             )
             regressionLog.add(entry)
-            Log.w(TAG, "[REGRESSION] $name: ${avgMs}ms vs baseline ${baselineMs}ms (+${"%.1f".format(regressionPercent)}%)")
+            Log.w(
+                TAG,
+                "[REGRESSION] $name: ${avgMs}ms vs baseline ${baselineMs}ms (+${"%.1f".format(regressionPercent)}%)"
+            )
             return true
         }
         return false

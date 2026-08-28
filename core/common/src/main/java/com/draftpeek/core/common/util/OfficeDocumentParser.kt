@@ -11,6 +11,11 @@
 package com.draftpeek.core.common.util
 
 import android.util.Log
+import java.io.ByteArrayInputStream
+import java.io.InputStream
+import java.io.PrintStream
+import java.io.SequenceInputStream
+import java.util.concurrent.locks.ReentrantLock
 import org.apache.poi.hslf.usermodel.HSLFSlideShow
 import org.apache.poi.hslf.usermodel.HSLFTextShape
 import org.apache.poi.hwpf.HWPFDocument
@@ -19,11 +24,6 @@ import org.apache.poi.ss.usermodel.WorkbookFactory
 import org.apache.poi.xslf.usermodel.XMLSlideShow
 import org.apache.poi.xslf.usermodel.XSLFTextShape
 import org.apache.poi.xwpf.usermodel.XWPFDocument
-import java.io.ByteArrayInputStream
-import java.io.InputStream
-import java.io.PrintStream
-import java.io.SequenceInputStream
-import java.util.concurrent.locks.ReentrantLock
 
 private const val TAG = "OfficeDocumentParser"
 
@@ -39,8 +39,14 @@ private val stderrLock = ReentrantLock()
 
 /** OLE2（旧版Office二进制格式）魔数 */
 private val OLE2_MAGIC = byteArrayOf(
-    0xD0.toByte(), 0xCF.toByte(), 0x11.toByte(), 0xE0.toByte(),
-    0xA1.toByte(), 0xB1.toByte(), 0x1A.toByte(), 0xE1.toByte(),
+    0xD0.toByte(),
+    0xCF.toByte(),
+    0x11.toByte(),
+    0xE0.toByte(),
+    0xA1.toByte(),
+    0xB1.toByte(),
+    0x1A.toByte(),
+    0xE1.toByte()
 )
 
 /** ZIP/OOXML格式魔数（"PK"） */
@@ -55,8 +61,7 @@ private fun ByteArray.isOle2Header(): Boolean =
 /**
  * 判断字节数组是否为ZIP/OOXML格式头。
  */
-private fun ByteArray.isZipHeader(): Boolean =
-    size >= 2 && this[0] == ZIP_MAGIC[0] && this[1] == ZIP_MAGIC[1]
+private fun ByteArray.isZipHeader(): Boolean = size >= 2 && this[0] == ZIP_MAGIC[0] && this[1] == ZIP_MAGIC[1]
 
 /**
  * Office文档解析工具对象。
@@ -76,9 +81,11 @@ object OfficeDocumentParser {
         stderrLock.lock()
         val originalErr = System.err
         return try {
-            System.setErr(PrintStream(object : java.io.OutputStream() {
-                override fun write(b: Int) {}
-            }))
+            System.setErr(
+                PrintStream(object : java.io.OutputStream() {
+                    override fun write(b: Int) {}
+                })
+            )
             block()
         } finally {
             System.setErr(originalErr)
@@ -126,128 +133,130 @@ object OfficeDocumentParser {
     /**
      * 解析OOXML格式Word文档（.docx）为HTML。
      */
-    private fun parseWordOoxml(wrappedStream: InputStream, isDark: Boolean): String {
-        return try {
-            withStderrSilenced {
-                XWPFDocument(wrappedStream).use { doc ->
-                    val html = StringBuilder()
-                    html.append(buildHtmlHeader(isDark))
+    private fun parseWordOoxml(wrappedStream: InputStream, isDark: Boolean): String = try {
+        withStderrSilenced {
+            XWPFDocument(wrappedStream).use { doc ->
+                val html = StringBuilder()
+                html.append(buildHtmlHeader(isDark))
 
-                    val hasContent = doc.paragraphs.any { it.text.isNotBlank() } || doc.tables.isNotEmpty()
-                    if (!hasContent) {
-                        html.appendLine(emptyContentHtml("文档内容为空", isDark))
-                    } else {
-                        for (paragraph in doc.paragraphs) {
-                            val text = paragraph.text
-                            if (text.isNotBlank()) {
-                                val style = paragraph.style
-                                val tag = when {
-                                    style?.contains("Heading") == true -> "h2"
-                                    style?.contains("Title") == true -> "h1"
-                                    else -> "p"
-                                }
-                                html.appendLine("<$tag>${escapeHtml(text)}</$tag>")
+                val hasContent = doc.paragraphs.any { it.text.isNotBlank() } || doc.tables.isNotEmpty()
+                if (!hasContent) {
+                    html.appendLine(emptyContentHtml("文档内容为空", isDark))
+                } else {
+                    for (paragraph in doc.paragraphs) {
+                        val text = paragraph.text
+                        if (text.isNotBlank()) {
+                            val style = paragraph.style
+                            val tag = when {
+                                style?.contains("Heading") == true -> "h2"
+                                style?.contains("Title") == true -> "h1"
+                                else -> "p"
                             }
-                        }
-
-                        for (table in doc.tables) {
-                            html.appendLine("<table>")
-                            for (row in table.rows) {
-                                html.appendLine("<tr>")
-                                for (cell in row.tableCells) {
-                                    html.appendLine("<td>${escapeHtml(cell.text)}</td>")
-                                }
-                                html.appendLine("</tr>")
-                            }
-                            html.appendLine("</table>")
+                            html.appendLine("<$tag>${escapeHtml(text)}</$tag>")
                         }
                     }
 
-                    html.append(getHtmlFooter())
-                    html.toString()
+                    for (table in doc.tables) {
+                        html.appendLine("<table>")
+                        for (row in table.rows) {
+                            html.appendLine("<tr>")
+                            for (cell in row.tableCells) {
+                                html.appendLine("<td>${escapeHtml(cell.text)}</td>")
+                            }
+                            html.appendLine("</tr>")
+                        }
+                        html.appendLine("</table>")
+                    }
                 }
+
+                html.append(getHtmlFooter())
+                html.toString()
             }
-        } catch (e: Throwable) {
-            Log.w(TAG, "Failed to parse Word (.docx) document", e)
-            getErrorHtml(isDark, "无法解析 Word 文件", mapWordErrorMessage(e))
         }
+    } catch (e: Throwable) {
+        Log.w(TAG, "Failed to parse Word (.docx) document", e)
+        getErrorHtml(isDark, "无法解析 Word 文件", mapWordErrorMessage(e))
     }
 
     /**
      * 解析旧版二进制格式Word文档（.doc）为HTML。
      */
-    private fun parseWordLegacy(wrappedStream: InputStream, isDark: Boolean): String {
-        return try {
-            withStderrSilenced {
-                HWPFDocument(wrappedStream).use { doc ->
-                    val html = StringBuilder()
-                    html.append(buildHtmlHeader(isDark))
+    private fun parseWordLegacy(wrappedStream: InputStream, isDark: Boolean): String = try {
+        withStderrSilenced {
+            HWPFDocument(wrappedStream).use { doc ->
+                val html = StringBuilder()
+                html.append(buildHtmlHeader(isDark))
 
-                    val range = doc.range
-                    val styleSheet = doc.styleSheet
-                    val numParagraphs = range.numParagraphs()
-                    var i = 0
-                    var hasContent = false
+                val range = doc.range
+                val styleSheet = doc.styleSheet
+                val numParagraphs = range.numParagraphs()
+                var i = 0
+                var hasContent = false
 
-                    while (i < numParagraphs) {
-                        val paragraph = try {
-                            range.getParagraph(i)
-                        } catch (e: Exception) {
-                            i++
-                            continue
-                        }
-
-                        if (paragraph.isInTable) {
-                            try {
-                                val table = range.getTable(paragraph)
-                                html.appendLine("<table>")
-                                for (rowIdx in 0 until table.numRows()) {
-                                    val row = table.getRow(rowIdx)
-                                    html.appendLine("<tr>")
-                                    for (cellIdx in 0 until row.numCells()) {
-                                        val cellText = try {
-                                            row.getCell(cellIdx).text()
-                                        } catch (e: Exception) { "" }
-                                        val tag = if (rowIdx == 0) "th" else "td"
-                                        html.appendLine("<$tag>${escapeHtml(cellText)}</$tag>")
-                                    }
-                                    html.appendLine("</tr>")
-                                }
-                                html.appendLine("</table>")
-                                hasContent = true
-                                val tableParagraphs = table.numParagraphs().coerceAtLeast(1)
-                                i += tableParagraphs
-                                continue
-                            } catch (e: Exception) {
-                                Log.w(TAG, "HWPF table extraction failed, falling back", e)
-                            }
-                        }
-
-                        val text = try {
-                            paragraph.text()
-                        } catch (e: Exception) { "" }
-                        if (text.isNotBlank()) {
-                            val tag = try {
-                                resolveHwpfParagraphTag(paragraph, styleSheet)
-                            } catch (e: Exception) { "p" }
-                            html.appendLine("<$tag>${escapeHtml(text)}</$tag>")
-                            hasContent = true
-                        }
+                while (i < numParagraphs) {
+                    val paragraph = try {
+                        range.getParagraph(i)
+                    } catch (e: Exception) {
                         i++
+                        continue
                     }
 
-                    if (!hasContent) {
-                        html.appendLine(emptyContentHtml("文档内容为空", isDark))
+                    if (paragraph.isInTable) {
+                        try {
+                            val table = range.getTable(paragraph)
+                            html.appendLine("<table>")
+                            for (rowIdx in 0 until table.numRows()) {
+                                val row = table.getRow(rowIdx)
+                                html.appendLine("<tr>")
+                                for (cellIdx in 0 until row.numCells()) {
+                                    val cellText = try {
+                                        row.getCell(cellIdx).text()
+                                    } catch (e: Exception) {
+                                        ""
+                                    }
+                                    val tag = if (rowIdx == 0) "th" else "td"
+                                    html.appendLine("<$tag>${escapeHtml(cellText)}</$tag>")
+                                }
+                                html.appendLine("</tr>")
+                            }
+                            html.appendLine("</table>")
+                            hasContent = true
+                            val tableParagraphs = table.numParagraphs().coerceAtLeast(1)
+                            i += tableParagraphs
+                            continue
+                        } catch (e: Exception) {
+                            Log.w(TAG, "HWPF table extraction failed, falling back", e)
+                        }
                     }
 
-                    html.append(getHtmlFooter())
-                    html.toString()
+                    val text = try {
+                        paragraph.text()
+                    } catch (e: Exception) {
+                        ""
+                    }
+                    if (text.isNotBlank()) {
+                        val tag = try {
+                            resolveHwpfParagraphTag(paragraph, styleSheet)
+                        } catch (e: Exception) {
+                            "p"
+                        }
+                        html.appendLine("<$tag>${escapeHtml(text)}</$tag>")
+                        hasContent = true
+                    }
+                    i++
                 }
+
+                if (!hasContent) {
+                    html.appendLine(emptyContentHtml("文档内容为空", isDark))
+                }
+
+                html.append(getHtmlFooter())
+                html.toString()
             }
-        } catch (e: Throwable) {
-            Log.w(TAG, "Failed to parse Word (.doc) document", e)
-            getErrorHtml(isDark, "无法解析 Word 文件", mapWordErrorMessage(e))
         }
+    } catch (e: Throwable) {
+        Log.w(TAG, "Failed to parse Word (.doc) document", e)
+        getErrorHtml(isDark, "无法解析 Word 文件", mapWordErrorMessage(e))
     }
 
     /**
@@ -255,14 +264,16 @@ object OfficeDocumentParser {
      */
     private fun resolveHwpfParagraphTag(
         paragraph: org.apache.poi.hwpf.usermodel.Paragraph,
-        styleSheet: org.apache.poi.hwpf.model.StyleSheet?,
+        styleSheet: org.apache.poi.hwpf.model.StyleSheet?
     ): String {
         if (styleSheet == null) return "p"
         val styleIdx = paragraph.styleIndex
         if (styleIdx < 0) return "p"
         val description = try {
             styleSheet.getStyleDescription(styleIdx.toInt())
-        } catch (e: Exception) { null } ?: return "p"
+        } catch (e: Exception) {
+            null
+        } ?: return "p"
         val name = description.name ?: return "p"
         return when {
             name.contains("Heading", ignoreCase = true) -> "h2"
@@ -275,29 +286,25 @@ object OfficeDocumentParser {
      * 统一POI异常错误消息映射。
      * 消除Word/Excel/PowerPoint解析器中重复的错误消息逻辑。
      */
-    private fun mapPoiErrorMessage(
-        docTypeLabel: String,
-        e: Throwable,
-        vararg additionalKeywords: String,
-    ): String = when {
-        e is OutOfMemoryError -> "内存不足，文件过大"
-        e.message?.contains("password", ignoreCase = true) == true ->
-            "${docTypeLabel}已加密，无法打开"
-        e.message?.contains("corrupt", ignoreCase = true) == true ||
-        e.message?.contains("invalid", ignoreCase = true) == true ||
-        additionalKeywords.any { kw -> e.message?.contains(kw, ignoreCase = true) == true } ->
-            "文件已损坏或格式无效"
-        e is NoClassDefFoundError || e is ExceptionInInitializerError ||
-        e.message?.contains("Class", ignoreCase = true) == true ->
-            "库初始化失败，请尝试更新应用"
-        else -> "解析失败: ${e.message}"
-    }
+    private fun mapPoiErrorMessage(docTypeLabel: String, e: Throwable, vararg additionalKeywords: String): String =
+        when {
+            e is OutOfMemoryError -> "内存不足，文件过大"
+            e.message?.contains("password", ignoreCase = true) == true ->
+                "${docTypeLabel}已加密，无法打开"
+            e.message?.contains("corrupt", ignoreCase = true) == true ||
+                e.message?.contains("invalid", ignoreCase = true) == true ||
+                additionalKeywords.any { kw -> e.message?.contains(kw, ignoreCase = true) == true } ->
+                "文件已损坏或格式无效"
+            e is NoClassDefFoundError ||
+                e is ExceptionInInitializerError ||
+                e.message?.contains("Class", ignoreCase = true) == true ->
+                "库初始化失败，请尝试更新应用"
+            else -> "解析失败: ${e.message}"
+        }
 
-    private fun mapWordErrorMessage(e: Throwable): String =
-        mapPoiErrorMessage("文档", e, "ZIP")
+    private fun mapWordErrorMessage(e: Throwable): String = mapPoiErrorMessage("文档", e, "ZIP")
 
-    private fun mapPresentationErrorMessage(e: Throwable): String =
-        mapPoiErrorMessage("演示文稿", e)
+    private fun mapPresentationErrorMessage(e: Throwable): String = mapPoiErrorMessage("演示文稿", e)
 
     /**
      * 解析Excel文档（.xlsx）为HTML表格。
@@ -335,13 +342,23 @@ object OfficeDocumentParser {
                                         CellType.STRING -> cell.stringCellValue
                                         CellType.NUMERIC -> {
                                             val num = cell.numericCellValue
-                                            if (num == num.toLong().toDouble()) num.toLong().toString() else num.toString()
+                                            if (num ==
+                                                num.toLong().toDouble()
+                                            ) {
+                                                num.toLong().toString()
+                                            } else {
+                                                num.toString()
+                                            }
                                         }
                                         CellType.BOOLEAN -> cell.booleanCellValue.toString()
                                         CellType.FORMULA -> try {
                                             cell.stringCellValue
                                         } catch (e: Exception) {
-                                            try { cell.numericCellValue.toString() } catch (e2: Exception) { "" }
+                                            try {
+                                                cell.numericCellValue.toString()
+                                            } catch (e2: Exception) {
+                                                ""
+                                            }
                                         }
                                         else -> ""
                                     }
@@ -360,8 +377,11 @@ object OfficeDocumentParser {
             }
         } catch (e: Throwable) {
             Log.w(TAG, "Failed to parse Excel document", e)
-            getErrorHtml(isDark, "无法解析 Excel 文件",
-                mapPoiErrorMessage("工作簿", e, "encrypt", "Record"))
+            getErrorHtml(
+                isDark,
+                "无法解析 Excel 文件",
+                mapPoiErrorMessage("工作簿", e, "encrypt", "Record")
+            )
         }
     }
 
@@ -390,49 +410,45 @@ object OfficeDocumentParser {
     /**
      * 解析OOXML格式PowerPoint文档（.pptx）为HTML。
      */
-    private fun parsePowerPointOoxml(wrappedStream: InputStream, isDark: Boolean): String {
-        return try {
-            withStderrSilenced {
-                XMLSlideShow(wrappedStream).use { slideShow ->
-                    renderSlides(
-                        slides = slideShow.slides,
-                        isDark = isDark,
-                        getShapes = { it.shapes },
-                        extractTextLines = { shape ->
-                            (shape as? XSLFTextShape)?.textParagraphs?.map { p -> p.text }
-                        },
-                    )
-                }
+    private fun parsePowerPointOoxml(wrappedStream: InputStream, isDark: Boolean): String = try {
+        withStderrSilenced {
+            XMLSlideShow(wrappedStream).use { slideShow ->
+                renderSlides(
+                    slides = slideShow.slides,
+                    isDark = isDark,
+                    getShapes = { it.shapes },
+                    extractTextLines = { shape ->
+                        (shape as? XSLFTextShape)?.textParagraphs?.map { p -> p.text }
+                    }
+                )
             }
-        } catch (e: Throwable) {
-            Log.w(TAG, "Failed to parse PowerPoint (.pptx) document", e)
-            getErrorHtml(isDark, "无法解析 PowerPoint 文件", mapPresentationErrorMessage(e))
         }
+    } catch (e: Throwable) {
+        Log.w(TAG, "Failed to parse PowerPoint (.pptx) document", e)
+        getErrorHtml(isDark, "无法解析 PowerPoint 文件", mapPresentationErrorMessage(e))
     }
 
     /**
      * 解析旧版二进制格式PowerPoint文档（.ppt）为HTML。
      */
-    private fun parsePowerPointLegacy(wrappedStream: InputStream, isDark: Boolean): String {
-        return try {
-            withStderrSilenced {
-                HSLFSlideShow(wrappedStream).use { slideShow ->
-                    renderSlides(
-                        slides = slideShow.slides.toList(),
-                        isDark = isDark,
-                        getShapes = { slide -> slide.shapes.toList() },
-                        extractTextLines = { shape ->
-                            (shape as? HSLFTextShape)?.textParagraphs?.map { para ->
-                                para.textRuns.joinToString("") { it.rawText }
-                            }
-                        },
-                    )
-                }
+    private fun parsePowerPointLegacy(wrappedStream: InputStream, isDark: Boolean): String = try {
+        withStderrSilenced {
+            HSLFSlideShow(wrappedStream).use { slideShow ->
+                renderSlides(
+                    slides = slideShow.slides.toList(),
+                    isDark = isDark,
+                    getShapes = { slide -> slide.shapes.toList() },
+                    extractTextLines = { shape ->
+                        (shape as? HSLFTextShape)?.textParagraphs?.map { para ->
+                            para.textRuns.joinToString("") { it.rawText }
+                        }
+                    }
+                )
             }
-        } catch (e: Throwable) {
-            Log.w(TAG, "Failed to parse PowerPoint (.ppt) document", e)
-            getErrorHtml(isDark, "无法解析 PowerPoint 文件", mapPresentationErrorMessage(e))
         }
+    } catch (e: Throwable) {
+        Log.w(TAG, "Failed to parse PowerPoint (.ppt) document", e)
+        getErrorHtml(isDark, "无法解析 PowerPoint 文件", mapPresentationErrorMessage(e))
     }
 
     /**
@@ -443,7 +459,7 @@ object OfficeDocumentParser {
         slides: List<S>,
         isDark: Boolean,
         getShapes: (S) -> List<SH>,
-        extractTextLines: (SH) -> List<String>?,
+        extractTextLines: (SH) -> List<String>?
     ): String {
         val html = StringBuilder()
         html.append(buildHtmlHeader(isDark))
@@ -460,7 +476,9 @@ object OfficeDocumentParser {
                 for (shape in getShapes(slide)) {
                     val lines = try {
                         extractTextLines(shape)
-                    } catch (e: Exception) { null }
+                    } catch (e: Exception) {
+                        null
+                    }
                     if (lines != null) {
                         for (text in lines) {
                             if (text.isNotBlank()) {
@@ -502,9 +520,16 @@ object OfficeDocumentParser {
         } else {
             listOf("#ffffff", "#333", "#1a1a1a", "#333", "#555", "#2563eb", "#f5f5f5", "#ddd", "#fafafa", "#eee")
         }
-        val bg = colors[0]; val text = colors[1]; val h1 = colors[2]; val h2 = colors[3]
-        val h3 = colors[4]; val border = colors[5]; val thBg = colors[6]; val thBorder = colors[7]
-        val slideBg = colors[8]; val hrColor = colors[9]
+        val bg = colors[0]
+        val text = colors[1]
+        val h1 = colors[2]
+        val h2 = colors[3]
+        val h3 = colors[4]
+        val border = colors[5]
+        val thBg = colors[6]
+        val thBorder = colors[7]
+        val slideBg = colors[8]
+        val hrColor = colors[9]
         return """<!DOCTYPE html>
 <html><head><meta charset="UTF-8">
 <style>
@@ -546,8 +571,7 @@ object OfficeDocumentParser {
         """.trimIndent()
     }
 
-    private fun getErrorHtml(isDark: Boolean, message: String): String =
-        getErrorHtml(isDark, "文件解析失败", message)
+    private fun getErrorHtml(isDark: Boolean, message: String): String = getErrorHtml(isDark, "文件解析失败", message)
 
     /**
      * HTML转义特殊字符，防止XSS。

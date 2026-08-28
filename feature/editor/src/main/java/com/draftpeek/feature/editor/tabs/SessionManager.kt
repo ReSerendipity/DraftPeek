@@ -16,6 +16,8 @@ import androidx.datastore.preferences.core.edit
 import androidx.datastore.preferences.core.stringPreferencesKey
 import androidx.datastore.preferences.preferencesDataStore
 import com.draftpeek.core.common.model.TabId
+import javax.inject.Inject
+import javax.inject.Singleton
 import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
@@ -27,8 +29,6 @@ import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.launch
 import org.json.JSONArray
 import org.json.JSONObject
-import javax.inject.Inject
-import javax.inject.Singleton
 
 private val Context.sessionDataStore by preferencesDataStore(name = "editor_session")
 private val KEY_SESSION_JSON = stringPreferencesKey("session_json")
@@ -59,7 +59,7 @@ private val KEY_SESSION_JSON = stringPreferencesKey("session_json")
 @Singleton
 class SessionManager @Inject constructor(
     private val tabManager: TabManager,
-    private val tabStateManager: TabStateManager,
+    private val tabStateManager: TabStateManager
 ) {
 
     companion object {
@@ -82,6 +82,7 @@ class SessionManager @Inject constructor(
     private var saveJob: Job? = null
 
     private val _isRestored = MutableStateFlow(false)
+
     /** 会话是否已恢复的 StateFlow */
     val isRestored: StateFlow<Boolean> = _isRestored.asStateFlow()
 
@@ -130,8 +131,8 @@ class SessionManager @Inject constructor(
                             cursorLine = tab.cursorLine,
                             cursorColumn = tab.cursorColumn,
                             scrollX = tab.scrollX,
-                            scrollY = tab.scrollY,
-                        ),
+                            scrollY = tab.scrollY
+                        )
                     )
                 }
                 Log.i(TAG, "Restored session: ${data.tabs.size} tabs, active=${data.activeTabId}")
@@ -169,12 +170,12 @@ class SessionManager @Inject constructor(
                                 cursorLine = state.cursorLine,
                                 cursorColumn = state.cursorColumn,
                                 scrollX = state.scrollX,
-                                scrollY = state.scrollY,
+                                scrollY = state.scrollY
                             )
                         } else {
                             tab
                         }
-                    },
+                    }
                 )
                 val json = serializeSessionData(enrichedData)
                 ctx.sessionDataStore.edit { prefs ->
@@ -260,7 +261,7 @@ class SessionManager @Inject constructor(
                     cursorLine = tabObj.optInt(KEY_CURSOR_LINE, 1),
                     cursorColumn = tabObj.optInt(KEY_CURSOR_COLUMN, 1),
                     scrollX = tabObj.optInt(KEY_SCROLL_X, 0),
-                    scrollY = tabObj.optInt(KEY_SCROLL_Y, 0),
+                    scrollY = tabObj.optInt(KEY_SCROLL_Y, 0)
                 )
             }
             return SessionData(tabs = tabs, activeTabId = activeTabId)

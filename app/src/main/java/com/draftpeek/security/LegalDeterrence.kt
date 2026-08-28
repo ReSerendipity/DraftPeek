@@ -24,12 +24,9 @@
 package com.draftpeek.security
 
 import android.app.Application
-import android.app.Notification
 import android.app.NotificationChannel
 import android.app.NotificationManager
-import android.app.PendingIntent
 import android.content.Context
-import android.content.Intent
 import android.media.RingtoneManager
 import android.os.VibrationEffect
 import android.os.Vibrator
@@ -62,7 +59,7 @@ object LegalDeterrence {
         LOCKED,
 
         /** 高级：检测到篡改 APK */
-        TAMPERED_APK,
+        TAMPERED_APK
     }
 
     /** 当前 resumed Activity 的弱引用（通过 ActivityLifecycleCallbacks 获取）。
@@ -87,18 +84,12 @@ object LegalDeterrence {
                 }
             }
 
-            override fun onActivityCreated(
-                activity: android.app.Activity,
-                savedInstanceState: android.os.Bundle?,
-            ) {
+            override fun onActivityCreated(activity: android.app.Activity, savedInstanceState: android.os.Bundle?) {
             }
 
             override fun onActivityStarted(activity: android.app.Activity) {}
             override fun onActivityStopped(activity: android.app.Activity) {}
-            override fun onActivitySaveInstanceState(
-                activity: android.app.Activity,
-                outState: android.os.Bundle,
-            ) {
+            override fun onActivitySaveInstanceState(activity: android.app.Activity, outState: android.os.Bundle) {
             }
 
             override fun onActivityDestroyed(activity: android.app.Activity) {}
@@ -141,10 +132,10 @@ object LegalDeterrence {
 
         val title = activity.getString(titleResId)
         val message = com.draftpeek.core.common.security.AiEthicalNotice
-            .LEGAL_CONSEQUENCES_TEXT[getCurrentLanguageTag()] ?:
-            com.draftpeek.core.common.security.AiEthicalNotice
-                .LEGAL_CONSEQUENCES_TEXT["en-US"] ?:
-            com.draftpeek.core.common.security.AiEthicalNotice
+            .LEGAL_CONSEQUENCES_TEXT[getCurrentLanguageTag()]
+            ?: com.draftpeek.core.common.security.AiEthicalNotice
+                .LEGAL_CONSEQUENCES_TEXT["en-US"]
+            ?: com.draftpeek.core.common.security.AiEthicalNotice
                 .LEGAL_CONSEQUENCES_TEXT["zh-CN"] ?: ""
 
         // 简化实现：通过系统 Notification 展示法律警告
@@ -166,7 +157,7 @@ object LegalDeterrence {
         val channel = NotificationChannel(
             CHANNEL_ID,
             context.getString(R.string.security_notification_channel_security_status),
-            NotificationManager.IMPORTANCE_LOW,
+            NotificationManager.IMPORTANCE_LOW
         ).apply {
             description = context.getString(R.string.security_notification_channel_security_status)
             setShowBadge(false)
@@ -241,12 +232,7 @@ object LegalDeterrence {
         }
     }
 
-    private fun showWarningNotification(
-        context: Context,
-        title: String,
-        message: String,
-        severity: Severity,
-    ) {
+    private fun showWarningNotification(context: Context, title: String, message: String, severity: Severity) {
         val notificationManager = context.getSystemService(Context.NOTIFICATION_SERVICE)
             as? NotificationManager ?: return
 
@@ -254,7 +240,7 @@ object LegalDeterrence {
         val channel = NotificationChannel(
             CHANNEL_ID,
             context.getString(R.string.security_notification_channel_security_status),
-            NotificationManager.IMPORTANCE_HIGH,
+            NotificationManager.IMPORTANCE_HIGH
         )
         notificationManager.createNotificationChannel(channel)
 

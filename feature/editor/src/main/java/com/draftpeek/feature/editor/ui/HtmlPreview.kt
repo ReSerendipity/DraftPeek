@@ -17,10 +17,8 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Transform
-import androidx.compose.material3.FloatingActionButton
 import androidx.compose.material3.Icon
 import androidx.compose.material3.SmallFloatingActionButton
-import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.getValue
@@ -55,7 +53,7 @@ fun HtmlPreview(
     htmlContent: String,
     modifier: Modifier = Modifier,
     darkTheme: Boolean = false,
-    onConvertToMarkdown: (() -> Unit)? = null,
+    onConvertToMarkdown: (() -> Unit)? = null
 ) {
     val pageBg = PrototypeTokens.pageBackground
     val surfaceColor = PrototypeTokens.surface
@@ -74,7 +72,7 @@ fun HtmlPreview(
     Box(
         modifier = modifier
             .fillMaxSize()
-            .background(pageBg),
+            .background(pageBg)
     ) {
         AndroidView(
             factory = { context ->
@@ -87,7 +85,7 @@ fun HtmlPreview(
             update = { view ->
                 view.setBackgroundColor(surfaceColor.toArgb())
                 WebViewStyleHelper.loadHtml(view, styledHtml)
-            },
+            }
         )
 
         // Convert to Markdown FAB
@@ -97,11 +95,11 @@ fun HtmlPreview(
                 modifier = Modifier
                     .align(Alignment.BottomEnd)
                     .padding(16.dp),
-                containerColor = surfaceColor,
+                containerColor = surfaceColor
             ) {
                 Icon(
                     imageVector = Icons.Filled.Transform,
-                    contentDescription = stringResource(R.string.editor_convert_html_to_markdown),
+                    contentDescription = stringResource(R.string.editor_convert_html_to_markdown)
                 )
             }
         }
@@ -121,12 +119,7 @@ fun HtmlPreview(
  * @return 添加了样式的 HTML 字符串
  */
 @Composable
-private fun rememberStyledHtml(
-    htmlContent: String,
-    darkTheme: Boolean,
-    surfaceColor: Color,
-    fgColor: Color,
-): String {
+private fun rememberStyledHtml(htmlContent: String, darkTheme: Boolean, surfaceColor: Color, fgColor: Color): String {
     if (!darkTheme) return htmlContent
     val surfaceHex = surfaceColor.toHexString()
     val fgHex = fgColor.toHexString()

@@ -30,15 +30,15 @@ import com.draftpeek.core.common.util.DeferredInitializer
 import com.draftpeek.core.data.repository.SecurityEventRepository
 import com.draftpeek.logging.AppLogger
 import com.draftpeek.security.AiDetector
-import com.draftpeek.core.common.security.AiProtectionStateHolder
 import com.draftpeek.security.AiResponseExecutor
 import com.draftpeek.security.AntiDebug
 import com.draftpeek.security.ApkIntegrityChecker
 import com.draftpeek.security.DexIntegrityChecker
 import com.draftpeek.security.LegalDeterrence
-
 import com.draftpeek.security.SecurityIntegrityChecker
 import dagger.hilt.android.HiltAndroidApp
+import java.util.Locale
+import javax.inject.Inject
 import kotlinx.coroutines.CoroutineExceptionHandler
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
@@ -46,8 +46,6 @@ import kotlinx.coroutines.SupervisorJob
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.launch
-import java.util.Locale
-import javax.inject.Inject
 import timber.log.Timber
 
 /**
@@ -114,9 +112,11 @@ class DraftPeekApp : Application() {
         // ════════════════════════════════════════════════════════════════
         AppLogger.init(
             this,
-            isDebug = (applicationInfo.flags and
-                android.content.pm.ApplicationInfo.FLAG_DEBUGGABLE) != 0,
-            versionCode = BuildConfig.VERSION_CODE,
+            isDebug = (
+                applicationInfo.flags and
+                    android.content.pm.ApplicationInfo.FLAG_DEBUGGABLE
+                ) != 0,
+            versionCode = BuildConfig.VERSION_CODE
         )
 
         // ════════════════════════════════════════════════════════════════
@@ -310,10 +310,13 @@ class DraftPeekApp : Application() {
         appScope.launch(Dispatchers.Default) {
             try {
                 val state = AiDetector.assess(this@DraftPeekApp)
-                Timber.i("AI protection assessment: threatLevel=${state.threatLevel}, signals=${state.triggeredSignals}")
+                Timber.i(
+                    "AI protection assessment: threatLevel=${state.threatLevel}, signals=${state.triggeredSignals}"
+                )
 
                 // 更新通知栏状态
-                val isOfficial = com.draftpeek.core.common.security.AiDetectionSignal.SIGNATURE_MISMATCH !in state.triggeredSignals
+                val isOfficial =
+                    com.draftpeek.core.common.security.AiDetectionSignal.SIGNATURE_MISMATCH !in state.triggeredSignals
                 LegalDeterrence.updateSignatureVerificationNotification(this@DraftPeekApp, isOfficial)
 
                 // 执行响应（非 SAFE 时）

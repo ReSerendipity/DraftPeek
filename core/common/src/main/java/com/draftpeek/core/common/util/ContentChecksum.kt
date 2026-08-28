@@ -58,7 +58,5 @@ object ContentChecksum {
      * @param previousChecksum 之前存储的CRC32校验和
      * @return 如果内容与基线不同返回`true`，否则返回`false`
      */
-    fun hasChanged(content: String, previousChecksum: Long): Boolean {
-        return crc32(content) != previousChecksum
-    }
+    fun hasChanged(content: String, previousChecksum: Long): Boolean = crc32(content) != previousChecksum
 }

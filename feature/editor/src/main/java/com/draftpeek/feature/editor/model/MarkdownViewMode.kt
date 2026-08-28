@@ -20,10 +20,13 @@ package com.draftpeek.feature.editor.model
 enum class MarkdownViewMode {
     /** 编辑模式：直接编辑 Markdown 源码 */
     EDIT,
+
     /** 预览模式：只读渲染预览 */
     PREVIEW,
+
     /** 分屏模式：左右分屏，编辑与预览同步 */
     SPLIT,
+
     /** 所见即所得模式：带行内格式化提示 */
     WYSIWYG
 }
