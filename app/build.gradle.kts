@@ -25,6 +25,9 @@ android {
         minSdk = libs.versions.minSdk.get().toInt()
         targetSdk = libs.versions.targetSdk.get().toInt()
 
+        // 为缺少 beta 构建类型的依赖模块指定缺失维度策略
+        missingDimensionStrategy("com.android.build.api.attributes.BuildTypeAttr", "debug", "release")
+
         // Version management: centralized in gradle.properties
         // versionCode: Integer, must increase monotonically with each release
         // versionName: Major.Minor.Patch format
