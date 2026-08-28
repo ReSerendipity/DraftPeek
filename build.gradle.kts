@@ -72,12 +72,22 @@ subprojects {
         }
     }
 
-    // 禁用 MissingTranslation 和 ExtraTranslation lint 检查
-    // 因为默认语言是中文，不需要所有字符串都翻译成所有语言
+    // 为所有子模块添加 beta 构建类型，以匹配 app 模块的构建类型
     plugins.withId("com.android.library") {
         configure<com.android.build.gradle.LibraryExtension> {
+            // 禁用 MissingTranslation 和 ExtraTranslation lint 检查
             lint {
                 disable += setOf("MissingTranslation", "ExtraTranslation")
+            }
+
+            // 添加 beta 构建类型
+            if (buildTypes.findByName("beta") == null) {
+                buildTypes {
+                    create("beta") {
+                        initWith(buildTypes.getByName("release"))
+                        isMinifyEnabled = false
+                    }
+                }
             }
         }
     }
