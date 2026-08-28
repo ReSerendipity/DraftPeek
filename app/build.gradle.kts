@@ -114,8 +114,6 @@ android {
             signingConfig = signingConfigs.getByName("debug")
             buildConfigField("boolean", "IS_BETA", "true")
             buildConfigField("String", "BUILD_CHANNEL", "\"beta\"")
-            // 为缺少 beta 构建类型的依赖模块指定缺失维度策略
-            missingDimensionStrategy("BuildTypeAttr", "debug")
         }
     }
 
