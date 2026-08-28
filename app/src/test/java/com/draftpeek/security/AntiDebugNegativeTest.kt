@@ -202,7 +202,7 @@ class AntiDebugNegativeTest {
         )
         assertTrue(
             "Xposed detection should include EdXposed (SandHook)",
-            expectedXposedClasses.any { it.contains("SandHook") }
+            expectedXposedClasses.any { it.contains("sandhook", ignoreCase = true) }
         )
     }
 
