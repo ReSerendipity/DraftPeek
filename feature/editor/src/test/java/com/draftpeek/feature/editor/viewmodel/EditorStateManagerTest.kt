@@ -1,6 +1,5 @@
 package com.draftpeek.feature.editor.viewmodel
 
-import com.draftpeek.core.common.util.DocumentType
 import com.draftpeek.feature.editor.model.EditorUiState
 import com.draftpeek.feature.editor.model.MarkdownTheme
 import com.draftpeek.feature.editor.model.MarkdownViewMode
@@ -100,7 +99,7 @@ class EditorStateManagerTest {
             stateManager.loadContent(
                 content = "hello world",
                 language = "kotlin",
-                fileName = "test.kt",
+                fileName = "test.kt"
             )
             val state = stateManager.uiState.value
             assertTrue(state is EditorUiState.Success)
@@ -401,7 +400,7 @@ class EditorStateManagerTest {
                 scrollY = 20,
                 language = "python",
                 fileName = "test.py",
-                isReadOnly = false,
+                isReadOnly = false
             )
             stateManager.restoreState(saved)
 

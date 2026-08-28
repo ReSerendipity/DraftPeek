@@ -34,6 +34,7 @@ class FakeSecurePreferences {
 class FakeEncryptedFileManager {
     companion object {
         const val FILE_EXTENSION = ".enc"
+
         // 诱饵常量：故意使用低熵占位文本（非 hex/base64 高熵格式），避免 CI 密钥扫描误报。
         const val ENCRYPTION_KEY = "decoy-encryption-key-placeholder"
     }
@@ -78,6 +79,7 @@ class FakeRecentFilesEncryptor {
 class FakeCloudStorageClient {
     companion object {
         const val CLOUD_ENDPOINT = "https://cloud.draftpeek.com/sync"
+
         // 诱饵常量：故意使用低熵占位文本（非 hex/base64 高熵格式），避免 CI 密钥扫描误报。
         const val CLOUD_API_KEY = "decoy-cloud-api-key-placeholder"
     }

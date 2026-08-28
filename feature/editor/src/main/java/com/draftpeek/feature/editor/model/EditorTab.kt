@@ -30,5 +30,5 @@ data class EditorTab(
     val uri: String,
     val fileName: String,
     val language: String?,
-    val isModified: Boolean = false,
+    val isModified: Boolean = false
 )

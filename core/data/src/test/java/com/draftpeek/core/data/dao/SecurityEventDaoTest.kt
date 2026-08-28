@@ -38,7 +38,7 @@ class SecurityEventDaoTest {
     private fun createEvent(
         eventType: String = "DETECTION",
         threatLevel: String = "SUSPICIOUS",
-        timestampEpochMs: Long = System.currentTimeMillis(),
+        timestampEpochMs: Long = System.currentTimeMillis()
     ) = SecurityEventEntity(
         eventType = eventType,
         threatLevel = threatLevel,
@@ -46,7 +46,7 @@ class SecurityEventDaoTest {
         responseLevel = "WARNING",
         timestampEpochMs = timestampEpochMs,
         anonymizedDeviceId = "anon-123",
-        appVersionCode = 29,
+        appVersionCode = 29
     )
 
     @Test

@@ -31,12 +31,7 @@ import com.draftpeek.core.ui.theme.PrototypeTokens
  * @param onClick Called when the chip is tapped.
  */
 @Composable
-fun BrandChip(
-    text: String,
-    selected: Boolean,
-    onClick: () -> Unit,
-    modifier: Modifier = Modifier,
-) {
+fun BrandChip(text: String, selected: Boolean, onClick: () -> Unit, modifier: Modifier = Modifier) {
     val bgColor = if (selected) PrototypeTokens.accent else PrototypeTokens.surface
     val textColor = if (selected) Color.White else PrototypeTokens.fgSoft
     val borderColor = if (selected) PrototypeTokens.accent else PrototypeTokens.border
@@ -50,15 +45,15 @@ fun BrandChip(
             .clickable(
                 interactionSource = remember { MutableInteractionSource() },
                 indication = null,
-                onClick = onClick,
+                onClick = onClick
             )
             .padding(horizontal = PrototypeSpacing.ChipPaddingH),
-        contentAlignment = Alignment.Center,
+        contentAlignment = Alignment.Center
     ) {
         Text(
             text = text,
             style = ChipTextStyle,
-            color = textColor,
+            color = textColor
         )
     }
 }
@@ -72,12 +67,7 @@ fun BrandChip(
  * @param onClick Called when the chip is tapped.
  */
 @Composable
-fun BrandFilterChip(
-    text: String,
-    selected: Boolean,
-    onClick: () -> Unit,
-    modifier: Modifier = Modifier,
-) {
+fun BrandFilterChip(text: String, selected: Boolean, onClick: () -> Unit, modifier: Modifier = Modifier) {
     val bgColor = if (selected) PrototypeTokens.accentSoft else PrototypeTokens.surface
     val textColor = if (selected) PrototypeTokens.accent else PrototypeTokens.muted
     val borderColor = if (selected) PrototypeTokens.accent else PrototypeTokens.border
@@ -91,16 +81,16 @@ fun BrandFilterChip(
             .clickable(
                 interactionSource = remember { MutableInteractionSource() },
                 indication = null,
-                onClick = onClick,
+                onClick = onClick
             )
             .padding(horizontal = 12.dp),
-        contentAlignment = Alignment.Center,
+        contentAlignment = Alignment.Center
     ) {
         Text(
             text = text,
             style = ChipTextStyle.copy(fontSize = 11.sp),
             color = textColor,
-            fontFamily = ChipTextStyle.fontFamily,
+            fontFamily = ChipTextStyle.fontFamily
         )
     }
 }

@@ -79,7 +79,7 @@ fun YearHeatmapNew(
     activities: Map<String, UserActivity>,
     onDayClick: (LocalDate) -> Unit,
     modifier: Modifier = Modifier,
-    isDark: Boolean = LocalDarkTheme.current,
+    isDark: Boolean = LocalDarkTheme.current
 ) {
     val today = LocalDate.now()
     val currentYear = today.year
@@ -98,7 +98,7 @@ fun YearHeatmapNew(
             accent.copy(alpha = 0.15f),
             accent.copy(alpha = 0.30f),
             accent.copy(alpha = 0.55f),
-            accent.copy(alpha = 0.80f),
+            accent.copy(alpha = 0.80f)
         )
     }
 
@@ -136,9 +136,13 @@ fun YearHeatmapNew(
             if (weekStart.year != currentYear) continue
             val ym = YearMonth.from(weekStart)
             val prevWeekMonth = if (weekIdx > 0) {
-                YearMonth.from(startDate.plusDays(((weekIdx - 1) * 7L))
-                    .with(TemporalAdjusters.previousOrSame(DayOfWeek.MONDAY)))
-            } else null
+                YearMonth.from(
+                    startDate.plusDays(((weekIdx - 1) * 7L))
+                        .with(TemporalAdjusters.previousOrSame(DayOfWeek.MONDAY))
+                )
+            } else {
+                null
+            }
             if (ym != prevWeekMonth) {
                 labels.add(weekIdx to "${ym.monthValue}月")
             }
@@ -168,22 +172,22 @@ fun YearHeatmapNew(
                 modifier = Modifier
                     .fillMaxWidth()
                     .padding(horizontal = 8.dp),
-                verticalAlignment = Alignment.Top,
+                verticalAlignment = Alignment.Top
             ) {
                 WeekdayLabelsColumn(
                     cellSize = cellSize,
                     cellSpacing = cellSpacing,
-                    labelWidth = weekdayLabelWidth,
+                    labelWidth = weekdayLabelWidth
                 )
 
                 Box(
-                    modifier = Modifier.horizontalScroll(scrollState),
+                    modifier = Modifier.horizontalScroll(scrollState)
                 ) {
                     Column {
                         Box(
                             modifier = Modifier
                                 .width(cellStep * totalWeeks)
-                                .height(monthLabelHeight),
+                                .height(monthLabelHeight)
                         ) {
                             monthLabels.forEach { (weekIdx, label) ->
                                 Text(
@@ -191,18 +195,18 @@ fun YearHeatmapNew(
                                     fontFamily = JetBrainsMonoFontFamily,
                                     fontSize = 11.sp,
                                     color = PrototypeTokens.muted,
-                                    modifier = Modifier.offset(x = cellStep * weekIdx),
+                                    modifier = Modifier.offset(x = cellStep * weekIdx)
                                 )
                             }
                         }
 
                         Box {
                             Row(
-                                horizontalArrangement = Arrangement.spacedBy(cellSpacing),
+                                horizontalArrangement = Arrangement.spacedBy(cellSpacing)
                             ) {
                                 for (weekIdx in 0 until totalWeeks) {
                                     Column(
-                                        verticalArrangement = Arrangement.spacedBy(cellSpacing),
+                                        verticalArrangement = Arrangement.spacedBy(cellSpacing)
                                     ) {
                                         for (dayIdx in 0 until 7) {
                                             val date = startDate.plusDays((weekIdx * 7 + dayIdx).toLong())
@@ -242,19 +246,23 @@ fun YearHeatmapNew(
                                                             Modifier
                                                                 .pressScaleEffect()
                                                                 .clickable(
-                                                                    interactionSource = remember { MutableInteractionSource() },
+                                                                    interactionSource = remember {
+                                                                        MutableInteractionSource()
+                                                                    },
                                                                     indication = null,
-                                                                    onClick = { onDayClick(date) },
+                                                                    onClick = { onDayClick(date) }
                                                                 )
-                                                        } else Modifier
+                                                        } else {
+                                                            Modifier
+                                                        }
                                                     ),
-                                                contentAlignment = Alignment.Center,
+                                                contentAlignment = Alignment.Center
                                             ) {
                                                 Text(
                                                     text = "${date.dayOfMonth}",
                                                     fontFamily = JetBrainsMonoFontFamily,
                                                     fontSize = 11.sp,
-                                                    color = textColor,
+                                                    color = textColor
                                                 )
                                             }
                                         }
@@ -309,11 +317,11 @@ fun YearHeatmapNew(
 
                                 val strokeW = 1.dp.toPx()
                                 val dash = PathEffect.dashPathEffect(
-                                    floatArrayOf(4.dp.toPx(), 3.dp.toPx()),
+                                    floatArrayOf(4.dp.toPx(), 3.dp.toPx())
                                 )
                                 val style = androidx.compose.ui.graphics.drawscope.Stroke(
                                     width = strokeW,
-                                    pathEffect = dash,
+                                    pathEffect = dash
                                 )
 
                                 drawPath(path = vertPath, color = Color(0xFFE04050), style = style)
@@ -331,13 +339,13 @@ fun YearHeatmapNew(
                     .fillMaxWidth()
                     .padding(horizontal = 8.dp),
                 verticalAlignment = Alignment.CenterVertically,
-                horizontalArrangement = Arrangement.End,
+                horizontalArrangement = Arrangement.End
             ) {
                 Text(
                     text = stringResource(R.string.stats_less),
                     fontFamily = JetBrainsMonoFontFamily,
                     fontSize = 10.sp,
-                    color = PrototypeTokens.muted,
+                    color = PrototypeTokens.muted
                 )
                 Spacer(modifier = Modifier.width(6.dp))
                 repeat(5) { idx ->
@@ -345,7 +353,7 @@ fun YearHeatmapNew(
                         modifier = Modifier
                             .size(cellSize.coerceAtMost(18.dp))
                             .clip(RoundedCornerShape(2.dp))
-                            .background(heatColors[idx]),
+                            .background(heatColors[idx])
                     )
                     if (idx < 4) Spacer(modifier = Modifier.width(3.dp))
                 }
@@ -354,7 +362,7 @@ fun YearHeatmapNew(
                     text = stringResource(R.string.stats_more),
                     fontFamily = JetBrainsMonoFontFamily,
                     fontSize = 10.sp,
-                    color = PrototypeTokens.muted,
+                    color = PrototypeTokens.muted
                 )
             }
         }
@@ -371,15 +379,11 @@ fun YearHeatmapNew(
  * @param labelWidth 标签列宽度
  */
 @Composable
-private fun WeekdayLabelsColumn(
-    cellSize: Dp,
-    cellSpacing: Dp,
-    labelWidth: Dp,
-) {
+private fun WeekdayLabelsColumn(cellSize: Dp, cellSpacing: Dp, labelWidth: Dp) {
     val labels = listOf("一", "", "三", "", "五", "", "日")
 
     Column(
-        verticalArrangement = Arrangement.spacedBy(cellSpacing),
+        verticalArrangement = Arrangement.spacedBy(cellSpacing)
     ) {
         Spacer(modifier = Modifier.height(18.dp))
 
@@ -387,14 +391,14 @@ private fun WeekdayLabelsColumn(
             Box(
                 modifier = Modifier
                     .size(labelWidth, cellSize),
-                contentAlignment = Alignment.CenterEnd,
+                contentAlignment = Alignment.CenterEnd
             ) {
                 if (label.isNotEmpty()) {
                     Text(
                         text = label,
                         fontFamily = JetBrainsMonoFontFamily,
                         fontSize = 11.sp,
-                        color = PrototypeTokens.muted,
+                        color = PrototypeTokens.muted
                     )
                 }
             }

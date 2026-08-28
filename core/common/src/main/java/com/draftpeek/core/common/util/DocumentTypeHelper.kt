@@ -9,10 +9,6 @@
  */
 package com.draftpeek.core.common.util
 
-import android.content.Context
-import android.content.Intent
-import android.net.Uri
-
 /**
  * 文档类型工具对象。
  *
@@ -23,17 +19,36 @@ object DocumentTypeHelper {
 
     /** Android BitmapFactory支持的图片文件扩展名集合 */
     private val IMAGE_EXTENSIONS = setOf(
-        "png", "jpg", "jpeg", "gif", "webp", "bmp",
+        "png",
+        "jpg",
+        "jpeg",
+        "gif",
+        "webp",
+        "bmp"
     )
 
     /** 音频文件扩展名集合 */
     private val AUDIO_EXTENSIONS = setOf(
-        "mp3", "wav", "ogg", "flac", "aac", "m4a", "wma", "opus",
+        "mp3",
+        "wav",
+        "ogg",
+        "flac",
+        "aac",
+        "m4a",
+        "wma",
+        "opus"
     )
 
     /** 视频文件扩展名集合 */
     private val VIDEO_EXTENSIONS = setOf(
-        "mp4", "mkv", "webm", "avi", "mov", "3gp", "m4v", "flv",
+        "mp4",
+        "mkv",
+        "webm",
+        "avi",
+        "mov",
+        "3gp",
+        "m4v",
+        "flv"
     )
 
     /**
@@ -51,7 +66,7 @@ object DocumentTypeHelper {
         "keystore", "jks", "p12", "pfx", "cer", "der", "pub", "key",
         "nib", "storyboard", "xib", "plist", "mobileprovision",
         "proto", "pb",
-        "thmx", "fnt", "fon", "suit", "sdf",
+        "thmx", "fnt", "fon", "suit", "sdf"
     )
 
     /**
@@ -130,16 +145,22 @@ object DocumentTypeHelper {
 enum class DocumentType {
     /** PDF文档 */
     PDF,
+
     /** Word文档（.doc/.docx） */
     WORD,
+
     /** Excel表格（.xls/.xlsx） */
     EXCEL,
+
     /** PowerPoint演示文稿（.ppt/.pptx） */
     POWERPOINT,
+
     /** 图片文件 */
     IMAGE,
+
     /** 音频文件 */
     AUDIO,
+
     /** 视频文件 */
-    VIDEO,
+    VIDEO
 }

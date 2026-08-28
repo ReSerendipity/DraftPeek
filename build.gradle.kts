@@ -1,6 +1,3 @@
-import com.android.build.api.dsl.CommonExtension
-import org.gradle.api.tasks.testing.logging.TestLogEvent
-
 plugins {
     alias(libs.plugins.android.application) apply false
     alias(libs.plugins.android.library) apply false
@@ -19,7 +16,7 @@ spotless {
         targetExclude(
             "**/build/**",
             "**/.gradle/**",
-            "**/generated/**",
+            "**/generated/**"
         )
         ktlint(libs.versions.ktlint.get())
             .editorConfigOverride(
@@ -27,7 +24,15 @@ spotless {
                     "ktlint_code_style" to "android_studio",
                     "indent_size" to "4",
                     "max_line_length" to "120",
-                ),
+                    "ktlint_function_naming_ignore_when_annotated_with" to "Composable",
+                    "ktlint_standard_max-line-length" to "disabled",
+                    "ktlint_standard_no-wildcard-imports" to "disabled",
+                    "ktlint_standard_filename" to "disabled",
+                    "ktlint_standard_backing-property-naming" to "disabled",
+                    "ktlint_standard_value-parameter-comment" to "disabled",
+                    "ktlint_standard_no-empty-file" to "disabled",
+                    "ktlint_standard_property-naming" to "disabled"
+                )
             )
         trimTrailingWhitespace()
         endWithNewline()
@@ -36,15 +41,15 @@ spotless {
         target("**/*.kts")
         targetExclude(
             "**/build/**",
-            "**/.gradle/**",
+            "**/.gradle/**"
         )
         ktlint(libs.versions.ktlint.get())
             .editorConfigOverride(
                 mapOf(
                     "ktlint_code_style" to "android_studio",
                     "indent_size" to "4",
-                    "max_line_length" to "120",
-                ),
+                    "max_line_length" to "120"
+                )
             )
         trimTrailingWhitespace()
         endWithNewline()
@@ -55,11 +60,11 @@ spotless {
 subprojects {
     plugins.withType<com.android.build.gradle.LibraryPlugin> {
         apply(plugin = "jacoco")
-        
+
         tasks.withType<JacocoReport> {
             group = "verification"
             description = "Generate JaCoCo coverage report"
-            
+
             reports {
                 xml.required.set(true)
                 html.required.set(true)
@@ -103,7 +108,9 @@ tasks.register("bumpVersion") {
 
         val newVersionCode = newMajor * 10000 + newMinor * 100 + newPatch
         val newVersionName = "$newMajor.$newMinor.$newPatch"
-        println("Version bumped: $currentMajor.$currentMinor.$currentPatch → $newVersionName (versionCode=$newVersionCode)")
+        println(
+            "Version bumped: $currentMajor.$currentMinor.$currentPatch → $newVersionName (versionCode=$newVersionCode)"
+        )
         println("Remember to:")
         println("  1. Update CHANGELOG.md with the new version entry")
         println("  2. Commit the changes: git add gradle.properties CHANGELOG.md")

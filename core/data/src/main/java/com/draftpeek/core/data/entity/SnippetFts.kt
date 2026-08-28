@@ -32,7 +32,4 @@ import androidx.room.Fts4
  */
 @Fts4(contentEntity = Snippet::class)
 @Entity(tableName = "snippets_fts")
-data class SnippetFts(
-    val title: String,
-    val content: String,
-)
+data class SnippetFts(val title: String, val content: String)

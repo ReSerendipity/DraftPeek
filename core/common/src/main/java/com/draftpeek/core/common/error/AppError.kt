@@ -31,10 +31,7 @@ sealed class AppError {
      * @property messageResId 本地化消息资源ID
      * @property cause 原始异常对象，可为空
      */
-    data class Network(
-        override val messageResId: Int,
-        val cause: Throwable? = null
-    ) : AppError()
+    data class Network(override val messageResId: Int, val cause: Throwable? = null) : AppError()
 
     /**
      * 文件操作错误。
@@ -46,11 +43,7 @@ sealed class AppError {
      * @property operation 发生错误的操作类型
      * @property messageResId 本地化消息资源ID
      */
-    data class FileOperation(
-        val fileType: FileType,
-        val operation: FileOp,
-        override val messageResId: Int
-    ) : AppError()
+    data class FileOperation(val fileType: FileType, val operation: FileOp, override val messageResId: Int) : AppError()
 
     /**
      * 输入验证错误。
@@ -61,10 +54,7 @@ sealed class AppError {
      * @property field 发生验证错误的字段名称
      * @property messageResId 本地化消息资源ID
      */
-    data class Validation(
-        val field: String,
-        override val messageResId: Int
-    ) : AppError()
+    data class Validation(val field: String, override val messageResId: Int) : AppError()
 
     /**
      * 解析错误。
@@ -74,10 +64,7 @@ sealed class AppError {
      * @property source 解析来源标识（如 "encoding"、"json"、"url" 等）
      * @property messageResId 本地化消息资源ID
      */
-    data class Parse(
-        val source: String,
-        override val messageResId: Int
-    ) : AppError()
+    data class Parse(val source: String, override val messageResId: Int) : AppError()
 
     /**
      * 未知或系统错误。
@@ -87,10 +74,7 @@ sealed class AppError {
      * @property messageResId 本地化消息资源ID
      * @property cause 原始异常对象，可为空
      */
-    data class Unknown(
-        override val messageResId: Int,
-        val cause: Throwable? = null
-    ) : AppError()
+    data class Unknown(override val messageResId: Int, val cause: Throwable? = null) : AppError()
 }
 
 /**
@@ -101,16 +85,22 @@ sealed class AppError {
 enum class FileType {
     /** 文本文件 */
     TEXT,
+
     /** 图片文件 */
     IMAGE,
+
     /** 音频文件 */
     AUDIO,
+
     /** 视频文件 */
     VIDEO,
+
     /** Office文档（Word/Excel/PPT） */
     OFFICE,
+
     /** PDF文档 */
     PDF,
+
     /** 其他类型文件 */
     OTHER
 }
@@ -123,12 +113,16 @@ enum class FileType {
 enum class FileOp {
     /** 文件读取操作 */
     READ,
+
     /** 文件写入操作 */
     WRITE,
+
     /** 文件删除操作 */
     DELETE,
+
     /** 文件创建操作 */
     CREATE,
+
     /** 文件导出操作 */
     EXPORT
 }

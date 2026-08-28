@@ -39,8 +39,14 @@ data class FontOption(
 object FontOptions {
     private val JetBrainsMono = FontFamily(
         androidx.compose.ui.text.font.Font(com.draftpeek.core.designsystem.R.font.jetbrains_mono_regular),
-        androidx.compose.ui.text.font.Font(com.draftpeek.core.designsystem.R.font.jetbrains_mono_medium, FontWeight.Medium),
-        androidx.compose.ui.text.font.Font(com.draftpeek.core.designsystem.R.font.jetbrains_mono_semibold, FontWeight.SemiBold),
+        androidx.compose.ui.text.font.Font(
+            com.draftpeek.core.designsystem.R.font.jetbrains_mono_medium,
+            FontWeight.Medium
+        ),
+        androidx.compose.ui.text.font.Font(
+            com.draftpeek.core.designsystem.R.font.jetbrains_mono_semibold,
+            FontWeight.SemiBold
+        )
     )
 
     val allOptions: List<FontOption> = listOf(
@@ -131,6 +137,7 @@ object FontOptions {
 
     /** 默认代码字体：JetBrains Mono */
     val defaultCodeFont: FontOption = allOptions.first { it.id == "jetbrains_mono" }
+
     /** 默认UI字体：Inter */
     val defaultUiFont: FontOption = allOptions.first { it.id == "inter" }
 
@@ -139,27 +146,21 @@ object FontOptions {
      * @param id 字体ID
      * @return 找到的字体选项，未找到时返回默认代码字体
      */
-    fun getById(id: String): FontOption {
-        return allOptions.find { it.id == id } ?: defaultCodeFont
-    }
+    fun getById(id: String): FontOption = allOptions.find { it.id == id } ?: defaultCodeFont
 
     /**
      * 根据ID查找代码字体选项。
      * @param id 字体ID
      * @return 找到的字体选项，未找到时返回默认代码字体
      */
-    fun getCodeFontById(id: String): FontOption {
-        return codeFonts.find { it.id == id } ?: defaultCodeFont
-    }
+    fun getCodeFontById(id: String): FontOption = codeFonts.find { it.id == id } ?: defaultCodeFont
 
     /**
      * 根据ID查找UI字体选项。
      * @param id 字体ID
      * @return 找到的字体选项，未找到时返回默认UI字体
      */
-    fun getUiFontById(id: String): FontOption {
-        return uiFonts.find { it.id == id } ?: defaultUiFont
-    }
+    fun getUiFontById(id: String): FontOption = uiFonts.find { it.id == id } ?: defaultUiFont
 
     /**
      * 根据旧版ID兼容查找字体选项。
@@ -167,12 +168,10 @@ object FontOptions {
      * @param legacyId 旧版字体标识符（如"monospace"、"sans-serif"、"serif"）
      * @return 对应的字体选项
      */
-    fun getByLegacyId(legacyId: String): FontOption {
-        return when (legacyId) {
-            "monospace" -> defaultCodeFont
-            "sans-serif" -> allOptions.first { it.id == "system_sans" }
-            "serif" -> allOptions.first { it.id == "system_serif" }
-            else -> defaultCodeFont
-        }
+    fun getByLegacyId(legacyId: String): FontOption = when (legacyId) {
+        "monospace" -> defaultCodeFont
+        "sans-serif" -> allOptions.first { it.id == "system_sans" }
+        "serif" -> allOptions.first { it.id == "system_serif" }
+        else -> defaultCodeFont
     }
 }

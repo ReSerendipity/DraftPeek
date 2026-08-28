@@ -36,7 +36,7 @@ fun BrandPill(
     text: String,
     modifier: Modifier = Modifier,
     dotColor: Color? = SemanticColors.Success,
-    textColor: Color = PrototypeTokens.fgSoft,
+    textColor: Color = PrototypeTokens.fgSoft
 ) {
     Row(
         modifier = modifier
@@ -45,14 +45,14 @@ fun BrandPill(
             .border(1.dp, PrototypeTokens.border, BrandShapes.Pill)
             .padding(horizontal = 10.dp, vertical = 5.dp),
         verticalAlignment = Alignment.CenterVertically,
-        horizontalArrangement = Arrangement.spacedBy(6.dp),
+        horizontalArrangement = Arrangement.spacedBy(6.dp)
     ) {
         if (dotColor != null) {
             Box(
                 modifier = Modifier
                     .size(6.dp)
                     .clip(CircleShape)
-                    .background(dotColor),
+                    .background(dotColor)
             )
         }
         Text(
@@ -61,7 +61,7 @@ fun BrandPill(
             fontSize = 12.sp,
             fontWeight = FontWeight.Medium,
             color = textColor,
-            lineHeight = 12.sp,
+            lineHeight = 12.sp
         )
     }
 }

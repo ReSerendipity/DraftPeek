@@ -28,15 +28,15 @@ import androidx.compose.ui.unit.dp
  */
 val Shapes = Shapes(
     // 小元素：8dp圆角
-    extraSmall = RoundedCornerShape(8.dp),       // 图标、标签
-    small = RoundedCornerShape(10.dp),           // 按钮、小卡片
+    extraSmall = RoundedCornerShape(8.dp), // 图标、标签
+    small = RoundedCornerShape(10.dp), // 按钮、小卡片
 
     // 中等元素：14dp卡片圆角（原型 --radius-card）
-    medium = RoundedCornerShape(14.dp),          // 列表项、卡片、对话框
+    medium = RoundedCornerShape(14.dp), // 列表项、卡片、对话框
 
     // 大元素：16dp圆角
-    large = RoundedCornerShape(DraftPeekSpacing.Corner.Large),        // 底部表单、模态框
-    extraLarge = RoundedCornerShape(20.dp),      // 页面级容器、底部表单顶部
+    large = RoundedCornerShape(DraftPeekSpacing.Corner.Large), // 底部表单、模态框
+    extraLarge = RoundedCornerShape(20.dp) // 页面级容器、底部表单顶部
 )
 
 /**
@@ -65,6 +65,7 @@ object BrandShapes {
     val SettingIcon = RoundedCornerShape(9.dp)
     val Pill = CircleShape
     val TopBarBack = CircleShape
+
     // 原型 .fab: 56x56, border-radius 16px — 圆角方块而非正圆
     val FAB = RoundedCornerShape(16.dp)
     val Switch = CircleShape
@@ -80,6 +81,7 @@ object PrototypeShapes {
     val Small = RoundedCornerShape(6.dp)
     val Medium = RoundedCornerShape(10.dp)
     val Large = RoundedCornerShape(16.dp)
+
     // 原型 .fab: border-radius 16px
     val FAB = RoundedCornerShape(16.dp)
     val BottomSheet = RoundedCornerShape(topStart = 20.dp, topEnd = 20.dp)

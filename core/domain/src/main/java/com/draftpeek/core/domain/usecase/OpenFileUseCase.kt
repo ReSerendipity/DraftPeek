@@ -23,33 +23,27 @@ import javax.inject.Inject
  * 返回[EditorFileReadOutcome]遵循离线优先模式：
  * 调用方必须显式处理Success和Error路径。
  */
-class OpenFileUseCase @Inject constructor(
-    private val repository: EditorFileRepository,
-) {
+class OpenFileUseCase @Inject constructor(private val repository: EditorFileRepository) {
     /**
      * 执行文件读取操作。
      * @param uri 文件URI
      * @param encoding 指定编码（可选，为null时自动检测）
      * @return 文件读取结果
      */
-    suspend operator fun invoke(
-        uri: Uri,
-        encoding: String? = null,
-    ): EditorFileReadOutcome = repository.readFile(uri, encoding)
+    suspend operator fun invoke(uri: Uri, encoding: String? = null): EditorFileReadOutcome =
+        repository.readFile(uri, encoding)
 
     /**
      * 检查是否为应用内部文件。
      * @param uriString 文件URI字符串
      * @return 是内部文件返回true
      */
-    fun isInternalFile(uriString: String): Boolean =
-        repository.isInternalFile(uriString)
+    fun isInternalFile(uriString: String): Boolean = repository.isInternalFile(uriString)
 
     /**
      * 删除内部文件。
      * @param uriString 文件URI字符串
      * @return 删除成功返回true
      */
-    suspend fun deleteInternalFile(uriString: String): Boolean =
-        repository.deleteInternalFile(uriString)
+    suspend fun deleteInternalFile(uriString: String): Boolean = repository.deleteInternalFile(uriString)
 }

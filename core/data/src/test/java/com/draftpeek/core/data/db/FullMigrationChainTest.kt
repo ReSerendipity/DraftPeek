@@ -19,16 +19,12 @@
 package com.draftpeek.core.data.db
 
 import android.content.Context
-import androidx.room.Room
 import androidx.sqlite.db.SupportSQLiteDatabase
 import androidx.sqlite.db.SupportSQLiteOpenHelper
 import androidx.sqlite.db.framework.FrameworkSQLiteOpenHelperFactory
 import androidx.test.core.app.ApplicationProvider
-import kotlinx.coroutines.flow.first
-import kotlinx.coroutines.test.runTest
 import org.junit.After
 import org.junit.Assert.assertEquals
-import org.junit.Assert.assertNotNull
 import org.junit.Assert.assertTrue
 import org.junit.Before
 import org.junit.Test
@@ -61,8 +57,12 @@ class FullMigrationChainTest {
                         """.trimIndent()
                     )
                     db.execSQL("CREATE INDEX IF NOT EXISTS index_recent_files_uri ON recent_files(uri)")
-                    db.execSQL("CREATE INDEX IF NOT EXISTS index_recent_files_isFavorite_lastOpenedAt ON recent_files(isFavorite, lastOpenedAt)")
-                    db.execSQL("CREATE INDEX IF NOT EXISTS index_recent_files_lastOpenedAt ON recent_files(lastOpenedAt)")
+                    db.execSQL(
+                        "CREATE INDEX IF NOT EXISTS index_recent_files_isFavorite_lastOpenedAt ON recent_files(isFavorite, lastOpenedAt)"
+                    )
+                    db.execSQL(
+                        "CREATE INDEX IF NOT EXISTS index_recent_files_lastOpenedAt ON recent_files(lastOpenedAt)"
+                    )
                 }
 
                 override fun onUpgrade(db: SupportSQLiteDatabase, oldVersion: Int, newVersion: Int) {
@@ -152,7 +152,9 @@ class FullMigrationChainTest {
             """INSERT INTO recent_files (uri, fileName, lastOpenedAt, isFavorite, cursorLine, cursorColumn, scrollX, scrollY)
             VALUES ('content://test.kt', 'test.kt', 1000, 0, 10, 5, 0, 200)"""
         )
-        val cursor = db.query("SELECT cursorLine, cursorColumn, scrollY FROM recent_files WHERE uri = 'content://test.kt'")
+        val cursor = db.query(
+            "SELECT cursorLine, cursorColumn, scrollY FROM recent_files WHERE uri = 'content://test.kt'"
+        )
         cursor.use {
             assertTrue(it.moveToFirst())
             assertEquals(10, it.getInt(0))
@@ -231,7 +233,9 @@ class FullMigrationChainTest {
         AppDatabase.MIGRATION_6_7.migrate(db)
 
         // 验证原有数据保留且新字段默认值为 0
-        val cursor = db.query("SELECT fileOpenCount, previewCount, searchCount FROM user_activity WHERE date = '2026-01-01'")
+        val cursor = db.query(
+            "SELECT fileOpenCount, previewCount, searchCount FROM user_activity WHERE date = '2026-01-01'"
+        )
         cursor.use {
             assertTrue(it.moveToFirst())
             assertEquals(3, it.getInt(0))
@@ -261,7 +265,9 @@ class FullMigrationChainTest {
 
         AppDatabase.MIGRATION_7_8.migrate(db)
 
-        val cursor = db.query("SELECT fileOpenCount, usageDurationMinutes, charWriteCount FROM user_activity WHERE date = '2026-01-02'")
+        val cursor = db.query(
+            "SELECT fileOpenCount, usageDurationMinutes, charWriteCount FROM user_activity WHERE date = '2026-01-02'"
+        )
         cursor.use {
             assertTrue(it.moveToFirst())
             assertEquals(1, it.getInt(0))
@@ -306,7 +312,9 @@ class FullMigrationChainTest {
         }
 
         // 验证具体数据值
-        val dataCursor = db.query("SELECT fileOpenCount, usageDurationMinutes, charWriteCount FROM user_activity WHERE date = '2026-01-03'")
+        val dataCursor = db.query(
+            "SELECT fileOpenCount, usageDurationMinutes, charWriteCount FROM user_activity WHERE date = '2026-01-03'"
+        )
         dataCursor.use {
             assertTrue(it.moveToFirst())
             assertEquals(5, it.getInt(0))
@@ -336,7 +344,15 @@ class FullMigrationChainTest {
         AppDatabase.MIGRATION_11_12.migrate(db)
 
         // 验证所有表存在
-        for (table in listOf("recent_files", "snippets", "snippets_fts", "user_activity", "bookmarks", "security_events", "links")) {
+        for (table in listOf(
+            "recent_files",
+            "snippets",
+            "snippets_fts",
+            "user_activity",
+            "bookmarks",
+            "security_events",
+            "links"
+        )) {
             val cursor = db.query("SELECT count(*) FROM $table")
             cursor.use {
                 assertTrue("Table $table should exist after full migration", it.moveToFirst())
@@ -371,12 +387,48 @@ class FullMigrationChainTest {
         )
 
         // 验证每张表数据
-        assertEquals(1, db.query("SELECT count(*) FROM recent_files").use { it.moveToFirst(); it.getInt(0) })
-        assertEquals(1, db.query("SELECT count(*) FROM snippets").use { it.moveToFirst(); it.getInt(0) })
-        assertEquals(1, db.query("SELECT count(*) FROM user_activity").use { it.moveToFirst(); it.getInt(0) })
-        assertEquals(1, db.query("SELECT count(*) FROM bookmarks").use { it.moveToFirst(); it.getInt(0) })
-        assertEquals(1, db.query("SELECT count(*) FROM security_events").use { it.moveToFirst(); it.getInt(0) })
-        assertEquals(1, db.query("SELECT count(*) FROM links").use { it.moveToFirst(); it.getInt(0) })
+        assertEquals(
+            1,
+            db.query("SELECT count(*) FROM recent_files").use {
+                it.moveToFirst()
+                it.getInt(0)
+            }
+        )
+        assertEquals(
+            1,
+            db.query("SELECT count(*) FROM snippets").use {
+                it.moveToFirst()
+                it.getInt(0)
+            }
+        )
+        assertEquals(
+            1,
+            db.query("SELECT count(*) FROM user_activity").use {
+                it.moveToFirst()
+                it.getInt(0)
+            }
+        )
+        assertEquals(
+            1,
+            db.query("SELECT count(*) FROM bookmarks").use {
+                it.moveToFirst()
+                it.getInt(0)
+            }
+        )
+        assertEquals(
+            1,
+            db.query("SELECT count(*) FROM security_events").use {
+                it.moveToFirst()
+                it.getInt(0)
+            }
+        )
+        assertEquals(
+            1,
+            db.query("SELECT count(*) FROM links").use {
+                it.moveToFirst()
+                it.getInt(0)
+            }
+        )
     }
 
     /**
@@ -443,7 +495,9 @@ class FullMigrationChainTest {
         }
 
         // recent_files 数据（含迁移添加的字段）
-        val fileCursor = db.query("SELECT fileName, cursorLine, scrollY FROM recent_files WHERE uri = 'content://file1.kt'")
+        val fileCursor = db.query(
+            "SELECT fileName, cursorLine, scrollY FROM recent_files WHERE uri = 'content://file1.kt'"
+        )
         fileCursor.use {
             assertTrue("Recent file data should survive full migration chain", it.moveToFirst())
             assertEquals("file1.kt", it.getString(0))

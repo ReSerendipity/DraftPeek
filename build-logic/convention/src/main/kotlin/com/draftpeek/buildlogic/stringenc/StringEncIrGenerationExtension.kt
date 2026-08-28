@@ -14,39 +14,12 @@
 package com.draftpeek.buildlogic.stringenc
 
 import org.jetbrains.kotlin.backend.common.IrElementTransformerVoidWithContext
-import org.jetbrains.kotlin.backend.common.extensions.IrPluginContext
 import org.jetbrains.kotlin.backend.common.extensions.IrGenerationExtension
-import org.jetbrains.kotlin.ir.declarations.IrModuleFragment
-import org.jetbrains.kotlin.ir.declarations.IrField
-import org.jetbrains.kotlin.ir.expressions.IrConst
-import org.jetbrains.kotlin.ir.expressions.IrExpression
-import org.jetbrains.kotlin.ir.expressions.IrCall
-import org.jetbrains.kotlin.ir.expressions.impl.IrCallImpl
-import org.jetbrains.kotlin.ir.expressions.impl.IrConstImpl
-import org.jetbrains.kotlin.ir.symbols.IrSimpleFunctionSymbol
-import org.jetbrains.kotlin.ir.types.IrType
-import org.jetbrains.kotlin.ir.util.defaultType
+import org.jetbrains.kotlin.backend.common.extensions.IrPluginContext
 import org.jetbrains.kotlin.ir.IrStatement
-import org.jetbrains.kotlin.ir.declarations.IrDeclarationOrigin
-import org.jetbrains.kotlin.ir.declarations.impl.IrFieldImpl
-import org.jetbrains.kotlin.ir.declarations.impl.IrVariableImpl
-import org.jetbrains.kotlin.ir.expressions.IrConstructorCall
-import org.jetbrains.kotlin.ir.symbols.IrClassSymbol
-import org.jetbrains.kotlin.backend.common.lower.DeclarationIrBuilder
-import org.jetbrains.kotlin.ir.builders.irCall
-import org.jetbrains.kotlin.ir.builders.irString
-import org.jetbrains.kotlin.name.Name
-import org.jetbrains.kotlin.ir.builders.Scope
-import org.jetbrains.kotlin.ir.builders.irBlock
-import org.jetbrains.kotlin.ir.builders.irBoolean
-import org.jetbrains.kotlin.ir.builders.irGetField
-import org.jetbrains.kotlin.ir.builders.irInt
-import org.jetbrains.kotlin.ir.builders.irNull
-import org.jetbrains.kotlin.ir.declarations.IrDeclarationContainer
-import org.jetbrains.kotlin.ir.declarations.IrProperty
-import org.jetbrains.kotlin.ir.declarations.IrVariable
-import org.jetbrains.kotlin.ir.expressions.IrSetField
-import org.jetbrains.kotlin.ir.visitors.IrElementTransformerVoid
+import org.jetbrains.kotlin.ir.declarations.IrField
+import org.jetbrains.kotlin.ir.declarations.IrModuleFragment
+import org.jetbrains.kotlin.ir.expressions.IrConst
 
 /**
  * 字符串加密 IR 插件入口。
@@ -76,9 +49,7 @@ class StringEncIrGenerationExtension : IrGenerationExtension {
  * 当前实现：使用简单的 XOR 加密作为占位（避免引入复杂依赖），
  * 生产环境应替换为 AES-256-CBC（密钥从 SecureStringResolver 获取）。
  */
-class StringEncTransformer(
-    private val pluginContext: IrPluginContext,
-) : IrElementTransformerVoidWithContext() {
+class StringEncTransformer(private val pluginContext: IrPluginContext) : IrElementTransformerVoidWithContext() {
 
     /** XOR 加密密钥（占位，生产环境使用 AES-256-CBC + SecureStringResolver 密钥分片） */
     private val xorKey: ByteArray = byteArrayOf(

@@ -3,6 +3,8 @@ package com.draftpeek.feature.browser.observer
 import android.net.Uri
 import android.os.FileObserver
 import android.util.Log
+import java.io.File
+import javax.inject.Inject
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.Job
@@ -12,8 +14,6 @@ import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.asSharedFlow
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
-import java.io.File
-import javax.inject.Inject
 
 /**
  * 目录观察者，监听文件系统变化并发出防抖刷新信号
@@ -33,6 +33,7 @@ import javax.inject.Inject
 class DirectoryObserver @Inject constructor() {
 
     private val _refreshEvents = MutableSharedFlow<Unit>(extraBufferCapacity = 1)
+
     /** 刷新事件流，订阅此 Flow 以接收目录变化通知 */
     val refreshEvents: Flow<Unit> = _refreshEvents.asSharedFlow()
 
@@ -52,11 +53,7 @@ class DirectoryObserver @Inject constructor() {
      * @param pathResolver 将 URI 转换为规范文件系统路径的函数，
      *   如果 URI 不可通过文件系统访问则返回 null
      */
-    fun startWatching(
-        uri: Uri,
-        scope: CoroutineScope,
-        pathResolver: (Uri) -> String?,
-    ) {
+    fun startWatching(uri: Uri, scope: CoroutineScope, pathResolver: (Uri) -> String?) {
         stopWatching()
         observerScope = scope
 
@@ -72,7 +69,7 @@ class DirectoryObserver @Inject constructor() {
         }
 
         val mask = FileObserver.CREATE or FileObserver.DELETE or
-                FileObserver.MODIFY or FileObserver.MOVED_FROM or FileObserver.MOVED_TO
+            FileObserver.MODIFY or FileObserver.MOVED_FROM or FileObserver.MOVED_TO
 
         @Suppress("DEPRECATION")
         val observer = object : FileObserver(fsPath) {
@@ -117,6 +114,7 @@ class DirectoryObserver @Inject constructor() {
 
     companion object {
         private const val TAG = "DirectoryObserver"
+
         /** 防抖延迟（毫秒），用于合并快速连续的文件系统事件 */
         const val DEBOUNCE_MS = 300L
     }

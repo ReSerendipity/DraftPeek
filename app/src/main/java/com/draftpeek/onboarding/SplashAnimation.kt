@@ -24,7 +24,6 @@ import androidx.compose.animation.core.EaseOutCubic
 import androidx.compose.animation.core.LinearEasing
 import androidx.compose.animation.core.spring
 import androidx.compose.animation.core.tween
-import androidx.compose.foundation.Canvas
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.layout.Arrangement
@@ -32,7 +31,6 @@ import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
-import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
@@ -53,11 +51,8 @@ import androidx.compose.ui.draw.drawBehind
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.graphics.StrokeCap
-import androidx.compose.ui.graphics.drawscope.Stroke
 import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.platform.LocalConfiguration
-import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
@@ -66,11 +61,11 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.draftpeek.core.ui.theme.JetBrainsMonoFontFamily
 import com.draftpeek.core.ui.theme.PrototypeTokens
+import kotlin.random.Random
 import kotlinx.coroutines.coroutineScope
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.joinAll
 import kotlinx.coroutines.launch
-import kotlin.random.Random
 
 /**
  * 启动屏动画风格枚举。
@@ -98,7 +93,7 @@ fun SplashAnimation(
     onComplete: () -> Unit,
     modifier: Modifier = Modifier,
     variant: SplashAnimVariant? = null,
-    minDurationMs: Long = 1200L,
+    minDurationMs: Long = 1200L
 ) {
     val selected = remember {
         variant ?: SplashAnimVariant.entries[Random.nextInt(SplashAnimVariant.entries.size)]
@@ -106,19 +101,25 @@ fun SplashAnimation(
     val pageBg = PrototypeTokens.pageBackground
 
     Box(
-        modifier = modifier.background(pageBg),
+        modifier = modifier.background(pageBg)
     ) {
         Box(modifier = Modifier.fillMaxSize()) {
             val dimens = rememberSplashDimens()
             when (selected) {
                 SplashAnimVariant.CodeLineWeave -> CodeLineWeaveSplash(
-                    dimens = dimens, onComplete = onComplete, minDurationMs = minDurationMs,
+                    dimens = dimens,
+                    onComplete = onComplete,
+                    minDurationMs = minDurationMs
                 )
                 SplashAnimVariant.AuroraReveal -> AuroraRevealSplash(
-                    dimens = dimens, onComplete = onComplete, minDurationMs = minDurationMs,
+                    dimens = dimens,
+                    onComplete = onComplete,
+                    minDurationMs = minDurationMs
                 )
                 SplashAnimVariant.CodeBrace -> CodeBraceSplash(
-                    dimens = dimens, onComplete = onComplete, minDurationMs = minDurationMs,
+                    dimens = dimens,
+                    onComplete = onComplete,
+                    minDurationMs = minDurationMs
                 )
             }
         }
@@ -146,7 +147,7 @@ data class SplashDimens(
     val chineseNameSizeSp: Float,
     val subtitleSizeSp: Float,
     val codeSizeSp: Float,
-    val codeLineCount: Int,
+    val codeLineCount: Int
 )
 
 /**
@@ -181,11 +182,11 @@ fun rememberSplashDimens(): SplashDimens {
         SplashDimens(
             scale = scale,
             maxContentWidth = maxW,
-            brandSizeSp = 32f * scale,           // 32 / 36.8 / 41.6 sp
-            chineseNameSizeSp = 14f * scale,    // 14 / 16.1 / 18.2 sp
-            subtitleSizeSp = 13f * scale,        // 13 / 14.95 / 16.9 sp
-            codeSizeSp = 13f * scale,            // 13 / 14.95 / 16.9 sp
-            codeLineCount = codeLineCount,
+            brandSizeSp = 32f * scale, // 32 / 36.8 / 41.6 sp
+            chineseNameSizeSp = 14f * scale, // 14 / 16.1 / 18.2 sp
+            subtitleSizeSp = 13f * scale, // 13 / 14.95 / 16.9 sp
+            codeSizeSp = 13f * scale, // 13 / 14.95 / 16.9 sp
+            codeLineCount = codeLineCount
         )
     }
 }
@@ -219,20 +220,20 @@ private fun BrandMark(
     letterSpacingEnglish: Float = 0.5f,
     letterSpacingChinese: Float = 4f,
     alpha: Float = 1f,
-    modifier: Modifier = Modifier,
+    modifier: Modifier = Modifier
 ) {
     Column(
         modifier = modifier.graphicsLayer { this.alpha = alpha },
         horizontalAlignment = Alignment.CenterHorizontally,
-        verticalArrangement = Arrangement.spacedBy(2.dp),
+        verticalArrangement = Arrangement.spacedBy(2.dp)
     ) {
         Text(
             text = english,
             color = color,
             fontSize = englishSizeSp.sp,
-            fontWeight = FontWeight.Medium,    // ← was Bold (700); now Medium (500)
+            fontWeight = FontWeight.Medium, // ← was Bold (700); now Medium (500)
             letterSpacing = letterSpacingEnglish.sp,
-            textAlign = TextAlign.Center,
+            textAlign = TextAlign.Center
         )
         Text(
             text = chinese,
@@ -240,7 +241,7 @@ private fun BrandMark(
             fontSize = chineseSizeSp.sp,
             fontWeight = FontWeight.Normal,
             letterSpacing = letterSpacingChinese.sp,
-            textAlign = TextAlign.Center,
+            textAlign = TextAlign.Center
         )
     }
 }
@@ -256,15 +257,11 @@ private val codeLineSamples: List<String> = listOf(
     "scrollTo(line = 42)",
     "git.fetch(\"main\")",
     "sora.bind(textMate)",
-    "tab.switch(next)",
+    "tab.switch(next)"
 )
 
 @Composable
-private fun CodeLineWeaveSplash(
-    dimens: SplashDimens,
-    onComplete: () -> Unit,
-    minDurationMs: Long,
-) {
+private fun CodeLineWeaveSplash(dimens: SplashDimens, onComplete: () -> Unit, minDurationMs: Long) {
     val accent = PrototypeTokens.accent
     val muted = PrototypeTokens.muted
     val fg = PrototypeTokens.fg
@@ -296,7 +293,7 @@ private fun CodeLineWeaveSplash(
                     delay(160L + delays[i])
                     anim.animateTo(
                         targetValue = 1f,
-                        animationSpec = tween(durationMillis = 360, easing = EaseOutCubic),
+                        animationSpec = tween(durationMillis = 360, easing = EaseOutCubic)
                     )
                 }
             }
@@ -329,7 +326,7 @@ private fun CodeLineWeaveSplash(
             .fillMaxSize()
             .padding(horizontal = 24.dp, vertical = 48.dp),
         verticalArrangement = Arrangement.SpaceEvenly,
-        horizontalAlignment = Alignment.CenterHorizontally,
+        horizontalAlignment = Alignment.CenterHorizontally
     ) {
         // Top: editor window chrome
         Row(
@@ -337,18 +334,18 @@ private fun CodeLineWeaveSplash(
             modifier = Modifier
                 .widthIn(max = dimens.maxContentWidth)
                 .fillMaxWidth()
-                .graphicsLayer { alpha = windowAlpha.value },
+                .graphicsLayer { alpha = windowAlpha.value }
         ) {
             listOf(
                 Color(0xFFFF5F57),
                 Color(0xFFFEBC2E),
-                Color(0xFF28C840),
+                Color(0xFF28C840)
             ).forEach { c ->
                 Box(
                     modifier = Modifier
                         .size(10.dp * dimens.scale)
                         .clip(CircleShape)
-                        .background(c),
+                        .background(c)
                 )
                 Spacer(Modifier.width(6.dp))
             }
@@ -361,13 +358,13 @@ private fun CodeLineWeaveSplash(
                     .background(surface)
                     .border(0.5.dp, border, RoundedCornerShape(4.dp))
                     .graphicsLayer { alpha = filenameAlpha.value },
-                contentAlignment = Alignment.Center,
+                contentAlignment = Alignment.Center
             ) {
                 Text(
                     text = "main.kt",
                     color = muted,
                     fontSize = (11f * dimens.scale).sp,
-                    fontFamily = JetBrainsMonoFontFamily,
+                    fontFamily = JetBrainsMonoFontFamily
                 )
             }
         }
@@ -386,20 +383,20 @@ private fun CodeLineWeaveSplash(
                                 0.85f to accent.copy(alpha = 0.18f * cursorBlink.value),
                                 1f to accent.copy(alpha = 0f),
                                 startX = 0f,
-                                endX = w.coerceAtLeast(1f),
+                                endX = w.coerceAtLeast(1f)
                             ),
                             topLeft = Offset.Zero,
-                            size = androidx.compose.ui.geometry.Size(w, size.height),
+                            size = androidx.compose.ui.geometry.Size(w, size.height)
                         )
                     }
-                },
+                }
         ) {
             Column(
                 verticalArrangement = Arrangement.spacedBy(6.dp * dimens.scale),
                 horizontalAlignment = Alignment.Start,
                 modifier = Modifier
                     .fillMaxWidth()
-                    .graphicsLayer { alpha = codeBackdrop.value.coerceIn(0.22f, 1f) },
+                    .graphicsLayer { alpha = codeBackdrop.value.coerceIn(0.22f, 1f) }
             ) {
                 for (i in 0 until n) {
                     CodeLineRow(
@@ -409,7 +406,7 @@ private fun CodeLineWeaveSplash(
                         fontSize = dimens.codeSizeSp.sp,
                         accent = accent,
                         muted = muted,
-                        border = border,
+                        border = border
                     )
                 }
             }
@@ -423,13 +420,13 @@ private fun CodeLineWeaveSplash(
                 alpha = brandAlpha.value
                 scaleX = brandScale.value
                 scaleY = brandScale.value
-            },
+            }
         ) {
             BrandMark(
                 englishSizeSp = dimens.brandSizeSp,
                 chineseSizeSp = dimens.chineseNameSizeSp,
                 color = fg,
-                chineseColor = muted,
+                chineseColor = muted
             )
         }
 
@@ -439,7 +436,7 @@ private fun CodeLineWeaveSplash(
             fontSize = dimens.subtitleSizeSp.sp,
             fontWeight = FontWeight.Normal,
             letterSpacing = 0.3.sp,
-            modifier = Modifier.graphicsLayer { alpha = subtitleAlpha.value * codeBackdrop.value },
+            modifier = Modifier.graphicsLayer { alpha = subtitleAlpha.value * codeBackdrop.value }
         )
     }
 }
@@ -452,21 +449,21 @@ private fun CodeLineRow(
     fontSize: androidx.compose.ui.unit.TextUnit,
     accent: Color,
     muted: Color,
-    border: Color,
+    border: Color
 ) {
     val translationPx = (1f - progress) * 64f
     Row(
         verticalAlignment = Alignment.CenterVertically,
         modifier = Modifier
             .fillMaxWidth()
-            .graphicsLayer { translationX = translationPx },
+            .graphicsLayer { translationX = translationPx }
     ) {
         Text(
             text = index.toString().padStart(2, '0'),
             color = if (progress >= 0.99f) accent.copy(alpha = 0.7f) else border,
             fontSize = fontSize,
             fontFamily = JetBrainsMonoFontFamily,
-            modifier = Modifier.width(24.dp),
+            modifier = Modifier.width(24.dp)
         )
         Spacer(Modifier.width(8.dp))
         Text(
@@ -475,7 +472,7 @@ private fun CodeLineRow(
             fontSize = fontSize,
             fontFamily = JetBrainsMonoFontFamily,
             maxLines = 1,
-            overflow = TextOverflow.Ellipsis,
+            overflow = TextOverflow.Ellipsis
         )
     }
 }
@@ -485,11 +482,7 @@ private fun CodeLineRow(
 // =============================================================================
 
 @Composable
-private fun AuroraRevealSplash(
-    dimens: SplashDimens,
-    onComplete: () -> Unit,
-    minDurationMs: Long,
-) {
+private fun AuroraRevealSplash(dimens: SplashDimens, onComplete: () -> Unit, minDurationMs: Long) {
     val accent = PrototypeTokens.accent
     val muted = PrototypeTokens.muted
     val fg = PrototypeTokens.fg
@@ -508,7 +501,7 @@ private fun AuroraRevealSplash(
             accent.copy(alpha = 0.55f),
             accent.copy(alpha = 0.85f),
             accent.copy(alpha = 0.55f),
-            accent.copy(alpha = 0f),
+            accent.copy(alpha = 0f)
         )
     }
 
@@ -516,7 +509,7 @@ private fun AuroraRevealSplash(
         coroutineScope {
             sweep.animateTo(
                 targetValue = 1.2f,
-                animationSpec = tween(durationMillis = bandTravelMs, easing = EaseInOutCubic),
+                animationSpec = tween(durationMillis = bandTravelMs, easing = EaseInOutCubic)
             )
             launch {
                 delay(80)
@@ -542,7 +535,7 @@ private fun AuroraRevealSplash(
             .fillMaxSize()
             .padding(horizontal = 24.dp, vertical = 48.dp),
         verticalArrangement = Arrangement.SpaceEvenly,
-        horizontalAlignment = Alignment.CenterHorizontally,
+        horizontalAlignment = Alignment.CenterHorizontally
     ) {
         // Spacer for visual weight distribution (not visible)
         Spacer(modifier = Modifier.height(0.dp))
@@ -566,17 +559,17 @@ private fun AuroraRevealSplash(
                                     0.25f to auroraGradient[1],
                                     0.5f to auroraGradient[2],
                                     0.75f to auroraGradient[3],
-                                    1f to auroraGradient[4],
+                                    1f to auroraGradient[4]
                                 ),
                                 startX = centerX - bandW / 2f,
-                                endX = centerX + bandW / 2f,
+                                endX = centerX + bandW / 2f
                             ),
                             topLeft = Offset(0f, 0f),
-                            size = androidx.compose.ui.geometry.Size(size.width, size.height),
+                            size = androidx.compose.ui.geometry.Size(size.width, size.height)
                         )
                     }
                 },
-            contentAlignment = Alignment.Center,
+            contentAlignment = Alignment.Center
         ) {
             // English wordmark — shadow + etched foreground
             Text(
@@ -587,13 +580,13 @@ private fun AuroraRevealSplash(
                 letterSpacing = 0.5.sp,
                 maxLines = 1,
                 modifier = Modifier.fillMaxWidth(),
-                textAlign = TextAlign.Center,
+                textAlign = TextAlign.Center
             )
             Box(
                 modifier = Modifier
                     .fillMaxWidth(etched.value.coerceIn(0f, 1f))
                     .height(rowHeight),
-                contentAlignment = Alignment.Center,
+                contentAlignment = Alignment.Center
             ) {
                 Text(
                     text = "DraftPeek",
@@ -603,7 +596,7 @@ private fun AuroraRevealSplash(
                     letterSpacing = 0.5.sp,
                     maxLines = 1,
                     modifier = Modifier.fillMaxWidth(),
-                    textAlign = TextAlign.Center,
+                    textAlign = TextAlign.Center
                 )
             }
         }
@@ -617,7 +610,7 @@ private fun AuroraRevealSplash(
             letterSpacing = 6.sp,
             modifier = Modifier.graphicsLayer {
                 alpha = underlineX.value.coerceIn(0f, 1f)
-            },
+            }
         )
 
         Box(
@@ -629,13 +622,13 @@ private fun AuroraRevealSplash(
                     brush = Brush.horizontalGradient(
                         0f to accent.copy(alpha = 0f),
                         0.5f to accent,
-                        1f to accent.copy(alpha = 0f),
-                    ),
+                        1f to accent.copy(alpha = 0f)
+                    )
                 )
                 .graphicsLayer {
                     scaleX = underlineX.value.coerceIn(0f, 1f)
                     transformOrigin = androidx.compose.ui.graphics.TransformOrigin.Center
-                },
+                }
         )
 
         Text(
@@ -644,7 +637,7 @@ private fun AuroraRevealSplash(
             fontSize = dimens.subtitleSizeSp.sp,
             fontWeight = FontWeight.Normal,
             letterSpacing = 0.3.sp,
-            modifier = Modifier.graphicsLayer { alpha = subtitleAlpha.value },
+            modifier = Modifier.graphicsLayer { alpha = subtitleAlpha.value }
         )
 
         Spacer(modifier = Modifier.height(0.dp))
@@ -657,11 +650,7 @@ private fun AuroraRevealSplash(
 // =============================================================================
 
 @Composable
-private fun CodeBraceSplash(
-    dimens: SplashDimens,
-    onComplete: () -> Unit,
-    minDurationMs: Long,
-) {
+private fun CodeBraceSplash(dimens: SplashDimens, onComplete: () -> Unit, minDurationMs: Long) {
     val accent = PrototypeTokens.accent
     val muted = PrototypeTokens.muted
     val fg = PrototypeTokens.fg
@@ -680,13 +669,13 @@ private fun CodeBraceSplash(
             launch {
                 leftBraceOffsetX.animateTo(
                     0f,
-                    spring(dampingRatio = 0.55f, stiffness = 280f),
+                    spring(dampingRatio = 0.55f, stiffness = 280f)
                 )
             }
             launch {
                 rightBraceOffsetX.animateTo(
                     0f,
-                    spring(dampingRatio = 0.55f, stiffness = 280f),
+                    spring(dampingRatio = 0.55f, stiffness = 280f)
                 )
             }
 
@@ -726,7 +715,7 @@ private fun CodeBraceSplash(
             .fillMaxSize()
             .padding(horizontal = 24.dp, vertical = 48.dp),
         verticalArrangement = Arrangement.SpaceEvenly,
-        horizontalAlignment = Alignment.CenterHorizontally,
+        horizontalAlignment = Alignment.CenterHorizontally
     ) {
         Spacer(modifier = Modifier.height(0.dp))
 
@@ -736,7 +725,7 @@ private fun CodeBraceSplash(
             horizontalArrangement = Arrangement.Center,
             modifier = Modifier
                 .widthIn(max = dimens.maxContentWidth)
-                .fillMaxWidth(),
+                .fillMaxWidth()
         ) {
             Text(
                 text = "{",
@@ -748,20 +737,20 @@ private fun CodeBraceSplash(
                     translationX = leftBraceOffsetX.value
                     scaleX = braceScale.value * braceSquish.value
                     scaleY = braceScale.value / braceSquish.value
-                },
+                }
             )
             Spacer(Modifier.width(12.dp * dimens.scale))
             Column(
                 horizontalAlignment = Alignment.CenterHorizontally,
                 verticalArrangement = Arrangement.spacedBy(2.dp),
-                modifier = Modifier.graphicsLayer { alpha = wordmarkAlpha.value },
+                modifier = Modifier.graphicsLayer { alpha = wordmarkAlpha.value }
             ) {
                 Text(
                     text = "DraftPeek",
                     color = fg,
                     fontSize = dimens.brandSizeSp.sp,
                     fontWeight = FontWeight.Medium,
-                    letterSpacing = 0.5.sp,
+                    letterSpacing = 0.5.sp
                 )
             }
             Spacer(Modifier.width(12.dp * dimens.scale))
@@ -775,7 +764,7 @@ private fun CodeBraceSplash(
                     translationX = rightBraceOffsetX.value
                     scaleX = braceScale.value * braceSquish.value
                     scaleY = braceScale.value / braceSquish.value
-                },
+                }
             )
         }
 
@@ -786,7 +775,7 @@ private fun CodeBraceSplash(
             fontSize = dimens.chineseNameSizeSp.sp,
             fontWeight = FontWeight.Normal,
             letterSpacing = 6.sp,
-            modifier = Modifier.graphicsLayer { alpha = chineseAlpha.value },
+            modifier = Modifier.graphicsLayer { alpha = chineseAlpha.value }
         )
 
         // Underline / accent
@@ -798,10 +787,10 @@ private fun CodeBraceSplash(
                     brush = Brush.horizontalGradient(
                         0f to accent.copy(alpha = 0f),
                         0.5f to accent,
-                        1f to accent.copy(alpha = 0f),
-                    ),
+                        1f to accent.copy(alpha = 0f)
+                    )
                 )
-                .graphicsLayer { alpha = chineseAlpha.value },
+                .graphicsLayer { alpha = chineseAlpha.value }
         )
 
         Text(
@@ -810,7 +799,7 @@ private fun CodeBraceSplash(
             fontSize = dimens.subtitleSizeSp.sp,
             fontWeight = FontWeight.Normal,
             letterSpacing = 0.3.sp,
-            modifier = Modifier.graphicsLayer { alpha = subtitleAlpha.value },
+            modifier = Modifier.graphicsLayer { alpha = subtitleAlpha.value }
         )
 
         Spacer(modifier = Modifier.height(0.dp))

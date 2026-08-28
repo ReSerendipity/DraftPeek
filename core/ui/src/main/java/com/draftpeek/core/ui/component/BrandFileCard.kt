@@ -18,7 +18,6 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
-import androidx.compose.material3.Icon
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.remember
@@ -26,17 +25,17 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Brush
-import androidx.compose.ui.unit.dp
 import androidx.compose.ui.text.style.TextOverflow
+import androidx.compose.ui.unit.dp
 import com.draftpeek.core.ui.icon.StrokeIcon
 import com.draftpeek.core.ui.icon.StrokeIcons
 import com.draftpeek.core.ui.modifier.pressScaleEffect
 import com.draftpeek.core.ui.theme.BrandShapes
-import com.draftpeek.core.ui.theme.PrototypeTokens
 import com.draftpeek.core.ui.theme.DraftPeekSpacing
 import com.draftpeek.core.ui.theme.FileMetaStyle
 import com.draftpeek.core.ui.theme.MonoFileNameStyle
 import com.draftpeek.core.ui.theme.MonoLabelStyle
+import com.draftpeek.core.ui.theme.PrototypeTokens
 
 /**
  * A branded file card composable for DraftPeek.
@@ -79,7 +78,7 @@ fun BrandFileCard(
     isPinned: Boolean = false,
     isSelected: Boolean = false,
     leadingContent: (@Composable () -> Unit)? = null,
-    trailingContent: (@Composable () -> Unit)? = null,
+    trailingContent: (@Composable () -> Unit)? = null
 ) {
     // Selected-state tint: subtle accent overlay
     val accent = PrototypeTokens.accent
@@ -88,8 +87,8 @@ fun BrandFileCard(
             Brush.horizontalGradient(
                 colors = listOf(
                     accent.copy(alpha = 0.12f),
-                    accent.copy(alpha = 0.04f),
-                ),
+                    accent.copy(alpha = 0.04f)
+                )
             )
         } else {
             null
@@ -100,7 +99,7 @@ fun BrandFileCard(
     val border = if (isSelected) {
         BorderStroke(
             width = DraftPeekSpacing.BorderWidth,
-            color = PrototypeTokens.border,
+            color = PrototypeTokens.border
         )
     } else {
         null
@@ -112,18 +111,18 @@ fun BrandFileCard(
             if (onLongClick != null) {
                 Modifier.combinedClickable(
                     onClick = onClick,
-                    onLongClick = onLongClick,
+                    onLongClick = onLongClick
                 )
             } else {
                 Modifier.clickable(onClick = onClick)
-            },
+            }
         )
 
     Card(
         shape = BrandShapes.Card,
         colors = CardDefaults.cardColors(containerColor = PrototypeTokens.surface),
         border = border,
-        modifier = cardModifier.fillMaxWidth(),
+        modifier = cardModifier.fillMaxWidth()
     ) {
         Box(modifier = Modifier.fillMaxWidth()) {
             // Optional selected-tint overlay
@@ -132,7 +131,7 @@ fun BrandFileCard(
                     modifier = Modifier
                         .matchParentSize()
                         .clip(BrandShapes.Card)
-                        .background(selectedTint),
+                        .background(selectedTint)
                 )
             }
 
@@ -140,7 +139,7 @@ fun BrandFileCard(
                 modifier = Modifier
                     .fillMaxWidth()
                     .padding(horizontal = 20.dp, vertical = 10.dp),
-                verticalAlignment = Alignment.CenterVertically,
+                verticalAlignment = Alignment.CenterVertically
             ) {
                 // Optional leading content (pin indicator, checkbox, etc.)
                 if (leadingContent != null) {
@@ -151,7 +150,7 @@ fun BrandFileCard(
                 // 3dp color indicator bar on the left edge
                 FileTypeColorIndicator(
                     extension = extension,
-                    modifier = Modifier.height(DraftPeekSpacing.FileTypeBadgeSize),
+                    modifier = Modifier.height(DraftPeekSpacing.FileTypeBadgeSize)
                 )
 
                 Spacer(modifier = Modifier.width(DraftPeekSpacing.One))
@@ -159,7 +158,7 @@ fun BrandFileCard(
                 // File type icon (28dp badge)
                 FileTypeIcon(
                     extension = extension,
-                    modifier = Modifier.size(DraftPeekSpacing.FileTypeBadgeSize),
+                    modifier = Modifier.size(DraftPeekSpacing.FileTypeBadgeSize)
                 )
 
                 Spacer(modifier = Modifier.width(DraftPeekSpacing.One))
@@ -171,7 +170,7 @@ fun BrandFileCard(
                         style = MonoFileNameStyle,
                         color = PrototypeTokens.fg,
                         maxLines = 1,
-                        overflow = TextOverflow.Ellipsis,
+                        overflow = TextOverflow.Ellipsis
                     )
 
                     Spacer(modifier = Modifier.height(DraftPeekSpacing.Half))
@@ -181,7 +180,7 @@ fun BrandFileCard(
                         Text(
                             text = extension.uppercase(),
                             style = MonoLabelStyle,
-                            color = PrototypeTokens.muted,
+                            color = PrototypeTokens.muted
                         )
 
                         if (metaText.isNotEmpty()) {
@@ -191,7 +190,7 @@ fun BrandFileCard(
                                 style = FileMetaStyle,
                                 color = PrototypeTokens.muted,
                                 maxLines = 1,
-                                overflow = TextOverflow.Ellipsis,
+                                overflow = TextOverflow.Ellipsis
                             )
                         }
                     }
@@ -202,7 +201,7 @@ fun BrandFileCard(
                     icon = StrokeIcons.ChevronRight,
                     contentDescription = null,
                     tint = PrototypeTokens.mutedSoft.copy(alpha = 0.35f),
-                    modifier = Modifier.size(14.dp),
+                    modifier = Modifier.size(14.dp)
                 )
 
                 // Optional trailing content (actions, overflow, etc.)
@@ -233,7 +232,7 @@ fun BrandDirectoryCard(
     directoryName: String,
     modifier: Modifier = Modifier,
     onClick: () -> Unit = {},
-    itemCount: Int? = null,
+    itemCount: Int? = null
 ) {
     val folderTint = PrototypeTokens.folderContainer
     val folderIconTint = PrototypeTokens.folder
@@ -244,13 +243,13 @@ fun BrandDirectoryCard(
         colors = CardDefaults.cardColors(containerColor = PrototypeTokens.surface),
         modifier = modifier
             .pressScaleEffect()
-            .fillMaxWidth(),
+            .fillMaxWidth()
     ) {
         Row(
             modifier = Modifier
                 .fillMaxWidth()
                 .padding(horizontal = 20.dp, vertical = 10.dp),
-            verticalAlignment = Alignment.CenterVertically,
+            verticalAlignment = Alignment.CenterVertically
         ) {
             // Folder icon
             Box(
@@ -258,13 +257,13 @@ fun BrandDirectoryCard(
                     .size(DraftPeekSpacing.FileTypeBadgeSize)
                     .clip(BrandShapes.Badge)
                     .background(folderTint),
-                contentAlignment = Alignment.Center,
+                contentAlignment = Alignment.Center
             ) {
                 StrokeIcon(
                     icon = StrokeIcons.FolderFilled,
                     contentDescription = null,
                     tint = folderIconTint,
-                    modifier = Modifier.size(18.dp),
+                    modifier = Modifier.size(18.dp)
                 )
             }
 
@@ -277,7 +276,7 @@ fun BrandDirectoryCard(
                     style = MonoFileNameStyle,
                     color = PrototypeTokens.fg,
                     maxLines = 1,
-                    overflow = TextOverflow.Ellipsis,
+                    overflow = TextOverflow.Ellipsis
                 )
 
                 if (itemCount != null) {
@@ -285,7 +284,7 @@ fun BrandDirectoryCard(
                     Text(
                         text = "$itemCount item${if (itemCount != 1) "s" else ""}",
                         style = FileMetaStyle,
-                        color = PrototypeTokens.muted,
+                        color = PrototypeTokens.muted
                     )
                 }
             }
@@ -295,7 +294,7 @@ fun BrandDirectoryCard(
                 icon = StrokeIcons.ChevronRight,
                 contentDescription = null,
                 tint = PrototypeTokens.mutedSoft.copy(alpha = 0.35f),
-                modifier = Modifier.size(14.dp),
+                modifier = Modifier.size(14.dp)
             )
         }
     }

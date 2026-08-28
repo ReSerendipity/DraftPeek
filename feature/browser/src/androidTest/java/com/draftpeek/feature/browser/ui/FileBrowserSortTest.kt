@@ -1,19 +1,11 @@
 package com.draftpeek.feature.browser.ui
 
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.Folder
-import androidx.compose.material3.Icon
-import androidx.compose.material3.IconButton
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
-import androidx.compose.ui.Modifier
-import androidx.compose.ui.semantics.contentDescription
-import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.test.assertIsDisplayed
 import androidx.compose.ui.test.junit4.createComposeRule
-import androidx.compose.ui.test.onNodeWithContentDescription
 import androidx.compose.ui.test.onNodeWithText
 import androidx.compose.ui.test.performClick
 import com.draftpeek.feature.browser.model.FileItem
@@ -36,9 +28,27 @@ class FileBrowserSortTest {
     val composeTestRule = createComposeRule()
 
     private val testFiles = listOf(
-        FileItem(name = "zfile.kt", uri = android.net.Uri.parse("content://z"), isDirectory = false, size = 100, lastModified = 3000),
-        FileItem(name = "afile.kt", uri = android.net.Uri.parse("content://a"), isDirectory = false, size = 200, lastModified = 1000),
-        FileItem(name = "mfile.kt", uri = android.net.Uri.parse("content://m"), isDirectory = false, size = 300, lastModified = 2000),
+        FileItem(
+            name = "zfile.kt",
+            uri = android.net.Uri.parse("content://z"),
+            isDirectory = false,
+            size = 100,
+            lastModified = 3000
+        ),
+        FileItem(
+            name = "afile.kt",
+            uri = android.net.Uri.parse("content://a"),
+            isDirectory = false,
+            size = 200,
+            lastModified = 1000
+        ),
+        FileItem(
+            name = "mfile.kt",
+            uri = android.net.Uri.parse("content://m"),
+            isDirectory = false,
+            size = 300,
+            lastModified = 2000
+        )
     )
 
     @Test
@@ -49,7 +59,7 @@ class FileBrowserSortTest {
             SortTestHarness(
                 files = testFiles,
                 sortOption = currentSort,
-                onSortChanged = { currentSort = it },
+                onSortChanged = { currentSort = it }
             )
         }
 
@@ -72,7 +82,7 @@ class FileBrowserSortTest {
             SortTestHarness(
                 files = testFiles,
                 sortOption = currentSort,
-                onSortChanged = { currentSort = it },
+                onSortChanged = { currentSort = it }
             )
         }
 
@@ -88,7 +98,7 @@ class FileBrowserSortTest {
             SortTestHarness(
                 files = testFiles,
                 sortOption = currentSort,
-                onSortChanged = { currentSort = it },
+                onSortChanged = { currentSort = it }
             )
         }
 
@@ -104,7 +114,7 @@ class FileBrowserSortTest {
             SortTestHarness(
                 files = testFiles,
                 sortOption = currentSort,
-                onSortChanged = { currentSort = it },
+                onSortChanged = { currentSort = it }
             )
         }
 
@@ -130,7 +140,7 @@ class FileBrowserSortTest {
 private fun SortTestHarness(
     files: List<FileItem>,
     sortOption: FileSortOption,
-    onSortChanged: (FileSortOption) -> Unit,
+    onSortChanged: (FileSortOption) -> Unit
 ) {
     val sortedFiles = files.sortFiles(sortOption)
 
@@ -156,7 +166,7 @@ private fun SortTestHarness(
 private fun SortButton(label: String, isSelected: Boolean, onClick: () -> Unit) {
     androidx.compose.material3.TextButton(onClick = onClick) {
         androidx.compose.material3.Text(
-            text = if (isSelected) "▶ $label" else label,
+            text = if (isSelected) "▶ $label" else label
         )
     }
 }

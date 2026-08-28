@@ -25,10 +25,10 @@ class StartupBenchmark {
     fun startup() = benchmarkRule.measureRepeated(
         packageName = "com.draftpeek",
         metrics = listOf(
-            androidx.benchmark.macro.StartupTimingMetric(),
+            androidx.benchmark.macro.StartupTimingMetric()
         ),
         iterations = 5,
-        startupMode = androidx.benchmark.macro.StartupMode.COLD,
+        startupMode = androidx.benchmark.macro.StartupMode.COLD
     ) {
         pressHome()
         startActivityAndWait()
@@ -38,10 +38,10 @@ class StartupBenchmark {
     fun startupWarm() = benchmarkRule.measureRepeated(
         packageName = "com.draftpeek",
         metrics = listOf(
-            androidx.benchmark.macro.StartupTimingMetric(),
+            androidx.benchmark.macro.StartupTimingMetric()
         ),
         iterations = 5,
-        startupMode = androidx.benchmark.macro.StartupMode.WARM,
+        startupMode = androidx.benchmark.macro.StartupMode.WARM
     ) {
         pressHome()
         startActivityAndWait()
@@ -51,10 +51,10 @@ class StartupBenchmark {
     fun startupHot() = benchmarkRule.measureRepeated(
         packageName = "com.draftpeek",
         metrics = listOf(
-            androidx.benchmark.macro.StartupTimingMetric(),
+            androidx.benchmark.macro.StartupTimingMetric()
         ),
         iterations = 5,
-        startupMode = androidx.benchmark.macro.StartupMode.HOT,
+        startupMode = androidx.benchmark.macro.StartupMode.HOT
     ) {
         pressHome()
         startActivityAndWait()

@@ -18,9 +18,7 @@ import javax.inject.Inject
  *
  * @property repository 最近文件仓库实例
  */
-class ReadingPositionUseCase @Inject constructor(
-    private val repository: RecentFilesRepository,
-) {
+class ReadingPositionUseCase @Inject constructor(private val repository: RecentFilesRepository) {
     /**
      * 保存当前阅读位置。
      * @param uri 文件 URI

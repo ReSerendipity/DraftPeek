@@ -35,14 +35,13 @@ fun PluginState.toDraftPeekEnabled(): Boolean = this == PluginState.STARTED
 /**
  * PF4J PluginWrapper → DraftPeek PluginInfo 转换。
  */
-fun PluginWrapper.toPluginInfo(): PluginInfo =
-    PluginInfo(
-        id = pluginId,
-        name = descriptor?.pluginId ?: pluginId,
-        version = descriptor?.version ?: "1.0.0",
-        description = descriptor?.pluginDescription ?: "",
-        author = descriptor?.provider ?: "",
-    )
+fun PluginWrapper.toPluginInfo(): PluginInfo = PluginInfo(
+    id = pluginId,
+    name = descriptor?.pluginId ?: pluginId,
+    version = descriptor?.version ?: "1.0.0",
+    description = descriptor?.pluginDescription ?: "",
+    author = descriptor?.provider ?: ""
+)
 
 /**
  * PF4J 插件加载器（骨架）。

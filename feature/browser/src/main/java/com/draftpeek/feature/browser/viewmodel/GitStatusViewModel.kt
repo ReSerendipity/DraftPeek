@@ -35,35 +35,37 @@ import com.draftpeek.core.common.vcs.GitRepoInfo
 import com.draftpeek.core.common.vcs.GitRepository
 import com.draftpeek.core.common.vcs.GitStatus
 import dagger.hilt.android.lifecycle.HiltViewModel
+import javax.inject.Inject
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.launch
-import javax.inject.Inject
 
 private const val TAG = "GitStatusVM"
 
 @HiltViewModel
-class GitStatusViewModel @Inject constructor(
-    savedStateHandle: SavedStateHandle,
-    private val gitManager: GitManager,
-) : ViewModel() {
+class GitStatusViewModel @Inject constructor(savedStateHandle: SavedStateHandle, private val gitManager: GitManager) :
+    ViewModel() {
 
     private val _gitRepoInfo = MutableStateFlow<GitRepoInfo?>(null)
+
     /** Git 仓库信息（分支名、远程、最后提交） */
     val gitRepoInfo: StateFlow<GitRepoInfo?> = _gitRepoInfo.asStateFlow()
 
     private val _gitFileStatuses = MutableStateFlow<List<GitFileStatus>>(emptyList())
+
     /** Git 文件状态列表 */
     val gitFileStatuses: StateFlow<List<GitFileStatus>> = _gitFileStatuses.asStateFlow()
 
     private val _isGitRepo = MutableStateFlow(false)
+
     /** 当前目录是否为 Git 仓库 */
     val isGitRepo: StateFlow<Boolean> = _isGitRepo.asStateFlow()
 
     /** 当前持有的 GitRepository 实例 */
     private var currentRepo: GitRepository? = null
+
     /** 当前加载的目录文件系统路径 */
     private var currentDirectoryPath: String? = null
 
@@ -128,9 +130,7 @@ class GitStatusViewModel @Inject constructor(
      * @param filePath 文件相对于仓库根目录的路径
      * @return GitStatus 枚举值，未找到或非 Git 仓库返回 null
      */
-    fun getFileStatus(filePath: String): GitStatus? {
-        return _gitFileStatuses.value.find { it.filePath == filePath }?.status
-    }
+    fun getFileStatus(filePath: String): GitStatus? = _gitFileStatuses.value.find { it.filePath == filePath }?.status
 
     /**
      * 获取单个文件的 diff 内容

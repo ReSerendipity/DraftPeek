@@ -6,8 +6,8 @@ import io.mockk.coEvery
 import io.mockk.coVerify
 import io.mockk.every
 import io.mockk.mockk
-import kotlinx.coroutines.flow.flowOf
 import kotlinx.coroutines.flow.first
+import kotlinx.coroutines.flow.flowOf
 import kotlinx.coroutines.test.runTest
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.BeforeEach
@@ -22,8 +22,12 @@ class SnippetRepositoryImplTest {
     private lateinit var repository: SnippetRepositoryImpl
 
     private val sampleSnippet = Snippet(
-        title = "Test", content = "fun test()", language = "kotlin",
-        category = "Kotlin", createdAt = 0L, updatedAt = 0L,
+        title = "Test",
+        content = "fun test()",
+        language = "kotlin",
+        category = "Kotlin",
+        createdAt = 0L,
+        updatedAt = 0L
     )
 
     @BeforeEach

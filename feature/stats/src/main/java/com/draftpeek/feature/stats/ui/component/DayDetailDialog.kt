@@ -43,14 +43,11 @@ import com.draftpeek.feature.stats.viewmodel.DayDetail
  * @param onDismiss 对话框关闭回调
  */
 @Composable
-fun DayDetailDialog(
-    detail: DayDetail,
-    onDismiss: () -> Unit,
-) {
+fun DayDetailDialog(detail: DayDetail, onDismiss: () -> Unit) {
     val monthDayText = stringResource(
         R.string.stats_day_detail_month_day_format,
         detail.date.monthValue,
-        detail.date.dayOfMonth,
+        detail.date.dayOfMonth
     )
 
     BrandDialog(
@@ -63,20 +60,20 @@ fun DayDetailDialog(
                 fontSize = 24.sp,
                 color = PrototypeTokens.accent,
                 textAlign = TextAlign.Center,
-                modifier = Modifier.fillMaxWidth(),
+                modifier = Modifier.fillMaxWidth()
             )
         },
         content = {
             Column(
                 horizontalAlignment = Alignment.CenterHorizontally,
                 verticalArrangement = Arrangement.spacedBy(14.dp),
-                modifier = Modifier.fillMaxWidth(),
+                modifier = Modifier.fillMaxWidth()
             ) {
                 Text(
                     text = detail.dayOfWeek,
                     style = MaterialTheme.typography.bodyMedium,
                     fontSize = 14.sp,
-                    color = PrototypeTokens.fgSoft,
+                    color = PrototypeTokens.fgSoft
                 )
 
                 Text(
@@ -84,12 +81,12 @@ fun DayDetailDialog(
                     style = MaterialTheme.typography.bodyMedium,
                     fontSize = 14.sp,
                     color = PrototypeTokens.fgSoft,
-                    textAlign = TextAlign.Center,
+                    textAlign = TextAlign.Center
                 )
 
                 if (detail.activeTimePeriods.isNotEmpty()) {
                     Row(
-                        horizontalArrangement = Arrangement.spacedBy(8.dp),
+                        horizontalArrangement = Arrangement.spacedBy(8.dp)
                     ) {
                         detail.activeTimePeriods.forEach { period ->
                             Text(
@@ -99,9 +96,9 @@ fun DayDetailDialog(
                                 modifier = Modifier
                                     .background(
                                         color = PrototypeTokens.accentSoft,
-                                        shape = RoundedCornerShape(20.dp),
+                                        shape = RoundedCornerShape(20.dp)
                                     )
-                                    .padding(horizontal = 14.dp, vertical = 5.dp),
+                                    .padding(horizontal = 14.dp, vertical = 5.dp)
                             )
                         }
                     }
@@ -109,36 +106,36 @@ fun DayDetailDialog(
 
                 Column(
                     verticalArrangement = Arrangement.spacedBy(12.dp),
-                    modifier = Modifier.fillMaxWidth(),
+                    modifier = Modifier.fillMaxWidth()
                 ) {
                     Row(
                         modifier = Modifier.fillMaxWidth(),
-                        horizontalArrangement = Arrangement.spacedBy(12.dp),
+                        horizontalArrangement = Arrangement.spacedBy(12.dp)
                     ) {
                         MetricItem(
                             label = stringResource(R.string.stats_card_usage_duration),
                             value = "${detail.usageDurationMinutes}min",
-                            modifier = Modifier.weight(1f),
+                            modifier = Modifier.weight(1f)
                         )
                         MetricItem(
                             label = stringResource(R.string.stats_card_chars_written),
                             value = "%,d".format(detail.charWriteCount),
-                            modifier = Modifier.weight(1f),
+                            modifier = Modifier.weight(1f)
                         )
                     }
                     Row(
                         modifier = Modifier.fillMaxWidth(),
-                        horizontalArrangement = Arrangement.spacedBy(12.dp),
+                        horizontalArrangement = Arrangement.spacedBy(12.dp)
                     ) {
                         MetricItem(
                             label = stringResource(R.string.stats_card_files_read),
                             value = "${detail.fileReadCount}${stringResource(R.string.stats_unit_files)}",
-                            modifier = Modifier.weight(1f),
+                            modifier = Modifier.weight(1f)
                         )
                         MetricItem(
                             label = stringResource(R.string.stats_card_files_created),
                             value = "${detail.fileCreateCount}${stringResource(R.string.stats_unit_files)}",
-                            modifier = Modifier.weight(1f),
+                            modifier = Modifier.weight(1f)
                         )
                     }
                 }
@@ -148,11 +145,11 @@ fun DayDetailDialog(
                     onClick = onDismiss,
                     modifier = Modifier
                         .fillMaxWidth()
-                        .padding(top = 4.dp),
+                        .padding(top = 4.dp)
                 )
             }
         },
-        confirmButton = {},
+        confirmButton = {}
     )
 }
 
@@ -166,26 +163,22 @@ fun DayDetailDialog(
  * @param modifier 修饰符
  */
 @Composable
-private fun MetricItem(
-    label: String,
-    value: String,
-    modifier: Modifier = Modifier,
-) {
+private fun MetricItem(label: String, value: String, modifier: Modifier = Modifier) {
     Column(
-        modifier = modifier,
+        modifier = modifier
     ) {
         Text(
             text = label,
             style = MaterialTheme.typography.bodySmall,
             fontSize = 11.sp,
-            color = PrototypeTokens.muted,
+            color = PrototypeTokens.muted
         )
         Text(
             text = value,
             fontFamily = JetBrainsMonoFontFamily,
             fontWeight = FontWeight.Bold,
             fontSize = 18.sp,
-            color = PrototypeTokens.fg,
+            color = PrototypeTokens.fg
         )
     }
 }

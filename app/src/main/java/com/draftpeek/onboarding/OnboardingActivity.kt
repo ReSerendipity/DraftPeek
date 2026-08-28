@@ -22,11 +22,11 @@ import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
 import androidx.datastore.preferences.core.booleanPreferencesKey
 import androidx.datastore.preferences.core.edit
+import androidx.lifecycle.lifecycleScope
 import com.draftpeek.DraftPeekApp
 import com.draftpeek.MainActivity
 import com.draftpeek.core.ui.theme.DraftPeekTheme
 import dagger.hilt.android.AndroidEntryPoint
-import androidx.lifecycle.lifecycleScope
 import kotlinx.coroutines.launch
 
 /**
@@ -51,7 +51,7 @@ class OnboardingActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         enableEdgeToEdge()
-        
+
         setContent {
             DraftPeekTheme {
                 OnboardingScreen(onComplete = {
@@ -62,11 +62,15 @@ class OnboardingActivity : ComponentActivity() {
                             prefs[booleanPreferencesKey("completed")] = true
                         }
                     }
-                    
+
                     // 跳转到主界面
                     startActivity(Intent(this@OnboardingActivity, MainActivity::class.java))
                     if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.UPSIDE_DOWN_CAKE) {
-                        overrideActivityTransition(Activity.OVERRIDE_TRANSITION_OPEN, android.R.anim.fade_in, android.R.anim.fade_out)
+                        overrideActivityTransition(
+                            Activity.OVERRIDE_TRANSITION_OPEN,
+                            android.R.anim.fade_in,
+                            android.R.anim.fade_out
+                        )
                     } else {
                         @Suppress("DEPRECATION")
                         overridePendingTransition(android.R.anim.fade_in, android.R.anim.fade_out)

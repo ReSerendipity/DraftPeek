@@ -36,5 +36,5 @@ data class ActivitySummary(
     val currentStreak: Int = 0,
     val longestStreak: Int = 0,
     val peakHour: Int? = null,
-    val favoriteExtension: String = "—",
+    val favoriteExtension: String = "—"
 )

@@ -1,15 +1,8 @@
 package com.draftpeek.feature.browser.vfs
 
-import com.draftpeek.feature.browser.model.FileItem
-import io.mockk.coEvery
-import io.mockk.mockk
-import kotlinx.coroutines.flow.flowOf
-import kotlinx.coroutines.flow.first
-import kotlinx.coroutines.test.runTest
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertFalse
 import org.junit.jupiter.api.Assertions.assertTrue
-import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.DisplayName
 import org.junit.jupiter.api.Nested
 import org.junit.jupiter.api.Test
@@ -35,7 +28,7 @@ class RemoteFileSystemProviderTest {
                 host = "ftp.example.com",
                 port = 21,
                 username = "user",
-                password = "pass",
+                password = "pass"
             )
             assertTrue(config.host.isNotEmpty())
             assertTrue(config.port > 0)
@@ -85,7 +78,7 @@ class RemoteFileSystemProviderTest {
         fun error_containsMessageAndCode() {
             val result = FileSystemResult.Error(
                 message = "Connection refused",
-                errorCode = FileSystemResult.ErrorCode.NETWORK_ERROR,
+                errorCode = FileSystemResult.ErrorCode.NETWORK_ERROR
             )
             assertTrue(result is FileSystemResult.Error)
             assertEquals("Connection refused", result.message)

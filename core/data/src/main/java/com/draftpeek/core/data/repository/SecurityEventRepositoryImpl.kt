@@ -10,10 +10,10 @@ package com.draftpeek.core.data.repository
 
 import com.draftpeek.core.data.dao.SecurityEventDao
 import com.draftpeek.core.data.entity.SecurityEventEntity
-import kotlinx.coroutines.flow.Flow
 import java.util.UUID
 import javax.inject.Inject
 import javax.inject.Singleton
+import kotlinx.coroutines.flow.Flow
 
 /**
  * [SecurityEventRepository] 的 Room 实现。
@@ -21,9 +21,7 @@ import javax.inject.Singleton
  * @property dao 安全事件 DAO 实例，由 Hilt 注入
  */
 @Singleton
-class SecurityEventRepositoryImpl @Inject constructor(
-    private val dao: SecurityEventDao,
-) : SecurityEventRepository {
+class SecurityEventRepositoryImpl @Inject constructor(private val dao: SecurityEventDao) : SecurityEventRepository {
 
     /** 匿名设备 ID（进程级缓存，每次应用启动时首次生成并缓存） */
     private val anonymizedDeviceId: String by lazy {
@@ -32,12 +30,7 @@ class SecurityEventRepositoryImpl @Inject constructor(
 
     override val allEvents: Flow<List<SecurityEventEntity>> = dao.getAllEvents()
 
-    override suspend fun record(
-        eventType: String,
-        threatLevel: String,
-        signalsMask: Int,
-        responseLevel: String,
-    ) {
+    override suspend fun record(eventType: String, threatLevel: String, signalsMask: Int, responseLevel: String) {
         dao.insert(
             SecurityEventEntity(
                 eventType = eventType,
@@ -46,13 +39,12 @@ class SecurityEventRepositoryImpl @Inject constructor(
                 responseLevel = responseLevel,
                 timestampEpochMs = System.currentTimeMillis(),
                 anonymizedDeviceId = anonymizedDeviceId,
-                appVersionCode = getAppVersionCode(),
+                appVersionCode = getAppVersionCode()
             )
         )
     }
 
-    override suspend fun getRecentEvents(limit: Int): List<SecurityEventEntity> =
-        dao.getRecentEvents(limit)
+    override suspend fun getRecentEvents(limit: Int): List<SecurityEventEntity> = dao.getRecentEvents(limit)
 
     override suspend fun getEventCount(): Int = dao.getEventCount()
 
@@ -62,13 +54,11 @@ class SecurityEventRepositoryImpl @Inject constructor(
      * 获取应用版本号。
      * 通过反射读取 BuildConfig 以避免 core/data 模块对 app 模块的依赖。
      */
-    private fun getAppVersionCode(): Int {
-        return try {
-            val buildConfigClass = Class.forName("com.draftpeek.BuildConfig")
-            val field = buildConfigClass.getField("VERSION_CODE")
-            field.getInt(null)
-        } catch (_: Exception) {
-            0
-        }
+    private fun getAppVersionCode(): Int = try {
+        val buildConfigClass = Class.forName("com.draftpeek.BuildConfig")
+        val field = buildConfigClass.getField("VERSION_CODE")
+        field.getInt(null)
+    } catch (_: Exception) {
+        0
     }
 }

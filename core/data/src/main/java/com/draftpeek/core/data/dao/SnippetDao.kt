@@ -61,12 +61,14 @@ interface SnippetDao {
      * @param query FTS4 搜索查询字符串
      * @return [Flow] 匹配的代码片段列表，按更新时间降序
      */
-    @Query("""
+    @Query(
+        """
         SELECT s.* FROM snippets s
         JOIN snippets_fts fts ON s.id = fts.rowid
         WHERE snippets_fts MATCH :query
         ORDER BY s.updatedAt DESC
-    """)
+    """
+    )
     fun searchSnippets(query: String): Flow<List<Snippet>>
 
     /**
@@ -75,12 +77,14 @@ interface SnippetDao {
      * @param category 分类名称过滤条件
      * @return [Flow] 匹配的代码片段列表
      */
-    @Query("""
+    @Query(
+        """
         SELECT s.* FROM snippets s
         JOIN snippets_fts fts ON s.id = fts.rowid
         WHERE snippets_fts MATCH :query AND s.category = :category
         ORDER BY s.updatedAt DESC
-    """)
+    """
+    )
     fun searchSnippetsByCategory(query: String, category: String): Flow<List<Snippet>>
 
     /**
@@ -89,12 +93,14 @@ interface SnippetDao {
      * @param language 语言标识过滤条件
      * @return [Flow] 匹配的代码片段列表
      */
-    @Query("""
+    @Query(
+        """
         SELECT s.* FROM snippets s
         JOIN snippets_fts fts ON s.id = fts.rowid
         WHERE snippets_fts MATCH :query AND s.language = :language
         ORDER BY s.updatedAt DESC
-    """)
+    """
+    )
     fun searchSnippetsByLanguage(query: String, language: String): Flow<List<Snippet>>
 
     /**
@@ -104,12 +110,14 @@ interface SnippetDao {
      * @param language 语言标识过滤条件
      * @return [Flow] 匹配的代码片段列表
      */
-    @Query("""
+    @Query(
+        """
         SELECT s.* FROM snippets s
         JOIN snippets_fts fts ON s.id = fts.rowid
         WHERE snippets_fts MATCH :query AND s.category = :category AND s.language = :language
         ORDER BY s.updatedAt DESC
-    """)
+    """
+    )
     fun searchSnippetsByCategoryAndLanguage(query: String, category: String, language: String): Flow<List<Snippet>>
 
     /**
@@ -122,12 +130,14 @@ interface SnippetDao {
      * @param query FTS4 搜索查询字符串
      * @return [Flow] 匹配的代码片段列表
      */
-    @Query("""
+    @Query(
+        """
         SELECT s.* FROM snippets s
         JOIN snippets_fts fts ON s.id = fts.rowid
         WHERE snippets_fts MATCH :query
         ORDER BY s.updatedAt DESC
-    """)
+    """
+    )
     fun searchSnippetsByTitle(query: String): Flow<List<Snippet>>
 
     /**
@@ -139,11 +149,13 @@ interface SnippetDao {
      * @param query 子串搜索关键词
      * @return [Flow] 匹配的代码片段列表
      */
-    @Query("""
+    @Query(
+        """
         SELECT * FROM snippets
         WHERE title LIKE '%' || :query || '%' OR content LIKE '%' || :query || '%'
         ORDER BY updatedAt DESC
-    """)
+    """
+    )
     fun searchSnippetsSubstring(query: String): Flow<List<Snippet>>
 
     /**

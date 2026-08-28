@@ -37,9 +37,7 @@ object ErrorHandler {
      * @param context Android上下文，用于检测网络状态和获取资源
      * @return 分类后的AppError实例
      */
-    fun fromException(e: Throwable, context: Context): AppError {
-        return fromException(e, !isNetworkUnavailable(context))
-    }
+    fun fromException(e: Throwable, context: Context): AppError = fromException(e, !isNetworkUnavailable(context))
 
     /**
      * 将异常转换为对应的AppError类型，无需Context参数。
@@ -87,9 +85,7 @@ object ErrorHandler {
      * @param context Android上下文，用于获取字符串资源
      * @return 本地化的错误消息字符串
      */
-    fun getUserMessage(error: AppError, context: Context): String {
-        return context.getString(error.messageResId)
-    }
+    fun getUserMessage(error: AppError, context: Context): String = context.getString(error.messageResId)
 
     /**
      * 判断错误是否可以通过重试操作恢复。
@@ -104,13 +100,11 @@ object ErrorHandler {
      * @param error 需要判断的AppError实例
      * @return true表示该错误支持重试，false表示不支持
      */
-    fun getRetryAction(error: AppError): Boolean {
-        return when (error) {
-            is AppError.Network -> true
-            is AppError.FileOperation -> error.operation == FileOp.READ
-            is AppError.Unknown -> true
-            else -> false
-        }
+    fun getRetryAction(error: AppError): Boolean = when (error) {
+        is AppError.Network -> true
+        is AppError.FileOperation -> error.operation == FileOp.READ
+        is AppError.Unknown -> true
+        else -> false
     }
 
     /**

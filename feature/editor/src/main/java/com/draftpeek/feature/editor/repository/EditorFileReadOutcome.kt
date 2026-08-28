@@ -31,10 +31,7 @@ sealed class EditorFileReadOutcome {
      * @property ageMs 缓存数据的近似年龄（毫秒），刚写入为 0，未知为 -1
      */
     @Immutable
-    data class Cached(
-        val result: FileReadResult,
-        val ageMs: Long = -1L,
-    ) : EditorFileReadOutcome()
+    data class Cached(val result: FileReadResult, val ageMs: Long = -1L) : EditorFileReadOutcome()
 
     /**
      * 文件内容从源（SAF URI、Asset 等）最新读取。
@@ -44,9 +41,7 @@ sealed class EditorFileReadOutcome {
      * @property result 最新读取的文件数据
      */
     @Immutable
-    data class Fresh(
-        val result: FileReadResult,
-    ) : EditorFileReadOutcome()
+    data class Fresh(val result: FileReadResult) : EditorFileReadOutcome()
 
     /**
      * 无法获取数据——缓存和源均不可用。
@@ -55,8 +50,6 @@ sealed class EditorFileReadOutcome {
      * @property message 人类可读的错误描述
      */
     @Immutable
-    data class Unavailable(
-        val error: Throwable,
-        val message: String = error.message ?: "File unavailable",
-    ) : EditorFileReadOutcome()
+    data class Unavailable(val error: Throwable, val message: String = error.message ?: "File unavailable") :
+        EditorFileReadOutcome()
 }

@@ -46,7 +46,7 @@ fun AdaptiveListDetailScaffold(
     listContent: @Composable () -> Unit,
     detailContent: @Composable () -> Unit,
     selectedItemKey: Any?,
-    modifier: Modifier = Modifier,
+    modifier: Modifier = Modifier
 ) {
     val scaffoldNavigator = rememberSupportingPaneScaffoldNavigator()
 
@@ -56,7 +56,7 @@ fun AdaptiveListDetailScaffold(
         ) {
             scaffoldNavigator.navigateTo(
                 SupportingPaneScaffoldRole.Supporting,
-                selectedItemKey,
+                selectedItemKey
             )
         }
     }
@@ -78,7 +78,7 @@ fun AdaptiveListDetailScaffold(
                     Box(modifier = Modifier.fillMaxSize())
                 }
             }
-        },
+        }
     )
 }
 
@@ -103,7 +103,7 @@ fun AdaptiveListDetailLayout(
     listContent: @Composable () -> Unit,
     detailContent: @Composable () -> Unit,
     modifier: Modifier = Modifier,
-    splitRatio: Float = 0.35f,
+    splitRatio: Float = 0.35f
 ) {
     when (layoutMode) {
         LayoutMode.EXPANDED -> {
@@ -117,7 +117,7 @@ fun AdaptiveListDetailLayout(
                     }
                 },
                 initialSplitRatio = splitRatio,
-                modifier = modifier,
+                modifier = modifier
             )
         }
         LayoutMode.MEDIUM,
@@ -125,7 +125,7 @@ fun AdaptiveListDetailLayout(
             Crossfade(
                 targetState = selectedItemKey != null,
                 modifier = modifier,
-                label = "list-detail-crossfade",
+                label = "list-detail-crossfade"
             ) { showDetail ->
                 if (showDetail && selectedItemKey != null) {
                     detailContent()

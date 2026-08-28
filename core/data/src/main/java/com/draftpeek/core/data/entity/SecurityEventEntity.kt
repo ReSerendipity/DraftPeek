@@ -29,8 +29,8 @@ import androidx.room.PrimaryKey
     tableName = "security_events",
     indices = [
         Index(value = ["timestampEpochMs"]),
-        Index(value = ["eventType"]),
-    ],
+        Index(value = ["eventType"])
+    ]
 )
 data class SecurityEventEntity(
     @PrimaryKey(autoGenerate = true) val id: Long = 0,
@@ -41,5 +41,5 @@ data class SecurityEventEntity(
     val timestampEpochMs: Long,
     val anonymizedDeviceId: String,
     val appVersionCode: Int,
-    val extra: String = "",
+    val extra: String = ""
 )

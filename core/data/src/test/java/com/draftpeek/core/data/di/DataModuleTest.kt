@@ -35,8 +35,10 @@ class DataModuleTest {
         fun bookmarkRepository_bindingExists() {
             val implClass = BookmarkRepositoryImpl::class.java
             val interfaceClass = BookmarkRepository::class.java
-            Assertions.assertTrue(interfaceClass.isAssignableFrom(implClass),
-                "BookmarkRepositoryImpl 必须实现 BookmarkRepository 接口")
+            Assertions.assertTrue(
+                interfaceClass.isAssignableFrom(implClass),
+                "BookmarkRepositoryImpl 必须实现 BookmarkRepository 接口"
+            )
         }
 
         @Test
@@ -44,8 +46,10 @@ class DataModuleTest {
         fun recentFilesRepository_bindingExists() {
             val implClass = RecentFilesRepositoryImpl::class.java
             val interfaceClass = RecentFilesRepository::class.java
-            Assertions.assertTrue(interfaceClass.isAssignableFrom(implClass),
-                "RecentFilesRepositoryImpl 必须实现 RecentFilesRepository 接口")
+            Assertions.assertTrue(
+                interfaceClass.isAssignableFrom(implClass),
+                "RecentFilesRepositoryImpl 必须实现 RecentFilesRepository 接口"
+            )
         }
 
         @Test
@@ -53,8 +57,10 @@ class DataModuleTest {
         fun snippetRepository_bindingExists() {
             val implClass = SnippetRepositoryImpl::class.java
             val interfaceClass = SnippetRepository::class.java
-            Assertions.assertTrue(interfaceClass.isAssignableFrom(implClass),
-                "SnippetRepositoryImpl 必须实现 SnippetRepository 接口")
+            Assertions.assertTrue(
+                interfaceClass.isAssignableFrom(implClass),
+                "SnippetRepositoryImpl 必须实现 SnippetRepository 接口"
+            )
         }
 
         @Test
@@ -62,8 +68,10 @@ class DataModuleTest {
         fun userActivityRepository_bindingExists() {
             val implClass = UserActivityRepositoryImpl::class.java
             val interfaceClass = UserActivityRepository::class.java
-            Assertions.assertTrue(interfaceClass.isAssignableFrom(implClass),
-                "UserActivityRepositoryImpl 必须实现 UserActivityRepository 接口")
+            Assertions.assertTrue(
+                interfaceClass.isAssignableFrom(implClass),
+                "UserActivityRepositoryImpl 必须实现 UserActivityRepository 接口"
+            )
         }
 
         @Test
@@ -71,8 +79,10 @@ class DataModuleTest {
         fun editorFileRepository_bindingExists() {
             val implClass = EditorFileRepositoryImpl::class.java
             val interfaceClass = EditorFileRepository::class.java
-            Assertions.assertTrue(interfaceClass.isAssignableFrom(implClass),
-                "EditorFileRepositoryImpl 必须实现 EditorFileRepository 接口")
+            Assertions.assertTrue(
+                interfaceClass.isAssignableFrom(implClass),
+                "EditorFileRepositoryImpl 必须实现 EditorFileRepository 接口"
+            )
         }
 
         @Test
@@ -80,8 +90,10 @@ class DataModuleTest {
         fun securityEventRepository_bindingExists() {
             val implClass = SecurityEventRepositoryImpl::class.java
             val interfaceClass = SecurityEventRepository::class.java
-            Assertions.assertTrue(interfaceClass.isAssignableFrom(implClass),
-                "SecurityEventRepositoryImpl 必须实现 SecurityEventRepository 接口")
+            Assertions.assertTrue(
+                interfaceClass.isAssignableFrom(implClass),
+                "SecurityEventRepositoryImpl 必须实现 SecurityEventRepository 接口"
+            )
         }
     }
 
@@ -97,7 +109,7 @@ class DataModuleTest {
                 RecentFilesRepositoryImpl::class.java,
                 SnippetRepositoryImpl::class.java,
                 UserActivityRepositoryImpl::class.java,
-                SecurityEventRepositoryImpl::class.java,
+                SecurityEventRepositoryImpl::class.java
             )
 
             implClasses.forEach { clazz ->
@@ -106,8 +118,10 @@ class DataModuleTest {
                         annotation.annotationClass.simpleName == "Inject"
                     }
                 }
-                Assertions.assertTrue(hasInjectConstructor,
-                    "${clazz.simpleName} 必须有 @Inject 构造器")
+                Assertions.assertTrue(
+                    hasInjectConstructor,
+                    "${clazz.simpleName} 必须有 @Inject 构造器"
+                )
             }
         }
     }

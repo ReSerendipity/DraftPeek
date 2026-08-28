@@ -19,19 +19,17 @@
  */
 package com.draftpeek.security
 
+import android.annotation.SuppressLint
 import android.content.Context
 import android.content.pm.PackageManager
-import android.annotation.SuppressLint
 import android.os.Build
 import androidx.annotation.WorkerThread
+import com.draftpeek.BuildConfig
 import com.draftpeek.core.common.security.AiDetectionSignal
 import com.draftpeek.core.common.security.AiDetectionSignal.*
 import com.draftpeek.core.common.security.AiProtectionState
 import com.draftpeek.core.common.security.AiProtectionStateHolder
 import com.draftpeek.core.common.security.AiThreatLevel
-import com.draftpeek.core.common.security.SecurityEventRecorder
-import com.draftpeek.core.common.security.SecurityGate
-import com.draftpeek.BuildConfig
 import java.io.File
 import java.util.ArrayDeque
 
@@ -78,11 +76,13 @@ object AiDetector {
             { Build.PRODUCT.contains("emulator", ignoreCase = true) },
             { Build.PRODUCT.contains("simulator", ignoreCase = true) },
             { File("/system/bin/qemu-props").exists() },
-            { File("/proc/cpuinfo").readText().runCatching {
-                contains("hypervisor", ignoreCase = true)
-            }.getOrDefault(false) },
+            {
+                File("/proc/cpuinfo").readText().runCatching {
+                    contains("hypervisor", ignoreCase = true)
+                }.getOrDefault(false)
+            },
             { Build.HARDWARE.contains("goldfish", ignoreCase = true) },
-            { Build.HARDWARE.contains("ranchu", ignoreCase = true) },
+            { Build.HARDWARE.contains("ranchu", ignoreCase = true) }
         )
         checks.forEach { check ->
             if (runCatching { check() }.getOrDefault(false)) score++
@@ -184,7 +184,7 @@ object AiDetector {
             val zipFile = java.util.zip.ZipFile(apkPath)
             var crc = 0L
             for (idx in 1..4) {
-                val entryName = if (idx == 1) "classes.dex" else "classes${idx}.dex"
+                val entryName = if (idx == 1) "classes.dex" else "classes$idx.dex"
                 val entry = zipFile.getEntry(entryName) ?: continue
                 crc += entry.crc
             }

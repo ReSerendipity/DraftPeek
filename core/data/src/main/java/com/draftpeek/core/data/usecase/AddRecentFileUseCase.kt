@@ -19,9 +19,7 @@ import javax.inject.Inject
  *
  * @property repository 最近文件仓库实例
  */
-class AddRecentFileUseCase @Inject constructor(
-    private val repository: RecentFilesRepository,
-) {
+class AddRecentFileUseCase @Inject constructor(private val repository: RecentFilesRepository) {
     /**
      * 执行添加最近文件操作。
      * @param uri 文件 URI
@@ -29,12 +27,7 @@ class AddRecentFileUseCase @Inject constructor(
      * @param language 编程语言标识
      * @param fileSize 文件大小（字节）
      */
-    suspend operator fun invoke(
-        uri: String,
-        fileName: String,
-        language: String?,
-        fileSize: Long,
-    ) {
+    suspend operator fun invoke(uri: String, fileName: String, language: String?, fileSize: Long) {
         repository.addRecentFile(uri, fileName, language, fileSize)
     }
 }

@@ -39,11 +39,7 @@ import javax.crypto.spec.GCMParameterSpec
  * @param prefsName SharedPreferences 文件名（实际文件名会加 "secure_" 前缀）
  * @param keyAlias Keystore 密钥别名（不同用途应使用不同别名以实现密钥隔离）
  */
-class SecurePreferences(
-    private val context: Context,
-    prefsName: String,
-    private val keyAlias: String,
-) {
+class SecurePreferences(private val context: Context, prefsName: String, private val keyAlias: String) {
 
     companion object {
         private const val KEYSTORE_PROVIDER = "AndroidKeyStore"
@@ -69,11 +65,11 @@ class SecurePreferences(
 
         val keyGenerator = KeyGenerator.getInstance(
             KeyProperties.KEY_ALGORITHM_AES,
-            KEYSTORE_PROVIDER,
+            KEYSTORE_PROVIDER
         )
         val spec = KeyGenParameterSpec.Builder(
             keyAlias,
-            KeyProperties.PURPOSE_ENCRYPT or KeyProperties.PURPOSE_DECRYPT,
+            KeyProperties.PURPOSE_ENCRYPT or KeyProperties.PURPOSE_DECRYPT
         )
             .setBlockModes(KeyProperties.BLOCK_MODE_GCM)
             .setEncryptionPaddings(KeyProperties.ENCRYPTION_PADDING_NONE)

@@ -71,7 +71,7 @@ fun ActivityCalendarGrid(
     cellSpacing: Dp = 3.dp,
     showMonthLabels: Boolean = false,
     showWeekdayLabels: Boolean = false,
-    onDayClick: ((LocalDate) -> Unit)? = null,
+    onDayClick: ((LocalDate) -> Unit)? = null
 ) {
     val isDark = LocalDarkTheme.current
     val emptyCellColor = PrototypeTokens.bg
@@ -83,7 +83,7 @@ fun ActivityCalendarGrid(
 
     Column(
         modifier = modifier,
-        horizontalAlignment = Alignment.CenterHorizontally,
+        horizontalAlignment = Alignment.CenterHorizontally
     ) {
         if (showMonthLabels) {
             MonthLabelsRow(
@@ -92,29 +92,29 @@ fun ActivityCalendarGrid(
                 cellSize = cellSize,
                 cellSpacing = cellSpacing,
                 showWeekdayLabels = showWeekdayLabels,
-                weekdayLabelWidth = weekdayLabelWidth,
+                weekdayLabelWidth = weekdayLabelWidth
             )
         }
 
         Row(
             horizontalArrangement = Arrangement.spacedBy(cellSpacing),
-            verticalAlignment = Alignment.Top,
+            verticalAlignment = Alignment.Top
         ) {
             if (showWeekdayLabels) {
                 WeekdayLabelsColumn(
                     startDate = startDate,
                     cellSize = cellSize,
                     cellSpacing = cellSpacing,
-                    labelWidth = weekdayLabelWidth,
+                    labelWidth = weekdayLabelWidth
                 )
             }
 
             Column(
-                verticalArrangement = Arrangement.spacedBy(cellSpacing),
+                verticalArrangement = Arrangement.spacedBy(cellSpacing)
             ) {
                 repeat(7) { dayIndex ->
                     Row(
-                        horizontalArrangement = Arrangement.spacedBy(cellSpacing),
+                        horizontalArrangement = Arrangement.spacedBy(cellSpacing)
                     ) {
                         repeat(weeks) { weekIndex ->
                             val cellIndex = weekIndex * 7 + dayIndex
@@ -127,7 +127,7 @@ fun ActivityCalendarGrid(
                                 } else {
                                     val level = contributionLevel(
                                         activity.totalIntensity(),
-                                        maxIntensity,
+                                        maxIntensity
                                     )
                                     heatColors[level.ordinal.coerceIn(0, heatColors.lastIndex)]
                                 }
@@ -140,9 +140,9 @@ fun ActivityCalendarGrid(
                                         .border(
                                             width = 0.5.dp,
                                             color = PrototypeTokens.border.copy(
-                                                alpha = if (isDark) 0.2f else 0.1f,
+                                                alpha = if (isDark) 0.2f else 0.1f
                                             ),
-                                            shape = RoundedCornerShape(2.dp),
+                                            shape = RoundedCornerShape(2.dp)
                                         )
                                         .then(
                                             if (onDayClick != null) {
@@ -154,9 +154,9 @@ fun ActivityCalendarGrid(
                                         .semantics {
                                             contentDescription = buildContentDescription(
                                                 date,
-                                                activity,
+                                                activity
                                             )
-                                        },
+                                        }
                                 )
                             }
                         }
@@ -186,12 +186,12 @@ private fun MonthLabelsRow(
     cellSize: Dp,
     cellSpacing: Dp,
     showWeekdayLabels: Boolean,
-    weekdayLabelWidth: Dp,
+    weekdayLabelWidth: Dp
 ) {
     Row(
         modifier = Modifier.height(14.dp),
         horizontalArrangement = Arrangement.spacedBy(cellSpacing),
-        verticalAlignment = Alignment.Bottom,
+        verticalAlignment = Alignment.Bottom
     ) {
         if (showWeekdayLabels) {
             Spacer(modifier = Modifier.width(weekdayLabelWidth))
@@ -206,17 +206,17 @@ private fun MonthLabelsRow(
 
             Box(
                 modifier = Modifier.width(cellSize),
-                contentAlignment = Alignment.BottomStart,
+                contentAlignment = Alignment.BottomStart
             ) {
                 if (showLabel) {
                     Text(
                         text = currentMonth.getDisplayName(
                             TextStyle.SHORT,
-                            Locale.ENGLISH,
+                            Locale.ENGLISH
                         ),
                         color = PrototypeTokens.muted,
                         fontSize = 10.sp,
-                        maxLines = 1,
+                        maxLines = 1
                     )
                 }
             }
@@ -235,14 +235,9 @@ private fun MonthLabelsRow(
  * @param labelWidth 标签列宽度
  */
 @Composable
-private fun WeekdayLabelsColumn(
-    startDate: LocalDate,
-    cellSize: Dp,
-    cellSpacing: Dp,
-    labelWidth: Dp,
-) {
+private fun WeekdayLabelsColumn(startDate: LocalDate, cellSize: Dp, cellSpacing: Dp, labelWidth: Dp) {
     Column(
-        verticalArrangement = Arrangement.spacedBy(cellSpacing),
+        verticalArrangement = Arrangement.spacedBy(cellSpacing)
     ) {
         repeat(7) { dayIndex ->
             val dayOfWeek = startDate.plusDays(dayIndex.toLong()).dayOfWeek
@@ -253,14 +248,14 @@ private fun WeekdayLabelsColumn(
 
             Box(
                 modifier = Modifier.size(labelWidth, cellSize),
-                contentAlignment = Alignment.CenterEnd,
+                contentAlignment = Alignment.CenterEnd
             ) {
                 if (label.isNotEmpty()) {
                     Text(
                         text = label,
                         color = PrototypeTokens.muted,
                         fontSize = 10.sp,
-                        maxLines = 1,
+                        maxLines = 1
                     )
                 }
             }

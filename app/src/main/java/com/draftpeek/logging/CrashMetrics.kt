@@ -18,13 +18,13 @@ import android.content.Context
 import android.content.SharedPreferences
 import android.os.Build
 import android.util.Log
-import org.json.JSONArray
-import org.json.JSONObject
 import java.text.SimpleDateFormat
 import java.util.Date
 import java.util.Locale
 import java.util.concurrent.atomic.AtomicInteger
 import java.util.concurrent.atomic.AtomicLong
+import org.json.JSONArray
+import org.json.JSONObject
 
 /**
  * 崩溃指标采集器（单例）。
@@ -154,12 +154,15 @@ object CrashMetrics {
                 put("thresholdWatch", THRESHOLD_WATCH)
                 put("thresholdCritical", THRESHOLD_CRITICAL)
                 put("dailyRecords", getDailyRecordsArray())
-                put("deviceInfo", JSONObject().apply {
-                    put("manufacturer", Build.MANUFACTURER)
-                    put("model", Build.MODEL)
-                    put("apiLevel", Build.VERSION.SDK_INT)
-                    put("osVersion", Build.VERSION.RELEASE ?: "unknown")
-                })
+                put(
+                    "deviceInfo",
+                    JSONObject().apply {
+                        put("manufacturer", Build.MANUFACTURER)
+                        put("model", Build.MODEL)
+                        put("apiLevel", Build.VERSION.SDK_INT)
+                        put("osVersion", Build.VERSION.RELEASE ?: "unknown")
+                    }
+                )
                 put("reportTime", System.currentTimeMillis())
             }
             return report.toString(2)
@@ -195,7 +198,10 @@ object CrashMetrics {
             val recordsArray = getDailyRecordsArray()
             val todayRecord: JSONObject = (0 until recordsArray.length()).map { recordsArray.getJSONObject(it) }
                 .find { it.optString("date") == date }
-                ?: JSONObject().apply { put("date", date); put("crashes", JSONArray()) }
+                ?: JSONObject().apply {
+                    put("date", date)
+                    put("crashes", JSONArray())
+                }
 
             val crashesArray = todayRecord.optJSONArray("crashes") ?: JSONArray()
             val crashEntry = JSONObject().apply {

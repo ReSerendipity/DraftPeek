@@ -4,6 +4,7 @@ import io.mockk.every
 import io.mockk.mockk
 import io.mockk.mockkConstructor
 import io.mockk.unmockkConstructor
+import java.io.File
 import org.junit.After
 import org.junit.Assert.assertFalse
 import org.junit.Assert.assertTrue
@@ -13,7 +14,6 @@ import org.junit.runner.RunWith
 import org.robolectric.RobolectricTestRunner
 import org.robolectric.annotation.Config
 import org.robolectric.util.ReflectionHelpers
-import java.io.File
 
 /**
  * AntiDebug 安全检测负面测试。
@@ -35,8 +35,11 @@ class AntiDebugNegativeTest {
         // 设置非模拟器 Build 字段，排除模拟器干扰
         ReflectionHelpers.setStaticField(android.os.Build::class.java, "BRAND", "samsung")
         ReflectionHelpers.setStaticField(android.os.Build::class.java, "DEVICE", "beyond1")
-        ReflectionHelpers.setStaticField(android.os.Build::class.java, "FINGERPRINT",
-            "samsung/beyond1/beyond1:14/UP1A.231005.007:user/release-keys")
+        ReflectionHelpers.setStaticField(
+            android.os.Build::class.java,
+            "FINGERPRINT",
+            "samsung/beyond1/beyond1:14/UP1A.231005.007:user/release-keys"
+        )
         ReflectionHelpers.setStaticField(android.os.Build::class.java, "HARDWARE", "qcom")
         ReflectionHelpers.setStaticField(android.os.Build::class.java, "MODEL", "SM-G973F")
         ReflectionHelpers.setStaticField(android.os.Build::class.java, "MANUFACTURER", "samsung")
@@ -69,7 +72,7 @@ class AntiDebugNegativeTest {
         // 模拟 Frida 特征文件存在
         val fridaPaths = listOf(
             "/data/local/tmp/frida-server",
-            "/data/local/tmp/re.frida.server",
+            "/data/local/tmp/re.frida.server"
         )
 
         // 由于 mockkConstructor 对 File(String) 的 mock 较复杂，
@@ -317,15 +320,24 @@ class AntiDebugNegativeTest {
         // 验证 Root 检测覆盖了 su 二进制 + Magisk + PATH 环境变量三个维度
         // su 二进制路径
         val suPaths = listOf(
-            "/system/xbin/su", "/system/bin/su", "/sbin/su",
-            "/data/local/xbin/su", "/data/local/bin/su", "/data/local/su",
-            "/su/bin/su", "/system/xbin/daemonsu"
+            "/system/xbin/su",
+            "/system/bin/su",
+            "/sbin/su",
+            "/data/local/xbin/su",
+            "/data/local/bin/su",
+            "/data/local/su",
+            "/su/bin/su",
+            "/system/xbin/daemonsu"
         )
         // Magisk 路径
         val magiskPaths = listOf(
-            "/sbin/.magisk", "/data/adb/magisk", "/data/adb/magisk.img",
-            "/cache/.disable_magisk", "/data/adb/modules",
-            "/data/adb/services.d", "/data/adb/post-fs-data.d"
+            "/sbin/.magisk",
+            "/data/adb/magisk",
+            "/data/adb/magisk.img",
+            "/cache/.disable_magisk",
+            "/data/adb/modules",
+            "/data/adb/services.d",
+            "/data/adb/post-fs-data.d"
         )
 
         // 验证 su 路径覆盖了系统级和用户级安装位置

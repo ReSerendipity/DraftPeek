@@ -34,10 +34,7 @@ object WebViewStyleHelper {
      * @param webView 要配置的WebView实例
      * @param backgroundColor 背景颜色（ARGB整数），默认透明
      */
-    fun configureStaticHtmlWebView(
-        webView: WebView,
-        backgroundColor: Int = Color.TRANSPARENT,
-    ) {
+    fun configureStaticHtmlWebView(webView: WebView, backgroundColor: Int = Color.TRANSPARENT) {
         webView.apply {
             settings.apply {
                 javaScriptEnabled = false
@@ -65,10 +62,7 @@ object WebViewStyleHelper {
      * @param backgroundColor 背景颜色（ARGB整数），默认透明
      */
     @SuppressLint("SetJavaScriptEnabled") // 渲染 Markdown 预览需 JS；已通过 blockNetworkLoads/禁文件访问/HTML 消毒（jsoup, VULN-004）加固
-    fun configureJavascriptWebView(
-        webView: WebView,
-        backgroundColor: Int = Color.TRANSPARENT,
-    ) {
+    fun configureJavascriptWebView(webView: WebView, backgroundColor: Int = Color.TRANSPARENT) {
         webView.apply {
             settings.apply {
                 javaScriptEnabled = true
@@ -94,18 +88,13 @@ object WebViewStyleHelper {
      * @param mimeType MIME类型，默认"text/html"
      * @param encoding 字符编码，默认"UTF-8"
      */
-    fun loadHtml(
-        webView: WebView,
-        htmlContent: String,
-        mimeType: String = "text/html",
-        encoding: String = "UTF-8",
-    ) {
+    fun loadHtml(webView: WebView, htmlContent: String, mimeType: String = "text/html", encoding: String = "UTF-8") {
         webView.loadDataWithBaseURL(
             "about:blank",
             htmlContent,
             "$mimeType; charset=$encoding",
             encoding,
-            null,
+            null
         )
     }
 }

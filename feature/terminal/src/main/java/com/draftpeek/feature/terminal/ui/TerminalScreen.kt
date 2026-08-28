@@ -26,14 +26,12 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
-import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.itemsIndexed
 import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.BasicTextField
-import androidx.compose.material3.Icon
 import androidx.compose.material3.LinearProgressIndicator
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
@@ -62,7 +60,6 @@ import com.draftpeek.feature.terminal.R
 import com.draftpeek.feature.terminal.emulator.ProotSetupState
 import com.draftpeek.feature.terminal.model.TerminalConfig
 import com.draftpeek.feature.terminal.viewmodel.TerminalViewModel
-import java.io.File
 
 /**
  * 终端主界面Composable。
@@ -167,7 +164,7 @@ fun TerminalScreen(
         AnimatedVisibility(
             visible = prootState is ProotSetupState.Extracting,
             enter = fadeIn(),
-            exit = fadeOut(),
+            exit = fadeOut()
         ) {
             val progress = (prootState as? ProotSetupState.Extracting)?.progress ?: 0f
             Column(
@@ -195,7 +192,7 @@ fun TerminalScreen(
                 Spacer(modifier = Modifier.height(8.dp))
                 LinearProgressIndicator(
                     progress = { progress },
-                    modifier = Modifier.fillMaxWidth(),
+                    modifier = Modifier.fillMaxWidth()
                 )
                 Spacer(modifier = Modifier.height(2.dp))
                 Text(
@@ -213,7 +210,7 @@ fun TerminalScreen(
         AnimatedVisibility(
             visible = prootState is ProotSetupState.Error,
             enter = fadeIn(),
-            exit = fadeOut(),
+            exit = fadeOut()
         ) {
             val errorMsg = (prootState as? ProotSetupState.Error)?.message ?: ""
             Row(
@@ -293,7 +290,7 @@ fun TerminalScreen(
                         text = session.title,
                         style = TextStyle.Default.copy(
                             fontSize = 12.sp,
-                            fontWeight = FontWeight(550),
+                            fontWeight = FontWeight(550)
                         ),
                         color = sessionFg
                     )
@@ -314,7 +311,7 @@ fun TerminalScreen(
                     .size(30.dp)
                     .clip(RoundedCornerShape(8.dp))
                     .clickable { viewModel.createSession(TerminalConfig()) },
-                contentAlignment = Alignment.Center,
+                contentAlignment = Alignment.Center
             ) {
                 StrokeIcon(
                     icon = StrokeIcons.Plus,
@@ -408,7 +405,7 @@ fun TerminalScreen(
                             inputText = ""
                         }
                     },
-                contentAlignment = Alignment.Center,
+                contentAlignment = Alignment.Center
             ) {
                 StrokeIcon(
                     icon = StrokeIcons.Send,

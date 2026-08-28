@@ -87,7 +87,7 @@ data class EditorModeConfig(
     val enableTabInsertion: Boolean = true,
     val tabSize: Int = 4,
     val maxFileSizeForHighlighting: Long = 1024 * 1024,
-    val maxFileSizeForLsp: Long = 512 * 1024,
+    val maxFileSizeForLsp: Long = 512 * 1024
 ) {
     companion object {
         /**
@@ -110,7 +110,7 @@ data class EditorModeConfig(
             enableTabInsertion = true,
             tabSize = 4,
             maxFileSizeForHighlighting = 1024 * 1024,
-            maxFileSizeForLsp = 512 * 1024,
+            maxFileSizeForLsp = 512 * 1024
         )
 
         /**
@@ -134,7 +134,7 @@ data class EditorModeConfig(
             enableTabInsertion = true,
             tabSize = 4,
             maxFileSizeForHighlighting = 0,
-            maxFileSizeForLsp = 0,
+            maxFileSizeForLsp = 0
         )
 
         /**
@@ -157,7 +157,7 @@ data class EditorModeConfig(
             enableTabInsertion = true,
             tabSize = 4,
             maxFileSizeForHighlighting = 0,
-            maxFileSizeForLsp = 0,
+            maxFileSizeForLsp = 0
         )
 
         /**
@@ -166,12 +166,10 @@ data class EditorModeConfig(
          * @param mode 编辑器模式
          * @return 对应模式的配置对象
          */
-        fun forMode(mode: EditorMode): EditorModeConfig {
-            return when (mode) {
-                EditorMode.STANDARD -> STANDARD_CONFIG
-                EditorMode.LITE -> LITE_CONFIG
-                EditorMode.WYSIWYG -> WYSIWYG_CONFIG
-            }
+        fun forMode(mode: EditorMode): EditorModeConfig = when (mode) {
+            EditorMode.STANDARD -> STANDARD_CONFIG
+            EditorMode.LITE -> LITE_CONFIG
+            EditorMode.WYSIWYG -> WYSIWYG_CONFIG
         }
     }
 }
@@ -181,12 +179,10 @@ data class EditorModeConfig(
  *
  * @return 模式的英文显示名称（"Standard"、"Lite"、"WYSIWYG"）
  */
-fun EditorMode.toDisplayString(): String {
-    return when (this) {
-        EditorMode.STANDARD -> "Standard"
-        EditorMode.LITE -> "Lite"
-        EditorMode.WYSIWYG -> "WYSIWYG"
-    }
+fun EditorMode.toDisplayString(): String = when (this) {
+    EditorMode.STANDARD -> "Standard"
+    EditorMode.LITE -> "Lite"
+    EditorMode.WYSIWYG -> "WYSIWYG"
 }
 
 /**
@@ -194,12 +190,10 @@ fun EditorMode.toDisplayString(): String {
  *
  * @return 模式功能的英文描述字符串
  */
-fun EditorMode.getDescription(): String {
-    return when (this) {
-        EditorMode.STANDARD -> "Full-featured editor with syntax highlighting and LSP support"
-        EditorMode.LITE -> "Lightweight editor for quick edits, better performance"
-        EditorMode.WYSIWYG -> "Rich text editing with real-time preview (Markdown only)"
-    }
+fun EditorMode.getDescription(): String = when (this) {
+    EditorMode.STANDARD -> "Full-featured editor with syntax highlighting and LSP support"
+    EditorMode.LITE -> "Lightweight editor for quick edits, better performance"
+    EditorMode.WYSIWYG -> "Rich text editing with real-time preview (Markdown only)"
 }
 
 /**
@@ -207,6 +201,4 @@ fun EditorMode.getDescription(): String {
  *
  * @return 如果是 WYSIWYG 模式返回 true，否则返回 false
  */
-fun EditorMode.isMarkdownOnly(): Boolean {
-    return this == EditorMode.WYSIWYG
-}
+fun EditorMode.isMarkdownOnly(): Boolean = this == EditorMode.WYSIWYG

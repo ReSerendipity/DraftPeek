@@ -9,8 +9,6 @@
  */
 package com.draftpeek.core.common.event
 
-import android.net.Uri
-
 /**
  * 编辑器事件密封类。
  *
@@ -25,10 +23,7 @@ sealed class EditorEvent : AppEvent {
      * @property uri 已保存文件的URI
      * @property fileName 已保存文件的显示名称
      */
-    data class FileSaved(
-        val uri: String,
-        val fileName: String = "",
-    ) : EditorEvent()
+    data class FileSaved(val uri: String, val fileName: String = "") : EditorEvent()
 
     /**
      * 在编辑器中打开新文件时发出的事件。
@@ -36,10 +31,7 @@ sealed class EditorEvent : AppEvent {
      * @property uri 已打开文件的URI
      * @property language 检测到的文件语言
      */
-    data class FileOpened(
-        val uri: String,
-        val language: String? = null,
-    ) : EditorEvent()
+    data class FileOpened(val uri: String, val language: String? = null) : EditorEvent()
 
     /**
      * 当前标签页切换时发出的事件。
@@ -47,10 +39,7 @@ sealed class EditorEvent : AppEvent {
      * @property tabId 新活跃标签页的ID
      * @property uri 新标签页中文件的URI
      */
-    data class TabChanged(
-        val tabId: String,
-        val uri: String,
-    ) : EditorEvent()
+    data class TabChanged(val tabId: String, val uri: String) : EditorEvent()
 
     /**
      * 编辑器脏状态（未保存更改）变更时发出的事件。
@@ -58,10 +47,7 @@ sealed class EditorEvent : AppEvent {
      * @property uri 脏状态变更的文件URI
      * @property isDirty 如果文件现在有未保存的更改则为true
      */
-    data class DirtyStateChanged(
-        val uri: String,
-        val isDirty: Boolean,
-    ) : EditorEvent()
+    data class DirtyStateChanged(val uri: String, val isDirty: Boolean) : EditorEvent()
 
     /**
      * 安全响应要求编辑器切换只读/解除只读。
@@ -71,8 +57,5 @@ sealed class EditorEvent : AppEvent {
      * @property locked true 表示切换为只读模式，false 表示解除只读
      * @property reason 锁定原因标识（如 "security_ai_threat_detected"）
      */
-    data class LockEditor(
-        val locked: Boolean,
-        val reason: String = "",
-    ) : EditorEvent()
+    data class LockEditor(val locked: Boolean, val reason: String = "") : EditorEvent()
 }

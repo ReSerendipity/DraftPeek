@@ -18,31 +18,25 @@
  */
 package com.draftpeek.navigation
 
+import android.net.Uri
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material3.ExperimentalMaterial3Api
-import androidx.compose.material3.Icon
-import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
-import androidx.compose.material3.TopAppBar
-import androidx.compose.material3.TopAppBarDefaults
-import androidx.compose.ui.text.TextStyle
-import androidx.compose.ui.text.font.FontFamily
-import androidx.compose.ui.text.font.FontWeight
-import androidx.compose.ui.unit.sp
-import android.net.Uri
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.text.TextStyle
+import androidx.compose.ui.text.font.FontFamily
+import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.unit.sp
 import androidx.navigation.NavHostController
 import androidx.navigation.NavType
 import androidx.navigation.compose.NavHost
@@ -115,7 +109,7 @@ fun DraftPeekNavHost(
     isSplitViewActive: Boolean = false,
     splitViewFileUri: String? = null,
     onSplitViewFileSelected: (FileItem) -> Unit = {},
-    modifier: Modifier = Modifier,
+    modifier: Modifier = Modifier
 ) {
     val context = LocalContext.current
     require(context is androidx.activity.ComponentActivity) {
@@ -124,13 +118,13 @@ fun DraftPeekNavHost(
     val tabManager = remember {
         EntryPointAccessors.fromActivity(
             context,
-            TabManagerEntryPoint::class.java,
+            TabManagerEntryPoint::class.java
         ).tabManager()
     }
     NavHost(
         navController = navController,
         startDestination = Route.Browser.route,
-        modifier = modifier.background(PrototypeTokens.pageBackground),
+        modifier = modifier.background(PrototypeTokens.pageBackground)
     ) {
         // ---- Browser --------------------------------------------------
         composable(
@@ -138,7 +132,7 @@ fun DraftPeekNavHost(
             enterTransition = { DraftPeekTransitions.topLevelEnter },
             exitTransition = { DraftPeekTransitions.topLevelExit },
             popEnterTransition = { DraftPeekTransitions.topLevelEnter },
-            popExitTransition = { DraftPeekTransitions.topLevelExit },
+            popExitTransition = { DraftPeekTransitions.topLevelExit }
         ) {
             if (layoutMode == LayoutMode.EXPANDED && isSplitViewActive) {
                 // Split view: browser on the left, editor on the right
@@ -162,7 +156,7 @@ fun DraftPeekNavHost(
                                 navController.navigate(Route.Terminal.createRoute(cwd))
                             },
                             layoutMode = layoutMode,
-                            foldInfo = foldInfo,
+                            foldInfo = foldInfo
                         )
                     },
                     endContent = {
@@ -172,18 +166,18 @@ fun DraftPeekNavHost(
                                 layoutMode = layoutMode,
                                 foldInfo = foldInfo,
                                 darkTheme = darkTheme,
-                                fileUri = splitViewFileUri,
+                                fileUri = splitViewFileUri
                             )
                         } else {
                             // No file selected yet -- show placeholder
                             Box(
                                 modifier = Modifier.fillMaxSize(),
-                                contentAlignment = Alignment.Center,
+                                contentAlignment = Alignment.Center
                             ) {
                                 Text(
                                     text = stringResource(R.string.app_hint_select_file_editor),
                                     style = MaterialTheme.typography.bodyLarge,
-                                    color = PrototypeTokens.fgSoft,
+                                    color = PrototypeTokens.fgSoft
                                 )
                             }
                         }
@@ -191,7 +185,7 @@ fun DraftPeekNavHost(
                     modifier = Modifier.fillMaxSize(),
                     initialSplitRatio = 0.35f,
                     minSplitRatio = 0.25f,
-                    maxSplitRatio = 0.6f,
+                    maxSplitRatio = 0.6f
                 )
             } else {
                 FileBrowserScreen(
@@ -226,7 +220,7 @@ fun DraftPeekNavHost(
                         navController.navigate(Route.Terminal.createRoute(cwd))
                     },
                     layoutMode = layoutMode,
-                    foldInfo = foldInfo,
+                    foldInfo = foldInfo
                 )
             }
         }
@@ -241,12 +235,12 @@ fun DraftPeekNavHost(
             arguments = listOf(
                 navArgument("uri") {
                     type = NavType.StringType
-                },
+                }
             ),
             enterTransition = DraftPeekTransitions.sharedAxisHorizontalEnter,
             exitTransition = DraftPeekTransitions.sharedAxisHorizontalExit,
             popEnterTransition = DraftPeekTransitions.sharedAxisHorizontalPopEnter,
-            popExitTransition = DraftPeekTransitions.sharedAxisHorizontalPopExit,
+            popExitTransition = DraftPeekTransitions.sharedAxisHorizontalPopExit
         ) { backStackEntry ->
             val uri = backStackEntry.arguments?.getString("uri") ?: ""
 
@@ -261,7 +255,7 @@ fun DraftPeekNavHost(
                 fileUri = uri.ifBlank { null },
                 onNavigateToTerminal = { cwd ->
                     navController.navigate(Route.Terminal.createRoute(cwd))
-                },
+                }
             )
         }
 
@@ -271,7 +265,7 @@ fun DraftPeekNavHost(
             enterTransition = { DraftPeekTransitions.topLevelEnter },
             exitTransition = { DraftPeekTransitions.topLevelExit },
             popEnterTransition = { DraftPeekTransitions.topLevelEnter },
-            popExitTransition = { DraftPeekTransitions.topLevelExit },
+            popExitTransition = { DraftPeekTransitions.topLevelExit }
         ) {
             ProfileScreen(
                 onFileClick = { uri ->
@@ -305,7 +299,7 @@ fun DraftPeekNavHost(
 
                         when {
                             signatureResult is ApkIntegrityChecker.IntegrityResult.Verified &&
-                            dexResult is DexIntegrityChecker.DexResult.Verified -> {
+                                dexResult is DexIntegrityChecker.DexResult.Verified -> {
                                 val fingerprint = DexIntegrityChecker.computeDexSha256(context)
                                 VerifyAppState.Success(fingerprint ?: "计算中...")
                             }
@@ -322,7 +316,7 @@ fun DraftPeekNavHost(
                     } catch (e: Exception) {
                         VerifyAppState.Error(e.message ?: "未知错误")
                     }
-                },
+                }
             )
         }
 
@@ -332,10 +326,10 @@ fun DraftPeekNavHost(
             enterTransition = DraftPeekTransitions.sharedAxisVerticalEnter,
             exitTransition = DraftPeekTransitions.sharedAxisVerticalExit,
             popEnterTransition = DraftPeekTransitions.sharedAxisVerticalPopEnter,
-            popExitTransition = DraftPeekTransitions.sharedAxisVerticalPopExit,
+            popExitTransition = DraftPeekTransitions.sharedAxisVerticalPopExit
         ) {
             AccessibilityScreen(
-                onNavigateUp = { navController.navigateUp() },
+                onNavigateUp = { navController.navigateUp() }
             )
         }
 
@@ -345,7 +339,7 @@ fun DraftPeekNavHost(
             enterTransition = DraftPeekTransitions.sharedAxisVerticalEnter,
             exitTransition = DraftPeekTransitions.sharedAxisVerticalExit,
             popEnterTransition = DraftPeekTransitions.sharedAxisVerticalPopEnter,
-            popExitTransition = DraftPeekTransitions.sharedAxisVerticalPopExit,
+            popExitTransition = DraftPeekTransitions.sharedAxisVerticalPopExit
         ) {
             SnippetScreen(navController = navController)
         }
@@ -356,13 +350,13 @@ fun DraftPeekNavHost(
             enterTransition = DraftPeekTransitions.sharedAxisVerticalEnter,
             exitTransition = DraftPeekTransitions.sharedAxisVerticalExit,
             popEnterTransition = DraftPeekTransitions.sharedAxisVerticalPopEnter,
-            popExitTransition = DraftPeekTransitions.sharedAxisVerticalPopExit,
+            popExitTransition = DraftPeekTransitions.sharedAxisVerticalPopExit
         ) {
             SampleFilesScreen(
                 onSampleClick = { uri ->
                     navController.navigate(Route.Editor.createRoute(uri))
                 },
-                onNavigateUp = { navController.navigateUp() },
+                onNavigateUp = { navController.navigateUp() }
             )
         }
 
@@ -372,7 +366,7 @@ fun DraftPeekNavHost(
             enterTransition = DraftPeekTransitions.sharedAxisVerticalEnter,
             exitTransition = DraftPeekTransitions.sharedAxisVerticalExit,
             popEnterTransition = DraftPeekTransitions.sharedAxisVerticalPopEnter,
-            popExitTransition = DraftPeekTransitions.sharedAxisVerticalPopExit,
+            popExitTransition = DraftPeekTransitions.sharedAxisVerticalPopExit
         ) {
             BrowseHistoryScreen(
                 onFileClick = { uri ->
@@ -387,7 +381,7 @@ fun DraftPeekNavHost(
                         navController.navigate(Route.Editor.createRoute(uri))
                     }
                 },
-                onBack = { navController.navigateUp() },
+                onBack = { navController.navigateUp() }
             )
         }
 
@@ -400,17 +394,17 @@ fun DraftPeekNavHost(
                 },
                 navArgument("rightUri") {
                     type = NavType.StringType
-                },
+                }
             ),
             enterTransition = DraftPeekTransitions.sharedAxisHorizontalEnter,
             exitTransition = DraftPeekTransitions.sharedAxisHorizontalExit,
             popEnterTransition = DraftPeekTransitions.sharedAxisHorizontalPopEnter,
-            popExitTransition = DraftPeekTransitions.sharedAxisHorizontalPopExit,
+            popExitTransition = DraftPeekTransitions.sharedAxisHorizontalPopExit
         ) {
             DiffScreen(
                 onNavigateUp = { navController.navigateUp() },
                 layoutMode = layoutMode,
-                foldInfo = foldInfo,
+                foldInfo = foldInfo
             )
         }
 
@@ -420,7 +414,7 @@ fun DraftPeekNavHost(
             enterTransition = DraftPeekTransitions.sharedAxisHorizontalEnter,
             exitTransition = DraftPeekTransitions.sharedAxisHorizontalExit,
             popEnterTransition = DraftPeekTransitions.sharedAxisHorizontalPopEnter,
-            popExitTransition = DraftPeekTransitions.sharedAxisHorizontalPopExit,
+            popExitTransition = DraftPeekTransitions.sharedAxisHorizontalPopExit
         ) {
             AchievementScreen(
                 onNavigateUp = { navController.popBackStack() }
@@ -434,14 +428,14 @@ fun DraftPeekNavHost(
             enterTransition = DraftPeekTransitions.sharedAxisHorizontalEnter,
             exitTransition = DraftPeekTransitions.sharedAxisHorizontalExit,
             popEnterTransition = DraftPeekTransitions.sharedAxisHorizontalPopEnter,
-            popExitTransition = DraftPeekTransitions.sharedAxisHorizontalPopExit,
+            popExitTransition = DraftPeekTransitions.sharedAxisHorizontalPopExit
         ) { backStackEntry ->
             val treeUri = backStackEntry.arguments?.getString("treeUri")?.let {
                 Uri.parse(Uri.decode(it))
             } ?: Uri.EMPTY
             GitScreen(
                 treeUri = treeUri,
-                onNavigateBack = { navController.popBackStack() },
+                onNavigateBack = { navController.popBackStack() }
             )
         }
 
@@ -458,7 +452,7 @@ fun DraftPeekNavHost(
             enterTransition = DraftPeekTransitions.sharedAxisHorizontalEnter,
             exitTransition = DraftPeekTransitions.sharedAxisHorizontalExit,
             popEnterTransition = DraftPeekTransitions.sharedAxisHorizontalPopEnter,
-            popExitTransition = DraftPeekTransitions.sharedAxisHorizontalPopExit,
+            popExitTransition = DraftPeekTransitions.sharedAxisHorizontalPopExit
         ) {
             Scaffold(
                 topBar = {
@@ -467,19 +461,19 @@ fun DraftPeekNavHost(
                         titleStyle = TextStyle(
                             fontFamily = FontFamily.Default,
                             fontWeight = FontWeight.Bold,
-                            fontSize = 20.sp,
+                            fontSize = 20.sp
                         ),
-                        onBack = { navController.navigateUp() },
+                        onBack = { navController.navigateUp() }
                     )
                 },
-                containerColor = PrototypeTokens.pageBackground,
+                containerColor = PrototypeTokens.pageBackground
             ) { innerPadding ->
                 val cwd = it.arguments?.getString("cwd")
                 TerminalScreen(
                     modifier = Modifier
                         .fillMaxSize()
                         .padding(innerPadding),
-                    initialCwd = cwd,
+                    initialCwd = cwd
                 )
             }
         }

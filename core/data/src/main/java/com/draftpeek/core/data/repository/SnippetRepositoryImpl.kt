@@ -11,28 +11,23 @@ package com.draftpeek.core.data.repository
 
 import com.draftpeek.core.data.dao.SnippetDao
 import com.draftpeek.core.data.entity.Snippet
-import kotlinx.coroutines.flow.Flow
 import javax.inject.Inject
+import kotlinx.coroutines.flow.Flow
 
 /**
  * [SnippetRepository] 的 Room 实现。
  *
  * @property dao 代码片段 DAO 实例
  */
-class SnippetRepositoryImpl @Inject constructor(
-    private val dao: SnippetDao,
-) : SnippetRepository {
+class SnippetRepositoryImpl @Inject constructor(private val dao: SnippetDao) : SnippetRepository {
 
     override fun getAllSnippets(): Flow<List<Snippet>> = dao.getAllSnippets()
 
-    override fun getSnippetsByCategory(category: String): Flow<List<Snippet>> =
-        dao.getSnippetsByCategory(category)
+    override fun getSnippetsByCategory(category: String): Flow<List<Snippet>> = dao.getSnippetsByCategory(category)
 
-    override fun getSnippetsByLanguage(language: String): Flow<List<Snippet>> =
-        dao.getSnippetsByLanguage(language)
+    override fun getSnippetsByLanguage(language: String): Flow<List<Snippet>> = dao.getSnippetsByLanguage(language)
 
-    override fun searchSnippets(query: String): Flow<List<Snippet>> =
-        dao.searchSnippets(query)
+    override fun searchSnippets(query: String): Flow<List<Snippet>> = dao.searchSnippets(query)
 
     override fun searchSnippetsByLanguage(query: String, language: String): Flow<List<Snippet>> =
         dao.searchSnippetsByLanguage(query, language)
@@ -40,8 +35,7 @@ class SnippetRepositoryImpl @Inject constructor(
     override fun searchSnippetsByCategory(query: String, category: String): Flow<List<Snippet>> =
         dao.searchSnippetsByCategory(query, category)
 
-    override fun searchSnippetsSubstring(query: String): Flow<List<Snippet>> =
-        dao.searchSnippetsSubstring(query)
+    override fun searchSnippetsSubstring(query: String): Flow<List<Snippet>> = dao.searchSnippetsSubstring(query)
 
     override fun getSnippetById(id: Long): Flow<Snippet?> = dao.getSnippetById(id)
 

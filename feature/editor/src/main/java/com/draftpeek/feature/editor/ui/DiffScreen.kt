@@ -61,7 +61,6 @@ import androidx.compose.ui.unit.sp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.draftpeek.core.common.util.DiffLine
-import com.draftpeek.feature.editor.R
 import com.draftpeek.core.common.util.DiffResult
 import com.draftpeek.core.common.util.DiffType
 import com.draftpeek.core.ui.layout.FoldInfo
@@ -72,7 +71,7 @@ import com.draftpeek.core.ui.theme.LocalDarkTheme
 import com.draftpeek.core.ui.theme.PrototypeShapes
 import com.draftpeek.core.ui.theme.PrototypeSpacing
 import com.draftpeek.core.ui.theme.PrototypeTokens
-import com.draftpeek.feature.editor.viewmodel.DiffUiState
+import com.draftpeek.feature.editor.R
 import com.draftpeek.feature.editor.viewmodel.DiffViewModel
 import kotlinx.coroutines.flow.distinctUntilChanged
 
@@ -92,7 +91,7 @@ fun DiffScreen(
     onNavigateUp: () -> Unit,
     layoutMode: LayoutMode = LayoutMode.COMPACT,
     foldInfo: FoldInfo = FoldInfo(),
-    viewModel: DiffViewModel = hiltViewModel(),
+    viewModel: DiffViewModel = hiltViewModel()
 ) {
     val uiState by viewModel.uiState.collectAsStateWithLifecycle()
     val currentDiffIndex by viewModel.currentDiffIndex.collectAsStateWithLifecycle()
@@ -108,18 +107,18 @@ fun DiffScreen(
     Box(
         modifier = Modifier
             .fillMaxSize()
-            .background(pageBg),
+            .background(pageBg)
     ) {
         Column(
             modifier = Modifier
                 .fillMaxSize()
-                .padding(horizontal = PrototypeSpacing.ScreenHorizontal),
+                .padding(horizontal = PrototypeSpacing.ScreenHorizontal)
         ) {
             Spacer(modifier = Modifier.height(8.dp))
 
             Row(
                 modifier = Modifier.fillMaxWidth(),
-                verticalAlignment = Alignment.CenterVertically,
+                verticalAlignment = Alignment.CenterVertically
             ) {
                 Box(
                     modifier = Modifier
@@ -128,13 +127,13 @@ fun DiffScreen(
                         .border(1.dp, border, PrototypeShapes.Medium)
                         .background(surface)
                         .clickable { onNavigateUp() },
-                    contentAlignment = Alignment.Center,
+                    contentAlignment = Alignment.Center
                 ) {
                     Icon(
                         imageVector = Icons.AutoMirrored.Filled.ArrowBack,
                         contentDescription = stringResource(R.string.editor_back),
                         tint = fgSoft,
-                        modifier = Modifier.size(16.dp),
+                        modifier = Modifier.size(16.dp)
                     )
                 }
                 Spacer(modifier = Modifier.width(12.dp))
@@ -142,20 +141,20 @@ fun DiffScreen(
                     Text(
                         text = "文件对比",
                         style = H2Style.copy(color = fg),
-                        maxLines = 1,
+                        maxLines = 1
                     )
                     val diffCount = uiState.diffResult?.diffCount ?: 0
                     if (diffCount > 0) {
                         Text(
                             text = "${uiState.leftFileName} → ${uiState.rightFileName} · $diffCount 处差异",
                             style = DraftPeekTypography.bodySmall.copy(color = muted),
-                            maxLines = 1,
+                            maxLines = 1
                         )
                     } else {
                         Text(
                             text = "${uiState.leftFileName} → ${uiState.rightFileName}",
                             style = DraftPeekTypography.bodySmall.copy(color = muted),
-                            maxLines = 1,
+                            maxLines = 1
                         )
                     }
                 }
@@ -169,13 +168,13 @@ fun DiffScreen(
                             .border(1.dp, border, PrototypeShapes.Medium)
                             .background(surface)
                             .clickable { viewModel.prevDiff() },
-                        contentAlignment = Alignment.Center,
+                        contentAlignment = Alignment.Center
                     ) {
                         Icon(
                             imageVector = Icons.Filled.KeyboardArrowUp,
                             contentDescription = stringResource(R.string.editor_prev_diff),
                             tint = fgSoft,
-                            modifier = Modifier.size(16.dp),
+                            modifier = Modifier.size(16.dp)
                         )
                     }
                     Spacer(modifier = Modifier.width(6.dp))
@@ -186,13 +185,13 @@ fun DiffScreen(
                             .border(1.dp, border, PrototypeShapes.Medium)
                             .background(surface)
                             .clickable { viewModel.nextDiff() },
-                        contentAlignment = Alignment.Center,
+                        contentAlignment = Alignment.Center
                     ) {
                         Icon(
                             imageVector = Icons.Filled.KeyboardArrowDown,
                             contentDescription = stringResource(R.string.editor_next_diff),
                             tint = fgSoft,
-                            modifier = Modifier.size(16.dp),
+                            modifier = Modifier.size(16.dp)
                         )
                     }
                 }
@@ -205,7 +204,7 @@ fun DiffScreen(
                     uiState.isLoading -> {
                         Box(
                             modifier = Modifier.fillMaxSize(),
-                            contentAlignment = Alignment.Center,
+                            contentAlignment = Alignment.Center
                         ) {
                             CircularProgressIndicator(color = accent)
                         }
@@ -213,11 +212,11 @@ fun DiffScreen(
                     uiState.error != null -> {
                         Box(
                             modifier = Modifier.fillMaxSize(),
-                            contentAlignment = Alignment.Center,
+                            contentAlignment = Alignment.Center
                         ) {
                             Text(
                                 text = uiState.error ?: "",
-                                style = DraftPeekTypography.bodyLarge.copy(color = PrototypeTokens.error),
+                                style = DraftPeekTypography.bodyLarge.copy(color = PrototypeTokens.error)
                             )
                         }
                     }
@@ -230,13 +229,13 @@ fun DiffScreen(
                                 diffResult = requireNotNull(uiState.diffResult),
                                 currentDiffIndex = currentDiffIndex,
                                 viewModel = viewModel,
-                                border = border,
+                                border = border
                             )
                         } else {
                             TabDiffContent(
                                 diffResult = requireNotNull(uiState.diffResult),
                                 currentDiffIndex = currentDiffIndex,
-                                viewModel = viewModel,
+                                viewModel = viewModel
                             )
                         }
                     }
@@ -253,11 +252,11 @@ fun DiffScreen(
                         .background(surface)
                         .border(1.dp, border, PrototypeShapes.Medium)
                         .padding(vertical = 8.dp),
-                    contentAlignment = Alignment.Center,
+                    contentAlignment = Alignment.Center
                 ) {
                     Text(
                         text = "${currentDiffIndex + 1}/${diffResult.diffCount} 处差异",
-                        style = DraftPeekTypography.bodySmall.copy(color = fgSoft),
+                        style = DraftPeekTypography.bodySmall.copy(color = fgSoft)
                     )
                 }
                 Spacer(modifier = Modifier.height(8.dp))
@@ -286,7 +285,7 @@ private fun SideBySideDiffContent(
     currentDiffIndex: Int,
     viewModel: DiffViewModel,
     border: Color,
-    modifier: Modifier = Modifier,
+    modifier: Modifier = Modifier
 ) {
     val leftListState = rememberLazyListState()
     val rightListState = rememberLazyListState()
@@ -313,18 +312,20 @@ private fun SideBySideDiffContent(
         modifier = modifier
             .fillMaxSize()
             .clip(PrototypeShapes.Card)
-            .border(1.dp, border, PrototypeShapes.Card),
+            .border(1.dp, border, PrototypeShapes.Card)
     ) {
         LazyColumn(
             state = leftListState,
             modifier = Modifier
                 .weight(1f)
-                .fillMaxHeight(),
+                .fillMaxHeight()
         ) {
-            itemsIndexed(diffResult.leftLines, key = { _, line -> "left_${line.lineNumber}_${line.type}" }) { index, line ->
+            itemsIndexed(diffResult.leftLines, key = { _, line ->
+                "left_${line.lineNumber}_${line.type}"
+            }) { index, line ->
                 DiffLineItem(
                     line = line,
-                    isHighlighted = isDiffHighlighted(diffResult, index, currentDiffIndex),
+                    isHighlighted = isDiffHighlighted(diffResult, index, currentDiffIndex)
                 )
             }
         }
@@ -333,19 +334,21 @@ private fun SideBySideDiffContent(
             modifier = Modifier
                 .fillMaxHeight()
                 .width(1.dp),
-            color = border,
+            color = border
         )
 
         LazyColumn(
             state = rightListState,
             modifier = Modifier
                 .weight(1f)
-                .fillMaxHeight(),
+                .fillMaxHeight()
         ) {
-            itemsIndexed(diffResult.rightLines, key = { _, line -> "right_${line.lineNumber}_${line.type}" }) { index, line ->
+            itemsIndexed(diffResult.rightLines, key = { _, line ->
+                "right_${line.lineNumber}_${line.type}"
+            }) { index, line ->
                 DiffLineItem(
                     line = line,
-                    isHighlighted = isDiffHighlighted(diffResult, index, currentDiffIndex),
+                    isHighlighted = isDiffHighlighted(diffResult, index, currentDiffIndex)
                 )
             }
         }
@@ -368,7 +371,7 @@ private fun TabDiffContent(
     diffResult: DiffResult,
     currentDiffIndex: Int,
     viewModel: DiffViewModel,
-    modifier: Modifier = Modifier,
+    modifier: Modifier = Modifier
 ) {
     var selectedTab by remember { mutableIntStateOf(0) }
     val listState = rememberLazyListState()
@@ -387,30 +390,30 @@ private fun TabDiffContent(
         modifier = modifier
             .fillMaxSize()
             .clip(PrototypeShapes.Card)
-            .border(1.dp, border, PrototypeShapes.Card),
+            .border(1.dp, border, PrototypeShapes.Card)
     ) {
         Row(
             modifier = Modifier
                 .fillMaxWidth()
-                .background(surface),
+                .background(surface)
         ) {
             DiffTabItem(
                 label = stringResource(R.string.editor_diff_original),
                 isSelected = selectedTab == 0,
                 onClick = { selectedTab = 0 },
-                modifier = Modifier.weight(1f),
+                modifier = Modifier.weight(1f)
             )
             Box(
                 modifier = Modifier
                     .width(1.dp)
                     .height(36.dp)
-                    .background(border),
+                    .background(border)
             )
             DiffTabItem(
                 label = stringResource(R.string.editor_diff_modified),
                 isSelected = selectedTab == 1,
                 onClick = { selectedTab = 1 },
-                modifier = Modifier.weight(1f),
+                modifier = Modifier.weight(1f)
             )
         }
 
@@ -420,12 +423,12 @@ private fun TabDiffContent(
 
         LazyColumn(
             state = listState,
-            modifier = Modifier.fillMaxSize(),
+            modifier = Modifier.fillMaxSize()
         ) {
             itemsIndexed(lines, key = { _, line -> "${line.lineNumber}_${line.type}" }) { index, line ->
                 DiffLineItem(
                     line = line,
-                    isHighlighted = isDiffHighlighted(diffResult, index, currentDiffIndex),
+                    isHighlighted = isDiffHighlighted(diffResult, index, currentDiffIndex)
                 )
             }
         }
@@ -443,48 +446,43 @@ private fun TabDiffContent(
  * @param modifier 修饰符
  */
 @Composable
-private fun DiffTabItem(
-    label: String,
-    isSelected: Boolean,
-    onClick: () -> Unit,
-    modifier: Modifier = Modifier,
-) {
+private fun DiffTabItem(label: String, isSelected: Boolean, onClick: () -> Unit, modifier: Modifier = Modifier) {
     val bgColor by animateColorAsState(
         targetValue = if (isSelected) PrototypeTokens.bg else PrototypeTokens.surface,
         animationSpec = tween(200),
-        label = "diff_tab_bg",
+        label = "diff_tab_bg"
     )
     val contentColor by animateColorAsState(
         targetValue = if (isSelected) PrototypeTokens.fg else PrototypeTokens.muted,
         animationSpec = tween(200),
-        label = "diff_tab_content",
+        label = "diff_tab_content"
     )
     val accent = PrototypeTokens.accent
 
     Column(
         modifier = modifier
             .clickable(onClick = onClick)
-            .background(bgColor),
+            .background(bgColor)
     ) {
         Box(
             modifier = Modifier
                 .fillMaxWidth()
                 .padding(vertical = 8.dp),
-            contentAlignment = Alignment.Center,
+            contentAlignment = Alignment.Center
         ) {
             Text(
                 text = label,
                 style = DraftPeekTypography.bodySmall.copy(
                     color = contentColor,
-                    fontWeight = if (isSelected) FontWeight.SemiBold else FontWeight.Normal,
-                ),
+                    fontWeight = if (isSelected) FontWeight.SemiBold else FontWeight.Normal
+                )
             )
         }
         Box(
             modifier = Modifier
                 .fillMaxWidth()
                 .height(2.dp)
-                .background(if (isSelected) accent else Color.Transparent),
+                .background(if (isSelected) accent else Color.Transparent)
         )
     }
 }
@@ -499,10 +497,7 @@ private fun DiffTabItem(
  * @param isHighlighted 是否为当前选中的差异行
  */
 @Composable
-private fun DiffLineItem(
-    line: DiffLine,
-    isHighlighted: Boolean,
-) {
+private fun DiffLineItem(line: DiffLine, isHighlighted: Boolean) {
     val isDark = LocalDarkTheme.current
     val backgroundColor = when (line.type) {
         DiffType.EQUAL -> Color.Transparent
@@ -521,10 +516,13 @@ private fun DiffLineItem(
             .fillMaxWidth()
             .background(backgroundColor)
             .then(
-                if (isHighlighted) Modifier.background(accent.copy(alpha = highlightAlpha))
-                else Modifier
+                if (isHighlighted) {
+                    Modifier.background(accent.copy(alpha = highlightAlpha))
+                } else {
+                    Modifier
+                }
             )
-            .padding(vertical = 1.dp),
+            .padding(vertical = 1.dp)
     ) {
         Text(
             text = if (line.lineNumber > 0) line.lineNumber.toString() else "",
@@ -533,7 +531,7 @@ private fun DiffLineItem(
             fontFamily = FontFamily.Monospace,
             modifier = Modifier
                 .width(44.dp)
-                .padding(start = 8.dp, top = 2.dp),
+                .padding(start = 8.dp, top = 2.dp)
         )
 
         val scrollState = rememberScrollState()
@@ -552,7 +550,7 @@ private fun DiffLineItem(
             modifier = Modifier
                 .weight(1f)
                 .horizontalScroll(scrollState)
-                .padding(end = 8.dp, top = 2.dp),
+                .padding(end = 8.dp, top = 2.dp)
         )
     }
 }
@@ -567,11 +565,7 @@ private fun DiffLineItem(
  * @param currentDiffIndex 当前选中的差异序号
  * @return 如果该行是当前选中的差异行则返回 true
  */
-private fun isDiffHighlighted(
-    diffResult: DiffResult,
-    lineIndex: Int,
-    currentDiffIndex: Int,
-): Boolean {
+private fun isDiffHighlighted(diffResult: DiffResult, lineIndex: Int, currentDiffIndex: Int): Boolean {
     if (diffResult.diffCount == 0) return false
     var count = 0
     for (i in diffResult.leftLines.indices) {

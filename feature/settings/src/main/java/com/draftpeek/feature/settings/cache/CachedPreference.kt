@@ -10,15 +10,14 @@
  */
 package com.draftpeek.feature.settings.cache
 
+import javax.inject.Inject
+import javax.inject.Singleton
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.catch
 import kotlinx.coroutines.flow.distinctUntilChanged
-import kotlinx.coroutines.flow.onEach
-import javax.inject.Inject
-import javax.inject.Singleton
 
 /**
  * 响应式缓存偏好设置，保持内存快照与持久化数据源（通常是 DataStore）同步。
@@ -45,10 +44,7 @@ import javax.inject.Singleton
  * @property initialValue 初始默认值，在数据源首次发射前使用
  */
 @Singleton
-class CachedPreference<T : Any>(
-    private val source: Flow<T>,
-    initialValue: T,
-) {
+class CachedPreference<T : Any>(private val source: Flow<T>, initialValue: T) {
     private val _state = MutableStateFlow(initialValue)
 
     /**
@@ -102,7 +98,5 @@ class CachedPreferenceFactory @Inject constructor() {
      * @param initialValue 初始默认值
      * @return 配置好的 CachedPreference 实例
      */
-    fun <T : Any> create(source: Flow<T>, initialValue: T): CachedPreference<T> {
-        return CachedPreference(source, initialValue)
-    }
+    fun <T : Any> create(source: Flow<T>, initialValue: T): CachedPreference<T> = CachedPreference(source, initialValue)
 }

@@ -10,11 +10,11 @@
  */
 package com.draftpeek.core.common.event
 
+import javax.inject.Inject
+import javax.inject.Singleton
 import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.SharedFlow
 import kotlinx.coroutines.flow.asSharedFlow
-import javax.inject.Inject
-import javax.inject.Singleton
 
 /**
  * 应用事件总线类（单例）。
@@ -28,7 +28,7 @@ class AppEventBus @Inject constructor() {
 
     private val _events = MutableSharedFlow<AppEvent>(
         extraBufferCapacity = DEFAULT_BUFFER_CAPACITY,
-        onBufferOverflow = kotlinx.coroutines.channels.BufferOverflow.DROP_OLDEST,
+        onBufferOverflow = kotlinx.coroutines.channels.BufferOverflow.DROP_OLDEST
     )
 
     /**
@@ -56,9 +56,7 @@ class AppEventBus @Inject constructor() {
      * @param event 要分发的事件
      * @return 事件是否成功缓冲/发送
      */
-    fun tryEmit(event: AppEvent): Boolean {
-        return _events.tryEmit(event)
-    }
+    fun tryEmit(event: AppEvent): Boolean = _events.tryEmit(event)
 
     companion object {
         /** SharedFlow缓冲区容量，满时DROP_OLDEST */

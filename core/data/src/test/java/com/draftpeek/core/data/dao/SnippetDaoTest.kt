@@ -41,14 +41,14 @@ class SnippetDaoTest {
         title: String = "Test Snippet",
         content: String = "fun test() { }",
         language: String? = "kotlin",
-        category: String = "Kotlin",
+        category: String = "Kotlin"
     ) = Snippet(
         title = title,
         content = content,
         language = language,
         category = category,
         createdAt = System.currentTimeMillis(),
-        updatedAt = System.currentTimeMillis(),
+        updatedAt = System.currentTimeMillis()
     )
 
     @Test

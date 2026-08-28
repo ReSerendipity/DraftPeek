@@ -29,31 +29,27 @@ import com.draftpeek.feature.stats.viewmodel.StatsPeriod
  * @param modifier 修饰符
  */
 @Composable
-fun PeriodChipRow(
-    selectedPeriod: StatsPeriod,
-    onPeriodSelected: (StatsPeriod) -> Unit,
-    modifier: Modifier = Modifier,
-) {
+fun PeriodChipRow(selectedPeriod: StatsPeriod, onPeriodSelected: (StatsPeriod) -> Unit, modifier: Modifier = Modifier) {
     val periods = listOf(
         StatsPeriod.SUMMARY to stringResource(R.string.stats_period_summary),
         StatsPeriod.YEAR to stringResource(R.string.stats_period_year),
         StatsPeriod.MONTH to stringResource(R.string.stats_period_month),
         StatsPeriod.WEEK to stringResource(R.string.stats_period_week),
         StatsPeriod.TODAY to stringResource(R.string.stats_period_today),
-        StatsPeriod.YESTERDAY to stringResource(R.string.stats_period_yesterday),
+        StatsPeriod.YESTERDAY to stringResource(R.string.stats_period_yesterday)
     )
 
     Row(
         modifier = modifier
             .horizontalScroll(rememberScrollState())
             .padding(horizontal = 20.dp),
-        horizontalArrangement = Arrangement.spacedBy(8.dp),
+        horizontalArrangement = Arrangement.spacedBy(8.dp)
     ) {
         periods.forEach { (period, label) ->
             BrandFilterChip(
                 text = label,
                 selected = selectedPeriod == period,
-                onClick = { onPeriodSelected(period) },
+                onClick = { onPeriodSelected(period) }
             )
         }
     }

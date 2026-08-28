@@ -2,6 +2,8 @@ package com.draftpeek.feature.editor.sora
 
 import android.content.Context
 import android.util.Log
+import com.draftpeek.core.common.util.LanguageConfig
+import com.draftpeek.feature.editor.treesitter.TreeSitterLanguageProvider
 import io.github.rosemoe.sora.langs.textmate.TextMateColorScheme
 import io.github.rosemoe.sora.langs.textmate.TextMateLanguage
 import io.github.rosemoe.sora.langs.textmate.registry.FileProviderRegistry
@@ -13,8 +15,6 @@ import io.github.rosemoe.sora.widget.CodeEditor
 import io.github.rosemoe.sora.widget.schemes.EditorColorScheme
 import io.github.rosemoe.sora.widget.schemes.SchemeDarcula
 import io.github.rosemoe.sora.widget.schemes.SchemeGitHub
-import com.draftpeek.core.common.util.LanguageConfig
-import com.draftpeek.feature.editor.treesitter.TreeSitterLanguageProvider
 import kotlinx.coroutines.CompletableDeferred
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
@@ -38,7 +38,7 @@ internal class SoraThemeManager(
     private val appContext: Context,
     private val editorProvider: () -> CodeEditor?,
     private val isReleased: () -> Boolean,
-    private val initScope: CoroutineScope,
+    private val initScope: CoroutineScope
 ) {
     @Volatile
     var textMateInitialized = false
@@ -403,11 +403,7 @@ internal class SoraThemeManager(
      * @param onReady Callback invoked on the main thread after language is set.
      * @param onTimeout Callback invoked on the main thread if init times out.
      */
-    suspend fun awaitInitAndApplyLanguage(
-        effectiveLanguage: String?,
-        onReady: () -> Unit,
-        onTimeout: () -> Unit,
-    ) {
+    suspend fun awaitInitAndApplyLanguage(effectiveLanguage: String?, onReady: () -> Unit, onTimeout: () -> Unit) {
         try {
             withTimeout(5000L) {
                 initComplete.await()
@@ -418,7 +414,9 @@ internal class SoraThemeManager(
                     setLanguageForContent(effectiveLanguage)
                 } catch (t: Throwable) {
                     Log.w(TAG, "setLanguageForContent failed after TextMate init", t)
-                    try { editorProvider()?.setEditorLanguage(null) } catch (_: Throwable) {}
+                    try {
+                        editorProvider()?.setEditorLanguage(null)
+                    } catch (_: Throwable) {}
                 }
                 onReady()
             }

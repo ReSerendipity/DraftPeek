@@ -31,7 +31,7 @@ data class AccessibilityState(
     val textScale: Float = 1.0f,
     val screenReaderOptimized: Boolean = false,
     val vibrationFeedback: Boolean = false,
-    val nonColorIndicators: Boolean = false,
+    val nonColorIndicators: Boolean = false
 ) {
     /** 是否有任何无障碍功能被启用 */
     val anyEnabled: Boolean

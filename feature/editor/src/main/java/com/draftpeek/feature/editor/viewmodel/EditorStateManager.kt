@@ -1,10 +1,10 @@
 /**
  * 文件功能：编辑器核心状态管理器
- * 
+ *
  * 主要类/数据类：
  * - [CursorPosition]：结构化光标位置数据类（替代旧的 "line:column" 字符串）
  * - [EditorStateManager]：编辑器状态管理单例，负责内容、修改标记、光标、滚动位置、大纲、预览模式等状态
- * 
+ *
  * 模块依赖：
  * - core/common：ContentChecksum 提供 CRC32 校验和功能
  * - feature/editor/model：EditorUiState、MarkdownTheme、MarkdownViewMode 等 UI 状态模型
@@ -21,6 +21,8 @@ import com.draftpeek.feature.editor.model.EditorUiState
 import com.draftpeek.feature.editor.model.MarkdownTheme
 import com.draftpeek.feature.editor.model.MarkdownViewMode
 import com.draftpeek.feature.editor.tabs.TabManager
+import javax.inject.Inject
+import javax.inject.Singleton
 import kotlinx.collections.immutable.ImmutableList
 import kotlinx.collections.immutable.persistentListOf
 import kotlinx.collections.immutable.toImmutableList
@@ -28,15 +30,13 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import org.json.JSONArray
-import javax.inject.Inject
-import javax.inject.Singleton
 
 /**
  * 结构化光标位置
- * 
+ *
  * 替代旧的 "line:column" 字符串表示，使用 @Immutable 标记让 Compose 在相同光标位置
  * 重新发射时可以跳过重组（利用数据类的身份相等性）。
- * 
+ *
  * @property line 行号（1-based）
  * @property column 列号（1-based）
  */
@@ -44,7 +44,7 @@ import javax.inject.Singleton
 data class CursorPosition(val line: Int = 1, val column: Int = 1) {
     /**
      * 转换为显示用的字符串格式
-     * 
+     *
      * @return "行:列" 格式的字符串，如 "42:15"
      */
     fun toDisplayString(): String = "$line:$column"
@@ -52,7 +52,7 @@ data class CursorPosition(val line: Int = 1, val column: Int = 1) {
 
 /**
  * 编辑器核心状态管理器
- * 
+ *
  * 从 EditorViewModel 中提取，作为独立可测试的状态管理器。负责管理：
  * - 编辑器 UI 状态（加载/成功/错误/带进度加载）
  * - 内容修改标记（带防抖和 CRC32 校验）
@@ -63,7 +63,7 @@ data class CursorPosition(val line: Int = 1, val column: Int = 1) {
  * - 专注模式/打字机模式
  * - Markdown 主题
  * - 实时内容流（用于分屏预览同步）
- * 
+ *
  * **优化要点**：
  * - 单一职责原则：从 ViewModel 提取，可独立测试
  * - 依赖倒置：依赖注入的 TabManager 抽象
@@ -74,9 +74,7 @@ data class CursorPosition(val line: Int = 1, val column: Int = 1) {
  * - CRC32 校验：快速检测内容是否恢复到基线版本
  */
 @Singleton
-class EditorStateManager @Inject constructor(
-    private val tabManager: TabManager,
-) {
+class EditorStateManager @Inject constructor(private val tabManager: TabManager) {
 
     companion object {
         /** 修改状态防抖窗口（毫秒） */
@@ -90,48 +88,58 @@ class EditorStateManager @Inject constructor(
     }
 
     private val _uiState = MutableStateFlow<EditorUiState>(EditorUiState.Loading)
+
     /** 编辑器 UI 状态流 */
     val uiState: StateFlow<EditorUiState> = _uiState.asStateFlow()
 
     private val _isModified = MutableStateFlow(false)
+
     /** 内容是否已修改（未保存）状态流 */
     val isModified: StateFlow<Boolean> = _isModified.asStateFlow()
 
     private val _cursorPosition = MutableStateFlow(CursorPosition())
+
     /** 光标位置状态流 */
     val cursorPosition: StateFlow<CursorPosition> = _cursorPosition.asStateFlow()
 
     private val _scrollPosition = MutableStateFlow(Pair(0, 0))
+
     /** 滚动位置状态流（scrollX, scrollY） */
     val scrollPosition: StateFlow<Pair<Int, Int>> = _scrollPosition.asStateFlow()
 
     private val _outlineItems = MutableStateFlow<ImmutableList<OutlineItem>>(persistentListOf())
+
     /** Markdown 大纲项列表状态流 */
     val outlineItems: StateFlow<ImmutableList<OutlineItem>> = _outlineItems.asStateFlow()
 
     private val _markdownViewMode = MutableStateFlow(MarkdownViewMode.WYSIWYG)
+
     /** Markdown 视图模式状态流 */
     val markdownViewMode: StateFlow<MarkdownViewMode> = _markdownViewMode.asStateFlow()
 
     private val _isFocusMode = MutableStateFlow(false)
+
     /** 是否处于专注模式状态流 */
     val isFocusMode: StateFlow<Boolean> = _isFocusMode.asStateFlow()
 
     private val _isTypewriterMode = MutableStateFlow(false)
+
     /** 是否处于打字机模式状态流 */
     val isTypewriterMode: StateFlow<Boolean> = _isTypewriterMode.asStateFlow()
 
     private val _isLargeMarkdownFile = MutableStateFlow(false)
+
     /** 当前是否为大 Markdown 文件（超过 WYSIWYG 阈值） */
     val isLargeMarkdownFile: StateFlow<Boolean> = _isLargeMarkdownFile.asStateFlow()
 
     private val _markdownTheme = MutableStateFlow(MarkdownTheme.DEFAULT)
+
     /** Markdown 预览主题状态流 */
     val markdownTheme: StateFlow<MarkdownTheme> = _markdownTheme.asStateFlow()
 
     /**
      * 设置 Markdown 预览主题
-     * 
+     *
      * @param theme 要应用的 Markdown 主题
      */
     fun setMarkdownTheme(theme: MarkdownTheme) {
@@ -143,12 +151,13 @@ class EditorStateManager @Inject constructor(
 
     @Volatile
     private var currentContent: String = ""
+
     @Volatile
     private var baselineContent: String = ""
 
     /**
      * 基线内容的 CRC32 校验和
-     * 
+     *
      * 与字符串比较配合用于高效变更检测——当内容被编辑后又撤销回原始内容时，
      * 校验和可以快速确认内容与已保存基线匹配，无需先进行完整字符串比较即可清除修改标记。
      */
@@ -157,7 +166,7 @@ class EditorStateManager @Inject constructor(
 
     /**
      * 上次实际与基线不同的内容变更时间戳
-     * 
+     *
      * 用于修改标记防抖：我们等待 [DIRTY_DEBOUNCE_MS] 后才将 [isModified] 置为 true，
      * 避免用户短暂输入后撤销时修改标记快速切换。
      */
@@ -166,7 +175,7 @@ class EditorStateManager @Inject constructor(
 
     /**
      * 尚未提交到 [_isModified] 的待处理修改状态
-     * 
+     *
      * 因为防抖窗口尚未到期。null 表示没有待处理更新。
      */
     @Volatile
@@ -181,7 +190,7 @@ class EditorStateManager @Inject constructor(
 
     /**
      * 实时内容流，用于分屏预览订阅
-     * 
+     *
      * 与 [uiState]（仅在加载/保存时重新发射）不同，此 Flow 跟踪每个防抖后的内容变更，
      * 以便 Markdown 预览可以实时同步，而无需强制全屏重组。
      */
@@ -208,7 +217,7 @@ class EditorStateManager @Inject constructor(
 
     /**
      * 编辑器报告内容变更时调用（由 SoraEditorWrapper 以 150ms 防抖）
-     * 
+     *
      * **算法步骤**：
      * 1. 快速路径：如果内容与当前内容相同，直接返回（减少不必要的 Flow 发射）
      * 2. 更新 currentContent 和 _liveContent（实时更新，不分防抖）
@@ -217,7 +226,7 @@ class EditorStateManager @Inject constructor(
      *    - CRC32 不同：内容实际已改变，修改标记应为 true
      * 4. 设置 pendingDirty 为计算出的修改状态，记录时间戳
      * 5. 调用方应定期调用 [flushDirtyState] 提交待处理状态
-     * 
+     *
      * **注意**：内容和 liveContent 立即更新（无防抖），确保分屏预览响应及时。
      * 仅修改标记采用防抖策略。
      */
@@ -238,7 +247,7 @@ class EditorStateManager @Inject constructor(
 
     /**
      * 如果防抖窗口已到期，刷新任何待处理的修改状态
-     * 
+     *
      * 应定期调用（例如从协程的短延迟循环或 UI 帧回调中）。
      * 如果没有待处理项或防抖窗口尚未到期，则提前返回。
      */
@@ -271,7 +280,7 @@ class EditorStateManager @Inject constructor(
 
     /**
      * 内容保存成功后调用，更新基线内容和校验和
-     * 
+     *
      * @param savedContent 已保存的内容
      */
     fun onContentSaved(savedContent: String) {
@@ -288,7 +297,7 @@ class EditorStateManager @Inject constructor(
 
     /**
      * 获取当前编辑器内容
-     * 
+     *
      * @return 当前文本内容
      */
     fun getCurrentContent(): String = currentContent
@@ -299,7 +308,7 @@ class EditorStateManager @Inject constructor(
 
     /**
      * 光标位置变化时调用
-     * 
+     *
      * @param line 行号（1-based）
      * @param column 列号（1-based）
      */
@@ -309,7 +318,7 @@ class EditorStateManager @Inject constructor(
 
     /**
      * 滚动位置变化时调用
-     * 
+     *
      * @param scrollX 水平滚动偏移
      * @param scrollY 垂直滚动偏移
      */
@@ -323,9 +332,9 @@ class EditorStateManager @Inject constructor(
 
     /**
      * 解析编辑器返回的大纲 JSON 数组
-     * 
+     *
      * 使用 org.json 进行结构化安全解析（替代脆弱的正则表达式）。
-     * 
+     *
      * @param json JSON 格式的大纲数组字符串
      */
     fun onOutlineItems(json: String) {
@@ -334,11 +343,13 @@ class EditorStateManager @Inject constructor(
             val items = mutableListOf<OutlineItem>()
             for (i in 0 until array.length()) {
                 val obj = array.getJSONObject(i)
-                items.add(OutlineItem(
-                    name = obj.getString("name"),
-                    line = obj.optInt("line", 1),
-                    type = obj.optString("type", ""),
-                ))
+                items.add(
+                    OutlineItem(
+                        name = obj.getString("name"),
+                        line = obj.optInt("line", 1),
+                        type = obj.optString("type", "")
+                    )
+                )
             }
             _outlineItems.value = items.toImmutableList()
         } catch (e: Exception) {
@@ -352,7 +363,7 @@ class EditorStateManager @Inject constructor(
 
     /**
      * 切换 Markdown 预览模式
-     * 
+     *
      * 循环顺序：所见即所得 → 编辑 → 预览 → 分屏 → 所见即所得
      * 仅在文件可预览时生效。
      */
@@ -370,7 +381,7 @@ class EditorStateManager @Inject constructor(
 
     /**
      * 设置指定的 Markdown 视图模式
-     * 
+     *
      * @param mode 要设置的视图模式
      */
     fun setMarkdownViewMode(mode: MarkdownViewMode) {
@@ -381,10 +392,14 @@ class EditorStateManager @Inject constructor(
     }
 
     /** 切换专注模式 */
-    fun toggleFocusMode() { _isFocusMode.value = !_isFocusMode.value }
-    
+    fun toggleFocusMode() {
+        _isFocusMode.value = !_isFocusMode.value
+    }
+
     /** 切换打字机模式 */
-    fun toggleTypewriterMode() { _isTypewriterMode.value = !_isTypewriterMode.value }
+    fun toggleTypewriterMode() {
+        _isTypewriterMode.value = !_isTypewriterMode.value
+    }
 
     // ------------------------------------------------------------------
     // 状态快照
@@ -392,7 +407,7 @@ class EditorStateManager @Inject constructor(
 
     /**
      * 保存当前编辑器状态为可恢复的快照
-     * 
+     *
      * @return 当前状态快照，UI 状态不是 Success 时返回 null
      */
     fun saveState(): EditorSavedState? {
@@ -408,13 +423,13 @@ class EditorStateManager @Inject constructor(
             language = state.language,
             fileName = state.fileName,
             isReadOnly = state.isReadOnly,
-            documentType = state.documentType,
+            documentType = state.documentType
         )
     }
 
     /**
      * 从保存的状态快照恢复编辑器状态
-     * 
+     *
      * @param savedState 要恢复的状态快照
      */
     fun restoreState(savedState: EditorSavedState) {
@@ -431,7 +446,7 @@ class EditorStateManager @Inject constructor(
             language = savedState.language,
             fileName = savedState.fileName,
             isReadOnly = savedState.isReadOnly,
-            documentType = savedState.documentType,
+            documentType = savedState.documentType
         )
         _uiState.value = successState
         // 恢复大文件标记：使用内容长度估算（字符数 ≈ 字节数）
@@ -444,18 +459,22 @@ class EditorStateManager @Inject constructor(
     }
 
     /** 设置 UI 状态为加载中 */
-    fun setLoading() { _uiState.value = EditorUiState.Loading }
-    
+    fun setLoading() {
+        _uiState.value = EditorUiState.Loading
+    }
+
     /**
      * 设置 UI 状态为错误
-     * 
+     *
      * @param message 错误消息
      */
-    fun setError(message: String) { _uiState.value = EditorUiState.Error(message) }
+    fun setError(message: String) {
+        _uiState.value = EditorUiState.Error(message)
+    }
 
     /**
      * 加载内容到编辑器，更新所有相关状态
-     * 
+     *
      * @param content 文件文本内容
      * @param language 语言标识符
      * @param fileName 文件名
@@ -485,7 +504,7 @@ class EditorStateManager @Inject constructor(
         restoreScrollX: Int = 0,
         restoreScrollY: Int = 0,
         isBinaryFile: Boolean = false,
-        isTruncated: Boolean = false,
+        isTruncated: Boolean = false
     ) {
         currentContent = content
         _liveContent.value = content
@@ -505,7 +524,7 @@ class EditorStateManager @Inject constructor(
             fileSizeWarning = fileSizeWarning,
             fileSize = fileSize,
             isBinaryFile = isBinaryFile,
-            isTruncated = isTruncated,
+            isTruncated = isTruncated
         )
         // 关键：先设置大文件标记和视图模式，再设置 UI 状态。
         // 如果先设 Success，Compose 可能在中间状态观察到 Success + WYSIWYG，
@@ -523,10 +542,10 @@ class EditorStateManager @Inject constructor(
 
     /**
      * 更新 UI 状态以显示大文件加载进度
-     * 
+     *
      * 用 [LoadingWithProgress] 替代通用的 [Loading] 状态，使用户能看到实时进度条，
      * 而不是冻结的加载指示器。
-     * 
+     *
      * @param loadedBytes 已加载字节数
      * @param totalBytes 总字节数，-1 表示未知
      */
@@ -534,20 +553,20 @@ class EditorStateManager @Inject constructor(
         _uiState.value = EditorUiState.LoadingWithProgress(
             loadedBytes = loadedBytes,
             totalBytes = totalBytes,
-            progress = if (totalBytes > 0) loadedBytes.toFloat() / totalBytes else -1f,
+            progress = if (totalBytes > 0) loadedBytes.toFloat() / totalBytes else -1f
         )
     }
 
     /**
      * 获取当前文件名
-     * 
+     *
      * @return 文件名，UI 状态不是 Success 时返回 null
      */
     fun getFileName(): String? = (_uiState.value as? EditorUiState.Success)?.fileName
-    
+
     /**
      * 获取当前语言
-     * 
+     *
      * @return 语言标识符，UI 状态不是 Success 时返回 null
      */
     fun getLanguage(): String? = (_uiState.value as? EditorUiState.Success)?.language

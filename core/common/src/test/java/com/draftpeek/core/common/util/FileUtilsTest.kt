@@ -58,7 +58,9 @@ class FileUtilsTest {
         @Test
         @DisplayName("content:// returns null")
         fun contentUriReturnsNull() {
-            val result = FileUtils.resolveLocalPath("content://com.android.externalstorage.documents/tree/primary%3ADocuments")
+            val result = FileUtils.resolveLocalPath(
+                "content://com.android.externalstorage.documents/tree/primary%3ADocuments"
+            )
             assertNull(result)
         }
 

@@ -42,24 +42,25 @@ object SecurityValidator {
      * 这些命令可能导致设备变砖或数据丢失且无法恢复。
      */
     private val BLOCKED_COMMANDS = setOf(
-        "reboot", "reboot -p",           // 设备重启/关机
-        "shutdown",                       // 系统关机
-        "recovery",                       // 启动到恢复模式
-        "bootloader",                     // 启动到bootloader
-        "fastboot",                       // Fastboot模式
-        "format",                         // 磁盘格式化
+        "reboot",
+        "reboot -p", // 设备重启/关机
+        "shutdown", // 系统关机
+        "recovery", // 启动到恢复模式
+        "bootloader", // 启动到bootloader
+        "fastboot", // Fastboot模式
+        "format" // 磁盘格式化
     )
 
     /**
      * 有条件危险的命令 - 允许执行但应标记以提醒用户。
      */
     private val DANGEROUS_PATTERNS = listOf(
-        Regex("""\brm\s+(-[a-zA-Z]*f[a-zA-Z]*\s+|.*--no-preserve-root.*)"""),  // rm -rf 强制递归删除
-        Regex("""\bdd\s+.*of=/dev/"""),                                           // dd写入设备（可能损坏分区）
-        Regex("""\biptables\s+-F"""),                                             // 清空防火墙规则
-        Regex("""\bsystemctl\s+(stop|disable)\s+"""),                              // 停止/禁用系统服务
-        Regex("""\bchmod\s+(-R\s+)?0{3,4}\s+/"""),                                // 根目录权限设为000
-        Regex("""\bchown\s+(-R\s+)?\S+\s+/"""),                                    // 修改根目录所有者
+        Regex("""\brm\s+(-[a-zA-Z]*f[a-zA-Z]*\s+|.*--no-preserve-root.*)"""), // rm -rf 强制递归删除
+        Regex("""\bdd\s+.*of=/dev/"""), // dd写入设备（可能损坏分区）
+        Regex("""\biptables\s+-F"""), // 清空防火墙规则
+        Regex("""\bsystemctl\s+(stop|disable)\s+"""), // 停止/禁用系统服务
+        Regex("""\bchmod\s+(-R\s+)?0{3,4}\s+/"""), // 根目录权限设为000
+        Regex("""\bchown\s+(-R\s+)?\S+\s+/""") // 修改根目录所有者
     )
 
     /**
@@ -70,7 +71,7 @@ object SecurityValidator {
         "/system",
         "/proc",
         "/sys",
-        "/dev",
+        "/dev"
     )
 
     /**
@@ -82,18 +83,13 @@ object SecurityValidator {
          * @property isDangerous 命令是否被认为有危险（用户可能需要确认）
          * @property warning 如果命令有危险，提供人类可读的警告信息
          */
-        data class Allowed(
-            val isDangerous: Boolean = false,
-            val warning: String? = null,
-        ) : ValidationResult()
+        data class Allowed(val isDangerous: Boolean = false, val warning: String? = null) : ValidationResult()
 
         /**
          * 命令被阻止，不得执行。
          * @property reason 命令被阻止的原因
          */
-        data class Blocked(
-            val reason: String,
-        ) : ValidationResult()
+        data class Blocked(val reason: String) : ValidationResult()
     }
 
     /**
@@ -124,7 +120,7 @@ object SecurityValidator {
         if (isBlockedCommand(baseCommand, trimmed)) {
             Log.w(TAG, "阻止命令: $trimmed")
             return ValidationResult.Blocked(
-                reason = "命令 '$baseCommand' 因安全原因被阻止。它可能导致不可逆的系统损坏。",
+                reason = "命令 '$baseCommand' 因安全原因被阻止。它可能导致不可逆的系统损坏。"
             )
         }
 
@@ -133,7 +129,7 @@ object SecurityValidator {
         if (dangerousMatch != null) {
             return ValidationResult.Allowed(
                 isDangerous = true,
-                warning = "此命令可能导致数据丢失或系统损坏，请谨慎操作。",
+                warning = "此命令可能导致数据丢失或系统损坏，请谨慎操作。"
             )
         }
 
@@ -141,7 +137,7 @@ object SecurityValidator {
         if (targetsRestrictedPath(trimmed)) {
             return ValidationResult.Allowed(
                 isDangerous = true,
-                warning = "此命令操作受限系统目录。",
+                warning = "此命令操作受限系统目录。"
             )
         }
 
@@ -185,9 +181,7 @@ object SecurityValidator {
      * @param command 命令字符串
      * @return 如果命令访问受限路径返回true
      */
-    private fun targetsRestrictedPath(command: String): Boolean {
-        return RESTRICTED_PATHS.any { prefix ->
-            command.contains(Regex("""\s${Regex.escape(prefix)}/"""))
-        }
+    private fun targetsRestrictedPath(command: String): Boolean = RESTRICTED_PATHS.any { prefix ->
+        command.contains(Regex("""\s${Regex.escape(prefix)}/"""))
     }
 }

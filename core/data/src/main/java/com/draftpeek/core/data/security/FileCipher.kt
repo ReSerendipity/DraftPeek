@@ -59,9 +59,8 @@ object FileCipher {
     private val keyCache: MutableMap<String, SecretKeySpec> =
         Collections.synchronizedMap(
             object : LinkedHashMap<String, SecretKeySpec>(KEY_CACHE_SIZE, 0.75f, true) {
-                override fun removeEldestEntry(eldest: MutableMap.MutableEntry<String, SecretKeySpec>?): Boolean {
-                    return size > KEY_CACHE_SIZE
-                }
+                override fun removeEldestEntry(eldest: MutableMap.MutableEntry<String, SecretKeySpec>?): Boolean =
+                    size > KEY_CACHE_SIZE
             }
         )
 
@@ -73,12 +72,10 @@ object FileCipher {
 
     /** P1-4: Derive the original file name from an encrypted export name.
      *  e.g. "document.txt.jenc" → "document.txt" */
-    fun originalNameFromEncrypted(fileName: String): String {
-        return if (isEncryptedExport(fileName)) {
-            fileName.dropLast(ENCRYPTED_FILE_EXTENSION.length)
-        } else {
-            fileName
-        }
+    fun originalNameFromEncrypted(fileName: String): String = if (isEncryptedExport(fileName)) {
+        fileName.dropLast(ENCRYPTED_FILE_EXTENSION.length)
+    } else {
+        fileName
     }
 
     private const val VERSION = 1
@@ -309,12 +306,10 @@ object FileCipher {
         out[offset + 3] = VERSION.toByte()
     }
 
-    private fun readVersion(data: ByteArray, offset: Int): Int {
-        return ((data[offset].toInt() and 0xFF) shl 24) or
-            ((data[offset + 1].toInt() and 0xFF) shl 16) or
-            ((data[offset + 2].toInt() and 0xFF) shl 8) or
-            (data[offset + 3].toInt() and 0xFF)
-    }
+    private fun readVersion(data: ByteArray, offset: Int): Int = ((data[offset].toInt() and 0xFF) shl 24) or
+        ((data[offset + 1].toInt() and 0xFF) shl 16) or
+        ((data[offset + 2].toInt() and 0xFF) shl 8) or
+        (data[offset + 3].toInt() and 0xFF)
 
     // ===== Keystore-bound File Encryption (VULN-016) =====
     // SECURITY VULN-016: Replaced Jetpack Security's legacy file encryption with self-built SecureFileStorage.
@@ -349,7 +344,6 @@ object FileCipher {
      * @param inputFile 加密文件
      * @return 解密后的文本内容
      */
-    fun decryptWithKeystore(context: Context, inputFile: File): String {
-        return SecureFileStorage.decryptFromFile(context, inputFile)
-    }
+    fun decryptWithKeystore(context: Context, inputFile: File): String =
+        SecureFileStorage.decryptFromFile(context, inputFile)
 }

@@ -46,6 +46,7 @@ class TerminalCommandReceiver : BroadcastReceiver() {
     companion object {
         /** 执行命令广播Action */
         const val ACTION_RUN_COMMAND = "com.draftpeek.terminal.RUN_COMMAND"
+
         /** 命令结果广播Action */
         const val ACTION_COMMAND_RESULT = "com.draftpeek.terminal.COMMAND_RESULT"
 
@@ -133,12 +134,7 @@ class TerminalCommandReceiver : BroadcastReceiver() {
      * - `result_message`: 人类可读的结果描述
      * - `result_command`: 原始命令字符串
      */
-    private fun sendResult(
-        context: Context,
-        resultCode: Int,
-        message: String,
-        command: String?,
-    ) {
+    private fun sendResult(context: Context, resultCode: Int, message: String, command: String?) {
         val resultIntent = Intent(ACTION_COMMAND_RESULT).apply {
             putExtra(EXTRA_RESULT_CODE, resultCode)
             putExtra(EXTRA_RESULT_MESSAGE, message)

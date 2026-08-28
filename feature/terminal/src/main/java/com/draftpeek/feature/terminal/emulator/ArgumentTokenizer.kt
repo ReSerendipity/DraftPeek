@@ -129,11 +129,9 @@ object ArgumentTokenizer {
      * @param command 原始命令字符串
      * @return 解析后的参数列表，引号未匹配时返回null
      */
-    fun tokenizeOrNull(command: String): List<String>? {
-        return try {
-            tokenize(command)
-        } catch (_: IllegalArgumentException) {
-            null
-        }
+    fun tokenizeOrNull(command: String): List<String>? = try {
+        tokenize(command)
+    } catch (_: IllegalArgumentException) {
+        null
     }
 }

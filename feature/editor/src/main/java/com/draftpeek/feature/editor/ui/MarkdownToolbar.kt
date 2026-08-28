@@ -24,25 +24,11 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.CheckBox
-import androidx.compose.material.icons.filled.Code
-import androidx.compose.material.icons.filled.FormatBold
-import androidx.compose.material.icons.filled.FormatItalic
-import androidx.compose.material.icons.filled.FormatListBulleted
-import androidx.compose.material.icons.filled.FormatListNumbered
-import androidx.compose.material.icons.filled.FormatStrikethrough
-import androidx.compose.material.icons.automirrored.filled.FormatListBulleted
-import androidx.compose.material.icons.filled.FormatListNumbered
-import androidx.compose.material.icons.filled.FormatQuote
-import androidx.compose.material.icons.filled.Functions
 import androidx.compose.material.icons.filled.HorizontalRule
 import androidx.compose.material.icons.filled.Image
-import androidx.compose.material.icons.filled.AddPhotoAlternate
 import androidx.compose.material.icons.filled.Link
 import androidx.compose.material.icons.filled.MoreVert
 import androidx.compose.material.icons.filled.SwapHoriz
-import androidx.compose.material.icons.filled.TableChart
 import androidx.compose.material3.DropdownMenu
 import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.HorizontalDivider
@@ -121,7 +107,7 @@ fun MarkdownToolbar(
     onFormatAction: (MarkdownFormatAction) -> Unit,
     modifier: Modifier = Modifier,
     onInsertEmoji: (() -> Unit)? = null,
-    onInsertImage: (() -> Unit)? = null,
+    onInsertImage: (() -> Unit)? = null
 ) {
     // --- Action content descriptions ---
     val bold = stringResource(R.string.editor_action_bold)
@@ -188,7 +174,7 @@ fun MarkdownToolbar(
             onConfirm = { text, url ->
                 onFormatAction(MarkdownFormatAction.Insert("[$text]($url)", text.length + 3))
                 showLinkDialog = false
-            },
+            }
         )
     }
 
@@ -198,7 +184,7 @@ fun MarkdownToolbar(
             onConfirm = { alt, url ->
                 onFormatAction(MarkdownFormatAction.Insert("![$alt]($url)", alt.length + 4))
                 showImageDialog = false
-            },
+            }
         )
     }
 
@@ -208,7 +194,7 @@ fun MarkdownToolbar(
             onConfirm = { rows, cols ->
                 onFormatAction(MarkdownFormatAction.Insert(generateTableTemplate(rows, cols), 2))
                 showTableDialog = false
-            },
+            }
         )
     }
 
@@ -220,7 +206,7 @@ fun MarkdownToolbar(
                 val offset = language.length + 5
                 onFormatAction(MarkdownFormatAction.Insert(template, offset))
                 showCodeBlockDialog = false
-            },
+            }
         )
     }
 
@@ -229,49 +215,59 @@ fun MarkdownToolbar(
         Box(
             modifier = Modifier
                 .fillMaxWidth()
-                .background(PrototypeTokens.surface),
+                .background(PrototypeTokens.surface)
         ) {
             Row(
                 modifier = Modifier
                     .horizontalScroll(rememberScrollState())
                     .padding(horizontal = 10.dp, vertical = 6.dp),
-                horizontalArrangement = Arrangement.spacedBy(2.dp),
+                horizontalArrangement = Arrangement.spacedBy(2.dp)
             ) {
                 // ── Basic group: Bold, Italic, Strikethrough, Code inline ──
                 FormatButton(
                     label = "B",
                     contentDescription = bold,
-                    onClick = { onFormatAction(MarkdownFormatAction.Wrap("**", "**", boldTpl)) },
+                    onClick = { onFormatAction(MarkdownFormatAction.Wrap("**", "**", boldTpl)) }
                 )
                 FormatButton(
                     label = "I",
                     contentDescription = italic,
                     italic = true,
-                    onClick = { onFormatAction(MarkdownFormatAction.Wrap("*", "*", italicTpl)) },
+                    onClick = { onFormatAction(MarkdownFormatAction.Wrap("*", "*", italicTpl)) }
                 )
                 FormatButton(
                     label = "S",
                     contentDescription = strikethrough,
                     strikethrough = true,
-                    onClick = { onFormatAction(MarkdownFormatAction.Wrap("~~", "~~", strikethroughTpl)) },
+                    onClick = { onFormatAction(MarkdownFormatAction.Wrap("~~", "~~", strikethroughTpl)) }
                 )
                 ToolbarIconButton(
                     onClick = { onFormatAction(MarkdownFormatAction.Wrap("`", "`", codeTpl)) },
-                    contentDescription = inlineCode,
+                    contentDescription = inlineCode
                 ) {
-                    Icon(DraftPeekIcons.CodeBrackets, contentDescription = inlineCode, modifier = Modifier.size(17.dp), tint = PrototypeTokens.muted)
+                    Icon(
+                        DraftPeekIcons.CodeBrackets,
+                        contentDescription = inlineCode,
+                        modifier = Modifier.size(17.dp),
+                        tint = PrototypeTokens.muted
+                    )
                 }
 
                 ToolbarIconButton(
                     onClick = { onFormatAction(MarkdownFormatAction.LinePrefix("- ")) },
-                    contentDescription = unorderedList,
+                    contentDescription = unorderedList
                 ) {
-                    StrokeIcon(icon = StrokeIcons.ListBullet, contentDescription = unorderedList, modifier = Modifier.size(17.dp), tint = PrototypeTokens.muted)
+                    StrokeIcon(
+                        icon = StrokeIcons.ListBullet,
+                        contentDescription = unorderedList,
+                        modifier = Modifier.size(17.dp),
+                        tint = PrototypeTokens.muted
+                    )
                 }
                 FormatButton(
                     label = "1.",
                     contentDescription = orderedList,
-                    onClick = { onFormatAction(MarkdownFormatAction.LinePrefix("1. ")) },
+                    onClick = { onFormatAction(MarkdownFormatAction.LinePrefix("1. ")) }
                 )
 
                 ToolbarDivider(Modifier.align(Alignment.CenterVertically))
@@ -280,17 +276,17 @@ fun MarkdownToolbar(
                 FormatButton(
                     label = "H1",
                     contentDescription = heading1,
-                    onClick = { onFormatAction(MarkdownFormatAction.LinePrefix("# ")) },
+                    onClick = { onFormatAction(MarkdownFormatAction.LinePrefix("# ")) }
                 )
                 FormatButton(
                     label = "H2",
                     contentDescription = heading2,
-                    onClick = { onFormatAction(MarkdownFormatAction.LinePrefix("## ")) },
+                    onClick = { onFormatAction(MarkdownFormatAction.LinePrefix("## ")) }
                 )
                 FormatButton(
                     label = "H3",
                     contentDescription = heading3,
-                    onClick = { onFormatAction(MarkdownFormatAction.LinePrefix("### ")) },
+                    onClick = { onFormatAction(MarkdownFormatAction.LinePrefix("### ")) }
                 )
 
                 ToolbarDivider(Modifier.align(Alignment.CenterVertically))
@@ -298,54 +294,89 @@ fun MarkdownToolbar(
                 FormatButton(
                     label = "\u9ad8\u4eae",
                     contentDescription = highlight,
-                    onClick = { onFormatAction(MarkdownFormatAction.Wrap("==", "==", highlightTpl)) },
+                    onClick = { onFormatAction(MarkdownFormatAction.Wrap("==", "==", highlightTpl)) }
                 )
                 ToolbarIconButton(
                     onClick = { onFormatAction(MarkdownFormatAction.LinePrefix("- [ ] ")) },
-                    contentDescription = taskList,
+                    contentDescription = taskList
                 ) {
-                    StrokeIcon(icon = StrokeIcons.TaskList, contentDescription = taskList, modifier = Modifier.size(16.dp), tint = PrototypeTokens.muted)
+                    StrokeIcon(
+                        icon = StrokeIcons.TaskList,
+                        contentDescription = taskList,
+                        modifier = Modifier.size(16.dp),
+                        tint = PrototypeTokens.muted
+                    )
                 }
                 ToolbarIconButton(
                     onClick = { onFormatAction(MarkdownFormatAction.Custom("toggle_list_type")) },
-                    contentDescription = toggleList,
+                    contentDescription = toggleList
                 ) {
-                    StrokeIcon(icon = StrokeIcons.SwapHoriz, contentDescription = toggleList, modifier = Modifier.size(16.dp), tint = PrototypeTokens.muted)
+                    StrokeIcon(
+                        icon = StrokeIcons.SwapHoriz,
+                        contentDescription = toggleList,
+                        modifier = Modifier.size(16.dp),
+                        tint = PrototypeTokens.muted
+                    )
                 }
 
                 ToolbarDivider(Modifier.align(Alignment.CenterVertically))
 
                 ToolbarIconButton(
                     onClick = { showLinkDialog = true },
-                    contentDescription = insertLinkDialog,
+                    contentDescription = insertLinkDialog
                 ) {
-                    StrokeIcon(icon = StrokeIcons.Link, contentDescription = insertLinkDialog, modifier = Modifier.size(16.dp), tint = PrototypeTokens.muted)
+                    StrokeIcon(
+                        icon = StrokeIcons.Link,
+                        contentDescription = insertLinkDialog,
+                        modifier = Modifier.size(16.dp),
+                        tint = PrototypeTokens.muted
+                    )
                 }
                 ToolbarIconButton(
                     onClick = { showImageDialog = true },
-                    contentDescription = insertImageDialog,
+                    contentDescription = insertImageDialog
                 ) {
-                    StrokeIcon(icon = StrokeIcons.Image, contentDescription = insertImageDialog, modifier = Modifier.size(16.dp), tint = PrototypeTokens.muted)
+                    StrokeIcon(
+                        icon = StrokeIcons.Image,
+                        contentDescription = insertImageDialog,
+                        modifier = Modifier.size(16.dp),
+                        tint = PrototypeTokens.muted
+                    )
                 }
                 if (onInsertImage != null) {
                     ToolbarIconButton(
                         onClick = { onInsertImage() },
-                        contentDescription = insertImage,
+                        contentDescription = insertImage
                     ) {
-                        StrokeIcon(icon = StrokeIcons.Image, contentDescription = insertImage, modifier = Modifier.size(16.dp), tint = PrototypeTokens.muted)
+                        StrokeIcon(
+                            icon = StrokeIcons.Image,
+                            contentDescription = insertImage,
+                            modifier = Modifier.size(16.dp),
+                            tint = PrototypeTokens.muted
+                        )
                     }
                 }
                 ToolbarIconButton(
                     onClick = { onFormatAction(MarkdownFormatAction.LinePrefix("> ")) },
-                    contentDescription = blockquote,
+                    contentDescription = blockquote
                 ) {
-                    StrokeIcon(icon = StrokeIcons.Quote, contentDescription = blockquote, modifier = Modifier.size(16.dp), tint = PrototypeTokens.muted)
+                    StrokeIcon(
+                        icon = StrokeIcons.Quote,
+                        contentDescription = blockquote,
+                        modifier = Modifier.size(16.dp),
+                        tint = PrototypeTokens.muted
+                    )
                 }
                 ToolbarIconButton(
                     onClick = { onFormatAction(MarkdownFormatAction.Insert("---\n", 0)) },
-                    contentDescription = horizontalRule,
+                    contentDescription = horizontalRule
                 ) {
-                    StrokeIcon(icon = StrokeIcons.HorizontalRule, contentDescription = horizontalRule, modifier = Modifier.size(16.dp), tint = PrototypeTokens.muted)
+                    StrokeIcon(
+                        icon = StrokeIcons.HorizontalRule,
+                        contentDescription = horizontalRule,
+                        modifier = Modifier.size(16.dp),
+                        tint = PrototypeTokens.muted
+                    )
                 }
 
                 ToolbarDivider(Modifier.align(Alignment.CenterVertically))
@@ -353,21 +384,36 @@ fun MarkdownToolbar(
                 // ── Advanced group: Code block, Table, Math, Mermaid ──
                 ToolbarIconButton(
                     onClick = { showCodeBlockDialog = true },
-                    contentDescription = codeBlockLang,
+                    contentDescription = codeBlockLang
                 ) {
-                    StrokeIcon(icon = StrokeIcons.CodeBlock, contentDescription = codeBlockLang, modifier = Modifier.size(16.dp), tint = PrototypeTokens.muted)
+                    StrokeIcon(
+                        icon = StrokeIcons.CodeBlock,
+                        contentDescription = codeBlockLang,
+                        modifier = Modifier.size(16.dp),
+                        tint = PrototypeTokens.muted
+                    )
                 }
                 ToolbarIconButton(
                     onClick = { showTableDialog = true },
-                    contentDescription = insertTable,
+                    contentDescription = insertTable
                 ) {
-                    StrokeIcon(icon = StrokeIcons.Table, contentDescription = insertTable, modifier = Modifier.size(16.dp), tint = PrototypeTokens.muted)
+                    StrokeIcon(
+                        icon = StrokeIcons.Table,
+                        contentDescription = insertTable,
+                        modifier = Modifier.size(16.dp),
+                        tint = PrototypeTokens.muted
+                    )
                 }
                 ToolbarIconButton(
                     onClick = { onFormatAction(MarkdownFormatAction.Insert(mathTpl, 4)) },
-                    contentDescription = mathFormula,
+                    contentDescription = mathFormula
                 ) {
-                    StrokeIcon(icon = StrokeIcons.Formula, contentDescription = mathFormula, modifier = Modifier.size(16.dp), tint = PrototypeTokens.muted)
+                    StrokeIcon(
+                        icon = StrokeIcons.Formula,
+                        contentDescription = mathFormula,
+                        modifier = Modifier.size(16.dp),
+                        tint = PrototypeTokens.muted
+                    )
                 }
 
                 ToolbarDivider(Modifier.align(Alignment.CenterVertically))
@@ -376,18 +422,18 @@ fun MarkdownToolbar(
                 Box(modifier = Modifier.align(Alignment.CenterVertically)) {
                     ToolbarIconButton(
                         onClick = { showMoreMenu = true },
-                        contentDescription = stringResource(R.string.editor_toolbar_more),
+                        contentDescription = stringResource(R.string.editor_toolbar_more)
                     ) {
                         StrokeIcon(
                             icon = StrokeIcons.MoreVert,
                             contentDescription = stringResource(R.string.editor_toolbar_more),
                             modifier = Modifier.size(16.dp),
-                            tint = PrototypeTokens.muted,
+                            tint = PrototypeTokens.muted
                         )
                     }
                     DropdownMenu(
                         expanded = showMoreMenu,
-                        onDismissRequest = { showMoreMenu = false },
+                        onDismissRequest = { showMoreMenu = false }
                     ) {
                         // Underline
                         DropdownMenuItem(
@@ -395,7 +441,7 @@ fun MarkdownToolbar(
                             onClick = {
                                 onFormatAction(MarkdownFormatAction.Insert(underlineTpl, 3))
                                 showMoreMenu = false
-                            },
+                            }
                         )
                         // Inline formula
                         DropdownMenuItem(
@@ -403,7 +449,7 @@ fun MarkdownToolbar(
                             onClick = {
                                 onFormatAction(MarkdownFormatAction.Wrap("$", "$", formulaTpl))
                                 showMoreMenu = false
-                            },
+                            }
                         )
                         // Superscript
                         DropdownMenuItem(
@@ -411,7 +457,7 @@ fun MarkdownToolbar(
                             onClick = {
                                 onFormatAction(MarkdownFormatAction.Wrap("^", "^", superscriptTpl))
                                 showMoreMenu = false
-                            },
+                            }
                         )
                         // Subscript
                         DropdownMenuItem(
@@ -419,7 +465,7 @@ fun MarkdownToolbar(
                             onClick = {
                                 onFormatAction(MarkdownFormatAction.Wrap("~", "~", subscriptTpl))
                                 showMoreMenu = false
-                            },
+                            }
                         )
                         HorizontalDivider()
                         // Quick link (inline template)
@@ -428,7 +474,7 @@ fun MarkdownToolbar(
                             onClick = {
                                 onFormatAction(MarkdownFormatAction.Insert(linkTpl, 1))
                                 showMoreMenu = false
-                            },
+                            }
                         )
                         // Quick image link (inline template)
                         DropdownMenuItem(
@@ -436,7 +482,7 @@ fun MarkdownToolbar(
                             onClick = {
                                 onFormatAction(MarkdownFormatAction.Insert(imageTpl, 2))
                                 showMoreMenu = false
-                            },
+                            }
                         )
                         // Quick code block (no language)
                         DropdownMenuItem(
@@ -444,7 +490,7 @@ fun MarkdownToolbar(
                             onClick = {
                                 onFormatAction(MarkdownFormatAction.Insert(codeBlockTpl, 4))
                                 showMoreMenu = false
-                            },
+                            }
                         )
                         // Quick table (default template)
                         DropdownMenuItem(
@@ -452,7 +498,7 @@ fun MarkdownToolbar(
                             onClick = {
                                 onFormatAction(MarkdownFormatAction.Insert(tableTpl, 2))
                                 showMoreMenu = false
-                            },
+                            }
                         )
                         HorizontalDivider()
                         // Mermaid diagram
@@ -461,7 +507,7 @@ fun MarkdownToolbar(
                             onClick = {
                                 onFormatAction(MarkdownFormatAction.Insert(mermaidTpl, 16))
                                 showMoreMenu = false
-                            },
+                            }
                         )
                     }
                 }
@@ -469,7 +515,7 @@ fun MarkdownToolbar(
                 if (onInsertEmoji != null) {
                     ToolbarIconButton(
                         onClick = { onInsertEmoji() },
-                        contentDescription = "Emoji",
+                        contentDescription = "Emoji"
                     ) {
                         Text(text = "\uD83D\uDE00", fontSize = 14.sp)
                     }
@@ -490,10 +536,7 @@ fun MarkdownToolbar(
  * @param onConfirm 确认插入回调，参数为链接文本和 URL
  */
 @Composable
-private fun InsertLinkDialog(
-    onDismiss: () -> Unit,
-    onConfirm: (text: String, url: String) -> Unit,
-) {
+private fun InsertLinkDialog(onDismiss: () -> Unit, onConfirm: (text: String, url: String) -> Unit) {
     var linkText by remember { mutableStateOf("") }
     var linkUrl by remember { mutableStateOf("") }
 
@@ -503,7 +546,7 @@ private fun InsertLinkDialog(
         confirmButton = {
             BrandFilledButton(
                 onClick = { if (linkText.isNotBlank() && linkUrl.isNotBlank()) onConfirm(linkText, linkUrl) },
-                enabled = linkText.isNotBlank() && linkUrl.isNotBlank(),
+                enabled = linkText.isNotBlank() && linkUrl.isNotBlank()
             ) {
                 Text(stringResource(R.string.editor_confirm))
             }
@@ -520,7 +563,7 @@ private fun InsertLinkDialog(
                 label = { Text(stringResource(R.string.editor_insert_link_text)) },
                 placeholder = { Text(stringResource(R.string.editor_insert_link_text_hint)) },
                 singleLine = true,
-                modifier = Modifier.fillMaxWidth().padding(bottom = 8.dp),
+                modifier = Modifier.fillMaxWidth().padding(bottom = 8.dp)
             )
             BrandOutlinedTextField(
                 value = linkUrl,
@@ -528,9 +571,9 @@ private fun InsertLinkDialog(
                 label = { Text(stringResource(R.string.editor_insert_link_url)) },
                 placeholder = { Text(stringResource(R.string.editor_insert_link_url_hint)) },
                 singleLine = true,
-                modifier = Modifier.fillMaxWidth(),
+                modifier = Modifier.fillMaxWidth()
             )
-        },
+        }
     )
 }
 
@@ -541,10 +584,7 @@ private fun InsertLinkDialog(
  * @param onConfirm 确认插入回调，参数为替代文本和图片 URL
  */
 @Composable
-private fun InsertImageDialog(
-    onDismiss: () -> Unit,
-    onConfirm: (alt: String, url: String) -> Unit,
-) {
+private fun InsertImageDialog(onDismiss: () -> Unit, onConfirm: (alt: String, url: String) -> Unit) {
     var altText by remember { mutableStateOf("") }
     var imageUrl by remember { mutableStateOf("") }
 
@@ -554,7 +594,7 @@ private fun InsertImageDialog(
         confirmButton = {
             BrandFilledButton(
                 onClick = { if (altText.isNotBlank() && imageUrl.isNotBlank()) onConfirm(altText, imageUrl) },
-                enabled = altText.isNotBlank() && imageUrl.isNotBlank(),
+                enabled = altText.isNotBlank() && imageUrl.isNotBlank()
             ) {
                 Text(stringResource(R.string.editor_confirm))
             }
@@ -571,7 +611,7 @@ private fun InsertImageDialog(
                 label = { Text(stringResource(R.string.editor_insert_image_alt)) },
                 placeholder = { Text(stringResource(R.string.editor_insert_image_alt_hint)) },
                 singleLine = true,
-                modifier = Modifier.fillMaxWidth().padding(bottom = 8.dp),
+                modifier = Modifier.fillMaxWidth().padding(bottom = 8.dp)
             )
             BrandOutlinedTextField(
                 value = imageUrl,
@@ -579,9 +619,9 @@ private fun InsertImageDialog(
                 label = { Text(stringResource(R.string.editor_insert_image_url)) },
                 placeholder = { Text(stringResource(R.string.editor_insert_image_url_hint)) },
                 singleLine = true,
-                modifier = Modifier.fillMaxWidth(),
+                modifier = Modifier.fillMaxWidth()
             )
-        },
+        }
     )
 }
 
@@ -592,10 +632,7 @@ private fun InsertImageDialog(
  * @param onConfirm 确认插入回调，参数为行数和列数
  */
 @Composable
-private fun InsertTableDialog(
-    onDismiss: () -> Unit,
-    onConfirm: (rows: Int, cols: Int) -> Unit,
-) {
+private fun InsertTableDialog(onDismiss: () -> Unit, onConfirm: (rows: Int, cols: Int) -> Unit) {
     var rowsText by remember { mutableStateOf("3") }
     var colsText by remember { mutableStateOf("3") }
     val rows = rowsText.toIntOrNull() ?: 3
@@ -608,7 +645,7 @@ private fun InsertTableDialog(
         confirmButton = {
             BrandFilledButton(
                 onClick = { if (valid) onConfirm(rows, cols) },
-                enabled = valid,
+                enabled = valid
             ) {
                 Text(stringResource(R.string.editor_confirm))
             }
@@ -625,7 +662,7 @@ private fun InsertTableDialog(
                 label = { Text(stringResource(R.string.editor_insert_table_rows)) },
                 placeholder = { Text(stringResource(R.string.editor_insert_table_rows_hint)) },
                 singleLine = true,
-                modifier = Modifier.fillMaxWidth().padding(bottom = 8.dp),
+                modifier = Modifier.fillMaxWidth().padding(bottom = 8.dp)
             )
             BrandOutlinedTextField(
                 value = colsText,
@@ -633,9 +670,9 @@ private fun InsertTableDialog(
                 label = { Text(stringResource(R.string.editor_insert_table_cols)) },
                 placeholder = { Text(stringResource(R.string.editor_insert_table_cols_hint)) },
                 singleLine = true,
-                modifier = Modifier.fillMaxWidth(),
+                modifier = Modifier.fillMaxWidth()
             )
-        },
+        }
     )
 }
 
@@ -646,10 +683,7 @@ private fun InsertTableDialog(
  * @param onConfirm 确认插入回调，参数为编程语言标识符
  */
 @Composable
-private fun InsertCodeBlockDialog(
-    onDismiss: () -> Unit,
-    onConfirm: (language: String) -> Unit,
-) {
+private fun InsertCodeBlockDialog(onDismiss: () -> Unit, onConfirm: (language: String) -> Unit) {
     var language by remember { mutableStateOf("") }
 
     BrandDialog(
@@ -658,7 +692,7 @@ private fun InsertCodeBlockDialog(
         confirmButton = {
             BrandFilledButton(
                 onClick = { onConfirm(language.trim()) },
-                enabled = true,
+                enabled = true
             ) {
                 Text(stringResource(R.string.editor_confirm))
             }
@@ -675,9 +709,9 @@ private fun InsertCodeBlockDialog(
                 label = { Text(stringResource(R.string.editor_code_block_language)) },
                 placeholder = { Text(stringResource(R.string.editor_code_block_language_hint)) },
                 singleLine = true,
-                modifier = Modifier.fillMaxWidth(),
+                modifier = Modifier.fillMaxWidth()
             )
-        },
+        }
     )
 }
 
@@ -725,7 +759,7 @@ private fun FormatButton(
     italic: Boolean = false,
     strikethrough: Boolean = false,
     underline: Boolean = false,
-    onClick: () -> Unit,
+    onClick: () -> Unit
 ) {
     val muted = PrototypeTokens.muted
     val isChinese = label.any { it.code > 0x2E80 }
@@ -744,14 +778,14 @@ private fun FormatButton(
                         .clickable { onClick() }
                 }
             ),
-        contentAlignment = Alignment.Center,
+        contentAlignment = Alignment.Center
     ) {
         Text(
             text = label,
             style = if (isChinese) {
                 DraftPeekTypography.labelMedium.copy(
                     color = muted,
-                    fontSize = 12.sp,
+                    fontSize = 12.sp
                 )
             } else {
                 DraftPeekTypography.bodySmall.copy(
@@ -763,9 +797,9 @@ private fun FormatButton(
                         strikethrough -> TextDecoration.LineThrough
                         underline -> TextDecoration.Underline
                         else -> null
-                    },
+                    }
                 )
-            },
+            }
         )
     }
 }
@@ -784,7 +818,7 @@ private fun ToolbarDivider(modifier: Modifier = Modifier) {
             .padding(horizontal = 2.dp)
             .height(24.dp)
             .width(1.dp),
-        color = PrototypeTokens.border,
+        color = PrototypeTokens.border
     )
 }
 
@@ -803,14 +837,14 @@ private fun ToolbarIconButton(
     onClick: () -> Unit,
     contentDescription: String,
     modifier: Modifier = Modifier,
-    content: @Composable () -> Unit,
+    content: @Composable () -> Unit
 ) {
     Box(
         modifier = modifier
             .size(32.dp, 28.dp)
             .clip(RoundedCornerShape(6.dp))
             .clickable { onClick() },
-        contentAlignment = Alignment.Center,
+        contentAlignment = Alignment.Center
     ) {
         content()
     }

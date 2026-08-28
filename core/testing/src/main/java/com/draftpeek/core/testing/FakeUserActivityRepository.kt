@@ -2,12 +2,12 @@ package com.draftpeek.core.testing
 
 import com.draftpeek.core.data.entity.UserActivity
 import com.draftpeek.core.data.repository.UserActivityRepository
-import kotlinx.coroutines.flow.Flow
-import kotlinx.coroutines.flow.MutableStateFlow
-import kotlinx.coroutines.flow.asStateFlow
 import java.time.Instant
 import java.time.ZoneId
 import java.time.format.DateTimeFormatter
+import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.asStateFlow
 
 /**
  * Fake implementation of [UserActivityRepository] for testing.
@@ -21,21 +21,19 @@ class FakeUserActivityRepository : UserActivityRepository {
     private val dateFormatter = DateTimeFormatter.ofPattern("yyyy-MM-dd")
         .withZone(ZoneId.systemDefault())
 
-    override fun getActivityForDateRange(start: String, end: String): Flow<List<UserActivity>> =
-        MutableStateFlow(
-            _activities.value.values
-                .filter { it.date in start..end }
-                .sortedBy { it.date }
-        ).asStateFlow()
+    override fun getActivityForDateRange(start: String, end: String): Flow<List<UserActivity>> = MutableStateFlow(
+        _activities.value.values
+            .filter { it.date in start..end }
+            .sortedBy { it.date }
+    ).asStateFlow()
 
     override fun getActivityForDate(date: String): Flow<UserActivity?> =
         MutableStateFlow(_activities.value[date]).asStateFlow()
 
-    private fun today(): String =
-        Instant.ofEpochMilli(System.currentTimeMillis())
-            .atZone(ZoneId.systemDefault())
-            .toLocalDate()
-            .format(dateFormatter)
+    private fun today(): String = Instant.ofEpochMilli(System.currentTimeMillis())
+        .atZone(ZoneId.systemDefault())
+        .toLocalDate()
+        .format(dateFormatter)
 
     private fun ensureDate(date: String) {
         if (date !in _activities.value) {
@@ -98,7 +96,8 @@ class FakeUserActivityRepository : UserActivityRepository {
         val date = today()
         ensureDate(date)
         val current = _activities.value[date]!!
-        _activities.value = _activities.value + (date to current.copy(usageDurationMinutes = current.usageDurationMinutes + minutes))
+        _activities.value =
+            _activities.value + (date to current.copy(usageDurationMinutes = current.usageDurationMinutes + minutes))
     }
 
     override suspend fun recordCharWrite(count: Int) {

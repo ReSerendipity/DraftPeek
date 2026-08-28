@@ -42,10 +42,7 @@ import com.draftpeek.core.ui.theme.PrototypeTokens
  * @param modifier 分隔线的可选 [Modifier]
  */
 @Composable
-fun DraggableDivider(
-    onDrag: (deltaPx: Float) -> Unit,
-    modifier: Modifier = Modifier,
-) {
+fun DraggableDivider(onDrag: (deltaPx: Float) -> Unit, modifier: Modifier = Modifier) {
     val interactionSource = remember { MutableInteractionSource() }
     val isHovered by interactionSource.collectIsHoveredAsState()
     val isDragged by interactionSource.collectIsDraggedAsState()
@@ -76,7 +73,7 @@ fun DraggableDivider(
                     onDrag(dragAmount.x)
                 }
             },
-        contentAlignment = Alignment.Center,
+        contentAlignment = Alignment.Center
     ) {
         Box(
             modifier = Modifier
@@ -89,5 +86,6 @@ fun DraggableDivider(
 
 /** 触摸目标宽度，确保足够的触摸区域 */
 private val TouchTargetWidth = 24.dp
+
 /** 可见分隔线宽度 */
 private val VisibleLineWidth = 1.dp

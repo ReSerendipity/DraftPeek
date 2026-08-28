@@ -14,8 +14,10 @@ package com.draftpeek.feature.stats.model
 enum class OperationType {
     /** 打开文件操作 */
     FILE_OPEN,
+
     /** 文本编辑操作 */
     TEXT_EDIT,
+
     /** 其他操作（预览、搜索、设置等） */
-    OTHER_OPERATION,
+    OTHER_OPERATION
 }

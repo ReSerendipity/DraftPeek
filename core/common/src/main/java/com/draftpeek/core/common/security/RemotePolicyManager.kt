@@ -20,11 +20,6 @@ import androidx.annotation.WorkerThread
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 import org.json.JSONObject
-import java.security.MessageDigest
-import java.security.Signature
-import java.security.spec.X509EncodedKeySpec
-import java.security.KeyFactory
-import java.util.Base64
 
 private const val TAG = "RemotePolicyManager"
 
@@ -60,7 +55,7 @@ object RemotePolicyManager {
         /** 策略版本号 */
         val version: Long = 0L,
         /** 策略过期时间（epoch ms） */
-        val expiresAt: Long = 0L,
+        val expiresAt: Long = 0L
     )
 
     @Volatile
@@ -167,28 +162,26 @@ object RemotePolicyManager {
     /**
      * 解析策略 JSON。
      */
-    private fun parsePolicy(json: String): SecurityPolicy? {
-        return try {
-            val obj = JSONObject(json)
-            SecurityPolicy(
-                killSwitchEnabled = obj.optBoolean("kill_switch", false),
-                aiProtectionEnabled = obj.optBoolean("ai_protection_enabled", true),
-                emulatorDetectionThreshold = obj.optInt("emulator_threshold", 5),
-                classloadingBurstThreshold = obj.optInt("classloading_burst_threshold", 20),
-                reflectionTimingThreshold = obj.optDouble("reflection_timing_threshold", 0.5),
-                extraFridaPaths = obj.optJSONArray("extra_frida_paths")?.let { arr ->
-                    (0 until arr.length()).map { arr.getString(it) }
-                } ?: emptyList(),
-                extraXposedClasses = obj.optJSONArray("extra_xposed_classes")?.let { arr ->
-                    (0 until arr.length()).map { arr.getString(it) }
-                } ?: emptyList(),
-                version = obj.optLong("version", 0L),
-                expiresAt = obj.optLong("expires_at", 0L),
-            )
-        } catch (e: Exception) {
-            Log.w(TAG, "Failed to parse policy JSON", e)
-            null
-        }
+    private fun parsePolicy(json: String): SecurityPolicy? = try {
+        val obj = JSONObject(json)
+        SecurityPolicy(
+            killSwitchEnabled = obj.optBoolean("kill_switch", false),
+            aiProtectionEnabled = obj.optBoolean("ai_protection_enabled", true),
+            emulatorDetectionThreshold = obj.optInt("emulator_threshold", 5),
+            classloadingBurstThreshold = obj.optInt("classloading_burst_threshold", 20),
+            reflectionTimingThreshold = obj.optDouble("reflection_timing_threshold", 0.5),
+            extraFridaPaths = obj.optJSONArray("extra_frida_paths")?.let { arr ->
+                (0 until arr.length()).map { arr.getString(it) }
+            } ?: emptyList(),
+            extraXposedClasses = obj.optJSONArray("extra_xposed_classes")?.let { arr ->
+                (0 until arr.length()).map { arr.getString(it) }
+            } ?: emptyList(),
+            version = obj.optLong("version", 0L),
+            expiresAt = obj.optLong("expires_at", 0L)
+        )
+    } catch (e: Exception) {
+        Log.w(TAG, "Failed to parse policy JSON", e)
+        null
     }
 
     /**

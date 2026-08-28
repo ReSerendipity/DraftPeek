@@ -21,7 +21,7 @@ import androidx.compose.runtime.Immutable
 data class ExportConfig(
     val pageSize: PageSize = PageSize.A4,
     val includePageNumbers: Boolean = false,
-    val includeTableOfContents: Boolean = false,
+    val includeTableOfContents: Boolean = false
 )
 
 /**
@@ -36,10 +36,13 @@ data class ExportConfig(
 enum class PageSize(val displayName: String, val widthMm: Int, val heightMm: Int) {
     /** A4 纸张（210mm × 297mm），国际标准 */
     A4("A4", 210, 297),
+
     /** A3 纸张（297mm × 420mm），国际标准 */
     A3("A3", 297, 420),
+
     /** Letter 纸张（216mm × 279mm），北美标准 */
     LETTER("Letter", 216, 279),
+
     /** Legal 纸张（216mm × 356mm），北美法律用纸 */
-    LEGAL("Legal", 216, 356),
+    LEGAL("Legal", 216, 356)
 }

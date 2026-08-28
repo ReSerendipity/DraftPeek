@@ -28,11 +28,7 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.ui.hapticfeedback.HapticFeedbackType
-import androidx.compose.ui.input.pointer.pointerInput
-import androidx.compose.ui.platform.LocalHapticFeedback
 import androidx.compose.material3.HorizontalDivider
-import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -46,28 +42,30 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.hapticfeedback.HapticFeedbackType
 import androidx.compose.ui.input.pointer.pointerInput
-import androidx.compose.ui.unit.IntOffset
 import androidx.compose.ui.platform.LocalDensity
+import androidx.compose.ui.platform.LocalHapticFeedback
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
+import androidx.compose.ui.unit.IntOffset
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import kotlinx.coroutines.launch
 import com.draftpeek.core.common.model.TabId
 import com.draftpeek.core.ui.component.ConfirmDialog
-import kotlin.math.roundToInt
 import com.draftpeek.core.ui.icon.StrokeIcon
 import com.draftpeek.core.ui.icon.StrokeIcons
 import com.draftpeek.core.ui.theme.CodeTextStyle
 import com.draftpeek.core.ui.theme.FileTypeColors
 import com.draftpeek.core.ui.theme.LocalDarkTheme
 import com.draftpeek.core.ui.theme.MonoLabelStyle
-import com.draftpeek.core.ui.theme.PrototypeTokens
 import com.draftpeek.core.ui.theme.PrototypeSpacing
+import com.draftpeek.core.ui.theme.PrototypeTokens
 import com.draftpeek.feature.editor.R
 import com.draftpeek.feature.editor.model.EditorTab
+import kotlin.math.roundToInt
+import kotlinx.coroutines.launch
 
 /**
  * 多标签页标签栏 Composable。
@@ -90,7 +88,7 @@ fun TabBar(
     onTabClick: (TabId) -> Unit,
     onTabClose: (TabId) -> Unit,
     onTabReorder: ((TabId, Int) -> Unit)? = null,
-    modifier: Modifier = Modifier,
+    modifier: Modifier = Modifier
 ) {
     // State for the close-confirmation dialog on modified tabs.
     var pendingCloseTabId by remember { mutableStateOf<TabId?>(null) }
@@ -136,7 +134,7 @@ fun TabBar(
         modifier = modifier
             .fillMaxWidth()
             .horizontalScroll(scrollState)
-            .background(surface),
+            .background(surface)
     ) {
         tabs.forEachIndexed { index, tab ->
             val isActive = tab.id == activeTabId
@@ -183,7 +181,7 @@ fun TabBar(
                         onDragCancel = {
                             dragTabId = null
                             dragOffsetX = 0f
-                        },
+                        }
                     )
                 }
             } else {
@@ -205,7 +203,7 @@ fun TabBar(
                     }
                 },
                 showRightBorder = index < tabs.lastIndex,
-                modifier = dragModifier.then(reorderModifier),
+                modifier = dragModifier.then(reorderModifier)
             )
         }
     }
@@ -217,14 +215,17 @@ fun TabBar(
         val tabToClose = tabs.find { it.id == pendingCloseTabId }
         ConfirmDialog(
             title = stringResource(R.string.editor_unsaved_changes),
-            message = stringResource(R.string.editor_tab_close_modified_message, tabToClose?.fileName ?: stringResource(R.string.editor_tab_file)),
+            message = stringResource(
+                R.string.editor_tab_close_modified_message,
+                tabToClose?.fileName ?: stringResource(R.string.editor_tab_file)
+            ),
             confirmLabel = stringResource(R.string.editor_close),
             isDestructive = true,
             onConfirm = {
                 pendingCloseTabId?.let { onTabClose(it) }
                 pendingCloseTabId = null
             },
-            onDismiss = { pendingCloseTabId = null },
+            onDismiss = { pendingCloseTabId = null }
         )
     }
 }
@@ -249,18 +250,18 @@ private fun TabItem(
     onClick: () -> Unit,
     onClose: () -> Unit,
     showRightBorder: Boolean,
-    modifier: Modifier = Modifier,
+    modifier: Modifier = Modifier
 ) {
     val isDark = LocalDarkTheme.current
     val bgColor by animateColorAsState(
         targetValue = if (isActive) PrototypeTokens.bg else PrototypeTokens.surface,
         animationSpec = tween(200),
-        label = "tab_bg",
+        label = "tab_bg"
     )
     val contentColor by animateColorAsState(
         targetValue = if (isActive) PrototypeTokens.fg else PrototypeTokens.muted,
         animationSpec = tween(200),
-        label = "tab_content",
+        label = "tab_content"
     )
     val border = PrototypeTokens.border
     val accent = PrototypeTokens.accent
@@ -273,13 +274,13 @@ private fun TabItem(
     Column(
         modifier = modifier
             .clickable(onClick = onClick)
-            .background(bgColor),
+            .background(bgColor)
     ) {
         Row(
             modifier = Modifier
                 .padding(horizontal = PrototypeSpacing.EditorTabPaddingH, vertical = 8.dp),
             verticalAlignment = Alignment.CenterVertically,
-            horizontalArrangement = Arrangement.spacedBy(6.dp),
+            horizontalArrangement = Arrangement.spacedBy(6.dp)
         ) {
             // File type badge (HTML prototype: border-radius 4px for mini)
             Box(
@@ -287,15 +288,15 @@ private fun TabItem(
                     .size(PrototypeSpacing.EditorTabMiniBadge)
                     .clip(RoundedCornerShape(4.dp))
                     .background(typeColor),
-                contentAlignment = Alignment.Center,
+                contentAlignment = Alignment.Center
             ) {
                 Text(
                     text = typeCode,
                     style = MonoLabelStyle.copy(
                         color = Color.White,
                         fontSize = 6.sp,
-                        fontWeight = FontWeight.Bold,
-                    ),
+                        fontWeight = FontWeight.Bold
+                    )
                 )
             }
 
@@ -304,22 +305,22 @@ private fun TabItem(
                 text = tab.fileName,
                 style = CodeTextStyle.copy(
                     color = contentColor,
-                    fontSize = PrototypeSpacing.EditorTabFontSize,
+                    fontSize = PrototypeSpacing.EditorTabFontSize
                 ),
                 maxLines = 1,
-                overflow = TextOverflow.Ellipsis,
+                overflow = TextOverflow.Ellipsis
             )
 
             // Close button — shown for each tab in the multi-tab bar
             IconButton(
                 onClick = onClose,
-                modifier = Modifier.size(14.dp),
+                modifier = Modifier.size(14.dp)
             ) {
                 StrokeIcon(
                     icon = StrokeIcons.Close,
                     contentDescription = stringResource(R.string.editor_close_tab),
                     modifier = Modifier.size(10.dp),
-                    tint = contentColor,
+                    tint = contentColor
                 )
             }
         }
@@ -329,7 +330,7 @@ private fun TabItem(
             modifier = Modifier
                 .fillMaxWidth()
                 .height(2.dp)
-                .background(if (isActive) accent else Color.Transparent),
+                .background(if (isActive) accent else Color.Transparent)
         )
 
         // Right border separator between tabs
@@ -338,7 +339,7 @@ private fun TabItem(
                 modifier = Modifier
                     .width(1.dp)
                     .height(38.dp)
-                    .background(PrototypeTokens.borderSoft),
+                    .background(PrototypeTokens.borderSoft)
             )
         }
     }

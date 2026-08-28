@@ -6,8 +6,8 @@ import io.mockk.coEvery
 import io.mockk.coVerify
 import io.mockk.every
 import io.mockk.mockk
-import kotlinx.coroutines.flow.flowOf
 import kotlinx.coroutines.flow.first
+import kotlinx.coroutines.flow.flowOf
 import kotlinx.coroutines.test.runTest
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.DisplayName
@@ -26,9 +26,13 @@ class SecurityEventRepositoryImplTest {
         fun allEvents_delegatesToDao() = runTest {
             val events = listOf(
                 SecurityEventEntity(
-                    eventType = "DETECTION", threatLevel = "SAFE", signalsMask = 0,
-                    responseLevel = "NONE", timestampEpochMs = 0L,
-                    anonymizedDeviceId = "dev", appVersionCode = 29,
+                    eventType = "DETECTION",
+                    threatLevel = "SAFE",
+                    signalsMask = 0,
+                    responseLevel = "NONE",
+                    timestampEpochMs = 0L,
+                    anonymizedDeviceId = "dev",
+                    appVersionCode = 29
                 )
             )
             val dao = mockk<SecurityEventDao>()
@@ -54,16 +58,18 @@ class SecurityEventRepositoryImplTest {
                 eventType = "DETECTION",
                 threatLevel = "SUSPICIOUS",
                 signalsMask = 5,
-                responseLevel = "WARNING",
+                responseLevel = "WARNING"
             )
 
             coVerify {
-                dao.insert(match {
-                    it.eventType == "DETECTION" &&
-                        it.threatLevel == "SUSPICIOUS" &&
-                        it.signalsMask == 5 &&
-                        it.responseLevel == "WARNING"
-                })
+                dao.insert(
+                    match {
+                        it.eventType == "DETECTION" &&
+                            it.threatLevel == "SUSPICIOUS" &&
+                            it.signalsMask == 5 &&
+                            it.responseLevel == "WARNING"
+                    }
+                )
             }
         }
     }

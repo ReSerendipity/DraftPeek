@@ -21,24 +21,33 @@ import androidx.compose.ui.unit.dp
 enum class MarkdownBlockType {
     /** 标题（H1-H6） */
     HEADING,
+
     /** 段落 */
     PARAGRAPH,
+
     /** 代码块（``` 或 ~~~） */
     CODE_BLOCK,
+
     /** 无序列表 */
     UNORDERED_LIST,
+
     /** 有序列表 */
     ORDERED_LIST,
+
     /** 任务列表 */
     TASK_LIST,
+
     /** 引用块 */
     BLOCKQUOTE,
+
     /** 表格 */
     TABLE,
+
     /** 水平分隔线 */
     HORIZONTAL_RULE,
+
     /** 空行（用于块间分隔） */
-    BLANK,
+    BLANK
 }
 
 /**
@@ -59,7 +68,7 @@ data class MarkdownBlock(
     val type: MarkdownBlockType,
     val startIndex: Int = 0,
     val endIndex: Int = 0,
-    val estimatedHeightDp: Dp = 0.dp,
+    val estimatedHeightDp: Dp = 0.dp
 ) {
     companion object {
         /**

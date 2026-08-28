@@ -8,7 +8,6 @@
  */
 package com.draftpeek.feature.editor.ui
 
-import android.util.Log
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.fadeIn
 import androidx.compose.animation.fadeOut
@@ -22,10 +21,10 @@ import androidx.compose.material3.FloatingActionButton
 import androidx.compose.material3.FloatingActionButtonDefaults
 import androidx.compose.material3.Icon
 import androidx.compose.runtime.Composable
-import com.draftpeek.core.ui.theme.PrototypeTokens
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
+import com.draftpeek.core.ui.theme.PrototypeTokens
 import com.draftpeek.feature.editor.R
 import io.github.rosemoe.sora.widget.CodeEditor
 
@@ -42,16 +41,12 @@ private const val TAG = "EditorScroll"
  * @param modifier 修饰符
  */
 @Composable
-fun ScrollToTopButton(
-    editor: CodeEditor,
-    hasScrolled: Boolean,
-    modifier: Modifier = Modifier,
-) {
+fun ScrollToTopButton(editor: CodeEditor, hasScrolled: Boolean, modifier: Modifier = Modifier) {
     AnimatedVisibility(
         visible = hasScrolled,
         enter = fadeIn() + slideInVertically { it },
         exit = fadeOut() + slideOutVertically { it },
-        modifier = modifier,
+        modifier = modifier
     ) {
         FloatingActionButton(
             onClick = {
@@ -61,14 +56,14 @@ fun ScrollToTopButton(
             contentColor = PrototypeTokens.accent,
             elevation = FloatingActionButtonDefaults.elevation(
                 defaultElevation = 4.dp,
-                pressedElevation = 8.dp,
+                pressedElevation = 8.dp
             ),
             shape = CircleShape,
-            modifier = Modifier.size(48.dp),
+            modifier = Modifier.size(48.dp)
         ) {
             Icon(
                 imageVector = Icons.Filled.KeyboardArrowUp,
-                contentDescription = stringResource(R.string.editor_scroll_to_top),
+                contentDescription = stringResource(R.string.editor_scroll_to_top)
             )
         }
     }

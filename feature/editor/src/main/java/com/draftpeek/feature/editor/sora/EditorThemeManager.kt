@@ -5,11 +5,11 @@ import android.util.Log
 import com.draftpeek.core.ui.theme.ThemeLoader
 import io.github.rosemoe.sora.langs.textmate.registry.ThemeRegistry
 import io.github.rosemoe.sora.langs.textmate.registry.model.ThemeModel
+import java.io.File
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import org.eclipse.tm4e.core.registry.IThemeSource
-import java.io.File
 
 /**
  * Manages available editor themes and theme selection.
@@ -34,7 +34,7 @@ object EditorThemeManager {
     private val BUNDLED_THEME_IDS = setOf(
         "draftpeek-dark", "draftpeek-light", "nord", "monokai", "dracula",
         "solarized_dark", "solarized_light", "ayu-dark", "darcula",
-        "quietlight", "tokyo-night",
+        "quietlight", "tokyo-night"
     )
 
     /**
@@ -48,12 +48,7 @@ object EditorThemeManager {
      * @param isDark Whether this is a dark theme.
      * @param assetPath Path to the JSON file in assets/textmate/.
      */
-    data class ThemeEntry(
-        val id: String,
-        val displayName: String,
-        val isDark: Boolean,
-        val assetPath: String,
-    )
+    data class ThemeEntry(val id: String, val displayName: String, val isDark: Boolean, val assetPath: String)
 
     /** All bundled themes available in the application. */
     val bundledThemes: List<ThemeEntry> = listOf(
@@ -67,7 +62,7 @@ object EditorThemeManager {
         ThemeEntry("ayu-dark", "Ayu Dark", true, "textmate/ayu-dark.json"),
         ThemeEntry("darcula", "Darcula", true, "textmate/darcula.json"),
         ThemeEntry("quietlight", "Quiet Light", false, "textmate/quietlight.json"),
-        ThemeEntry("tokyo-night", "Tokyo Night", true, "textmate/tokyo-night.json"),
+        ThemeEntry("tokyo-night", "Tokyo Night", true, "textmate/tokyo-night.json")
     )
 
     /** Bundled themes as [ThemeMetadata] for the unified list. */
@@ -77,7 +72,7 @@ object EditorThemeManager {
             displayName = entry.displayName,
             isDark = entry.isDark,
             isBundled = true,
-            filePath = entry.assetPath,
+            filePath = entry.assetPath
         )
     }
 
@@ -122,9 +117,7 @@ object EditorThemeManager {
      * @param themeId The unique theme identifier.
      * @return The matching [ThemeEntry] for bundled themes, or null.
      */
-    fun findThemeById(themeId: String): ThemeEntry? {
-        return bundledThemes.find { it.id == themeId }
-    }
+    fun findThemeById(themeId: String): ThemeEntry? = bundledThemes.find { it.id == themeId }
 
     /**
      * Find theme metadata by ID across both bundled and custom themes.
@@ -132,9 +125,7 @@ object EditorThemeManager {
      * @param themeId The unique theme identifier.
      * @return The matching [ThemeMetadata], or null if not found.
      */
-    fun findThemeMetadataById(themeId: String): ThemeMetadata? {
-        return _allThemes.value.find { it.id == themeId }
-    }
+    fun findThemeMetadataById(themeId: String): ThemeMetadata? = _allThemes.value.find { it.id == themeId }
 
     // ── Custom theme management ──
 
@@ -160,19 +151,17 @@ object EditorThemeManager {
      * @param entry The theme entry to load.
      * @return true if the theme was loaded successfully.
      */
-    fun loadBundledTheme(context: Context, entry: ThemeEntry): Boolean {
-        return try {
-            context.assets.open(entry.assetPath).use { input ->
-                val source = IThemeSource.fromInputStream(input, entry.assetPath, null)
-                val model = ThemeModel(source, entry.id).apply { isDark = entry.isDark }
-                ThemeRegistry.getInstance().loadTheme(model)
-                Log.d(TAG, "Loaded bundled theme: ${entry.displayName} (${entry.id})")
-                true
-            }
-        } catch (e: Exception) {
-            Log.e(TAG, "Failed to load bundled theme: ${entry.displayName}", e)
-            false
+    fun loadBundledTheme(context: Context, entry: ThemeEntry): Boolean = try {
+        context.assets.open(entry.assetPath).use { input ->
+            val source = IThemeSource.fromInputStream(input, entry.assetPath, null)
+            val model = ThemeModel(source, entry.id).apply { isDark = entry.isDark }
+            ThemeRegistry.getInstance().loadTheme(model)
+            Log.d(TAG, "Loaded bundled theme: ${entry.displayName} (${entry.id})")
+            true
         }
+    } catch (e: Exception) {
+        Log.e(TAG, "Failed to load bundled theme: ${entry.displayName}", e)
+        false
     }
 
     /**
@@ -284,7 +273,7 @@ object EditorThemeManager {
                             displayName = parsed.name,
                             isDark = parsed.isDark,
                             isBundled = false,
-                            filePath = file.absolutePath,
+                            filePath = file.absolutePath
                         )
                         customMetadata.add(metadata)
                     }
@@ -310,15 +299,13 @@ object EditorThemeManager {
      * @param themeId The ID of the theme to apply.
      * @return true if the theme was found and applied.
      */
-    fun applyTheme(themeId: String): Boolean {
-        return try {
-            ThemeRegistry.getInstance().setTheme(themeId)
-            Log.d(TAG, "Applied theme: $themeId")
-            true
-        } catch (e: Exception) {
-            Log.e(TAG, "Failed to apply theme: $themeId", e)
-            false
-        }
+    fun applyTheme(themeId: String): Boolean = try {
+        ThemeRegistry.getInstance().setTheme(themeId)
+        Log.d(TAG, "Applied theme: $themeId")
+        true
+    } catch (e: Exception) {
+        Log.e(TAG, "Failed to apply theme: $themeId", e)
+        false
     }
 
     /**
@@ -329,9 +316,7 @@ object EditorThemeManager {
      * @param themeId The theme identifier.
      * @return The display name, or the raw ID if not found.
      */
-    fun getThemeDisplayName(themeId: String): String {
-        return findThemeMetadataById(themeId)?.displayName ?: themeId
-    }
+    fun getThemeDisplayName(themeId: String): String = findThemeMetadataById(themeId)?.displayName ?: themeId
 
     /**
      * Check if a theme ID refers to a dark theme.
@@ -341,7 +326,5 @@ object EditorThemeManager {
      * @param themeId The theme identifier.
      * @return true if the theme is dark, false if light or unknown.
      */
-    fun isDarkTheme(themeId: String): Boolean {
-        return findThemeMetadataById(themeId)?.isDark ?: true
-    }
+    fun isDarkTheme(themeId: String): Boolean = findThemeMetadataById(themeId)?.isDark ?: true
 }

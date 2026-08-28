@@ -9,7 +9,6 @@
  */
 package com.draftpeek.feature.browser.ui
 
-import androidx.compose.foundation.gestures.detectDragGesturesAfterLongPress
 import androidx.compose.foundation.lazy.LazyListState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableFloatStateOf
@@ -17,21 +16,14 @@ import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateMapOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
-import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.unit.Density
-import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import kotlinx.coroutines.Job
 
 /**
  * 虚拟目录区：行在视口中的边界（拖动时按需更新）
  */
-data class VRowBounds(
-    val index: Int,
-    val top: Float,
-    val bottom: Float,
-    val height: Int,
-)
+data class VRowBounds(val index: Int, val top: Float, val bottom: Float, val height: Int)
 
 /**
  * 虚拟目录区：绝对累计坐标（含 header），拖动开始时构建并冻结
@@ -44,7 +36,7 @@ data class VAbsBounds(
     val absBottom: Float,
     val height: Float,
     /** 与下一项 absTop 差 = height + spacing */
-    val step: Float,
+    val step: Float
 )
 
 /**
@@ -66,10 +58,7 @@ data class VAbsBounds(
  * @param density Compose Density，用于 dp→px 转换
  * @param listState LazyListState，用于查询可见项和滚动
  */
-class DragDropController(
-    val density: Density,
-    val listState: LazyListState,
-) {
+class DragDropController(val density: Density, val listState: LazyListState) {
     // ── 拖拽状态 ──
     var dragStartIndex by mutableIntStateOf(-1)
     var dragInsertionIndex by mutableIntStateOf(-1)
@@ -121,17 +110,21 @@ class DragDropController(
         var currentY = -firstVisibleOffset.toFloat()
         val totalLogical = 1 + itemCount
         for (li in firstVisible until totalLogical) {
-            val h = if (li == 0) headerHeightPx
-            else {
+            val h = if (li == 0) {
+                headerHeightPx
+            } else {
                 val itemIdx = li - 1
                 rowBounds[itemIdx]?.height?.toFloat() ?: defaultRowHeightPx
             }
             val top = currentY
             val bottom = currentY + h + itemSpacingPx
             if (localY in top..bottom) {
-                return if (li == 0) -1 else {
-                    if (forStart) li - 1
-                    else {
+                return if (li == 0) {
+                    -1
+                } else {
+                    if (forStart) {
+                        li - 1
+                    } else {
                         val center = (top + bottom) / 2f
                         if (localY < center) li - 1 else li
                     }
@@ -157,7 +150,7 @@ class DragDropController(
                 absTop = top,
                 absBottom = top + h,
                 height = h,
-                step = h + itemSpacingPx,
+                step = h + itemSpacingPx
             )
             top += h + itemSpacingPx
         }
@@ -165,8 +158,7 @@ class DragDropController(
     }
 
     /** 计算当前手指的绝对 Y 坐标 */
-    fun currentFingerAbsY(): Float =
-        originalViewportTopAbs + dragScrollOffset + (dragStartFingerY + dragOffset)
+    fun currentFingerAbsY(): Float = originalViewportTopAbs + dragScrollOffset + (dragStartFingerY + dragOffset)
 
     /**
      * 用绝对坐标找插入线（0..itemCount）
@@ -245,9 +237,11 @@ class DragDropController(
         } else {
             val itemAtFirst = firstVisibleIdxAtStart - 1
             val b = frozenAbsBounds[itemAtFirst]
-            if (b != null) b.absTop - firstVisibleOffAtStart
-            else {
-                (headerHeightPx + itemSpacingPx) + itemAtFirst * (defaultRowHeightPx + itemSpacingPx) - firstVisibleOffAtStart
+            if (b != null) {
+                b.absTop - firstVisibleOffAtStart
+            } else {
+                (headerHeightPx + itemSpacingPx) + itemAtFirst * (defaultRowHeightPx + itemSpacingPx) -
+                    firstVisibleOffAtStart
             }
         }
     }

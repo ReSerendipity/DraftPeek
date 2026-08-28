@@ -41,7 +41,7 @@ class AiDetectorTest {
         val timestamps = listOf(
             1000L, 1050L, 1100L, 1180L, 1250L, 1400L, 1450L, 1600L,
             1700L, 1850L, 1900L, 2050L, 2200L, 2300L, 2500L, 2600L,
-            2750L, 2900L, 3100L, 3200L,
+            2750L, 2900L, 3100L, 3200L
         )
 
         val result = AiDetector.detectSandboxTouchTiming(timestamps)

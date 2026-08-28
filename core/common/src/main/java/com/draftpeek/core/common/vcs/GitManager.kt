@@ -13,6 +13,19 @@ package com.draftpeek.core.common.vcs
 import android.content.Context
 import android.util.Log
 import com.draftpeek.core.common.R
+import java.io.ByteArrayOutputStream
+import java.io.File
+import java.io.FileNotFoundException
+import java.net.URI
+import java.net.UnknownHostException
+import java.nio.file.NoSuchFileException
+import java.util.Date
+import java.util.concurrent.Executors
+import java.util.concurrent.ThreadFactory
+import java.util.concurrent.TimeUnit
+import java.util.concurrent.TimeoutException
+import java.util.concurrent.atomic.AtomicInteger
+import javax.net.ssl.SSLHandshakeException
 import org.eclipse.jgit.api.Git
 import org.eclipse.jgit.api.errors.InvalidRemoteException
 import org.eclipse.jgit.api.errors.TransportException as JGitApiTransportException
@@ -27,21 +40,9 @@ import org.eclipse.jgit.transport.CredentialsProvider
 import org.eclipse.jgit.transport.TransportHttp
 import org.eclipse.jgit.transport.UsernamePasswordCredentialsProvider
 import org.eclipse.jgit.treewalk.filter.PathFilter
-import java.io.ByteArrayOutputStream
-import java.io.File
-import java.io.FileNotFoundException
-import java.net.URI
-import java.net.UnknownHostException
-import java.nio.file.NoSuchFileException
-import java.util.Date
-import java.util.concurrent.Executors
-import java.util.concurrent.ThreadFactory
-import java.util.concurrent.TimeUnit
-import java.util.concurrent.TimeoutException
-import java.util.concurrent.atomic.AtomicInteger
-import javax.net.ssl.SSLHandshakeException
 
 private const val TAG = "GitManager"
+
 /** 克隆操作默认超时时间（3分钟） */
 private const val CLONE_TIMEOUT_MS = 3 * 60 * 1000L
 
@@ -53,9 +54,7 @@ private const val CLONE_TIMEOUT_MS = 3 * 60 * 1000L
  *
  * @property onProgress 进度消息回调，在JGit工作线程上调用，调用方需自行切换到主线程
  */
-private class CallbackProgressMonitor(
-    private val onProgress: (String) -> Unit,
-) : ProgressMonitor {
+private class CallbackProgressMonitor(private val onProgress: (String) -> Unit) : ProgressMonitor {
     private var currentTask: String = ""
     private var totalWork: Int = 0
     private var lastReportedPercent = -1
@@ -102,10 +101,7 @@ private class CallbackProgressMonitor(
  * @property filePath 文件相对路径
  * @property status 文件Git状态
  */
-data class GitFileStatus(
-    val filePath: String,
-    val status: GitStatus,
-)
+data class GitFileStatus(val filePath: String, val status: GitStatus)
 
 /**
  * Git文件状态枚举。
@@ -113,16 +109,21 @@ data class GitFileStatus(
 enum class GitStatus {
     /** 未跟踪的新文件 */
     UNTRACKED,
+
     /** 已修改的文件 */
     MODIFIED,
+
     /** 已添加到暂存区的文件 */
     ADDED,
+
     /** 已删除的文件 */
     DELETED,
+
     /** 未修改的文件 */
     UNMODIFIED,
+
     /** 存在冲突的文件 */
-    CONFLICTED,
+    CONFLICTED
 }
 
 /**
@@ -137,7 +138,7 @@ data class GitRepoInfo(
     val branchName: String,
     val remoteUrl: String?,
     val lastCommitMessage: String?,
-    val lastCommitDate: Date?,
+    val lastCommitDate: Date?
 )
 
 /**
@@ -171,12 +172,14 @@ data class RebaseResult(
     val status: String,
     val currentCommit: String? = null,
     val conflictedPaths: List<String> = emptyList(),
-    val errorMessage: String? = null,
+    val errorMessage: String? = null
 ) {
     /** 操作是否成功完成 */
     val isOk: Boolean get() = status == "OK" || status == "UP_TO_DATE"
+
     /** 是否存在冲突 */
     val hasConflicts: Boolean get() = conflictedPaths.isNotEmpty() || status == "CONFLICTS"
+
     /** 操作是否失败 */
     val isFailed: Boolean get() = status == "FAILED" || errorMessage != null
 }
@@ -195,10 +198,11 @@ data class MergeResult(
     val mergeCommitSha: String? = null,
     val isConflicting: Boolean = false,
     val conflictedPaths: List<String> = emptyList(),
-    val errorMessage: String? = null,
+    val errorMessage: String? = null
 ) {
     /** 合并是否成功 */
     val isOk: Boolean get() = status.startsWith("MERGED") || status == "FAST_FORWARD"
+
     /** 合并是否失败 */
     val isFailed: Boolean get() = status == "FAILED" || errorMessage != null
 }
@@ -215,10 +219,11 @@ data class CherryPickResult(
     val status: String,
     val newCommitSha: String? = null,
     val conflictedPaths: List<String> = emptyList(),
-    val errorMessage: String? = null,
+    val errorMessage: String? = null
 ) {
     /** 操作是否成功 */
     val isOk: Boolean get() = status == "OK" && errorMessage == null
+
     /** 操作是否失败 */
     val isFailed: Boolean get() = status == "FAILED" || errorMessage != null
 }
@@ -230,11 +235,7 @@ data class CherryPickResult(
  * @property url 远程拉取URL
  * @property pushUrl 远程推送URL，可为null
  */
-data class RemoteInfo(
-    val name: String,
-    val url: String,
-    val pushUrl: String? = null,
-)
+data class RemoteInfo(val name: String, val url: String, val pushUrl: String? = null)
 
 /**
  * Git操作管理器类。
@@ -246,10 +247,7 @@ data class RemoteInfo(
  *           提供后，clone/push/pull/fetch将自动使用远程主机存储的凭证。
  *           为null时仅支持公共（未认证）操作。
  */
-class GitManager(
-    private val context: Context,
-    private val credentialProvider: CredentialProvider? = null,
-) {
+class GitManager(private val context: Context, private val credentialProvider: CredentialProvider? = null) {
 
     /**
      * JGit HTTPS传输发送的User-Agent字符串。
@@ -282,11 +280,9 @@ class GitManager(
          * 获取Git操作专用的单线程Executor。
          * 使用懒加载初始化，daemon线程确保应用退出时不会阻止JVM关闭。
          */
-        private fun getExecutor(): java.util.concurrent.ExecutorService {
-            return executor ?: synchronized(executorLock) {
-                executor ?: Executors.newSingleThreadExecutor(gitThreadFactory).also {
-                    executor = it
-                }
+        private fun getExecutor(): java.util.concurrent.ExecutorService = executor ?: synchronized(executorLock) {
+            executor ?: Executors.newSingleThreadExecutor(gitThreadFactory).also {
+                executor = it
             }
         }
 
@@ -359,10 +355,8 @@ class GitManager(
         depth: Int = 1,
         sparsePaths: List<String>? = null,
         timeoutMs: Long = CLONE_TIMEOUT_MS,
-        onProgress: ((String) -> Unit)? = null,
-    ): CloneResult {
-        return executeClone(remoteUrl, targetDirectory, depth, sparsePaths, timeoutMs, null, onProgress)
-    }
+        onProgress: ((String) -> Unit)? = null
+    ): CloneResult = executeClone(remoteUrl, targetDirectory, depth, sparsePaths, timeoutMs, null, onProgress)
 
     /**
      * 使用安全存储的凭证克隆远程仓库。
@@ -388,7 +382,7 @@ class GitManager(
         depth: Int = 1,
         sparsePaths: List<String>? = null,
         timeoutMs: Long = CLONE_TIMEOUT_MS,
-        onProgress: ((String) -> Unit)? = null,
+        onProgress: ((String) -> Unit)? = null
     ): CloneResult {
         val credentialsProvider = resolveCredentials(remoteUrl)
         return executeClone(remoteUrl, targetDirectory, depth, sparsePaths, timeoutMs, credentialsProvider, onProgress)
@@ -413,7 +407,7 @@ class GitManager(
         sparsePaths: List<String>?,
         timeoutMs: Long,
         credentialsProvider: CredentialsProvider?,
-        onProgress: ((String) -> Unit)? = null,
+        onProgress: ((String) -> Unit)? = null
     ): CloneResult {
         return try {
             if (targetDirectory.exists() && File(targetDirectory, ".git").exists()) {
@@ -433,7 +427,14 @@ class GitManager(
             try {
                 val future = getExecutor().submit {
                     if (!sparsePaths.isNullOrEmpty()) {
-                        cloneWithSparseCheckout(remoteUrl, targetDirectory, depth, sparsePaths, credentialsProvider, progressMonitor)
+                        cloneWithSparseCheckout(
+                            remoteUrl,
+                            targetDirectory,
+                            depth,
+                            sparsePaths,
+                            credentialsProvider,
+                            progressMonitor
+                        )
                     } else {
                         val cloneCommand = Git.cloneRepository()
                             .setURI(remoteUrl)
@@ -544,7 +545,7 @@ class GitManager(
         depth: Int,
         sparsePaths: List<String>,
         credentialsProvider: CredentialsProvider?,
-        progressMonitor: ProgressMonitor? = null,
+        progressMonitor: ProgressMonitor? = null
     ) {
         val cloneCommand = Git.cloneRepository()
             .setURI(remoteUrl)
@@ -608,7 +609,8 @@ class GitManager(
                 message.contains("upload pack") ->
                     context.getString(R.string.git_error_upload_pack)
                 message.contains("not authorized") ||
-                    message.contains("403") || message.contains("401") ->
+                    message.contains("403") ||
+                    message.contains("401") ->
                     context.getString(R.string.git_error_auth)
                 message.contains("not found") ->
                     context.getString(R.string.git_error_not_found)
@@ -621,7 +623,8 @@ class GitManager(
                 message.contains("upload pack") ->
                     context.getString(R.string.git_error_upload_pack)
                 message.contains("not authorized") ||
-                    message.contains("403") || message.contains("401") ->
+                    message.contains("403") ||
+                    message.contains("401") ->
                     context.getString(R.string.git_error_auth)
                 else ->
                     context.getString(R.string.git_error_transport, e.localizedMessage ?: unknown)
@@ -654,13 +657,11 @@ class GitRepository(private val git: Git) {
      *
      * @return 当前分支名称，失败时返回"HEAD"
      */
-    fun getCurrentBranch(): String {
-        return try {
-            repository.branch ?: Constants.HEAD
-        } catch (e: Exception) {
-            Log.w(TAG, "Failed to get current branch", e)
-            Constants.HEAD
-        }
+    fun getCurrentBranch(): String = try {
+        repository.branch ?: Constants.HEAD
+    } catch (e: Exception) {
+        Log.w(TAG, "Failed to get current branch", e)
+        Constants.HEAD
     }
 
     /**
@@ -668,22 +669,20 @@ class GitRepository(private val git: Git) {
      *
      * @return GitFileStatus列表，失败时返回空列表
      */
-    fun getFileStatuses(): List<GitFileStatus> {
-        return try {
-            val status = git.status().call()
-            buildList {
-                status.untracked.forEach { add(GitFileStatus(it, GitStatus.UNTRACKED)) }
-                status.untrackedFolders.forEach { add(GitFileStatus(it, GitStatus.UNTRACKED)) }
-                status.modified.forEach { add(GitFileStatus(it, GitStatus.MODIFIED)) }
-                status.added.forEach { add(GitFileStatus(it, GitStatus.ADDED)) }
-                status.removed.forEach { add(GitFileStatus(it, GitStatus.DELETED)) }
-                status.changed.forEach { add(GitFileStatus(it, GitStatus.MODIFIED)) }
-                status.conflicting.forEach { add(GitFileStatus(it, GitStatus.CONFLICTED)) }
-            }
-        } catch (e: Exception) {
-            Log.w(TAG, "Failed to get file statuses", e)
-            emptyList()
+    fun getFileStatuses(): List<GitFileStatus> = try {
+        val status = git.status().call()
+        buildList {
+            status.untracked.forEach { add(GitFileStatus(it, GitStatus.UNTRACKED)) }
+            status.untrackedFolders.forEach { add(GitFileStatus(it, GitStatus.UNTRACKED)) }
+            status.modified.forEach { add(GitFileStatus(it, GitStatus.MODIFIED)) }
+            status.added.forEach { add(GitFileStatus(it, GitStatus.ADDED)) }
+            status.removed.forEach { add(GitFileStatus(it, GitStatus.DELETED)) }
+            status.changed.forEach { add(GitFileStatus(it, GitStatus.MODIFIED)) }
+            status.conflicting.forEach { add(GitFileStatus(it, GitStatus.CONFLICTED)) }
         }
+    } catch (e: Exception) {
+        Log.w(TAG, "Failed to get file statuses", e)
+        emptyList()
     }
 
     /**
@@ -692,9 +691,7 @@ class GitRepository(private val git: Git) {
      * @param filePath 文件相对路径
      * @return GitFileStatus，文件未找到返回null
      */
-    fun getFileStatus(filePath: String): GitFileStatus? {
-        return getFileStatuses().find { it.filePath == filePath }
-    }
+    fun getFileStatus(filePath: String): GitFileStatus? = getFileStatuses().find { it.filePath == filePath }
 
     /**
      * 获取仓库基本信息。
@@ -809,15 +806,13 @@ class GitRepository(private val git: Git) {
      * @param force 是否强制删除（即使未完全合并）
      * @return 分支成功删除返回true
      */
-    fun deleteBranch(branchName: String, force: Boolean = false): Boolean {
-        return try {
-            val command = git.branchDelete().setBranchNames(branchName)
-            if (force) command.setForce(true)
-            command.call().isNotEmpty()
-        } catch (e: Exception) {
-            Log.w(TAG, "Failed to delete branch $branchName", e)
-            false
-        }
+    fun deleteBranch(branchName: String, force: Boolean = false): Boolean = try {
+        val command = git.branchDelete().setBranchNames(branchName)
+        if (force) command.setForce(true)
+        command.call().isNotEmpty()
+    } catch (e: Exception) {
+        Log.w(TAG, "Failed to delete branch $branchName", e)
+        false
     }
 
     /**
@@ -826,15 +821,13 @@ class GitRepository(private val git: Git) {
      * @param includeRemote 是否包含远程跟踪分支
      * @return 分支名称列表
      */
-    fun listAllBranches(includeRemote: Boolean = false): List<String> {
-        return try {
-            val command = git.branchList()
-            if (includeRemote) command.setListMode(org.eclipse.jgit.api.ListBranchCommand.ListMode.ALL)
-            command.call().map { it.name }
-        } catch (e: Exception) {
-            Log.w(TAG, "Failed to list branches", e)
-            emptyList()
-        }
+    fun listAllBranches(includeRemote: Boolean = false): List<String> = try {
+        val command = git.branchList()
+        if (includeRemote) command.setListMode(org.eclipse.jgit.api.ListBranchCommand.ListMode.ALL)
+        command.call().map { it.name }
+    } catch (e: Exception) {
+        Log.w(TAG, "Failed to list branches", e)
+        emptyList()
     }
 
     /**
@@ -855,31 +848,29 @@ class GitRepository(private val git: Git) {
      * @param filePath 相对于仓库根的文件路径
      * @return 统一差异字符串，没有更改返回null
      */
-    fun getFileDiff(filePath: String): String? {
-        return try {
-            val pathFilter = PathFilter.create(filePath)
-            val outputStream = ByteArrayOutputStream()
+    fun getFileDiff(filePath: String): String? = try {
+        val pathFilter = PathFilter.create(filePath)
+        val outputStream = ByteArrayOutputStream()
 
-            DiffFormatter(outputStream).use { diffFormatter ->
-                diffFormatter.setRepository(repository)
-                diffFormatter.setPathFilter(pathFilter)
+        DiffFormatter(outputStream).use { diffFormatter ->
+            diffFormatter.setRepository(repository)
+            diffFormatter.setPathFilter(pathFilter)
 
-                val diffs = git.diff()
-                    .setPathFilter(pathFilter)
-                    .call()
+            val diffs = git.diff()
+                .setPathFilter(pathFilter)
+                .call()
 
-                for (diffEntry in diffs) {
-                    diffFormatter.format(diffEntry)
-                }
-                diffFormatter.flush()
+            for (diffEntry in diffs) {
+                diffFormatter.format(diffEntry)
             }
-
-            val result = outputStream.toString("UTF-8")
-            if (result.isBlank()) null else result
-        } catch (e: Exception) {
-            Log.w(TAG, "Failed to get file diff for $filePath", e)
-            null
+            diffFormatter.flush()
         }
+
+        val result = outputStream.toString("UTF-8")
+        if (result.isBlank()) null else result
+    } catch (e: Exception) {
+        Log.w(TAG, "Failed to get file diff for $filePath", e)
+        null
     }
 
     /**
@@ -888,29 +879,27 @@ class GitRepository(private val git: Git) {
      * @param filePath 相对于仓库根的文件路径
      * @return 统一差异字符串，没有已暂存更改返回null
      */
-    fun getStagedDiff(filePath: String): String? {
-        return try {
-            val outputStream = ByteArrayOutputStream()
-            DiffFormatter(outputStream).use { diffFormatter ->
-                diffFormatter.setRepository(repository)
+    fun getStagedDiff(filePath: String): String? = try {
+        val outputStream = ByteArrayOutputStream()
+        DiffFormatter(outputStream).use { diffFormatter ->
+            diffFormatter.setRepository(repository)
 
-                val diffs = git.diff()
-                    .setCached(true)
-                    .setPathFilter(PathFilter.create(filePath))
-                    .call()
+            val diffs = git.diff()
+                .setCached(true)
+                .setPathFilter(PathFilter.create(filePath))
+                .call()
 
-                for (diffEntry in diffs) {
-                    diffFormatter.format(diffEntry)
-                }
-                diffFormatter.flush()
+            for (diffEntry in diffs) {
+                diffFormatter.format(diffEntry)
             }
-
-            val result = outputStream.toString("UTF-8")
-            if (result.isBlank()) null else result
-        } catch (e: Exception) {
-            Log.w(TAG, "Failed to get staged diff for $filePath", e)
-            null
+            diffFormatter.flush()
         }
+
+        val result = outputStream.toString("UTF-8")
+        if (result.isBlank()) null else result
+    } catch (e: Exception) {
+        Log.w(TAG, "Failed to get staged diff for $filePath", e)
+        null
     }
 
     /**
@@ -918,25 +907,23 @@ class GitRepository(private val git: Git) {
      *
      * @return 统一差异字符串，没有更改返回null
      */
-    fun getFullDiff(): String? {
-        return try {
-            val outputStream = ByteArrayOutputStream()
-            DiffFormatter(outputStream).use { diffFormatter ->
-                diffFormatter.setRepository(repository)
+    fun getFullDiff(): String? = try {
+        val outputStream = ByteArrayOutputStream()
+        DiffFormatter(outputStream).use { diffFormatter ->
+            diffFormatter.setRepository(repository)
 
-                val diffs = git.diff().call()
-                for (diffEntry in diffs) {
-                    diffFormatter.format(diffEntry)
-                }
-                diffFormatter.flush()
+            val diffs = git.diff().call()
+            for (diffEntry in diffs) {
+                diffFormatter.format(diffEntry)
             }
-
-            val result = outputStream.toString("UTF-8")
-            if (result.isBlank()) null else result
-        } catch (e: Exception) {
-            Log.w(TAG, "Failed to get full diff", e)
-            null
+            diffFormatter.flush()
         }
+
+        val result = outputStream.toString("UTF-8")
+        if (result.isBlank()) null else result
+    } catch (e: Exception) {
+        Log.w(TAG, "Failed to get full diff", e)
+        null
     }
 
     /**
@@ -953,7 +940,7 @@ class GitRepository(private val git: Git) {
         val shortSha: String,
         val message: String,
         val authorName: String,
-        val authorDate: Date,
+        val authorDate: Date
     )
 
     /**
@@ -962,24 +949,22 @@ class GitRepository(private val git: Git) {
      * @param maxCount 返回的最大提交数（默认20）
      * @return 提交条目列表，最新的在前
      */
-    fun getCommitLog(maxCount: Int = 20): List<CommitEntry> {
-        return try {
-            git.log()
-                .setMaxCount(maxCount)
-                .call()
-                .map { commit ->
-                    CommitEntry(
-                        sha = commit.getId().name(),
-                        shortSha = commit.getId().abbreviate(7).name(),
-                        message = commit.shortMessage,
-                        authorName = commit.authorIdent.name,
-                        authorDate = commit.authorIdent.getWhen(),
-                    )
-                }
-        } catch (e: Exception) {
-            Log.w(TAG, "Failed to get commit log", e)
-            emptyList()
-        }
+    fun getCommitLog(maxCount: Int = 20): List<CommitEntry> = try {
+        git.log()
+            .setMaxCount(maxCount)
+            .call()
+            .map { commit ->
+                CommitEntry(
+                    sha = commit.getId().name(),
+                    shortSha = commit.getId().abbreviate(7).name(),
+                    message = commit.shortMessage,
+                    authorName = commit.authorIdent.name,
+                    authorDate = commit.authorIdent.getWhen()
+                )
+            }
+    } catch (e: Exception) {
+        Log.w(TAG, "Failed to get commit log", e)
+        emptyList()
     }
 
     /**
@@ -1001,12 +986,18 @@ class GitRepository(private val git: Git) {
                 val oldTreeParser = org.eclipse.jgit.treewalk.CanonicalTreeParser()
                 val newTreeParser = org.eclipse.jgit.treewalk.CanonicalTreeParser()
                 repository.newObjectReader().use { reader ->
-                    oldTreeParser.reset(reader, RevWalk(repository).use { rw ->
-                        rw.parseCommit(fromId).tree
-                    })
-                    newTreeParser.reset(reader, RevWalk(repository).use { rw ->
-                        rw.parseCommit(toId).tree
-                    })
+                    oldTreeParser.reset(
+                        reader,
+                        RevWalk(repository).use { rw ->
+                            rw.parseCommit(fromId).tree
+                        }
+                    )
+                    newTreeParser.reset(
+                        reader,
+                        RevWalk(repository).use { rw ->
+                            rw.parseCommit(toId).tree
+                        }
+                    )
                 }
                 val diffs = git.diff()
                     .setOldTree(oldTreeParser)
@@ -1032,16 +1023,14 @@ class GitRepository(private val git: Git) {
      * @param message 可选的stash消息
      * @return stash成功返回true
      */
-    fun stash(message: String? = null): Boolean {
-        return try {
-            val command = git.stashCreate()
-            message?.let { command.setWorkingDirectoryMessage(it) }
-            command.call()
-            true
-        } catch (e: Exception) {
-            Log.w(TAG, "Failed to stash changes", e)
-            false
-        }
+    fun stash(message: String? = null): Boolean = try {
+        val command = git.stashCreate()
+        message?.let { command.setWorkingDirectoryMessage(it) }
+        command.call()
+        true
+    } catch (e: Exception) {
+        Log.w(TAG, "Failed to stash changes", e)
+        false
     }
 
     /**
@@ -1049,15 +1038,13 @@ class GitRepository(private val git: Git) {
      *
      * @return stash pop成功返回true
      */
-    fun stashPop(): Boolean {
-        return try {
-            git.stashApply().setStashRef("stash@{0}").call()
-            git.stashDrop().setStashRef(0).call()
-            true
-        } catch (e: Exception) {
-            Log.w(TAG, "Failed to pop stash", e)
-            false
-        }
+    fun stashPop(): Boolean = try {
+        git.stashApply().setStashRef("stash@{0}").call()
+        git.stashDrop().setStashRef(0).call()
+        true
+    } catch (e: Exception) {
+        Log.w(TAG, "Failed to pop stash", e)
+        false
     }
 
     /**
@@ -1065,22 +1052,20 @@ class GitRepository(private val git: Git) {
      *
      * @return stash条目消息列表
      */
-    fun listStashes(): List<String> {
-        return try {
-            val stashWalk = org.eclipse.jgit.revwalk.RevWalk(repository)
-            val stashRefs = repository.refDatabase.getRefsByPrefix("refs/stash/")
-            stashRefs.mapNotNull { ref ->
-                try {
-                    val commit = stashWalk.parseCommit(ref.objectId)
-                    commit.shortMessage
-                } catch (e: Exception) {
-                    null
-                }
+    fun listStashes(): List<String> = try {
+        val stashWalk = org.eclipse.jgit.revwalk.RevWalk(repository)
+        val stashRefs = repository.refDatabase.getRefsByPrefix("refs/stash/")
+        stashRefs.mapNotNull { ref ->
+            try {
+                val commit = stashWalk.parseCommit(ref.objectId)
+                commit.shortMessage
+            } catch (e: Exception) {
+                null
             }
-        } catch (e: Exception) {
-            Log.w(TAG, "Failed to list stashes", e)
-            emptyList()
         }
+    } catch (e: Exception) {
+        Log.w(TAG, "Failed to list stashes", e)
+        emptyList()
     }
 
     /**
@@ -1097,10 +1082,11 @@ class GitRepository(private val git: Git) {
         val added: Int = 0,
         val deleted: Int = 0,
         val untracked: Int = 0,
-        val conflicted: Int = 0,
+        val conflicted: Int = 0
     ) {
         /** 更改总数 */
         val totalChanges: Int get() = modified + added + deleted + untracked + conflicted
+
         /** 是否有更改 */
         val hasChanges: Boolean get() = totalChanges > 0
     }
@@ -1110,20 +1096,18 @@ class GitRepository(private val git: Git) {
      *
      * @return StatusSummary实例
      */
-    fun getStatusSummary(): StatusSummary {
-        return try {
-            val status = git.status().call()
-            StatusSummary(
-                modified = status.modified.size + status.changed.size,
-                added = status.added.size,
-                deleted = status.removed.size,
-                untracked = status.untracked.size + status.untrackedFolders.size,
-                conflicted = status.conflicting.size,
-            )
-        } catch (e: Exception) {
-            Log.w(TAG, "Failed to get status summary", e)
-            StatusSummary()
-        }
+    fun getStatusSummary(): StatusSummary = try {
+        val status = git.status().call()
+        StatusSummary(
+            modified = status.modified.size + status.changed.size,
+            added = status.added.size,
+            deleted = status.removed.size,
+            untracked = status.untracked.size + status.untrackedFolders.size,
+            conflicted = status.conflicting.size
+        )
+    } catch (e: Exception) {
+        Log.w(TAG, "Failed to get status summary", e)
+        StatusSummary()
     }
 
     /**
@@ -1161,9 +1145,7 @@ class GitRepository(private val git: Git) {
      *
      * @return 分支名称列表
      */
-    fun listBranches(): List<String> {
-        return git.branchList().call().map { it.name }
-    }
+    fun listBranches(): List<String> = git.branchList().call().map { it.name }
 
     /**
      * 将当前分支变基到[upstreamBranch]上。
@@ -1171,24 +1153,22 @@ class GitRepository(private val git: Git) {
      * @param upstreamBranch 要变基到的分支（如 "main"、"origin/main"）
      * @return RebaseResult包含状态（OK、CONFLICTS、ABORTED等）
      */
-    fun rebase(upstreamBranch: String): RebaseResult {
-        return try {
-            val result = git.rebase()
-                .setUpstream(upstreamBranch)
-                .call()
-            Log.d(TAG, "Rebase onto $upstreamBranch: ${result.status}")
-            RebaseResult(
-                status = result.status.name,
-                currentCommit = result.currentCommit?.name,
-                conflictedPaths = result.conflicts?.toList() ?: emptyList(),
-            )
-        } catch (e: Exception) {
-            Log.e(TAG, "Rebase failed", e)
-            RebaseResult(
-                status = "FAILED",
-                errorMessage = e.message,
-            )
-        }
+    fun rebase(upstreamBranch: String): RebaseResult = try {
+        val result = git.rebase()
+            .setUpstream(upstreamBranch)
+            .call()
+        Log.d(TAG, "Rebase onto $upstreamBranch: ${result.status}")
+        RebaseResult(
+            status = result.status.name,
+            currentCommit = result.currentCommit?.name,
+            conflictedPaths = result.conflicts?.toList() ?: emptyList()
+        )
+    } catch (e: Exception) {
+        Log.e(TAG, "Rebase failed", e)
+        RebaseResult(
+            status = "FAILED",
+            errorMessage = e.message
+        )
     }
 
     /**
@@ -1196,16 +1176,14 @@ class GitRepository(private val git: Git) {
      *
      * @return 中止成功返回true
      */
-    fun rebaseAbort(): Boolean {
-        return try {
-            git.rebase()
-                .setOperation(org.eclipse.jgit.api.RebaseCommand.Operation.ABORT)
-                .call()
-            true
-        } catch (e: Exception) {
-            Log.e(TAG, "Rebase abort failed", e)
-            false
-        }
+    fun rebaseAbort(): Boolean = try {
+        git.rebase()
+            .setOperation(org.eclipse.jgit.api.RebaseCommand.Operation.ABORT)
+            .call()
+        true
+    } catch (e: Exception) {
+        Log.e(TAG, "Rebase abort failed", e)
+        false
     }
 
     /**
@@ -1213,19 +1191,17 @@ class GitRepository(private val git: Git) {
      *
      * @return RebaseResult包含最新状态
      */
-    fun rebaseContinue(): RebaseResult {
-        return try {
-            val result = git.rebase()
-                .setOperation(org.eclipse.jgit.api.RebaseCommand.Operation.CONTINUE)
-                .call()
-            RebaseResult(
-                status = result.status.name,
-                currentCommit = result.currentCommit?.name,
-                conflictedPaths = result.conflicts?.toList() ?: emptyList(),
-            )
-        } catch (e: Exception) {
-            RebaseResult(status = "FAILED", errorMessage = e.message)
-        }
+    fun rebaseContinue(): RebaseResult = try {
+        val result = git.rebase()
+            .setOperation(org.eclipse.jgit.api.RebaseCommand.Operation.CONTINUE)
+            .call()
+        RebaseResult(
+            status = result.status.name,
+            currentCommit = result.currentCommit?.name,
+            conflictedPaths = result.conflicts?.toList() ?: emptyList()
+        )
+    } catch (e: Exception) {
+        RebaseResult(status = "FAILED", errorMessage = e.message)
     }
 
     /**
@@ -1235,30 +1211,28 @@ class GitRepository(private val git: Git) {
      * @param fastForwardOnly 如果为true，仅允许快进合并（不创建合并提交）
      * @return MergeResult包含状态和合并提交SHA
      */
-    fun merge(branch: String, fastForwardOnly: Boolean = false): MergeResult {
-        return try {
-            val mergeCommand = git.merge()
-                .include(git.repository.resolve(branch))
+    fun merge(branch: String, fastForwardOnly: Boolean = false): MergeResult = try {
+        val mergeCommand = git.merge()
+            .include(git.repository.resolve(branch))
 
-            if (fastForwardOnly) {
-                mergeCommand.setFastForward(
-                    org.eclipse.jgit.api.MergeCommand.FastForwardMode.FF_ONLY
-                )
-            }
-
-            val result = mergeCommand.call()
-            Log.d(TAG, "Merge $branch: ${result.mergeStatus}")
-            MergeResult(
-                status = result.mergeStatus.name,
-                mergeCommitSha = result.newHead?.name,
-                isConflicting = result.mergeStatus.isSuccessful.not() &&
-                    result.conflicts != null,
-                conflictedPaths = result.conflicts?.keys?.toList() ?: emptyList(),
+        if (fastForwardOnly) {
+            mergeCommand.setFastForward(
+                org.eclipse.jgit.api.MergeCommand.FastForwardMode.FF_ONLY
             )
-        } catch (e: Exception) {
-            Log.e(TAG, "Merge failed", e)
-            MergeResult(status = "FAILED", errorMessage = e.message)
         }
+
+        val result = mergeCommand.call()
+        Log.d(TAG, "Merge $branch: ${result.mergeStatus}")
+        MergeResult(
+            status = result.mergeStatus.name,
+            mergeCommitSha = result.newHead?.name,
+            isConflicting = result.mergeStatus.isSuccessful.not() &&
+                result.conflicts != null,
+            conflictedPaths = result.conflicts?.keys?.toList() ?: emptyList()
+        )
+    } catch (e: Exception) {
+        Log.e(TAG, "Merge failed", e)
+        MergeResult(status = "FAILED", errorMessage = e.message)
     }
 
     /**
@@ -1267,27 +1241,25 @@ class GitRepository(private val git: Git) {
      * @param commitSha 要拣选的提交SHA
      * @return CherryPickResult包含状态
      */
-    fun cherryPick(commitSha: String): CherryPickResult {
-        return try {
-            val objectId = git.repository.resolve(commitSha)
-                ?: throw IllegalArgumentException("Commit not found: $commitSha")
+    fun cherryPick(commitSha: String): CherryPickResult = try {
+        val objectId = git.repository.resolve(commitSha)
+            ?: throw IllegalArgumentException("Commit not found: $commitSha")
 
-            val result = git.cherryPick()
-                .include(objectId)
-                .call()
+        val result = git.cherryPick()
+            .include(objectId)
+            .call()
 
-            val cherryPickStatus = result.getStatus()
-            Log.d(TAG, "Cherry-pick $commitSha: $cherryPickStatus")
+        val cherryPickStatus = result.getStatus()
+        Log.d(TAG, "Cherry-pick $commitSha: $cherryPickStatus")
 
-            CherryPickResult(
-                status = cherryPickStatus.name,
-                newCommitSha = result.newHead?.name,
-                conflictedPaths = emptyList(),
-            )
-        } catch (e: Exception) {
-            Log.e(TAG, "Cherry-pick failed", e)
-            CherryPickResult(status = "FAILED", errorMessage = e.message)
-        }
+        CherryPickResult(
+            status = cherryPickStatus.name,
+            newCommitSha = result.newHead?.name,
+            conflictedPaths = emptyList()
+        )
+    } catch (e: Exception) {
+        Log.e(TAG, "Cherry-pick failed", e)
+        CherryPickResult(status = "FAILED", errorMessage = e.message)
     }
 
     /**
@@ -1295,21 +1267,19 @@ class GitRepository(private val git: Git) {
      *
      * @return RemoteInfo列表
      */
-    fun listRemotes(): List<RemoteInfo> {
-        return try {
-            val config = git.repository.config
-            val remoteSections = config.getSubsections("remote")
-            remoteSections.map { name ->
-                RemoteInfo(
-                    name = name,
-                    url = config.getString("remote", name, "url") ?: "",
-                    pushUrl = config.getString("remote", name, "pushurl"),
-                )
-            }
-        } catch (e: Exception) {
-            Log.e(TAG, "List remotes failed", e)
-            emptyList()
+    fun listRemotes(): List<RemoteInfo> = try {
+        val config = git.repository.config
+        val remoteSections = config.getSubsections("remote")
+        remoteSections.map { name ->
+            RemoteInfo(
+                name = name,
+                url = config.getString("remote", name, "url") ?: "",
+                pushUrl = config.getString("remote", name, "pushurl")
+            )
         }
+    } catch (e: Exception) {
+        Log.e(TAG, "List remotes failed", e)
+        emptyList()
     }
 
     /**
@@ -1319,17 +1289,15 @@ class GitRepository(private val git: Git) {
      * @param url 远程仓库URL
      * @return 添加成功返回true
      */
-    fun addRemote(name: String, url: String): Boolean {
-        return try {
-            git.remoteAdd()
-                .setName(name)
-                .setUri(org.eclipse.jgit.transport.URIish(url))
-                .call()
-            true
-        } catch (e: Exception) {
-            Log.e(TAG, "Add remote failed", e)
-            false
-        }
+    fun addRemote(name: String, url: String): Boolean = try {
+        git.remoteAdd()
+            .setName(name)
+            .setUri(org.eclipse.jgit.transport.URIish(url))
+            .call()
+        true
+    } catch (e: Exception) {
+        Log.e(TAG, "Add remote failed", e)
+        false
     }
 
     /**
@@ -1338,16 +1306,14 @@ class GitRepository(private val git: Git) {
      * @param name 要移除的远程名称
      * @return 移除成功返回true
      */
-    fun removeRemote(name: String): Boolean {
-        return try {
-            git.remoteRemove()
-                .setRemoteName(name)
-                .call()
-            true
-        } catch (e: Exception) {
-            Log.e(TAG, "Remove remote failed", e)
-            false
-        }
+    fun removeRemote(name: String): Boolean = try {
+        git.remoteRemove()
+            .setRemoteName(name)
+            .call()
+        true
+    } catch (e: Exception) {
+        Log.e(TAG, "Remove remote failed", e)
+        false
     }
 
     /**

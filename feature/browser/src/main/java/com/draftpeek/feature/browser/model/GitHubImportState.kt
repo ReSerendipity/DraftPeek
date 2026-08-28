@@ -27,11 +27,7 @@ sealed class GitHubImportState {
      * @property repo 仓库名称
      * @property files 仓库文件列表
      */
-    data class FileList(
-        val owner: String,
-        val repo: String,
-        val files: List<GitHubFileEntry>,
-    ) : GitHubImportState()
+    data class FileList(val owner: String, val repo: String, val files: List<GitHubFileEntry>) : GitHubImportState()
 
     /**
      * 正在克隆用户选择的文件

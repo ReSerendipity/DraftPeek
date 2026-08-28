@@ -19,9 +19,7 @@ import javax.inject.Inject
  * 封装编辑器阅读位置的持久化逻辑，使ViewModel无需了解
  * 底层存储机制。
  */
-class ReadingPositionUseCase @Inject constructor(
-    private val repository: RecentFilesRepository,
-) {
+class ReadingPositionUseCase @Inject constructor(private val repository: RecentFilesRepository) {
     /**
      * 保存阅读位置。
      * @param uri 文件URI字符串

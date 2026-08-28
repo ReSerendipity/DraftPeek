@@ -26,7 +26,7 @@ class CredentialProviderTest {
         fun should_hasTokenBeTrue_when_onlyTokenProvided() {
             val cred = CredentialProvider.GitCredential(
                 host = "github.com",
-                token = "ghp_xxxx",
+                token = "ghp_xxxx"
             )
             assertTrue(cred.hasToken)
             assertFalse(cred.hasBasicAuth)
@@ -38,7 +38,7 @@ class CredentialProviderTest {
         fun should_hasTokenBeFalse_when_emptyToken() {
             val cred = CredentialProvider.GitCredential(
                 host = "github.com",
-                token = "",
+                token = ""
             )
             assertFalse(cred.hasToken)
             assertFalse(cred.isValid)
@@ -49,7 +49,7 @@ class CredentialProviderTest {
         fun should_hasTokenBeFalse_when_blankToken() {
             val cred = CredentialProvider.GitCredential(
                 host = "github.com",
-                token = "   ",
+                token = "   "
             )
             assertFalse(cred.hasToken)
         }
@@ -65,7 +65,7 @@ class CredentialProviderTest {
             val cred = CredentialProvider.GitCredential(
                 host = "github.com",
                 username = "user",
-                password = "pass",
+                password = "pass"
             )
             assertTrue(cred.hasBasicAuth)
             assertFalse(cred.hasToken)
@@ -77,7 +77,7 @@ class CredentialProviderTest {
         fun should_hasBasicAuthBeFalse_when_onlyUsername() {
             val cred = CredentialProvider.GitCredential(
                 host = "github.com",
-                username = "user",
+                username = "user"
             )
             assertFalse(cred.hasBasicAuth)
             assertFalse(cred.isValid)
@@ -88,7 +88,7 @@ class CredentialProviderTest {
         fun should_hasBasicAuthBeFalse_when_onlyPassword() {
             val cred = CredentialProvider.GitCredential(
                 host = "github.com",
-                password = "pass",
+                password = "pass"
             )
             assertFalse(cred.hasBasicAuth)
             assertFalse(cred.isValid)
@@ -106,7 +106,7 @@ class CredentialProviderTest {
                 host = "github.com",
                 username = "user",
                 password = "pass",
-                token = "ghp_xxxx",
+                token = "ghp_xxxx"
             )
             assertTrue(cred.hasToken)
             assertTrue(cred.hasBasicAuth)

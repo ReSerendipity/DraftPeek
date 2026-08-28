@@ -1,9 +1,9 @@
 package com.draftpeek.feature.browser.ui
 
-import android.widget.Toast
 import android.content.Intent
 import android.net.Uri
 import android.text.format.DateUtils
+import android.widget.Toast
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.animation.core.FastOutSlowInEasing
@@ -19,13 +19,16 @@ import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.combinedClickable
+import androidx.compose.foundation.gestures.detectDragGestures
+import androidx.compose.foundation.gestures.detectDragGesturesAfterLongPress
+import androidx.compose.foundation.gestures.scrollBy
 import androidx.compose.foundation.horizontalScroll
+import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
-import androidx.compose.foundation.layout.WindowInsets
 import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
@@ -42,31 +45,27 @@ import androidx.compose.foundation.lazy.grid.GridItemSpan
 import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
 import androidx.compose.foundation.lazy.grid.items
 import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.lazy.itemsIndexed
+import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.foundation.rememberScrollState
-import androidx.compose.material.icons.Icons
 import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.material.icons.automirrored.filled.ArrowForward
-import androidx.compose.material.icons.automirrored.filled.KeyboardArrowRight
-import androidx.compose.material.icons.filled.Add
+import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Bookmark
-import androidx.compose.material.icons.outlined.BookmarkBorder
-import androidx.compose.material.icons.filled.CallSplit
 import androidx.compose.material.icons.filled.CheckCircle
 import androidx.compose.material.icons.filled.CloudDownload
-import androidx.compose.material.icons.filled.DataObject
 import androidx.compose.material.icons.filled.Delete
 import androidx.compose.material.icons.filled.Description
+import androidx.compose.material.icons.filled.DragHandle
+import androidx.compose.material.icons.filled.FileUpload
 import androidx.compose.material.icons.filled.Folder
 import androidx.compose.material.icons.filled.FolderOff
 import androidx.compose.material.icons.filled.FolderOpen
 import androidx.compose.material.icons.filled.History
-import androidx.compose.material.icons.filled.PushPin
-import androidx.compose.material.icons.filled.FileUpload
-import androidx.compose.material.icons.filled.FileOpen
-import androidx.compose.material.icons.outlined.PushPin
 import androidx.compose.material.icons.filled.Lock
+import androidx.compose.material.icons.filled.PushPin
 import androidx.compose.material.icons.filled.Terminal
-import androidx.compose.material.icons.filled.DragHandle
+import androidx.compose.material.icons.outlined.BookmarkBorder
+import androidx.compose.material.icons.outlined.PushPin
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.Checkbox
@@ -79,7 +78,6 @@ import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
-import com.draftpeek.core.ui.component.BrandOutlinedTextField
 import androidx.compose.material3.PlainTooltip
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
@@ -89,32 +87,16 @@ import androidx.compose.material3.rememberTooltipState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.derivedStateOf
-import androidx.compose.runtime.rememberCoroutineScope
-import kotlinx.coroutines.Job
-import kotlinx.coroutines.delay
-import kotlinx.coroutines.launch
-import androidx.compose.runtime.withFrameNanos
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableFloatStateOf
+import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateMapOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
-import androidx.compose.foundation.gestures.detectDragGesturesAfterLongPress
-import androidx.compose.foundation.gestures.detectDragGestures
-import androidx.compose.foundation.lazy.itemsIndexed
-import androidx.compose.foundation.lazy.rememberLazyListState
-import androidx.compose.runtime.mutableStateMapOf
-import androidx.compose.foundation.gestures.scrollBy
-import androidx.compose.ui.input.pointer.pointerInput
-import androidx.compose.ui.input.pointer.PointerEventType
-import androidx.compose.ui.input.pointer.PointerEventPass
-import androidx.compose.foundation.interaction.MutableInteractionSource
-import androidx.compose.ui.layout.onGloballyPositioned
-import androidx.compose.ui.layout.onSizeChanged
-import androidx.compose.ui.platform.LocalContext
+import androidx.compose.runtime.withFrameNanos
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -123,6 +105,10 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.graphics.lerp
 import androidx.compose.ui.graphics.vector.ImageVector
+import androidx.compose.ui.input.pointer.pointerInput
+import androidx.compose.ui.layout.onGloballyPositioned
+import androidx.compose.ui.layout.onSizeChanged
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.platform.LocalWindowInfo
 import androidx.compose.ui.res.stringResource
@@ -142,60 +128,62 @@ import androidx.compose.ui.zIndex
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.window.layout.FoldingFeature
-import com.draftpeek.core.common.vcs.GitFileStatus
-import com.draftpeek.core.common.vcs.GitHubFileEntry
-import com.draftpeek.core.common.vcs.GitStatus
-import com.draftpeek.core.data.entity.RecentFile
-import kotlin.math.roundToInt
-import java.util.regex.Pattern
-import com.draftpeek.core.ui.component.BrandChip
-import com.draftpeek.core.ui.component.BrandDialog
-import com.draftpeek.core.ui.component.BrandDirectoryCard
-import com.draftpeek.core.ui.icon.StrokeIcon
-import com.draftpeek.core.ui.icon.StrokeIcons
-import com.draftpeek.core.ui.modifier.pressScaleEffect
-import com.draftpeek.core.ui.component.BrandFAB
-import com.draftpeek.core.ui.component.BrandFileCard
-import com.draftpeek.core.ui.component.BrandFilledButton
-import com.draftpeek.core.ui.component.BrandSearchBar
-import com.draftpeek.core.ui.component.BrandTopBar
-import com.draftpeek.core.ui.component.FABMenuItem
-import com.draftpeek.core.ui.component.accessibilityEnhanced
 import com.draftpeek.core.common.feature.FeatureFlag
 import com.draftpeek.core.common.util.FileUtils
 import com.draftpeek.core.common.util.InputValidator
 import com.draftpeek.core.common.util.ValidationResult
+import com.draftpeek.core.common.vcs.GitFileStatus
+import com.draftpeek.core.common.vcs.GitHubFileEntry
+import com.draftpeek.core.common.vcs.GitStatus
+import com.draftpeek.core.data.entity.RecentFile
+import com.draftpeek.core.ui.component.BrandChip
+import com.draftpeek.core.ui.component.BrandDialog
+import com.draftpeek.core.ui.component.BrandDirectoryCard
+import com.draftpeek.core.ui.component.BrandFAB
+import com.draftpeek.core.ui.component.BrandFileCard
+import com.draftpeek.core.ui.component.BrandFilledButton
+import com.draftpeek.core.ui.component.BrandOutlinedTextField
+import com.draftpeek.core.ui.component.BrandSearchBar
+import com.draftpeek.core.ui.component.BrandTopBar
+import com.draftpeek.core.ui.component.FABMenuItem
 import com.draftpeek.core.ui.component.FileTypeIcon
+import com.draftpeek.core.ui.component.accessibilityEnhanced
+import com.draftpeek.core.ui.composition.isFeatureEnabled
+import com.draftpeek.core.ui.icon.StrokeIcon
+import com.draftpeek.core.ui.icon.StrokeIcons
 import com.draftpeek.core.ui.layout.FoldInfo
-import com.draftpeek.core.ui.theme.BrandShapes
-import com.draftpeek.core.ui.theme.DraftPeekSpacing
-import com.draftpeek.core.ui.theme.FileTypeColors
-import com.draftpeek.core.ui.theme.LocalDarkTheme
 import com.draftpeek.core.ui.layout.FoldableState
 import com.draftpeek.core.ui.layout.LayoutMode
 import com.draftpeek.core.ui.layout.SplitScreenLayout
 import com.draftpeek.core.ui.modifier.minimumTouchTarget
+import com.draftpeek.core.ui.modifier.pressScaleEffect
+import com.draftpeek.core.ui.theme.BrandShapes
+import com.draftpeek.core.ui.theme.CodeTextStyle
+import com.draftpeek.core.ui.theme.DraftPeekSpacing
+import com.draftpeek.core.ui.theme.DraftPeekTypography
+import com.draftpeek.core.ui.theme.FileMetaStyle
+import com.draftpeek.core.ui.theme.FileTypeColors
+import com.draftpeek.core.ui.theme.LocalDarkTheme
+import com.draftpeek.core.ui.theme.MonoFileNameStyle
+import com.draftpeek.core.ui.theme.MonoLabelStyle
+import com.draftpeek.core.ui.theme.MonoUppercaseTitleStyle
+import com.draftpeek.core.ui.theme.PrototypeShapes
+import com.draftpeek.core.ui.theme.PrototypeSpacing
+import com.draftpeek.core.ui.theme.PrototypeTokens
+import com.draftpeek.core.ui.theme.SemanticColors
+import com.draftpeek.feature.browser.R
 import com.draftpeek.feature.browser.model.BrowserUiState
 import com.draftpeek.feature.browser.model.FileItem
 import com.draftpeek.feature.browser.model.GitHubImportState
 import com.draftpeek.feature.browser.viewmodel.FileBrowserViewModel
 import com.draftpeek.feature.browser.viewmodel.GitEvent
 import com.draftpeek.feature.browser.viewmodel.GitViewModel
-import com.draftpeek.feature.browser.R
 import com.draftpeek.feature.browser.viewmodel.RecentFilesViewModel
-import com.draftpeek.core.ui.theme.PrototypeTokens
-import com.draftpeek.core.ui.theme.PrototypeShapes
-import com.draftpeek.core.ui.theme.PrototypeSpacing
-import com.draftpeek.core.ui.theme.MetaStyle
-import com.draftpeek.core.ui.theme.CodeTextStyle
-import com.draftpeek.core.ui.theme.FileMetaStyle
-import com.draftpeek.core.ui.theme.SemanticColors
-import com.draftpeek.core.ui.theme.DraftPeekTypography
-import com.draftpeek.core.ui.theme.MonoLabelStyle
-import com.draftpeek.core.ui.theme.MonoFileNameStyle
-import com.draftpeek.core.ui.theme.MonoUppercaseTitleStyle
-import com.draftpeek.core.ui.composition.LocalFeatureToggle
-import com.draftpeek.core.ui.composition.isFeatureEnabled
+import java.util.regex.Pattern
+import kotlin.math.roundToInt
+import kotlinx.coroutines.Job
+import kotlinx.coroutines.delay
+import kotlinx.coroutines.launch
 
 // ---- 文件筛选选项 ----
 /**
@@ -210,7 +198,7 @@ private enum class FileFilter {
     BOOKMARKS,
     CODE,
     DOCUMENTS,
-    MEDIA,
+    MEDIA
 }
 
 /**
@@ -236,20 +224,20 @@ private val CODE_EXTENSIONS = setOf(
     "py", "pyw", "c", "h", "cpp", "cc", "cxx", "hpp", "cs", "go", "rs", "swift",
     "rb", "php", "html", "htm", "css", "scss", "less", "sh", "bash", "zsh", "fish",
     "lua", "dart", "groovy", "gradle", "json", "yaml", "yml", "xml", "xsl", "xsd",
-    "toml", "md", "markdown", "sql", "scala", "r", "dockerfile", "cmake", "make", "proto",
+    "toml", "md", "markdown", "sql", "scala", "r", "dockerfile", "cmake", "make", "proto"
 )
 
 // 文档文件扩展名集合
 private val DOCUMENT_EXTENSIONS = setOf(
     "pdf", "doc", "docx", "xls", "xlsx", "ppt", "pptx",
-    "txt", "rtf", "odt", "ods", "odp", "csv",
+    "txt", "rtf", "odt", "ods", "odp", "csv"
 )
 
 // 媒体文件扩展名集合
 private val MEDIA_EXTENSIONS = setOf(
     "png", "jpg", "jpeg", "gif", "webp", "bmp", "svg", "ico", "heic", "heif",
     "mp4", "avi", "mkv", "mov", "wmv", "flv", "webm",
-    "mp3", "wav", "flac", "aac", "ogg", "m4a", "wma",
+    "mp3", "wav", "flac", "aac", "ogg", "m4a", "wma"
 )
 
 /**
@@ -292,7 +280,7 @@ fun FileBrowserScreen(
     onNavigateToTerminal: (String?) -> Unit = {},
     layoutMode: LayoutMode = LayoutMode.COMPACT,
     foldInfo: FoldInfo = FoldInfo(),
-    viewModel: FileBrowserViewModel = hiltViewModel(),
+    viewModel: FileBrowserViewModel = hiltViewModel()
 ) {
     val uiState by viewModel.uiState.collectAsStateWithLifecycle()
     val currentTreeUri by viewModel.currentTreeUri.collectAsStateWithLifecycle()
@@ -413,7 +401,7 @@ fun FileBrowserScreen(
                     name = uri.lastPathSegment?.substringAfterLast('/') ?: "file",
                     uri = uri,
                     isDirectory = false,
-                    size = 0L,
+                    size = 0L
                 )
             )
         }
@@ -457,7 +445,7 @@ fun FileBrowserScreen(
             onCreate = { filename, language, initialContent ->
                 showCreateFileDialog = false
                 snippetViewModel.createFileInInternalStorage(filename, language, initialContent)
-            },
+            }
         )
     }
 
@@ -473,29 +461,45 @@ fun FileBrowserScreen(
                     onValueChange = { folderName = it },
                     label = { Text(stringResource(R.string.browser_hint_enter_folder_name)) },
                     singleLine = true,
-                    modifier = Modifier.fillMaxWidth(),
+                    modifier = Modifier.fillMaxWidth()
                 )
             },
             confirmButton = {
                 BrandFilledButton(
                     onClick = {
                         if (folderName.isBlank()) {
-                            Toast.makeText(context, context.getString(R.string.browser_error_folder_name_empty), Toast.LENGTH_SHORT).show()
+                            Toast.makeText(
+                                context,
+                                context.getString(R.string.browser_error_folder_name_empty),
+                                Toast.LENGTH_SHORT
+                            ).show()
                             return@BrandFilledButton
                         }
                         val existing = viewModel.getInternalFolders().any { it.name == folderName }
                         if (existing) {
-                            Toast.makeText(context, context.getString(R.string.browser_error_folder_exists), Toast.LENGTH_SHORT).show()
+                            Toast.makeText(
+                                context,
+                                context.getString(R.string.browser_error_folder_exists),
+                                Toast.LENGTH_SHORT
+                            ).show()
                             return@BrandFilledButton
                         }
                         val created = viewModel.createFolder(folderName)
                         if (created) {
-                            Toast.makeText(context, context.getString(R.string.browser_folder_create_success), Toast.LENGTH_SHORT).show()
+                            Toast.makeText(
+                                context,
+                                context.getString(R.string.browser_folder_create_success),
+                                Toast.LENGTH_SHORT
+                            ).show()
                         } else {
-                            Toast.makeText(context, context.getString(R.string.browser_folder_create_failed), Toast.LENGTH_SHORT).show()
+                            Toast.makeText(
+                                context,
+                                context.getString(R.string.browser_folder_create_failed),
+                                Toast.LENGTH_SHORT
+                            ).show()
                         }
                         showCreateFolderDialog = false
-                    },
+                    }
                 ) {
                     Text(stringResource(R.string.browser_action_create))
                 }
@@ -504,7 +508,7 @@ fun FileBrowserScreen(
                 TextButton(onClick = { showCreateFolderDialog = false }) {
                     Text(stringResource(R.string.browser_action_cancel))
                 }
-            },
+            }
         )
     }
 
@@ -513,7 +517,10 @@ fun FileBrowserScreen(
         val folders = viewModel.getInternalFolders()
         val isMultiSelect = isMultiSelectMode && selectedItems.isNotEmpty()
         BrandDialog(
-            onDismissRequest = { showMoveToDialog = false; fileToMove = null },
+            onDismissRequest = {
+                showMoveToDialog = false
+                fileToMove = null
+            },
             title = { Text(stringResource(R.string.browser_dialog_move_to_title)) },
             content = {
                 Column {
@@ -524,7 +531,7 @@ fun FileBrowserScreen(
                             Icon(
                                 imageVector = Icons.Filled.Folder,
                                 contentDescription = null,
-                                tint = PrototypeTokens.accent,
+                                tint = PrototypeTokens.accent
                             )
                         },
                         onClick = {
@@ -534,9 +541,12 @@ fun FileBrowserScreen(
                                 val count = viewModel.moveSelectedFiles(rootUri)
                                 Toast.makeText(
                                     context,
-                                    if (count > 0) context.getString(R.string.browser_move_success, count)
-                                    else context.getString(R.string.browser_move_failed),
-                                    Toast.LENGTH_SHORT,
+                                    if (count > 0) {
+                                        context.getString(R.string.browser_move_success, count)
+                                    } else {
+                                        context.getString(R.string.browser_move_failed)
+                                    },
+                                    Toast.LENGTH_SHORT
                                 ).show()
                             } else {
                                 val item = fileToMove
@@ -544,15 +554,18 @@ fun FileBrowserScreen(
                                     val moved = viewModel.moveFile(item.uri.toString(), rootUri)
                                     Toast.makeText(
                                         context,
-                                        if (moved) context.getString(R.string.browser_move_success, 1)
-                                        else context.getString(R.string.browser_move_failed),
-                                        Toast.LENGTH_SHORT,
+                                        if (moved) {
+                                            context.getString(R.string.browser_move_success, 1)
+                                        } else {
+                                            context.getString(R.string.browser_move_failed)
+                                        },
+                                        Toast.LENGTH_SHORT
                                     ).show()
                                 }
                             }
                             showMoveToDialog = false
                             fileToMove = null
-                        },
+                        }
                     )
                     if (folders.isNotEmpty()) {
                         HorizontalDivider(modifier = Modifier.padding(vertical = 4.dp))
@@ -563,18 +576,23 @@ fun FileBrowserScreen(
                                     Icon(
                                         imageVector = Icons.Filled.Folder,
                                         contentDescription = null,
-                                        tint = PrototypeTokens.accent,
+                                        tint = PrototypeTokens.accent
                                     )
                                 },
                                 onClick = {
-                                    val folderUri = com.draftpeek.core.common.util.AppFileManager.fileToInternalUri(folder)
+                                    val folderUri = com.draftpeek.core.common.util.AppFileManager.fileToInternalUri(
+                                        folder
+                                    )
                                     if (isMultiSelect) {
                                         val count = viewModel.moveSelectedFiles(folderUri)
                                         Toast.makeText(
                                             context,
-                                            if (count > 0) context.getString(R.string.browser_move_success, count)
-                                            else context.getString(R.string.browser_move_failed),
-                                            Toast.LENGTH_SHORT,
+                                            if (count > 0) {
+                                                context.getString(R.string.browser_move_success, count)
+                                            } else {
+                                                context.getString(R.string.browser_move_failed)
+                                            },
+                                            Toast.LENGTH_SHORT
                                         ).show()
                                     } else {
                                         val item = fileToMove
@@ -582,15 +600,18 @@ fun FileBrowserScreen(
                                             val moved = viewModel.moveFile(item.uri.toString(), folderUri)
                                             Toast.makeText(
                                                 context,
-                                                if (moved) context.getString(R.string.browser_move_success, 1)
-                                                else context.getString(R.string.browser_move_failed),
-                                                Toast.LENGTH_SHORT,
+                                                if (moved) {
+                                                    context.getString(R.string.browser_move_success, 1)
+                                                } else {
+                                                    context.getString(R.string.browser_move_failed)
+                                                },
+                                                Toast.LENGTH_SHORT
                                             ).show()
                                         }
                                     }
                                     showMoveToDialog = false
                                     fileToMove = null
-                                },
+                                }
                             )
                         }
                     }
@@ -598,10 +619,13 @@ fun FileBrowserScreen(
             },
             confirmButton = {},
             dismissButton = {
-                TextButton(onClick = { showMoveToDialog = false; fileToMove = null }) {
+                TextButton(onClick = {
+                    showMoveToDialog = false
+                    fileToMove = null
+                }) {
                     Text(stringResource(R.string.browser_action_cancel))
                 }
-            },
+            }
         )
     }
 
@@ -613,7 +637,7 @@ fun FileBrowserScreen(
                 snippetViewModel.addSnippet(title, content, language, category)
                 showCreateSnippetDialog = false
             },
-            categories = emptyList(),
+            categories = emptyList()
         )
     }
 
@@ -627,7 +651,7 @@ fun FileBrowserScreen(
             onBrowse = { url ->
                 showGitHubImportDialog = false
                 viewModel.importFromGitHub(url)
-            },
+            }
         )
     }
 
@@ -636,7 +660,7 @@ fun FileBrowserScreen(
         is GitHubImportState.Loading -> {
             GitHubLoadingDialog(
                 message = stringResource(R.string.browser_github_loading),
-                onDismiss = { viewModel.resetGitHubImportState() },
+                onDismiss = { viewModel.resetGitHubImportState() }
             )
         }
         is GitHubImportState.FileList -> {
@@ -649,13 +673,13 @@ fun FileBrowserScreen(
                 onSelectAll = { viewModel.selectAllGitHubFiles() },
                 onClearAll = { viewModel.clearGitHubFileSelection() },
                 onConfirm = { viewModel.confirmGitHubImport() },
-                onDismiss = { viewModel.resetGitHubImportState() },
+                onDismiss = { viewModel.resetGitHubImportState() }
             )
         }
         is GitHubImportState.Cloning -> {
             GitHubLoadingDialog(
                 message = state.progressMessage ?: stringResource(R.string.browser_github_loading),
-                onDismiss = { viewModel.resetGitHubImportState() },
+                onDismiss = { viewModel.resetGitHubImportState() }
             )
         }
         is GitHubImportState.Success -> {
@@ -710,7 +734,7 @@ fun FileBrowserScreen(
             onPush = { gitViewModel.push() },
             onPull = { gitViewModel.pull() },
             onFetch = { gitViewModel.fetch() },
-            onCheckout = { branch -> gitViewModel.checkout(branch) },
+            onCheckout = { branch -> gitViewModel.checkout(branch) }
         )
     }
 
@@ -722,7 +746,7 @@ fun FileBrowserScreen(
             onCommit = { message, selectedFiles ->
                 gitViewModel.commit(message, selectedFiles)
             },
-            onDismiss = { showGitCommitDialog = false },
+            onDismiss = { showGitCommitDialog = false }
         )
     }
 
@@ -738,7 +762,7 @@ fun FileBrowserScreen(
             content = {
                 Text(
                     text = stringResource(R.string.browser_dialog_delete_file_message, fileItem.name),
-                    style = DraftPeekTypography.bodyMedium,
+                    style = DraftPeekTypography.bodyMedium
                 )
             },
             confirmButton = {
@@ -755,7 +779,7 @@ fun FileBrowserScreen(
                         }
                         showDeleteConfirmDialog = false
                         fileToDelete = null
-                    },
+                    }
                 ) {
                     Text(stringResource(R.string.browser_action_delete_file))
                 }
@@ -803,7 +827,7 @@ fun FileBrowserScreen(
                     name = info.file.name,
                     uri = android.net.Uri.parse(uri),
                     isDirectory = false,
-                    size = info.file.length(),
+                    size = info.file.length()
                 )
             )
         }
@@ -861,7 +885,9 @@ fun FileBrowserScreen(
                     items = items.sortedBy { orderMap[it.uri.toString()] ?: Int.MAX_VALUE }
                 }
                 items
-            } else emptyList()
+            } else {
+                emptyList()
+            }
         )
     }
     val favoriteFileItems by remember(selectedFilter, pinnedFiles, internalFiles, searchQuery, pinnedOrder) {
@@ -877,7 +903,9 @@ fun FileBrowserScreen(
                     items = items.sortedBy { orderMap[it.uri.toString()] ?: Int.MAX_VALUE }
                 }
                 items
-            } else emptyList()
+            } else {
+                emptyList()
+            }
         )
     }
     // 首页"最近打开"区块数据（数量由设置 recentFilesLimit 控制，独立于筛选/搜索状态）
@@ -899,8 +927,11 @@ fun FileBrowserScreen(
         }
         result = when (selectedFilter) {
             FileFilter.ALL -> result
-            FileFilter.RECENT -> result.filter { !it.isDirectory && it.lastModified > 0 &&
-                (System.currentTimeMillis() - it.lastModified) < 7 * 24 * 60 * 60 * 1000L }
+            FileFilter.RECENT -> result.filter {
+                !it.isDirectory &&
+                    it.lastModified > 0 &&
+                    (System.currentTimeMillis() - it.lastModified) < 7 * 24 * 60 * 60 * 1000L
+            }
             FileFilter.FAVORITES -> result.filter { it.isPinned }
             FileFilter.BOOKMARKS -> result.filter { it.isBookmarked }
             FileFilter.CODE -> result.filter { !it.isDirectory && it.extension.lowercase() in CODE_EXTENSIONS }
@@ -913,16 +944,20 @@ fun FileBrowserScreen(
     Box(
         modifier = Modifier
             .fillMaxSize()
-            .background(pageBg),
+            .background(pageBg)
     ) {
         Column(
-            modifier = Modifier.fillMaxSize(),
+            modifier = Modifier.fillMaxSize()
         ) {
             // ---- TopBar ----
             BrandTopBar(
                 title = stringResource(R.string.browser_page_title),
                 titleStyle = MonoUppercaseTitleStyle,
-                onBack = if (isInSubdirectory) {{ viewModel.navigateUp() }} else null,
+                onBack = if (isInSubdirectory) {
+                    { viewModel.navigateUp() }
+                } else {
+                    null
+                },
                 actions = {
                     if (isGitRepo && gitUiEnabled) {
                         IconButton(
@@ -931,17 +966,29 @@ fun FileBrowserScreen(
                             },
                             modifier = Modifier.accessibilityEnhanced(
                                 contentDescription = stringResource(R.string.browser_git_action_sheet),
-                                stateDescription = if (gitUiState.modifiedCount > 0) "有 ${gitUiState.modifiedCount} 个修改" else "无修改",
-                            ),
+                                stateDescription = if (gitUiState.modifiedCount >
+                                    0
+                                ) {
+                                    "有 ${gitUiState.modifiedCount} 个修改"
+                                } else {
+                                    "无修改"
+                                }
+                            )
                         ) {
                             StrokeIcon(
                                 icon = StrokeIcons.GitBranch,
                                 contentDescription = stringResource(R.string.browser_git_action_sheet),
-                                tint = if (gitUiState.modifiedCount > 0) PrototypeTokens.accent else PrototypeTokens.muted,
+                                tint = if (gitUiState.modifiedCount >
+                                    0
+                                ) {
+                                    PrototypeTokens.accent
+                                } else {
+                                    PrototypeTokens.muted
+                                }
                             )
                         }
                     }
-                },
+                }
             )
 
             // ---- Search Bar ----
@@ -951,7 +998,7 @@ fun FileBrowserScreen(
                 placeholder = stringResource(R.string.browser_search_hint),
                 modifier = Modifier
                     .padding(horizontal = PrototypeSpacing.ScreenHorizontal)
-                    .padding(top = 12.dp),
+                    .padding(top = 12.dp)
             )
 
             // ---- Filter Chips Row ----
@@ -961,13 +1008,13 @@ fun FileBrowserScreen(
                     .horizontalScroll(rememberScrollState())
                     .padding(horizontal = PrototypeSpacing.ScreenHorizontal)
                     .padding(top = 12.dp),
-                horizontalArrangement = Arrangement.spacedBy(8.dp),
+                horizontalArrangement = Arrangement.spacedBy(8.dp)
             ) {
                 FileFilter.entries.forEach { filter ->
                     BrandChip(
                         text = fileFilterLabel(filter),
                         selected = selectedFilter == filter,
-                        onClick = { selectedFilter = filter },
+                        onClick = { selectedFilter = filter }
                     )
                 }
             }
@@ -980,7 +1027,7 @@ fun FileBrowserScreen(
                     modifier = Modifier
                         .fillMaxWidth()
                         .padding(horizontal = PrototypeSpacing.ScreenHorizontal)
-                        .padding(top = 8.dp),
+                        .padding(top = 8.dp)
                 )
             }
 
@@ -991,7 +1038,13 @@ fun FileBrowserScreen(
                 when {
                     isVirtualFolderActive -> {
                         // Virtual folder view (Recent / Favourites) — overrides normal listing
-                        val virtualItems = if (selectedFilter == FileFilter.RECENT) recentFileItems else favoriteFileItems
+                        val virtualItems = if (selectedFilter ==
+                            FileFilter.RECENT
+                        ) {
+                            recentFileItems
+                        } else {
+                            favoriteFileItems
+                        }
                         val sectionTitle = if (selectedFilter == FileFilter.RECENT) {
                             stringResource(R.string.browser_recent_section)
                         } else {
@@ -1007,21 +1060,27 @@ fun FileBrowserScreen(
                             Column(
                                 modifier = Modifier.fillMaxSize(),
                                 horizontalAlignment = Alignment.CenterHorizontally,
-                                verticalArrangement = Arrangement.Center,
+                                verticalArrangement = Arrangement.Center
                             ) {
                                 Icon(
-                                    imageVector = if (selectedFilter == FileFilter.RECENT) Icons.Filled.History else Icons.Filled.PushPin,
+                                    imageVector = if (selectedFilter ==
+                                        FileFilter.RECENT
+                                    ) {
+                                        Icons.Filled.History
+                                    } else {
+                                        Icons.Filled.PushPin
+                                    },
                                     contentDescription = null,
                                     tint = muted.copy(alpha = 0.35f),
-                                    modifier = Modifier.size(64.dp),
+                                    modifier = Modifier.size(64.dp)
                                 )
                                 Spacer(modifier = Modifier.height(16.dp))
                                 Text(
                                     text = emptyText,
                                     style = DraftPeekTypography.titleMedium.copy(
-                                        fontWeight = FontWeight.SemiBold,
+                                        fontWeight = FontWeight.SemiBold
                                     ),
-                                    color = fg.copy(alpha = 0.6f),
+                                    color = fg.copy(alpha = 0.6f)
                                 )
                             }
                         } else {
@@ -1067,7 +1126,10 @@ fun FileBrowserScreen(
                                             if (delta != 0f) {
                                                 val consumed = vListState.scrollBy(delta)
                                                 if (consumed != 0f) {
-                                                    dragController.onAutoScrollConsumed(consumed, localVirtualItems.size)
+                                                    dragController.onAutoScrollConsumed(
+                                                        consumed,
+                                                        localVirtualItems.size
+                                                    )
                                                 }
                                             }
                                             withFrameNanos { }
@@ -1089,19 +1151,30 @@ fun FileBrowserScreen(
                                         detectDragGesturesAfterLongPress(
                                             onDragStart = { offset ->
                                                 val localY = offset.y
-                                                val hit = dragController.resolveTarget(forStart = true, localY = localY, itemCount = localVirtualItems.size)
+                                                val hit = dragController.resolveTarget(
+                                                    forStart = true,
+                                                    localY = localY,
+                                                    itemCount = localVirtualItems.size
+                                                )
                                                 if (hit in localVirtualItems.indices) {
                                                     dragController.onDragStart(hit, localY)
                                                 }
                                             },
                                             onDrag = { change, dragAmount ->
                                                 change.consume()
-                                                if (dragController.dragStartIndex < 0) return@detectDragGesturesAfterLongPress
+                                                if (dragController.dragStartIndex <
+                                                    0
+                                                ) {
+                                                    return@detectDragGesturesAfterLongPress
+                                                }
                                                 dragController.onDragUpdate(dragAmount.y, localVirtualItems.size)
                                             },
                                             onDragEnd = {
                                                 if (dragController.dragStartIndex >= 0) {
-                                                    val target = dragController.resolveTargetIndex(dragController.dragStartIndex, dragController.dragInsertionIndex)
+                                                    val target = dragController.resolveTargetIndex(
+                                                        dragController.dragStartIndex,
+                                                        dragController.dragInsertionIndex
+                                                    )
                                                         .coerceIn(localVirtualItems.indices)
                                                     if (target != dragController.dragStartIndex) {
                                                         val newList = localVirtualItems.toMutableList()
@@ -1123,25 +1196,30 @@ fun FileBrowserScreen(
                                                     delay(260)
                                                     dragController.resetDragState()
                                                 }
-                                            },
+                                            }
                                         )
                                     },
-                                verticalArrangement = Arrangement.spacedBy(4.dp),
+                                verticalArrangement = Arrangement.spacedBy(4.dp)
                             ) {
                                 item {
                                     SectionMonoHeader(
                                         title = sectionTitle,
-                                        count = localVirtualItems.size,
+                                        count = localVirtualItems.size
                                     )
                                 }
-                                itemsIndexed(localVirtualItems, key = { idx, it -> "vf_${it.uri.toString()}_$idx" }) { index, item ->
+                                itemsIndexed(localVirtualItems, key = { idx, it ->
+                                    "vf_${it.uri}_$idx"
+                                }) { index, item ->
                                     val isDraggingNow = index == dragController.dragStartIndex
                                     val insertionAtThis = dragController.dragInsertionIndex == index && !isDraggingNow
                                     val stepPx: Float = run {
                                         val frozen = dragController.frozenAbsBounds
                                         if (frozen.isNotEmpty()) {
                                             frozen[index]?.step
-                                                ?: ((frozen[index]?.height ?: dragController.defaultRowHeightPx) + dragController.itemSpacingPx.toFloat())
+                                                ?: (
+                                                    (frozen[index]?.height ?: dragController.defaultRowHeightPx) +
+                                                        dragController.itemSpacingPx.toFloat()
+                                                    )
                                         } else {
                                             val cur = dragController.rowBounds[index]
                                             val next = dragController.rowBounds[index + 1]
@@ -1149,7 +1227,8 @@ fun FileBrowserScreen(
                                                 val d = next.top - cur.top
                                                 if (d > 0) return@run d
                                             }
-                                            (cur?.height?.toFloat() ?: dragController.defaultRowHeightPx) + dragController.itemSpacingPx.toFloat()
+                                            (cur?.height?.toFloat() ?: dragController.defaultRowHeightPx) +
+                                                dragController.itemSpacingPx.toFloat()
                                         }
                                     }
                                     val rowDisplacement = when {
@@ -1164,22 +1243,25 @@ fun FileBrowserScreen(
                                     }
                                     val transition = updateTransition(
                                         targetState = isDraggingNow,
-                                        label = "vf_item_$index",
+                                        label = "vf_item_$index"
                                     )
                                     val scale by transition.animateFloat(
                                         transitionSpec = {
-                                            if (targetState) spring(Spring.DampingRatioLowBouncy, Spring.StiffnessMediumLow)
-                                            else spring(Spring.DampingRatioNoBouncy, Spring.StiffnessMedium)
+                                            if (targetState) {
+                                                spring(Spring.DampingRatioLowBouncy, Spring.StiffnessMediumLow)
+                                            } else {
+                                                spring(Spring.DampingRatioNoBouncy, Spring.StiffnessMedium)
+                                            }
                                         },
-                                        label = "scale_v_$index",
+                                        label = "scale_v_$index"
                                     ) { d -> if (d) 1.06f else 1f }
                                     val cardElevPx by transition.animateFloat(
                                         transitionSpec = { tween(220, easing = FastOutSlowInEasing) },
-                                        label = "elev_v_$index",
+                                        label = "elev_v_$index"
                                     ) { d -> if (d) 18f else 0f }
                                     val bgAlpha by transition.animateFloat(
                                         transitionSpec = { tween(180) },
-                                        label = "alpha_v_$index",
+                                        label = "alpha_v_$index"
                                     ) { d -> if (d) 0.96f else 1f }
                                     val translationY by animateFloatAsState(
                                         targetValue = when {
@@ -1191,7 +1273,7 @@ fun FileBrowserScreen(
                                         } else {
                                             spring(Spring.DampingRatioNoBouncy, Spring.StiffnessHigh)
                                         },
-                                        label = "vf_trans_$index",
+                                        label = "vf_trans_$index"
                                     )
                                     StaggeredAppearance(index = index) {
                                         Box(
@@ -1213,12 +1295,16 @@ fun FileBrowserScreen(
                                                 }
                                                 .offset { IntOffset(0, translationY.roundToInt()) }
                                                 .then(
-                                                    if (isDraggingNow) Modifier.shadow(
-                                                        with(density) { cardElevPx.toDp() },
-                                                        shape = BrandShapes.Card,
-                                                        clip = false,
-                                                    ) else Modifier
-                                                ),
+                                                    if (isDraggingNow) {
+                                                        Modifier.shadow(
+                                                            with(density) { cardElevPx.toDp() },
+                                                            shape = BrandShapes.Card,
+                                                            clip = false
+                                                        )
+                                                    } else {
+                                                        Modifier
+                                                    }
+                                                )
                                         ) {
                                             if (insertionAtThis) {
                                                 Box(
@@ -1226,7 +1312,7 @@ fun FileBrowserScreen(
                                                         .fillMaxWidth()
                                                         .height(6.dp)
                                                         .padding(horizontal = 12.dp),
-                                                    contentAlignment = Alignment.Center,
+                                                    contentAlignment = Alignment.Center
                                                 ) {
                                                     Box(
                                                         modifier = Modifier
@@ -1234,8 +1320,8 @@ fun FileBrowserScreen(
                                                             .height(2.dp)
                                                             .background(
                                                                 color = accent,
-                                                                shape = RoundedCornerShape(999.dp),
-                                                            ),
+                                                                shape = RoundedCornerShape(999.dp)
+                                                            )
                                                     )
                                                 }
                                             }
@@ -1263,7 +1349,7 @@ fun FileBrowserScreen(
                                                 isMultiSelectMode = isMultiSelectMode,
                                                 isItemSelected = selectedItems.contains(item.uri.toString()),
                                                 currentDirectoryUri = "",
-                                                modifier = Modifier.fillMaxWidth(),
+                                                modifier = Modifier.fillMaxWidth()
                                             )
                                         }
                                     }
@@ -1281,7 +1367,9 @@ fun FileBrowserScreen(
                             val orderedInternal = if (internalFilesOrder.isNotEmpty()) {
                                 val orderMap = internalFilesOrder.withIndex().associate { it.value to it.index }
                                 filteredInternal0.sortedBy { orderMap[it.uri.toString()] ?: Int.MAX_VALUE }
-                            } else filteredInternal0
+                            } else {
+                                filteredInternal0
+                            }
 
                             val dirs0 = orderedInternal.filter { it.isDirectory }
                             val files0 = orderedInternal.filter { !it.isDirectory }
@@ -1290,7 +1378,9 @@ fun FileBrowserScreen(
                                     if (bookmarkOrder.isNotEmpty()) {
                                         val orderMap = bookmarkOrder.withIndex().associate { it.value to it.index }
                                         list.sortedBy { orderMap[it.uri.toString()] ?: Int.MAX_VALUE }
-                                    } else list
+                                    } else {
+                                        list
+                                    }
                                 }
 
                             val scope = rememberCoroutineScope()
@@ -1352,7 +1442,8 @@ fun FileBrowserScreen(
                                 }
                             }
 
-                            val hasBookmarks = localBookmarks.isNotEmpty() && searchQuery.isBlank() && selectedFilter == FileFilter.ALL
+                            val hasBookmarks =
+                                localBookmarks.isNotEmpty() && searchQuery.isBlank() && selectedFilter == FileFilter.ALL
                             val hasDirs = localDirs.isNotEmpty()
                             val hasFiles = localFiles.isNotEmpty()
                             val iIsDragging = iDragSection != null
@@ -1386,6 +1477,7 @@ fun FileBrowserScreen(
                                     logicalIdx++
                                     return null
                                 }
+
                                 // 跳到 firstVisible：通过模拟 advance 直到达到 firstVisible
                                 fun advanceIfNeeded(targetSection: String, listSize: Int, sectionHeader: Boolean) {
                                     if (logicalIdx >= firstVisible) return
@@ -1414,17 +1506,29 @@ fun FileBrowserScreen(
                                         for (i in localBookmarks.indices) {
                                             val h = iSectionRowHeight("bookmark", i)
                                             val hit = consume(h) {
-                                                if (!forInsertion) "bookmark" to i
-                                                else {
+                                                if (!forInsertion) {
+                                                    "bookmark" to i
+                                                } else {
                                                     val top = currentY
                                                     val bottom = currentY + h + iItemSpacingPx
                                                     val center = (top + bottom) / 2f
-                                                    if (localY < center) "bookmark_insert" to i else "bookmark_insert" to (i + 1)
+                                                    if (localY <
+                                                        center
+                                                    ) {
+                                                        "bookmark_insert" to i
+                                                    } else {
+                                                        "bookmark_insert" to (i + 1)
+                                                    }
                                                 }
                                             }
                                             if (hit != null) {
-                                                return if (forInsertion && hit.first == "bookmark_insert") "bookmark" to hit.second
-                                                       else hit
+                                                return if (forInsertion &&
+                                                    hit.first == "bookmark_insert"
+                                                ) {
+                                                    "bookmark" to hit.second
+                                                } else {
+                                                    hit
+                                                }
                                             }
                                         }
                                     }
@@ -1435,8 +1539,9 @@ fun FileBrowserScreen(
                                     for (i in localDirs.indices) {
                                         val h = iSectionRowHeight("dir", i)
                                         val hit = consume(h) {
-                                            if (!forInsertion) "dir" to i
-                                            else {
+                                            if (!forInsertion) {
+                                                "dir" to i
+                                            } else {
                                                 val top = currentY
                                                 val bottom = currentY + h + iItemSpacingPx
                                                 val center = (top + bottom) / 2f
@@ -1444,8 +1549,11 @@ fun FileBrowserScreen(
                                             }
                                         }
                                         if (hit != null) {
-                                            return if (forInsertion && hit.first == "dir_insert") "dir" to hit.second
-                                                   else hit
+                                            return if (forInsertion && hit.first == "dir_insert") {
+                                                "dir" to hit.second
+                                            } else {
+                                                hit
+                                            }
                                         }
                                     }
                                 }
@@ -1455,8 +1563,9 @@ fun FileBrowserScreen(
                                     for (i in localFiles.indices) {
                                         val h = iSectionRowHeight("file", i)
                                         val hit = consume(h) {
-                                            if (!forInsertion) "file" to i
-                                            else {
+                                            if (!forInsertion) {
+                                                "file" to i
+                                            } else {
                                                 val top = currentY
                                                 val bottom = currentY + h + iItemSpacingPx
                                                 val center = (top + bottom) / 2f
@@ -1464,8 +1573,11 @@ fun FileBrowserScreen(
                                             }
                                         }
                                         if (hit != null) {
-                                            return if (forInsertion && hit.first == "file_insert") "file" to hit.second
-                                                   else hit
+                                            return if (forInsertion && hit.first == "file_insert") {
+                                                "file" to hit.second
+                                            } else {
+                                                hit
+                                            }
                                         }
                                     }
                                 }
@@ -1495,7 +1607,7 @@ fun FileBrowserScreen(
                                             absTop = top,
                                             absBottom = top + h,
                                             height = h,
-                                            step = h + iItemSpacingPx,
+                                            step = h + iItemSpacingPx
                                         )
                                         top += h + iItemSpacingPx
                                     }
@@ -1581,7 +1693,10 @@ fun FileBrowserScreen(
                                 var matched = false
 
                                 fun advanceHeader() {
-                                    if (logicalCursor >= firstVisible) { matched = true; return }
+                                    if (logicalCursor >= firstVisible) {
+                                        matched = true
+                                        return
+                                    }
                                     logicalCursor++
                                     absCursor += iHeaderHeightPx + iItemSpacingPx
                                 }
@@ -1589,15 +1704,27 @@ fun FileBrowserScreen(
                                     if (matched) return
                                     val stepCount = (firstVisible - logicalCursor).coerceAtMost(count)
                                     for (i in 0 until stepCount) {
-                                        if (logicalCursor >= firstVisible) { matched = true; return }
+                                        if (logicalCursor >= firstVisible) {
+                                            matched = true
+                                            return
+                                        }
                                         absCursor += iSectionRowHeight(section, i) + iItemSpacingPx
                                         logicalCursor++
                                     }
                                 }
 
-                                if (hasBookmarks) { advanceHeader(); advanceItems(localBookmarks.size, "bookmark") }
-                                if (hasDirs)      { advanceHeader(); advanceItems(localDirs.size,     "dir") }
-                                if (hasFiles)     { advanceHeader(); advanceItems(localFiles.size,    "file") }
+                                if (hasBookmarks) {
+                                    advanceHeader()
+                                    advanceItems(localBookmarks.size, "bookmark")
+                                }
+                                if (hasDirs) {
+                                    advanceHeader()
+                                    advanceItems(localDirs.size, "dir")
+                                }
+                                if (hasFiles) {
+                                    advanceHeader()
+                                    advanceItems(localFiles.size, "file")
+                                }
                                 return absCursor - firstOff
                             }
 
@@ -1633,7 +1760,8 @@ fun FileBrowserScreen(
                                                     iDragScrollOffset += consumed
                                                     val sec = iDragSection
                                                     if (sec != null) {
-                                                        iDragInsertionIndex = iResolveInsertionIndex(sec, iCurrentFingerGlobalAbsY())
+                                                        iDragInsertionIndex =
+                                                            iResolveInsertionIndex(sec, iCurrentFingerGlobalAbsY())
                                                     }
                                                 }
                                             }
@@ -1647,7 +1775,10 @@ fun FileBrowserScreen(
                                 }
                             }
 
-                            if (filteredInternal0.isEmpty() && searchQuery.isBlank() && selectedFilter == FileFilter.ALL) {
+                            if (filteredInternal0.isEmpty() &&
+                                searchQuery.isBlank() &&
+                                selectedFilter == FileFilter.ALL
+                            ) {
                                 EmptyFilesContent(modifier = Modifier.fillMaxSize())
                             } else {
                                 LazyColumn(
@@ -1656,45 +1787,61 @@ fun FileBrowserScreen(
                                         .fillMaxSize()
                                         .graphicsLayer { clip = false }
                                         .onSizeChanged { iViewportHeight = it.height.toFloat() },
-                                    verticalArrangement = Arrangement.spacedBy(4.dp),
+                                    verticalArrangement = Arrangement.spacedBy(4.dp)
                                 ) {
                                     // 最近打开（首页置顶，代码预览卡片）
-                                    val hasHomeRecent = homeRecentFiles.isNotEmpty() && searchQuery.isBlank() && selectedFilter == FileFilter.ALL
+                                    val hasHomeRecent =
+                                        homeRecentFiles.isNotEmpty() &&
+                                            searchQuery.isBlank() &&
+                                            selectedFilter == FileFilter.ALL
                                     if (hasHomeRecent) {
                                         item {
                                             SectionMonoHeader(
                                                 title = stringResource(R.string.browser_recent_section),
-                                                count = homeRecentFiles.size,
+                                                count = homeRecentFiles.size
                                             )
                                         }
-                                        itemsIndexed(homeRecentFiles, key = { idx, rf -> "home_recent_${rf.uri}_$idx" }) { _, recentFile ->
+                                        itemsIndexed(homeRecentFiles, key = { idx, rf ->
+                                            "home_recent_${rf.uri}_$idx"
+                                        }) { _, recentFile ->
                                             val fileItem = remember(recentFile) { recentFile.toFileItem() }
                                             RecentFilePreviewCard(
                                                 recentFile = recentFile,
                                                 viewModel = viewModel,
                                                 onClick = { onOpenFile(fileItem) },
-                                                modifier = Modifier.fillMaxWidth(),
+                                                modifier = Modifier.fillMaxWidth()
                                             )
                                         }
                                     }
 
                                     // Bookmarks section
-                                    val hasBm = localBookmarks.isNotEmpty() && searchQuery.isBlank() && selectedFilter == FileFilter.ALL
+                                    val hasBm =
+                                        localBookmarks.isNotEmpty() &&
+                                            searchQuery.isBlank() &&
+                                            selectedFilter == FileFilter.ALL
                                     if (hasBm) {
                                         item {
                                             SectionMonoHeader(
                                                 title = stringResource(R.string.browser_bookmarks_section),
-                                                count = localBookmarks.size,
+                                                count = localBookmarks.size
                                             )
                                         }
-                                        itemsIndexed(localBookmarks, key = { idx, it -> "bookmark_${it.uri}_$idx" }) { index, item ->
+                                        itemsIndexed(localBookmarks, key = { idx, it ->
+                                            "bookmark_${it.uri}_$idx"
+                                        }) { index, item ->
                                             val isDraggingNow = iDragSection == "bookmark" && index == iDragStartIndex
-                                            val insertionAtThis = iDragSection == "bookmark" && iDragInsertionIndex == index && !isDraggingNow
+                                            val insertionAtThis =
+                                                iDragSection == "bookmark" &&
+                                                    iDragInsertionIndex == index &&
+                                                    !isDraggingNow
                                             val stepPx: Float = run {
                                                 val frozen = iFrozenGlobalAbs
                                                 if (frozen.isNotEmpty()) {
                                                     frozen["bookmark_$index"]?.step
-                                                        ?: ((frozen["bookmark_$index"]?.height ?: iDefaultRowHeightPx) + iItemSpacingPx.toFloat())
+                                                        ?: (
+                                                            (frozen["bookmark_$index"]?.height ?: iDefaultRowHeightPx) +
+                                                                iItemSpacingPx.toFloat()
+                                                            )
                                                 } else {
                                                     val bounds = iRowBounds
                                                     val cur = bounds["bookmark_$index"]
@@ -1703,32 +1850,39 @@ fun FileBrowserScreen(
                                                         val d = next.top - cur.top
                                                         if (d > 0) return@run d
                                                     }
-                                                    (cur?.height?.toFloat() ?: iDefaultRowHeightPx) + iItemSpacingPx.toFloat()
+                                                    (cur?.height?.toFloat() ?: iDefaultRowHeightPx) +
+                                                        iItemSpacingPx.toFloat()
                                                 }
                                             }
                                             val rowDisplacement = when {
                                                 iDragSection != "bookmark" -> 0f
                                                 iDragInsertionIndex > iDragStartIndex &&
-                                                    index > iDragStartIndex && index < iDragInsertionIndex -> -stepPx
+                                                    index > iDragStartIndex &&
+                                                    index < iDragInsertionIndex -> -stepPx
                                                 iDragInsertionIndex < iDragStartIndex &&
-                                                    index >= iDragInsertionIndex && index < iDragStartIndex -> stepPx
+                                                    index >= iDragInsertionIndex &&
+                                                    index < iDragStartIndex -> stepPx
                                                 else -> 0f
                                             }
-                                            val transition = updateTransition(targetState = isDraggingNow, label = "bm_$index")
+                                            val transition =
+                                                updateTransition(targetState = isDraggingNow, label = "bm_$index")
                                             val scale by transition.animateFloat(
                                                 transitionSpec = {
-                                                    if (targetState) spring(Spring.DampingRatioLowBouncy, Spring.StiffnessMediumLow)
-                                                    else spring(Spring.DampingRatioNoBouncy, Spring.StiffnessMedium)
+                                                    if (targetState) {
+                                                        spring(Spring.DampingRatioLowBouncy, Spring.StiffnessMediumLow)
+                                                    } else {
+                                                        spring(Spring.DampingRatioNoBouncy, Spring.StiffnessMedium)
+                                                    }
                                                 },
-                                                label = "bm_scale_$index",
+                                                label = "bm_scale_$index"
                                             ) { d -> if (d) 1.06f else 1f }
                                             val elevPx by transition.animateFloat(
                                                 transitionSpec = { tween(220, easing = FastOutSlowInEasing) },
-                                                label = "bm_elev_$index",
+                                                label = "bm_elev_$index"
                                             ) { d -> if (d) 18f else 0f }
                                             val alpha by transition.animateFloat(
                                                 transitionSpec = { tween(180) },
-                                                label = "bm_alpha_$index",
+                                                label = "bm_alpha_$index"
                                             ) { d -> if (d) 0.96f else 1f }
                                             val translationY by animateFloatAsState(
                                                 targetValue = when {
@@ -1740,7 +1894,7 @@ fun FileBrowserScreen(
                                                 } else {
                                                     spring(Spring.DampingRatioNoBouncy, Spring.StiffnessHigh)
                                                 },
-                                                label = "bm_trans_$index",
+                                                label = "bm_trans_$index"
                                             )
                                             Box(
                                                 modifier = Modifier.zIndex(if (isDraggingNow) 10f else 0f)
@@ -1761,7 +1915,7 @@ fun FileBrowserScreen(
                                                                     indexInSection = index,
                                                                     top = top,
                                                                     bottom = bottom,
-                                                                    height = h,
+                                                                    height = h
                                                                 )
                                                             }
                                                             .graphicsLayer {
@@ -1774,12 +1928,16 @@ fun FileBrowserScreen(
                                                             }
                                                             .offset { IntOffset(0, translationY.roundToInt()) }
                                                             .then(
-                                                                if (isDraggingNow) Modifier.shadow(
-                                                                    with(density) { elevPx.toDp() },
-                                                                    shape = BrandShapes.Card,
-                                                                    clip = false,
-                                                                ) else Modifier
-                                                            ),
+                                                                if (isDraggingNow) {
+                                                                    Modifier.shadow(
+                                                                        with(density) { elevPx.toDp() },
+                                                                        shape = BrandShapes.Card,
+                                                                        clip = false
+                                                                    )
+                                                                } else {
+                                                                    Modifier
+                                                                }
+                                                            )
                                                     ) {
                                                         if (insertionAtThis) {
                                                             Box(
@@ -1787,7 +1945,7 @@ fun FileBrowserScreen(
                                                                     .fillMaxWidth()
                                                                     .height(6.dp)
                                                                     .padding(horizontal = 12.dp),
-                                                                contentAlignment = Alignment.Center,
+                                                                contentAlignment = Alignment.Center
                                                             ) {
                                                                 Box(
                                                                     modifier = Modifier
@@ -1795,8 +1953,8 @@ fun FileBrowserScreen(
                                                                         .height(2.dp)
                                                                         .background(
                                                                             color = accent,
-                                                                            shape = RoundedCornerShape(999.dp),
-                                                                        ),
+                                                                            shape = RoundedCornerShape(999.dp)
+                                                                        )
                                                                 )
                                                             }
                                                         }
@@ -1822,32 +1980,44 @@ fun FileBrowserScreen(
                                                                 viewModel.toggleItemSelected(uri)
                                                             },
                                                             isMultiSelectMode = isMultiSelectMode,
-                                                            isItemSelected = selectedItems.contains(item.uri.toString()),
+                                                            isItemSelected = selectedItems.contains(
+                                                                item.uri.toString()
+                                                            ),
                                                             currentDirectoryUri = "",
                                                             modifier = Modifier.fillMaxWidth(),
                                                             onDragStart = {
                                                                 iDragSection = "bookmark"
                                                                 iDragStartIndex = index
                                                                 iDragInsertionIndex = index
-                                                                iDragStartFingerY = iDragStartCenterInViewport("bookmark", index)
+                                                                iDragStartFingerY =
+                                                                    iDragStartCenterInViewport("bookmark", index)
                                                                 iDragOffset = 0f
                                                                 iDragScrollOffset = 0f
                                                                 iAnimateBack = false
                                                                 iFrozenGlobalAbs = iBuildFullGlobalAbs()
-                                                                iFirstVisibleIdxAtStart = iListState.firstVisibleItemIndex
-                                                                iFirstVisibleOffAtStart = iListState.firstVisibleItemScrollOffset.toFloat()
+                                                                iFirstVisibleIdxAtStart =
+                                                                    iListState.firstVisibleItemIndex
+                                                                iFirstVisibleOffAtStart =
+                                                                    iListState.firstVisibleItemScrollOffset.toFloat()
                                                                 iOriginalViewportTopGlobalAbs = iComputeViewportTopAbs()
                                                             },
                                                             onDrag = { dragAmountY ->
                                                                 if (iDragSection != null && iDragStartIndex >= 0) {
                                                                     iDragOffset += dragAmountY
-                                                                    iDragInsertionIndex = iResolveInsertionIndex(iDragSection!!, iCurrentFingerGlobalAbsY())
+                                                                    iDragInsertionIndex =
+                                                                        iResolveInsertionIndex(
+                                                                            iDragSection!!,
+                                                                            iCurrentFingerGlobalAbsY()
+                                                                        )
                                                                 }
                                                             },
                                                             onDragEnd = {
                                                                 if (iDragSection != null && iDragStartIndex >= 0) {
                                                                     val list = localBookmarks
-                                                                    val target = iResolveTargetIndex(iDragStartIndex, iDragInsertionIndex)
+                                                                    val target = iResolveTargetIndex(
+                                                                        iDragStartIndex,
+                                                                        iDragInsertionIndex
+                                                                    )
                                                                         .coerceIn(list.indices)
                                                                     if (target != iDragStartIndex) {
                                                                         val newList = list.toMutableList()
@@ -1868,7 +2038,7 @@ fun FileBrowserScreen(
                                                                     iDragStartFingerY = 0f
                                                                     iAnimateBack = false
                                                                 }
-                                                            },
+                                                            }
                                                         )
                                                     }
                                                 }
@@ -1880,17 +2050,23 @@ fun FileBrowserScreen(
                                         item {
                                             SectionMonoHeader(
                                                 title = stringResource(R.string.browser_folders_section),
-                                                count = localDirs.size,
+                                                count = localDirs.size
                                             )
                                         }
-                                        itemsIndexed(localDirs, key = { idx, it -> "dir_${it.uri}_$idx" }) { index, item ->
+                                        itemsIndexed(localDirs, key = { idx, it ->
+                                            "dir_${it.uri}_$idx"
+                                        }) { index, item ->
                                             val isDraggingNow = iDragSection == "dir" && index == iDragStartIndex
-                                            val insertionAtThis = iDragSection == "dir" && iDragInsertionIndex == index && !isDraggingNow
+                                            val insertionAtThis =
+                                                iDragSection == "dir" && iDragInsertionIndex == index && !isDraggingNow
                                             val stepPx: Float = run {
                                                 val frozen = iFrozenGlobalAbs
                                                 if (frozen.isNotEmpty()) {
                                                     frozen["dir_$index"]?.step
-                                                        ?: ((frozen["dir_$index"]?.height ?: iDefaultDirHeightPx) + iItemSpacingPx.toFloat())
+                                                        ?: (
+                                                            (frozen["dir_$index"]?.height ?: iDefaultDirHeightPx) +
+                                                                iItemSpacingPx.toFloat()
+                                                            )
                                                 } else {
                                                     val bounds = iRowBounds
                                                     val cur = bounds["dir_$index"]
@@ -1899,32 +2075,39 @@ fun FileBrowserScreen(
                                                         val d = next.top - cur.top
                                                         if (d > 0) return@run d
                                                     }
-                                                    (cur?.height?.toFloat() ?: iDefaultDirHeightPx) + iItemSpacingPx.toFloat()
+                                                    (cur?.height?.toFloat() ?: iDefaultDirHeightPx) +
+                                                        iItemSpacingPx.toFloat()
                                                 }
                                             }
                                             val rowDisplacement = when {
                                                 iDragSection != "dir" -> 0f
                                                 iDragInsertionIndex > iDragStartIndex &&
-                                                    index > iDragStartIndex && index < iDragInsertionIndex -> -stepPx
+                                                    index > iDragStartIndex &&
+                                                    index < iDragInsertionIndex -> -stepPx
                                                 iDragInsertionIndex < iDragStartIndex &&
-                                                    index >= iDragInsertionIndex && index < iDragStartIndex -> stepPx
+                                                    index >= iDragInsertionIndex &&
+                                                    index < iDragStartIndex -> stepPx
                                                 else -> 0f
                                             }
-                                            val transition = updateTransition(targetState = isDraggingNow, label = "dir_$index")
+                                            val transition =
+                                                updateTransition(targetState = isDraggingNow, label = "dir_$index")
                                             val scale by transition.animateFloat(
                                                 transitionSpec = {
-                                                    if (targetState) spring(Spring.DampingRatioLowBouncy, Spring.StiffnessMediumLow)
-                                                    else spring(Spring.DampingRatioNoBouncy, Spring.StiffnessMedium)
+                                                    if (targetState) {
+                                                        spring(Spring.DampingRatioLowBouncy, Spring.StiffnessMediumLow)
+                                                    } else {
+                                                        spring(Spring.DampingRatioNoBouncy, Spring.StiffnessMedium)
+                                                    }
                                                 },
-                                                label = "dir_scale_$index",
+                                                label = "dir_scale_$index"
                                             ) { d -> if (d) 1.05f else 1f }
                                             val elevPx by transition.animateFloat(
                                                 transitionSpec = { tween(220, easing = FastOutSlowInEasing) },
-                                                label = "dir_elev_$index",
+                                                label = "dir_elev_$index"
                                             ) { d -> if (d) 16f else 0f }
                                             val alpha by transition.animateFloat(
                                                 transitionSpec = { tween(180) },
-                                                label = "dir_alpha_$index",
+                                                label = "dir_alpha_$index"
                                             ) { d -> if (d) 0.96f else 1f }
                                             val translationY by animateFloatAsState(
                                                 targetValue = when {
@@ -1936,7 +2119,7 @@ fun FileBrowserScreen(
                                                 } else {
                                                     spring(Spring.DampingRatioNoBouncy, Spring.StiffnessHigh)
                                                 },
-                                                label = "dir_trans_$index",
+                                                label = "dir_trans_$index"
                                             )
                                             Box(
                                                 modifier = Modifier.zIndex(if (isDraggingNow) 10f else 0f)
@@ -1957,7 +2140,7 @@ fun FileBrowserScreen(
                                                                     indexInSection = index,
                                                                     top = top,
                                                                     bottom = bottom,
-                                                                    height = h,
+                                                                    height = h
                                                                 )
                                                             }
                                                             .graphicsLayer {
@@ -1970,12 +2153,16 @@ fun FileBrowserScreen(
                                                             }
                                                             .offset { IntOffset(0, translationY.roundToInt()) }
                                                             .then(
-                                                                if (isDraggingNow) Modifier.shadow(
-                                                                    with(density) { elevPx.toDp() },
-                                                                    shape = BrandShapes.Card,
-                                                                    clip = false,
-                                                                ) else Modifier
-                                                            ),
+                                                                if (isDraggingNow) {
+                                                                    Modifier.shadow(
+                                                                        with(density) { elevPx.toDp() },
+                                                                        shape = BrandShapes.Card,
+                                                                        clip = false
+                                                                    )
+                                                                } else {
+                                                                    Modifier
+                                                                }
+                                                            )
                                                     ) {
                                                         if (insertionAtThis) {
                                                             Box(
@@ -1983,7 +2170,7 @@ fun FileBrowserScreen(
                                                                     .fillMaxWidth()
                                                                     .height(6.dp)
                                                                     .padding(horizontal = 12.dp),
-                                                                contentAlignment = Alignment.Center,
+                                                                contentAlignment = Alignment.Center
                                                             ) {
                                                                 Box(
                                                                     modifier = Modifier
@@ -1991,8 +2178,8 @@ fun FileBrowserScreen(
                                                                         .height(2.dp)
                                                                         .background(
                                                                             color = accent,
-                                                                            shape = RoundedCornerShape(999.dp),
-                                                                        ),
+                                                                            shape = RoundedCornerShape(999.dp)
+                                                                        )
                                                                 )
                                                             }
                                                         }
@@ -2005,8 +2192,10 @@ fun FileBrowserScreen(
                                                             },
                                                             modifier = Modifier
                                                                 .fillMaxWidth()
-                                                                .padding(horizontal = PrototypeSpacing.ScreenHorizontal),
-                                                            itemCount = null,
+                                                                .padding(
+                                                                    horizontal = PrototypeSpacing.ScreenHorizontal
+                                                                ),
+                                                            itemCount = null
                                                         )
                                                     }
                                                 }
@@ -2017,18 +2206,24 @@ fun FileBrowserScreen(
                                         item {
                                             SectionMonoHeader(
                                                 title = stringResource(R.string.browser_files_section),
-                                                count = localFiles.size,
+                                                count = localFiles.size
                                             )
                                         }
-                                        itemsIndexed(localFiles, key = { idx, it -> "file_${it.uri}_$idx" }) { index, item ->
+                                        itemsIndexed(localFiles, key = { idx, it ->
+                                            "file_${it.uri}_$idx"
+                                        }) { index, item ->
                                             val dirOffset = localDirs.size
                                             val isDraggingNow = iDragSection == "file" && index == iDragStartIndex
-                                            val insertionAtThis = iDragSection == "file" && iDragInsertionIndex == index && !isDraggingNow
+                                            val insertionAtThis =
+                                                iDragSection == "file" && iDragInsertionIndex == index && !isDraggingNow
                                             val stepPx: Float = run {
                                                 val frozen = iFrozenGlobalAbs
                                                 if (frozen.isNotEmpty()) {
                                                     frozen["file_$index"]?.step
-                                                        ?: ((frozen["file_$index"]?.height ?: iDefaultRowHeightPx) + iItemSpacingPx.toFloat())
+                                                        ?: (
+                                                            (frozen["file_$index"]?.height ?: iDefaultRowHeightPx) +
+                                                                iItemSpacingPx.toFloat()
+                                                            )
                                                 } else {
                                                     val bounds = iRowBounds
                                                     val cur = bounds["file_$index"]
@@ -2037,32 +2232,39 @@ fun FileBrowserScreen(
                                                         val d = next.top - cur.top
                                                         if (d > 0) return@run d
                                                     }
-                                                    (cur?.height?.toFloat() ?: iDefaultRowHeightPx) + iItemSpacingPx.toFloat()
+                                                    (cur?.height?.toFloat() ?: iDefaultRowHeightPx) +
+                                                        iItemSpacingPx.toFloat()
                                                 }
                                             }
                                             val rowDisplacement = when {
                                                 iDragSection != "file" -> 0f
                                                 iDragInsertionIndex > iDragStartIndex &&
-                                                    index > iDragStartIndex && index < iDragInsertionIndex -> -stepPx
+                                                    index > iDragStartIndex &&
+                                                    index < iDragInsertionIndex -> -stepPx
                                                 iDragInsertionIndex < iDragStartIndex &&
-                                                    index >= iDragInsertionIndex && index < iDragStartIndex -> stepPx
+                                                    index >= iDragInsertionIndex &&
+                                                    index < iDragStartIndex -> stepPx
                                                 else -> 0f
                                             }
-                                            val transition = updateTransition(targetState = isDraggingNow, label = "fl_$index")
+                                            val transition =
+                                                updateTransition(targetState = isDraggingNow, label = "fl_$index")
                                             val scale by transition.animateFloat(
                                                 transitionSpec = {
-                                                    if (targetState) spring(Spring.DampingRatioLowBouncy, Spring.StiffnessMediumLow)
-                                                    else spring(Spring.DampingRatioNoBouncy, Spring.StiffnessMedium)
+                                                    if (targetState) {
+                                                        spring(Spring.DampingRatioLowBouncy, Spring.StiffnessMediumLow)
+                                                    } else {
+                                                        spring(Spring.DampingRatioNoBouncy, Spring.StiffnessMedium)
+                                                    }
                                                 },
-                                                label = "fl_scale_$index",
+                                                label = "fl_scale_$index"
                                             ) { d -> if (d) 1.06f else 1f }
                                             val elevPx by transition.animateFloat(
                                                 transitionSpec = { tween(220, easing = FastOutSlowInEasing) },
-                                                label = "fl_elev_$index",
+                                                label = "fl_elev_$index"
                                             ) { d -> if (d) 18f else 0f }
                                             val alpha by transition.animateFloat(
                                                 transitionSpec = { tween(180) },
-                                                label = "fl_alpha_$index",
+                                                label = "fl_alpha_$index"
                                             ) { d -> if (d) 0.96f else 1f }
                                             val translationY by animateFloatAsState(
                                                 targetValue = when {
@@ -2074,7 +2276,7 @@ fun FileBrowserScreen(
                                                 } else {
                                                     spring(Spring.DampingRatioNoBouncy, Spring.StiffnessHigh)
                                                 },
-                                                label = "fl_trans_$index",
+                                                label = "fl_trans_$index"
                                             )
                                             Box(
                                                 modifier = Modifier.zIndex(if (isDraggingNow) 10f else 0f)
@@ -2095,7 +2297,7 @@ fun FileBrowserScreen(
                                                                     indexInSection = index,
                                                                     top = top,
                                                                     bottom = bottom,
-                                                                    height = h,
+                                                                    height = h
                                                                 )
                                                             }
                                                             .graphicsLayer {
@@ -2108,12 +2310,16 @@ fun FileBrowserScreen(
                                                             }
                                                             .offset { IntOffset(0, translationY.roundToInt()) }
                                                             .then(
-                                                                if (isDraggingNow) Modifier.shadow(
-                                                                    with(density) { elevPx.toDp() },
-                                                                    shape = BrandShapes.Card,
-                                                                    clip = false,
-                                                                ) else Modifier
-                                                            ),
+                                                                if (isDraggingNow) {
+                                                                    Modifier.shadow(
+                                                                        with(density) { elevPx.toDp() },
+                                                                        shape = BrandShapes.Card,
+                                                                        clip = false
+                                                                    )
+                                                                } else {
+                                                                    Modifier
+                                                                }
+                                                            )
                                                     ) {
                                                         if (insertionAtThis) {
                                                             Box(
@@ -2121,7 +2327,7 @@ fun FileBrowserScreen(
                                                                     .fillMaxWidth()
                                                                     .height(6.dp)
                                                                     .padding(horizontal = 12.dp),
-                                                                contentAlignment = Alignment.Center,
+                                                                contentAlignment = Alignment.Center
                                                             ) {
                                                                 Box(
                                                                     modifier = Modifier
@@ -2129,8 +2335,8 @@ fun FileBrowserScreen(
                                                                         .height(2.dp)
                                                                         .background(
                                                                             color = accent,
-                                                                            shape = RoundedCornerShape(999.dp),
-                                                                        ),
+                                                                            shape = RoundedCornerShape(999.dp)
+                                                                        )
                                                                 )
                                                             }
                                                         }
@@ -2156,32 +2362,44 @@ fun FileBrowserScreen(
                                                                 viewModel.toggleItemSelected(uri)
                                                             },
                                                             isMultiSelectMode = isMultiSelectMode,
-                                                            isItemSelected = selectedItems.contains(item.uri.toString()),
+                                                            isItemSelected = selectedItems.contains(
+                                                                item.uri.toString()
+                                                            ),
                                                             currentDirectoryUri = "",
                                                             modifier = Modifier.fillMaxWidth(),
                                                             onDragStart = {
                                                                 iDragSection = "file"
                                                                 iDragStartIndex = index
                                                                 iDragInsertionIndex = index
-                                                                iDragStartFingerY = iDragStartCenterInViewport("file", index)
+                                                                iDragStartFingerY =
+                                                                    iDragStartCenterInViewport("file", index)
                                                                 iDragOffset = 0f
                                                                 iDragScrollOffset = 0f
                                                                 iAnimateBack = false
                                                                 iFrozenGlobalAbs = iBuildFullGlobalAbs()
-                                                                iFirstVisibleIdxAtStart = iListState.firstVisibleItemIndex
-                                                                iFirstVisibleOffAtStart = iListState.firstVisibleItemScrollOffset.toFloat()
+                                                                iFirstVisibleIdxAtStart =
+                                                                    iListState.firstVisibleItemIndex
+                                                                iFirstVisibleOffAtStart =
+                                                                    iListState.firstVisibleItemScrollOffset.toFloat()
                                                                 iOriginalViewportTopGlobalAbs = iComputeViewportTopAbs()
                                                             },
                                                             onDrag = { dragAmountY ->
                                                                 if (iDragSection != null && iDragStartIndex >= 0) {
                                                                     iDragOffset += dragAmountY
-                                                                    iDragInsertionIndex = iResolveInsertionIndex(iDragSection!!, iCurrentFingerGlobalAbsY())
+                                                                    iDragInsertionIndex =
+                                                                        iResolveInsertionIndex(
+                                                                            iDragSection!!,
+                                                                            iCurrentFingerGlobalAbsY()
+                                                                        )
                                                                 }
                                                             },
                                                             onDragEnd = {
                                                                 if (iDragSection != null && iDragStartIndex >= 0) {
                                                                     val list = localFiles
-                                                                    val target = iResolveTargetIndex(iDragStartIndex, iDragInsertionIndex)
+                                                                    val target = iResolveTargetIndex(
+                                                                        iDragStartIndex,
+                                                                        iDragInsertionIndex
+                                                                    )
                                                                         .coerceIn(list.indices)
                                                                     if (target != iDragStartIndex) {
                                                                         val newList = list.toMutableList()
@@ -2202,7 +2420,7 @@ fun FileBrowserScreen(
                                                                     iDragStartFingerY = 0f
                                                                     iAnimateBack = false
                                                                 }
-                                                            },
+                                                            }
                                                         )
                                                     }
                                                 }
@@ -2216,33 +2434,37 @@ fun FileBrowserScreen(
                         } else {
                             NoPermissionContent(
                                 onSelectDirectory = { safLauncher.launch(null) },
-                                onOpenFile = { openFileLauncher.launch(arrayOf(
-                                    "text/*",
-                                    "application/json",
-                                    "application/xml",
-                                    "application/pdf",
-                                    "application/msword",
-                                    "application/vnd.openxmlformats-officedocument.wordprocessingml.document",
-                                    "application/vnd.ms-excel",
-                                    "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
-                                    "application/vnd.ms-powerpoint",
-                                    "application/vnd.openxmlformats-officedocument.presentationml.presentation",
-                                    "image/*",
-                                    "audio/*",
-                                    "video/*",
-                                    "application/octet-stream",
-                                )) },
+                                onOpenFile = {
+                                    openFileLauncher.launch(
+                                        arrayOf(
+                                            "text/*",
+                                            "application/json",
+                                            "application/xml",
+                                            "application/pdf",
+                                            "application/msword",
+                                            "application/vnd.openxmlformats-officedocument.wordprocessingml.document",
+                                            "application/vnd.ms-excel",
+                                            "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+                                            "application/vnd.ms-powerpoint",
+                                            "application/vnd.openxmlformats-officedocument.presentationml.presentation",
+                                            "image/*",
+                                            "audio/*",
+                                            "video/*",
+                                            "application/octet-stream"
+                                        )
+                                    )
+                                },
                                 onNavigateToSamples = onNavigateToSamples,
                                 modifier = Modifier
                                     .fillMaxSize()
-                                    .padding(horizontal = PrototypeSpacing.ScreenHorizontal),
+                                    .padding(horizontal = PrototypeSpacing.ScreenHorizontal)
                             )
                         }
                     }
                     uiState is BrowserUiState.Loading -> {
                         Box(
                             modifier = Modifier.fillMaxSize(),
-                            contentAlignment = Alignment.Center,
+                            contentAlignment = Alignment.Center
                         ) {
                             CircularProgressIndicator(color = accent)
                         }
@@ -2251,7 +2473,7 @@ fun FileBrowserScreen(
                         ErrorContent(
                             message = (uiState as BrowserUiState.Error).message,
                             onRetry = { viewModel.refresh() },
-                            modifier = Modifier.fillMaxSize(),
+                            modifier = Modifier.fillMaxSize()
                         )
                     }
                     uiState is BrowserUiState.Success -> {
@@ -2274,7 +2496,7 @@ fun FileBrowserScreen(
                                 if (current.size == 2) {
                                     onCompareFiles(
                                         current[0].uri.toString(),
-                                        current[1].uri.toString(),
+                                        current[1].uri.toString()
                                     )
                                     isCompareMode = false
                                     compareSelection = emptyList()
@@ -2307,7 +2529,7 @@ fun FileBrowserScreen(
                                 currentDirectoryUri = currentTreeUri?.toString() ?: "",
                                 layoutMode = layoutMode,
                                 onSaveExternalFile = onSaveExternalFile,
-                                modifier = Modifier,
+                                modifier = Modifier
                             )
                         } else if (isHalfOpened) {
                             FoldableBrowserLayout(
@@ -2345,7 +2567,7 @@ fun FileBrowserScreen(
                                 onOpenTerminal = { item ->
                                     onNavigateToTerminal(FileUtils.resolveLocalPath(item.uri.toString()))
                                 },
-                                modifier = Modifier,
+                                modifier = Modifier
                             )
                         } else if (isFlatExpanded) {
                             TwoPaneFileBrowser(
@@ -2382,29 +2604,38 @@ fun FileBrowserScreen(
                                 onOpenTerminal = { item ->
                                     onNavigateToTerminal(FileUtils.resolveLocalPath(item.uri.toString()))
                                 },
-                                modifier = Modifier,
+                                modifier = Modifier
                             )
                         } else {
                             // Compact list with grouped sections
                             val filtered = filterFiles(files)
                             val dirs = filtered.filter { it.isDirectory }
                             val nonDirs = filtered.filter { !it.isDirectory }
-                            val isEmpty = filtered.isEmpty() && searchQuery.isBlank() && selectedFilter == FileFilter.ALL
+                            val isEmpty =
+                                filtered.isEmpty() && searchQuery.isBlank() && selectedFilter == FileFilter.ALL
 
                             if (isEmpty) {
                                 EmptyFilesContent(modifier = Modifier.fillMaxSize())
                             } else {
                                 LazyColumn(
                                     modifier = Modifier.fillMaxSize(),
-                                    verticalArrangement = Arrangement.spacedBy(4.dp),
+                                    verticalArrangement = Arrangement.spacedBy(4.dp)
                                 ) {
                                     // Git status section
-                                    if (isGitRepo && gitFileStatuses.isNotEmpty() && searchQuery.isBlank() && selectedFilter == FileFilter.ALL) {
-                                        item { SectionMonoHeader(title = stringResource(R.string.browser_changes_section)) }
+                                    if (isGitRepo &&
+                                        gitFileStatuses.isNotEmpty() &&
+                                        searchQuery.isBlank() &&
+                                        selectedFilter == FileFilter.ALL
+                                    ) {
+                                        item {
+                                            SectionMonoHeader(title = stringResource(R.string.browser_changes_section))
+                                        }
                                         items(gitFileStatuses, key = { "git_${it.filePath}" }) { gitStatus ->
                                             GitStatusItemComposable(
                                                 gitFileStatus = gitStatus,
-                                                modifier = Modifier.padding(horizontal = PrototypeSpacing.ScreenHorizontal),
+                                                modifier = Modifier.padding(
+                                                    horizontal = PrototypeSpacing.ScreenHorizontal
+                                                )
                                             )
                                         }
                                     }
@@ -2413,7 +2644,7 @@ fun FileBrowserScreen(
                                         item {
                                             SectionMonoHeader(
                                                 title = stringResource(R.string.browser_folders_section),
-                                                count = dirs.size,
+                                                count = dirs.size
                                             )
                                         }
                                         items(dirs, key = { it.uri.toString() }) { item ->
@@ -2428,7 +2659,7 @@ fun FileBrowserScreen(
                                                         .fillMaxWidth()
                                                         .combinedClickable(
                                                             onClick = { viewModel.navigateTo(item) },
-                                                            onLongClick = { showTerminalMenu = true },
+                                                            onLongClick = { showTerminalMenu = true }
                                                         )
                                                 ) {
                                                     BrandDirectoryCard(
@@ -2437,29 +2668,37 @@ fun FileBrowserScreen(
                                                         modifier = Modifier
                                                             .fillMaxWidth()
                                                             .padding(horizontal = PrototypeSpacing.ScreenHorizontal),
-                                                        itemCount = null,
+                                                        itemCount = null
                                                     )
                                                 }
                                             }
                                             DropdownMenu(
                                                 expanded = showTerminalMenu,
                                                 onDismissRequest = { showTerminalMenu = false },
-                                                containerColor = MaterialTheme.colorScheme.surface,
+                                                containerColor = MaterialTheme.colorScheme.surface
                                             ) {
                                                 DropdownMenuItem(
-                                                    text = { Text(stringResource(R.string.browser_action_open_terminal)) },
+                                                    text = {
+                                                        Text(stringResource(R.string.browser_action_open_terminal))
+                                                    },
                                                     leadingIcon = {
                                                         StrokeIcon(
                                                             icon = StrokeIcons.Terminal,
                                                             contentDescription = null,
-                                                            tint = if (localPath != null) PrototypeTokens.accent else PrototypeTokens.muted,
+                                                            tint = if (localPath !=
+                                                                null
+                                                            ) {
+                                                                PrototypeTokens.accent
+                                                            } else {
+                                                                PrototypeTokens.muted
+                                                            }
                                                         )
                                                     },
                                                     enabled = localPath != null,
                                                     onClick = {
                                                         showTerminalMenu = false
                                                         onNavigateToTerminal(localPath)
-                                                    },
+                                                    }
                                                 )
                                             }
                                         }
@@ -2469,7 +2708,7 @@ fun FileBrowserScreen(
                                         item {
                                             SectionMonoHeader(
                                                 title = stringResource(R.string.browser_files_section),
-                                                count = nonDirs.size,
+                                                count = nonDirs.size
                                             )
                                         }
                                         items(nonDirs, key = { it.uri.toString() }) { item ->
@@ -2486,7 +2725,9 @@ fun FileBrowserScreen(
                                                             }
                                                         },
                                                         onSave = onSaveExternalFile,
-                                                        modifier = Modifier.padding(horizontal = PrototypeSpacing.ScreenHorizontal),
+                                                        modifier = Modifier.padding(
+                                                            horizontal = PrototypeSpacing.ScreenHorizontal
+                                                        )
                                                     )
                                                 } else {
                                                     FileItemComposable(
@@ -2517,7 +2758,7 @@ fun FileBrowserScreen(
                                                         currentDirectoryUri = currentTreeUri?.toString() ?: "",
                                                         modifier = Modifier
                                                             .fillMaxWidth()
-                                                            .padding(horizontal = 0.dp),
+                                                            .padding(horizontal = 0.dp)
                                                     )
                                                 }
                                             }
@@ -2525,18 +2766,20 @@ fun FileBrowserScreen(
                                     }
 
                                     // No results for search/filter
-                                    if (filtered.isEmpty() && (searchQuery.isNotBlank() || selectedFilter != FileFilter.ALL)) {
+                                    if (filtered.isEmpty() &&
+                                        (searchQuery.isNotBlank() || selectedFilter != FileFilter.ALL)
+                                    ) {
                                         item {
                                             Box(
                                                 modifier = Modifier
                                                     .fillMaxWidth()
                                                     .padding(vertical = 48.dp),
-                                                contentAlignment = Alignment.Center,
+                                                contentAlignment = Alignment.Center
                                             ) {
                                                 Text(
                                                     text = stringResource(R.string.browser_no_matching_files),
                                                     style = DraftPeekTypography.bodyMedium,
-                                                    color = muted,
+                                                    color = muted
                                                 )
                                             }
                                         }
@@ -2551,7 +2794,7 @@ fun FileBrowserScreen(
                     else -> {
                         Box(
                             modifier = Modifier.fillMaxSize(),
-                            contentAlignment = Alignment.Center,
+                            contentAlignment = Alignment.Center
                         ) {
                             CircularProgressIndicator(color = accent)
                         }
@@ -2570,21 +2813,21 @@ fun FileBrowserScreen(
                     .navigationBarsPadding()
                     .padding(horizontal = 16.dp, vertical = 12.dp),
                 horizontalArrangement = Arrangement.SpaceEvenly,
-                verticalAlignment = Alignment.CenterVertically,
+                verticalAlignment = Alignment.CenterVertically
             ) {
                 Text(
                     text = stringResource(R.string.browser_action_select_all),
                     color = PrototypeTokens.accent,
                     modifier = Modifier
                         .clickable { viewModel.selectAllItems() }
-                        .padding(horizontal = 12.dp, vertical = 8.dp),
+                        .padding(horizontal = 12.dp, vertical = 8.dp)
                 )
                 Text(
                     text = stringResource(R.string.browser_action_deselect_all),
                     color = PrototypeTokens.muted,
                     modifier = Modifier
                         .clickable { viewModel.clearSelection() }
-                        .padding(horizontal = 12.dp, vertical = 8.dp),
+                        .padding(horizontal = 12.dp, vertical = 8.dp)
                 )
                 Text(
                     text = stringResource(R.string.browser_action_move, selectedItems.size),
@@ -2593,14 +2836,14 @@ fun FileBrowserScreen(
                         .clickable(enabled = selectedItems.isNotEmpty()) {
                             showMoveToDialog = true
                         }
-                        .padding(horizontal = 12.dp, vertical = 8.dp),
+                        .padding(horizontal = 12.dp, vertical = 8.dp)
                 )
                 Text(
                     text = stringResource(R.string.browser_action_cancel),
                     color = PrototypeTokens.muted,
                     modifier = Modifier
                         .clickable { viewModel.toggleMultiSelectMode() }
-                        .padding(horizontal = 12.dp, vertical = 8.dp),
+                        .padding(horizontal = 12.dp, vertical = 8.dp)
                 )
             }
         }
@@ -2610,55 +2853,57 @@ fun FileBrowserScreen(
             FABMenuItem(
                 icon = StrokeIcons.Plus,
                 label = stringResource(R.string.browser_fab_new_file),
-                onClick = { showCreateFileDialog = true },
+                onClick = { showCreateFileDialog = true }
             ),
             FABMenuItem(
                 icon = StrokeIcons.FolderOutline,
                 label = stringResource(R.string.browser_fab_new_folder),
-                onClick = { showCreateFolderDialog = true },
+                onClick = { showCreateFolderDialog = true }
             ),
             FABMenuItem(
                 icon = StrokeIcons.Upload,
                 label = stringResource(R.string.browser_fab_import_file),
-                onClick = { importFileLauncher.launch(arrayOf("*/*")) },
+                onClick = { importFileLauncher.launch(arrayOf("*/*")) }
             ),
             FABMenuItem(
                 icon = StrokeIcons.FolderOutline,
                 label = stringResource(R.string.browser_fab_open_file),
-                onClick = { openFileLauncher.launch(arrayOf("*/*")) },
+                onClick = { openFileLauncher.launch(arrayOf("*/*")) }
             ),
             FABMenuItem(
                 icon = StrokeIcons.Download,
                 label = stringResource(R.string.browser_github_import),
-                onClick = { showGitHubImportDialog = true },
-            ),
+                onClick = { showGitHubImportDialog = true }
+            )
         )
         if (terminalEnabled) {
             fabItems.add(
                 FABMenuItem(
                     icon = StrokeIcons.Terminal,
                     label = stringResource(R.string.browser_fab_terminal),
-                    onClick = { onNavigateToTerminal(null) },
+                    onClick = { onNavigateToTerminal(null) }
                 )
             )
         }
-        fabItems.addAll(listOf(
-            FABMenuItem(
-                icon = StrokeIcons.Braces,
-                label = stringResource(R.string.browser_action_snippets),
-                onClick = onNavigateToSnippets,
-            ),
-            FABMenuItem(
-                icon = StrokeIcons.File,
-                label = stringResource(R.string.browser_fab_samples),
-                onClick = onNavigateToSamples,
-            ),
-            FABMenuItem(
-                icon = StrokeIcons.Clock,
-                label = stringResource(R.string.browser_history_content_desc),
-                onClick = onNavigateToHistory,
-            ),
-        ))
+        fabItems.addAll(
+            listOf(
+                FABMenuItem(
+                    icon = StrokeIcons.Braces,
+                    label = stringResource(R.string.browser_action_snippets),
+                    onClick = onNavigateToSnippets
+                ),
+                FABMenuItem(
+                    icon = StrokeIcons.File,
+                    label = stringResource(R.string.browser_fab_samples),
+                    onClick = onNavigateToSamples
+                ),
+                FABMenuItem(
+                    icon = StrokeIcons.Clock,
+                    label = stringResource(R.string.browser_history_content_desc),
+                    onClick = onNavigateToHistory
+                )
+            )
+        )
         BrandFAB(
             items = fabItems,
             modifier = Modifier
@@ -2666,8 +2911,8 @@ fun FileBrowserScreen(
                 .navigationBarsPadding()
                 .padding(
                     end = PrototypeSpacing.FABRight,
-                    bottom = 16.dp,
-                ),
+                    bottom = 16.dp
+                )
         )
     }
 }
@@ -2677,30 +2922,26 @@ fun FileBrowserScreen(
 // ============================================================
 
 @Composable
-private fun SectionMonoHeader(
-    title: String,
-    modifier: Modifier = Modifier,
-    count: Int? = null,
-) {
+private fun SectionMonoHeader(title: String, modifier: Modifier = Modifier, count: Int? = null) {
     val muted = PrototypeTokens.muted
     Row(
         modifier = modifier
             .fillMaxWidth()
             .padding(horizontal = PrototypeSpacing.ScreenHorizontal)
             .padding(top = 16.dp, bottom = 8.dp),
-        verticalAlignment = Alignment.CenterVertically,
+        verticalAlignment = Alignment.CenterVertically
     ) {
         Text(
             text = title,
             style = MonoLabelStyle,
-            color = muted,
+            color = muted
         )
         if (count != null) {
             Spacer(modifier = Modifier.width(6.dp))
             Text(
                 text = count.toString(),
                 style = MonoLabelStyle,
-                color = muted.copy(alpha = 0.6f),
+                color = muted.copy(alpha = 0.6f)
             )
         }
     }
@@ -2711,11 +2952,7 @@ private fun SectionMonoHeader(
 // ============================================================
 
 @Composable
-private fun BreadcrumbBar(
-    path: String,
-    onNavigateUp: () -> Unit,
-    modifier: Modifier = Modifier,
-) {
+private fun BreadcrumbBar(path: String, onNavigateUp: () -> Unit, modifier: Modifier = Modifier) {
     val muted = PrototypeTokens.muted
     val fgSoft = PrototypeTokens.fgSoft
     val surface = PrototypeTokens.surface
@@ -2733,19 +2970,19 @@ private fun BreadcrumbBar(
             .clickable { onNavigateUp() }
             .padding(horizontal = 10.dp, vertical = 6.dp),
         verticalAlignment = Alignment.CenterVertically,
-        horizontalArrangement = Arrangement.spacedBy(6.dp),
+        horizontalArrangement = Arrangement.spacedBy(6.dp)
     ) {
         StrokeIcon(
             icon = StrokeIcons.FolderFilled,
             contentDescription = null,
             tint = PrototypeTokens.folder,
-            modifier = Modifier.size(14.dp),
+            modifier = Modifier.size(14.dp)
         )
         StrokeIcon(
             icon = StrokeIcons.ChevronRight,
             contentDescription = null,
             tint = muted.copy(alpha = 0.4f),
-            modifier = Modifier.size(12.dp),
+            modifier = Modifier.size(12.dp)
         )
         Text(
             text = displayName,
@@ -2753,7 +2990,7 @@ private fun BreadcrumbBar(
             color = fgSoft,
             maxLines = 1,
             overflow = TextOverflow.Ellipsis,
-            modifier = Modifier.weight(1f, fill = false),
+            modifier = Modifier.weight(1f, fill = false)
         )
     }
 }
@@ -2763,36 +3000,34 @@ private fun BreadcrumbBar(
 // ============================================================
 
 @Composable
-private fun EmptyFilesContent(
-    modifier: Modifier = Modifier,
-) {
+private fun EmptyFilesContent(modifier: Modifier = Modifier) {
     val muted = PrototypeTokens.muted
     val fgSoft = PrototypeTokens.fgSoft
 
     Column(
         modifier = modifier,
         horizontalAlignment = Alignment.CenterHorizontally,
-        verticalArrangement = Arrangement.Center,
+        verticalArrangement = Arrangement.Center
     ) {
         Icon(
             imageVector = Icons.Filled.FolderOff,
             contentDescription = null,
             tint = muted.copy(alpha = 0.35f),
-            modifier = Modifier.size(64.dp),
+            modifier = Modifier.size(64.dp)
         )
         Spacer(modifier = Modifier.height(16.dp))
         Text(
             text = stringResource(R.string.browser_no_files_yet),
             style = DraftPeekTypography.titleMedium.copy(
-                fontWeight = FontWeight.SemiBold,
+                fontWeight = FontWeight.SemiBold
             ),
-            color = fgSoft,
+            color = fgSoft
         )
         Spacer(modifier = Modifier.height(6.dp))
         Text(
             text = stringResource(R.string.browser_no_files_hint),
             style = DraftPeekTypography.bodySmall,
-            color = muted,
+            color = muted
         )
     }
 }
@@ -2809,7 +3044,7 @@ private fun SmallFloatingActionMenuItem(
     onClick: () -> Unit,
     surface: Color,
     fg: Color,
-    border: Color,
+    border: Color
 ) {
     Row(
         modifier = Modifier
@@ -2821,28 +3056,34 @@ private fun SmallFloatingActionMenuItem(
             .clickable(onClick = onClick)
             .padding(horizontal = 16.dp),
         verticalAlignment = Alignment.CenterVertically,
-        horizontalArrangement = Arrangement.Center,
+        horizontalArrangement = Arrangement.Center
     ) {
         Icon(
             imageVector = icon,
             contentDescription = null,
             tint = fg,
-            modifier = Modifier.size(16.dp),
+            modifier = Modifier.size(16.dp)
         )
         Spacer(modifier = Modifier.width(6.dp))
         Text(
             text = label,
             style = DraftPeekTypography.bodySmall.copy(
                 color = fg,
-                fontWeight = FontWeight.Medium,
-            ),
+                fontWeight = FontWeight.Medium
+            )
         )
     }
 }
 
 private fun formatRecentFileMeta(recentFile: RecentFile): String {
     val parts = mutableListOf<String>()
-    parts.add(DateUtils.getRelativeTimeSpanString(recentFile.lastOpenedAt, System.currentTimeMillis(), DateUtils.MINUTE_IN_MILLIS).toString())
+    parts.add(
+        DateUtils.getRelativeTimeSpanString(
+            recentFile.lastOpenedAt,
+            System.currentTimeMillis(),
+            DateUtils.MINUTE_IN_MILLIS
+        ).toString()
+    )
     return parts.joinToString(" · ")
 }
 
@@ -2858,17 +3099,14 @@ private fun RecentFile.toFileItem(): FileItem = FileItem(
     mimeType = "",
     extension = fileName.substringAfterLast('.', ""),
     isPinned = isFavorite,
-    isBookmarked = false,
+    isBookmarked = false
 )
 
 /**
  * Map a set of pinned URIs to [FileItem] objects by looking up matching items
  * in the internal files list first, then falling back to URI-based construction.
  */
-private fun mapPinnedUrisToFileItems(
-    pinnedUris: Set<String>,
-    internalFiles: List<FileItem>,
-): List<FileItem> {
+private fun mapPinnedUrisToFileItems(pinnedUris: Set<String>, internalFiles: List<FileItem>): List<FileItem> {
     val internalByUri = internalFiles.associateBy { it.uri.toString() }
     return pinnedUris.mapNotNull { uriString ->
         internalByUri[uriString] ?: run {
@@ -2881,7 +3119,7 @@ private fun mapPinnedUrisToFileItems(
                 isDirectory = false,
                 size = 0L,
                 extension = name.substringAfterLast('.', ""),
-                isPinned = true,
+                isPinned = true
             )
         }
     }
@@ -2907,7 +3145,7 @@ private fun FoldableBrowserLayout(
     selectedItems: Set<String> = emptySet(),
     currentDirectoryUri: String = "",
     onSaveExternalFile: (FileItem) -> Unit = {},
-    onOpenTerminal: ((FileItem) -> Unit)? = null,
+    onOpenTerminal: ((FileItem) -> Unit)? = null
 ) {
     val windowSize = LocalWindowInfo.current.containerSize
 
@@ -2915,7 +3153,9 @@ private fun FoldableBrowserLayout(
         val screenHeightPx = windowSize.height
         val splitRatio = if (screenHeightPx > 0) {
             foldInfo.bounds.top.toFloat() / screenHeightPx
-        } else 0.5f
+        } else {
+            0.5f
+        }
 
         Column(modifier = modifier.fillMaxSize()) {
             FileListContent(
@@ -2952,7 +3192,9 @@ private fun FoldableBrowserLayout(
         val screenWidthPx = windowSize.width
         val splitRatio = if (screenWidthPx > 0) {
             foldInfo.bounds.left.toFloat() / screenWidthPx
-        } else 0.4f
+        } else {
+            0.4f
+        }
 
         Row(modifier = modifier.fillMaxSize()) {
             FileListContent(
@@ -3011,7 +3253,7 @@ private fun TwoPaneFileBrowser(
     selectedItems: Set<String> = emptySet(),
     currentDirectoryUri: String = "",
     onSaveExternalFile: (FileItem) -> Unit = {},
-    onOpenTerminal: ((FileItem) -> Unit)? = null,
+    onOpenTerminal: ((FileItem) -> Unit)? = null
 ) {
     SplitScreenLayout(
         startContent = {
@@ -3045,16 +3287,12 @@ private fun TwoPaneFileBrowser(
         modifier = modifier,
         initialSplitRatio = 0.4f,
         minSplitRatio = 0.25f,
-        maxSplitRatio = 0.75f,
+        maxSplitRatio = 0.75f
     )
 }
 
 @Composable
-private fun FilePreviewPane(
-    selectedFile: FileItem?,
-    onOpenFile: (FileItem) -> Unit,
-    modifier: Modifier = Modifier,
-) {
+private fun FilePreviewPane(selectedFile: FileItem?, onOpenFile: (FileItem) -> Unit, modifier: Modifier = Modifier) {
     Box(
         modifier = modifier
             .fillMaxSize()
@@ -3085,9 +3323,18 @@ private fun FilePreviewPane(
                 verticalArrangement = Arrangement.spacedBy(12.dp)
             ) {
                 Icon(
-                    imageVector = if (selectedFile.isDirectory) Icons.Filled.Folder
-                    else Icons.Filled.Description,
-                    contentDescription = if (selectedFile.isDirectory) stringResource(R.string.browser_content_desc_folder) else stringResource(R.string.browser_content_desc_file),
+                    imageVector = if (selectedFile.isDirectory) {
+                        Icons.Filled.Folder
+                    } else {
+                        Icons.Filled.Description
+                    },
+                    contentDescription = if (selectedFile.isDirectory) {
+                        stringResource(
+                            R.string.browser_content_desc_folder
+                        )
+                    } else {
+                        stringResource(R.string.browser_content_desc_file)
+                    },
                     modifier = Modifier.size(48.dp),
                     tint = if (selectedFile.isDirectory) {
                         PrototypeTokens.folder
@@ -3097,11 +3344,14 @@ private fun FilePreviewPane(
                 )
                 Text(
                     text = selectedFile.name,
-                    style = DraftPeekTypography.headlineSmall,
+                    style = DraftPeekTypography.headlineSmall
                 )
                 HorizontalDivider()
                 if (!selectedFile.isDirectory) {
-                    FileInfoRow(label = stringResource(R.string.browser_label_size), value = formatFileSize(selectedFile.size))
+                    FileInfoRow(
+                        label = stringResource(R.string.browser_label_size),
+                        value = formatFileSize(selectedFile.size)
+                    )
                     if (selectedFile.lastModified > 0) {
                         FileInfoRow(
                             label = stringResource(R.string.browser_label_modified_time),
@@ -3116,7 +3366,10 @@ private fun FilePreviewPane(
                         FileInfoRow(label = stringResource(R.string.browser_label_type), value = selectedFile.mimeType)
                     }
                     if (selectedFile.extension.isNotEmpty()) {
-                        FileInfoRow(label = stringResource(R.string.browser_label_extension), value = ".${selectedFile.extension}")
+                        FileInfoRow(
+                            label = stringResource(R.string.browser_label_extension),
+                            value = ".${selectedFile.extension}"
+                        )
                     }
                 }
                 Spacer(modifier = Modifier.weight(1f))
@@ -3124,7 +3377,7 @@ private fun FilePreviewPane(
                     BrandFilledButton(
                         text = stringResource(R.string.browser_action_open_in_editor),
                         onClick = { onOpenFile(selectedFile) },
-                        modifier = Modifier.fillMaxWidth(),
+                        modifier = Modifier.fillMaxWidth()
                     )
                 }
             }
@@ -3148,7 +3401,7 @@ private fun FileInfoRow(label: String, value: String) {
         )
         Text(
             text = value,
-            style = DraftPeekTypography.bodyMedium,
+            style = DraftPeekTypography.bodyMedium
         )
     }
 }
@@ -3158,7 +3411,7 @@ private fun NoPermissionContent(
     onSelectDirectory: () -> Unit,
     onOpenFile: () -> Unit,
     onNavigateToSamples: () -> Unit,
-    modifier: Modifier = Modifier,
+    modifier: Modifier = Modifier
 ) {
     val elevated = PrototypeTokens.elevated
     val surface = PrototypeTokens.surface
@@ -3173,7 +3426,7 @@ private fun NoPermissionContent(
         modifier = modifier
             .fillMaxSize()
             .padding(vertical = 12.dp),
-        horizontalAlignment = Alignment.CenterHorizontally,
+        horizontalAlignment = Alignment.CenterHorizontally
     ) {
         Column(
             modifier = Modifier
@@ -3182,20 +3435,20 @@ private fun NoPermissionContent(
                 .background(elevated)
                 .border(1.dp, border, PrototypeShapes.Card)
                 .padding(20.dp),
-            horizontalAlignment = Alignment.CenterHorizontally,
+            horizontalAlignment = Alignment.CenterHorizontally
         ) {
             Box(
                 modifier = Modifier
                     .size(48.dp)
                     .clip(RoundedCornerShape(14.dp))
                     .background(accentSoft),
-                contentAlignment = Alignment.Center,
+                contentAlignment = Alignment.Center
             ) {
                 Icon(
                     imageVector = Icons.Filled.FolderOpen,
                     contentDescription = null,
                     tint = accent,
-                    modifier = Modifier.size(24.dp),
+                    modifier = Modifier.size(24.dp)
                 )
             }
             Spacer(modifier = Modifier.height(12.dp))
@@ -3204,14 +3457,14 @@ private fun NoPermissionContent(
                 style = DraftPeekTypography.bodyLarge.copy(
                     color = fg,
                     fontWeight = FontWeight.SemiBold,
-                    fontSize = 15.sp,
-                ),
+                    fontSize = 15.sp
+                )
             )
             Spacer(modifier = Modifier.height(6.dp))
             Text(
                 text = stringResource(R.string.browser_open_from_device_desc),
                 style = DraftPeekTypography.bodySmall.copy(color = muted, lineHeight = 18.sp),
-                textAlign = TextAlign.Center,
+                textAlign = TextAlign.Center
             )
             Spacer(modifier = Modifier.height(14.dp))
             Box(
@@ -3221,15 +3474,15 @@ private fun NoPermissionContent(
                     .clip(PrototypeShapes.Medium)
                     .background(accent)
                     .clickable { onSelectDirectory() },
-                contentAlignment = Alignment.Center,
+                contentAlignment = Alignment.Center
             ) {
                 Text(
                     text = stringResource(R.string.browser_choose_folder),
                     style = DraftPeekTypography.bodyMedium.copy(
                         color = Color.White,
                         fontWeight = FontWeight.SemiBold,
-                        fontSize = 13.sp,
-                    ),
+                        fontSize = 13.sp
+                    )
                 )
             }
         }
@@ -3240,22 +3493,18 @@ private fun NoPermissionContent(
                 .clip(RoundedCornerShape(10.dp))
                 .background(info.copy(alpha = 0.06f))
                 .border(1.dp, info.copy(alpha = 0.12f), RoundedCornerShape(10.dp))
-                .padding(12.dp),
+                .padding(12.dp)
         ) {
             Text(
                 text = stringResource(R.string.browser_external_readonly_hint),
-                style = DraftPeekTypography.bodySmall.copy(color = info, lineHeight = 18.sp),
+                style = DraftPeekTypography.bodySmall.copy(color = info, lineHeight = 18.sp)
             )
         }
     }
 }
 
 @Composable
-private fun ErrorContent(
-    message: String,
-    onRetry: () -> Unit,
-    modifier: Modifier = Modifier
-) {
+private fun ErrorContent(message: String, onRetry: () -> Unit, modifier: Modifier = Modifier) {
     Column(
         modifier = modifier
             .fillMaxSize()
@@ -3267,46 +3516,43 @@ private fun ErrorContent(
             imageVector = Icons.Filled.FolderOff,
             contentDescription = null,
             tint = PrototypeTokens.error.copy(alpha = 0.5f),
-            modifier = Modifier.size(48.dp),
+            modifier = Modifier.size(48.dp)
         )
         Spacer(modifier = Modifier.height(12.dp))
         Text(
             text = message,
             style = DraftPeekTypography.bodyMedium,
             color = PrototypeTokens.error,
-            textAlign = TextAlign.Center,
+            textAlign = TextAlign.Center
         )
         Spacer(modifier = Modifier.height(16.dp))
         BrandFilledButton(
             text = stringResource(R.string.browser_action_retry),
-            onClick = onRetry,
+            onClick = onRetry
         )
     }
 }
 
 @Composable
-private fun SectionHeader(
-    title: String,
-    action: @Composable (() -> Unit)? = null,
-) {
+private fun SectionHeader(title: String, action: @Composable (() -> Unit)? = null) {
     Row(
         modifier = Modifier
             .fillMaxWidth()
             .padding(horizontal = 16.dp, vertical = 10.dp),
-        verticalAlignment = Alignment.CenterVertically,
+        verticalAlignment = Alignment.CenterVertically
     ) {
         Box(
             modifier = Modifier
                 .width(3.dp)
                 .height(16.dp)
-                .background(PrototypeTokens.accent),
+                .background(PrototypeTokens.accent)
         )
         Spacer(modifier = Modifier.width(8.dp))
         Text(
             text = title,
             style = DraftPeekTypography.titleMedium,
             color = PrototypeTokens.accent,
-            modifier = Modifier.weight(1f),
+            modifier = Modifier.weight(1f)
         )
         action?.invoke()
     }
@@ -3332,7 +3578,7 @@ private fun FileListContent(
     currentDirectoryUri: String = "",
     layoutMode: LayoutMode = LayoutMode.COMPACT,
     onSaveExternalFile: (FileItem) -> Unit = {},
-    onOpenTerminal: ((FileItem) -> Unit)? = null,
+    onOpenTerminal: ((FileItem) -> Unit)? = null
 ) {
     val useGrid = layoutMode != LayoutMode.COMPACT && compareSelection.isEmpty()
 
@@ -3342,11 +3588,15 @@ private fun FileListContent(
             modifier = modifier.fillMaxSize(),
             horizontalArrangement = Arrangement.spacedBy(4.dp),
             verticalArrangement = Arrangement.spacedBy(4.dp),
-            contentPadding = androidx.compose.foundation.layout.PaddingValues(horizontal = 12.dp, vertical = 4.dp),
+            contentPadding = androidx.compose.foundation.layout.PaddingValues(horizontal = 12.dp, vertical = 4.dp)
         ) {
             if (isGitRepo && gitFileStatuses.isNotEmpty()) {
-                item(span = { GridItemSpan(maxLineSpan) }) { SectionHeader(stringResource(R.string.browser_section_git_changes)) }
-                items(gitFileStatuses, key = { "git_${it.filePath}" }, span = { GridItemSpan(maxLineSpan) }) { gitStatus ->
+                item(span = {
+                    GridItemSpan(maxLineSpan)
+                }) { SectionHeader(stringResource(R.string.browser_section_git_changes)) }
+                items(gitFileStatuses, key = {
+                    "git_${it.filePath}"
+                }, span = { GridItemSpan(maxLineSpan) }) { gitStatus ->
                     GitStatusItemComposable(gitFileStatus = gitStatus)
                 }
                 item(span = { GridItemSpan(maxLineSpan) }) { HorizontalDivider() }
@@ -3358,7 +3608,7 @@ private fun FileListContent(
                         modifier = Modifier
                             .fillMaxWidth()
                             .padding(vertical = 64.dp),
-                        contentAlignment = Alignment.Center,
+                        contentAlignment = Alignment.Center
                     ) {
                         EmptyFilesContent()
                     }
@@ -3373,7 +3623,7 @@ private fun FileListContent(
                         onTogglePin = onTogglePin,
                         onToggleBookmark = onToggleBookmark,
                         currentDirectoryUri = currentDirectoryUri,
-                        onOpenTerminal = onOpenTerminal,
+                        onOpenTerminal = onOpenTerminal
                     )
                 }
             }
@@ -3381,7 +3631,7 @@ private fun FileListContent(
     } else {
         LazyColumn(
             modifier = modifier.fillMaxSize(),
-            contentPadding = androidx.compose.foundation.layout.PaddingValues(bottom = 96.dp),
+            contentPadding = androidx.compose.foundation.layout.PaddingValues(bottom = 96.dp)
         ) {
             if (isGitRepo && gitFileStatuses.isNotEmpty()) {
                 item { SectionHeader(stringResource(R.string.browser_section_git_changes)) }
@@ -3397,7 +3647,7 @@ private fun FileListContent(
                         modifier = Modifier
                             .fillMaxWidth()
                             .padding(vertical = 64.dp),
-                        contentAlignment = Alignment.Center,
+                        contentAlignment = Alignment.Center
                     ) {
                         EmptyFilesContent()
                     }
@@ -3411,7 +3661,7 @@ private fun FileListContent(
                     item {
                         SectionMonoHeader(
                             title = stringResource(R.string.browser_folders_section),
-                            count = dirs.size,
+                            count = dirs.size
                         )
                     }
                     items(dirs, key = { it.uri.toString() }) { item ->
@@ -3424,7 +3674,7 @@ private fun FileListContent(
                                 .fillMaxWidth()
                                 .combinedClickable(
                                     onClick = { onFileClick(item) },
-                                    onLongClick = { showTerminalMenu = true },
+                                    onLongClick = { showTerminalMenu = true }
                                 )
                         ) {
                             BrandDirectoryCard(
@@ -3433,13 +3683,13 @@ private fun FileListContent(
                                 modifier = Modifier
                                     .fillMaxWidth()
                                     .padding(horizontal = PrototypeSpacing.ScreenHorizontal, vertical = 3.dp),
-                                itemCount = null,
+                                itemCount = null
                             )
                         }
                         DropdownMenu(
                             expanded = showTerminalMenu,
                             onDismissRequest = { showTerminalMenu = false },
-                            containerColor = MaterialTheme.colorScheme.surface,
+                            containerColor = MaterialTheme.colorScheme.surface
                         ) {
                             DropdownMenuItem(
                                 text = { Text(stringResource(R.string.browser_action_open_terminal)) },
@@ -3447,14 +3697,14 @@ private fun FileListContent(
                                     StrokeIcon(
                                         icon = StrokeIcons.Terminal,
                                         contentDescription = null,
-                                        tint = if (localPath != null) PrototypeTokens.accent else PrototypeTokens.muted,
+                                        tint = if (localPath != null) PrototypeTokens.accent else PrototypeTokens.muted
                                     )
                                 },
                                 enabled = localPath != null,
                                 onClick = {
                                     showTerminalMenu = false
                                     onOpenTerminal?.invoke(item)
-                                },
+                                }
                             )
                         }
                     }
@@ -3464,7 +3714,7 @@ private fun FileListContent(
                     item {
                         SectionMonoHeader(
                             title = stringResource(R.string.browser_files_section),
-                            count = nonDirs.size,
+                            count = nonDirs.size
                         )
                     }
                     items(nonDirs, key = { it.uri.toString() }) { item ->
@@ -3475,7 +3725,7 @@ private fun FileListContent(
                                 item = item,
                                 onClick = onFileClick,
                                 onSave = onSaveExternalFile,
-                                modifier = Modifier.padding(horizontal = PrototypeSpacing.ScreenHorizontal),
+                                modifier = Modifier.padding(horizontal = PrototypeSpacing.ScreenHorizontal)
                             )
                         } else {
                             FileItemComposable(
@@ -3491,7 +3741,7 @@ private fun FileListContent(
                                 onMoveTo = onMoveTo,
                                 onMultiSelect = onMultiSelect,
                                 onToggleSelect = onToggleSelect,
-                                currentDirectoryUri = currentDirectoryUri,
+                                currentDirectoryUri = currentDirectoryUri
                             )
                         }
                     }
@@ -3502,11 +3752,7 @@ private fun FileListContent(
 }
 
 @Composable
-private fun StaggeredAppearance(
-    index: Int,
-    delayMillis: Int = 50,
-    content: @Composable () -> Unit,
-) {
+private fun StaggeredAppearance(index: Int, delayMillis: Int = 50, content: @Composable () -> Unit) {
     var visible by remember { mutableStateOf(false) }
     LaunchedEffect(Unit) {
         delay(delayMillis.toLong() * index.coerceAtMost(20))
@@ -3515,34 +3761,32 @@ private fun StaggeredAppearance(
     val alpha by animateFloatAsState(
         targetValue = if (visible) 1f else 0f,
         animationSpec = tween(durationMillis = 300),
-        label = "stagger_alpha",
+        label = "stagger_alpha"
     )
     val offsetY by animateFloatAsState(
         targetValue = if (visible) 0f else 20f,
         animationSpec = tween(durationMillis = 300, easing = FastOutSlowInEasing),
-        label = "stagger_offset",
+        label = "stagger_offset"
     )
     Box(
         modifier = Modifier.graphicsLayer {
             this.alpha = alpha
             this.translationY = offsetY
-            this.clip = false   // 允许内部阴影/缩放溢出
+            this.clip = false // 允许内部阴影/缩放溢出
         }
     ) {
         content()
     }
 }
 
-private fun isCodeExtension(ext: String): Boolean {
-    return ext.lowercase() in CODE_EXTENSIONS
-}
+private fun isCodeExtension(ext: String): Boolean = ext.lowercase() in CODE_EXTENSIONS
 
 @Composable
 private fun ExternalFileCard(
     item: FileItem,
     onClick: (FileItem) -> Unit,
     onSave: (FileItem) -> Unit,
-    modifier: Modifier = Modifier,
+    modifier: Modifier = Modifier
 ) {
     val extension = item.extension
     val isDark = LocalDarkTheme.current
@@ -3558,21 +3802,21 @@ private fun ExternalFileCard(
         colors = CardDefaults.cardColors(containerColor = PrototypeTokens.surface),
         modifier = modifier
             .fillMaxWidth()
-            .padding(vertical = 3.dp),
+            .padding(vertical = 3.dp)
     ) {
         Row(
             modifier = Modifier
                 .fillMaxWidth()
                 .clickable { onClick(item) }
                 .padding(horizontal = 14.dp, vertical = 12.dp),
-            verticalAlignment = Alignment.CenterVertically,
+            verticalAlignment = Alignment.CenterVertically
         ) {
             Box(
                 modifier = Modifier
                     .width(3.dp)
                     .height(24.dp)
                     .clip(RoundedCornerShape(2.dp))
-                    .background(typeColor),
+                    .background(typeColor)
             )
             Spacer(modifier = Modifier.width(12.dp))
             Box(
@@ -3580,31 +3824,48 @@ private fun ExternalFileCard(
                     .size(28.dp)
                     .clip(RoundedCornerShape(6.dp))
                     .background(typeColor),
-                contentAlignment = Alignment.Center,
+                contentAlignment = Alignment.Center
             ) {
                 Text(
                     text = extension.uppercase().take(2),
-                    style = MonoLabelStyle.copy(color = Color.White, fontSize = 9.sp, fontWeight = FontWeight.SemiBold, letterSpacing = 0.02.sp),
+                    style = MonoLabelStyle.copy(
+                        color = Color.White,
+                        fontSize = 9.sp,
+                        fontWeight = FontWeight.SemiBold,
+                        letterSpacing = 0.02.sp
+                    )
                 )
             }
             Spacer(modifier = Modifier.width(12.dp))
             Column(modifier = Modifier.weight(1f)) {
-                Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(6.dp)) {
+                Row(
+                    verticalAlignment = Alignment.CenterVertically,
+                    horizontalArrangement = Arrangement.spacedBy(6.dp)
+                ) {
                     Text(
                         text = item.name,
-                        style = DraftPeekTypography.bodyMedium.copy(color = fg, fontWeight = FontWeight.Medium, fontSize = 13.sp),
+                        style = DraftPeekTypography.bodyMedium.copy(
+                            color = fg,
+                            fontWeight = FontWeight.Medium,
+                            fontSize = 13.sp
+                        ),
                         maxLines = 1,
-                        overflow = TextOverflow.Ellipsis,
+                        overflow = TextOverflow.Ellipsis
                     )
                     Box(
                         modifier = Modifier
                             .clip(RoundedCornerShape(4.dp))
                             .background(warning.copy(alpha = 0.12f))
-                            .padding(horizontal = 8.dp, vertical = 2.dp),
+                            .padding(horizontal = 8.dp, vertical = 2.dp)
                     ) {
                         Text(
                             text = "EXT",
-                            style = CodeTextStyle.copy(color = warning, fontSize = 9.sp, fontWeight = FontWeight.SemiBold, letterSpacing = 0.04.sp),
+                            style = CodeTextStyle.copy(
+                                color = warning,
+                                fontSize = 9.sp,
+                                fontWeight = FontWeight.SemiBold,
+                                letterSpacing = 0.04.sp
+                            )
                         )
                     }
                 }
@@ -3617,7 +3878,7 @@ private fun ExternalFileCard(
                     style = FileMetaStyle,
                     color = muted,
                     maxLines = 1,
-                    overflow = TextOverflow.Ellipsis,
+                    overflow = TextOverflow.Ellipsis
                 )
             }
             Box(
@@ -3625,11 +3886,11 @@ private fun ExternalFileCard(
                     .clip(RoundedCornerShape(6.dp))
                     .background(accentSoft)
                     .clickable { onSave(item) }
-                    .padding(horizontal = 10.dp, vertical = 6.dp),
+                    .padding(horizontal = 10.dp, vertical = 6.dp)
             ) {
                 Text(
                     text = stringResource(R.string.browser_action_save),
-                    style = CodeTextStyle.copy(color = accent, fontWeight = FontWeight.SemiBold, fontSize = 10.sp),
+                    style = CodeTextStyle.copy(color = accent, fontWeight = FontWeight.SemiBold, fontSize = 10.sp)
                 )
             }
         }
@@ -3655,22 +3916,30 @@ fun FileItemComposable(
     currentDirectoryUri: String = "",
     onDragStart: (() -> Unit)? = null,
     onDrag: ((Float) -> Unit)? = null,
-    onDragEnd: (() -> Unit)? = null,
+    onDragEnd: (() -> Unit)? = null
 ) {
     var showContextMenu by remember { mutableStateOf(false) }
     val extension = item.extension
     val isInternalFile = !item.isExternal && !item.isDirectory
 
-    val displayName = if (compareIndex > 0) "${compareIndex}. ${item.name}" else item.name
+    val displayName = if (compareIndex > 0) "$compareIndex. ${item.name}" else item.name
     val metaText = if (!item.isDirectory) {
         buildString {
             append(formatFileSize(item.size))
             if (item.lastModified > 0) {
                 append("  ")
-                append(DateUtils.getRelativeTimeSpanString(item.lastModified, System.currentTimeMillis(), DateUtils.MINUTE_IN_MILLIS))
+                append(
+                    DateUtils.getRelativeTimeSpanString(
+                        item.lastModified,
+                        System.currentTimeMillis(),
+                        DateUtils.MINUTE_IN_MILLIS
+                    )
+                )
             }
         }
-    } else ""
+    } else {
+        ""
+    }
 
     if (item.isDirectory) {
         BrandDirectoryCard(
@@ -3679,7 +3948,7 @@ fun FileItemComposable(
             modifier = modifier
                 .fillMaxWidth()
                 .padding(horizontal = PrototypeSpacing.ScreenHorizontal, vertical = 3.dp),
-            itemCount = null,
+            itemCount = null
         )
     } else {
         BrandFileCard(
@@ -3696,9 +3965,16 @@ fun FileItemComposable(
             },
             onLongClick = if (isMultiSelectMode && onToggleSelect != null) {
                 { onToggleSelect.invoke(item.uri.toString()) }
-            } else if (onTogglePin != null || onToggleBookmark != null || (onDelete != null && isInternalFile) || onMoveTo != null || onMultiSelect != null) {
+            } else if (onTogglePin != null ||
+                onToggleBookmark != null ||
+                (onDelete != null && isInternalFile) ||
+                onMoveTo != null ||
+                onMultiSelect != null
+            ) {
                 { showContextMenu = true }
-            } else null,
+            } else {
+                null
+            },
             isPinned = item.isPinned,
             isSelected = selected || compareIndex > 0 || isItemSelected,
             leadingContent = if (isMultiSelectMode) {
@@ -3708,9 +3984,9 @@ fun FileItemComposable(
                         onCheckedChange = { onToggleSelect?.invoke(item.uri.toString()) },
                         colors = CheckboxDefaults.colors(
                             checkedColor = PrototypeTokens.accent,
-                            uncheckedColor = PrototypeTokens.muted.copy(alpha = 0.6f),
+                            uncheckedColor = PrototypeTokens.muted.copy(alpha = 0.6f)
                         ),
-                        modifier = Modifier.size(20.dp),
+                        modifier = Modifier.size(20.dp)
                     )
                 }
             } else if (item.isPinned || item.isBookmarked) {
@@ -3720,7 +3996,7 @@ fun FileItemComposable(
                             imageVector = Icons.Filled.Bookmark,
                             contentDescription = stringResource(R.string.browser_content_desc_bookmarked),
                             tint = PrototypeTokens.accent,
-                            modifier = Modifier.size(16.dp),
+                            modifier = Modifier.size(16.dp)
                         )
                     }
                     if (item.isPinned) {
@@ -3729,18 +4005,20 @@ fun FileItemComposable(
                             imageVector = Icons.Filled.PushPin,
                             contentDescription = stringResource(R.string.browser_content_desc_pinned),
                             tint = PrototypeTokens.accent,
-                            modifier = Modifier.size(16.dp),
+                            modifier = Modifier.size(16.dp)
                         )
                     }
                 }
-            } else null,
+            } else {
+                null
+            },
             trailingContent = {
                 if (item.isReadOnly) {
                     Icon(
                         imageVector = Icons.Filled.Lock,
                         contentDescription = stringResource(R.string.browser_content_desc_read_only),
                         tint = PrototypeTokens.muted.copy(alpha = 0.6f),
-                        modifier = Modifier.size(14.dp),
+                        modifier = Modifier.size(14.dp)
                     )
                     Spacer(modifier = Modifier.width(4.dp))
                 }
@@ -3770,7 +4048,7 @@ fun FileItemComposable(
                                 },
                                 onDragCancel = {
                                     onDragEnd?.invoke()
-                                },
+                                }
                             )
                         }
                 ) {
@@ -3778,7 +4056,7 @@ fun FileItemComposable(
                         imageVector = Icons.Filled.DragHandle,
                         contentDescription = stringResource(R.string.browser_action_drag_reorder),
                         tint = PrototypeTokens.muted.copy(alpha = 0.6f),
-                        modifier = Modifier.size(22.dp),
+                        modifier = Modifier.size(22.dp)
                     )
                 }
                 Spacer(modifier = Modifier.width(4.dp))
@@ -3786,48 +4064,88 @@ fun FileItemComposable(
                     icon = StrokeIcons.ChevronRight,
                     contentDescription = stringResource(R.string.browser_action_open_in_editor),
                     tint = PrototypeTokens.muted.copy(alpha = 0.3f),
-                    modifier = Modifier.size(16.dp),
+                    modifier = Modifier.size(16.dp)
                 )
-            },
+            }
         )
     }
 
-    if (!item.isDirectory && (onTogglePin != null || onToggleBookmark != null || (onDelete != null && isInternalFile) || onMoveTo != null || onMultiSelect != null)) {
+    if (!item.isDirectory &&
+        (
+            onTogglePin != null ||
+                onToggleBookmark != null ||
+                (onDelete != null && isInternalFile) ||
+                onMoveTo != null ||
+                onMultiSelect != null
+            )
+    ) {
         DropdownMenu(
             expanded = showContextMenu,
             onDismissRequest = { showContextMenu = false },
-            containerColor = MaterialTheme.colorScheme.surface,
+            containerColor = MaterialTheme.colorScheme.surface
         ) {
             if (onTogglePin != null) {
                 DropdownMenuItem(
-                    text = { Text(if (item.isPinned) stringResource(R.string.browser_action_unpin) else stringResource(R.string.browser_action_pin)) },
+                    text = {
+                        Text(
+                            if (item.isPinned) {
+                                stringResource(
+                                    R.string.browser_action_unpin
+                                )
+                            } else {
+                                stringResource(R.string.browser_action_pin)
+                            }
+                        )
+                    },
                     leadingIcon = {
                         Icon(
                             imageVector = if (item.isPinned) Icons.Outlined.PushPin else Icons.Filled.PushPin,
-                            contentDescription = if (item.isPinned) stringResource(R.string.browser_action_unpin) else stringResource(R.string.browser_action_pin),
-                            tint = PrototypeTokens.accent,
+                            contentDescription = if (item.isPinned) {
+                                stringResource(
+                                    R.string.browser_action_unpin
+                                )
+                            } else {
+                                stringResource(R.string.browser_action_pin)
+                            },
+                            tint = PrototypeTokens.accent
                         )
                     },
                     onClick = {
                         showContextMenu = false
                         onTogglePin.invoke(item.uri.toString())
-                    },
+                    }
                 )
             }
             if (onToggleBookmark != null) {
                 DropdownMenuItem(
-                    text = { Text(if (item.isBookmarked) stringResource(R.string.browser_action_unbookmark) else stringResource(R.string.browser_action_bookmark)) },
+                    text = {
+                        Text(
+                            if (item.isBookmarked) {
+                                stringResource(
+                                    R.string.browser_action_unbookmark
+                                )
+                            } else {
+                                stringResource(R.string.browser_action_bookmark)
+                            }
+                        )
+                    },
                     leadingIcon = {
                         Icon(
                             imageVector = if (item.isBookmarked) Icons.Filled.Bookmark else Icons.Outlined.BookmarkBorder,
-                            contentDescription = if (item.isBookmarked) stringResource(R.string.browser_action_unbookmark) else stringResource(R.string.browser_action_bookmark),
-                            tint = PrototypeTokens.accent,
+                            contentDescription = if (item.isBookmarked) {
+                                stringResource(
+                                    R.string.browser_action_unbookmark
+                                )
+                            } else {
+                                stringResource(R.string.browser_action_bookmark)
+                            },
+                            tint = PrototypeTokens.accent
                         )
                     },
                     onClick = {
                         showContextMenu = false
                         onToggleBookmark.invoke(item.uri.toString(), item.name, currentDirectoryUri)
-                    },
+                    }
                 )
             }
             if (onMoveTo != null && isInternalFile) {
@@ -3837,13 +4155,13 @@ fun FileItemComposable(
                         Icon(
                             imageVector = Icons.Filled.FileUpload,
                             contentDescription = stringResource(R.string.browser_action_move_to),
-                            tint = PrototypeTokens.accent,
+                            tint = PrototypeTokens.accent
                         )
                     },
                     onClick = {
                         showContextMenu = false
                         onMoveTo.invoke(item)
-                    },
+                    }
                 )
             }
             if (onMultiSelect != null) {
@@ -3853,13 +4171,13 @@ fun FileItemComposable(
                         Icon(
                             imageVector = Icons.Filled.CheckCircle,
                             contentDescription = stringResource(R.string.browser_action_multi_select),
-                            tint = PrototypeTokens.accent,
+                            tint = PrototypeTokens.accent
                         )
                     },
                     onClick = {
                         showContextMenu = false
                         onMultiSelect.invoke()
-                    },
+                    }
                 )
             }
             if (onDelete != null && isInternalFile) {
@@ -3867,18 +4185,23 @@ fun FileItemComposable(
                     HorizontalDivider()
                 }
                 DropdownMenuItem(
-                    text = { Text(stringResource(R.string.browser_action_delete_file), color = MaterialTheme.colorScheme.error) },
+                    text = {
+                        Text(
+                            stringResource(R.string.browser_action_delete_file),
+                            color = MaterialTheme.colorScheme.error
+                        )
+                    },
                     leadingIcon = {
                         Icon(
                             imageVector = Icons.Filled.Delete,
                             contentDescription = stringResource(R.string.browser_action_delete_file),
-                            tint = MaterialTheme.colorScheme.error,
+                            tint = MaterialTheme.colorScheme.error
                         )
                     },
                     onClick = {
                         showContextMenu = false
                         onDelete.invoke(item)
-                    },
+                    }
                 )
             }
         }
@@ -3895,7 +4218,7 @@ private fun FileGridItem(
     onTogglePin: ((String) -> Unit)? = null,
     onToggleBookmark: ((String, String, String) -> Unit)? = null,
     currentDirectoryUri: String = "",
-    onOpenTerminal: ((FileItem) -> Unit)? = null,
+    onOpenTerminal: ((FileItem) -> Unit)? = null
 ) {
     val extension = item.extension
     var showContextMenu by remember { mutableStateOf(false) }
@@ -3910,7 +4233,7 @@ private fun FileGridItem(
             .fillMaxWidth()
             .border(
                 BorderStroke(1.dp, PrototypeTokens.border.copy(alpha = 0.5f)),
-                RoundedCornerShape(10.dp),
+                RoundedCornerShape(10.dp)
             )
             .combinedClickable(
                 onClick = { onClick(item) },
@@ -3922,21 +4245,21 @@ private fun FileGridItem(
                     } else if (onTogglePin != null || onToggleBookmark != null) {
                         showContextMenu = true
                     }
-                },
+                }
             ),
         shape = RoundedCornerShape(10.dp),
         colors = CardDefaults.cardColors(
-            containerColor = cardContainerColor,
+            containerColor = cardContainerColor
         ),
         elevation = CardDefaults.cardElevation(
-            defaultElevation = 1.dp,
-        ),
+            defaultElevation = 1.dp
+        )
     ) {
         Column(
             modifier = Modifier
                 .fillMaxWidth()
                 .padding(horizontal = 8.dp, vertical = 12.dp),
-            horizontalAlignment = Alignment.CenterHorizontally,
+            horizontalAlignment = Alignment.CenterHorizontally
         ) {
             if (item.isBookmarked || item.isPinned) {
                 Row(horizontalArrangement = Arrangement.spacedBy(2.dp)) {
@@ -3945,7 +4268,7 @@ private fun FileGridItem(
                             imageVector = Icons.Filled.Bookmark,
                             contentDescription = stringResource(R.string.browser_content_desc_bookmarked),
                             tint = PrototypeTokens.accent,
-                            modifier = Modifier.size(12.dp),
+                            modifier = Modifier.size(12.dp)
                         )
                     }
                     if (item.isPinned) {
@@ -3953,7 +4276,7 @@ private fun FileGridItem(
                             imageVector = Icons.Filled.PushPin,
                             contentDescription = stringResource(R.string.browser_content_desc_pinned),
                             tint = PrototypeTokens.accent,
-                            modifier = Modifier.size(12.dp),
+                            modifier = Modifier.size(12.dp)
                         )
                     }
                 }
@@ -3966,12 +4289,12 @@ private fun FileGridItem(
                         imageVector = Icons.Filled.Folder,
                         contentDescription = stringResource(R.string.browser_content_desc_folder),
                         tint = PrototypeTokens.folder,
-                        modifier = Modifier.size(36.dp),
+                        modifier = Modifier.size(36.dp)
                     )
                 } else {
                     FileTypeIcon(
                         extension = extension,
-                        showExtension = true,
+                        showExtension = true
                     )
                 }
                 if (item.isReadOnly) {
@@ -3981,7 +4304,7 @@ private fun FileGridItem(
                         tint = PrototypeTokens.muted.copy(alpha = 0.7f),
                         modifier = Modifier
                             .size(10.dp)
-                            .offset(x = (-4).dp, y = 18.dp),
+                            .offset(x = (-4).dp, y = 18.dp)
                     )
                 }
                 if (item.gitStatus != null) {
@@ -4005,17 +4328,17 @@ private fun FileGridItem(
                     DraftPeekTypography.bodySmall.copy(
                         fontFamily = FontFamily.Monospace,
                         fontWeight = FontWeight.Medium,
-                        fontSize = 11.sp,
+                        fontSize = 11.sp
                     )
                 } else {
                     DraftPeekTypography.bodySmall.copy(
                         fontWeight = FontWeight.Medium,
-                        fontSize = 12.sp,
+                        fontSize = 12.sp
                     )
                 },
                 maxLines = 2,
                 overflow = TextOverflow.Ellipsis,
-                textAlign = TextAlign.Center,
+                textAlign = TextAlign.Center
             )
 
             if (!item.isDirectory) {
@@ -4023,7 +4346,7 @@ private fun FileGridItem(
                     text = formatFileSize(item.size),
                     style = DraftPeekTypography.labelSmall.copy(fontSize = 10.sp),
                     color = PrototypeTokens.muted,
-                    maxLines = 1,
+                    maxLines = 1
                 )
             }
         }
@@ -4032,7 +4355,7 @@ private fun FileGridItem(
     DropdownMenu(
         expanded = showContextMenu,
         onDismissRequest = { showContextMenu = false },
-        containerColor = MaterialTheme.colorScheme.surface,
+        containerColor = MaterialTheme.colorScheme.surface
     ) {
         if (item.isDirectory && onOpenTerminal != null) {
             val localPath = FileUtils.resolveLocalPath(item.uri.toString())
@@ -4042,56 +4365,74 @@ private fun FileGridItem(
                     StrokeIcon(
                         icon = StrokeIcons.Terminal,
                         contentDescription = null,
-                        tint = if (localPath != null) PrototypeTokens.accent else PrototypeTokens.muted,
+                        tint = if (localPath != null) PrototypeTokens.accent else PrototypeTokens.muted
                     )
                 },
                 enabled = localPath != null,
                 onClick = {
                     showContextMenu = false
                     onOpenTerminal.invoke(item)
-                },
+                }
             )
         }
         if (onTogglePin != null) {
             DropdownMenuItem(
                 text = {
                     Text(
-                        if (item.isPinned) stringResource(R.string.browser_action_unpin)
-                        else stringResource(R.string.browser_action_pin)
+                        if (item.isPinned) {
+                            stringResource(R.string.browser_action_unpin)
+                        } else {
+                            stringResource(R.string.browser_action_pin)
+                        }
                     )
                 },
                 leadingIcon = {
                     Icon(
                         imageVector = if (item.isPinned) Icons.Outlined.PushPin else Icons.Filled.PushPin,
-                        contentDescription = if (item.isPinned) stringResource(R.string.browser_action_unpin) else stringResource(R.string.browser_action_pin),
-                        tint = PrototypeTokens.accent,
+                        contentDescription = if (item.isPinned) {
+                            stringResource(
+                                R.string.browser_action_unpin
+                            )
+                        } else {
+                            stringResource(R.string.browser_action_pin)
+                        },
+                        tint = PrototypeTokens.accent
                     )
                 },
                 onClick = {
                     showContextMenu = false
                     onTogglePin?.invoke(item.uri.toString())
-                },
+                }
             )
         }
         if (onToggleBookmark != null) {
             DropdownMenuItem(
                 text = {
                     Text(
-                        if (item.isBookmarked) stringResource(R.string.browser_action_unbookmark)
-                        else stringResource(R.string.browser_action_bookmark)
+                        if (item.isBookmarked) {
+                            stringResource(R.string.browser_action_unbookmark)
+                        } else {
+                            stringResource(R.string.browser_action_bookmark)
+                        }
                     )
                 },
                 leadingIcon = {
                     Icon(
                         imageVector = if (item.isBookmarked) Icons.Filled.Bookmark else Icons.Outlined.BookmarkBorder,
-                        contentDescription = if (item.isBookmarked) stringResource(R.string.browser_action_unbookmark) else stringResource(R.string.browser_action_bookmark),
-                        tint = PrototypeTokens.accent,
+                        contentDescription = if (item.isBookmarked) {
+                            stringResource(
+                                R.string.browser_action_unbookmark
+                            )
+                        } else {
+                            stringResource(R.string.browser_action_bookmark)
+                        },
+                        tint = PrototypeTokens.accent
                     )
                 },
                 onClick = {
                     showContextMenu = false
                     onToggleBookmark.invoke(item.uri.toString(), item.name, currentDirectoryUri)
-                },
+                }
             )
         }
     }
@@ -4116,7 +4457,7 @@ private fun RecentFilePreviewCard(
     recentFile: RecentFile,
     viewModel: FileBrowserViewModel,
     onClick: () -> Unit,
-    modifier: Modifier = Modifier,
+    modifier: Modifier = Modifier
 ) {
     val surface = PrototypeTokens.surface
     val codeBg = PrototypeTokens.bg
@@ -4141,14 +4482,14 @@ private fun RecentFilePreviewCard(
         modifier = modifier
             .fillMaxWidth()
             .padding(horizontal = PrototypeSpacing.ScreenHorizontal, vertical = 4.dp)
-            .pressScaleEffect(),
+            .pressScaleEffect()
     ) {
         Column(modifier = Modifier.padding(14.dp)) {
             // Hero row：文件类型徽章 + 等宽文件名 + 元信息
             Row(verticalAlignment = Alignment.CenterVertically) {
                 FileTypeIcon(
                     extension = recentFile.fileName.substringAfterLast('.', ""),
-                    modifier = Modifier.size(DraftPeekSpacing.FileTypeBadgeSize),
+                    modifier = Modifier.size(DraftPeekSpacing.FileTypeBadgeSize)
                 )
                 Spacer(modifier = Modifier.width(10.dp))
                 Column(modifier = Modifier.weight(1f)) {
@@ -4157,7 +4498,7 @@ private fun RecentFilePreviewCard(
                         style = MonoFileNameStyle,
                         color = fg,
                         maxLines = 1,
-                        overflow = TextOverflow.Ellipsis,
+                        overflow = TextOverflow.Ellipsis
                     )
                     Spacer(modifier = Modifier.height(2.dp))
                     Text(
@@ -4165,7 +4506,7 @@ private fun RecentFilePreviewCard(
                         style = FileMetaStyle,
                         color = muted,
                         maxLines = 1,
-                        overflow = TextOverflow.Ellipsis,
+                        overflow = TextOverflow.Ellipsis
                     )
                 }
             }
@@ -4177,14 +4518,14 @@ private fun RecentFilePreviewCard(
                     .clip(RoundedCornerShape(8.dp))
                     .background(codeBg)
                     .border(1.dp, borderSoft, RoundedCornerShape(8.dp))
-                    .padding(horizontal = 12.dp, vertical = 10.dp),
+                    .padding(horizontal = 12.dp, vertical = 10.dp)
             ) {
                 val previewText = preview
                 if (previewText.isNullOrBlank()) {
                     Text(
                         text = stringResource(R.string.browser_recent_no_preview),
                         style = CodeTextStyle.copy(fontSize = 11.sp, lineHeight = 18.sp),
-                        color = muted.copy(alpha = 0.7f),
+                        color = muted.copy(alpha = 0.7f)
                     )
                 } else {
                     Text(
@@ -4195,12 +4536,12 @@ private fun RecentFilePreviewCard(
                             secondary = secondary,
                             tertiary = tertiary,
                             muted = muted,
-                            warning = warning,
+                            warning = warning
                         ),
                         style = CodeTextStyle.copy(fontSize = 11.sp, lineHeight = 18.sp),
                         color = fgSoft,
                         maxLines = 5,
-                        overflow = TextOverflow.Clip,
+                        overflow = TextOverflow.Clip
                     )
                 }
             }
@@ -4217,7 +4558,7 @@ private val CodePreviewKeywords = setOf(
     "true", "false", "this", "super", "typealias", "where", "get", "set", "abstract", "open",
     "final", "const", "lateinit", "lazy", "launch", "withContext", "remember",
     "mutableStateOf", "collect", "repeat", "require", "check", "let", "apply", "also", "run",
-    "with", "implementation", "api", "kapt", "ksp", "apply", "plugin", "alias", "libs",
+    "with", "implementation", "api", "kapt", "ksp", "apply", "plugin", "alias", "libs"
 )
 
 /** 分词正则：注释 / 字符串 / 数字 / 标识符 / 其他符号。 */
@@ -4240,7 +4581,7 @@ private fun buildCodePreviewAnnotatedString(
     secondary: Color,
     tertiary: Color,
     muted: Color,
-    warning: Color,
+    warning: Color
 ): AnnotatedString {
     val typeColor = lerp(secondary, fgSoft, 0.35f)
     return buildAnnotatedString {
@@ -4277,15 +4618,12 @@ private fun formatFileSize(size: Long): String {
 }
 
 @Composable
-private fun GitStatusItemComposable(
-    gitFileStatus: GitFileStatus,
-    modifier: Modifier = Modifier,
-) {
+private fun GitStatusItemComposable(gitFileStatus: GitFileStatus, modifier: Modifier = Modifier) {
     Row(
         modifier = modifier
             .fillMaxWidth()
             .padding(horizontal = PrototypeSpacing.ScreenHorizontal, vertical = 8.dp),
-        verticalAlignment = Alignment.CenterVertically,
+        verticalAlignment = Alignment.CenterVertically
     ) {
         Box(
             modifier = Modifier
@@ -4301,13 +4639,13 @@ private fun GitStatusItemComposable(
                 text = gitFileStatus.filePath,
                 style = DraftPeekTypography.bodyMedium,
                 maxLines = 1,
-                overflow = TextOverflow.Ellipsis,
+                overflow = TextOverflow.Ellipsis
             )
         }
         Text(
             text = stringResource(gitStatusLabelRes(gitFileStatus.status)),
             style = DraftPeekTypography.labelSmall,
-            color = gitStatusColor(gitFileStatus.status),
+            color = gitStatusColor(gitFileStatus.status)
         )
     }
 }
@@ -4333,10 +4671,7 @@ private fun gitStatusLabelRes(status: GitStatus): Int = when (status) {
 }
 
 @Composable
-private fun GitHubImportUrlDialog(
-    onDismiss: () -> Unit,
-    onBrowse: (String) -> Unit,
-) {
+private fun GitHubImportUrlDialog(onDismiss: () -> Unit, onBrowse: (String) -> Unit) {
     var url by remember { mutableStateOf("") }
     var urlError by remember { mutableStateOf("") }
     val context = LocalContext.current
@@ -4360,13 +4695,15 @@ private fun GitHubImportUrlDialog(
                     Icon(
                         imageVector = Icons.Filled.CloudDownload,
                         contentDescription = stringResource(R.string.browser_github_import),
-                        tint = PrototypeTokens.accent,
+                        tint = PrototypeTokens.accent
                     )
                 },
                 isError = urlError.isNotEmpty(),
                 supportingText = if (urlError.isNotEmpty()) {
                     { Text(urlError) }
-                } else null,
+                } else {
+                    null
+                }
             )
         },
         confirmButton = {
@@ -4384,7 +4721,7 @@ private fun GitHubImportUrlDialog(
                     }
                     onBrowse(sanitizedUrl)
                 },
-                enabled = url.isNotBlank(),
+                enabled = url.isNotBlank()
             ) {
                 Text(stringResource(R.string.browser_github_browse))
             }
@@ -4398,17 +4735,14 @@ private fun GitHubImportUrlDialog(
 }
 
 @Composable
-private fun GitHubLoadingDialog(
-    message: String,
-    onDismiss: () -> Unit,
-) {
+private fun GitHubLoadingDialog(message: String, onDismiss: () -> Unit) {
     BrandDialog(
         onDismissRequest = onDismiss,
         title = { Text(stringResource(R.string.browser_github_import)) },
         content = {
             Row(
                 verticalAlignment = Alignment.CenterVertically,
-                horizontalArrangement = Arrangement.spacedBy(16.dp),
+                horizontalArrangement = Arrangement.spacedBy(16.dp)
             ) {
                 CircularProgressIndicator()
                 Text(message)
@@ -4432,7 +4766,7 @@ private fun GitHubFileSelectionDialog(
     onSelectAll: () -> Unit,
     onClearAll: () -> Unit,
     onConfirm: () -> Unit,
-    onDismiss: () -> Unit,
+    onDismiss: () -> Unit
 ) {
     BrandDialog(
         onDismissRequest = onDismiss,
@@ -4442,7 +4776,7 @@ private fun GitHubFileSelectionDialog(
                 Text(
                     text = "$owner/$repo",
                     style = DraftPeekTypography.bodySmall,
-                    color = PrototypeTokens.accent,
+                    color = PrototypeTokens.accent
                 )
             }
         },
@@ -4450,7 +4784,7 @@ private fun GitHubFileSelectionDialog(
             Column(modifier = Modifier.fillMaxWidth()) {
                 Row(
                     modifier = Modifier.fillMaxWidth(),
-                    horizontalArrangement = Arrangement.End,
+                    horizontalArrangement = Arrangement.End
                 ) {
                     TextButton(onClick = onSelectAll) {
                         Text(stringResource(R.string.browser_action_select_all))
@@ -4470,25 +4804,25 @@ private fun GitHubFileSelectionDialog(
                                 .fillMaxWidth()
                                 .clickable { onToggleFile(file.path) }
                                 .padding(vertical = 4.dp),
-                            verticalAlignment = Alignment.CenterVertically,
+                            verticalAlignment = Alignment.CenterVertically
                         ) {
                             Checkbox(
                                 checked = selectedFiles.contains(file.path),
                                 onCheckedChange = { onToggleFile(file.path) },
-                                colors = CheckboxDefaults.colors(checkedColor = PrototypeTokens.accent),
+                                colors = CheckboxDefaults.colors(checkedColor = PrototypeTokens.accent)
                             )
                             Spacer(modifier = Modifier.width(8.dp))
                             FileTypeIcon(
                                 extension = file.path.substringAfterLast('.', ""),
                                 modifier = Modifier.size(20.dp),
-                                showExtension = false,
+                                showExtension = false
                             )
                             Spacer(modifier = Modifier.width(8.dp))
                             Text(
                                 text = file.path,
                                 style = DraftPeekTypography.bodySmall,
                                 maxLines = 2,
-                                modifier = Modifier.weight(1f),
+                                modifier = Modifier.weight(1f)
                             )
                         }
                     }
@@ -4498,7 +4832,7 @@ private fun GitHubFileSelectionDialog(
         confirmButton = {
             TextButton(
                 onClick = onConfirm,
-                enabled = selectedFiles.isNotEmpty(),
+                enabled = selectedFiles.isNotEmpty()
             ) {
                 Text(stringResource(R.string.browser_github_browse))
             }
@@ -4517,12 +4851,12 @@ private fun TooltipIconButton(
     tooltip: String,
     onClick: () -> Unit,
     modifier: Modifier = Modifier,
-    content: @Composable () -> Unit,
+    content: @Composable () -> Unit
 ) {
     TooltipBox(
         positionProvider = TooltipDefaults.rememberPlainTooltipPositionProvider(),
         tooltip = { PlainTooltip { Text(tooltip) } },
-        state = rememberTooltipState(),
+        state = rememberTooltipState()
     ) {
         IconButton(onClick = onClick, modifier = modifier.minimumTouchTarget()) {
             content()
@@ -4535,7 +4869,7 @@ private data class IRowBounds(
     val indexInSection: Int,
     val top: Float,
     val bottom: Float,
-    val height: Int,
+    val height: Int
 )
 
 /** 内部文件列表区：每个 section 内部独立的绝对累计坐标（0 = section header 之后） */
@@ -4546,6 +4880,5 @@ private data class IAbsBounds(
     val absTop: Float,
     val absBottom: Float,
     val height: Float,
-    val step: Float,
+    val step: Float
 )
-

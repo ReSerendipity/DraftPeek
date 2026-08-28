@@ -23,7 +23,6 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.wrapContentHeight
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.lazy.rememberLazyListState
@@ -31,11 +30,8 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.produceState
-import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -51,8 +47,8 @@ import androidx.compose.ui.text.withStyle
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.draftpeek.core.designsystem.theme.PrototypeTokens
-import com.draftpeek.feature.editor.model.MarkdownBlockType
 import com.draftpeek.feature.editor.model.MarkdownBlock
+import com.draftpeek.feature.editor.model.MarkdownBlockType
 import com.draftpeek.feature.editor.util.chunkMarkdown
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
@@ -77,11 +73,7 @@ private const val PRELOAD_EXTRA_BLOCKS = 3
  * @param modifier 修饰符
  */
 @Composable
-fun LazyMarkdownPreview(
-    markdownContent: String,
-    modifier: Modifier = Modifier,
-    isDarkTheme: Boolean = false,
-) {
+fun LazyMarkdownPreview(markdownContent: String, modifier: Modifier = Modifier, isDarkTheme: Boolean = false) {
     val listState = rememberLazyListState()
 
     // Chunk markdown on a background thread to avoid jank
@@ -108,11 +100,11 @@ fun LazyMarkdownPreview(
         state = listState,
         modifier = modifier.fillMaxSize(),
         contentPadding = PaddingValues(horizontal = 16.dp, vertical = 12.dp),
-        verticalArrangement = Arrangement.spacedBy(4.dp),
+        verticalArrangement = Arrangement.spacedBy(4.dp)
     ) {
         items(
             items = blocks,
-            key = { it.startIndex },
+            key = { it.startIndex }
         ) { block ->
             MarkdownBlockRenderer(
                 block = block,
@@ -122,7 +114,7 @@ fun LazyMarkdownPreview(
                 codeBgColor = codeBgColor,
                 quoteColor = quoteColor,
                 dividerColor = dividerColor,
-                isDarkTheme = isDarkTheme,
+                isDarkTheme = isDarkTheme
             )
         }
     }
@@ -149,26 +141,26 @@ private fun MarkdownBlockRenderer(
     codeBgColor: Color,
     quoteColor: Color,
     dividerColor: Color,
-    isDarkTheme: Boolean,
+    isDarkTheme: Boolean
 ) {
     when (block.type) {
-MarkdownBlockType.HEADING -> HeadingBlock(block, fgColor, isDarkTheme)
-MarkdownBlockType.CODE_BLOCK -> CodeBlockRenderer(block, fgColor, codeBgColor)
-MarkdownBlockType.PARAGRAPH -> Text(
+        MarkdownBlockType.HEADING -> HeadingBlock(block, fgColor, isDarkTheme)
+        MarkdownBlockType.CODE_BLOCK -> CodeBlockRenderer(block, fgColor, codeBgColor)
+        MarkdownBlockType.PARAGRAPH -> Text(
             text = parseInlineMarkdown(block.content, fgColor, accentColor),
             style = androidx.compose.material3.MaterialTheme.typography.bodyLarge,
             color = fgColor,
-            modifier = Modifier.fillMaxWidth(),
+            modifier = Modifier.fillMaxWidth()
         )
-MarkdownBlockType.UNORDERED_LIST -> ListBlockRenderer(block, fgColor, accentColor, ordered = false)
-MarkdownBlockType.ORDERED_LIST -> ListBlockRenderer(block, fgColor, accentColor, ordered = true)
-MarkdownBlockType.TASK_LIST -> TaskListBlockRenderer(block, fgColor, accentColor)
-MarkdownBlockType.BLOCKQUOTE -> BlockquoteRenderer(block, fgColor, fgSoftColor, quoteColor)
-MarkdownBlockType.TABLE -> TableBlockRenderer(block, fgColor, fgSoftColor, dividerColor)
-MarkdownBlockType.HORIZONTAL_RULE -> HorizontalDivider(
+        MarkdownBlockType.UNORDERED_LIST -> ListBlockRenderer(block, fgColor, accentColor, ordered = false)
+        MarkdownBlockType.ORDERED_LIST -> ListBlockRenderer(block, fgColor, accentColor, ordered = true)
+        MarkdownBlockType.TASK_LIST -> TaskListBlockRenderer(block, fgColor, accentColor)
+        MarkdownBlockType.BLOCKQUOTE -> BlockquoteRenderer(block, fgColor, fgSoftColor, quoteColor)
+        MarkdownBlockType.TABLE -> TableBlockRenderer(block, fgColor, fgSoftColor, dividerColor)
+        MarkdownBlockType.HORIZONTAL_RULE -> HorizontalDivider(
             thickness = 1.dp,
             color = dividerColor,
-            modifier = Modifier.fillMaxWidth().padding(vertical = 8.dp),
+            modifier = Modifier.fillMaxWidth().padding(vertical = 8.dp)
         )
         MarkdownBlockType.BLANK -> Box(modifier = Modifier.height(8.dp))
     }
@@ -178,11 +170,7 @@ MarkdownBlockType.HORIZONTAL_RULE -> HorizontalDivider(
  * 渲染标题块。
  */
 @Composable
-private fun HeadingBlock(
-    block: MarkdownBlock,
-    fgColor: Color,
-    isDarkTheme: Boolean,
-) {
+private fun HeadingBlock(block: MarkdownBlock, fgColor: Color, isDarkTheme: Boolean) {
     val level = block.content.takeWhile { it == '#' }.length.coerceAtMost(6)
     val text = block.content.dropWhile { it == '#' || it == ' ' }.trimEnd()
     val (fontSize, fontWeight) = when (level) {
@@ -199,11 +187,11 @@ private fun HeadingBlock(
         style = androidx.compose.material3.MaterialTheme.typography.headlineSmall.copy(
             fontSize = fontSize,
             fontWeight = fontWeight,
-            color = headingColor,
+            color = headingColor
         ),
         modifier = Modifier
             .fillMaxWidth()
-            .padding(top = if (level <= 2) 8.dp else 4.dp, bottom = 4.dp),
+            .padding(top = if (level <= 2) 8.dp else 4.dp, bottom = 4.dp)
     )
 }
 
@@ -211,11 +199,7 @@ private fun HeadingBlock(
  * 渲染代码块。
  */
 @Composable
-private fun CodeBlockRenderer(
-    block: MarkdownBlock,
-    fgColor: Color,
-    codeBgColor: Color,
-) {
+private fun CodeBlockRenderer(block: MarkdownBlock, fgColor: Color, codeBgColor: Color) {
     // Strip the ``` or ~~~ markers
     val codeContent = block.content.lines()
         .filterNot { it.trimStart().startsWith("```") || it.trimStart().startsWith("~~~") }
@@ -227,7 +211,7 @@ private fun CodeBlockRenderer(
             .fillMaxWidth()
             .clip(RoundedCornerShape(6.dp))
             .background(codeBgColor)
-            .padding(12.dp),
+            .padding(12.dp)
     ) {
         Text(
             text = codeContent,
@@ -235,9 +219,9 @@ private fun CodeBlockRenderer(
                 fontFamily = FontFamily.Monospace,
                 fontSize = 13.sp,
                 lineHeight = 20.sp,
-                color = codeColor,
+                color = codeColor
             ),
-            modifier = Modifier.fillMaxWidth(),
+            modifier = Modifier.fillMaxWidth()
         )
     }
 }
@@ -246,16 +230,11 @@ private fun CodeBlockRenderer(
  * 渲染列表块。
  */
 @Composable
-private fun ListBlockRenderer(
-    block: MarkdownBlock,
-    fgColor: Color,
-    accentColor: Color,
-    ordered: Boolean,
-) {
+private fun ListBlockRenderer(block: MarkdownBlock, fgColor: Color, accentColor: Color, ordered: Boolean) {
     val lines = block.content.lines().filter { it.isNotBlank() }
     Column(
         modifier = Modifier.fillMaxWidth(),
-        verticalArrangement = Arrangement.spacedBy(2.dp),
+        verticalArrangement = Arrangement.spacedBy(2.dp)
     ) {
         lines.forEachIndexed { index, line ->
             val prefix = if (ordered) {
@@ -270,13 +249,13 @@ private fun ListBlockRenderer(
                 Text(
                     text = prefix,
                     style = androidx.compose.material3.MaterialTheme.typography.bodyMedium,
-                    color = accentColor,
+                    color = accentColor
                 )
                 Text(
                     text = parseInlineMarkdown(content, fgColor, accentColor),
                     style = androidx.compose.material3.MaterialTheme.typography.bodyMedium,
                     color = fgColor,
-                    modifier = Modifier.weight(1f),
+                    modifier = Modifier.weight(1f)
                 )
             }
         }
@@ -287,15 +266,11 @@ private fun ListBlockRenderer(
  * 渲染任务列表块。
  */
 @Composable
-private fun TaskListBlockRenderer(
-    block: MarkdownBlock,
-    fgColor: Color,
-    accentColor: Color,
-) {
+private fun TaskListBlockRenderer(block: MarkdownBlock, fgColor: Color, accentColor: Color) {
     val lines = block.content.lines().filter { it.isNotBlank() }
     Column(
         modifier = Modifier.fillMaxWidth(),
-        verticalArrangement = Arrangement.spacedBy(2.dp),
+        verticalArrangement = Arrangement.spacedBy(2.dp)
     ) {
         lines.forEach { line ->
             val content = line.trimStart()
@@ -308,15 +283,15 @@ private fun TaskListBlockRenderer(
                 Text(
                     text = checkbox,
                     style = androidx.compose.material3.MaterialTheme.typography.bodyMedium,
-                    color = accentColor,
+                    color = accentColor
                 )
                 Text(
                     text = parseInlineMarkdown(content, fgColor, accentColor),
                     style = androidx.compose.material3.MaterialTheme.typography.bodyMedium.copy(
-                        textDecoration = if (isChecked) TextDecoration.LineThrough else TextDecoration.None,
+                        textDecoration = if (isChecked) TextDecoration.LineThrough else TextDecoration.None
                     ),
                     color = if (isChecked) fgColor.copy(alpha = 0.6f) else fgColor,
-                    modifier = Modifier.weight(1f),
+                    modifier = Modifier.weight(1f)
                 )
             }
         }
@@ -327,12 +302,7 @@ private fun TaskListBlockRenderer(
  * 渲染引用块。
  */
 @Composable
-private fun BlockquoteRenderer(
-    block: MarkdownBlock,
-    fgColor: Color,
-    fgSoftColor: Color,
-    quoteColor: Color,
-) {
+private fun BlockquoteRenderer(block: MarkdownBlock, fgColor: Color, fgSoftColor: Color, quoteColor: Color) {
     val content = block.content.lines()
         .joinToString("\n") { it.removePrefix(">").trimStart() }
     Box(
@@ -341,16 +311,16 @@ private fun BlockquoteRenderer(
             .border(
                 width = 3.dp,
                 color = quoteColor,
-                shape = RoundedCornerShape(topStart = 0.dp, bottomStart = 0.dp),
+                shape = RoundedCornerShape(topStart = 0.dp, bottomStart = 0.dp)
             )
-            .padding(start = 12.dp, top = 6.dp, bottom = 6.dp),
+            .padding(start = 12.dp, top = 6.dp, bottom = 6.dp)
     ) {
         Text(
             text = parseInlineMarkdown(content, fgSoftColor, fgColor),
             style = androidx.compose.material3.MaterialTheme.typography.bodyMedium.copy(
-                fontStyle = FontStyle.Italic,
+                fontStyle = FontStyle.Italic
             ),
-            color = fgSoftColor,
+            color = fgSoftColor
         )
     }
 }
@@ -359,12 +329,7 @@ private fun BlockquoteRenderer(
  * 渲染表格块（简化版，直接显示原始文本）。
  */
 @Composable
-private fun TableBlockRenderer(
-    block: MarkdownBlock,
-    fgColor: Color,
-    fgSoftColor: Color,
-    dividerColor: Color,
-) {
+private fun TableBlockRenderer(block: MarkdownBlock, fgColor: Color, fgSoftColor: Color, dividerColor: Color) {
     val lines = block.content.lines().filter { it.isNotBlank() }
     Column(
         modifier = Modifier
@@ -372,13 +337,13 @@ private fun TableBlockRenderer(
             .clip(RoundedCornerShape(4.dp))
             .border(1.dp, dividerColor, RoundedCornerShape(4.dp))
             .padding(8.dp),
-        verticalArrangement = Arrangement.spacedBy(2.dp),
+        verticalArrangement = Arrangement.spacedBy(2.dp)
     ) {
         lines.forEachIndexed { index, line ->
             val cells = line.split("|").filter { it.isNotBlank() }.map { it.trim() }
             Row(
                 modifier = Modifier.fillMaxWidth(),
-                horizontalArrangement = Arrangement.SpaceBetween,
+                horizontalArrangement = Arrangement.SpaceBetween
             ) {
                 cells.forEach { cell ->
                     Text(
@@ -386,7 +351,7 @@ private fun TableBlockRenderer(
                         style = androidx.compose.material3.MaterialTheme.typography.bodySmall,
                         color = if (index == 0) fgColor else fgSoftColor,
                         fontWeight = if (index == 0) FontWeight.SemiBold else FontWeight.Normal,
-                        modifier = Modifier.weight(1f).padding(horizontal = 4.dp),
+                        modifier = Modifier.weight(1f).padding(horizontal = 4.dp)
                     )
                 }
             }
@@ -394,7 +359,7 @@ private fun TableBlockRenderer(
                 HorizontalDivider(
                     thickness = 1.dp,
                     color = dividerColor,
-                    modifier = Modifier.fillMaxWidth(),
+                    modifier = Modifier.fillMaxWidth()
                 )
             }
         }
@@ -412,7 +377,7 @@ private val CODE_REGEX = Regex("""`([^`]+)`""")
 private val STRIKE_REGEX = Regex("""~~(.+?)~~""")
 private val LINK_REGEX = Regex("""\[([^\]]+)]\(([^)]+)\)""")
 private val COMBINED_REGEX = Regex(
-    """\*\*(.+?)\*\*|__(.+?)__|`([^`]+)`|~~(.+?)~~|\*([^*]+?)\*|_([^_]+?)_|\[([^\]]+)]\(([^)]+)\)""",
+    """\*\*(.+?)\*\*|__(.+?)__|`([^`]+)`|~~(.+?)~~|\*([^*]+?)\*|_([^_]+?)_|\[([^\]]+)]\(([^)]+)\)"""
 )
 
 /**
@@ -425,12 +390,8 @@ private val COMBINED_REGEX = Regex(
  * @param accentColor 强调色（用于链接、代码等）
  * @return 带格式的 AnnotatedString
  */
-private fun parseInlineMarkdown(
-    text: String,
-    fgColor: Color,
-    accentColor: Color,
-): AnnotatedString {
-    return buildAnnotatedString {
+private fun parseInlineMarkdown(text: String, fgColor: Color, accentColor: Color): AnnotatedString =
+    buildAnnotatedString {
         var lastIndex = 0
         COMBINED_REGEX.findAll(text).forEach { match ->
             // Append plain text before this match
@@ -490,7 +451,6 @@ private fun parseInlineMarkdown(
             append(text.substring(lastIndex))
         }
     }
-}
 
 /**
  * 将超大块进一步拆分为更小的块。
@@ -517,7 +477,7 @@ private fun splitLargeBlock(block: MarkdownBlock): List<MarkdownBlock> {
                     type = block.type,
                     startIndex = chunkStart,
                     endIndex = chunkStart + content.length,
-                    estimatedHeightDp = MarkdownBlock.estimateHeight(content, block.type),
+                    estimatedHeightDp = MarkdownBlock.estimateHeight(content, block.type)
                 )
             )
             chunkStart += currentSize
@@ -536,7 +496,7 @@ private fun splitLargeBlock(block: MarkdownBlock): List<MarkdownBlock> {
                 type = block.type,
                 startIndex = chunkStart,
                 endIndex = chunkStart + content.length,
-                estimatedHeightDp = MarkdownBlock.estimateHeight(content, block.type),
+                estimatedHeightDp = MarkdownBlock.estimateHeight(content, block.type)
             )
         )
     }

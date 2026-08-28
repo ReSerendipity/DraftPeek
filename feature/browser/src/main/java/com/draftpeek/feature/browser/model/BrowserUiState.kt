@@ -8,8 +8,10 @@ import kotlinx.collections.immutable.ImmutableList
 sealed class BrowserUiState {
     data object Idle : BrowserUiState()
     data object Loading : BrowserUiState()
+
     @Immutable
     data class Success(val files: ImmutableList<FileItem>, val currentPath: String) : BrowserUiState()
+
     @Immutable
     data class Error(val message: String) : BrowserUiState()
 }

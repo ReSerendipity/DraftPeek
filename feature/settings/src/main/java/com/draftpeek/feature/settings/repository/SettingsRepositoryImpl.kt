@@ -31,18 +31,16 @@ import com.draftpeek.core.designsystem.theme.RainbowColor
 import com.draftpeek.feature.settings.model.AppLanguage
 import com.draftpeek.feature.settings.model.AppTheme
 import com.draftpeek.feature.settings.model.EditorSettings
+import javax.inject.Inject
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.map
-import javax.inject.Inject
 
 /**
  * 设置仓库实现类，负责将 SettingsRepository 接口调用映射到 DataStore 操作。
  *
  * @property dataStore DataStore Preferences 实例，由 Hilt 注入，单例
  */
-class SettingsRepositoryImpl @Inject constructor(
-    private val dataStore: DataStore<Preferences>
-) : SettingsRepository {
+class SettingsRepositoryImpl @Inject constructor(private val dataStore: DataStore<Preferences>) : SettingsRepository {
 
     /**
      * DataStore 键名常量对象。
@@ -53,93 +51,121 @@ class SettingsRepositoryImpl @Inject constructor(
     private object Keys {
         /** 编辑器字体大小 */
         val FONT_SIZE = intPreferencesKey("font_size")
+
         /** 应用主题 */
         val THEME = stringPreferencesKey("theme")
+
         /** 自动换行开关 */
         val LINE_WRAPPING = booleanPreferencesKey("line_wrapping")
+
         /** 显示行号开关 */
         val SHOW_LINE_NUMBERS = booleanPreferencesKey("show_line_numbers")
+
         /** Tab 宽度 */
         val TAB_WIDTH = intPreferencesKey("tab_width")
+
         /** 自动缩进开关 */
         val AUTO_INDENT = booleanPreferencesKey("auto_indent")
+
         /** 高亮当前行开关 */
         val HIGHLIGHT_CURRENT_LINE = booleanPreferencesKey("highlight_current_line")
+
         /** 显示缩进参考线开关 */
         val SHOW_INDENT_GUIDES = booleanPreferencesKey("show_indent_guides")
+
         /** 默认文件编码 */
         val DEFAULT_ENCODING = stringPreferencesKey("default_encoding")
+
         /** 自动保存开关 */
         val AUTO_SAVE = booleanPreferencesKey("auto_save")
+
         /** 自动保存间隔 */
         val AUTO_SAVE_INTERVAL_MS = longPreferencesKey("auto_save_interval_ms")
+
         /** @deprecated 旧版字体设置，保留用于迁移 */
         val FONT_FAMILY = stringPreferencesKey("font_family")
+
         /** 代码字体 ID */
         val CODE_FONT_FAMILY_ID = stringPreferencesKey("code_font_family_id")
+
         /** UI 字体 ID */
         val UI_FONT_FAMILY_ID = stringPreferencesKey("ui_font_family_id")
+
         /** 应用语言 */
         val LANGUAGE = stringPreferencesKey("language")
+
         /** 固定文件集合 */
         val PINNED_FILES = stringSetPreferencesKey("pinned_files")
+
         /** 活动日历颜色 */
         val ACTIVITY_COLOR = stringPreferencesKey("activity_color")
+
         /** 用户名称 */
         val USER_NAME = stringPreferencesKey("user_name")
+
         /** 用户头像 URI */
         val USER_AVATAR_URI = stringPreferencesKey("user_avatar_uri")
+
         /** 首页最近打开显示数量 */
         val RECENT_FILES_LIMIT = intPreferencesKey("recent_files_limit")
         // 无障碍功能设置
         /** 色盲模式 */
         val COLOR_BLIND_MODE = stringPreferencesKey("color_blind_mode")
+
         /** 高对比度模式 */
         val HIGH_CONTRAST_MODE = booleanPreferencesKey("high_contrast_mode")
+
         /** UI 文字缩放 */
         val TEXT_SCALE = floatPreferencesKey("text_scale")
+
         /** 屏幕阅读器优化 */
         val SCREEN_READER_OPTIMIZED = booleanPreferencesKey("screen_reader_optimized")
+
         /** 振动反馈 */
         val VIBRATION_FEEDBACK = booleanPreferencesKey("vibration_feedback")
+
         /** 非色彩标识 */
         val NON_COLOR_INDICATORS = booleanPreferencesKey("non_color_indicators")
+
         /** 粘性滚动 */
         val STICKY_SCROLL = booleanPreferencesKey("sticky_scroll")
+
         /** 显示缩略图 */
         val SHOW_MINIMAP = booleanPreferencesKey("show_minimap")
         // 自动配对补全
         /** 自动配对补全 */
         val AUTO_PAIR_COMPLETION = booleanPreferencesKey("auto_pair_completion")
+
         /** GitHub 镜像 URL */
         val GITHUB_MIRROR_URL = stringPreferencesKey("github_mirror_url")
+
         /** 编辑器主题 ID */
         val EDITOR_THEME_ID = stringPreferencesKey("editor_theme_id")
         // Markdown 预览设置
         /** Markdown 预览主题名称 */
         val MARKDOWN_THEME_NAME = stringPreferencesKey("markdown_theme_name")
+
         /** 自定义 Markdown CSS */
         val CUSTOM_MARKDOWN_CSS = stringPreferencesKey("custom_markdown_css")
         // ===== 首页文件列表自定义排序 =====
         /** 收藏文件自定义排序（逗号分隔的 URI 字符串） */
         val PINNED_ORDER = stringPreferencesKey("pinned_order")
+
         /** 最近文件自定义排序（逗号分隔的 URI 字符串） */
         val RECENT_ORDER = stringPreferencesKey("recent_order")
+
         /** 内部存储文件自定义排序（逗号分隔的 URI 字符串） */
         val INTERNAL_FILES_ORDER = stringPreferencesKey("internal_files_order")
+
         /** 书签文件自定义排序（逗号分隔的 URI 字符串） */
         val BOOKMARK_ORDER = stringPreferencesKey("bookmark_order")
     }
 
     /** 将逗号分隔字符串解码为 URI 列表 */
-    private fun decodeOrderList(raw: String?): List<String> {
-        return raw?.split(",")?.filter { it.isNotBlank() } ?: emptyList()
-    }
+    private fun decodeOrderList(raw: String?): List<String> = raw?.split(",")?.filter { it.isNotBlank() } ?: emptyList()
 
     /** 将 URI 列表编码为逗号分隔字符串 */
-    private fun encodeOrderList(order: List<String>): String {
-        return order.joinToString(",")
-    }
+    private fun encodeOrderList(order: List<String>): String = order.joinToString(",")
 
     /** 目录排序偏好键前缀，实际键为 dir_sort_{directoryUri} */
     private val DIR_SORT_PREFIX = "dir_sort_"
@@ -202,7 +228,7 @@ class SettingsRepositoryImpl @Inject constructor(
             githubMirrorUrl = prefs[Keys.GITHUB_MIRROR_URL] ?: "",
             editorThemeId = prefs[Keys.EDITOR_THEME_ID] ?: "",
             markdownThemeName = prefs[Keys.MARKDOWN_THEME_NAME] ?: "DEFAULT",
-            customMarkdownCss = prefs[Keys.CUSTOM_MARKDOWN_CSS] ?: "",
+            customMarkdownCss = prefs[Keys.CUSTOM_MARKDOWN_CSS] ?: ""
         )
     }
 
@@ -246,7 +272,9 @@ class SettingsRepositoryImpl @Inject constructor(
         }
     }
 
-    override fun getHighlightCurrentLine(): Flow<Boolean> = dataStore.data.map { it[Keys.HIGHLIGHT_CURRENT_LINE] ?: true }
+    override fun getHighlightCurrentLine(): Flow<Boolean> = dataStore.data.map {
+        it[Keys.HIGHLIGHT_CURRENT_LINE] ?: true
+    }
 
     override suspend fun setHighlightCurrentLine(enabled: Boolean) {
         dataStore.edit { prefs ->

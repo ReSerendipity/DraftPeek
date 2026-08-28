@@ -21,6 +21,8 @@ import com.draftpeek.feature.terminal.model.TerminalTheme
 import com.draftpeek.feature.terminal.service.TerminalService
 import dagger.hilt.android.lifecycle.HiltViewModel
 import dagger.hilt.android.qualifiers.ApplicationContext
+import java.io.File
+import javax.inject.Inject
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
@@ -29,8 +31,6 @@ import kotlinx.coroutines.flow.flatMapLatest
 import kotlinx.coroutines.flow.flowOf
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
-import java.io.File
-import javax.inject.Inject
 
 /**
  * 快捷命令数据类。
@@ -38,10 +38,7 @@ import javax.inject.Inject
  * @property label 显示标签
  * @property command 实际执行的命令
  */
-data class QuickCommand(
-    val label: String,
-    val command: String,
-)
+data class QuickCommand(val label: String, val command: String)
 
 /**
  * 终端ViewModel。
@@ -53,7 +50,7 @@ data class QuickCommand(
 @HiltViewModel
 class TerminalViewModel @Inject constructor(
     private val sessionManager: TerminalSessionManager,
-    @ApplicationContext context: Context,
+    @ApplicationContext context: Context
 ) : ViewModel() {
 
     private val context = context.applicationContext
@@ -74,10 +71,12 @@ class TerminalViewModel @Inject constructor(
         .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5000), "")
 
     private val _inputBuffer = MutableStateFlow("")
+
     /** 用户输入缓冲区 */
     val inputBuffer: StateFlow<String> = _inputBuffer.asStateFlow()
 
     private val _theme = MutableStateFlow(TerminalTheme())
+
     /** 终端颜色主题 */
     val theme: StateFlow<TerminalTheme> = _theme.asStateFlow()
 
@@ -129,12 +128,12 @@ class TerminalViewModel @Inject constructor(
                 QuickCommand("git status", "git status"),
                 QuickCommand("git diff", "git diff"),
                 QuickCommand("git log", "git log --oneline -10"),
-                QuickCommand("http.server", "python -m http.server"),
+                QuickCommand("http.server", "python -m http.server")
             )
         } else {
             listOf(
                 QuickCommand("ls", "ls"),
-                QuickCommand("pwd", "pwd"),
+                QuickCommand("pwd", "pwd")
             )
         }
         _quickCommands.value = commands

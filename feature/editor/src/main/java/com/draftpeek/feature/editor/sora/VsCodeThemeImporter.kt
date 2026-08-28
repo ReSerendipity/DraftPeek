@@ -30,7 +30,11 @@ object VsCodeThemeImporter {
      */
     fun importFromVsCodeTheme(vscodeJson: String): String? {
         val parsed = ThemeLoader.loadFromJson(vscodeJson) ?: return null
-        val root = try { JSONObject(vscodeJson) } catch (_: Exception) { return null }
+        val root = try {
+            JSONObject(vscodeJson)
+        } catch (_: Exception) {
+            return null
+        }
 
         // Convert VS Code color keys to DraftPeek color slots
         val convertedColors = convertVsCodeColors(root.optJSONObject("colors"))
@@ -42,11 +46,14 @@ object VsCodeThemeImporter {
         val draftpeekTheme = JSONObject().apply {
             put("name", "${parsed.name} (VS Code)")
             put("type", if (parsed.isDark) "dark" else "light")
-            put("metadata", JSONObject().apply {
-                put("version", 1)
-                put("source", "vscode-import")
-                put("originalName", parsed.name)
-            })
+            put(
+                "metadata",
+                JSONObject().apply {
+                    put("version", 1)
+                    put("source", "vscode-import")
+                    put("originalName", parsed.name)
+                }
+            )
             put("colors", convertedColors)
             put("tokenColors", tokenColors)
         }
@@ -136,7 +143,7 @@ object VsCodeThemeImporter {
             "editorGutter.background" to "editorGutter.background",
             "editorGutter.modifiedBackground" to "editorGutter.modifiedBackground",
             "editorGutter.addedBackground" to "editorGutter.addedBackground",
-            "editorGutter.deletedBackground" to "editorGutter.deletedBackground",
+            "editorGutter.deletedBackground" to "editorGutter.deletedBackground"
         )
 
         // Apply direct mappings

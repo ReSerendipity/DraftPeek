@@ -22,8 +22,8 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.toArgb
 import androidx.compose.ui.viewinterop.AndroidView
-import com.draftpeek.core.common.util.WebViewStyleHelper
 import com.draftpeek.core.common.util.DocumentType
+import com.draftpeek.core.common.util.WebViewStyleHelper
 import com.draftpeek.core.ui.theme.PrototypeTokens
 
 /**
@@ -42,7 +42,7 @@ fun OfficeDocumentScreen(
     htmlContent: String,
     documentType: DocumentType,
     modifier: Modifier = Modifier,
-    darkTheme: Boolean = false,
+    darkTheme: Boolean = false
 ) {
     val pageBg = PrototypeTokens.pageBackground
     val surfaceColor = PrototypeTokens.surface
@@ -61,7 +61,7 @@ fun OfficeDocumentScreen(
     Box(
         modifier = modifier
             .fillMaxSize()
-            .background(pageBg),
+            .background(pageBg)
     ) {
         AndroidView(
             factory = { context ->
@@ -75,7 +75,7 @@ fun OfficeDocumentScreen(
             update = { view ->
                 view.setBackgroundColor(surfaceColor.toArgb())
                 WebViewStyleHelper.loadHtml(view, styledHtml)
-            },
+            }
         )
     }
 }
@@ -96,7 +96,7 @@ private fun rememberStyledHtml(
     htmlContent: String,
     darkTheme: Boolean,
     surfaceColor: androidx.compose.ui.graphics.Color,
-    fgColor: androidx.compose.ui.graphics.Color,
+    fgColor: androidx.compose.ui.graphics.Color
 ): String {
     if (!darkTheme) return htmlContent
     val surfaceHex = surfaceColor.toHexString()

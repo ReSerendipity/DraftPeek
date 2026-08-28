@@ -33,10 +33,20 @@ object HtmlMarkdownConverter {
         md = md.replace(Regex("<h1[^>]*>(.*?)</h1>", RegexOption.DOT_MATCHES_ALL)) { "# ${it.groupValues[1].trim()}" }
         md = md.replace(Regex("<h2[^>]*>(.*?)</h2>", RegexOption.DOT_MATCHES_ALL)) { "## ${it.groupValues[1].trim()}" }
         md = md.replace(Regex("<h3[^>]*>(.*?)</h3>", RegexOption.DOT_MATCHES_ALL)) { "### ${it.groupValues[1].trim()}" }
-        md = md.replace(Regex("<h4[^>]*>(.*?)</h4>", RegexOption.DOT_MATCHES_ALL)) { "#### ${it.groupValues[1].trim()}" }
-        md = md.replace(Regex("<h5[^>]*>(.*?)</h5>", RegexOption.DOT_MATCHES_ALL)) { "##### ${it.groupValues[1].trim()}" }
-        md = md.replace(Regex("<h6[^>]*>(.*?)</h6>", RegexOption.DOT_MATCHES_ALL)) { "###### ${it.groupValues[1].trim()}" }
-        md = md.replace(Regex("<(strong|b)>(.*?)</\\1>", RegexOption.DOT_MATCHES_ALL)) { "**${it.groupValues[2].trim()}**" }
+        md =
+            md.replace(Regex("<h4[^>]*>(.*?)</h4>", RegexOption.DOT_MATCHES_ALL)) { "#### ${it.groupValues[1].trim()}" }
+        md =
+            md.replace(Regex("<h5[^>]*>(.*?)</h5>", RegexOption.DOT_MATCHES_ALL)) {
+                "##### ${it.groupValues[1].trim()}"
+            }
+        md =
+            md.replace(Regex("<h6[^>]*>(.*?)</h6>", RegexOption.DOT_MATCHES_ALL)) {
+                "###### ${it.groupValues[1].trim()}"
+            }
+        md =
+            md.replace(Regex("<(strong|b)>(.*?)</\\1>", RegexOption.DOT_MATCHES_ALL)) {
+                "**${it.groupValues[2].trim()}**"
+            }
         md = md.replace(Regex("<(em|i)>(.*?)</\\1>", RegexOption.DOT_MATCHES_ALL)) { "*${it.groupValues[2].trim()}*" }
         md = md.replace(Regex("<code>(.*?)</code>")) { "`${it.groupValues[1]}`" }
         md = md.replace(Regex("<pre[^>]*><code[^>]*>(.*?)</code></pre>", RegexOption.DOT_MATCHES_ALL)) {
@@ -56,7 +66,11 @@ object HtmlMarkdownConverter {
         md = md.replace(Regex("<p[^>]*>(.*?)</p>", RegexOption.DOT_MATCHES_ALL)) { "${it.groupValues[1].trim()}\n\n" }
         md = md.replace(Regex("<br\\s*/?>"), "  \n")
         md = md.replace(Regex("<[^>]+>"), "")
-        md = md.replace("&amp;", "&").replace("&lt;", "<").replace("&gt;", ">").replace("&quot;", "\"").replace("&#39;", "'")
+        md =
+            md.replace(
+                "&amp;",
+                "&"
+            ).replace("&lt;", "<").replace("&gt;", ">").replace("&quot;", "\"").replace("&#39;", "'")
         md = md.replace(Regex("\n{3,}"), "\n\n")
         return md.trim()
     }

@@ -13,7 +13,6 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.BasicTextField
-import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -43,7 +42,7 @@ fun BrandSearchBar(
     value: String,
     onValueChange: (String) -> Unit,
     modifier: Modifier = Modifier,
-    placeholder: String = "Search...",
+    placeholder: String = "Search..."
 ) {
     val interactionSource = remember { MutableInteractionSource() }
     val bgColor = PrototypeTokens.surface
@@ -56,13 +55,13 @@ fun BrandSearchBar(
             .background(bgColor)
             .border(1.dp, PrototypeTokens.border, RoundedCornerShape(10.dp))
             .padding(horizontal = PrototypeSpacing.SearchBarPaddingH),
-        verticalAlignment = Alignment.CenterVertically,
+        verticalAlignment = Alignment.CenterVertically
     ) {
         StrokeIcon(
             icon = StrokeIcons.Search,
             contentDescription = null,
             tint = PrototypeTokens.muted,
-            modifier = Modifier.size(16.dp),
+            modifier = Modifier.size(16.dp)
         )
         Spacer(modifier = Modifier.width(10.dp))
         Box(modifier = Modifier.weight(1f)) {
@@ -70,7 +69,7 @@ fun BrandSearchBar(
                 Text(
                     text = placeholder,
                     style = SearchBarHintStyle,
-                    color = PrototypeTokens.mutedSoft,
+                    color = PrototypeTokens.mutedSoft
                 )
             }
             BasicTextField(
@@ -79,11 +78,11 @@ fun BrandSearchBar(
                 singleLine = true,
                 textStyle = MaterialTheme.typography.bodyMedium.copy(
                     color = PrototypeTokens.fg,
-                    fontSize = 14.sp,
+                    fontSize = 14.sp
                 ),
                 cursorBrush = SolidColor(PrototypeTokens.accent),
                 interactionSource = interactionSource,
-                modifier = Modifier.fillMaxWidth(),
+                modifier = Modifier.fillMaxWidth()
             )
         }
     }

@@ -1,14 +1,14 @@
 /**
  * 文件功能：编辑器硬件键盘快捷键处理器
- * 
+ *
  * 主要类：
  * - [KeyboardShortcutHandler]：键盘快捷键处理类，将常用 Ctrl+key 组合映射到编辑器操作
- * 
+ *
  * 模块依赖：
  * - android.view.KeyEvent：Android 按键事件
  * - androidx.compose.runtime：Compose 稳定注解
  * - feature.editor.ui.MarkdownFormatAction：Markdown 格式化操作
- * 
+ *
  * 设计说明：
  * - sora-editor 原生处理的快捷键（Ctrl+S、Ctrl+Z、Ctrl+Y、Ctrl+C、Ctrl+V、Ctrl+X）不在这里拦截
  * - 当 [isMarkdownMode] 为 true 时，启用额外的 Markdown 专用快捷键（Ctrl+B 粗体、Ctrl+I 斜体等）
@@ -22,9 +22,9 @@ import com.draftpeek.feature.editor.ui.MarkdownFormatAction
 
 /**
  * 编辑器硬件键盘快捷键处理器
- * 
+ *
  * 职责：映射物理键盘快捷键到编辑器操作，通过回调函数与 UI 层解耦。
- * 
+ *
  * 支持的快捷键：
  * - Ctrl+S：保存文件
  * - Ctrl+Z：撤销
@@ -40,7 +40,7 @@ import com.draftpeek.feature.editor.ui.MarkdownFormatAction
  * - Ctrl+Alt+Left：跳转到上次编辑位置
  * - Tab/Shift+Tab：Markdown 列表缩进/反缩进
  * - Markdown 模式：Ctrl+B 粗体、Ctrl+I 斜体、Ctrl+K 链接、Ctrl+Shift+K 代码块、Ctrl+Shift+M 数学公式
- * 
+ *
  * @property onSave Ctrl+S – 保存当前文件
  * @property onUndo Ctrl+Z – 撤销（通常由编辑器处理，保留以完整性）
  * @property onRedo Ctrl+Shift+Z / Ctrl+Y – 重做
@@ -73,7 +73,7 @@ class KeyboardShortcutHandler(
     val onToggleTypewriterMode: (() -> Unit)? = null,
     val onGoToLastEditLocation: (() -> Unit)? = null,
     val onFindNext: (() -> Unit)? = null,
-    val onFindPrevious: (() -> Unit)? = null,
+    val onFindPrevious: (() -> Unit)? = null
 ) {
 
     /** 当前文件是否为 Markdown 文件（启用 Markdown 快捷键） */
@@ -82,9 +82,9 @@ class KeyboardShortcutHandler(
 
     /**
      * 更新 Markdown 模式状态
-     * 
+     *
      * 当活动文件变化时调用。
-     * 
+     *
      * @param isMarkdown 是否为 Markdown 模式
      */
     fun setMarkdownMode(isMarkdown: Boolean) {
@@ -93,14 +93,14 @@ class KeyboardShortcutHandler(
 
     /**
      * 处理按键事件，返回快捷键是否已处理
-     * 
+     *
      * 处理流程：
      * 1. 检查是否为 ACTION_DOWN 事件，否则返回 false
      * 2. 读取 Ctrl/Shift/Alt 修饰键状态
      * 3. 处理功能键（F3、F8、F9、Ctrl+Alt+Left）
      * 4. 处理 Tab/Shift+Tab（Markdown 列表缩进）
      * 5. 处理 Ctrl 组合键
-     * 
+     *
      * @param event 按键事件
      * @return 如果快捷键已处理返回 true，否则返回 false
      */
@@ -145,9 +145,9 @@ class KeyboardShortcutHandler(
                 val lineText = getCurrentLineText.invoke()
                 val trimmed = lineText.trimStart()
                 val isListLine = trimmed.startsWith("- ") ||
-                        trimmed.startsWith("* ") ||
-                        trimmed.startsWith("+ ") ||
-                        trimmed.matches(Regex("^\\d+[.)]\\s.*"))
+                    trimmed.startsWith("* ") ||
+                    trimmed.startsWith("+ ") ||
+                    trimmed.matches(Regex("^\\d+[.)]\\s.*"))
                 if (isListLine) {
                     if (shift) {
                         // Shift+Tab：减少缩进（移除前导空格）
@@ -171,44 +171,82 @@ class KeyboardShortcutHandler(
         return when (event.keyCode) {
             // Ctrl+S – 保存
             KeyEvent.KEYCODE_S -> {
-                if (!shift) { onSave(); true } else false
+                if (!shift) {
+                    onSave()
+                    true
+                } else {
+                    false
+                }
             }
             // Ctrl+Z – 撤销
             KeyEvent.KEYCODE_Z -> {
-                if (!shift) { onUndo(); true } else { onRedo(); true }
+                if (!shift) {
+                    onUndo()
+                    true
+                } else {
+                    onRedo()
+                    true
+                }
             }
             // Ctrl+Y – 重做
             KeyEvent.KEYCODE_Y -> {
-                onRedo(); true
+                onRedo()
+                true
             }
             // Ctrl+F – 搜索
             KeyEvent.KEYCODE_F -> {
-                if (!shift) { onOpenSearch(); true } else false
+                if (!shift) {
+                    onOpenSearch()
+                    true
+                } else {
+                    false
+                }
             }
             // Ctrl+H – 替换
             KeyEvent.KEYCODE_H -> {
-                if (!shift) { onOpenReplace(); true } else false
+                if (!shift) {
+                    onOpenReplace()
+                    true
+                } else {
+                    false
+                }
             }
             // Ctrl+G – 转到行
             KeyEvent.KEYCODE_G -> {
-                if (!shift) { onGoToLine(); true } else false
+                if (!shift) {
+                    onGoToLine()
+                    true
+                } else {
+                    false
+                }
             }
             // Ctrl+A – 全选
             KeyEvent.KEYCODE_A -> {
-                if (!shift) { onSelectAll(); true } else false
+                if (!shift) {
+                    onSelectAll()
+                    true
+                } else {
+                    false
+                }
             }
             // --- Markdown 快捷键（仅 isMarkdownMode 为 true 时生效） ---
             // Ctrl+B – 粗体
             KeyEvent.KEYCODE_B -> {
                 if (isMarkdownMode && !shift && onMarkdownFormatAction != null) {
-                    onMarkdownFormatAction(MarkdownFormatAction.Wrap("**", "**", tplBold)); true
-                } else false
+                    onMarkdownFormatAction(MarkdownFormatAction.Wrap("**", "**", tplBold))
+                    true
+                } else {
+                    false
+                }
             }
             // Ctrl+I – 斜体
             KeyEvent.KEYCODE_I -> {
                 if (isMarkdownMode && !shift && onMarkdownFormatAction != null) {
-                    onMarkdownFormatAction(MarkdownFormatAction.Wrap("*", "*", tplItalic)); true
-                } else false
+                    onMarkdownFormatAction(MarkdownFormatAction.Wrap("*", "*", tplItalic))
+                    true
+                } else {
+                    false
+                }
             }
             // Ctrl+K / Ctrl+Shift+K – 插入链接 / 插入代码块
             KeyEvent.KEYCODE_K -> {
@@ -219,19 +257,27 @@ class KeyboardShortcutHandler(
                         onMarkdownFormatAction(MarkdownFormatAction.Insert(tplLink, 1))
                     }
                     true
-                } else false
+                } else {
+                    false
+                }
             }
             // Ctrl+Shift+M – 插入数学公式
             KeyEvent.KEYCODE_M -> {
                 if (isMarkdownMode && shift && onMarkdownFormatAction != null) {
-                    onMarkdownFormatAction(MarkdownFormatAction.Insert(tplMathFormula, 4)); true
-                } else false
+                    onMarkdownFormatAction(MarkdownFormatAction.Insert(tplMathFormula, 4))
+                    true
+                } else {
+                    false
+                }
             }
             // Ctrl+Shift+P – 打开命令面板
             KeyEvent.KEYCODE_P -> {
                 if (shift && onOpenCommandPalette != null) {
-                    onOpenCommandPalette(); true
-                } else false
+                    onOpenCommandPalette()
+                    true
+                } else {
+                    false
+                }
             }
             else -> false
         }
@@ -239,9 +285,9 @@ class KeyboardShortcutHandler(
 
     /**
      * 通过移除 [removeCount] 个前导空格来减少缩进
-     * 
+     *
      * 委托给 [onDecreaseIndent] 回调，该回调直接编辑编辑器文本。
-     * 
+     *
      * @param removeCount 要移除的前导空格数量
      */
     private fun handleDecreaseIndent(removeCount: Int) {

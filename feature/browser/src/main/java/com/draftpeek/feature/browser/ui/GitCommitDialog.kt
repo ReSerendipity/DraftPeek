@@ -17,7 +17,6 @@ import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.material3.Checkbox
 import androidx.compose.material3.CheckboxDefaults
-import com.draftpeek.core.ui.component.BrandOutlinedTextField
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
@@ -36,6 +35,7 @@ import com.draftpeek.core.common.vcs.GitStatus
 import com.draftpeek.core.ui.component.BrandDialog
 import com.draftpeek.core.ui.component.BrandFilledButton
 import com.draftpeek.core.ui.component.BrandOutlinedButton
+import com.draftpeek.core.ui.component.BrandOutlinedTextField
 import com.draftpeek.core.ui.theme.DraftPeekTypography
 import com.draftpeek.core.ui.theme.MonoLabelStyle
 import com.draftpeek.core.ui.theme.PrototypeShapes
@@ -61,7 +61,7 @@ fun GitCommitDialog(
     isCommitting: Boolean,
     onCommit: (message: String, selectedFiles: Set<String>) -> Unit,
     onDismiss: () -> Unit,
-    modifier: Modifier = Modifier,
+    modifier: Modifier = Modifier
 ) {
     var commitMessage by remember { mutableStateOf("") }
     var selectedFiles by remember { mutableStateOf<Set<String>>(emptySet()) }
@@ -92,7 +92,7 @@ fun GitCommitDialog(
                     modifier = Modifier
                         .fillMaxWidth()
                         .heightIn(min = 80.dp),
-                    enabled = !isCommitting,
+                    enabled = !isCommitting
                 )
 
                 Spacer(modifier = Modifier.height(12.dp))
@@ -100,17 +100,17 @@ fun GitCommitDialog(
                 // Select all / deselect all
                 Row(
                     modifier = Modifier.fillMaxWidth(),
-                    horizontalArrangement = Arrangement.End,
+                    horizontalArrangement = Arrangement.End
                 ) {
                     BrandFilledButton(
                         text = stringResource(R.string.browser_git_select_all),
                         onClick = { selectedFiles = committableFiles.map { it.filePath }.toSet() },
-                        enabled = !isCommitting,
+                        enabled = !isCommitting
                     )
                     BrandOutlinedButton(
                         text = stringResource(R.string.browser_git_deselect_all),
                         onClick = { selectedFiles = emptySet() },
-                        enabled = !isCommitting,
+                        enabled = !isCommitting
                     )
                 }
 
@@ -118,7 +118,7 @@ fun GitCommitDialog(
                     text = stringResource(R.string.browser_git_commit_files, committableFiles.size),
                     style = MonoLabelStyle,
                     color = muted,
-                    modifier = Modifier.padding(bottom = 4.dp),
+                    modifier = Modifier.padding(bottom = 4.dp)
                 )
 
                 if (committableFiles.isEmpty()) {
@@ -126,14 +126,14 @@ fun GitCommitDialog(
                         text = stringResource(R.string.browser_git_no_changes),
                         style = DraftPeekTypography.bodySmall,
                         color = muted,
-                        modifier = Modifier.padding(vertical = 12.dp),
+                        modifier = Modifier.padding(vertical = 12.dp)
                     )
                 } else {
                     LazyColumn(
                         modifier = Modifier
                             .fillMaxWidth()
                             .heightIn(max = 200.dp),
-                        verticalArrangement = Arrangement.spacedBy(0.dp),
+                        verticalArrangement = Arrangement.spacedBy(0.dp)
                     ) {
                         items(committableFiles, key = { it.filePath }) { fileStatus ->
                             val isSelected = fileStatus.filePath in selectedFiles
@@ -148,7 +148,7 @@ fun GitCommitDialog(
                                         }
                                     }
                                     .padding(vertical = 4.dp),
-                                verticalAlignment = Alignment.CenterVertically,
+                                verticalAlignment = Alignment.CenterVertically
                             ) {
                                 Checkbox(
                                     checked = isSelected,
@@ -160,7 +160,7 @@ fun GitCommitDialog(
                                         }
                                     },
                                     enabled = !isCommitting,
-                                    colors = CheckboxDefaults.colors(checkedColor = PrototypeTokens.accent),
+                                    colors = CheckboxDefaults.colors(checkedColor = PrototypeTokens.accent)
                                 )
                                 Spacer(modifier = Modifier.width(8.dp))
                                 Box(
@@ -168,24 +168,24 @@ fun GitCommitDialog(
                                         .size(8.dp)
                                         .background(
                                             color = gitStatusColor(fileStatus.status),
-                                            shape = PrototypeShapes.Small,
-                                        ),
+                                            shape = PrototypeShapes.Small
+                                        )
                                 )
                                 Spacer(modifier = Modifier.width(8.dp))
                                 Text(
                                     text = fileStatus.filePath,
                                     style = DraftPeekTypography.bodySmall.copy(
-                                        fontWeight = FontWeight.Medium,
+                                        fontWeight = FontWeight.Medium
                                     ),
                                     maxLines = 1,
                                     overflow = TextOverflow.Ellipsis,
-                                    modifier = Modifier.weight(1f),
+                                    modifier = Modifier.weight(1f)
                                 )
                                 Text(
                                     text = stringResource(gitStatusLabelRes(fileStatus.status)),
                                     style = MonoLabelStyle.copy(fontSize = 10.sp),
                                     color = gitStatusColor(fileStatus.status),
-                                    modifier = Modifier.padding(start = 6.dp),
+                                    modifier = Modifier.padding(start = 6.dp)
                                 )
                             }
                         }
@@ -201,16 +201,16 @@ fun GitCommitDialog(
                         onCommit(commitMessage, selectedFiles)
                     }
                 },
-                enabled = !isCommitting && commitMessage.isNotBlank() && selectedFiles.isNotEmpty(),
+                enabled = !isCommitting && commitMessage.isNotBlank() && selectedFiles.isNotEmpty()
             )
         },
         dismissButton = {
             BrandOutlinedButton(
                 text = stringResource(R.string.browser_action_cancel),
                 onClick = onDismiss,
-                enabled = !isCommitting,
+                enabled = !isCommitting
             )
-        },
+        }
     )
 }
 

@@ -20,12 +20,9 @@ abstract class BrowserModule {
     companion object {
         @Provides
         @ViewModelScoped
-        fun provideFileSystemRegistry(
-            localProvider: LocalFileSystemProvider,
-        ): FileSystemRegistry {
-            return FileSystemRegistry().apply {
+        fun provideFileSystemRegistry(localProvider: LocalFileSystemProvider): FileSystemRegistry =
+            FileSystemRegistry().apply {
                 register(localProvider)
             }
-        }
     }
 }

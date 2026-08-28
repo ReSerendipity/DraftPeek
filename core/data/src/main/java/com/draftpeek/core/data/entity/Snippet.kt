@@ -36,7 +36,7 @@ import androidx.room.PrimaryKey
         Index(value = ["category", "updatedAt"]),
         Index(value = ["language", "updatedAt"]),
         Index(value = ["updatedAt"]),
-        Index(value = ["category"]),
+        Index(value = ["category"])
     ]
 )
 data class Snippet(
@@ -46,5 +46,5 @@ data class Snippet(
     val language: String?,
     val category: String,
     val createdAt: Long,
-    val updatedAt: Long,
+    val updatedAt: Long
 )

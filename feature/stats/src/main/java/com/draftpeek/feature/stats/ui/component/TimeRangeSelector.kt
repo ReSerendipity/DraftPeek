@@ -16,12 +16,11 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
+import com.draftpeek.core.ui.theme.PrototypeTokens
 import com.draftpeek.feature.stats.R
 import com.draftpeek.feature.stats.model.TimeRange
-import com.draftpeek.core.ui.theme.PrototypeTokens
 
 /**
  * 时间范围选择器组件。
@@ -33,16 +32,12 @@ import com.draftpeek.core.ui.theme.PrototypeTokens
  * @param modifier 修饰符
  */
 @Composable
-fun TimeRangeSelector(
-    selectedRange: TimeRange,
-    onRangeSelected: (TimeRange) -> Unit,
-    modifier: Modifier = Modifier,
-) {
+fun TimeRangeSelector(selectedRange: TimeRange, onRangeSelected: (TimeRange) -> Unit, modifier: Modifier = Modifier) {
     val typography = MaterialTheme.typography
 
     Row(
         modifier = modifier,
-        horizontalArrangement = Arrangement.spacedBy(8.dp),
+        horizontalArrangement = Arrangement.spacedBy(8.dp)
     ) {
         TimeRange.entries.forEach { range ->
             val labelRes = when (range) {
@@ -56,15 +51,15 @@ fun TimeRangeSelector(
                 label = {
                     Text(
                         text = stringResource(labelRes),
-                        style = typography.labelLarge,
+                        style = typography.labelLarge
                     )
                 },
                 shape = RoundedCornerShape(8.dp),
                 colors = FilterChipDefaults.filterChipColors(
                     selectedContainerColor = PrototypeTokens.accentSoft,
-                    selectedLabelColor = PrototypeTokens.accent,
+                    selectedLabelColor = PrototypeTokens.accent
                 ),
-                modifier = Modifier.padding(vertical = 2.dp),
+                modifier = Modifier.padding(vertical = 2.dp)
             )
         }
     }

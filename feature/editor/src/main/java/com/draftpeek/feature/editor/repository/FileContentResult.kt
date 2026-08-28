@@ -42,7 +42,7 @@ sealed class FileContentResult {
         val content: String,
         val encoding: String = "UTF-8",
         val cachedAtTimestamp: Long = 0L,
-        val fileSize: Long = 0L,
+        val fileSize: Long = 0L
     ) : FileContentResult()
 
     /**
@@ -53,11 +53,8 @@ sealed class FileContentResult {
      * @property fileSize 文件大小（字节）
      */
     @Immutable
-    data class Fresh(
-        val content: String,
-        val encoding: String = "UTF-8",
-        val fileSize: Long = 0L,
-    ) : FileContentResult()
+    data class Fresh(val content: String, val encoding: String = "UTF-8", val fileSize: Long = 0L) :
+        FileContentResult()
 
     /**
      * 无法从任何源加载内容。
@@ -66,8 +63,5 @@ sealed class FileContentResult {
      * @property cause 底层异常（如果有）
      */
     @Immutable
-    data class Error(
-        val message: String,
-        val cause: Throwable? = null,
-    ) : FileContentResult()
+    data class Error(val message: String, val cause: Throwable? = null) : FileContentResult()
 }

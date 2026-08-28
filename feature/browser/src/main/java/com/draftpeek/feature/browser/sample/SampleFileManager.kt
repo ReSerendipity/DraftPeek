@@ -8,7 +8,6 @@ import androidx.datastore.preferences.preferencesDataStore
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.map
-import kotlinx.coroutines.runBlocking
 
 private const val TAG = "SampleFileManager"
 
@@ -22,12 +21,7 @@ private val Context.browserDataStore by preferencesDataStore(name = "browser_pre
  * @param language A human-readable language label, e.g. "Python".
  * @param uri The android_asset URI that the editor can open.
  */
-data class SampleFile(
-    val name: String,
-    val assetPath: String,
-    val language: String,
-    val uri: String,
-)
+data class SampleFile(val name: String, val assetPath: String, val language: String, val uri: String)
 
 /**
  * Manager for built-in sample files located in `assets/samples/`.
@@ -57,7 +51,7 @@ object SampleFileManager {
         "ps1" to "PowerShell",
         "sh" to "Bash",
         "bat" to "BAT",
-        "swift" to "Swift",
+        "swift" to "Swift"
     )
 
     /**
@@ -83,7 +77,7 @@ object SampleFileManager {
         "Dart" to 16,
         "PowerShell" to 17,
         "Bash" to 18,
-        "BAT" to 19,
+        "BAT" to 19
     )
 
     /**
@@ -114,7 +108,7 @@ object SampleFileManager {
                     name = name,
                     assetPath = assetPath,
                     language = language,
-                    uri = "file:///android_asset/$assetPath",
+                    uri = "file:///android_asset/$assetPath"
                 )
             }
             .sortedWith(
@@ -138,21 +132,18 @@ object SampleFileManager {
     /**
      * Loads the saved custom sample order as a Flow.
      */
-    fun observeSampleOrder(context: Context): Flow<List<String>> {
-        return context.browserDataStore.data.map { prefs ->
-            prefs[SAMPLE_ORDER_KEY]?.split(",")?.filter { it.isNotBlank() } ?: emptyList()
-        }
+    fun observeSampleOrder(context: Context): Flow<List<String>> = context.browserDataStore.data.map { prefs ->
+        prefs[SAMPLE_ORDER_KEY]?.split(",")?.filter { it.isNotBlank() } ?: emptyList()
     }
 
     /**
      * Loads the saved custom sample order (suspending).
      */
-    suspend fun loadSampleOrder(context: Context): List<String> {
-        return context.browserDataStore.data.first()[SAMPLE_ORDER_KEY]
+    suspend fun loadSampleOrder(context: Context): List<String> =
+        context.browserDataStore.data.first()[SAMPLE_ORDER_KEY]
             ?.split(",")
             ?.filter { it.isNotBlank() }
             ?: emptyList()
-    }
 
     /**
      * Saves the custom sample order.

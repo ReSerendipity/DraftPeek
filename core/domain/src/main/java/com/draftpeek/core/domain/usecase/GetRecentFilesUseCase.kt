@@ -10,8 +10,8 @@ package com.draftpeek.core.domain.usecase
 
 import com.draftpeek.core.data.entity.RecentFile
 import com.draftpeek.core.data.repository.RecentFilesRepository
-import kotlinx.coroutines.flow.Flow
 import javax.inject.Inject
+import kotlinx.coroutines.flow.Flow
 
 /**
  * 观察最近文件和收藏文件的用例。
@@ -19,9 +19,7 @@ import javax.inject.Inject
  * 提供最近文件数据的只读可观察接口，
  * 保持ViewModel与仓库内部实现解耦。
  */
-class GetRecentFilesUseCase @Inject constructor(
-    private val repository: RecentFilesRepository,
-) {
+class GetRecentFilesUseCase @Inject constructor(private val repository: RecentFilesRepository) {
     /**
      * 获取最近文件列表的Flow。
      * @return 最近文件列表的Flow流

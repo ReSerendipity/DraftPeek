@@ -26,6 +26,7 @@ import androidx.activity.enableEdgeToEdge
 import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.windowsizeclass.ExperimentalMaterial3WindowSizeClassApi
 import androidx.compose.material3.windowsizeclass.calculateWindowSizeClass
 import androidx.compose.runtime.Composable
@@ -35,46 +36,44 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
+import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.toArgb
 import androidx.compose.ui.platform.LocalConfiguration
-import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
-import androidx.compose.material3.MaterialTheme
 import androidx.core.view.WindowCompat
 import androidx.core.view.WindowInsetsControllerCompat
 import androidx.hilt.navigation.compose.hiltViewModel
-import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.lifecycle.Lifecycle
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.lifecycle.lifecycleScope
 import androidx.lifecycle.repeatOnLifecycle
 import androidx.navigation.NavGraph.Companion.findStartDestination
 import androidx.navigation.compose.currentBackStackEntryAsState
 import androidx.navigation.compose.rememberNavController
-import com.draftpeek.R
+import androidx.window.layout.FoldingFeature
+import com.draftpeek.core.common.feature.FeatureToggleManager
 import com.draftpeek.core.common.util.FpsMonitor
+import com.draftpeek.core.data.repository.UserActivityRepository
 import com.draftpeek.core.ui.component.BrandToastHost
 import com.draftpeek.core.ui.component.CustomScaffold
 import com.draftpeek.core.ui.component.TabBarItem
+import com.draftpeek.core.ui.composition.FoldInfo as CompositionFoldInfo
+import com.draftpeek.core.ui.composition.LocalFeatureToggle
+import com.draftpeek.core.ui.composition.LocalFoldInfo
+import com.draftpeek.core.ui.composition.LocalIsLandscape
+import com.draftpeek.core.ui.composition.LocalIsWideScreen
 import com.draftpeek.core.ui.icon.StrokeIcons
 import com.draftpeek.core.ui.layout.FoldInfo
 import com.draftpeek.core.ui.layout.FoldableState
 import com.draftpeek.core.ui.layout.LayoutMode
 import com.draftpeek.core.ui.layout.layoutMode
 import com.draftpeek.core.ui.layout.rememberFoldableState
-import com.draftpeek.core.common.feature.FeatureToggleManager
-import com.draftpeek.core.ui.composition.LocalFeatureToggle
-import com.draftpeek.core.ui.composition.LocalIsLandscape
-import com.draftpeek.core.ui.composition.LocalFoldInfo
-import com.draftpeek.core.ui.composition.LocalIsWideScreen
-import com.draftpeek.core.ui.composition.FoldInfo as CompositionFoldInfo
 import com.draftpeek.core.ui.theme.AccessibilityState
 import com.draftpeek.core.ui.theme.AppFonts
 import com.draftpeek.core.ui.theme.DraftPeekTheme
 import com.draftpeek.core.ui.theme.FontOptions
 import com.draftpeek.feature.browser.model.FileItem
-import com.draftpeek.core.data.repository.UserActivityRepository
 import com.draftpeek.feature.settings.model.AppTheme
-import androidx.window.layout.FoldingFeature
 import com.draftpeek.feature.settings.viewmodel.SettingsViewModel
 import com.draftpeek.navigation.DraftPeekNavHost
 import com.draftpeek.navigation.Route
@@ -141,18 +140,18 @@ class MainActivity : ComponentActivity() {
                 textScale = settings.textScale,
                 screenReaderOptimized = settings.screenReaderOptimized,
                 vibrationFeedback = settings.vibrationFeedback,
-                nonColorIndicators = settings.nonColorIndicators,
+                nonColorIndicators = settings.nonColorIndicators
             )
 
             val appFonts = AppFonts(
                 uiFontFamily = FontOptions.getUiFontById(settings.uiFontFamilyId).fontFamily,
-                codeFontFamily = FontOptions.getCodeFontById(settings.codeFontFamilyId).fontFamily,
+                codeFontFamily = FontOptions.getCodeFontById(settings.codeFontFamilyId).fontFamily
             )
 
             DraftPeekTheme(
                 darkTheme = darkTheme,
                 accessibilityState = accessibilityState,
-                appFonts = appFonts,
+                appFonts = appFonts
             ) {
                 val surfaceColor = MaterialTheme.colorScheme.surface.toArgb()
 
@@ -177,7 +176,7 @@ class MainActivity : ComponentActivity() {
                         foldInfo.bounds.exactCenterY() / resources.displayMetrics.heightPixels
                     } else {
                         0.5f
-                    },
+                    }
                 )
                 val configuration = LocalConfiguration.current
                 val isLandscape = configuration.orientation == android.content.res.Configuration.ORIENTATION_LANDSCAPE
@@ -187,13 +186,13 @@ class MainActivity : ComponentActivity() {
                     LocalFeatureToggle provides featureToggleManager,
                     LocalIsLandscape provides isLandscape,
                     LocalIsWideScreen provides isWideScreen,
-                    LocalFoldInfo provides compositionFoldInfo,
+                    LocalFoldInfo provides compositionFoldInfo
                 ) {
                     BrandToastHost {
                         DraftPeekContent(
                             layoutMode = layoutMode,
                             foldInfo = foldInfo,
-                            darkTheme = darkTheme,
+                            darkTheme = darkTheme
                         )
                     }
                 }
@@ -222,7 +221,10 @@ private fun DraftPeekContent(layoutMode: LayoutMode, foldInfo: FoldInfo, darkThe
     var splitViewFileUri by rememberSaveable { mutableStateOf<String?>(null) }
 
     // Auto-enable split view in book/half-opened posture
-    if (foldInfo.state == FoldableState.HALF_OPENED && foldInfo.orientation == FoldingFeature.Orientation.HORIZONTAL && layoutMode != LayoutMode.COMPACT) {
+    if (foldInfo.state == FoldableState.HALF_OPENED &&
+        foldInfo.orientation == FoldingFeature.Orientation.HORIZONTAL &&
+        layoutMode != LayoutMode.COMPACT
+    ) {
         if (!isSplitViewActive) {
             isSplitViewActive = true
         }
@@ -233,13 +235,13 @@ private fun DraftPeekContent(layoutMode: LayoutMode, foldInfo: FoldInfo, darkThe
         TabBarItem(
             label = stringResource(R.string.app_nav_files),
             icon = StrokeIcons.FolderOutline,
-            route = Route.Browser.route,
+            route = Route.Browser.route
         ),
         TabBarItem(
             label = stringResource(R.string.app_nav_me),
             icon = StrokeIcons.Person,
-            route = Route.Profile.route,
-        ),
+            route = Route.Profile.route
+        )
     )
 
     val isInEditor = currentRoute == Route.Editor.route
@@ -262,7 +264,7 @@ private fun DraftPeekContent(layoutMode: LayoutMode, foldInfo: FoldInfo, darkThe
         navItems = navItems,
         layoutMode = layoutMode,
         showNavigation = !isInEditor,
-        modifier = Modifier.fillMaxSize(),
+        modifier = Modifier.fillMaxSize()
     ) { innerPadding ->
         DraftPeekNavHost(
             navController = navController,
@@ -272,7 +274,7 @@ private fun DraftPeekContent(layoutMode: LayoutMode, foldInfo: FoldInfo, darkThe
             isSplitViewActive = isSplitViewActive,
             splitViewFileUri = splitViewFileUri,
             onSplitViewFileSelected = onSplitViewFileSelected,
-            modifier = Modifier.padding(innerPadding),
+            modifier = Modifier.padding(innerPadding)
         )
     }
 }

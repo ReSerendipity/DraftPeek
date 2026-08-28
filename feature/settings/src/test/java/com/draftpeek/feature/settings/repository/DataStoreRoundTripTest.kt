@@ -2,13 +2,13 @@ package com.draftpeek.feature.settings.repository
 
 import androidx.datastore.core.DataStore
 import androidx.datastore.preferences.core.Preferences
+import androidx.datastore.preferences.core.booleanPreferencesKey
 import androidx.datastore.preferences.core.edit
 import androidx.datastore.preferences.core.intPreferencesKey
 import androidx.datastore.preferences.core.stringPreferencesKey
-import androidx.datastore.preferences.core.booleanPreferencesKey
 import androidx.test.core.app.ApplicationProvider
-import com.draftpeek.feature.settings.model.AppTheme
 import app.cash.turbine.test
+import com.draftpeek.feature.settings.model.AppTheme
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.test.runTest
 import org.junit.After

@@ -68,11 +68,7 @@ import com.draftpeek.feature.browser.sample.SampleFileManager
  */
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun SampleFilesScreen(
-    onSampleClick: (String) -> Unit,
-    onNavigateUp: () -> Unit,
-    modifier: Modifier = Modifier,
-) {
+fun SampleFilesScreen(onSampleClick: (String) -> Unit, onNavigateUp: () -> Unit, modifier: Modifier = Modifier) {
     val context = LocalContext.current
     val listState = rememberLazyListState()
 
@@ -95,23 +91,23 @@ fun SampleFilesScreen(
     Box(
         modifier = modifier
             .fillMaxSize()
-            .background(pageBg),
+            .background(pageBg)
     ) {
         Column(
             modifier = Modifier
                 .fillMaxSize()
-                .padding(horizontal = PrototypeSpacing.ScreenHorizontal),
+                .padding(horizontal = PrototypeSpacing.ScreenHorizontal)
         ) {
             Spacer(modifier = Modifier.height(8.dp))
 
             Row(
                 modifier = Modifier.fillMaxWidth(),
-                verticalAlignment = Alignment.CenterVertically,
+                verticalAlignment = Alignment.CenterVertically
             ) {
                 TooltipBox(
                     positionProvider = TooltipDefaults.rememberPlainTooltipPositionProvider(),
                     tooltip = { PlainTooltip { Text(stringResource(R.string.browser_action_navigate_back)) } },
-                    state = rememberTooltipState(),
+                    state = rememberTooltipState()
                 ) {
                     Box(
                         modifier = Modifier
@@ -119,20 +115,20 @@ fun SampleFilesScreen(
                             .clip(PrototypeShapes.Medium)
                             .background(surface)
                             .clickable { onNavigateUp() },
-                        contentAlignment = Alignment.Center,
+                        contentAlignment = Alignment.Center
                     ) {
                         Icon(
                             imageVector = Icons.AutoMirrored.Filled.ArrowBack,
                             contentDescription = stringResource(R.string.browser_action_navigate_back),
                             tint = fgSoft,
-                            modifier = Modifier.size(16.dp),
+                            modifier = Modifier.size(16.dp)
                         )
                     }
                 }
                 Spacer(modifier = Modifier.width(12.dp))
                 Text(
                     text = stringResource(R.string.browser_title_sample_files),
-                    style = H2Style.copy(color = fg),
+                    style = H2Style.copy(color = fg)
                 )
             }
 
@@ -141,7 +137,7 @@ fun SampleFilesScreen(
             Text(
                 text = stringResource(R.string.browser_hint_sample_files),
                 style = DraftPeekTypography.bodySmall.copy(color = muted),
-                modifier = Modifier.padding(horizontal = 4.dp),
+                modifier = Modifier.padding(horizontal = 4.dp)
             )
 
             Spacer(modifier = Modifier.height(12.dp))
@@ -149,12 +145,12 @@ fun SampleFilesScreen(
             LazyColumn(
                 state = listState,
                 modifier = Modifier.fillMaxSize(),
-                verticalArrangement = Arrangement.spacedBy(4.dp),
+                verticalArrangement = Arrangement.spacedBy(4.dp)
             ) {
                 itemsIndexed(samples, key = { _, sample -> sample.uri }) { _, sample ->
                     SampleFileCard(
                         sample = sample,
-                        onClick = { onSampleClick(sample.uri) },
+                        onClick = { onSampleClick(sample.uri) }
                     )
                 }
             }
@@ -168,11 +164,7 @@ fun SampleFilesScreen(
  * 显示示例文件的图标、文件名、扩展名和语言信息。
  */
 @Composable
-private fun SampleFileCard(
-    sample: SampleFile,
-    onClick: () -> Unit,
-    modifier: Modifier = Modifier,
-) {
+private fun SampleFileCard(sample: SampleFile, onClick: () -> Unit, modifier: Modifier = Modifier) {
     val ext = sample.name.substringAfterLast('.', "")
 
     Card(
@@ -181,25 +173,25 @@ private fun SampleFileCard(
         elevation = CardDefaults.cardElevation(defaultElevation = 0.dp),
         modifier = modifier
             .fillMaxWidth()
-            .pressScaleEffect(),
+            .pressScaleEffect()
     ) {
         Row(
             modifier = Modifier
                 .fillMaxWidth()
                 .clickable(onClick = onClick)
                 .padding(horizontal = 14.dp, vertical = 12.dp),
-            verticalAlignment = Alignment.CenterVertically,
+            verticalAlignment = Alignment.CenterVertically
         ) {
             Box {
                 FileTypeIcon(
                     extension = ext,
-                    modifier = Modifier.size(36.dp),
+                    modifier = Modifier.size(36.dp)
                 )
                 FileTypeColorIndicator(
                     extension = ext,
                     modifier = Modifier
                         .size(8.dp)
-                        .align(Alignment.BottomEnd),
+                        .align(Alignment.BottomEnd)
                 )
             }
             Spacer(modifier = Modifier.width(12.dp))
@@ -209,14 +201,14 @@ private fun SampleFileCard(
                     style = MonoFileNameStyle,
                     maxLines = 1,
                     overflow = TextOverflow.Ellipsis,
-                    color = PrototypeTokens.fg,
+                    color = PrototypeTokens.fg
                 )
                 Spacer(modifier = Modifier.height(2.dp))
                 Text(
                     text = sample.language.ifBlank { ext.uppercase() },
                     style = FileMetaStyle,
                     maxLines = 1,
-                    overflow = TextOverflow.Ellipsis,
+                    overflow = TextOverflow.Ellipsis
                 )
             }
             Spacer(modifier = Modifier.width(8.dp))
@@ -227,7 +219,7 @@ private fun SampleFileCard(
                 modifier = Modifier
                     .clip(BrandShapes.Pill)
                     .background(PrototypeTokens.mutedSoft)
-                    .padding(horizontal = 8.dp, vertical = 4.dp),
+                    .padding(horizontal = 8.dp, vertical = 4.dp)
             )
         }
     }

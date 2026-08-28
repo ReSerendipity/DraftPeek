@@ -5,8 +5,8 @@ package com.draftpeek.core.ui.theme
 import android.content.Context
 import android.util.Log
 import androidx.compose.runtime.Stable
-import org.json.JSONObject
 import java.io.File
+import org.json.JSONObject
 
 /**
  * 编辑器主题加载器。
@@ -39,7 +39,7 @@ object ThemeLoader {
         val isDark: Boolean,
         val colors: Map<String, String>,
         val tokenColors: List<JSONObject>,
-        val metadata: Map<String, String> = emptyMap(),
+        val metadata: Map<String, String> = emptyMap()
     )
 
     /**
@@ -49,14 +49,12 @@ object ThemeLoader {
      * @param fileName 主题文件名，相对于 assets/themes/ 目录（如 "draftpeek-light.json"）
      * @return 解析后的 [EditorTheme]，加载失败时返回 null
      */
-    fun loadFromAssets(context: Context, fileName: String): EditorTheme? {
-        return try {
-            val json = context.assets.open("themes/$fileName").bufferedReader().use { it.readText() }
-            loadFromJson(json)
-        } catch (e: Exception) {
-            Log.e(TAG, "Failed to load theme from assets: themes/$fileName", e)
-            null
-        }
+    fun loadFromAssets(context: Context, fileName: String): EditorTheme? = try {
+        val json = context.assets.open("themes/$fileName").bufferedReader().use { it.readText() }
+        loadFromJson(json)
+    } catch (e: Exception) {
+        Log.e(TAG, "Failed to load theme from assets: themes/$fileName", e)
+        null
     }
 
     /**
@@ -65,14 +63,12 @@ object ThemeLoader {
      * @param file 主题 JSON 文件
      * @return 解析后的 [EditorTheme]，加载失败时返回 null
      */
-    fun loadFromFile(file: File): EditorTheme? {
-        return try {
-            val json = file.readText(Charsets.UTF_8)
-            loadFromJson(json)
-        } catch (e: Exception) {
-            Log.e(TAG, "Failed to load theme from file: ${file.absolutePath}", e)
-            null
-        }
+    fun loadFromFile(file: File): EditorTheme? = try {
+        val json = file.readText(Charsets.UTF_8)
+        loadFromJson(json)
+    } catch (e: Exception) {
+        Log.e(TAG, "Failed to load theme from file: ${file.absolutePath}", e)
+        null
     }
 
     /**
@@ -92,52 +88,50 @@ object ThemeLoader {
      * @param json 主题 JSON 字符串
      * @return 解析后的 [EditorTheme]，解析失败时返回 null
      */
-    fun loadFromJson(json: String): EditorTheme? {
-        return try {
-            val root = JSONObject(json)
-            val name = root.optString("name", "Unnamed")
-            val type = root.optString("type", "light")
-            val isDark = type == "dark"
+    fun loadFromJson(json: String): EditorTheme? = try {
+        val root = JSONObject(json)
+        val name = root.optString("name", "Unnamed")
+        val type = root.optString("type", "light")
+        val isDark = type == "dark"
 
-            val colors = mutableMapOf<String, String>()
-            val colorsObj = root.optJSONObject("colors")
-            if (colorsObj != null) {
-                val keys = colorsObj.keys()
-                while (keys.hasNext()) {
-                    val key = keys.next()
-                    colors[key] = colorsObj.getString(key)
-                }
+        val colors = mutableMapOf<String, String>()
+        val colorsObj = root.optJSONObject("colors")
+        if (colorsObj != null) {
+            val keys = colorsObj.keys()
+            while (keys.hasNext()) {
+                val key = keys.next()
+                colors[key] = colorsObj.getString(key)
             }
-
-            val tokenColors = mutableListOf<JSONObject>()
-            val tokenColorsArr = root.optJSONArray("tokenColors")
-            if (tokenColorsArr != null) {
-                for (i in 0 until tokenColorsArr.length()) {
-                    tokenColors.add(tokenColorsArr.getJSONObject(i))
-                }
-            }
-
-            val metadata = mutableMapOf<String, String>()
-            val metadataObj = root.optJSONObject("metadata")
-            if (metadataObj != null) {
-                val keys = metadataObj.keys()
-                while (keys.hasNext()) {
-                    val key = keys.next()
-                    metadata[key] = metadataObj.getString(key)
-                }
-            }
-
-            EditorTheme(
-                name = name,
-                isDark = isDark,
-                colors = colors,
-                tokenColors = tokenColors,
-                metadata = metadata,
-            )
-        } catch (e: Exception) {
-            Log.e(TAG, "Failed to parse theme JSON", e)
-            null
         }
+
+        val tokenColors = mutableListOf<JSONObject>()
+        val tokenColorsArr = root.optJSONArray("tokenColors")
+        if (tokenColorsArr != null) {
+            for (i in 0 until tokenColorsArr.length()) {
+                tokenColors.add(tokenColorsArr.getJSONObject(i))
+            }
+        }
+
+        val metadata = mutableMapOf<String, String>()
+        val metadataObj = root.optJSONObject("metadata")
+        if (metadataObj != null) {
+            val keys = metadataObj.keys()
+            while (keys.hasNext()) {
+                val key = keys.next()
+                metadata[key] = metadataObj.getString(key)
+            }
+        }
+
+        EditorTheme(
+            name = name,
+            isDark = isDark,
+            colors = colors,
+            tokenColors = tokenColors,
+            metadata = metadata
+        )
+    } catch (e: Exception) {
+        Log.e(TAG, "Failed to parse theme JSON", e)
+        null
     }
 
     /**

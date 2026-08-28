@@ -1,22 +1,22 @@
 /**
  * 文件功能：LSP（Language Server Protocol）管理器
- * 
+ *
  * 主要类：[LspManager] —— 管理 LSP 客户端生命周期、按语言路由编辑器事件、
  *                        维护诊断状态、支持用户配置的服务器
- * 
+ *
  * 模块依赖：
  * - com.draftpeek.core.common.error：错误处理
  * - com.draftpeek.feature.editor.diagnostics：诊断导航
  * - Hilt 依赖注入
  * - kotlinx.coroutines：协程和 Flow
- * 
+ *
  * 核心功能：
  * 1. 按语言 ID 维护 LSP 客户端实例（懒加载、单例）
  * 2. 将编辑器事件（打开、更改、关闭）路由到适当的服务器
  * 3. 从 textDocument/publishDiagnostics 通知中收集诊断信息
  * 4. 与 DiagnosticNavigator 集成，在编辑器边距/状态栏中显示诊断
  * 5. 支持用户配置的 LSP 服务器（如通过 Node.js/Termux 本地运行）
- * 
+ *
  * 线程安全：所有公共方法在 viewModelScope 中启动协程，所有可变状态
  * 通过 Mutex 或并发集合保护。
  */
@@ -26,16 +26,17 @@ import android.content.Context
 import android.net.Uri
 import android.util.Log
 import androidx.compose.runtime.Immutable
-import com.draftpeek.core.common.error.AppError
 import com.draftpeek.core.common.error.ErrorEvent
 import com.draftpeek.core.common.feature.FeatureFlag
 import com.draftpeek.core.common.feature.FeatureToggleManager
 import com.draftpeek.core.common.util.LanguageConfig
-import com.draftpeek.core.common.util.RequestCanceller
 import com.draftpeek.feature.editor.diagnostics.DiagnosticItem
 import com.draftpeek.feature.editor.diagnostics.DiagnosticNavigator
 import dagger.hilt.android.qualifiers.ApplicationContext
-import dagger.hilt.android.scopes.ActivityRetainedScoped
+import java.io.File
+import java.util.concurrent.ConcurrentHashMap
+import javax.inject.Inject
+import javax.inject.Singleton
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.Job
@@ -51,14 +52,10 @@ import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.sync.Mutex
 import kotlinx.coroutines.sync.withLock
-import java.io.File
-import java.util.concurrent.ConcurrentHashMap
-import javax.inject.Inject
-import javax.inject.Singleton
 
 /**
  * 用户可配置的 LSP 服务器配置
- * 
+ *
  * @property languageId 此服务器支持的语言 ID（如 "python"、"javascript"）
  * @property name 用户可见的服务器名称（如 "Python LSP (pylsp)"）
  * @property command 启动服务器的命令（如 "pylsp"、"node ./server.js"）
@@ -73,21 +70,21 @@ data class LspServerConfig(
     val command: String,
     val args: List<String> = emptyList(),
     val workingDir: String? = null,
-    val enabled: Boolean = true,
+    val enabled: Boolean = true
 )
 
 /**
  * 语言服务器协议管理器
- * 
+ *
  * 作为所有 LSP 交互的中心协调器。编辑器通过此类发送文档事件
  * 并查询语言功能（补全、悬停等）。管理器负责：
  * - 根据需要懒加载和初始化 LSP 客户端
  * - 在客户端和内置诊断提供程序之间路由诊断信息
  * - 在服务器发生错误时提供回退机制
- * 
+ *
  * 线程安全：此类是单例且线程安全。协程在独立的 SupervisorJob 上启动，
  * 以防止一个服务器的故障影响其他服务器。
- * 
+ *
  * @property context 应用上下文（用于访问文件和进程 API）
  * @property diagnosticNavigator 跨编辑器会话的共享诊断导航器
  */
@@ -95,7 +92,7 @@ data class LspServerConfig(
 class LspManager @Inject constructor(
     @ApplicationContext private val context: Context,
     val diagnosticNavigator: DiagnosticNavigator,
-    private val featureToggleManager: FeatureToggleManager,
+    private val featureToggleManager: FeatureToggleManager
 ) {
 
     private val lspEnabled: Boolean
@@ -110,14 +107,17 @@ class LspManager @Inject constructor(
     private val clientInitJobs = java.util.concurrent.ConcurrentHashMap<String, Job>()
 
     private val _clientStatus = MutableStateFlow<Map<String, Boolean>>(emptyMap())
+
     /** 每个语言 ID 的服务器状态（运行 = true） */
     val clientStatus: StateFlow<Map<String, Boolean>> = _clientStatus.asStateFlow()
 
     private val _errorFlow = MutableSharedFlow<ErrorEvent>()
+
     /** 用于向 UI 显示的错误事件 */
     val errorFlow: SharedFlow<ErrorEvent> = _errorFlow.asSharedFlow()
 
     private val _userServers = MutableStateFlow<List<LspServerConfig>>(emptyList())
+
     /** 用户配置的服务器 */
     val userServers: StateFlow<List<LspServerConfig>> = _userServers.asStateFlow()
 
@@ -137,7 +137,9 @@ class LspManager @Inject constructor(
      */
     private val completionGenerations = ConcurrentHashMap<String, java.util.concurrent.atomic.AtomicInteger>()
 
-    private val _supportedLanguages = MutableStateFlow(setOf("python", "javascript", "typescript", "java", "kotlin", "go", "dart"))
+    private val _supportedLanguages =
+        MutableStateFlow(setOf("python", "javascript", "typescript", "java", "kotlin", "go", "dart"))
+
     /** 支持 LSP 的语言 ID 集合 */
     val supportedLanguages: StateFlow<Set<String>> = _supportedLanguages.asStateFlow()
 
@@ -147,13 +149,13 @@ class LspManager @Inject constructor(
 
     /**
      * 获取或创建指定语言的 LSP 客户端
-     * 
+     *
      * 算法步骤：
      * 1. 检查客户端是否已存在且正在运行
      * 2. 双重检查锁定（使用 Mutex）确保线程安全
      * 3. 根据语言 ID 选择适当的 LspClient 实现
      * 4. 初始化客户端并更新状态
-     * 
+     *
      * @param languageId 语言标识符（如 "python"、"kotlin"）
      * @return 正在运行的 LspClient；如果语言不支持或初始化失败则返回 null
      */
@@ -183,9 +185,11 @@ class LspManager @Inject constructor(
                         clients.remove(languageId)
                     }
                     _clientStatus.update { it - languageId }
-                    _errorFlow.emit(ErrorEvent(
-                        message = "LSP 服务器初始化失败 ($languageId): ${error.message}",
-                    ))
+                    _errorFlow.emit(
+                        ErrorEvent(
+                            message = "LSP 服务器初始化失败 ($languageId): ${error.message}"
+                        )
+                    )
                 }
             } catch (e: Exception) {
                 Log.e(TAG, "Unexpected error initializing LSP client for $languageId", e)
@@ -203,12 +207,12 @@ class LspManager @Inject constructor(
 
     /**
      * 根据语言 ID 创建 LSP 客户端实例
-     * 
+     *
      * 算法步骤：
      * 1. 先检查用户配置的服务器是否匹配该语言
      * 2. 如果有用户配置，使用 UserConfiguredLspClient
      * 3. 否则使用内置的存根 provider（需要平台二进制文件才能正常工作）
-     * 
+     *
      * @param languageId 语言标识符
      * @return LspClient 实例，如果不支持该语言则返回 null
      */
@@ -232,13 +236,13 @@ class LspManager @Inject constructor(
 
     /**
      * 通知管理器文档已打开
-     * 
+     *
      * 算法步骤：
      * 1. 检测文件语言（可显式提供或从扩展名推断）
      * 2. 如果该语言支持 LSP，获取或创建客户端
      * 3. 向服务器发送 textDocument/didOpen
      * 4. 将文档同步到诊断导航器
-     * 
+     *
      * @param uri 文档 URI
      * @param languageId 语言 ID（可选，null 时从扩展名检测）
      * @param text 完整文档内容
@@ -269,12 +273,12 @@ class LspManager @Inject constructor(
 
     /**
      * 通知管理器文档内容已更改
-     * 
+     *
      * 算法步骤：
      * 1. 增加文档版本号
      * 2. 如果有活动的 LSP 客户端，发送 textDocument/didChange（完整同步）
      * 3. 同步到诊断导航器
-     * 
+     *
      * @param uri 文档 URI
      * @param text 新的完整文档内容
      */
@@ -303,9 +307,9 @@ class LspManager @Inject constructor(
 
     /**
      * 通知管理器文档已关闭
-     * 
+     *
      * 清理该文档的所有待处理补全请求，释放资源。
-     * 
+     *
      * @param uri 文档 URI
      */
     fun onDocumentClosed(uri: String) {
@@ -333,7 +337,7 @@ class LspManager @Inject constructor(
 
     /**
      * 请求给定位置的自动补全项
-     * 
+     *
      * 使用请求取消模式（代次计数器）：同一文档新的补全请求会递增代次，
      * 旧请求返回时检测到不是最新代次则丢弃结果。避免快速输入时旧补全结果闪烁显示。
      * 参考 CodeAssist 的补全取消实现。
@@ -372,7 +376,7 @@ class LspManager @Inject constructor(
 
     /**
      * 请求给定位置的悬停信息
-     * 
+     *
      * @param uri 文档 URI
      * @param line 行号（0-based）
      * @param column 列号（0-based）
@@ -394,7 +398,7 @@ class LspManager @Inject constructor(
 
     /**
      * 跳转到给定位置的定义
-     * 
+     *
      * @param uri 文档 URI
      * @param line 行号（0-based）
      * @param column 列号（0-based）
@@ -416,7 +420,7 @@ class LspManager @Inject constructor(
 
     /**
      * 请求给定位置符号的引用
-     * 
+     *
      * @param uri 文档 URI
      * @param line 行号（0-based）
      * @param column 列号（0-based）
@@ -427,7 +431,7 @@ class LspManager @Inject constructor(
         uri: String,
         line: Int,
         column: Int,
-        includeDeclaration: Boolean = false,
+        includeDeclaration: Boolean = false
     ): List<LocationLink> {
         if (!lspEnabled) return emptyList()
         val lang = detectLanguageFromUri(uri) ?: return emptyList()
@@ -444,7 +448,7 @@ class LspManager @Inject constructor(
 
     /**
      * 请求签名帮助
-     * 
+     *
      * @param uri 文档 URI
      * @param line 行号（0-based）
      * @param column 列号（0-based）
@@ -466,7 +470,7 @@ class LspManager @Inject constructor(
 
     /**
      * 请求文档格式化编辑
-     * 
+     *
      * @param uri 文档 URI
      * @param tabSize 每个缩进级别的空格数
      * @param insertSpaces 用空格代替制表符
@@ -488,7 +492,7 @@ class LspManager @Inject constructor(
 
     /**
      * 请求内嵌提示（类型注解、参数名）
-     * 
+     *
      * @param uri 文档 URI
      * @param range 请求提示的范围
      * @return 内嵌提示列表
@@ -509,13 +513,17 @@ class LspManager @Inject constructor(
 
     /**
      * 请求给定范围的代码操作
-     * 
+     *
      * @param uri 文档 URI
      * @param range 请求操作的范围
      * @param diagnostics 上下文中的诊断
      * @return 可用代码操作列表
      */
-    suspend fun getCodeActions(uri: String, range: LspRange, diagnostics: List<LspDiagnostic> = emptyList()): List<CodeActionItem> {
+    suspend fun getCodeActions(
+        uri: String,
+        range: LspRange,
+        diagnostics: List<LspDiagnostic> = emptyList()
+    ): List<CodeActionItem> {
         if (!lspEnabled) return emptyList()
         val lang = detectLanguageFromUri(uri) ?: return emptyList()
         val client = getOrCreateClient(lang) ?: return emptyList()
@@ -531,7 +539,7 @@ class LspManager @Inject constructor(
 
     /**
      * 重命名符号
-     * 
+     *
      * @param uri 文档 URI
      * @param line 行号（0-based）
      * @param column 列号（0-based）
@@ -554,12 +562,12 @@ class LspManager @Inject constructor(
 
     /**
      * 从 LSP 客户端获取诊断并发布到诊断导航器
-     * 
+     *
      * 算法步骤：
      * 1. 从 LSP 客户端获取诊断
      * 2. 将基于行/列的 LSP 诊断转换为基于字符偏移的 DiagnosticItem
      * 3. 将转换后的诊断发布到 DiagnosticNavigator
-     * 
+     *
      * @param uri 文档 URI
      * @param languageId 语言 ID
      * @param client LSP 客户端
@@ -577,7 +585,7 @@ class LspManager @Inject constructor(
                         LspDiagnostic.SEVERITY_INFORMATION -> DiagnosticItem.SEVERITY_TYPO
                         else -> DiagnosticItem.SEVERITY_TYPO
                     },
-                    message = d.message,
+                    message = d.message
                 )
             }
             diagnosticNavigator.setLspDiagnostics(uri, items)
@@ -609,7 +617,7 @@ class LspManager @Inject constructor(
 
     /**
      * 获取 LSP 初始化的工作区根 URI
-     * 
+     *
      * @return 文件 URI 字符串
      */
     private fun getRootUri(): String {
@@ -619,7 +627,7 @@ class LspManager @Inject constructor(
 
     /**
      * 注册用户配置的 LSP 服务器
-     * 
+     *
      * @param config 服务器配置
      */
     fun registerUserServer(config: LspServerConfig) {
@@ -638,7 +646,7 @@ class LspManager @Inject constructor(
 
     /**
      * 移除用户配置的 LSP 服务器
-     * 
+     *
      * @param languageId 语言 ID
      * @param name 服务器名称
      */
@@ -697,20 +705,17 @@ class LspManager @Inject constructor(
 
 /**
  * 用户配置的 LSP 客户端，启动用户指定的本地进程
- * 
+ *
  * 这是一个存根实现——完整实现将需要：
  * 1. 产生配置的命令作为子进程
  * 2. 通过 stdin/stdout 实现 JSON-RPC 传输
  * 3. 关联请求/响应 ID
  * 4. 在后台协程中处理通知
- * 
+ *
  * @property config 服务器配置
  * @property context 应用上下文
  */
-private class UserConfiguredLspClient(
-    private val config: LspServerConfig,
-    private val context: Context,
-) : LspClient {
+private class UserConfiguredLspClient(private val config: LspServerConfig, private val context: Context) : LspClient {
 
     @Volatile
     private var running = false
@@ -720,26 +725,24 @@ private class UserConfiguredLspClient(
     override val isRunning: Boolean
         get() = running
 
-    override suspend fun initialize(rootUri: String): Result<Unit> {
-        return try {
-            val cmd = mutableListOf<String>()
-            cmd.add(config.command)
-            cmd.addAll(config.args)
+    override suspend fun initialize(rootUri: String): Result<Unit> = try {
+        val cmd = mutableListOf<String>()
+        cmd.add(config.command)
+        cmd.addAll(config.args)
 
-            val workDir = config.workingDir?.let { File(it) } ?: context.filesDir
+        val workDir = config.workingDir?.let { File(it) } ?: context.filesDir
 
-            process = ProcessBuilder(cmd)
-                .directory(workDir)
-                .redirectErrorStream(true)
-                .start()
+        process = ProcessBuilder(cmd)
+            .directory(workDir)
+            .redirectErrorStream(true)
+            .start()
 
-            running = true
-            Log.d("UserConfiguredLsp", "Started LSP server: ${config.name} (${config.command})")
-            Result.success(Unit)
-        } catch (e: Exception) {
-            Log.e("UserConfiguredLsp", "Failed to start LSP server: ${config.name}", e)
-            Result.failure(e)
-        }
+        running = true
+        Log.d("UserConfiguredLsp", "Started LSP server: ${config.name} (${config.command})")
+        Result.success(Unit)
+    } catch (e: Exception) {
+        Log.e("UserConfiguredLsp", "Failed to start LSP server: ${config.name}", e)
+        Result.failure(e)
     }
 
     override suspend fun openDocument(uri: String, languageId: String, text: String) {
@@ -757,12 +760,21 @@ private class UserConfiguredLspClient(
     override suspend fun completions(uri: String, line: Int, column: Int): List<CompletionItem> = emptyList()
     override suspend fun hover(uri: String, line: Int, column: Int): HoverResult? = null
     override suspend fun gotoDefinition(uri: String, line: Int, column: Int): List<LocationLink> = emptyList()
-    override suspend fun findReferences(uri: String, line: Int, column: Int, includeDeclaration: Boolean): List<LocationLink> = emptyList()
+    override suspend fun findReferences(
+        uri: String,
+        line: Int,
+        column: Int,
+        includeDeclaration: Boolean
+    ): List<LocationLink> = emptyList()
     override suspend fun signatureHelp(uri: String, line: Int, column: Int): String? = null
     override suspend fun formatting(uri: String, tabSize: Int, insertSpaces: Boolean): List<TextEdit> = emptyList()
     override suspend fun diagnostics(uri: String): List<LspDiagnostic> = emptyList()
     override suspend fun inlayHints(uri: String, range: LspRange): List<InlayHintItem> = emptyList()
-    override suspend fun codeActions(uri: String, range: LspRange, diagnostics: List<LspDiagnostic>): List<CodeActionItem> = emptyList()
+    override suspend fun codeActions(
+        uri: String,
+        range: LspRange,
+        diagnostics: List<LspDiagnostic>
+    ): List<CodeActionItem> = emptyList()
     override suspend fun rename(uri: String, line: Int, column: Int, newName: String): WorkspaceEdit? = null
 
     override suspend fun shutdown() {

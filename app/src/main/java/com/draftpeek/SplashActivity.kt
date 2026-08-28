@@ -20,7 +20,6 @@
 package com.draftpeek
 
 import android.annotation.SuppressLint
-
 import android.app.Activity
 import android.content.Intent
 import android.content.res.Configuration
@@ -94,14 +93,14 @@ class SplashActivity : ComponentActivity() {
                             overrideActivityTransition(
                                 Activity.OVERRIDE_TRANSITION_OPEN,
                                 android.R.anim.fade_in,
-                                android.R.anim.fade_out,
+                                android.R.anim.fade_out
                             )
                         } else {
                             @Suppress("DEPRECATION")
                             overridePendingTransition(android.R.anim.fade_in, android.R.anim.fade_out)
                         }
                         finish()
-                    },
+                    }
                 )
             }
         }
@@ -159,7 +158,7 @@ private fun SplashContent(onAnimationComplete: (isFirstLaunch: Boolean) -> Unit)
             onComplete = { animationFinished = true },
             modifier = Modifier
                 .fillMaxSize()
-                .clickable { animationFinished = true },
+                .clickable { animationFinished = true }
         )
     }
 }

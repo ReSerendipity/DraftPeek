@@ -16,13 +16,13 @@
  */
 package com.draftpeek.feature.editor
 
+import java.io.File
+import java.nio.charset.Charset
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertFalse
 import org.junit.jupiter.api.DisplayName
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.io.TempDir
-import java.io.File
-import java.nio.charset.Charset
 
 /**
  * 往返保真（Round-trip Fidelity）测试类。
@@ -173,7 +173,7 @@ Code block:
     def hello():
         print("world")
 
-Another paragraph with trailing spaces  
+Another paragraph with trailing spaces
 This is a new line due to hard break.
 
 ---

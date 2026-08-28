@@ -76,7 +76,7 @@ data class EditorSettingsDefaults(
     val showMinimap: Boolean = false,
     val autoPairCompletion: Boolean = true,
     val autoSave: Boolean = false,
-    val defaultEncoding: String = "UTF-8",
+    val defaultEncoding: String = "UTF-8"
 )
 
 /**
@@ -108,7 +108,7 @@ val LocalFoldInfo = staticCompositionLocalOf { FoldInfo() }
 data class FoldInfo(
     val isFolded: Boolean = false,
     val isSeparating: Boolean = false,
-    val foldPositionRatio: Float = 0.5f,
+    val foldPositionRatio: Float = 0.5f
 )
 
 /**
@@ -119,6 +119,4 @@ data class FoldInfo(
  * @return 功能是否启用
  */
 @Composable
-fun isFeatureEnabled(flag: FeatureFlag): Boolean {
-    return LocalFeatureToggle.current?.isEnabled(flag) ?: flag.defaultEnabled
-}
+fun isFeatureEnabled(flag: FeatureFlag): Boolean = LocalFeatureToggle.current?.isEnabled(flag) ?: flag.defaultEnabled

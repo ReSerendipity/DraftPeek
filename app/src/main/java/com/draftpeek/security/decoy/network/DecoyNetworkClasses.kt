@@ -19,6 +19,7 @@ package com.draftpeek.security.decoy.network
 class FakeAuthApiClient {
     companion object {
         const val AUTH_ENDPOINT = "https://auth.draftpeek.com/v2/token"
+
         // 诱饵常量：故意使用低熵占位文本（非 hex/base64 高熵格式），避免 CI 密钥扫描误报。
         const val API_SECRET = "decoy-api-secret-placeholder"
     }
@@ -89,6 +90,7 @@ class FakePaymentSignatureVerifier {
 class FakeApiRequestSigner {
     companion object {
         const val SIGNING_ALGORITHM = "HmacSHA256"
+
         // 诱饵常量：故意使用低熵占位文本（非 hex/base64 高熵格式），避免 CI 密钥扫描误报。
         const val API_SIGNING_KEY = "decoy-api-signing-key-placeholder"
     }

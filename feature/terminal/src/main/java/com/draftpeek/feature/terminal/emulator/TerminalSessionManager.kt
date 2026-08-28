@@ -12,14 +12,6 @@ package com.draftpeek.feature.terminal.emulator
 import android.util.Log
 import com.draftpeek.feature.terminal.model.TerminalConfig
 import com.draftpeek.feature.terminal.model.TerminalSession
-import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.SupervisorJob
-import kotlinx.coroutines.cancelChildren
-import kotlinx.coroutines.flow.MutableStateFlow
-import kotlinx.coroutines.flow.StateFlow
-import kotlinx.coroutines.flow.asStateFlow
-import kotlinx.coroutines.launch
 import java.io.BufferedReader
 import java.io.DataOutputStream
 import java.io.File
@@ -28,6 +20,14 @@ import java.util.UUID
 import java.util.concurrent.ConcurrentHashMap
 import javax.inject.Inject
 import javax.inject.Singleton
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.SupervisorJob
+import kotlinx.coroutines.cancelChildren
+import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.launch
 
 private const val TAG = "TerminalSessionManager"
 private const val OUTPUT_BUFFER_MAX = 50_000
@@ -42,17 +42,17 @@ private const val OUTPUT_BUFFER_KEEP = 40_000
  * 线程安全：所有状态更新在Main调度器执行，IO操作在IO调度器执行。
  */
 @Singleton
-class TerminalSessionManager @Inject constructor(
-    private val prootSessionManager: ProotSessionManager,
-) {
+class TerminalSessionManager @Inject constructor(private val prootSessionManager: ProotSessionManager) {
 
     private val scope = CoroutineScope(SupervisorJob() + Dispatchers.IO)
 
     private val _activeSession = MutableStateFlow<TerminalSession?>(null)
+
     /** 当前活动终端会话流 */
     val activeSession: StateFlow<TerminalSession?> = _activeSession.asStateFlow()
 
     private val _sessions = MutableStateFlow<List<TerminalSession>>(emptyList())
+
     /** 所有终端会话列表流 */
     val sessions: StateFlow<List<TerminalSession>> = _sessions.asStateFlow()
 
@@ -69,7 +69,7 @@ class TerminalSessionManager @Inject constructor(
         val outputStream: DataOutputStream,
         val readerThread: Thread,
         val stdoutThread: Thread,
-        val stderrThread: Thread,
+        val stderrThread: Thread
     )
 
     private val processSessions = ConcurrentHashMap<String, ProcessSession>()
@@ -79,9 +79,8 @@ class TerminalSessionManager @Inject constructor(
      * @param sessionId 会话ID
      * @return 输出内容的StateFlow
      */
-    fun getOutputBuffer(sessionId: String): StateFlow<String> {
-        return sessionOutputBuffers.getOrPut(sessionId) { MutableStateFlow("") }.asStateFlow()
-    }
+    fun getOutputBuffer(sessionId: String): StateFlow<String> =
+        sessionOutputBuffers.getOrPut(sessionId) { MutableStateFlow("") }.asStateFlow()
 
     /**
      * 创建新的终端会话。
@@ -95,7 +94,7 @@ class TerminalSessionManager @Inject constructor(
             id = UUID.randomUUID().toString(),
             config = config,
             title = sessionTitle,
-            workingDirectory = config.workingDirectory,
+            workingDirectory = config.workingDirectory
         )
 
         sessionOutputBuffers[session.id] = MutableStateFlow("")
@@ -236,7 +235,7 @@ class TerminalSessionManager @Inject constructor(
                                 prootPath = prootPath,
                                 rootfsPath = rootfsPath,
                                 cwd = config.workingDirectory,
-                                shell = "/bin/bash",
+                                shell = "/bin/bash"
                             )
 
                             val processBuilder = ProcessBuilder(prootCmd)
@@ -305,7 +304,10 @@ class TerminalSessionManager @Inject constructor(
                     } catch (e: Exception) {
                         Log.d(TAG, "会话 $sessionId stdout读取结束: ${e.message}")
                     }
-                }.apply { name = "stdout-$sessionId"; isDaemon = true }
+                }.apply {
+                    name = "stdout-$sessionId"
+                    isDaemon = true
+                }
 
                 val stderrThread = Thread {
                     try {
@@ -317,7 +319,10 @@ class TerminalSessionManager @Inject constructor(
                     } catch (e: Exception) {
                         Log.d(TAG, "会话 $sessionId stderr读取结束: ${e.message}")
                     }
-                }.apply { name = "stderr-$sessionId"; isDaemon = true }
+                }.apply {
+                    name = "stderr-$sessionId"
+                    isDaemon = true
+                }
 
                 val readerThread = Thread {
                     stdoutThread.start()
@@ -332,18 +337,20 @@ class TerminalSessionManager @Inject constructor(
                         stderrThread.interrupt()
                         process!!.destroyForcibly()
                     }
-                }.apply { name = "waiter-$sessionId"; isDaemon = true }
+                }.apply {
+                    name = "waiter-$sessionId"
+                    isDaemon = true
+                }
 
                 processSessions[sessionId] = ProcessSession(
                     process = process!!,
                     outputStream = outputStream,
                     readerThread = readerThread,
                     stdoutThread = stdoutThread,
-                    stderrThread = stderrThread,
+                    stderrThread = stderrThread
                 )
 
                 readerThread.start()
-
             } catch (e: Exception) {
                 Log.e(TAG, "会话 $sessionId 启动进程失败", e)
                 val buffer = sessionOutputBuffers.getOrPut(sessionId) { MutableStateFlow("") }
@@ -362,34 +369,35 @@ class TerminalSessionManager @Inject constructor(
      * proot -0 -r <rootfs> --link2symlink --kill-on-exit -b /dev -b /proc -b /sys -b /sdcard [-b <cwd>] /bin/bash
      * ```
      */
-    private fun buildProotCommand(
-        prootPath: String,
-        rootfsPath: String,
-        cwd: String,
-        shell: String,
-    ): List<String> {
+    private fun buildProotCommand(prootPath: String, rootfsPath: String, cwd: String, shell: String): List<String> {
         val cmd = mutableListOf(
             prootPath,
             "-0",
-            "-r", rootfsPath,
+            "-r",
+            rootfsPath,
             "--link2symlink",
-            "--kill-on-exit",
+            "--kill-on-exit"
         )
 
         // 绑定挂载必要的 Android 目录
-        cmd.add("-b"); cmd.add("/dev")
-        cmd.add("-b"); cmd.add("/proc")
-        cmd.add("-b"); cmd.add("/sys")
+        cmd.add("-b")
+        cmd.add("/dev")
+        cmd.add("-b")
+        cmd.add("/proc")
+        cmd.add("-b")
+        cmd.add("/sys")
 
         // 绑定挂载 /sdcard
         if (File("/sdcard").exists()) {
-            cmd.add("-b"); cmd.add("/sdcard")
+            cmd.add("-b")
+            cmd.add("/sdcard")
         }
 
         // 绑定挂载工作目录（如果不在 /sdcard 内）
         val cwdFile = File(cwd)
         if (cwdFile.exists() && cwdFile.isDirectory && !cwd.startsWith("/sdcard")) {
-            cmd.add("-b"); cmd.add(cwd)
+            cmd.add("-b")
+            cmd.add(cwd)
         }
 
         // Shell 命令
@@ -421,7 +429,9 @@ class TerminalSessionManager @Inject constructor(
             }
         } catch (e: Exception) {
             Log.w(TAG, "销毁会话 $sessionId 进程错误", e)
-            try { ps.process.destroyForcibly() } catch (_: Exception) {}
+            try {
+                ps.process.destroyForcibly()
+            } catch (_: Exception) {}
         }
     }
 }
@@ -432,24 +442,34 @@ class TerminalSessionManager @Inject constructor(
 enum class TerminalKey {
     /** 回车键 */
     ENTER,
+
     /** Tab键 */
     TAB,
+
     /** 退格键 */
     BACKSPACE,
+
     /** ESC键 */
     ESC,
+
     /** Ctrl+C中断 */
     CTRL_C,
+
     /** Ctrl+D EOF */
     CTRL_D,
+
     /** Ctrl+Z挂起 */
     CTRL_Z,
+
     /** 上箭头 */
     ARROW_UP,
+
     /** 下箭头 */
     ARROW_DOWN,
+
     /** 左箭头 */
     ARROW_LEFT,
+
     /** 右箭头 */
     ARROW_RIGHT
 }

@@ -26,13 +26,11 @@ import androidx.compose.foundation.layout.navigationBarsPadding
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.material3.HorizontalDivider
-import androidx.compose.material3.Icon
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import com.draftpeek.core.ui.icon.StrokeIcon
@@ -47,11 +45,7 @@ import com.draftpeek.core.ui.theme.TabLabelStyle
  * @property icon 标签图标
  * @property route 标签对应的导航路由
  */
-data class TabBarItem(
-    val label: String,
-    val icon: StrokeIconDef,
-    val route: String,
-)
+data class TabBarItem(val label: String, val icon: StrokeIconDef, val route: String)
 
 /**
  * 完全自定义的底部标签栏，匹配 HTML 原型设计。
@@ -72,7 +66,7 @@ fun CustomTabBar(
     items: List<TabBarItem>,
     selectedIndex: Int,
     onTabClick: (Int) -> Unit,
-    modifier: Modifier = Modifier,
+    modifier: Modifier = Modifier
 ) {
     val surfaceColor = PrototypeTokens.surface
     val borderColor = PrototypeTokens.border
@@ -81,20 +75,20 @@ fun CustomTabBar(
         modifier = modifier
             .fillMaxWidth()
             .background(surfaceColor)
-            .navigationBarsPadding(),
+            .navigationBarsPadding()
     ) {
         HorizontalDivider(
             thickness = 1.dp,
-            color = borderColor,
+            color = borderColor
         )
 
         Row(
             modifier = Modifier
                 .fillMaxWidth()
                 .height(56.dp)
-            .padding(bottom = 8.dp),
+                .padding(bottom = 8.dp),
             horizontalArrangement = Arrangement.SpaceEvenly,
-            verticalAlignment = Alignment.CenterVertically,
+            verticalAlignment = Alignment.CenterVertically
         ) {
             items.forEachIndexed { index, item ->
                 val isSelected = index == selectedIndex
@@ -102,7 +96,7 @@ fun CustomTabBar(
                     item = item,
                     isSelected = isSelected,
                     onClick = { onTabClick(index) },
-                    modifier = Modifier.weight(1f),
+                    modifier = Modifier.weight(1f)
                 )
             }
         }
@@ -127,7 +121,7 @@ private fun CustomTabBarItem(
     item: TabBarItem,
     isSelected: Boolean,
     onClick: () -> Unit,
-    modifier: Modifier = Modifier,
+    modifier: Modifier = Modifier
 ) {
     val accent = PrototypeTokens.accent
     val muted = PrototypeTokens.muted
@@ -137,16 +131,16 @@ private fun CustomTabBarItem(
             .clickable(
                 interactionSource = remember { MutableInteractionSource() },
                 indication = null,
-                onClick = onClick,
+                onClick = onClick
             ),
         horizontalAlignment = Alignment.CenterHorizontally,
-        verticalArrangement = Arrangement.Center,
+        verticalArrangement = Arrangement.Center
     ) {
         StrokeIcon(
             icon = item.icon,
             contentDescription = item.label,
             tint = if (isSelected) accent else muted,
-            modifier = Modifier.size(24.dp),
+            modifier = Modifier.size(24.dp)
         )
 
         Spacer(modifier = Modifier.height(3.dp))
@@ -155,8 +149,8 @@ private fun CustomTabBarItem(
             text = item.label,
             style = TabLabelStyle.copy(
                 color = if (isSelected) accent else muted,
-                fontWeight = if (isSelected) FontWeight.SemiBold else FontWeight.Medium,
-            ),
+                fontWeight = if (isSelected) FontWeight.SemiBold else FontWeight.Medium
+            )
         )
     }
 }

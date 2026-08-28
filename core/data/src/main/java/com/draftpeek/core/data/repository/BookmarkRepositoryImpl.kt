@@ -11,17 +11,15 @@ package com.draftpeek.core.data.repository
 
 import com.draftpeek.core.data.dao.BookmarkDao
 import com.draftpeek.core.data.entity.BookmarkEntity
-import kotlinx.coroutines.flow.Flow
 import javax.inject.Inject
+import kotlinx.coroutines.flow.Flow
 
 /**
  * [BookmarkRepository] 的 Room 实现。
  *
  * @property dao 书签 DAO 实例，由 Hilt 注入
  */
-class BookmarkRepositoryImpl @Inject constructor(
-    private val dao: BookmarkDao,
-) : BookmarkRepository {
+class BookmarkRepositoryImpl @Inject constructor(private val dao: BookmarkDao) : BookmarkRepository {
 
     override val allBookmarks: Flow<List<BookmarkEntity>> = dao.getAllBookmarks()
 
@@ -37,7 +35,7 @@ class BookmarkRepositoryImpl @Inject constructor(
             BookmarkEntity(
                 uri = uri,
                 fileName = fileName,
-                directoryUri = directoryUri,
+                directoryUri = directoryUri
             )
         )
     }

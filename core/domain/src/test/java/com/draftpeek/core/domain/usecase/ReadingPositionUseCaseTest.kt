@@ -46,8 +46,14 @@ class ReadingPositionUseCaseTest {
         @DisplayName("返回保存的阅读位置")
         fun get_returnsReadingPosition() = runTest {
             val file = RecentFile(
-                uri = "uri1", fileName = "file.kt", language = "kotlin",
-                lastOpenedAt = 0L, cursorLine = 42, cursorColumn = 7, scrollX = 50, scrollY = 100,
+                uri = "uri1",
+                fileName = "file.kt",
+                language = "kotlin",
+                lastOpenedAt = 0L,
+                cursorLine = 42,
+                cursorColumn = 7,
+                scrollX = 50,
+                scrollY = 100
             )
             coEvery { repository.getReadingPosition("uri1") } returns file
 

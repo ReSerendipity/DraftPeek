@@ -30,9 +30,8 @@ interface CredentialProvider {
      *
      * @property cause 原始异常原因，可为null
      */
-    class CredentialLockedException(
-        cause: Throwable? = null,
-    ) : RuntimeException("Stored credentials are inaccessible due to Keystore key invalidation", cause)
+    class CredentialLockedException(cause: Throwable? = null) :
+        RuntimeException("Stored credentials are inaccessible due to Keystore key invalidation", cause)
 
     /**
      * 表示特定主机的Git凭证集合数据类。
@@ -50,7 +49,7 @@ interface CredentialProvider {
         val host: String,
         val username: String? = null,
         val password: String? = null,
-        val token: String? = null,
+        val token: String? = null
     ) {
         /**
          * 是否存在有效的令牌。

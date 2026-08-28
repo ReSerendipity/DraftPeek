@@ -42,7 +42,7 @@ import androidx.room.PrimaryKey
  */
 @Entity(
     tableName = "user_activity",
-    indices = [Index(value = ["date"], unique = true)],
+    indices = [Index(value = ["date"], unique = true)]
 )
 data class UserActivity(
     @PrimaryKey
@@ -58,35 +58,33 @@ data class UserActivity(
     val usageDurationMinutes: Int = 0,
     val charWriteCount: Int = 0,
     val fileCreateCount: Int = 0,
-    val updatedAt: Long = System.currentTimeMillis(),
+    val updatedAt: Long = System.currentTimeMillis()
 ) {
     /**
      * 计算加权活动总强度，用于热力图颜色深度渲染。
      * 不同操作类型按业务重要性赋予不同权重。
      * @return 加权后的总强度值
      */
-    fun totalIntensity(): Int =
-        fileOpenCount * 3 +
-            textEditCount * 5 +
-            otherOperationCount * 1 +
-            sessionCount * 1 +
-            previewCount * 2 +
-            searchCount * 2 +
-            snippetCount * 2 +
-            diffCount * 2 +
-            usageDurationMinutes * 1 +
-            charWriteCount * 1 +
-            fileCreateCount * 3
+    fun totalIntensity(): Int = fileOpenCount * 3 +
+        textEditCount * 5 +
+        otherOperationCount * 1 +
+        sessionCount * 1 +
+        previewCount * 2 +
+        searchCount * 2 +
+        snippetCount * 2 +
+        diffCount * 2 +
+        usageDurationMinutes * 1 +
+        charWriteCount * 1 +
+        fileCreateCount * 3
 
     /**
      * 计算未加权的总操作次数，用于简单计数和活动等级划分。
      * @return 所有操作类型的简单总和
      */
-    fun totalOperations(): Int =
-        fileOpenCount + textEditCount + otherOperationCount +
-            sessionCount + previewCount + searchCount +
-            snippetCount + diffCount +
-            usageDurationMinutes + charWriteCount + fileCreateCount
+    fun totalOperations(): Int = fileOpenCount + textEditCount + otherOperationCount +
+        sessionCount + previewCount + searchCount +
+        snippetCount + diffCount +
+        usageDurationMinutes + charWriteCount + fileCreateCount
 
     /**
      * 判断当天是否有任何用户活动。

@@ -24,10 +24,10 @@ import androidx.annotation.WorkerThread
 import com.google.android.play.core.integrity.IntegrityManager
 import com.google.android.play.core.integrity.IntegrityManagerFactory
 import com.google.android.play.core.integrity.IntegrityTokenRequest
+import kotlin.coroutines.resume
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.suspendCancellableCoroutine
 import kotlinx.coroutines.withContext
-import kotlin.coroutines.resume
 
 private const val TAG = "PlayIntegrity"
 
@@ -48,8 +48,10 @@ object PlayIntegrityChecker {
     sealed class IntegrityCheckResult {
         /** Play 服务可用且 token 请求成功 */
         data class Success(val token: String) : IntegrityCheckResult()
+
         /** 设备没有 Google Play 服务（中性信号，不一定表示威胁） */
         data object NoPlayServices : IntegrityCheckResult()
+
         /** API 请求失败（可疑信号） */
         data class Error(val message: String) : IntegrityCheckResult()
     }
@@ -59,16 +61,12 @@ object PlayIntegrityChecker {
      */
     sealed class ServerVerificationResult {
         /** 设备通过服务端验证 */
-        data class Trusted(
-            val deviceIntegrity: String,
-            val appIntegrity: String,
-        ) : ServerVerificationResult()
+        data class Trusted(val deviceIntegrity: String, val appIntegrity: String) : ServerVerificationResult()
+
         /** 设备未通过验证 */
-        data class NotTrusted(
-            val deviceIntegrity: String,
-            val appIntegrity: String,
-            val reason: String,
-        ) : ServerVerificationResult()
+        data class NotTrusted(val deviceIntegrity: String, val appIntegrity: String, val reason: String) :
+            ServerVerificationResult()
+
         /** 服务端不可达或验证失败 */
         data class Unavailable(val reason: String) : ServerVerificationResult()
     }
@@ -90,48 +88,49 @@ object PlayIntegrityChecker {
      * @return 检查结果
      */
     @WorkerThread
-    suspend fun requestIntegrityToken(context: Context): IntegrityCheckResult {
-        return try {
-            val integrityManager: IntegrityManager =
-                IntegrityManagerFactory.create(context)
+    suspend fun requestIntegrityToken(context: Context): IntegrityCheckResult = try {
+        val integrityManager: IntegrityManager =
+            IntegrityManagerFactory.create(context)
 
-            // 生成随机 nonce（32 字节十六进制字符串）
-            val nonce = generateNonce()
+        // 生成随机 nonce（32 字节十六进制字符串）
+        val nonce = generateNonce()
 
-            val request = IntegrityTokenRequest.builder()
-                .setNonce(nonce)
-                .build()
+        val request = IntegrityTokenRequest.builder()
+            .setNonce(nonce)
+            .build()
 
-            suspendCancellableCoroutine { continuation ->
-                integrityManager.requestIntegrityToken(request)
-                    .addOnSuccessListener { response ->
-                        val token = response.token()
-                        lastResult = IntegrityCheckResult.Success(token)
-                        continuation.resume(IntegrityCheckResult.Success(token))
+        suspendCancellableCoroutine { continuation ->
+            integrityManager.requestIntegrityToken(request)
+                .addOnSuccessListener { response ->
+                    val token = response.token()
+                    lastResult = IntegrityCheckResult.Success(token)
+                    continuation.resume(IntegrityCheckResult.Success(token))
+                }
+                .addOnFailureListener { e ->
+                    // 判断是否是因为没有 Play 服务
+                    val message = e.message ?: "Unknown error"
+                    if (message.contains("Play Services") || message.contains("SERVICE")) {
+                        lastResult = IntegrityCheckResult.NoPlayServices
+                        continuation.resume(IntegrityCheckResult.NoPlayServices)
+                    } else {
+                        lastResult = IntegrityCheckResult.Error(message)
+                        continuation.resume(IntegrityCheckResult.Error(message))
                     }
-                    .addOnFailureListener { e ->
-                        // 判断是否是因为没有 Play 服务
-                        val message = e.message ?: "Unknown error"
-                        if (message.contains("Play Services") || message.contains("SERVICE")) {
-                            lastResult = IntegrityCheckResult.NoPlayServices
-                            continuation.resume(IntegrityCheckResult.NoPlayServices)
-                        } else {
-                            lastResult = IntegrityCheckResult.Error(message)
-                            continuation.resume(IntegrityCheckResult.Error(message))
-                        }
-                    }
-            }
-        } catch (e: Exception) {
-            // 如果创建 IntegrityManager 失败，可能设备没有 Play 服务
-            val message = e.message ?: "Unknown error"
-            if (message.contains("Play Services") || message.contains("SERVICE") ||
-                message.contains("ClassNotFound") || message.contains("NoClassDefFound")) {
-                lastResult = IntegrityCheckResult.NoPlayServices
-                IntegrityCheckResult.NoPlayServices
-            } else {
-                lastResult = IntegrityCheckResult.Error(message)
-                IntegrityCheckResult.Error(message)
-            }
+                }
+        }
+    } catch (e: Exception) {
+        // 如果创建 IntegrityManager 失败，可能设备没有 Play 服务
+        val message = e.message ?: "Unknown error"
+        if (message.contains("Play Services") ||
+            message.contains("SERVICE") ||
+            message.contains("ClassNotFound") ||
+            message.contains("NoClassDefFound")
+        ) {
+            lastResult = IntegrityCheckResult.NoPlayServices
+            IntegrityCheckResult.NoPlayServices
+        } else {
+            lastResult = IntegrityCheckResult.Error(message)
+            IntegrityCheckResult.Error(message)
         }
     }
 
@@ -145,9 +144,7 @@ object PlayIntegrityChecker {
      *
      * @return true 如果检查成功（有 Play 服务且 token 获取成功）
      */
-    fun isDeviceTrusted(): Boolean {
-        return lastResult is IntegrityCheckResult.Success
-    }
+    fun isDeviceTrusted(): Boolean = lastResult is IntegrityCheckResult.Success
 
     /**
      * 执行完整的服务端验证流程：
@@ -163,10 +160,7 @@ object PlayIntegrityChecker {
      * @return 服务端验证结果
      */
     @WorkerThread
-    suspend fun verifyWithServer(
-        context: Context,
-        serverUrl: String = DEFAULT_SERVER_URL,
-    ): ServerVerificationResult {
+    suspend fun verifyWithServer(context: Context, serverUrl: String = DEFAULT_SERVER_URL): ServerVerificationResult {
         // Step 1: 获取 token 和 nonce
         val tokenResult = requestIntegrityToken(context)
         val token = when (tokenResult) {
@@ -185,57 +179,55 @@ object PlayIntegrityChecker {
      * 将 Play Integrity token 发送到服务端进行验证。
      */
     @WorkerThread
-    private suspend fun sendTokenToServer(
-        token: String,
-        nonce: String,
-        serverUrl: String,
-    ): ServerVerificationResult = withContext(Dispatchers.IO) {
-        try {
-            val jsonBody = org.json.JSONObject().apply {
-                put("token", token)
-                put("nonce", nonce)
-                put("package_name", "com.draftpeek")
-            }
+    private suspend fun sendTokenToServer(token: String, nonce: String, serverUrl: String): ServerVerificationResult =
+        withContext(Dispatchers.IO) {
+            try {
+                val jsonBody = org.json.JSONObject().apply {
+                    put("token", token)
+                    put("nonce", nonce)
+                    put("package_name", "com.draftpeek")
+                }
 
-            val url = java.net.URL("$serverUrl/integrity/verify")
-            val conn = (url.openConnection() as java.net.HttpURLConnection).apply {
-                requestMethod = "POST"
-                connectTimeout = 10_000
-                readTimeout = 10_000
-                doOutput = true
-                setRequestProperty("Content-Type", "application/json; charset=utf-8")
-            }
+                val url = java.net.URL("$serverUrl/integrity/verify")
+                val conn = (url.openConnection() as java.net.HttpURLConnection).apply {
+                    requestMethod = "POST"
+                    connectTimeout = 10_000
+                    readTimeout = 10_000
+                    doOutput = true
+                    setRequestProperty("Content-Type", "application/json; charset=utf-8")
+                }
 
-            conn.outputStream.use { it.write(jsonBody.toString().toByteArray(Charsets.UTF_8)) }
+                conn.outputStream.use { it.write(jsonBody.toString().toByteArray(Charsets.UTF_8)) }
 
-            val responseCode = conn.responseCode
-            if (responseCode != 200) {
+                val responseCode = conn.responseCode
+                if (responseCode != 200) {
+                    conn.disconnect()
+                    return@withContext ServerVerificationResult.Unavailable(
+                        "Server returned HTTP $responseCode"
+                    )
+                }
+
+                val body = conn.inputStream.bufferedReader().use { it.readText() }
                 conn.disconnect()
-                return@withContext ServerVerificationResult.Unavailable(
-                    "Server returned HTTP $responseCode"
-                )
+
+                val json = org.json.JSONObject(body)
+                val verified = json.optBoolean("verified", false)
+                val deviceIntegrity = json.optString("device_integrity", "UNKNOWN")
+                val appIntegrity = json.optString("app_integrity", "UNKNOWN")
+
+                if (verified) {
+                    ServerVerificationResult.Trusted(deviceIntegrity, appIntegrity)
+                } else {
+                    ServerVerificationResult.NotTrusted(
+                        deviceIntegrity,
+                        appIntegrity,
+                        "Server verification failed"
+                    )
+                }
+            } catch (e: Exception) {
+                ServerVerificationResult.Unavailable(e.message ?: "Network error")
             }
-
-            val body = conn.inputStream.bufferedReader().use { it.readText() }
-            conn.disconnect()
-
-            val json = org.json.JSONObject(body)
-            val verified = json.optBoolean("verified", false)
-            val deviceIntegrity = json.optString("device_integrity", "UNKNOWN")
-            val appIntegrity = json.optString("app_integrity", "UNKNOWN")
-
-            if (verified) {
-                ServerVerificationResult.Trusted(deviceIntegrity, appIntegrity)
-            } else {
-                ServerVerificationResult.NotTrusted(
-                    deviceIntegrity, appIntegrity,
-                    "Server verification failed",
-                )
-            }
-        } catch (e: Exception) {
-            ServerVerificationResult.Unavailable(e.message ?: "Network error")
         }
-    }
 
     /** DraftPeek Integrity Server 默认地址 */
     private const val DEFAULT_SERVER_URL = "https://integrity.draftpeek.com"

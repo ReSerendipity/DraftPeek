@@ -25,9 +25,7 @@ import android.util.Log
  * 注意：永不将原始用户命令字符串直接传递给shell！
  * 始终传递分词后的参数数组以防止命令注入。
  */
-class CommandExecutor(
-    private val sessionManager: TerminalSessionManager,
-) {
+class CommandExecutor(private val sessionManager: TerminalSessionManager) {
 
     /**
      * 命令执行结果密封类。
@@ -49,10 +47,7 @@ class CommandExecutor(
          * @property warning 警告消息
          * @property executeToken 用于确认执行的令牌
          */
-        data class RequiresConfirmation(
-            val warning: String,
-            val executeToken: String,
-        ) : ExecutionResult()
+        data class RequiresConfirmation(val warning: String, val executeToken: String) : ExecutionResult()
 
         /**
          * 执行期间发生错误。
@@ -97,7 +92,7 @@ class CommandExecutor(
                     pendingConfirmations[token] = args
                     ExecutionResult.RequiresConfirmation(
                         warning = validation.warning ?: "此命令可能存在危险",
-                        executeToken = token,
+                        executeToken = token
                     )
                 } else {
                     // Step 3: Execute with tokenized args (NOT raw string!)
@@ -126,22 +121,18 @@ class CommandExecutor(
      * 关键安全点：写入命令时附加换行符，但不重新拼接成shell命令字符串。
      * 由于使用-proot/shell会话逐字符/逐行处理输入，这保持了参数完整性。
      */
-    private fun executeValidated(sessionId: String, args: List<String>): ExecutionResult {
-        return try {
-            // 将分词后的参数拼接为命令行并发送到指定会话
-            val commandLine = args.joinToString(" ") + "\n"
-            sessionManager.sendInput(sessionId, commandLine)
+    private fun executeValidated(sessionId: String, args: List<String>): ExecutionResult = try {
+        // 将分词后的参数拼接为命令行并发送到指定会话
+        val commandLine = args.joinToString(" ") + "\n"
+        sessionManager.sendInput(sessionId, commandLine)
 
-            Log.d("CommandExecutor", "执行: ${args.first()} (${args.size - 1} 个参数)")
-            ExecutionResult.Success
-        } catch (e: Exception) {
-            Log.e("CommandExecutor", "执行失败", e)
-            ExecutionResult.Error(e.message ?: "未知错误")
-        }
+        Log.d("CommandExecutor", "执行: ${args.first()} (${args.size - 1} 个参数)")
+        ExecutionResult.Success
+    } catch (e: Exception) {
+        Log.e("CommandExecutor", "执行失败", e)
+        ExecutionResult.Error(e.message ?: "未知错误")
     }
 
     @Synchronized
-    private fun generateToken(): String {
-        return "exec_${System.currentTimeMillis()}_${++tokenCounter}"
-    }
+    private fun generateToken(): String = "exec_${System.currentTimeMillis()}_${++tokenCounter}"
 }

@@ -30,6 +30,7 @@ import androidx.sqlite.db.SupportSQLiteDatabase
 import com.draftpeek.core.data.dao.BookmarkDao
 import com.draftpeek.core.data.dao.LinkDao
 import com.draftpeek.core.data.dao.RecentFileDao
+import com.draftpeek.core.data.dao.SecurityEventDao
 import com.draftpeek.core.data.dao.SnippetDao
 import com.draftpeek.core.data.dao.UserActivityDao
 import com.draftpeek.core.data.entity.BookmarkEntity
@@ -39,7 +40,6 @@ import com.draftpeek.core.data.entity.SecurityEventEntity
 import com.draftpeek.core.data.entity.Snippet
 import com.draftpeek.core.data.entity.SnippetFts
 import com.draftpeek.core.data.entity.UserActivity
-import com.draftpeek.core.data.dao.SecurityEventDao
 
 /**
  * 应用 Room 数据库主类。
@@ -53,7 +53,7 @@ import com.draftpeek.core.data.dao.SecurityEventDao
 @Database(
     entities = [BookmarkEntity::class, LinkEntity::class, RecentFile::class, Snippet::class, SnippetFts::class, UserActivity::class, SecurityEventEntity::class],
     version = 12,
-    exportSchema = true,
+    exportSchema = true
 )
 abstract class AppDatabase : RoomDatabase() {
     /**
@@ -128,12 +128,18 @@ abstract class AppDatabase : RoomDatabase() {
          */
         val MIGRATION_2_3 = object : Migration(2, 3) {
             override fun migrate(db: SupportSQLiteDatabase) {
-                db.execSQL("CREATE INDEX IF NOT EXISTS index_snippets_category_updatedAt ON snippets(category, updatedAt)")
-                db.execSQL("CREATE INDEX IF NOT EXISTS index_snippets_language_updatedAt ON snippets(language, updatedAt)")
+                db.execSQL(
+                    "CREATE INDEX IF NOT EXISTS index_snippets_category_updatedAt ON snippets(category, updatedAt)"
+                )
+                db.execSQL(
+                    "CREATE INDEX IF NOT EXISTS index_snippets_language_updatedAt ON snippets(language, updatedAt)"
+                )
                 db.execSQL("CREATE INDEX IF NOT EXISTS index_snippets_updatedAt ON snippets(updatedAt)")
                 db.execSQL("CREATE INDEX IF NOT EXISTS index_snippets_category ON snippets(category)")
 
-                db.execSQL("CREATE INDEX IF NOT EXISTS index_recent_files_isFavorite_lastOpenedAt ON recent_files(isFavorite, lastOpenedAt)")
+                db.execSQL(
+                    "CREATE INDEX IF NOT EXISTS index_recent_files_isFavorite_lastOpenedAt ON recent_files(isFavorite, lastOpenedAt)"
+                )
                 db.execSQL("CREATE INDEX IF NOT EXISTS index_recent_files_lastOpenedAt ON recent_files(lastOpenedAt)")
 
                 db.execSQL(
@@ -394,7 +400,9 @@ abstract class AppDatabase : RoomDatabase() {
                     )
                     """.trimIndent()
                 )
-                db.execSQL("CREATE INDEX IF NOT EXISTS index_security_events_timestampEpochMs ON security_events(timestampEpochMs)")
+                db.execSQL(
+                    "CREATE INDEX IF NOT EXISTS index_security_events_timestampEpochMs ON security_events(timestampEpochMs)"
+                )
                 db.execSQL("CREATE INDEX IF NOT EXISTS index_security_events_eventType ON security_events(eventType)")
             }
         }
@@ -420,7 +428,9 @@ abstract class AppDatabase : RoomDatabase() {
                     )
                     """.trimIndent()
                 )
-                db.execSQL("CREATE UNIQUE INDEX IF NOT EXISTS index_links_sourceUri_targetTitle ON links(sourceUri, targetTitle)")
+                db.execSQL(
+                    "CREATE UNIQUE INDEX IF NOT EXISTS index_links_sourceUri_targetTitle ON links(sourceUri, targetTitle)"
+                )
                 db.execSQL("CREATE INDEX IF NOT EXISTS index_links_targetTitle ON links(targetTitle)")
                 db.execSQL("CREATE INDEX IF NOT EXISTS index_links_sourceUri ON links(sourceUri)")
             }
@@ -440,7 +450,7 @@ abstract class AppDatabase : RoomDatabase() {
             val title: String,
             val content: String,
             val language: String?,
-            val category: String,
+            val category: String
         )
 
         /**
@@ -456,7 +466,7 @@ abstract class AppDatabase : RoomDatabase() {
     println("Hello, World!")
 }""",
                 language = "kotlin",
-                category = "Kotlin",
+                category = "Kotlin"
             ),
             DefaultSnippet(
                 title = "Compose Screen Template",
@@ -472,7 +482,7 @@ fun MyScreen(
     }
 }""",
                 language = "kotlin",
-                category = "Compose",
+                category = "Compose"
             ),
             DefaultSnippet(
                 title = "Room DAO Query",
@@ -488,7 +498,7 @@ interface MyDao {
     fun getAll(): Flow<List<Item>>
 }""",
                 language = "kotlin",
-                category = "Room",
+                category = "Room"
             ),
             DefaultSnippet(
                 title = "Hilt Module",
@@ -500,7 +510,7 @@ abstract class MyModule {
     abstract fun bindRepository(impl: RepositoryImpl): Repository
 }""",
                 language = "kotlin",
-                category = "Hilt",
+                category = "Hilt"
             ),
             DefaultSnippet(
                 title = "Python FastAPI Endpoint",
@@ -512,7 +522,7 @@ app = FastAPI()
 async def read_item(item_id: int, q: str | None = None):
     return {"item_id": item_id, "q": q}""",
                 language = "python",
-                category = "Python",
+                category = "Python"
             ),
             DefaultSnippet(
                 title = "HTML5 Boilerplate",
@@ -528,7 +538,7 @@ async def read_item(item_id: int, q: str | None = None):
 </body>
 </html>""",
                 language = "html",
-                category = "Web",
+                category = "Web"
             ),
             DefaultSnippet(
                 title = "JSON Structure",
@@ -541,8 +551,8 @@ async def read_item(item_id: int, q: str | None = None):
     ]
 }""",
                 language = "json",
-                category = "Data",
-            ),
+                category = "Data"
+            )
         )
 
         /**
@@ -567,7 +577,7 @@ async def read_item(item_id: int, q: str | None = None):
                             snippet.language,
                             snippet.category,
                             now,
-                            now,
+                            now
                         )
                     )
                 }

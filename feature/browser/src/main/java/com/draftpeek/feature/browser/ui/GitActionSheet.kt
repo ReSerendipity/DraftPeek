@@ -74,7 +74,7 @@ fun GitActionSheet(
     onPull: () -> Unit,
     onFetch: () -> Unit,
     onCheckout: (String) -> Unit,
-    modifier: Modifier = Modifier,
+    modifier: Modifier = Modifier
 ) {
     val sheetState = rememberModalBottomSheetState(skipPartiallyExpanded = true)
     val fg = PrototypeTokens.fg
@@ -88,33 +88,33 @@ fun GitActionSheet(
         onDismissRequest = onDismiss,
         sheetState = sheetState,
         containerColor = surface,
-        modifier = modifier,
+        modifier = modifier
     ) {
         Column(
             modifier = Modifier
                 .fillMaxWidth()
                 .padding(horizontal = PrototypeSpacing.ScreenHorizontal)
-                .padding(bottom = 32.dp),
+                .padding(bottom = 32.dp)
         ) {
             Row(
                 modifier = Modifier
                     .fillMaxWidth()
                     .padding(bottom = 16.dp),
-                verticalAlignment = Alignment.CenterVertically,
+                verticalAlignment = Alignment.CenterVertically
             ) {
                 Box(
                     modifier = Modifier
                         .clip(RoundedCornerShape(6.dp))
                         .background(accentSoft)
-                        .padding(horizontal = 10.dp, vertical = 4.dp),
+                        .padding(horizontal = 10.dp, vertical = 4.dp)
                 ) {
                     Text(
                         text = uiState.branchName.ifBlank { "HEAD" },
                         style = MonoLabelStyle.copy(
                             color = accent,
                             fontWeight = FontWeight.SemiBold,
-                            fontSize = 12.sp,
-                        ),
+                            fontSize = 12.sp
+                        )
                     )
                 }
                 Spacer(modifier = Modifier.width(12.dp))
@@ -125,7 +125,7 @@ fun GitActionSheet(
                         color = muted,
                         maxLines = 1,
                         overflow = TextOverflow.Ellipsis,
-                        modifier = Modifier.weight(1f),
+                        modifier = Modifier.weight(1f)
                     )
                 }
             }
@@ -138,14 +138,14 @@ fun GitActionSheet(
                         .background(PrototypeTokens.elevated)
                         .border(1.dp, border, RoundedCornerShape(8.dp))
                         .padding(horizontal = 14.dp, vertical = 10.dp),
-                    verticalAlignment = Alignment.CenterVertically,
+                    verticalAlignment = Alignment.CenterVertically
                 ) {
                     Text(
                         text = stringResource(R.string.browser_git_status_summary, uiState.modifiedCount),
                         style = DraftPeekTypography.bodyMedium.copy(
-                            fontWeight = FontWeight.Medium,
+                            fontWeight = FontWeight.Medium
                         ),
-                        color = fg,
+                        color = fg
                     )
                 }
                 Spacer(modifier = Modifier.height(12.dp))
@@ -157,12 +157,12 @@ fun GitActionSheet(
                         .background(SemanticColors.Success.copy(alpha = 0.08f))
                         .border(1.dp, SemanticColors.Success.copy(alpha = 0.15f), RoundedCornerShape(8.dp))
                         .padding(horizontal = 14.dp, vertical = 10.dp),
-                    verticalAlignment = Alignment.CenterVertically,
+                    verticalAlignment = Alignment.CenterVertically
                 ) {
                     Text(
                         text = stringResource(R.string.browser_git_status_clean),
                         style = DraftPeekTypography.bodyMedium,
-                        color = SemanticColors.Success,
+                        color = SemanticColors.Success
                     )
                 }
                 Spacer(modifier = Modifier.height(12.dp))
@@ -172,7 +172,7 @@ fun GitActionSheet(
                 Text(
                     text = stringResource(R.string.browser_git_last_commit),
                     style = MonoLabelStyle,
-                    color = muted,
+                    color = muted
                 )
                 Spacer(modifier = Modifier.height(4.dp))
                 Text(
@@ -180,7 +180,7 @@ fun GitActionSheet(
                     style = DraftPeekTypography.bodySmall,
                     color = fg,
                     maxLines = 2,
-                    overflow = TextOverflow.Ellipsis,
+                    overflow = TextOverflow.Ellipsis
                 )
                 Spacer(modifier = Modifier.height(16.dp))
             }
@@ -188,13 +188,13 @@ fun GitActionSheet(
             Text(
                 text = stringResource(R.string.browser_git_actions),
                 style = MonoLabelStyle,
-                color = muted,
+                color = muted
             )
             Spacer(modifier = Modifier.height(8.dp))
 
             Row(
                 modifier = Modifier.fillMaxWidth(),
-                horizontalArrangement = Arrangement.spacedBy(8.dp),
+                horizontalArrangement = Arrangement.spacedBy(8.dp)
             ) {
                 GitActionButton(
                     icon = Icons.Filled.CloudUpload,
@@ -202,7 +202,7 @@ fun GitActionSheet(
                     onClick = onPush,
                     enabled = !uiState.isPushing,
                     isLoading = uiState.isPushing,
-                    modifier = Modifier.weight(1f),
+                    modifier = Modifier.weight(1f)
                 )
                 GitActionButton(
                     icon = Icons.Filled.CloudDownload,
@@ -210,7 +210,7 @@ fun GitActionSheet(
                     onClick = onPull,
                     enabled = !uiState.isPulling,
                     isLoading = uiState.isPulling,
-                    modifier = Modifier.weight(1f),
+                    modifier = Modifier.weight(1f)
                 )
                 GitActionButton(
                     icon = Icons.Filled.Sync,
@@ -218,7 +218,7 @@ fun GitActionSheet(
                     onClick = onFetch,
                     enabled = !uiState.isFetching,
                     isLoading = uiState.isFetching,
-                    modifier = Modifier.weight(1f),
+                    modifier = Modifier.weight(1f)
                 )
             }
 
@@ -231,7 +231,7 @@ fun GitActionSheet(
                 enabled = !uiState.isCommitting && uiState.modifiedCount > 0,
                 isLoading = uiState.isCommitting,
                 modifier = Modifier.fillMaxWidth(),
-                isPrimary = true,
+                isPrimary = true
             )
 
             if (uiState.isGitRepo) {
@@ -242,7 +242,7 @@ fun GitActionSheet(
                 Text(
                     text = stringResource(R.string.browser_git_checkout_branch),
                     style = MonoLabelStyle,
-                    color = muted,
+                    color = muted
                 )
                 Spacer(modifier = Modifier.height(4.dp))
 
@@ -250,14 +250,14 @@ fun GitActionSheet(
                     Text(
                         text = stringResource(R.string.browser_git_no_branches),
                         style = DraftPeekTypography.bodySmall,
-                        color = muted,
+                        color = muted
                     )
                 } else {
                     LazyColumn(
                         modifier = Modifier
                             .fillMaxWidth()
                             .heightIn(max = 150.dp),
-                        verticalArrangement = Arrangement.spacedBy(2.dp),
+                        verticalArrangement = Arrangement.spacedBy(2.dp)
                     ) {
                         items(branches, key = { it }) { branch ->
                             val displayName = branch.removePrefix("refs/heads/")
@@ -269,23 +269,23 @@ fun GitActionSheet(
                                     .background(if (isCurrent) accentSoft else Color.Transparent)
                                     .clickable(enabled = !isCurrent) { onCheckout(branch) }
                                     .padding(horizontal = 12.dp, vertical = 8.dp),
-                                verticalAlignment = Alignment.CenterVertically,
+                                verticalAlignment = Alignment.CenterVertically
                             ) {
                                 Text(
                                     text = displayName,
                                     style = DraftPeekTypography.bodyMedium.copy(
                                         fontWeight = if (isCurrent) FontWeight.SemiBold else FontWeight.Normal,
-                                        color = if (isCurrent) accent else fg,
+                                        color = if (isCurrent) accent else fg
                                     ),
                                     maxLines = 1,
                                     overflow = TextOverflow.Ellipsis,
-                                    modifier = Modifier.weight(1f),
+                                    modifier = Modifier.weight(1f)
                                 )
                                 if (isCurrent) {
                                     Text(
                                         text = stringResource(R.string.browser_git_current_branch),
                                         style = MonoLabelStyle.copy(fontSize = 10.sp),
-                                        color = accent,
+                                        color = accent
                                     )
                                 }
                             }
@@ -316,7 +316,7 @@ private fun GitActionButton(
     enabled: Boolean,
     isLoading: Boolean,
     modifier: Modifier = Modifier,
-    isPrimary: Boolean = false,
+    isPrimary: Boolean = false
 ) {
     val accent = PrototypeTokens.accent
     val accentSoft = PrototypeTokens.accentSoft
@@ -344,20 +344,20 @@ private fun GitActionButton(
             .clickable(enabled = enabled && !isLoading, onClick = onClick)
             .padding(horizontal = 12.dp),
         verticalAlignment = Alignment.CenterVertically,
-        horizontalArrangement = Arrangement.Center,
+        horizontalArrangement = Arrangement.Center
     ) {
         if (isLoading) {
             CircularProgressIndicator(
                 modifier = Modifier.size(16.dp),
                 strokeWidth = 2.dp,
-                color = fgColor,
+                color = fgColor
             )
         } else if (icon != null) {
             Icon(
                 imageVector = icon,
                 contentDescription = null,
                 tint = fgColor,
-                modifier = Modifier.size(16.dp),
+                modifier = Modifier.size(16.dp)
             )
         }
         if (icon != null || isLoading) {
@@ -368,8 +368,8 @@ private fun GitActionButton(
             style = DraftPeekTypography.bodySmall.copy(
                 color = fgColor,
                 fontWeight = FontWeight.SemiBold,
-                fontSize = 12.sp,
-            ),
+                fontSize = 12.sp
+            )
         )
     }
 }

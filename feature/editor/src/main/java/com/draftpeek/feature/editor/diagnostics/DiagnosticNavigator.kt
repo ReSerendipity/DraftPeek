@@ -20,14 +20,14 @@
 package com.draftpeek.feature.editor.diagnostics
 
 import androidx.compose.runtime.Immutable
+import javax.inject.Inject
+import javax.inject.Singleton
 import kotlinx.collections.immutable.ImmutableList
 import kotlinx.collections.immutable.persistentListOf
 import kotlinx.collections.immutable.toImmutableList
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
-import javax.inject.Inject
-import javax.inject.Singleton
 
 /**
  * 诊断项导航状态
@@ -43,7 +43,7 @@ import javax.inject.Singleton
 @Immutable
 data class DiagnosticNavigationState(
     val diagnostics: ImmutableList<DiagnosticItem> = persistentListOf(),
-    val currentIndex: Int = -1,
+    val currentIndex: Int = -1
 ) {
     /** 当前聚焦的诊断项，无焦点时返回 null */
     val current: DiagnosticItem?
@@ -107,13 +107,11 @@ fun DiagnosticNavigationState.moveToPrevious(): DiagnosticNavigationState {
  * @param diagnostics 诊断项列表
  * @return 新的导航状态实例
  */
-fun DiagnosticNavigationState.fromDiagnostics(
-    diagnostics: List<DiagnosticItem>,
-): DiagnosticNavigationState {
+fun DiagnosticNavigationState.fromDiagnostics(diagnostics: List<DiagnosticItem>): DiagnosticNavigationState {
     val capped = diagnostics.take(DiagnosticNavigationState.MAX_TRACKED_DIAGNOSTICS)
     return DiagnosticNavigationState(
         diagnostics = capped.toImmutableList(),
-        currentIndex = if (capped.isEmpty()) -1 else -1,
+        currentIndex = if (capped.isEmpty()) -1 else -1
     )
 }
 
@@ -123,10 +121,7 @@ fun DiagnosticNavigationState.fromDiagnostics(
  * @property diagnostics 该文档的诊断项列表
  * @property text 文档的当前文本内容（用于诊断定位）
  */
-data class DocumentDiagnostics(
-    val diagnostics: List<DiagnosticItem> = emptyList(),
-    val text: String = "",
-)
+data class DocumentDiagnostics(val diagnostics: List<DiagnosticItem> = emptyList(), val text: String = "")
 
 /**
  * 诊断导航器接口

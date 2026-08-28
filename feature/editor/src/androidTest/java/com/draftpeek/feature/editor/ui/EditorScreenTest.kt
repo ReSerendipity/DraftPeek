@@ -48,7 +48,7 @@ class EditorScreenTest {
                         MarkdownViewMode.SPLIT -> MarkdownViewMode.WYSIWYG
                         MarkdownViewMode.WYSIWYG -> MarkdownViewMode.EDIT
                     }
-                },
+                }
             )
         }
 
@@ -86,7 +86,7 @@ class EditorScreenTest {
                         MarkdownViewMode.SPLIT -> MarkdownViewMode.WYSIWYG
                         MarkdownViewMode.WYSIWYG -> MarkdownViewMode.EDIT
                     }
-                },
+                }
             )
         }
 
@@ -113,7 +113,7 @@ class EditorScreenTest {
         composeTestRule.setContent {
             ViewModeSelectorTestHarness(
                 currentMode = currentMode,
-                onModeSelected = { currentMode = it },
+                onModeSelected = { currentMode = it }
             )
         }
 
@@ -144,7 +144,7 @@ class EditorScreenTest {
                         MarkdownViewMode.SPLIT -> MarkdownViewMode.WYSIWYG
                         MarkdownViewMode.WYSIWYG -> MarkdownViewMode.EDIT
                     }
-                },
+                }
             )
         }
 
@@ -166,10 +166,7 @@ class EditorScreenTest {
  * from EditorScreen's top app bar.
  */
 @Composable
-private fun ViewModeToggleTestHarness(
-    currentMode: MarkdownViewMode,
-    onToggle: () -> Unit,
-) {
+private fun ViewModeToggleTestHarness(currentMode: MarkdownViewMode, onToggle: () -> Unit) {
     val modeLabel = when (currentMode) {
         MarkdownViewMode.EDIT -> "编辑模式"
         MarkdownViewMode.PREVIEW -> "预览模式"
@@ -186,7 +183,7 @@ private fun ViewModeToggleTestHarness(
         onClick = onToggle,
         modifier = Modifier.semantics {
             contentDescription = "切换视图模式"
-        },
+        }
     ) {
         Text(text = "⟳")
     }
@@ -196,10 +193,7 @@ private fun ViewModeToggleTestHarness(
  * Test harness for direct mode selection (e.g., FilterChip group).
  */
 @Composable
-private fun ViewModeSelectorTestHarness(
-    currentMode: MarkdownViewMode,
-    onModeSelected: (MarkdownViewMode) -> Unit,
-) {
+private fun ViewModeSelectorTestHarness(currentMode: MarkdownViewMode, onModeSelected: (MarkdownViewMode) -> Unit) {
     Row {
         MarkdownViewMode.entries.forEach { mode ->
             val label = when (mode) {
@@ -211,7 +205,7 @@ private fun ViewModeSelectorTestHarness(
             FilterChip(
                 selected = currentMode == mode,
                 onClick = { onModeSelected(mode) },
-                label = { Text(label) },
+                label = { Text(label) }
             )
         }
     }

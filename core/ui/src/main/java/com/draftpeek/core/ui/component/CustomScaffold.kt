@@ -17,7 +17,6 @@ import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.interaction.MutableInteractionSource
-import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
@@ -33,10 +32,6 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.statusBars
 import androidx.compose.foundation.layout.width
-import androidx.compose.foundation.rememberScrollState
-import androidx.compose.foundation.verticalScroll
-import androidx.compose.material3.HorizontalDivider
-import androidx.compose.material3.Icon
 import androidx.compose.material3.Text
 import androidx.compose.material3.VerticalDivider
 import androidx.compose.runtime.Composable
@@ -44,12 +39,10 @@ import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
-import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.platform.LocalDensity
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
-import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import com.draftpeek.core.ui.R
 import com.draftpeek.core.ui.icon.StrokeIcon
@@ -83,7 +76,7 @@ fun CustomScaffold(
     showNavigation: Boolean = true,
     fab: @Composable () -> Unit = {},
     modifier: Modifier = Modifier,
-    content: @Composable (PaddingValues) -> Unit,
+    content: @Composable (PaddingValues) -> Unit
 ) {
     when (layoutMode) {
         LayoutMode.COMPACT -> CompactCustomScaffold(
@@ -93,7 +86,7 @@ fun CustomScaffold(
             showNavigation = showNavigation,
             fab = fab,
             modifier = modifier,
-            content = content,
+            content = content
         )
         LayoutMode.MEDIUM -> MediumCustomScaffold(
             currentRoute = currentRoute,
@@ -101,7 +94,7 @@ fun CustomScaffold(
             navItems = navItems,
             showNavigation = showNavigation,
             modifier = modifier,
-            content = content,
+            content = content
         )
         LayoutMode.EXPANDED -> ExpandedCustomScaffold(
             currentRoute = currentRoute,
@@ -109,7 +102,7 @@ fun CustomScaffold(
             navItems = navItems,
             showNavigation = showNavigation,
             modifier = modifier,
-            content = content,
+            content = content
         )
     }
 }
@@ -124,7 +117,7 @@ private fun CompactCustomScaffold(
     showNavigation: Boolean,
     fab: @Composable () -> Unit,
     modifier: Modifier,
-    content: @Composable (PaddingValues) -> Unit,
+    content: @Composable (PaddingValues) -> Unit
 ) {
     val density = LocalDensity.current
     val statusBarInsets = WindowInsets.statusBars
@@ -146,13 +139,13 @@ private fun CompactCustomScaffold(
     Box(
         modifier = modifier
             .fillMaxSize()
-            .background(PrototypeTokens.pageBackground),
+            .background(PrototypeTokens.pageBackground)
     ) {
         // Content
         content(
             PaddingValues(
                 top = topPadding,
-                bottom = bottomContentPadding,
+                bottom = bottomContentPadding
             )
         )
 
@@ -163,8 +156,8 @@ private fun CompactCustomScaffold(
                     .align(Alignment.BottomEnd)
                     .padding(
                         end = PrototypeSpacing.FABRight,
-                        bottom = tabBarVisualHeight + navBarBottom + PrototypeSpacing.FABBottom,
-                    ),
+                        bottom = tabBarVisualHeight + navBarBottom + PrototypeSpacing.FABBottom
+                    )
             ) {
                 fab()
             }
@@ -181,7 +174,7 @@ private fun CompactCustomScaffold(
                         onNavigate(navItems[index].route)
                     }
                 },
-                modifier = Modifier.align(Alignment.BottomCenter),
+                modifier = Modifier.align(Alignment.BottomCenter)
             )
         }
     }
@@ -196,7 +189,7 @@ private fun MediumCustomScaffold(
     navItems: List<TabBarItem>,
     showNavigation: Boolean,
     modifier: Modifier,
-    content: @Composable (PaddingValues) -> Unit,
+    content: @Composable (PaddingValues) -> Unit
 ) {
     val railWidth = 72.dp
     val surface = PrototypeTokens.surface
@@ -212,7 +205,7 @@ private fun MediumCustomScaffold(
     Row(
         modifier = modifier
             .fillMaxSize()
-            .background(PrototypeTokens.pageBackground),
+            .background(PrototypeTokens.pageBackground)
     ) {
         if (showNavigation) {
             // Custom Navigation Rail
@@ -221,7 +214,7 @@ private fun MediumCustomScaffold(
                     .width(railWidth)
                     .fillMaxHeight()
                     .background(surface),
-                horizontalAlignment = Alignment.CenterHorizontally,
+                horizontalAlignment = Alignment.CenterHorizontally
             ) {
                 Spacer(modifier = Modifier.weight(1f))
 
@@ -233,24 +226,24 @@ private fun MediumCustomScaffold(
                             .clickable(
                                 interactionSource = remember { MutableInteractionSource() },
                                 indication = null,
-                                onClick = { onNavigate(item.route) },
+                                onClick = { onNavigate(item.route) }
                             )
                             .padding(vertical = 12.dp),
-                        horizontalAlignment = Alignment.CenterHorizontally,
+                        horizontalAlignment = Alignment.CenterHorizontally
                     ) {
                         StrokeIcon(
                             icon = item.icon,
                             contentDescription = item.label,
                             tint = if (isSelected) accent else muted,
-                            modifier = Modifier.size(PrototypeSpacing.TabBarIconSize),
+                            modifier = Modifier.size(PrototypeSpacing.TabBarIconSize)
                         )
                         Text(
                             text = item.label,
                             style = TabLabelStyle.copy(
                                 color = if (isSelected) accent else muted,
-                                fontWeight = if (isSelected) FontWeight.SemiBold else FontWeight.Medium,
+                                fontWeight = if (isSelected) FontWeight.SemiBold else FontWeight.Medium
                             ),
-                            modifier = Modifier.padding(top = 2.dp),
+                            modifier = Modifier.padding(top = 2.dp)
                         )
                     }
                 }
@@ -259,7 +252,7 @@ private fun MediumCustomScaffold(
             }
             VerticalDivider(
                 thickness = 1.dp,
-                color = borderColor,
+                color = borderColor
             )
         }
 
@@ -269,7 +262,7 @@ private fun MediumCustomScaffold(
                 PaddingValues(
                     top = topPadding,
                     bottom = bottomPadding,
-                    start = if (showNavigation) 0.dp else 0.dp,
+                    start = if (showNavigation) 0.dp else 0.dp
                 )
             )
         }
@@ -285,7 +278,7 @@ private fun ExpandedCustomScaffold(
     navItems: List<TabBarItem>,
     showNavigation: Boolean,
     modifier: Modifier,
-    content: @Composable (PaddingValues) -> Unit,
+    content: @Composable (PaddingValues) -> Unit
 ) {
     val drawerWidth = 240.dp
     val surface = PrototypeTokens.surface
@@ -303,7 +296,7 @@ private fun ExpandedCustomScaffold(
     Row(
         modifier = modifier
             .fillMaxSize()
-            .background(PrototypeTokens.pageBackground),
+            .background(PrototypeTokens.pageBackground)
     ) {
         if (showNavigation) {
             // Custom Navigation Drawer
@@ -311,7 +304,7 @@ private fun ExpandedCustomScaffold(
                 modifier = Modifier
                     .width(drawerWidth)
                     .fillMaxHeight()
-                    .background(surface),
+                    .background(surface)
             ) {
                 // Brand title
                 Text(
@@ -321,8 +314,8 @@ private fun ExpandedCustomScaffold(
                         top = 32.dp,
                         start = 32.dp,
                         end = 32.dp,
-                        bottom = 16.dp,
-                    ),
+                        bottom = 16.dp
+                    )
                 )
 
                 // Nav items
@@ -342,10 +335,10 @@ private fun ExpandedCustomScaffold(
                             .clickable(
                                 interactionSource = remember { MutableInteractionSource() },
                                 indication = null,
-                                onClick = { onNavigate(item.route) },
+                                onClick = { onNavigate(item.route) }
                             )
                             .padding(horizontal = 32.dp, vertical = 12.dp),
-                        verticalAlignment = Alignment.CenterVertically,
+                        verticalAlignment = Alignment.CenterVertically
                     ) {
                         if (isSelected) {
                             // Left accent indicator bar
@@ -364,17 +357,17 @@ private fun ExpandedCustomScaffold(
                             icon = item.icon,
                             contentDescription = item.label,
                             tint = if (isSelected) accent else muted,
-                            modifier = Modifier.size(20.dp),
+                            modifier = Modifier.size(20.dp)
                         )
                         Spacer(modifier = Modifier.width(12.dp))
                         Text(
                             text = item.label,
                             style = DraftPeekTypography.bodyMedium.copy(
                                 color = if (isSelected) accent else fg,
-                                fontWeight = if (isSelected) FontWeight.SemiBold else FontWeight.Normal,
+                                fontWeight = if (isSelected) FontWeight.SemiBold else FontWeight.Normal
                             ),
                             maxLines = 1,
-                            overflow = TextOverflow.Clip,
+                            overflow = TextOverflow.Clip
                         )
                     }
                 }
@@ -383,7 +376,7 @@ private fun ExpandedCustomScaffold(
             }
             VerticalDivider(
                 thickness = 1.dp,
-                color = borderColor,
+                color = borderColor
             )
         }
 
@@ -392,7 +385,7 @@ private fun ExpandedCustomScaffold(
             content(
                 PaddingValues(
                     top = topPadding,
-                    bottom = bottomPadding,
+                    bottom = bottomPadding
                 )
             )
         }

@@ -25,12 +25,7 @@ import javax.inject.Singleton
  * @property scrollX 水平滚动位置
  * @property scrollY 垂直滚动位置
  */
-data class RestoredPosition(
-    val cursorLine: Int,
-    val cursorColumn: Int,
-    val scrollX: Int,
-    val scrollY: Int,
-)
+data class RestoredPosition(val cursorLine: Int, val cursorColumn: Int, val scrollX: Int, val scrollY: Int)
 
 /**
  * 管理每个标签页的编辑器状态（光标、滚动、内容快照）。
@@ -39,9 +34,7 @@ data class RestoredPosition(
  * 确保与标签页关联的编辑器状态有单一可信源。
  */
 @Singleton
-class TabStateManager @Inject constructor(
-    private val tabManager: TabManager,
-) {
+class TabStateManager @Inject constructor(private val tabManager: TabManager) {
 
     private val tabStates = ConcurrentHashMap<TabId, EditorSavedState>()
     private val restoredPositions = ConcurrentHashMap<TabId, RestoredPosition>()
@@ -147,10 +140,7 @@ class TabStateManager @Inject constructor(
         data class RestoreState(val state: EditorSavedState) : SwitchResult()
 
         /** 标签页没有已保存状态；从磁盘加载其内容 */
-        data class LoadFromDisk(
-            val uri: String,
-            val restoredPosition: RestoredPosition? = null,
-        ) : SwitchResult()
+        data class LoadFromDisk(val uri: String, val restoredPosition: RestoredPosition? = null) : SwitchResult()
 
         /** 无需操作（标签页未找到） */
         data object Noop : SwitchResult()

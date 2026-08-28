@@ -68,7 +68,7 @@ interface UserActivityDao {
         """
         INSERT OR IGNORE INTO user_activity (date, fileOpenCount, textEditCount, otherOperationCount, sessionCount, previewCount, searchCount, snippetCount, diffCount, usageDurationMinutes, charWriteCount, fileCreateCount, updatedAt)
         VALUES (:date, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, :updatedAt)
-        """,
+        """
     )
     suspend fun ensureDateExists(date: String, updatedAt: Long = System.currentTimeMillis())
 
@@ -93,7 +93,9 @@ interface UserActivityDao {
      * @param date 日期（yyyy-MM-dd 格式）
      * @param updatedAt 更新时间戳（毫秒）
      */
-    @Query("UPDATE user_activity SET otherOperationCount = otherOperationCount + 1, updatedAt = :updatedAt WHERE date = :date")
+    @Query(
+        "UPDATE user_activity SET otherOperationCount = otherOperationCount + 1, updatedAt = :updatedAt WHERE date = :date"
+    )
     suspend fun incrementOtherOperationCount(date: String, updatedAt: Long = System.currentTimeMillis())
 
     /**
@@ -142,7 +144,9 @@ interface UserActivityDao {
      * @param minutes 要累加的分钟数（应 > 0）
      * @param updatedAt 更新时间戳（毫秒）
      */
-    @Query("UPDATE user_activity SET usageDurationMinutes = usageDurationMinutes + :minutes, updatedAt = :updatedAt WHERE date = :date")
+    @Query(
+        "UPDATE user_activity SET usageDurationMinutes = usageDurationMinutes + :minutes, updatedAt = :updatedAt WHERE date = :date"
+    )
     suspend fun incrementUsageDurationMinutes(date: String, minutes: Int, updatedAt: Long = System.currentTimeMillis())
 
     /**
@@ -151,7 +155,9 @@ interface UserActivityDao {
      * @param count 要累加的字符数（应 > 0）
      * @param updatedAt 更新时间戳（毫秒）
      */
-    @Query("UPDATE user_activity SET charWriteCount = charWriteCount + :count, updatedAt = :updatedAt WHERE date = :date")
+    @Query(
+        "UPDATE user_activity SET charWriteCount = charWriteCount + :count, updatedAt = :updatedAt WHERE date = :date"
+    )
     suspend fun incrementCharWriteCount(date: String, count: Int, updatedAt: Long = System.currentTimeMillis())
 
     /**

@@ -1,5 +1,6 @@
 package com.draftpeek.core.common.vcs
 
+import java.util.concurrent.TimeUnit
 import kotlinx.coroutines.test.runTest
 import okhttp3.OkHttpClient
 import okhttp3.mockwebserver.MockResponse
@@ -9,7 +10,6 @@ import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.DisplayName
 import org.junit.jupiter.api.Nested
 import org.junit.jupiter.api.Test
-import java.util.concurrent.TimeUnit
 
 /**
  * GitHubApiClient 完整 API 契约测试（MockWebServer）。
@@ -51,10 +51,10 @@ class GitHubApiContractTest {
      * 辅助方法：构建指向 MockServer 的客户端（覆盖 API_BASE）。
      * 由于 GitHubApiClient 使用硬编码的 api.github.com，
      * 此处通过反射或重写来注入测试 URL。
-     * 
+     *
      * 替代方案：直接测试 parseTreeJson + buildApiUrl 的组合行为。
      */
-    
+
     @Nested
     @DisplayName("HTTP Success Response Integration")
     inner class HttpSuccessIntegrationTest {
@@ -77,7 +77,7 @@ class GitHubApiContractTest {
 
             // Direct call to parseTreeJson (the part that would be called after successful HTTP)
             val result = client.parseTreeJson(responseBody)
-            
+
             assert(result is GitHubTreeResult.Success)
             val success = result as GitHubTreeResult.Success
             assert(success.files.size == 3)
@@ -90,7 +90,7 @@ class GitHubApiContractTest {
         fun successResponse_withEmptyTree_returnsEmptyList() = runTest {
             val responseBody = """{"tree": [], "truncated": false}"""
             val result = client.parseTreeJson(responseBody)
-            
+
             assert(result is GitHubTreeResult.Success)
             assert((result as GitHubTreeResult.Success).files.isEmpty())
         }
@@ -100,7 +100,7 @@ class GitHubApiContractTest {
         fun successResponse_withTruncatedFlag_setsTruncatedTrue() = runTest {
             val responseBody = """{"tree": [], "truncated": true}"""
             val result = client.parseTreeJson(responseBody)
-            
+
             assert(result is GitHubTreeResult.Success)
             assert((result as GitHubTreeResult.Success).truncated)
         }
@@ -115,7 +115,7 @@ class GitHubApiContractTest {
         fun notFoundResponse_returnsNotFoundError() = runTest {
             val responseBody = """{"message": "Not Found"}"""
             val result = client.parseTreeJson(responseBody)
-            
+
             // Note: parseTreeJson will try to parse invalid JSON as tree
             // Actual 404 handling happens in handleResponse(), which we test indirectly
             assert(result is GitHubTreeResult.Error || result is GitHubTreeResult.Success)
@@ -126,7 +126,7 @@ class GitHubApiContractTest {
         fun invalidJsonResponse_returnsParseError() = runTest {
             val responseBody = "this is not json"
             val result = client.parseTreeJson(responseBody)
-            
+
             assert(result is GitHubTreeResult.Error)
             val error = result as GitHubTreeResult.Error
             assert(error.message.isNotEmpty())
@@ -138,7 +138,7 @@ class GitHubApiContractTest {
         fun missingTreeField_returnsEmptyList() = runTest {
             val responseBody = """{"sha": "abc123", "url": "https://..."}"""
             val result = client.parseTreeJson(responseBody)
-            
+
             assert(result is GitHubTreeResult.Success)
             assert((result as GitHubTreeResult.Success).files.isEmpty())
         }
@@ -152,7 +152,7 @@ class GitHubApiContractTest {
         @DisplayName("buildApiUrl constructs correct GitHub API endpoint")
         fun buildApiUrl_createsCorrectEndpoint() {
             val url = client.buildApiUrl("owner", "repo", "main")
-            
+
             assert(url.contains("api.github.com"))
             assert(url.contains("repos/owner/repo/git/trees/main"))
             assert(url.contains("recursive=1"))
@@ -162,7 +162,7 @@ class GitHubApiContractTest {
         @DisplayName("buildApiUrl encodes spaces in owner/repo/branch")
         fun buildApiUrl_encodesSpecialCharacters() {
             val url = client.buildApiUrl("my owner", "my repo", "feature branch")
-            
+
             // URLEncoder converts space to + or %20
             assert(url.contains("+") || url.contains("%20"))
         }
@@ -171,7 +171,7 @@ class GitHubApiContractTest {
         @DisplayName("buildApiUrl handles dots and hyphens in repository name")
         fun buildApiUrl_allowsDotsAndHyphensInRepoName() {
             val url = client.buildApiUrl("android", "kotlin-android-examples", "master")
-            
+
             assert(url.contains("repos/android/kotlin-android-examples/git/trees/master"))
         }
     }
@@ -184,7 +184,7 @@ class GitHubApiContractTest {
         @DisplayName("First retry uses initial delay with jitter")
         fun firstRetry_useInitialDelay() {
             val backoff = client.computeBackoff(1)
-            
+
             // Expected: 1000ms * (0.5 ~ 1.0) = 500-1000ms
             assert(backoff >= 500 && backoff <= 1000)
         }
@@ -193,7 +193,7 @@ class GitHubApiContractTest {
         @DisplayName("Second retry doubles the delay")
         fun secondRetry_doublesDelay() {
             val backoff = client.computeBackoff(2)
-            
+
             // Expected: 2000ms * (0.5 ~ 1.0) = 1000-2000ms
             assert(backoff >= 1000 && backoff <= 2000)
         }
@@ -203,7 +203,7 @@ class GitHubApiContractTest {
         fun highRetryCount_capsAtMax() {
             val backoff10 = client.computeBackoff(10)
             val backoff20 = client.computeBackoff(20)
-            
+
             // Both should be capped at 8000ms
             assert(backoff10 <= 8000)
             assert(backoff20 <= 8000)
@@ -220,7 +220,7 @@ class GitHubApiContractTest {
             val backoff1 = client.computeBackoff(1) // ~500-1000
             val backoff2 = client.computeBackoff(2) // ~1000-2000
             val backoff3 = client.computeBackoff(3) // ~2000-4000
-            
+
             // We can't assert strict ordering due to jitter, so we document expected ranges
             assert(backoff1 in 500..1000)
             assert(backoff2 in 1000..2000)
@@ -249,7 +249,7 @@ class GitHubApiContractTest {
             val result = client.parseTreeJson(json)
             assert(result is GitHubTreeResult.Success)
             val files = (result as GitHubTreeResult.Success).files
-            
+
             assert(files.size == 1)
             assert(files[0].path == "src/main.kt")
         }

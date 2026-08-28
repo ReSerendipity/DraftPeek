@@ -11,17 +11,15 @@ package com.draftpeek.core.data.usecase
 
 import com.draftpeek.core.data.entity.BookmarkEntity
 import com.draftpeek.core.data.repository.BookmarkRepository
-import kotlinx.coroutines.flow.Flow
 import javax.inject.Inject
+import kotlinx.coroutines.flow.Flow
 
 /**
  * 书签管理用例。
  *
  * @property repository 书签仓库实例
  */
-class ManageBookmarksUseCase @Inject constructor(
-    private val repository: BookmarkRepository,
-) {
+class ManageBookmarksUseCase @Inject constructor(private val repository: BookmarkRepository) {
     /** 获取所有书签，按文件名排序。 */
     fun allBookmarks(): Flow<List<BookmarkEntity>> = repository.allBookmarks
 

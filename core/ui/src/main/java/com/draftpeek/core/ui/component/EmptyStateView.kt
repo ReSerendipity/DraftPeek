@@ -15,12 +15,12 @@
 package com.draftpeek.core.ui.component
 
 import androidx.compose.animation.core.RepeatMode
+import androidx.compose.animation.core.Spring
 import androidx.compose.animation.core.animateFloat
 import androidx.compose.animation.core.animateFloatAsState
 import androidx.compose.animation.core.infiniteRepeatable
 import androidx.compose.animation.core.rememberInfiniteTransition
 import androidx.compose.animation.core.spring
-import androidx.compose.animation.core.Spring
 import androidx.compose.animation.core.tween
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -30,6 +30,7 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
+import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -48,14 +49,10 @@ import androidx.compose.ui.graphics.StrokeJoin
 import androidx.compose.ui.graphics.drawscope.DrawScope
 import androidx.compose.ui.graphics.drawscope.Stroke
 import androidx.compose.ui.graphics.graphicsLayer
-import androidx.compose.ui.text.TextStyle
-import androidx.compose.ui.text.font.FontFamily
+import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
-import androidx.compose.ui.graphics.vector.ImageVector
-import androidx.compose.material3.Icon
 import androidx.compose.ui.unit.dp
-import androidx.compose.ui.unit.sp
 import com.draftpeek.core.ui.theme.PrototypeTokens
 
 /**
@@ -64,8 +61,9 @@ import com.draftpeek.core.ui.theme.PrototypeTokens
 enum class EmptyStateVariant {
     /** 书法钢笔尖动画，带墨水波纹和衬线字体排版 */
     CALLIGRAPHY,
+
     /** 简约图标 + 文本，适用于次要空状态（历史记录、代码片段等） */
-    MINIMAL,
+    MINIMAL
 }
 
 /**
@@ -91,7 +89,7 @@ fun EmptyStateView(
     variant: EmptyStateVariant = EmptyStateVariant.CALLIGRAPHY,
     icon: ImageVector? = null,
     action: (@Composable () -> Unit)? = null,
-    modifier: Modifier = Modifier,
+    modifier: Modifier = Modifier
 ) {
     if (variant == EmptyStateVariant.MINIMAL) {
         EmptyStateMinimal(
@@ -99,14 +97,14 @@ fun EmptyStateView(
             subtitle = subtitle,
             icon = icon,
             action = action,
-            modifier = modifier,
+            modifier = modifier
         )
     } else {
         EmptyStateCalligraphy(
             title = title,
             subtitle = subtitle,
             action = action,
-            modifier = modifier,
+            modifier = modifier
         )
     }
 }
@@ -120,7 +118,7 @@ private fun EmptyStateMinimal(
     subtitle: String?,
     icon: ImageVector?,
     action: (@Composable () -> Unit)?,
-    modifier: Modifier,
+    modifier: Modifier
 ) {
     var visible by remember { mutableStateOf(false) }
     LaunchedEffect(Unit) { visible = true }
@@ -128,15 +126,15 @@ private fun EmptyStateMinimal(
     val contentAlpha by animateFloatAsState(
         targetValue = if (visible) 1f else 0f,
         animationSpec = tween(durationMillis = 400),
-        label = "minimal_alpha",
+        label = "minimal_alpha"
     )
     val contentOffsetY by animateFloatAsState(
         targetValue = if (visible) 0f else 12f,
         animationSpec = spring(
             dampingRatio = Spring.DampingRatioNoBouncy,
-            stiffness = Spring.StiffnessMedium,
+            stiffness = Spring.StiffnessMedium
         ),
-        label = "minimal_offset",
+        label = "minimal_offset"
     )
 
     Column(
@@ -147,14 +145,14 @@ private fun EmptyStateMinimal(
                 translationY = contentOffsetY
             },
         horizontalAlignment = Alignment.CenterHorizontally,
-        verticalArrangement = Arrangement.Center,
+        verticalArrangement = Arrangement.Center
     ) {
         if (icon != null) {
             Icon(
                 imageVector = icon,
                 contentDescription = null,
                 tint = PrototypeTokens.fgSoft.copy(alpha = 0.5f),
-                modifier = Modifier.size(48.dp),
+                modifier = Modifier.size(48.dp)
             )
             Spacer(modifier = Modifier.height(16.dp))
         }
@@ -163,11 +161,11 @@ private fun EmptyStateMinimal(
             text = title,
             style = MaterialTheme.typography.titleSmall.copy(
                 fontWeight = FontWeight.SemiBold,
-                textAlign = TextAlign.Center,
+                textAlign = TextAlign.Center
             ),
             color = PrototypeTokens.fg,
             textAlign = TextAlign.Center,
-            modifier = Modifier.fillMaxWidth(0.85f),
+            modifier = Modifier.fillMaxWidth(0.85f)
         )
 
         if (subtitle != null) {
@@ -175,13 +173,13 @@ private fun EmptyStateMinimal(
             Text(
                 text = subtitle,
                 style = MaterialTheme.typography.bodyMedium.copy(
-                    textAlign = TextAlign.Center,
+                    textAlign = TextAlign.Center
                 ),
                 color = PrototypeTokens.fgSoft,
                 textAlign = TextAlign.Center,
                 modifier = Modifier
                     .fillMaxWidth(0.85f)
-                    .padding(horizontal = 16.dp),
+                    .padding(horizontal = 16.dp)
             )
         }
 
@@ -200,7 +198,7 @@ private fun EmptyStateCalligraphy(
     title: String,
     subtitle: String?,
     action: (@Composable () -> Unit)?,
-    modifier: Modifier,
+    modifier: Modifier
 ) {
     // Entrance animation
     var visible by remember { mutableStateOf(false) }
@@ -209,16 +207,16 @@ private fun EmptyStateCalligraphy(
     val contentAlpha by animateFloatAsState(
         targetValue = if (visible) 1f else 0f,
         animationSpec = tween(durationMillis = 400),
-        label = "content_alpha",
+        label = "content_alpha"
     )
 
     val contentOffsetY by animateFloatAsState(
         targetValue = if (visible) 0f else 20f,
         animationSpec = spring(
             dampingRatio = Spring.DampingRatioNoBouncy,
-            stiffness = Spring.StiffnessMedium,
+            stiffness = Spring.StiffnessMedium
         ),
-        label = "content_offset",
+        label = "content_offset"
     )
 
     // Pen bob animation: translateY oscillates 0 -> -5dp over 3 seconds, ease-in-out
@@ -229,11 +227,11 @@ private fun EmptyStateCalligraphy(
         animationSpec = infiniteRepeatable(
             animation = tween(
                 durationMillis = 3000,
-                easing = androidx.compose.animation.core.FastOutSlowInEasing,
+                easing = androidx.compose.animation.core.FastOutSlowInEasing
             ),
-            repeatMode = RepeatMode.Reverse,
+            repeatMode = RepeatMode.Reverse
         ),
-        label = "pen_bob_offset",
+        label = "pen_bob_offset"
     )
 
     // Ink ripple 1: scale from 0 to 5x with fading opacity, 3s cycle
@@ -242,18 +240,18 @@ private fun EmptyStateCalligraphy(
         targetValue = 1f,
         animationSpec = infiniteRepeatable(
             animation = tween(3000),
-            repeatMode = RepeatMode.Restart,
+            repeatMode = RepeatMode.Restart
         ),
-        label = "ink_ripple1_scale",
+        label = "ink_ripple1_scale"
     )
     val inkRipple1Alpha by infiniteTransition.animateFloat(
         initialValue = 0.4f,
         targetValue = 0f,
         animationSpec = infiniteRepeatable(
             animation = tween(3000),
-            repeatMode = RepeatMode.Restart,
+            repeatMode = RepeatMode.Restart
         ),
-        label = "ink_ripple1_alpha",
+        label = "ink_ripple1_alpha"
     )
 
     // Ink ripple 2: same cycle but staggered by 0.5s (start delay)
@@ -262,18 +260,18 @@ private fun EmptyStateCalligraphy(
         targetValue = 1f,
         animationSpec = infiniteRepeatable(
             animation = tween(3000, delayMillis = 500),
-            repeatMode = RepeatMode.Restart,
+            repeatMode = RepeatMode.Restart
         ),
-        label = "ink_ripple2_scale",
+        label = "ink_ripple2_scale"
     )
     val inkRipple2Alpha by infiniteTransition.animateFloat(
         initialValue = 0.3f,
         targetValue = 0f,
         animationSpec = infiniteRepeatable(
             animation = tween(3000, delayMillis = 500),
-            repeatMode = RepeatMode.Restart,
+            repeatMode = RepeatMode.Restart
         ),
-        label = "ink_ripple2_alpha",
+        label = "ink_ripple2_alpha"
     )
 
     val penColor = PrototypeTokens.fgSoft.copy(alpha = 0.4f)
@@ -287,16 +285,16 @@ private fun EmptyStateCalligraphy(
                 translationY = contentOffsetY
             },
         horizontalAlignment = Alignment.CenterHorizontally,
-        verticalArrangement = Arrangement.Center,
+        verticalArrangement = Arrangement.Center
     ) {
         // Pen nib with ink ripples
         Box(
             modifier = Modifier.size(width = 96.dp, height = 120.dp),
-            contentAlignment = Alignment.Center,
+            contentAlignment = Alignment.Center
         ) {
             // Ink ripple circles expanding from pen tip area
             androidx.compose.foundation.Canvas(
-                modifier = Modifier.size(width = 96.dp, height = 120.dp),
+                modifier = Modifier.size(width = 96.dp, height = 120.dp)
             ) {
                 val center = Offset(size.width / 2f, size.height * 0.65f)
                 val baseRadius = size.width * 0.06f
@@ -307,7 +305,7 @@ private fun EmptyStateCalligraphy(
                         color = rippleColor,
                         radius = baseRadius * inkRipple1Scale * 5f,
                         center = center,
-                        alpha = inkRipple1Alpha,
+                        alpha = inkRipple1Alpha
                     )
                 }
 
@@ -317,7 +315,7 @@ private fun EmptyStateCalligraphy(
                         color = rippleColor,
                         radius = baseRadius * inkRipple2Scale * 5f,
                         center = center,
-                        alpha = inkRipple2Alpha,
+                        alpha = inkRipple2Alpha
                     )
                 }
             }
@@ -328,7 +326,7 @@ private fun EmptyStateCalligraphy(
                     .size(width = 48.dp, height = 80.dp)
                     .graphicsLayer {
                         translationY = penOffsetY * 5f // maps -1..0 to -5..0 dp
-                    },
+                    }
             ) {
                 drawPenNib(penColor)
             }
@@ -341,7 +339,7 @@ private fun EmptyStateCalligraphy(
             text = title,
             style = com.draftpeek.core.ui.theme.SerifTitleStyle,
             color = PrototypeTokens.fg,
-            textAlign = TextAlign.Center,
+            textAlign = TextAlign.Center
         )
 
         if (subtitle != null) {
@@ -355,7 +353,7 @@ private fun EmptyStateCalligraphy(
                 textAlign = TextAlign.Center,
                 modifier = Modifier
                     .fillMaxWidth(0.85f)
-                    .padding(horizontal = 16.dp),
+                    .padding(horizontal = 16.dp)
             )
         }
 
@@ -400,8 +398,8 @@ private fun DrawScope.drawPenNib(color: Color) {
         style = Stroke(
             width = 1.2.dp.toPx(),
             cap = StrokeCap.Round,
-            join = StrokeJoin.Round,
-        ),
+            join = StrokeJoin.Round
+        )
     )
 
     // Text lines on pen body
@@ -414,7 +412,7 @@ private fun DrawScope.drawPenNib(color: Color) {
             start = Offset(lineLeft, y * scaleY),
             end = Offset(lineRight, y * scaleY),
             strokeWidth = 1.5.dp.toPx(),
-            cap = StrokeCap.Round,
+            cap = StrokeCap.Round
         )
     }
 
@@ -431,7 +429,7 @@ private fun DrawScope.drawPenNib(color: Color) {
             start = Offset(centerX - halfWidth, y * scaleY),
             end = Offset(centerX + halfWidth, y * scaleY),
             strokeWidth = 1.5.dp.toPx(),
-            cap = StrokeCap.Round,
+            cap = StrokeCap.Round
         )
     }
 }

@@ -60,64 +60,190 @@ private data class OssComponent(
     val license: String,
     val licenseAsset: String? = null,
     val sourceUrl: String? = null,
-    val noticeResId: Int? = null,
+    val noticeResId: Int? = null
 )
 
 /** 第三方组件清单，与 THIRD_PARTY_NOTICES.md 保持同步。 */
 private val ossComponents = listOf(
-    OssComponent("sora-editor (Rosemoe)", "0.24.6", "LGPL-2.1",
-        "licenses/LGPL-2.1.txt", "https://github.com/Rosemoe/sora-editor"),
-    OssComponent("language-textmate (Rosemoe)", "0.24.6", "LGPL-2.1",
-        "licenses/LGPL-2.1.txt", "https://github.com/Rosemoe/sora-editor"),
-    OssComponent("language-treesitter (Rosemoe)", "0.24.6", "LGPL-2.1",
-        "licenses/LGPL-2.1.txt", "https://github.com/Rosemoe/language-treesitter"),
-    OssComponent("android-tree-sitter (AndroidIDE)", "4.3.2", "LGPL-2.1",
-        "licenses/LGPL-2.1.txt", "https://github.com/AndroidIDEOfficial/android-tree-sitter"),
-    OssComponent("tree-sitter-java (AndroidIDE)", "4.3.2", "LGPL-2.1",
-        "licenses/LGPL-2.1.txt", "https://github.com/AndroidIDEOfficial/tree-sitter-java"),
-    OssComponent("proot", "", "GPL-2.0",
-        "licenses/GPL-2.0.txt", "https://github.com/proot-me/proot",
-        noticeResId = R.string.profile_oss_not_bundled),
-    OssComponent("KaTeX", "0.16.9", "MIT",
-        "licenses/MIT.txt", "https://github.com/KaTeX/KaTeX"),
-    OssComponent("KaTeX fonts (woff2)", "", "SIL OFL-1.1",
-        "licenses/OFL-1.1.txt", "https://github.com/KaTeX/KaTeX"),
-    OssComponent("Mermaid", "11.13.0", "MIT",
-        "licenses/MIT.txt", "https://github.com/mermaid-js/mermaid"),
-    OssComponent("marked", "12.0.0", "MIT",
-        "licenses/MIT.txt", "https://github.com/markedjs/marked"),
-    OssComponent("highlight.js", "11.9.0", "BSD-3-Clause",
-        "licenses/BSD-3-Clause.txt", "https://github.com/highlightjs/highlight.js"),
-    OssComponent("TextMate 语法文件（40+ 语言）", "", "MIT",
-        "licenses/MIT.txt", "https://github.com/microsoft/vscode"),
-    OssComponent("Inter 字体", "", "SIL OFL-1.1",
-        "licenses/OFL-1.1.txt", "https://github.com/rsms/inter"),
-    OssComponent("JetBrains Mono 字体", "", "SIL OFL-1.1",
-        "licenses/OFL-1.1.txt", "https://github.com/JetBrains/JetBrainsMono"),
-    OssComponent("jsch (mwiede fork)", "0.2.24", "BSD-3-Clause",
-        "licenses/BSD-3-Clause.txt", "https://github.com/mwiede/jsch"),
-    OssComponent("Room / DataStore", "", "Apache-2.0",
-        "licenses/Apache-2.0.txt", "https://developer.android.com/jetpack/androidx/releases/room"),
-    OssComponent("SQLCipher", "4.6.0", "BSD-3-Clause",
-        "licenses/BSD-3-Clause.txt", "https://github.com/sqlcipher/sqlcipher-android"),
-    OssComponent("Apache POI", "5.3.0", "Apache-2.0",
-        "licenses/Apache-2.0.txt", "https://poi.apache.org/"),
-    OssComponent("java-diff-utils", "4.12", "Apache-2.0",
-        "licenses/Apache-2.0.txt", "https://github.com/java-diff-utils/java-diff-utils"),
-    OssComponent("Hilt / KSP", "", "Apache-2.0",
-        "licenses/Apache-2.0.txt", "https://dagger.dev/"),
-    OssComponent("CommonMark (commonmark-java)", "0.24.0", "BSD-2-Clause",
-        sourceUrl = "https://github.com/commonmark/commonmark-java"),
-    OssComponent("Jetpack Compose / Material 3", "", "Apache-2.0",
-        "licenses/Apache-2.0.txt", "https://developer.android.com/jetpack/compose"),
-    OssComponent("richeditor-compose", "", "Apache-2.0",
-        "licenses/Apache-2.0.txt", "https://github.com/MohamedRejeb/Compose-Rich-Editor"),
-    OssComponent("JGit", "6.10.1", "EDL-1.0",
-        sourceUrl = "https://www.eclipse.org/jgit/"),
-    OssComponent("LSP4J", "", "EPL-2.0",
-        sourceUrl = "https://github.com/eclipse-lsp4j/lsp4j"),
-    OssComponent("tm4e", "", "EPL-2.0",
-        sourceUrl = "https://github.com/eclipse-tm4e/tm4e"),
+    OssComponent(
+        "sora-editor (Rosemoe)",
+        "0.24.6",
+        "LGPL-2.1",
+        "licenses/LGPL-2.1.txt",
+        "https://github.com/Rosemoe/sora-editor"
+    ),
+    OssComponent(
+        "language-textmate (Rosemoe)",
+        "0.24.6",
+        "LGPL-2.1",
+        "licenses/LGPL-2.1.txt",
+        "https://github.com/Rosemoe/sora-editor"
+    ),
+    OssComponent(
+        "language-treesitter (Rosemoe)",
+        "0.24.6",
+        "LGPL-2.1",
+        "licenses/LGPL-2.1.txt",
+        "https://github.com/Rosemoe/language-treesitter"
+    ),
+    OssComponent(
+        "android-tree-sitter (AndroidIDE)",
+        "4.3.2",
+        "LGPL-2.1",
+        "licenses/LGPL-2.1.txt",
+        "https://github.com/AndroidIDEOfficial/android-tree-sitter"
+    ),
+    OssComponent(
+        "tree-sitter-java (AndroidIDE)",
+        "4.3.2",
+        "LGPL-2.1",
+        "licenses/LGPL-2.1.txt",
+        "https://github.com/AndroidIDEOfficial/tree-sitter-java"
+    ),
+    OssComponent(
+        "proot",
+        "",
+        "GPL-2.0",
+        "licenses/GPL-2.0.txt",
+        "https://github.com/proot-me/proot",
+        noticeResId = R.string.profile_oss_not_bundled
+    ),
+    OssComponent(
+        "KaTeX",
+        "0.16.9",
+        "MIT",
+        "licenses/MIT.txt",
+        "https://github.com/KaTeX/KaTeX"
+    ),
+    OssComponent(
+        "KaTeX fonts (woff2)",
+        "",
+        "SIL OFL-1.1",
+        "licenses/OFL-1.1.txt",
+        "https://github.com/KaTeX/KaTeX"
+    ),
+    OssComponent(
+        "Mermaid",
+        "11.13.0",
+        "MIT",
+        "licenses/MIT.txt",
+        "https://github.com/mermaid-js/mermaid"
+    ),
+    OssComponent(
+        "marked",
+        "12.0.0",
+        "MIT",
+        "licenses/MIT.txt",
+        "https://github.com/markedjs/marked"
+    ),
+    OssComponent(
+        "highlight.js",
+        "11.9.0",
+        "BSD-3-Clause",
+        "licenses/BSD-3-Clause.txt",
+        "https://github.com/highlightjs/highlight.js"
+    ),
+    OssComponent(
+        "TextMate 语法文件（40+ 语言）",
+        "",
+        "MIT",
+        "licenses/MIT.txt",
+        "https://github.com/microsoft/vscode"
+    ),
+    OssComponent(
+        "Inter 字体",
+        "",
+        "SIL OFL-1.1",
+        "licenses/OFL-1.1.txt",
+        "https://github.com/rsms/inter"
+    ),
+    OssComponent(
+        "JetBrains Mono 字体",
+        "",
+        "SIL OFL-1.1",
+        "licenses/OFL-1.1.txt",
+        "https://github.com/JetBrains/JetBrainsMono"
+    ),
+    OssComponent(
+        "jsch (mwiede fork)",
+        "0.2.24",
+        "BSD-3-Clause",
+        "licenses/BSD-3-Clause.txt",
+        "https://github.com/mwiede/jsch"
+    ),
+    OssComponent(
+        "Room / DataStore",
+        "",
+        "Apache-2.0",
+        "licenses/Apache-2.0.txt",
+        "https://developer.android.com/jetpack/androidx/releases/room"
+    ),
+    OssComponent(
+        "SQLCipher",
+        "4.6.0",
+        "BSD-3-Clause",
+        "licenses/BSD-3-Clause.txt",
+        "https://github.com/sqlcipher/sqlcipher-android"
+    ),
+    OssComponent(
+        "Apache POI",
+        "5.3.0",
+        "Apache-2.0",
+        "licenses/Apache-2.0.txt",
+        "https://poi.apache.org/"
+    ),
+    OssComponent(
+        "java-diff-utils",
+        "4.12",
+        "Apache-2.0",
+        "licenses/Apache-2.0.txt",
+        "https://github.com/java-diff-utils/java-diff-utils"
+    ),
+    OssComponent(
+        "Hilt / KSP",
+        "",
+        "Apache-2.0",
+        "licenses/Apache-2.0.txt",
+        "https://dagger.dev/"
+    ),
+    OssComponent(
+        "CommonMark (commonmark-java)",
+        "0.24.0",
+        "BSD-2-Clause",
+        sourceUrl = "https://github.com/commonmark/commonmark-java"
+    ),
+    OssComponent(
+        "Jetpack Compose / Material 3",
+        "",
+        "Apache-2.0",
+        "licenses/Apache-2.0.txt",
+        "https://developer.android.com/jetpack/compose"
+    ),
+    OssComponent(
+        "richeditor-compose",
+        "",
+        "Apache-2.0",
+        "licenses/Apache-2.0.txt",
+        "https://github.com/MohamedRejeb/Compose-Rich-Editor"
+    ),
+    OssComponent(
+        "JGit",
+        "6.10.1",
+        "EDL-1.0",
+        sourceUrl = "https://www.eclipse.org/jgit/"
+    ),
+    OssComponent(
+        "LSP4J",
+        "",
+        "EPL-2.0",
+        sourceUrl = "https://github.com/eclipse-lsp4j/lsp4j"
+    ),
+    OssComponent(
+        "tm4e",
+        "",
+        "EPL-2.0",
+        sourceUrl = "https://github.com/eclipse-tm4e/tm4e"
+    )
 )
 
 /**
@@ -139,7 +265,7 @@ fun OpenSourceLicensesDialog(onDismiss: () -> Unit) {
                 Text(
                     text = stringResource(R.string.profile_oss_list_intro),
                     style = MaterialTheme.typography.bodySmall,
-                    color = PrototypeTokens.fgSoft,
+                    color = PrototypeTokens.fgSoft
                 )
                 Spacer(modifier = Modifier.height(8.dp))
                 LazyColumn {
@@ -152,7 +278,7 @@ fun OpenSourceLicensesDialog(onDismiss: () -> Unit) {
                                 } else {
                                     component.sourceUrl?.let { openBrowser(context, it) }
                                 }
-                            },
+                            }
                         )
                     }
                 }
@@ -161,15 +287,15 @@ fun OpenSourceLicensesDialog(onDismiss: () -> Unit) {
         confirmButton = {
             BrandFilledButton(
                 text = stringResource(R.string.profile_oss_dialog_close),
-                onClick = onDismiss,
+                onClick = onDismiss
             )
-        },
+        }
     )
 
     selected?.let { component ->
         LicenseTextDialog(
             component = component,
-            onDismiss = { selected = null },
+            onDismiss = { selected = null }
         )
     }
 }
@@ -182,22 +308,22 @@ private fun OssRow(component: OssComponent, onClick: () -> Unit) {
         modifier = Modifier
             .fillMaxWidth()
             .clickable(enabled = canOpen, onClick = onClick)
-            .padding(vertical = 6.dp),
+            .padding(vertical = 6.dp)
     ) {
         Column(modifier = Modifier.weight(1f)) {
             Text(
                 text = component.name,
                 style = MaterialTheme.typography.bodyMedium,
-                color = PrototypeTokens.fg,
+                color = PrototypeTokens.fg
             )
             val meta = listOfNotNull(
                 component.license,
-                component.version.takeIf { it.isNotBlank() },
+                component.version.takeIf { it.isNotBlank() }
             ).joinToString(" · ")
             Text(
                 text = meta,
                 style = MaterialTheme.typography.bodySmall,
-                color = PrototypeTokens.fgSoft,
+                color = PrototypeTokens.fgSoft
             )
         }
         component.noticeResId?.let { resId ->
@@ -205,7 +331,7 @@ private fun OssRow(component: OssComponent, onClick: () -> Unit) {
             Text(
                 text = stringResource(resId),
                 style = MaterialTheme.typography.labelSmall,
-                color = PrototypeTokens.accent,
+                color = PrototypeTokens.accent
             )
         }
     }
@@ -227,20 +353,20 @@ private fun LicenseTextDialog(component: OssComponent, onDismiss: () -> Unit) {
             Column(
                 modifier = Modifier
                     .heightIn(max = 380.dp)
-                    .verticalScroll(rememberScrollState()),
+                    .verticalScroll(rememberScrollState())
             ) {
                 val text = licenseText
                 if (text != null) {
                     Text(
                         text = text,
                         style = MaterialTheme.typography.bodySmall,
-                        color = PrototypeTokens.fgSoft,
+                        color = PrototypeTokens.fgSoft
                     )
                 } else {
                     Text(
                         text = stringResource(R.string.profile_oss_license_load_failed),
                         style = MaterialTheme.typography.bodySmall,
-                        color = PrototypeTokens.fgSoft,
+                        color = PrototypeTokens.fgSoft
                     )
                 }
             }
@@ -248,19 +374,19 @@ private fun LicenseTextDialog(component: OssComponent, onDismiss: () -> Unit) {
         confirmButton = {
             BrandFilledButton(
                 text = stringResource(R.string.profile_oss_dialog_close),
-                onClick = onDismiss,
+                onClick = onDismiss
             )
         },
         dismissButton = if (sourceUrl != null) {
             {
                 BrandOutlinedButton(
                     text = stringResource(R.string.profile_oss_open_source),
-                    onClick = { openBrowser(context, sourceUrl) },
+                    onClick = { openBrowser(context, sourceUrl) }
                 )
             }
         } else {
             null
-        },
+        }
     )
 }
 

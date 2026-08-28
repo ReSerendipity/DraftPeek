@@ -56,12 +56,12 @@ import com.draftpeek.core.ui.component.BrandOutlinedButton
 import com.draftpeek.core.ui.component.BrandSettingRow
 import com.draftpeek.core.ui.component.BrandSwitchSettingRow
 import com.draftpeek.core.ui.component.BrandTopBar
-import com.draftpeek.core.ui.theme.JetBrainsMonoFontFamily
-import com.draftpeek.core.ui.theme.SubPageTopBarTitleStyle
 import com.draftpeek.core.ui.theme.ColorBlindMode
+import com.draftpeek.core.ui.theme.JetBrainsMonoFontFamily
 import com.draftpeek.core.ui.theme.PrototypeShapes
 import com.draftpeek.core.ui.theme.PrototypeTokens
 import com.draftpeek.core.ui.theme.SettingDescStyle
+import com.draftpeek.core.ui.theme.SubPageTopBarTitleStyle
 import com.draftpeek.feature.settings.viewmodel.SettingsViewModel
 import com.draftpeek.feature.stats.R
 
@@ -77,10 +77,7 @@ import com.draftpeek.feature.stats.R
  * 所有功能遵循 WCAG 2.1 AA 级标准。
  */
 @Composable
-fun AccessibilityScreen(
-    onNavigateUp: () -> Unit,
-    settingsViewModel: SettingsViewModel = hiltViewModel(),
-) {
+fun AccessibilityScreen(onNavigateUp: () -> Unit, settingsViewModel: SettingsViewModel = hiltViewModel()) {
     val settings by settingsViewModel.settings.collectAsStateWithLifecycle()
     val context = LocalContext.current
     val hapticHelper = remember { HapticFeedbackHelper(context) }
@@ -95,7 +92,7 @@ fun AccessibilityScreen(
                 settingsViewModel.updateColorBlindMode(mode)
                 showColorBlindDialog = false
             },
-            onDismiss = { showColorBlindDialog = false },
+            onDismiss = { showColorBlindDialog = false }
         )
     }
 
@@ -103,32 +100,32 @@ fun AccessibilityScreen(
         TextScaleDialog(
             currentScale = settings.textScale,
             onScaleChange = { settingsViewModel.updateTextScale(it) },
-            onDismiss = { showTextScaleDialog = false },
+            onDismiss = { showTextScaleDialog = false }
         )
     }
 
     Column(
         modifier = Modifier
             .fillMaxSize()
-            .background(PrototypeTokens.pageBackground),
+            .background(PrototypeTokens.pageBackground)
     ) {
         BrandTopBar(
             onBack = onNavigateUp,
             title = stringResource(R.string.accessibility_page_title),
-            titleStyle = SubPageTopBarTitleStyle,
+            titleStyle = SubPageTopBarTitleStyle
         )
 
         Column(
             modifier = Modifier
                 .fillMaxSize()
-                .verticalScroll(rememberScrollState()),
+                .verticalScroll(rememberScrollState())
         ) {
             // WCAG 信息横幅
             WcagInfoBanner()
 
             // ===== 视觉辅助 =====
             AccessibilitySectionHeader(
-                text = stringResource(R.string.accessibility_section_visual),
+                text = stringResource(R.string.accessibility_section_visual)
             )
 
             BrandSettingRow(
@@ -136,10 +133,10 @@ fun AccessibilityScreen(
                 label = stringResource(R.string.accessibility_color_blind_mode),
                 value = colorBlindModeLabel(settings.colorBlindMode),
                 onClick = { showColorBlindDialog = true },
-                showDivider = true,
+                showDivider = true
             )
             SettingDescription(
-                text = stringResource(R.string.accessibility_color_blind_mode_desc),
+                text = stringResource(R.string.accessibility_color_blind_mode_desc)
             )
 
             BrandSwitchSettingRow(
@@ -147,10 +144,10 @@ fun AccessibilityScreen(
                 label = stringResource(R.string.accessibility_high_contrast),
                 checked = settings.highContrastMode,
                 onCheckedChange = { settingsViewModel.updateHighContrastMode(it) },
-                showDivider = true,
+                showDivider = true
             )
             SettingDescription(
-                text = stringResource(R.string.accessibility_high_contrast_desc),
+                text = stringResource(R.string.accessibility_high_contrast_desc)
             )
 
             BrandSwitchSettingRow(
@@ -158,10 +155,10 @@ fun AccessibilityScreen(
                 label = stringResource(R.string.accessibility_non_color_indicators),
                 checked = settings.nonColorIndicators,
                 onCheckedChange = { settingsViewModel.updateNonColorIndicators(it) },
-                showDivider = true,
+                showDivider = true
             )
             SettingDescription(
-                text = stringResource(R.string.accessibility_non_color_indicators_desc),
+                text = stringResource(R.string.accessibility_non_color_indicators_desc)
             )
 
             BrandSettingRow(
@@ -169,17 +166,17 @@ fun AccessibilityScreen(
                 label = stringResource(R.string.accessibility_text_scale),
                 value = "${Math.round(settings.textScale * 100)}%",
                 onClick = { showTextScaleDialog = true },
-                showDivider = false,
+                showDivider = false
             )
             SettingDescription(
-                text = stringResource(R.string.accessibility_text_scale_desc),
+                text = stringResource(R.string.accessibility_text_scale_desc)
             )
 
             Spacer(modifier = Modifier.height(8.dp))
 
             // ===== 屏幕阅读器 =====
             AccessibilitySectionHeader(
-                text = stringResource(R.string.accessibility_section_screen_reader),
+                text = stringResource(R.string.accessibility_section_screen_reader)
             )
 
             BrandSwitchSettingRow(
@@ -187,17 +184,17 @@ fun AccessibilityScreen(
                 label = stringResource(R.string.accessibility_screen_reader_optimized),
                 checked = settings.screenReaderOptimized,
                 onCheckedChange = { settingsViewModel.updateScreenReaderOptimized(it) },
-                showDivider = false,
+                showDivider = false
             )
             SettingDescription(
-                text = stringResource(R.string.accessibility_screen_reader_optimized_desc),
+                text = stringResource(R.string.accessibility_screen_reader_optimized_desc)
             )
 
             Spacer(modifier = Modifier.height(8.dp))
 
             // ===== 听觉辅助 =====
             AccessibilitySectionHeader(
-                text = stringResource(R.string.accessibility_section_hearing),
+                text = stringResource(R.string.accessibility_section_hearing)
             )
 
             BrandSwitchSettingRow(
@@ -205,10 +202,10 @@ fun AccessibilityScreen(
                 label = stringResource(R.string.accessibility_vibration_feedback),
                 checked = settings.vibrationFeedback,
                 onCheckedChange = { settingsViewModel.updateVibrationFeedback(it) },
-                showDivider = true,
+                showDivider = true
             )
             SettingDescription(
-                text = stringResource(R.string.accessibility_vibration_feedback_desc),
+                text = stringResource(R.string.accessibility_vibration_feedback_desc)
             )
 
             // 振动测试按钮
@@ -217,7 +214,7 @@ fun AccessibilityScreen(
                     enabled = settings.vibrationFeedback && hapticHelper.hasVibrator,
                     onTest = {
                         hapticHelper.success()
-                    },
+                    }
                 )
             }
 
@@ -236,12 +233,12 @@ private fun AccessibilitySectionHeader(text: String) {
         text = text,
         style = MaterialTheme.typography.labelMedium.copy(
             fontWeight = FontWeight.SemiBold,
-            letterSpacing = 1.sp,
+            letterSpacing = 1.sp
         ),
         color = PrototypeTokens.muted,
         modifier = Modifier
             .padding(start = 20.dp, end = 20.dp, top = 16.dp, bottom = 4.dp)
-            .semantics { heading() },
+            .semantics { heading() }
     )
 }
 
@@ -251,7 +248,7 @@ private fun SettingDescription(text: String) {
         text = text,
         style = SettingDescStyle,
         color = PrototypeTokens.muted,
-        modifier = Modifier.padding(start = 64.dp, end = 20.dp, bottom = 8.dp),
+        modifier = Modifier.padding(start = 64.dp, end = 20.dp, bottom = 8.dp)
     )
 }
 
@@ -265,34 +262,31 @@ private fun WcagInfoBanner() {
             .background(PrototypeTokens.infoContainer)
             .border(1.dp, PrototypeTokens.borderSoft, PrototypeShapes.Card)
             .padding(horizontal = 16.dp, vertical = 12.dp),
-        verticalAlignment = Alignment.CenterVertically,
+        verticalAlignment = Alignment.CenterVertically
     ) {
         Icon(
             imageVector = Icons.Filled.Accessibility,
             contentDescription = null,
             tint = PrototypeTokens.onInfoContainer,
-            modifier = Modifier.size(20.dp),
+            modifier = Modifier.size(20.dp)
         )
         Spacer(modifier = Modifier.width(10.dp))
         Text(
             text = stringResource(R.string.accessibility_wcag_info),
             style = MaterialTheme.typography.bodySmall,
             color = PrototypeTokens.onInfoContainer,
-            fontWeight = FontWeight.Medium,
+            fontWeight = FontWeight.Medium
         )
     }
 }
 
 @Composable
-private fun VibrationTestRow(
-    enabled: Boolean,
-    onTest: () -> Unit,
-) {
+private fun VibrationTestRow(enabled: Boolean, onTest: () -> Unit) {
     Row(
         modifier = Modifier
             .fillMaxWidth()
             .padding(start = 64.dp, end = 20.dp, bottom = 8.dp),
-        verticalAlignment = Alignment.CenterVertically,
+        verticalAlignment = Alignment.CenterVertically
     ) {
         Row(
             modifier = Modifier
@@ -301,19 +295,19 @@ private fun VibrationTestRow(
                 .clickable(enabled = enabled, onClick = onTest)
                 .padding(horizontal = 12.dp, vertical = 6.dp),
             verticalAlignment = Alignment.CenterVertically,
-            horizontalArrangement = Arrangement.spacedBy(6.dp),
+            horizontalArrangement = Arrangement.spacedBy(6.dp)
         ) {
             Icon(
                 imageVector = Icons.Filled.Vibration,
                 contentDescription = null,
                 tint = if (enabled) PrototypeTokens.accent else PrototypeTokens.muted,
-                modifier = Modifier.size(14.dp),
+                modifier = Modifier.size(14.dp)
             )
             Text(
                 text = stringResource(R.string.accessibility_test_vibration),
                 style = MaterialTheme.typography.labelSmall,
                 color = if (enabled) PrototypeTokens.accent else PrototypeTokens.muted,
-                fontWeight = FontWeight.Medium,
+                fontWeight = FontWeight.Medium
             )
         }
     }
@@ -327,13 +321,13 @@ private fun VibrationTestRow(
 private fun ColorBlindModeDialog(
     currentMode: ColorBlindMode,
     onModeSelected: (ColorBlindMode) -> Unit,
-    onDismiss: () -> Unit,
+    onDismiss: () -> Unit
 ) {
     val options = listOf(
         ColorBlindMode.NONE to stringResource(R.string.accessibility_color_blind_mode_none),
         ColorBlindMode.PROTANOPIA to stringResource(R.string.accessibility_color_blind_mode_protanopia),
         ColorBlindMode.DEUTERANOPIA to stringResource(R.string.accessibility_color_blind_mode_deuteranopia),
-        ColorBlindMode.TRITANOPIA to stringResource(R.string.accessibility_color_blind_mode_tritanopia),
+        ColorBlindMode.TRITANOPIA to stringResource(R.string.accessibility_color_blind_mode_tritanopia)
     )
 
     BrandDialog(
@@ -347,7 +341,7 @@ private fun ColorBlindModeDialog(
                             .fillMaxWidth()
                             .clickable { onModeSelected(mode) }
                             .padding(vertical = 10.dp),
-                        verticalAlignment = Alignment.CenterVertically,
+                        verticalAlignment = Alignment.CenterVertically
                     ) {
                         // Color preview circle to show how colors look in each mode
                         ColorBlindPreviewDot(mode = mode)
@@ -356,14 +350,14 @@ private fun ColorBlindModeDialog(
                             text = label,
                             style = MaterialTheme.typography.bodyLarge,
                             color = if (mode == currentMode) PrototypeTokens.accent else PrototypeTokens.fg,
-                            fontWeight = if (mode == currentMode) FontWeight.SemiBold else FontWeight.Normal,
+                            fontWeight = if (mode == currentMode) FontWeight.SemiBold else FontWeight.Normal
                         )
                         Spacer(modifier = Modifier.weight(1f))
                         if (mode == currentMode) {
                             Text(
                                 text = "✓",
                                 color = PrototypeTokens.accent,
-                                fontWeight = FontWeight.Bold,
+                                fontWeight = FontWeight.Bold
                             )
                         }
                     }
@@ -374,30 +368,33 @@ private fun ColorBlindModeDialog(
             androidx.compose.material3.TextButton(onClick = onDismiss) {
                 Text(
                     stringResource(R.string.profile_dialog_confirm),
-                    color = PrototypeTokens.accent,
+                    color = PrototypeTokens.accent
                 )
             }
-        },
+        }
     )
 }
 
 @Composable
 private fun ColorBlindPreviewDot(mode: ColorBlindMode) {
     val previewColors = listOf(
-        androidx.compose.ui.graphics.Color(0xFFEF5350),  // Red
-        androidx.compose.ui.graphics.Color(0xFF42A5F5),  // Blue
-        androidx.compose.ui.graphics.Color(0xFF66BB6A),  // Green
-        androidx.compose.ui.graphics.Color(0xFFFFB300),  // Amber
+        androidx.compose.ui.graphics.Color(0xFFEF5350), // Red
+        androidx.compose.ui.graphics.Color(0xFF42A5F5), // Blue
+        androidx.compose.ui.graphics.Color(0xFF66BB6A), // Green
+        androidx.compose.ui.graphics.Color(0xFFFFB300) // Amber
     )
     Row(horizontalArrangement = Arrangement.spacedBy(2.dp)) {
         previewColors.forEach { color ->
-            val transformed = if (mode == ColorBlindMode.NONE) color
-                else com.draftpeek.core.ui.theme.ColorBlindnessHelper.transform(color, mode)
+            val transformed = if (mode == ColorBlindMode.NONE) {
+                color
+            } else {
+                com.draftpeek.core.ui.theme.ColorBlindnessHelper.transform(color, mode)
+            }
             androidx.compose.foundation.layout.Box(
                 modifier = Modifier
                     .size(10.dp)
                     .clip(CircleShape)
-                    .background(transformed),
+                    .background(transformed)
             )
         }
     }
@@ -416,11 +413,7 @@ private fun colorBlindModeLabel(mode: ColorBlindMode): String = when (mode) {
 }
 
 @Composable
-private fun TextScaleDialog(
-    currentScale: Float,
-    onScaleChange: (Float) -> Unit,
-    onDismiss: () -> Unit,
-) {
+private fun TextScaleDialog(currentScale: Float, onScaleChange: (Float) -> Unit, onDismiss: () -> Unit) {
     var sliderValue by remember { mutableStateOf(currentScale) }
 
     BrandDialog(
@@ -433,7 +426,7 @@ private fun TextScaleDialog(
                     fontFamily = JetBrainsMonoFontFamily,
                     fontWeight = FontWeight.Bold,
                     fontSize = 28.sp,
-                    color = PrototypeTokens.accent,
+                    color = PrototypeTokens.accent
                 )
 
                 Spacer(modifier = Modifier.height(12.dp))
@@ -443,14 +436,14 @@ private fun TextScaleDialog(
                         .fillMaxWidth()
                         .clip(RoundedCornerShape(12.dp))
                         .background(PrototypeTokens.surface)
-                        .padding(14.dp),
+                        .padding(14.dp)
                 ) {
                     Text(
                         text = "中华人民共和国\n文字缩放预览 AaBbCc 123\nThe quick brown fox",
                         fontFamily = FontFamily.SansSerif,
                         fontSize = (16 * sliderValue).sp,
                         color = PrototypeTokens.fg,
-                        lineHeight = (16 * sliderValue * 1.5f).sp,
+                        lineHeight = (16 * sliderValue * 1.5f).sp
                     )
                 }
 
@@ -458,12 +451,12 @@ private fun TextScaleDialog(
 
                 Row(
                     modifier = Modifier.fillMaxWidth(),
-                    verticalAlignment = Alignment.CenterVertically,
+                    verticalAlignment = Alignment.CenterVertically
                 ) {
                     Text(
                         text = "80%",
                         fontSize = 12.sp,
-                        color = PrototypeTokens.muted,
+                        color = PrototypeTokens.muted
                     )
                     Slider(
                         value = sliderValue,
@@ -478,13 +471,13 @@ private fun TextScaleDialog(
                         colors = SliderDefaults.colors(
                             activeTrackColor = PrototypeTokens.accent,
                             inactiveTrackColor = PrototypeTokens.accentSoft,
-                            thumbColor = PrototypeTokens.accent,
-                        ),
+                            thumbColor = PrototypeTokens.accent
+                        )
                     )
                     Text(
                         text = "200%",
                         fontSize = 12.sp,
-                        color = PrototypeTokens.muted,
+                        color = PrototypeTokens.muted
                     )
                 }
             }
@@ -494,6 +487,6 @@ private fun TextScaleDialog(
         },
         dismissButton = {
             BrandOutlinedButton(text = stringResource(R.string.profile_dialog_cancel), onClick = onDismiss)
-        },
+        }
     )
 }

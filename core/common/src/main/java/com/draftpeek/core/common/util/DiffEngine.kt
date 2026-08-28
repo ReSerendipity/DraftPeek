@@ -28,11 +28,7 @@ import com.github.difflib.patch.InsertDelta
  * @property content 行内容
  * @property type 差异类型
  */
-data class DiffLine(
-    val lineNumber: Int,
-    val content: String,
-    val type: DiffType,
-)
+data class DiffLine(val lineNumber: Int, val content: String, val type: DiffType)
 
 /**
  * 差异类型枚举。
@@ -40,12 +36,15 @@ data class DiffLine(
 enum class DiffType {
     /** 两行相等 */
     EQUAL,
+
     /** 右侧新增行 */
     INSERT,
+
     /** 左侧删除行 */
     DELETE,
+
     /** 修改行（删除+新增配对） */
-    MODIFY,
+    MODIFY
 }
 
 /**
@@ -55,11 +54,7 @@ enum class DiffType {
  * @property rightLines 右侧（新文本）的差异行列表
  * @property diffCount 差异行数统计
  */
-data class DiffResult(
-    val leftLines: List<DiffLine>,
-    val rightLines: List<DiffLine>,
-    val diffCount: Int,
-)
+data class DiffResult(val leftLines: List<DiffLine>, val rightLines: List<DiffLine>, val diffCount: Int)
 
 /**
  * 文本差异引擎单例对象。
@@ -92,7 +87,7 @@ object DiffEngine {
             return DiffResult(
                 leftLines = effectiveLines.mapIndexed { i, line -> DiffLine(i + 1, line, DiffType.EQUAL) },
                 rightLines = effectiveLines.mapIndexed { i, line -> DiffLine(i + 1, line, DiffType.EQUAL) },
-                diffCount = 0,
+                diffCount = 0
             )
         }
 
@@ -116,7 +111,7 @@ object DiffEngine {
             return DiffResult(
                 leftLines = leftLines.mapIndexed { i, line -> DiffLine(i + 1, line, DiffType.EQUAL) },
                 rightLines = rightLines.mapIndexed { i, line -> DiffLine(i + 1, line, DiffType.EQUAL) },
-                diffCount = 0,
+                diffCount = 0
             )
         }
 
@@ -127,7 +122,7 @@ object DiffEngine {
             return DiffResult(
                 leftLines = padding,
                 rightLines = right,
-                diffCount = right.size,
+                diffCount = right.size
             )
         }
         if (rightLines.isEmpty()) {
@@ -136,7 +131,7 @@ object DiffEngine {
             return DiffResult(
                 leftLines = left,
                 rightLines = padding,
-                diffCount = left.size,
+                diffCount = left.size
             )
         }
 
@@ -168,12 +163,12 @@ object DiffEngine {
     private fun buildRawDiff(
         deltas: List<AbstractDelta<String>>,
         leftLines: List<String>,
-        rightLines: List<String>,
+        rightLines: List<String>
     ): Pair<MutableList<DiffLine>, MutableList<DiffLine>> {
         val rawLeft = mutableListOf<DiffLine>()
         val rawRight = mutableListOf<DiffLine>()
 
-        var leftPos = 0  // 下一个待处理的左侧行索引
+        var leftPos = 0 // 下一个待处理的左侧行索引
         var rightPos = 0 // 下一个待处理的右侧行索引
 
         for (delta in deltas) {
@@ -267,7 +262,7 @@ object DiffEngine {
      */
     private fun assignLineNumbers(
         rawLeft: List<DiffLine>,
-        rawRight: List<DiffLine>,
+        rawRight: List<DiffLine>
     ): Pair<List<DiffLine>, List<DiffLine>> {
         var leftNum = 0
         var rightNum = 0

@@ -42,10 +42,7 @@ import com.draftpeek.core.ui.theme.LocalAccessibilityState
  * hapticController.longPress() // 长按 / 删除
  * ```
  */
-class HapticController(
-    private val view: View,
-    private val enabled: Boolean,
-) {
+class HapticController(private val view: View, private val enabled: Boolean) {
     /** 操作成功反馈 — 使用 CONFIRM（API 30+），低版本回退到 KEYBOARD_TAP。 */
     fun confirm() {
         if (!enabled) return

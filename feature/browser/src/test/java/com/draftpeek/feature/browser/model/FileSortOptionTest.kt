@@ -19,7 +19,7 @@ class FileSortOptionTest {
         size: Long = 0,
         lastModified: Long = 0,
         extension: String = "",
-        isPinned: Boolean = false,
+        isPinned: Boolean = false
     ) = FileItem(
         name = name,
         uri = mockUri,
@@ -27,13 +27,13 @@ class FileSortOptionTest {
         size = size,
         lastModified = lastModified,
         extension = extension,
-        isPinned = isPinned,
+        isPinned = isPinned
     )
 
     private val testFiles = listOf(
         createFile("zfile.kt", size = 100, lastModified = 3000, extension = "kt"),
         createFile("afile.kt", size = 200, lastModified = 1000, extension = "kt"),
-        createFile("mfile.kt", size = 300, lastModified = 2000, extension = "kt"),
+        createFile("mfile.kt", size = 300, lastModified = 2000, extension = "kt")
     )
 
     @Nested
@@ -54,7 +54,7 @@ class FileSortOptionTest {
         fun directoriesBeforeFiles() {
             val files = listOf(
                 createFile("file.kt"),
-                createFile("dir", isDirectory = true),
+                createFile("dir", isDirectory = true)
             )
             val sorted = files.sortFiles(FileSortOption.NAME_ASC)
             assertEquals("dir", sorted[0].name)
@@ -142,7 +142,7 @@ class FileSortOptionTest {
             val files = listOf(
                 createFile("afile.kt"),
                 createFile("zfile.kt", isPinned = true),
-                createFile("mfile.kt"),
+                createFile("mfile.kt")
             )
             val sorted = files.sortFiles(FileSortOption.NAME_ASC)
             assertEquals("zfile.kt", sorted[0].name)
@@ -154,7 +154,7 @@ class FileSortOptionTest {
             val files = listOf(
                 createFile("zpin.kt", isPinned = true),
                 createFile("apin.kt", isPinned = true),
-                createFile("normal.kt"),
+                createFile("normal.kt")
             )
             val sorted = files.sortFiles(FileSortOption.NAME_ASC)
             assertEquals("apin.kt", sorted[0].name)
@@ -173,7 +173,7 @@ class FileSortOptionTest {
             val files = listOf(
                 createFile("file.kt", extension = "kt"),
                 createFile("file.py", extension = "py"),
-                createFile("file.go", extension = "go"),
+                createFile("file.go", extension = "go")
             )
             val sorted = files.sortFiles(FileSortOption.TYPE_ASC)
             assertEquals("go", sorted[0].extension)

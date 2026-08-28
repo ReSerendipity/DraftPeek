@@ -34,16 +34,14 @@ import androidx.lifecycle.viewModelScope
 import com.draftpeek.core.data.entity.RecentFile
 import com.draftpeek.core.data.repository.RecentFilesRepository
 import dagger.hilt.android.lifecycle.HiltViewModel
+import javax.inject.Inject
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
-import javax.inject.Inject
 
 @HiltViewModel
-class RecentFilesViewModel @Inject constructor(
-    private val repository: RecentFilesRepository,
-) : ViewModel() {
+class RecentFilesViewModel @Inject constructor(private val repository: RecentFilesRepository) : ViewModel() {
 
     /**
      * 最近打开文件列表（StateFlow）

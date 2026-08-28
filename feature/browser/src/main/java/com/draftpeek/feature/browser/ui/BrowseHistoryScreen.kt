@@ -4,6 +4,7 @@ import android.text.format.DateUtils
 import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.background
 import androidx.compose.foundation.combinedClickable
+import androidx.compose.foundation.horizontalScroll
 import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -19,7 +20,6 @@ import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.rememberScrollState
-import androidx.compose.foundation.horizontalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.KeyboardArrowRight
 import androidx.compose.material.icons.filled.Delete
@@ -72,7 +72,11 @@ import kotlin.math.pow
  * 用于最近文件列表按时间范围筛选
  */
 private enum class HistoryFilter {
-    Today, Yesterday, ThisWeek, ThisMonth, All;
+    Today,
+    Yesterday,
+    ThisWeek,
+    ThisMonth,
+    All;
 
     /**
      * 获取筛选选项的字符串资源 ID
@@ -93,8 +97,10 @@ private enum class HistoryFilter {
      */
     fun matches(timestamp: Long): Boolean {
         val todayStart = Calendar.getInstance().apply {
-            set(Calendar.HOUR_OF_DAY, 0); set(Calendar.MINUTE, 0)
-            set(Calendar.SECOND, 0); set(Calendar.MILLISECOND, 0)
+            set(Calendar.HOUR_OF_DAY, 0)
+            set(Calendar.MINUTE, 0)
+            set(Calendar.SECOND, 0)
+            set(Calendar.MILLISECOND, 0)
         }.timeInMillis
         return when (this) {
             All -> true
@@ -105,8 +111,10 @@ private enum class HistoryFilter {
             }
             ThisWeek -> {
                 val weekStart = Calendar.getInstance().apply {
-                    set(Calendar.HOUR_OF_DAY, 0); set(Calendar.MINUTE, 0)
-                    set(Calendar.SECOND, 0); set(Calendar.MILLISECOND, 0)
+                    set(Calendar.HOUR_OF_DAY, 0)
+                    set(Calendar.MINUTE, 0)
+                    set(Calendar.SECOND, 0)
+                    set(Calendar.MILLISECOND, 0)
                     val dow = get(Calendar.DAY_OF_WEEK)
                     val diff = (dow - Calendar.MONDAY + 7) % 7
                     add(Calendar.DAY_OF_YEAR, -diff)
@@ -116,8 +124,10 @@ private enum class HistoryFilter {
             ThisMonth -> {
                 val monthStart = Calendar.getInstance().apply {
                     set(Calendar.DAY_OF_MONTH, 1)
-                    set(Calendar.HOUR_OF_DAY, 0); set(Calendar.MINUTE, 0)
-                    set(Calendar.SECOND, 0); set(Calendar.MILLISECOND, 0)
+                    set(Calendar.HOUR_OF_DAY, 0)
+                    set(Calendar.MINUTE, 0)
+                    set(Calendar.SECOND, 0)
+                    set(Calendar.MILLISECOND, 0)
                 }.timeInMillis
                 timestamp >= monthStart
             }
@@ -134,7 +144,7 @@ private enum class DateSection(val labelRes: Int) {
     Today(R.string.browser_section_today),
     Yesterday(R.string.browser_section_yesterday),
     EarlierThisWeek(R.string.browser_section_this_week),
-    Earlier(R.string.browser_section_earlier),
+    Earlier(R.string.browser_section_earlier)
 }
 
 /**
@@ -145,13 +155,17 @@ private enum class DateSection(val labelRes: Int) {
  */
 private fun categorizeFile(timestamp: Long): DateSection {
     val todayStart = Calendar.getInstance().apply {
-        set(Calendar.HOUR_OF_DAY, 0); set(Calendar.MINUTE, 0)
-        set(Calendar.SECOND, 0); set(Calendar.MILLISECOND, 0)
+        set(Calendar.HOUR_OF_DAY, 0)
+        set(Calendar.MINUTE, 0)
+        set(Calendar.SECOND, 0)
+        set(Calendar.MILLISECOND, 0)
     }.timeInMillis
     val yesterdayStart = todayStart - TimeUnit.DAYS.toMillis(1)
     val weekStart = Calendar.getInstance().apply {
-        set(Calendar.HOUR_OF_DAY, 0); set(Calendar.MINUTE, 0)
-        set(Calendar.SECOND, 0); set(Calendar.MILLISECOND, 0)
+        set(Calendar.HOUR_OF_DAY, 0)
+        set(Calendar.MINUTE, 0)
+        set(Calendar.SECOND, 0)
+        set(Calendar.MILLISECOND, 0)
         val dow = get(Calendar.DAY_OF_WEEK)
         val diff = (dow - Calendar.MONDAY + 7) % 7
         add(Calendar.DAY_OF_YEAR, -diff)
@@ -173,7 +187,7 @@ private val MonoUppercaseSectionStyle = TextStyle(
     fontWeight = FontWeight.Bold,
     fontSize = 11.sp,
     letterSpacing = 1.2.sp,
-    lineHeight = 16.sp,
+    lineHeight = 16.sp
 )
 
 private val HistoryTitleStyle = TextStyle(
@@ -181,7 +195,7 @@ private val HistoryTitleStyle = TextStyle(
     fontWeight = FontWeight.Bold,
     fontSize = 18.sp,
     letterSpacing = 2.sp,
-    lineHeight = 24.sp,
+    lineHeight = 24.sp
 )
 
 /**
@@ -199,7 +213,7 @@ private val HistoryTitleStyle = TextStyle(
 fun BrowseHistoryScreen(
     onFileClick: (String) -> Unit = {},
     onBack: () -> Unit = {},
-    recentFilesViewModel: RecentFilesViewModel = hiltViewModel(),
+    recentFilesViewModel: RecentFilesViewModel = hiltViewModel()
 ) {
     val recentFiles by recentFilesViewModel.recentFiles.collectAsStateWithLifecycle()
 
@@ -231,7 +245,7 @@ fun BrowseHistoryScreen(
         DateSection.Today,
         DateSection.Yesterday,
         DateSection.EarlierThisWeek,
-        DateSection.Earlier,
+        DateSection.Earlier
     )
 
     if (showClearAllDialog) {
@@ -245,7 +259,7 @@ fun BrowseHistoryScreen(
                 recentFilesViewModel.clearAllRecentFiles()
                 showClearAllDialog = false
             },
-            onDismiss = { showClearAllDialog = false },
+            onDismiss = { showClearAllDialog = false }
         )
     }
 
@@ -262,7 +276,7 @@ fun BrowseHistoryScreen(
                                     stringResource(R.string.browser_action_unfavorite)
                                 } else {
                                     stringResource(R.string.browser_action_favorite)
-                                },
+                                }
                             )
                         },
                         onClick = {
@@ -273,15 +287,15 @@ fun BrowseHistoryScreen(
                             Icon(
                                 Icons.Filled.Star,
                                 contentDescription = stringResource(R.string.browser_action_favorite),
-                                tint = fgSoft,
+                                tint = fgSoft
                             )
-                        },
+                        }
                     )
                     DropdownMenuItem(
                         text = {
                             Text(
                                 stringResource(R.string.browser_action_remove_from_list),
-                                color = error,
+                                color = error
                             )
                         },
                         onClick = {
@@ -292,9 +306,9 @@ fun BrowseHistoryScreen(
                             Icon(
                                 Icons.Filled.Delete,
                                 contentDescription = stringResource(R.string.browser_action_remove_from_list),
-                                tint = error,
+                                tint = error
                             )
-                        },
+                        }
                     )
                 }
             },
@@ -303,14 +317,14 @@ fun BrowseHistoryScreen(
                 TextButton(onClick = { showRecentFileMenu = null }) {
                     Text(stringResource(R.string.browser_action_cancel))
                 }
-            },
+            }
         )
     }
 
     Column(
         modifier = Modifier
             .fillMaxSize()
-            .background(pageBg),
+            .background(pageBg)
     ) {
         // ---- TopBar ----
         BrandTopBar(
@@ -322,40 +336,40 @@ fun BrowseHistoryScreen(
                     icon = Icons.Filled.Delete,
                     onClick = { showClearAllDialog = true },
                     contentDescription = stringResource(R.string.browser_content_desc_clear_history),
-                    tint = fgSoft,
+                    tint = fgSoft
                 )
-            },
+            }
         )
 
         if (recentFiles.isEmpty()) {
             // ---- Empty state ----
             Box(
                 modifier = Modifier.fillMaxSize(),
-                contentAlignment = Alignment.Center,
+                contentAlignment = Alignment.Center
             ) {
                 Column(
                     horizontalAlignment = Alignment.CenterHorizontally,
-                    verticalArrangement = Arrangement.Center,
+                    verticalArrangement = Arrangement.Center
                 ) {
                     Icon(
                         imageVector = Icons.Filled.History,
                         contentDescription = null,
                         tint = muted.copy(alpha = 0.45f),
-                        modifier = Modifier.size(64.dp),
+                        modifier = Modifier.size(64.dp)
                     )
                     Spacer(modifier = Modifier.height(16.dp))
                     Text(
                         text = stringResource(R.string.browser_empty_history_title),
                         style = HistoryTitleStyle.copy(fontSize = 16.sp, letterSpacing = 1.sp),
                         color = muted,
-                        textAlign = TextAlign.Center,
+                        textAlign = TextAlign.Center
                     )
                     Spacer(modifier = Modifier.height(6.dp))
                     Text(
                         text = stringResource(R.string.browser_empty_history_subtitle),
                         style = FileMetaStyle,
                         color = muted.copy(alpha = 0.7f),
-                        textAlign = TextAlign.Center,
+                        textAlign = TextAlign.Center
                     )
                 }
             }
@@ -366,13 +380,13 @@ fun BrowseHistoryScreen(
                     .fillMaxWidth()
                     .horizontalScroll(rememberScrollState())
                     .padding(horizontal = PrototypeSpacing.ScreenHorizontal, vertical = 12.dp),
-                horizontalArrangement = Arrangement.spacedBy(8.dp),
+                horizontalArrangement = Arrangement.spacedBy(8.dp)
             ) {
                 HistoryFilter.entries.forEach { filter ->
                     BrandFilterChip(
                         text = stringResource(filter.labelRes()),
                         selected = selectedFilter == filter,
-                        onClick = { selectedFilter = filter },
+                        onClick = { selectedFilter = filter }
                     )
                 }
             }
@@ -381,18 +395,18 @@ fun BrowseHistoryScreen(
             if (filteredFiles.isEmpty()) {
                 Box(
                     modifier = Modifier.fillMaxSize(),
-                    contentAlignment = Alignment.Center,
+                    contentAlignment = Alignment.Center
                 ) {
                     Text(
                         text = stringResource(R.string.browser_empty_no_history),
                         style = FileMetaStyle,
                         color = muted,
-                        textAlign = TextAlign.Center,
+                        textAlign = TextAlign.Center
                     )
                 }
             } else {
                 LazyColumn(
-                    modifier = Modifier.fillMaxSize(),
+                    modifier = Modifier.fillMaxSize()
                 ) {
                     sectionOrder.forEach { section ->
                         val filesInSection = groupedFiles[section] ?: return@forEach
@@ -408,24 +422,24 @@ fun BrowseHistoryScreen(
                                     start = PrototypeSpacing.ScreenHorizontal,
                                     end = PrototypeSpacing.ScreenHorizontal,
                                     top = 16.dp,
-                                    bottom = 4.dp,
-                                ),
+                                    bottom = 4.dp
+                                )
                             )
                         }
 
                         items(
                             items = filesInSection,
-                            key = { "recent_${it.uri}" },
+                            key = { "recent_${it.uri}" }
                         ) { file ->
                             RecentFileRow(
                                 recentFile = file,
                                 onClick = { onFileClick(file.uri) },
-                                onLongClick = { showRecentFileMenu = file },
+                                onLongClick = { showRecentFileMenu = file }
                             )
                             HorizontalDivider(
                                 thickness = 1.dp,
                                 color = border.copy(alpha = 0.5f),
-                                modifier = Modifier.padding(horizontal = PrototypeSpacing.ScreenHorizontal),
+                                modifier = Modifier.padding(horizontal = PrototypeSpacing.ScreenHorizontal)
                             )
                         }
                     }
@@ -458,11 +472,7 @@ fun BrowseHistoryScreen(
  */
 @OptIn(ExperimentalFoundationApi::class)
 @Composable
-private fun RecentFileRow(
-    recentFile: RecentFile,
-    onClick: () -> Unit,
-    onLongClick: () -> Unit,
-) {
+private fun RecentFileRow(recentFile: RecentFile, onClick: () -> Unit, onLongClick: () -> Unit) {
     val fg = PrototypeTokens.fg
     val muted = PrototypeTokens.muted
     val mutedSoft = PrototypeTokens.mutedSoft
@@ -472,7 +482,7 @@ private fun RecentFileRow(
     val timeAgo = DateUtils.getRelativeTimeSpanString(
         recentFile.lastOpenedAt,
         System.currentTimeMillis(),
-        DateUtils.MINUTE_IN_MILLIS,
+        DateUtils.MINUTE_IN_MILLIS
     ).toString()
 
     val metaText = buildString {
@@ -495,32 +505,32 @@ private fun RecentFileRow(
                 interactionSource = remember { MutableInteractionSource() },
                 indication = null,
                 onClick = onClick,
-                onLongClick = onLongClick,
+                onLongClick = onLongClick
             )
             .padding(
                 horizontal = PrototypeSpacing.ScreenHorizontal,
-                vertical = 12.dp,
+                vertical = 12.dp
             ),
-        verticalAlignment = Alignment.CenterVertically,
+        verticalAlignment = Alignment.CenterVertically
     ) {
         // 24dp mini file-type badge
         FileTypeIcon(
             extension = ext.ifEmpty { "txt" },
-            modifier = Modifier.size(24.dp),
+            modifier = Modifier.size(24.dp)
         )
 
         Spacer(modifier = Modifier.width(12.dp))
 
         // Middle column: filename + meta
         Column(
-            modifier = Modifier.weight(1f, fill = false),
+            modifier = Modifier.weight(1f, fill = false)
         ) {
             Text(
                 text = recentFile.fileName,
                 style = MonoFileNameStyle,
                 color = fg,
                 maxLines = 1,
-                overflow = TextOverflow.Ellipsis,
+                overflow = TextOverflow.Ellipsis
             )
             Spacer(modifier = Modifier.height(2.dp))
             Text(
@@ -528,7 +538,7 @@ private fun RecentFileRow(
                 style = FileMetaStyle,
                 color = muted,
                 maxLines = 1,
-                overflow = TextOverflow.Ellipsis,
+                overflow = TextOverflow.Ellipsis
             )
         }
 
@@ -539,7 +549,7 @@ private fun RecentFileRow(
             imageVector = Icons.AutoMirrored.Filled.KeyboardArrowRight,
             contentDescription = null,
             tint = mutedSoft.copy(alpha = 0.4f),
-            modifier = Modifier.size(16.dp),
+            modifier = Modifier.size(16.dp)
         )
     }
 }

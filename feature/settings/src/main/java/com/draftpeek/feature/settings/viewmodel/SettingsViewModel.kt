@@ -39,11 +39,11 @@ import com.draftpeek.feature.settings.model.AppTheme
 import com.draftpeek.feature.settings.model.EditorSettings
 import com.draftpeek.feature.settings.repository.SettingsRepository
 import dagger.hilt.android.lifecycle.HiltViewModel
+import javax.inject.Inject
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
-import javax.inject.Inject
 
 /**
  * 设置 ViewModel，提供设置状态的响应式访问和更新方法。
@@ -54,9 +54,7 @@ import javax.inject.Inject
  * @property repository 设置仓库接口，由 Hilt 注入
  */
 @HiltViewModel
-class SettingsViewModel @Inject constructor(
-    private val repository: SettingsRepository
-) : ViewModel() {
+class SettingsViewModel @Inject constructor(private val repository: SettingsRepository) : ViewModel() {
 
     companion object {
         /** 日志标签，用于 Logcat 过滤设置相关错误 */

@@ -22,7 +22,5 @@ sealed class SecurityEvent : AppEvent {
      * @property preservePersistentFiles true 只清内存，不删磁盘文件；
      *                                     false 由订阅者自行决定是否擦除磁盘文件（默认 true）。
      */
-    data class ClearAllSensitiveCaches(
-        val preservePersistentFiles: Boolean = true,
-    ) : SecurityEvent()
+    data class ClearAllSensitiveCaches(val preservePersistentFiles: Boolean = true) : SecurityEvent()
 }

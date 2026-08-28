@@ -43,17 +43,13 @@ import com.draftpeek.core.ui.theme.PrototypeTokens
  * @param modifier 应用于组件的 Modifier
  */
 @Composable
-fun BrandSwitch(
-    checked: Boolean,
-    onCheckedChange: (Boolean) -> Unit,
-    modifier: Modifier = Modifier,
-) {
+fun BrandSwitch(checked: Boolean, onCheckedChange: (Boolean) -> Unit, modifier: Modifier = Modifier) {
     val trackColor = if (checked) PrototypeTokens.accent else PrototypeTokens.border
     val borderColor = if (checked) PrototypeTokens.accent.copy(alpha = 0.3f) else Color.Transparent
     val thumbOffset by animateDpAsState(
         targetValue = if (checked) (PrototypeSpacing.SwitchWidth - PrototypeSpacing.SwitchHeight + 2.dp) else 2.dp,
         animationSpec = spring(dampingRatio = 0.6f, stiffness = 400f),
-        label = "switchThumb",
+        label = "switchThumb"
     )
 
     Box(
@@ -65,8 +61,8 @@ fun BrandSwitch(
             .clickable(
                 interactionSource = remember { MutableInteractionSource() },
                 indication = null,
-                onClick = { onCheckedChange(!checked) },
-            ),
+                onClick = { onCheckedChange(!checked) }
+            )
     ) {
         Box(
             modifier = Modifier
@@ -74,7 +70,7 @@ fun BrandSwitch(
                 .size(PrototypeSpacing.SwitchThumbSize)
                 .shadow(2.dp, CircleShape)
                 .clip(CircleShape)
-                .background(Color.White),
+                .background(Color.White)
         )
     }
 }

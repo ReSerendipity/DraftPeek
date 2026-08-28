@@ -1,7 +1,6 @@
 package com.draftpeek.feature.browser.ui
 
 import android.net.Uri
-import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
@@ -20,8 +19,6 @@ import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.foundation.text.KeyboardActions
-import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.filled.Check
@@ -40,8 +37,6 @@ import androidx.compose.material3.IconButton
 import androidx.compose.material3.Tab
 import androidx.compose.material3.TabRow
 import androidx.compose.material3.Text
-import androidx.compose.material3.TextField
-import androidx.compose.material3.TextFieldDefaults
 import androidx.compose.material3.TopAppBar
 import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
@@ -57,26 +52,23 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.ImageVector
-import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.font.FontWeight
-import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import com.draftpeek.core.common.vcs.GitFileStatus
+import com.draftpeek.core.common.vcs.GitStatus
 import com.draftpeek.core.ui.component.BrandFilledButton
-import com.draftpeek.core.ui.component.BrandOutlinedButton
 import com.draftpeek.core.ui.component.BrandOutlinedTextField
 import com.draftpeek.core.ui.theme.DraftPeekTypography
 import com.draftpeek.core.ui.theme.MonoLabelStyle
 import com.draftpeek.core.ui.theme.PrototypeSpacing
 import com.draftpeek.core.ui.theme.PrototypeTokens
 import com.draftpeek.core.ui.theme.SemanticColors
-import com.draftpeek.core.common.vcs.GitFileStatus
-import com.draftpeek.core.common.vcs.GitStatus
 import com.draftpeek.feature.browser.R
 import com.draftpeek.feature.browser.viewmodel.GitUiState
 import com.draftpeek.feature.browser.viewmodel.GitViewModel
@@ -99,11 +91,7 @@ import com.draftpeek.feature.browser.viewmodel.GitViewModel
  */
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun GitScreen(
-    treeUri: Uri,
-    onNavigateBack: () -> Unit,
-    viewModel: GitViewModel = hiltViewModel(),
-) {
+fun GitScreen(treeUri: Uri, onNavigateBack: () -> Unit, viewModel: GitViewModel = hiltViewModel()) {
     val uiState by viewModel.uiState.collectAsStateWithLifecycle()
     val branches = remember { viewModel.getBranches() }
     var selectedTab by rememberSaveable { mutableIntStateOf(0) }
@@ -124,7 +112,7 @@ fun GitScreen(
     Column(
         modifier = Modifier
             .fillMaxSize()
-            .background(surface),
+            .background(surface)
     ) {
         // Top bar
         TopAppBar(
@@ -132,7 +120,7 @@ fun GitScreen(
                 Text(
                     text = stringResource(R.string.browser_git_screen_title),
                     style = DraftPeekTypography.titleMedium,
-                    color = fg,
+                    color = fg
                 )
             },
             navigationIcon = {
@@ -140,7 +128,7 @@ fun GitScreen(
                     Icon(
                         imageVector = Icons.AutoMirrored.Filled.ArrowBack,
                         contentDescription = stringResource(android.R.string.cancel),
-                        tint = fg,
+                        tint = fg
                     )
                 }
             },
@@ -149,11 +137,11 @@ fun GitScreen(
                     Icon(
                         imageVector = Icons.Filled.Refresh,
                         contentDescription = stringResource(R.string.browser_git_action_fetch),
-                        tint = muted,
+                        tint = muted
                     )
                 }
             },
-            colors = TopAppBarDefaults.topAppBarColors(containerColor = surface),
+            colors = TopAppBarDefaults.topAppBarColors(containerColor = surface)
         )
 
         // Branch info bar
@@ -163,21 +151,21 @@ fun GitScreen(
                     .fillMaxWidth()
                     .background(elevated)
                     .padding(horizontal = PrototypeSpacing.ScreenHorizontal, vertical = 8.dp),
-                verticalAlignment = Alignment.CenterVertically,
+                verticalAlignment = Alignment.CenterVertically
             ) {
                 Box(
                     modifier = Modifier
                         .clip(RoundedCornerShape(6.dp))
                         .background(accentSoft)
-                        .padding(horizontal = 10.dp, vertical = 4.dp),
+                        .padding(horizontal = 10.dp, vertical = 4.dp)
                 ) {
                     Text(
                         text = uiState.branchName.ifBlank { "HEAD" },
                         style = MonoLabelStyle.copy(
                             color = accent,
                             fontWeight = FontWeight.SemiBold,
-                            fontSize = 12.sp,
-                        ),
+                            fontSize = 12.sp
+                        )
                     )
                 }
                 Spacer(modifier = Modifier.width(12.dp))
@@ -188,7 +176,7 @@ fun GitScreen(
                         color = muted,
                         maxLines = 1,
                         overflow = TextOverflow.Ellipsis,
-                        modifier = Modifier.weight(1f),
+                        modifier = Modifier.weight(1f)
                     )
                 }
             }
@@ -200,14 +188,14 @@ fun GitScreen(
             stringResource(R.string.browser_git_tab_commit),
             stringResource(R.string.browser_git_tab_remote),
             stringResource(R.string.browser_git_tab_branches),
-            stringResource(R.string.browser_git_tab_log),
+            stringResource(R.string.browser_git_tab_log)
         )
 
         TabRow(
             selectedTabIndex = selectedTab,
             containerColor = surface,
             contentColor = accent,
-            divider = { HorizontalDivider(color = border) },
+            divider = { HorizontalDivider(color = border) }
         ) {
             tabs.forEachIndexed { index, title ->
                 Tab(
@@ -216,9 +204,9 @@ fun GitScreen(
                     text = {
                         Text(
                             text = title,
-                            style = DraftPeekTypography.labelSmall,
+                            style = DraftPeekTypography.labelSmall
                         )
-                    },
+                    }
                 )
             }
         }
@@ -253,14 +241,19 @@ fun GitScreen(
 @Composable
 private fun StatusTab(
     uiState: GitUiState,
-    fg: Color, muted: Color, accent: Color, accentSoft: Color,
-    surface: Color, border: Color, elevated: Color,
+    fg: Color,
+    muted: Color,
+    accent: Color,
+    accentSoft: Color,
+    surface: Color,
+    border: Color,
+    elevated: Color
 ) {
     if (!uiState.isGitRepo) {
         EmptyState(
             icon = Icons.Filled.Source,
             message = stringResource(R.string.browser_git_no_repo),
-            muted = muted,
+            muted = muted
         )
         return
     }
@@ -270,7 +263,7 @@ private fun StatusTab(
             .fillMaxSize()
             .padding(horizontal = PrototypeSpacing.ScreenHorizontal)
             .imePadding(),
-        verticalArrangement = Arrangement.spacedBy(4.dp),
+        verticalArrangement = Arrangement.spacedBy(4.dp)
     ) {
         // Summary
         item {
@@ -280,7 +273,7 @@ private fun StatusTab(
             Text(
                 text = stringResource(R.string.browser_git_changed_files),
                 style = MonoLabelStyle,
-                color = muted,
+                color = muted
             )
             Spacer(modifier = Modifier.height(4.dp))
         }
@@ -293,7 +286,7 @@ private fun StatusTab(
                     text = stringResource(R.string.browser_git_status_clean),
                     style = DraftPeekTypography.bodySmall,
                     color = SemanticColors.Success,
-                    modifier = Modifier.padding(vertical = 8.dp),
+                    modifier = Modifier.padding(vertical = 8.dp)
                 )
             }
         } else {
@@ -307,8 +300,12 @@ private fun StatusTab(
 @Composable
 private fun StatusSummaryCard(
     uiState: GitUiState,
-    fg: Color, muted: Color, accent: Color, accentSoft: Color,
-    border: Color, elevated: Color,
+    fg: Color,
+    muted: Color,
+    accent: Color,
+    accentSoft: Color,
+    border: Color,
+    elevated: Color
 ) {
     Row(
         modifier = Modifier
@@ -317,12 +314,12 @@ private fun StatusSummaryCard(
             .background(elevated)
             .border(1.dp, border, RoundedCornerShape(8.dp))
             .padding(horizontal = 14.dp, vertical = 10.dp),
-        verticalAlignment = Alignment.CenterVertically,
+        verticalAlignment = Alignment.CenterVertically
     ) {
         Text(
             text = stringResource(R.string.browser_git_status_summary, uiState.modifiedCount),
             style = DraftPeekTypography.bodyMedium.copy(fontWeight = FontWeight.Medium),
-            color = fg,
+            color = fg
         )
     }
 }
@@ -330,7 +327,11 @@ private fun StatusSummaryCard(
 @Composable
 private fun FileStatusRow(
     file: GitFileStatus,
-    fg: Color, muted: Color, accent: Color, accentSoft: Color, border: Color,
+    fg: Color,
+    muted: Color,
+    accent: Color,
+    accentSoft: Color,
+    border: Color
 ) {
     val (statusLabel, statusColor) = when (file.status) {
         GitStatus.MODIFIED -> "M" to SemanticColors.Warning
@@ -347,21 +348,21 @@ private fun FileStatusRow(
             .background(Color.Transparent)
             .border(1.dp, border.copy(alpha = 0.5f), RoundedCornerShape(6.dp))
             .padding(horizontal = 12.dp, vertical = 8.dp),
-        verticalAlignment = Alignment.CenterVertically,
+        verticalAlignment = Alignment.CenterVertically
     ) {
         Box(
             modifier = Modifier
                 .clip(RoundedCornerShape(4.dp))
                 .background(statusColor.copy(alpha = 0.15f))
-                .padding(horizontal = 6.dp, vertical = 2.dp),
+                .padding(horizontal = 6.dp, vertical = 2.dp)
         ) {
             Text(
                 text = statusLabel,
                 style = MonoLabelStyle.copy(
                     color = statusColor,
                     fontWeight = FontWeight.Bold,
-                    fontSize = 11.sp,
-                ),
+                    fontSize = 11.sp
+                )
             )
         }
         Spacer(modifier = Modifier.width(10.dp))
@@ -369,19 +370,19 @@ private fun FileStatusRow(
             text = file.filePath.substringAfterLast('/'),
             style = DraftPeekTypography.bodySmall.copy(
                 fontWeight = FontWeight.Medium,
-                fontFamily = FontFamily.Monospace,
+                fontFamily = FontFamily.Monospace
             ),
             color = fg,
             maxLines = 1,
             overflow = TextOverflow.Ellipsis,
-            modifier = Modifier.weight(1f),
+            modifier = Modifier.weight(1f)
         )
         Text(
             text = file.filePath.substringBeforeLast('/', ""),
             style = MonoLabelStyle.copy(fontSize = 10.sp),
             color = muted,
             maxLines = 1,
-            overflow = TextOverflow.Ellipsis,
+            overflow = TextOverflow.Ellipsis
         )
     }
 }
@@ -392,8 +393,13 @@ private fun FileStatusRow(
 private fun CommitTab(
     uiState: GitUiState,
     viewModel: GitViewModel,
-    fg: Color, muted: Color, accent: Color, accentSoft: Color,
-    surface: Color, border: Color, elevated: Color,
+    fg: Color,
+    muted: Color,
+    accent: Color,
+    accentSoft: Color,
+    surface: Color,
+    border: Color,
+    elevated: Color
 ) {
     var commitMessage by rememberSaveable { mutableStateOf("") }
     val changedFiles = uiState.fileStatuses.filter { it.status != GitStatus.UNMODIFIED }
@@ -408,7 +414,7 @@ private fun CommitTab(
         modifier = Modifier
             .fillMaxSize()
             .padding(horizontal = PrototypeSpacing.ScreenHorizontal)
-            .imePadding(),
+            .imePadding()
     ) {
         Spacer(modifier = Modifier.height(12.dp))
 
@@ -416,7 +422,7 @@ private fun CommitTab(
         Text(
             text = stringResource(R.string.browser_git_commit_message_label),
             style = MonoLabelStyle,
-            color = muted,
+            color = muted
         )
         Spacer(modifier = Modifier.height(4.dp))
         BrandOutlinedTextField(
@@ -425,7 +431,7 @@ private fun CommitTab(
             modifier = Modifier.fillMaxWidth(),
             placeholder = { Text(stringResource(R.string.browser_git_commit_message_hint)) },
             singleLine = false,
-            maxLines = 5,
+            maxLines = 5
         )
 
         Spacer(modifier = Modifier.height(16.dp))
@@ -434,7 +440,7 @@ private fun CommitTab(
         Text(
             text = stringResource(R.string.browser_git_stage_files),
             style = MonoLabelStyle,
-            color = muted,
+            color = muted
         )
         Spacer(modifier = Modifier.height(4.dp))
 
@@ -443,14 +449,14 @@ private fun CommitTab(
                 text = stringResource(R.string.browser_git_no_changes),
                 style = DraftPeekTypography.bodySmall,
                 color = muted,
-                modifier = Modifier.padding(vertical = 8.dp),
+                modifier = Modifier.padding(vertical = 8.dp)
             )
         } else {
             LazyColumn(
                 modifier = Modifier
                     .fillMaxWidth()
                     .weight(1f),
-                verticalArrangement = Arrangement.spacedBy(2.dp),
+                verticalArrangement = Arrangement.spacedBy(2.dp)
             ) {
                 items(changedFiles, key = { it.filePath }) { file ->
                     val isSelected = selectedFiles.value.contains(file.filePath)
@@ -467,13 +473,13 @@ private fun CommitTab(
                                 }
                             }
                             .padding(horizontal = 12.dp, vertical = 8.dp),
-                        verticalAlignment = Alignment.CenterVertically,
+                        verticalAlignment = Alignment.CenterVertically
                     ) {
                         Icon(
                             imageVector = if (isSelected) Icons.Filled.Check else Icons.Filled.CreateNewFolder,
                             contentDescription = null,
                             tint = if (isSelected) accent else muted,
-                            modifier = Modifier.size(16.dp),
+                            modifier = Modifier.size(16.dp)
                         )
                         Spacer(modifier = Modifier.width(8.dp))
                         Text(
@@ -482,7 +488,7 @@ private fun CommitTab(
                             color = if (isSelected) fg else muted,
                             maxLines = 1,
                             overflow = TextOverflow.Ellipsis,
-                            modifier = Modifier.weight(1f),
+                            modifier = Modifier.weight(1f)
                         )
                     }
                 }
@@ -498,13 +504,13 @@ private fun CommitTab(
                 commitMessage = ""
             },
             enabled = commitMessage.isNotBlank() && selectedFiles.value.isNotEmpty() && !uiState.isCommitting,
-            modifier = Modifier.fillMaxWidth(),
+            modifier = Modifier.fillMaxWidth()
         ) {
             if (uiState.isCommitting) {
                 CircularProgressIndicator(
                     modifier = Modifier.size(16.dp),
                     strokeWidth = 2.dp,
-                    color = Color.White,
+                    color = Color.White
                 )
                 Spacer(modifier = Modifier.width(8.dp))
             }
@@ -520,14 +526,19 @@ private fun CommitTab(
 private fun RemoteTab(
     uiState: GitUiState,
     viewModel: GitViewModel,
-    fg: Color, muted: Color, accent: Color, accentSoft: Color,
-    surface: Color, border: Color, elevated: Color,
+    fg: Color,
+    muted: Color,
+    accent: Color,
+    accentSoft: Color,
+    surface: Color,
+    border: Color,
+    elevated: Color
 ) {
     Column(
         modifier = Modifier
             .fillMaxSize()
             .padding(horizontal = PrototypeSpacing.ScreenHorizontal),
-        verticalArrangement = Arrangement.spacedBy(12.dp),
+        verticalArrangement = Arrangement.spacedBy(12.dp)
     ) {
         Spacer(modifier = Modifier.height(12.dp))
 
@@ -538,7 +549,7 @@ private fun RemoteTab(
             Text(
                 text = stringResource(R.string.browser_git_no_remote),
                 style = DraftPeekTypography.bodySmall,
-                color = muted,
+                color = muted
             )
         }
 
@@ -553,7 +564,7 @@ private fun RemoteTab(
             enabled = uiState.isGitRepo && !uiState.isPushing,
             onClick = { viewModel.push() },
             fg = fg, muted = muted, accent = accent, accentSoft = accentSoft,
-            surface = surface, border = border, elevated = elevated,
+            surface = surface, border = border, elevated = elevated
         )
 
         // Pull button
@@ -565,7 +576,7 @@ private fun RemoteTab(
             enabled = uiState.isGitRepo && !uiState.isPulling,
             onClick = { viewModel.pull() },
             fg = fg, muted = muted, accent = accent, accentSoft = accentSoft,
-            surface = surface, border = border, elevated = elevated,
+            surface = surface, border = border, elevated = elevated
         )
 
         // Fetch button
@@ -577,7 +588,7 @@ private fun RemoteTab(
             enabled = uiState.isGitRepo && !uiState.isFetching,
             onClick = { viewModel.fetch() },
             fg = fg, muted = muted, accent = accent, accentSoft = accentSoft,
-            surface = surface, border = border, elevated = elevated,
+            surface = surface, border = border, elevated = elevated
         )
     }
 }
@@ -585,8 +596,12 @@ private fun RemoteTab(
 @Composable
 private fun RemoteInfoCard(
     uiState: GitUiState,
-    fg: Color, muted: Color, accent: Color, accentSoft: Color,
-    border: Color, elevated: Color,
+    fg: Color,
+    muted: Color,
+    accent: Color,
+    accentSoft: Color,
+    border: Color,
+    elevated: Color
 ) {
     Column(
         modifier = Modifier
@@ -594,12 +609,12 @@ private fun RemoteInfoCard(
             .clip(RoundedCornerShape(8.dp))
             .background(elevated)
             .border(1.dp, border, RoundedCornerShape(8.dp))
-            .padding(14.dp),
+            .padding(14.dp)
     ) {
         Text(
             text = stringResource(R.string.browser_git_remote_info),
             style = MonoLabelStyle,
-            color = muted,
+            color = muted
         )
         Spacer(modifier = Modifier.height(4.dp))
         Text(
@@ -607,7 +622,7 @@ private fun RemoteInfoCard(
             style = DraftPeekTypography.bodySmall.copy(fontFamily = FontFamily.Monospace),
             color = fg,
             maxLines = 2,
-            overflow = TextOverflow.Ellipsis,
+            overflow = TextOverflow.Ellipsis
         )
     }
 }
@@ -620,8 +635,13 @@ private fun RemoteActionCard(
     isLoading: Boolean,
     enabled: Boolean,
     onClick: () -> Unit,
-    fg: Color, muted: Color, accent: Color, accentSoft: Color,
-    surface: Color, border: Color, elevated: Color,
+    fg: Color,
+    muted: Color,
+    accent: Color,
+    accentSoft: Color,
+    surface: Color,
+    border: Color,
+    elevated: Color
 ) {
     Row(
         modifier = Modifier
@@ -631,27 +651,27 @@ private fun RemoteActionCard(
             .border(1.dp, border, RoundedCornerShape(8.dp))
             .clickable(enabled = enabled && !isLoading, onClick = onClick)
             .padding(14.dp),
-        verticalAlignment = Alignment.CenterVertically,
+        verticalAlignment = Alignment.CenterVertically
     ) {
         Box(
             modifier = Modifier
                 .size(40.dp)
                 .clip(RoundedCornerShape(8.dp))
                 .background(accentSoft),
-            contentAlignment = Alignment.Center,
+            contentAlignment = Alignment.Center
         ) {
             if (isLoading) {
                 CircularProgressIndicator(
                     modifier = Modifier.size(20.dp),
                     strokeWidth = 2.dp,
-                    color = accent,
+                    color = accent
                 )
             } else {
                 Icon(
                     imageVector = icon,
                     contentDescription = null,
                     tint = if (enabled) accent else muted,
-                    modifier = Modifier.size(20.dp),
+                    modifier = Modifier.size(20.dp)
                 )
             }
         }
@@ -660,12 +680,12 @@ private fun RemoteActionCard(
             Text(
                 text = title,
                 style = DraftPeekTypography.bodyMedium.copy(fontWeight = FontWeight.SemiBold),
-                color = if (enabled) fg else muted,
+                color = if (enabled) fg else muted
             )
             Text(
                 text = description,
                 style = DraftPeekTypography.bodySmall,
-                color = muted,
+                color = muted
             )
         }
     }
@@ -678,21 +698,26 @@ private fun BranchesTab(
     branches: List<String>,
     uiState: GitUiState,
     viewModel: GitViewModel,
-    fg: Color, muted: Color, accent: Color, accentSoft: Color,
-    surface: Color, border: Color, elevated: Color,
+    fg: Color,
+    muted: Color,
+    accent: Color,
+    accentSoft: Color,
+    surface: Color,
+    border: Color,
+    elevated: Color
 ) {
     LazyColumn(
         modifier = Modifier
             .fillMaxSize()
             .padding(horizontal = PrototypeSpacing.ScreenHorizontal),
-        verticalArrangement = Arrangement.spacedBy(2.dp),
+        verticalArrangement = Arrangement.spacedBy(2.dp)
     ) {
         item {
             Spacer(modifier = Modifier.height(12.dp))
             Text(
                 text = stringResource(R.string.browser_git_checkout_branch),
                 style = MonoLabelStyle,
-                color = muted,
+                color = muted
             )
             Spacer(modifier = Modifier.height(4.dp))
         }
@@ -703,7 +728,7 @@ private fun BranchesTab(
                     text = stringResource(R.string.browser_git_no_branches),
                     style = DraftPeekTypography.bodySmall,
                     color = muted,
-                    modifier = Modifier.padding(vertical = 8.dp),
+                    modifier = Modifier.padding(vertical = 8.dp)
                 )
             }
         } else {
@@ -718,13 +743,13 @@ private fun BranchesTab(
                         .border(1.dp, if (isCurrent) accent.copy(alpha = 0.3f) else border, RoundedCornerShape(6.dp))
                         .clickable(enabled = !isCurrent) { viewModel.checkout(branch) }
                         .padding(horizontal = 12.dp, vertical = 10.dp),
-                    verticalAlignment = Alignment.CenterVertically,
+                    verticalAlignment = Alignment.CenterVertically
                 ) {
                     Icon(
                         imageVector = Icons.Filled.Source,
                         contentDescription = null,
                         tint = if (isCurrent) accent else muted,
-                        modifier = Modifier.size(16.dp),
+                        modifier = Modifier.size(16.dp)
                     )
                     Spacer(modifier = Modifier.width(8.dp))
                     Text(
@@ -732,17 +757,17 @@ private fun BranchesTab(
                         style = DraftPeekTypography.bodyMedium.copy(
                             fontWeight = if (isCurrent) FontWeight.SemiBold else FontWeight.Normal,
                             fontFamily = FontFamily.Monospace,
-                            color = if (isCurrent) accent else fg,
+                            color = if (isCurrent) accent else fg
                         ),
                         maxLines = 1,
                         overflow = TextOverflow.Ellipsis,
-                        modifier = Modifier.weight(1f),
+                        modifier = Modifier.weight(1f)
                     )
                     if (isCurrent) {
                         Text(
                             text = stringResource(R.string.browser_git_current_branch),
                             style = MonoLabelStyle.copy(fontSize = 10.sp),
-                            color = accent,
+                            color = accent
                         )
                     }
                 }
@@ -756,13 +781,18 @@ private fun BranchesTab(
 @Composable
 private fun LogTab(
     uiState: GitUiState,
-    fg: Color, muted: Color, accent: Color, accentSoft: Color,
-    surface: Color, border: Color, elevated: Color,
+    fg: Color,
+    muted: Color,
+    accent: Color,
+    accentSoft: Color,
+    surface: Color,
+    border: Color,
+    elevated: Color
 ) {
     Column(
         modifier = Modifier
             .fillMaxSize()
-            .padding(horizontal = PrototypeSpacing.ScreenHorizontal),
+            .padding(horizontal = PrototypeSpacing.ScreenHorizontal)
     ) {
         Spacer(modifier = Modifier.height(12.dp))
 
@@ -773,12 +803,12 @@ private fun LogTab(
                     .clip(RoundedCornerShape(8.dp))
                     .background(elevated)
                     .border(1.dp, border, RoundedCornerShape(8.dp))
-                    .padding(14.dp),
+                    .padding(14.dp)
             ) {
                 Text(
                     text = stringResource(R.string.browser_git_last_commit),
                     style = MonoLabelStyle,
-                    color = muted,
+                    color = muted
                 )
                 Spacer(modifier = Modifier.height(4.dp))
                 Text(
@@ -786,14 +816,14 @@ private fun LogTab(
                     style = DraftPeekTypography.bodyMedium.copy(fontWeight = FontWeight.Medium),
                     color = fg,
                     maxLines = 5,
-                    overflow = TextOverflow.Ellipsis,
+                    overflow = TextOverflow.Ellipsis
                 )
             }
         } ?: run {
             EmptyState(
                 icon = Icons.Filled.History,
                 message = stringResource(R.string.browser_git_no_commits),
-                muted = muted,
+                muted = muted
             )
         }
     }
@@ -808,19 +838,19 @@ private fun EmptyState(icon: ImageVector, message: String, muted: Color) {
             .fillMaxSize()
             .padding(32.dp),
         horizontalAlignment = Alignment.CenterHorizontally,
-        verticalArrangement = Arrangement.Center,
+        verticalArrangement = Arrangement.Center
     ) {
         Icon(
             imageVector = icon,
             contentDescription = null,
             tint = muted.copy(alpha = 0.5f),
-            modifier = Modifier.size(48.dp),
+            modifier = Modifier.size(48.dp)
         )
         Spacer(modifier = Modifier.height(12.dp))
         Text(
             text = message,
             style = DraftPeekTypography.bodyMedium,
-            color = muted,
+            color = muted
         )
     }
 }

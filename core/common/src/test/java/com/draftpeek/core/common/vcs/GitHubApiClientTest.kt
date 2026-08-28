@@ -1,5 +1,6 @@
 package com.draftpeek.core.common.vcs
 
+import java.util.concurrent.TimeUnit
 import kotlinx.coroutines.test.runTest
 import okhttp3.OkHttpClient
 import okhttp3.mockwebserver.MockResponse
@@ -14,7 +15,6 @@ import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.DisplayName
 import org.junit.jupiter.api.Nested
 import org.junit.jupiter.api.Test
-import java.util.concurrent.TimeUnit
 
 /**
  * GitHubApiClient 单元测试，使用 MockWebServer 模拟 GitHub API 响应。

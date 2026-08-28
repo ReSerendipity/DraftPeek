@@ -209,17 +209,22 @@ object FileTypeColors {
     private val lightMap = mapOf(
         "kt" to FileTypeColorsLight.Kotlin, "kts" to FileTypeColorsLight.Kotlin,
         "java" to FileTypeColorsLight.Java,
-        "js" to FileTypeColorsLight.JavaScript, "mjs" to FileTypeColorsLight.JavaScript, "cjs" to FileTypeColorsLight.JavaScript,
-        "ts" to FileTypeColorsLight.TypeScript, "mts" to FileTypeColorsLight.TypeScript, "cts" to FileTypeColorsLight.TypeScript,
+        "js" to FileTypeColorsLight.JavaScript, "mjs" to FileTypeColorsLight.JavaScript,
+        "cjs" to FileTypeColorsLight.JavaScript,
+        "ts" to FileTypeColorsLight.TypeScript, "mts" to FileTypeColorsLight.TypeScript,
+        "cts" to FileTypeColorsLight.TypeScript,
         "jsx" to FileTypeColorsLight.JavaScript, "tsx" to FileTypeColorsLight.TypeScript,
         "html" to FileTypeColorsLight.Html, "htm" to FileTypeColorsLight.Html,
         "css" to FileTypeColorsLight.Css, "scss" to FileTypeColorsLight.Css, "less" to FileTypeColorsLight.Css,
         "py" to FileTypeColorsLight.Python, "pyw" to FileTypeColorsLight.Python,
         "c" to FileTypeColorsLight.C, "h" to FileTypeColorsLight.C,
-        "cpp" to FileTypeColorsLight.Cpp, "cc" to FileTypeColorsLight.Cpp, "cxx" to FileTypeColorsLight.Cpp, "hpp" to FileTypeColorsLight.Cpp,
-        "cs" to FileTypeColorsLight.CSharp, "go" to FileTypeColorsLight.Go, "rs" to FileTypeColorsLight.Rust, "swift" to FileTypeColorsLight.Swift,
+        "cpp" to FileTypeColorsLight.Cpp, "cc" to FileTypeColorsLight.Cpp, "cxx" to FileTypeColorsLight.Cpp,
+        "hpp" to FileTypeColorsLight.Cpp,
+        "cs" to FileTypeColorsLight.CSharp, "go" to FileTypeColorsLight.Go, "rs" to FileTypeColorsLight.Rust,
+        "swift" to FileTypeColorsLight.Swift,
         "rb" to FileTypeColorsLight.Ruby, "php" to FileTypeColorsLight.Php,
-        "sh" to FileTypeColorsLight.Shell, "bash" to FileTypeColorsLight.Shell, "zsh" to FileTypeColorsLight.Shell, "fish" to FileTypeColorsLight.Shell,
+        "sh" to FileTypeColorsLight.Shell, "bash" to FileTypeColorsLight.Shell, "zsh" to FileTypeColorsLight.Shell,
+        "fish" to FileTypeColorsLight.Shell,
         "lua" to FileTypeColorsLight.Lua, "dart" to FileTypeColorsLight.Dart,
         "groovy" to FileTypeColorsLight.Groovy, "gradle" to FileTypeColorsLight.Groovy,
         "json" to FileTypeColorsLight.Json,
@@ -233,23 +238,28 @@ object FileTypeColors {
         "doc" to FileTypeColorsLight.Word, "docx" to FileTypeColorsLight.Word,
         "xls" to FileTypeColorsLight.Excel, "xlsx" to FileTypeColorsLight.Excel,
         "ppt" to FileTypeColorsLight.PowerPoint, "pptx" to FileTypeColorsLight.PowerPoint,
-        "jenc" to FileTypeColorsLight.Jenc,
+        "jenc" to FileTypeColorsLight.Jenc
     )
 
     private val darkMap = mapOf(
         "kt" to FileTypeColorsDark.Kotlin, "kts" to FileTypeColorsDark.Kotlin,
         "java" to FileTypeColorsDark.Java,
-        "js" to FileTypeColorsDark.JavaScript, "mjs" to FileTypeColorsDark.JavaScript, "cjs" to FileTypeColorsDark.JavaScript,
-        "ts" to FileTypeColorsDark.TypeScript, "mts" to FileTypeColorsDark.TypeScript, "cts" to FileTypeColorsDark.TypeScript,
+        "js" to FileTypeColorsDark.JavaScript, "mjs" to FileTypeColorsDark.JavaScript,
+        "cjs" to FileTypeColorsDark.JavaScript,
+        "ts" to FileTypeColorsDark.TypeScript, "mts" to FileTypeColorsDark.TypeScript,
+        "cts" to FileTypeColorsDark.TypeScript,
         "jsx" to FileTypeColorsDark.JavaScript, "tsx" to FileTypeColorsDark.TypeScript,
         "html" to FileTypeColorsDark.Html, "htm" to FileTypeColorsDark.Html,
         "css" to FileTypeColorsDark.Css, "scss" to FileTypeColorsDark.Css, "less" to FileTypeColorsDark.Css,
         "py" to FileTypeColorsDark.Python, "pyw" to FileTypeColorsDark.Python,
         "c" to FileTypeColorsDark.C, "h" to FileTypeColorsDark.C,
-        "cpp" to FileTypeColorsDark.Cpp, "cc" to FileTypeColorsDark.Cpp, "cxx" to FileTypeColorsDark.Cpp, "hpp" to FileTypeColorsDark.Cpp,
-        "cs" to FileTypeColorsDark.CSharp, "go" to FileTypeColorsDark.Go, "rs" to FileTypeColorsDark.Rust, "swift" to FileTypeColorsDark.Swift,
+        "cpp" to FileTypeColorsDark.Cpp, "cc" to FileTypeColorsDark.Cpp, "cxx" to FileTypeColorsDark.Cpp,
+        "hpp" to FileTypeColorsDark.Cpp,
+        "cs" to FileTypeColorsDark.CSharp, "go" to FileTypeColorsDark.Go, "rs" to FileTypeColorsDark.Rust,
+        "swift" to FileTypeColorsDark.Swift,
         "rb" to FileTypeColorsDark.Ruby, "php" to FileTypeColorsDark.Php,
-        "sh" to FileTypeColorsDark.Shell, "bash" to FileTypeColorsDark.Shell, "zsh" to FileTypeColorsDark.Shell, "fish" to FileTypeColorsDark.Shell,
+        "sh" to FileTypeColorsDark.Shell, "bash" to FileTypeColorsDark.Shell, "zsh" to FileTypeColorsDark.Shell,
+        "fish" to FileTypeColorsDark.Shell,
         "lua" to FileTypeColorsDark.Lua, "dart" to FileTypeColorsDark.Dart,
         "groovy" to FileTypeColorsDark.Groovy, "gradle" to FileTypeColorsDark.Groovy,
         "json" to FileTypeColorsDark.Json,
@@ -263,7 +273,7 @@ object FileTypeColors {
         "doc" to FileTypeColorsDark.Word, "docx" to FileTypeColorsDark.Word,
         "xls" to FileTypeColorsDark.Excel, "xlsx" to FileTypeColorsDark.Excel,
         "ppt" to FileTypeColorsDark.PowerPoint, "pptx" to FileTypeColorsDark.PowerPoint,
-        "jenc" to FileTypeColorsDark.Jenc,
+        "jenc" to FileTypeColorsDark.Jenc
     )
 }
 
@@ -301,8 +311,8 @@ val PageBackgroundLight = Color(0xFFEFEFEF)
 val PageBackgroundDark = Color(0xFF080808)
 
 // Accent soft (for pill backgrounds, badges, highlighted states)
-val AccentSoftLight = Color(0x1AC41E3A)    // rgba(196,30,58,0.10)
-val AccentSoftDark = Color(0x1FE8A838)    // rgba(232,168,56,0.12)
+val AccentSoftLight = Color(0x1AC41E3A) // rgba(196,30,58,0.10)
+val AccentSoftDark = Color(0x1FE8A838) // rgba(232,168,56,0.12)
 
 // Fg-soft (secondary text color)
 val FgSoftLight = Color(0xFF3A3A42)
@@ -339,8 +349,8 @@ val InfoContainerDark = Color(0xFF1A3050)
 val OnInfoContainerDark = Color(0xFF93C5FD)
 
 // Icon background tint (6% of on-surface)
-val IconBackgroundLight = Color(0x0F1B2838)  // 27,40,56 at 6% alpha
-val IconBackgroundDark = Color(0x14E8EDF2)   // 232,237,242 at 8% alpha
+val IconBackgroundLight = Color(0x0F1B2838) // 27,40,56 at 6% alpha
+val IconBackgroundDark = Color(0x14E8EDF2) // 232,237,242 at 8% alpha
 
 /**
  * 返回原型设计中基于强调色的5级热力图颜色列表。
@@ -348,12 +358,10 @@ val IconBackgroundDark = Color(0x14E8EDF2)   // 232,237,242 at 8% alpha
  * @param isDark 是否为深色主题
  * @return 5级热力图颜色列表，索引0为最浅（无活动），索引4为最深
  */
-fun accentHeatMapColors(isDark: Boolean): List<Color> {
-    return if (isDark) {
-        listOf(HeatL0Dark, HeatL1Dark, HeatL2Dark, HeatL3Dark, HeatL4Dark)
-    } else {
-        listOf(HeatL0Light, HeatL1Light, HeatL2Light, HeatL3Light, HeatL4Light)
-    }
+fun accentHeatMapColors(isDark: Boolean): List<Color> = if (isDark) {
+    listOf(HeatL0Dark, HeatL1Dark, HeatL2Dark, HeatL3Dark, HeatL4Dark)
+} else {
+    listOf(HeatL0Light, HeatL1Light, HeatL2Light, HeatL3Light, HeatL4Light)
 }
 
 /**
@@ -386,11 +394,7 @@ fun accentHeatMapColor(level: ContributionLevel, isDark: Boolean): Color {
  * @property baseLight 浅色主题下的基础颜色
  * @property baseDark 深色主题下的基础颜色
  */
-enum class RainbowColor(
-    val displayName: String,
-    val baseLight: Color,
-    val baseDark: Color,
-) {
+enum class RainbowColor(val displayName: String, val baseLight: Color, val baseDark: Color) {
     RED("红", Color(0xFFEF5350), Color(0xFFFF8A80)),
     AMBER("琥珀", Color(0xFFFFB300), Color(0xFFFFD54F)),
     ORANGE("橙", Color(0xFFFF9800), Color(0xFFFFB74D)),
@@ -406,8 +410,7 @@ enum class RainbowColor(
          * @param name 颜色名称（枚举名）
          * @return 找到的颜色，未找到时返回RED
          */
-        fun fromName(name: String): RainbowColor =
-            entries.find { it.name == name } ?: RED
+        fun fromName(name: String): RainbowColor = entries.find { it.name == name } ?: RED
     }
 }
 
@@ -425,7 +428,7 @@ fun RainbowColor.heatMapColors(isDark: Boolean): List<Color> {
         base.copy(alpha = 0.28f),
         base.copy(alpha = 0.50f),
         base.copy(alpha = 0.75f),
-        base,
+        base
     )
 }
 
@@ -458,5 +461,9 @@ fun RainbowColor.heatMapColor(level: ContributionLevel, isDark: Boolean): Color 
  * - [VERY_HIGH] 极高活动量
  */
 enum class ContributionLevel {
-    NONE, LOW, MEDIUM, HIGH, VERY_HIGH
+    NONE,
+    LOW,
+    MEDIUM,
+    HIGH,
+    VERY_HIGH
 }

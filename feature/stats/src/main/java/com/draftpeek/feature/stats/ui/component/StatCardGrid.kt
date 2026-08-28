@@ -44,7 +44,7 @@ fun StatCardGrid(
     stats: PeriodStats,
     formatDuration: (Long) -> String,
     formatNumber: (Long) -> String,
-    modifier: Modifier = Modifier,
+    modifier: Modifier = Modifier
 ) {
     val cardShape = RoundedCornerShape(12.dp)
 
@@ -52,44 +52,44 @@ fun StatCardGrid(
         modifier = modifier
             .fillMaxWidth()
             .padding(horizontal = 20.dp),
-        verticalArrangement = Arrangement.spacedBy(10.dp),
+        verticalArrangement = Arrangement.spacedBy(10.dp)
     ) {
         Row(
             modifier = Modifier.fillMaxWidth(),
-            horizontalArrangement = Arrangement.spacedBy(10.dp),
+            horizontalArrangement = Arrangement.spacedBy(10.dp)
         ) {
             StatCardItem(
                 label = stringResource(R.string.stats_card_usage_duration),
                 value = formatDuration(stats.usageDurationMinutes),
                 unit = "",
                 modifier = Modifier.weight(1f),
-                cardShape = cardShape,
+                cardShape = cardShape
             )
             StatCardItem(
                 label = stringResource(R.string.stats_card_chars_written),
                 value = formatNumber(stats.charWriteCount),
                 unit = stringResource(R.string.stats_unit_chars),
                 modifier = Modifier.weight(1f),
-                cardShape = cardShape,
+                cardShape = cardShape
             )
         }
         Row(
             modifier = Modifier.fillMaxWidth(),
-            horizontalArrangement = Arrangement.spacedBy(10.dp),
+            horizontalArrangement = Arrangement.spacedBy(10.dp)
         ) {
             StatCardItem(
                 label = stringResource(R.string.stats_card_files_read),
                 value = stats.fileReadCount.toString(),
                 unit = stringResource(R.string.stats_unit_files),
                 modifier = Modifier.weight(1f),
-                cardShape = cardShape,
+                cardShape = cardShape
             )
             StatCardItem(
                 label = stringResource(R.string.stats_card_files_created),
                 value = stats.fileCreateCount.toString(),
                 unit = stringResource(R.string.stats_unit_files),
                 modifier = Modifier.weight(1f),
-                cardShape = cardShape,
+                cardShape = cardShape
             )
         }
     }
@@ -112,30 +112,30 @@ private fun StatCardItem(
     value: String,
     unit: String,
     cardShape: RoundedCornerShape,
-    modifier: Modifier = Modifier,
+    modifier: Modifier = Modifier
 ) {
     Box(
         modifier = modifier
             .background(PrototypeTokens.surface, cardShape)
             .border(1.dp, PrototypeTokens.border, cardShape)
-            .padding(14.dp),
+            .padding(14.dp)
     ) {
         Column {
             Text(
                 text = label,
                 style = MaterialTheme.typography.labelMedium,
                 fontSize = 11.sp,
-                color = PrototypeTokens.muted,
+                color = PrototypeTokens.muted
             )
             Row(
-                verticalAlignment = Alignment.Bottom,
+                verticalAlignment = Alignment.Bottom
             ) {
                 Text(
                     text = value,
                     fontFamily = JetBrainsMonoFontFamily,
                     fontWeight = FontWeight.Bold,
                     fontSize = 22.sp,
-                    color = PrototypeTokens.fg,
+                    color = PrototypeTokens.fg
                 )
                 if (unit.isNotEmpty()) {
                     Text(
@@ -143,7 +143,7 @@ private fun StatCardItem(
                         style = MaterialTheme.typography.bodySmall,
                         fontSize = 12.sp,
                         color = PrototypeTokens.muted,
-                        modifier = Modifier.padding(start = 3.dp, bottom = 2.dp),
+                        modifier = Modifier.padding(start = 3.dp, bottom = 2.dp)
                     )
                 }
             }

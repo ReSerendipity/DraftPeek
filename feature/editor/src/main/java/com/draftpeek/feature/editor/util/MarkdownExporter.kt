@@ -1,9 +1,9 @@
 /**
  * 文件功能：Markdown 内容导出工具，支持 HTML、PDF、DOCX、图片、ZIP 多种格式
- * 
+ *
  * 主要对象：
  * - [MarkdownExporter]：导出工具单例对象，提供多种格式导出能力
- * 
+ *
  * 模块依赖：
  * - android.content：ContentResolver、MediaStore 用于文件保存
  * - android.graphics：Bitmap、Canvas 用于长截图
@@ -14,7 +14,7 @@
  * - kotlinx.coroutines：协程支持
  * - org.apache.poi：DOCX 导出
  * - java.util.zip：ZIP 打包
- * 
+ *
  * 导出格式：
  * - HTML：自包含独立 HTML（内联所有 JS/CSS 资源）
  * - PDF：使用 Android 打印 API 通过 WebView 渲染后打印
@@ -38,9 +38,6 @@ import android.webkit.WebView
 import android.webkit.WebViewClient
 import com.draftpeek.core.common.security.SecurityGate
 import com.draftpeek.feature.editor.model.MarkdownTheme
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.suspendCancellableCoroutine
-import kotlinx.coroutines.withContext
 import java.io.File
 import java.io.FileInputStream
 import java.io.OutputStream
@@ -48,47 +45,54 @@ import java.util.zip.ZipEntry
 import java.util.zip.ZipOutputStream
 import kotlin.coroutines.resume
 import kotlin.coroutines.resumeWithException
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.suspendCancellableCoroutine
+import kotlinx.coroutines.withContext
 
 private const val ASSET_BASE = "markdown"
 
 /**
  * Markdown 导出工具（单例对象）
- * 
+ *
  * 提供 Markdown 内容到多种格式的导出功能，所有导出操作都通过 SecurityGate 安全校验。
  */
 object MarkdownExporter {
 
     /**
      * 读取资产文件内容为 UTF-8 字符串
-     * 
+     *
      * @param context Android 上下文
      * @param fileName 资产文件名（相对于 markdown/ 目录）
      * @return 文件内容字符串
      * @throws java.io.IOException 如果读取资产失败
      */
-    private fun readAsset(context: Context, fileName: String): String {
-        return context.assets.open("$ASSET_BASE/$fileName").bufferedReader(Charsets.UTF_8).use { it.readText() }
-    }
+    private fun readAsset(context: Context, fileName: String): String =
+        context.assets.open("$ASSET_BASE/$fileName").bufferedReader(Charsets.UTF_8).use { it.readText() }
 
     /**
      * 从 Markdown 内容生成独立 HTML 文档
-     * 
+     *
      * 所有 JS/CSS 库从本地资产内联，支持离线自包含导出。
-     * 
+     *
      * HTML 生成步骤：
      * 1. 读取所有本地资产（KaTeX、highlight.js、marked.js、Mermaid）
      * 2. 构建 HTML 头部（meta、CSS、内联 JS 库）
      * 3. 根据主题参数添加主题 CSS
      * 4. 构建 body 和渲染容器
      * 5. 注入渲染脚本和转义后的 Markdown 内容
-     * 
+     *
      * @param context Android 上下文（用于读取资产）
      * @param markdownContent 原始 Markdown 文本
      * @param isDarkTheme 是否使用深色主题
      * @param theme Markdown 预览主题
      * @return 完整的 HTML 文档字符串
      */
-    fun generateHtml(context: Context, markdownContent: String, isDarkTheme: Boolean = false, theme: MarkdownTheme = MarkdownTheme.DEFAULT): String {
+    fun generateHtml(
+        context: Context,
+        markdownContent: String,
+        isDarkTheme: Boolean = false,
+        theme: MarkdownTheme = MarkdownTheme.DEFAULT
+    ): String {
         val katexCss = readAsset(context, "katex.min.css")
         val highlightJs = readAsset(context, "highlight.min.js")
         val markedJs = readAsset(context, "marked.min.js")
@@ -106,7 +110,9 @@ object MarkdownExporter {
             appendLine("<style>")
             appendLine(katexCss)
             appendLine("</style>")
-            appendLine("<link rel=\"stylesheet\" href=\"https://cdn.jsdelivr.net/npm/highlight.js@11.9.0/styles/github.min.css\">")
+            appendLine(
+                "<link rel=\"stylesheet\" href=\"https://cdn.jsdelivr.net/npm/highlight.js@11.9.0/styles/github.min.css\">"
+            )
             appendLine("<style>")
             appendLine(getMarkdownStyles())
             appendLine("</style>")
@@ -149,7 +155,7 @@ object MarkdownExporter {
 
     /**
      * 将 HTML 内容写入输出流
-     * 
+     *
      * @param html HTML 字符串
      * @param outputStream 目标输出流
      * @throws java.io.IOException 如果写入失败
@@ -163,25 +169,20 @@ object MarkdownExporter {
 
     /**
      * 使用 Android 打印 API 将 Markdown 导出为 PDF
-     * 
+     *
      * 流程：
      * 1. 创建 WebView 并启用 JavaScript
      * 2. 生成 HTML 并加载到 WebView
      * 3. 在 onPageFinished 回调中创建打印任务
      * 4. 系统打印对话框处理实际 PDF 生成
-     * 
+     *
      * @param context Android 上下文
      * @param markdownContent 原始 Markdown 文本
      * @param fileName 打印作业的文件名
      * @param isDarkTheme 是否使用深色主题
      */
     @SuppressLint("SetJavaScriptEnabled") // 渲染需 JS；HTML 已通过 jsoup 消毒（VULN-004），导出场景内容为本地生成的 Markdown
-    fun exportToPdf(
-        context: Context,
-        markdownContent: String,
-        fileName: String,
-        isDarkTheme: Boolean = false,
-    ) {
+    fun exportToPdf(context: Context, markdownContent: String, fileName: String, isDarkTheme: Boolean = false) {
         if (!SecurityGate.isOperationAllowed()) return
         val webView = WebView(context)
         webView.settings.javaScriptEnabled = true
@@ -202,7 +203,7 @@ object MarkdownExporter {
 
     /**
      * 使用 Apache POI 将 Markdown 导出为 DOCX
-     * 
+     *
      * @param markdownContent 原始 Markdown 文本
      * @param outputStream 输出流
      * @throws SecurityException 如果安全校验失败
@@ -214,20 +215,20 @@ object MarkdownExporter {
 
     /**
      * 将渲染后的 Markdown 内容导出为长截图（PNG 图片）
-     * 
+     *
      * 使用 WebView 的 enableSlowWholeDocumentDraw 捕获整个文档，
      * 然后绘制到 Bitmap 上，通过 MediaStore 保存到 Downloads 目录。
-     * 
+     *
      * **必须在 UI 线程调用**（用于 WebView 截图部分）。
      * MediaStore 写入在 IO 调度器上执行。
-     * 
+     *
      * 截图流程：
      * 1. 启用整个文档绘制
      * 2. 创建 WebView 并加载渲染后的 HTML
      * 3. 页面加载完成后测量 WebView 尺寸
      * 4. 创建匹配尺寸的 Bitmap 并绘制 WebView 内容
      * 5. 在 IO 线程通过 MediaStore 保存到 Downloads
-     * 
+     *
      * @param context Android 上下文
      * @param markdownContent 原始 Markdown 文本
      * @param fileName 基础文件名（不含扩展名）
@@ -241,7 +242,7 @@ object MarkdownExporter {
         markdownContent: String,
         fileName: String,
         isDarkTheme: Boolean = false,
-        theme: MarkdownTheme = MarkdownTheme.DEFAULT,
+        theme: MarkdownTheme = MarkdownTheme.DEFAULT
     ): String? = withContext(Dispatchers.Main) {
         if (!SecurityGate.isOperationAllowed()) return@withContext null
         val bitmap = suspendCancellableCoroutine<Bitmap?> { cont ->
@@ -265,7 +266,7 @@ object MarkdownExporter {
                         val width = (contentWidth * scale).toInt().coerceAtLeast(1)
                         view.measure(
                             android.view.View.MeasureSpec.makeMeasureSpec(width, android.view.View.MeasureSpec.EXACTLY),
-                            android.view.View.MeasureSpec.makeMeasureSpec(0, android.view.View.MeasureSpec.UNSPECIFIED),
+                            android.view.View.MeasureSpec.makeMeasureSpec(0, android.view.View.MeasureSpec.UNSPECIFIED)
                         )
                         val height = view.measuredHeight.coerceAtLeast(1)
                         val bmp = Bitmap.createBitmap(width, height, Bitmap.Config.ARGB_8888)
@@ -320,17 +321,17 @@ object MarkdownExporter {
 
     /**
      * 将 Markdown 文件及其关联资源（图片文件夹等）导出为 ZIP 压缩包
-     * 
+     *
      * ZIP 通过 MediaStore 保存到 Downloads 目录。
      * **在 IO 调度器上运行。**
-     * 
+     *
      * 打包流程：
      * 1. 检查源文件存在
      * 2. 创建 ZIP 文件并通过 MediaStore 获取 URI
      * 3. 添加 Markdown 文件本身
      * 4. 检测并添加关联的资源文件夹（<name>_files、<name>.assets、images、assets）
      * 5. 递归添加文件夹内容
-     * 
+     *
      * @param context Android 上下文
      * @param markdownFilePath Markdown 文件的绝对路径
      * @param fileName ZIP 压缩包的基础文件名
@@ -340,7 +341,7 @@ object MarkdownExporter {
     suspend fun exportAsZip(
         context: Context,
         markdownFilePath: String,
-        fileName: String,
+        fileName: String
     ): String? = withContext(Dispatchers.IO) {
         if (!SecurityGate.isOperationAllowed()) return@withContext null
         if (Build.VERSION.SDK_INT < Build.VERSION_CODES.Q) {
@@ -370,7 +371,7 @@ object MarkdownExporter {
 
                     val parentDir = sourceFile.parentFile ?: return@use
                     val baseName = sourceFile.nameWithoutExtension
-                    val imageFolders = listOf("${baseName}_files", "${baseName}.assets", "images", "assets")
+                    val imageFolders = listOf("${baseName}_files", "$baseName.assets", "images", "assets")
                     for (folderName in imageFolders) {
                         val folder = File(parentDir, folderName)
                         if (folder.exists() && folder.isDirectory) {
@@ -394,7 +395,7 @@ object MarkdownExporter {
 
     /**
      * 递归将单个文件添加到 ZIP 输出流
-     * 
+     *
      * @param zipOut ZIP 输出流
      * @param file 要添加的文件
      * @param entryPath ZIP 内的条目路径
@@ -414,7 +415,7 @@ object MarkdownExporter {
 
     /**
      * 递归将文件夹及其内容添加到 ZIP 输出流
-     * 
+     *
      * @param zipOut ZIP 输出流
      * @param folder 要添加的文件夹
      * @param basePath ZIP 内的基础路径
@@ -433,18 +434,17 @@ object MarkdownExporter {
 
     /**
      * 获取 Markdown 预览的基础 CSS 样式
-     * 
+     *
      * 包含：
      * - CSS 变量定义（浅色/深色主题）
      * - 排版样式（字体、行高、颜色）
      * - 标题、段落、链接、代码、引用、表格、列表等元素样式
      * - KaTeX 和 Mermaid 容器样式
      * - 前置元数据样式
-     * 
+     *
      * @return CSS 样式字符串
      */
-    private fun getMarkdownStyles(): String {
-        return """
+    private fun getMarkdownStyles(): String = """
             :root {
                 --bg-color: #ffffff;
                 --text-color: #1c1c1e;
@@ -499,23 +499,21 @@ object MarkdownExporter {
             .front-matter .fm-value { color: #666; }
             .front-matter .fm-tags { display: flex; flex-wrap: wrap; gap: 4px; margin-top: 4px; }
             .front-matter .fm-tag { background: var(--code-bg); padding: 2px 8px; border-radius: 12px; font-size: 0.85em; }
-        """.trimIndent()
-    }
+    """.trimIndent()
 
     /**
      * 获取 Markdown 渲染的 JavaScript 脚本
-     * 
+     *
      * 脚本功能：
      * - 配置 marked.js（启用 GFM、换行、语法高亮）
      * - 自定义渲染器支持任务列表复选框
      * - LaTeX 数学公式渲染（KaTeX）：先处理代码块占位符，避免代码中的 $ 被误渲染
      * - YAML 前置元数据解析
      * - renderMarkdown 主函数：处理代码块占位 → 渲染数学 → marked 解析 → 渲染 Mermaid
-     * 
+     *
      * @return JavaScript 脚本字符串
      */
-    private fun getRenderScript(): String {
-        return """
+    private fun getRenderScript(): String = """
             <script>
             marked.setOptions({ breaks: true, gfm: true,
                 highlight: function(code, lang) {
@@ -583,11 +581,10 @@ object MarkdownExporter {
             try { mermaid.initialize({ startOnLoad: false, theme: 'default', securityLevel: 'loose' }); } catch(e) {}
             </script>
         """
-    }
 
     /**
      * 获取指定 Markdown 主题的 CSS 样式覆盖
-     * 
+     *
      * 支持的主题：
      * - GITHUB：GitHub 风格
      * - NEWSPRINT：报纸风格（衬线字体）
@@ -595,13 +592,12 @@ object MarkdownExporter {
      * - PIXY：可爱紫色风格
      * - ACADEMIC：学术论文风格
      * - DEFAULT：默认样式（无覆盖）
-     * 
+     *
      * @param theme Markdown 主题枚举
      * @return 主题 CSS 字符串
      */
-    private fun getThemeCSS(theme: MarkdownTheme): String {
-        return when (theme) {
-            MarkdownTheme.GITHUB -> """
+    private fun getThemeCSS(theme: MarkdownTheme): String = when (theme) {
+        MarkdownTheme.GITHUB -> """
                 :root.github {
                   --bg-color: #ffffff; --text-color: #24292f; --code-bg: #f6f8fa;
                   --border-color: #d0d7de; --link-color: #0969da; --table-border: #d0d7de;
@@ -615,8 +611,8 @@ object MarkdownExporter {
                 .github pre { background: #f6f8fa; border-radius: 6px; padding: 16px; }
                 .github blockquote { border-left: 4px solid #d0d7de; color: #656d76; padding: 0 1em; }
                 .github table th { background: #f6f8fa; font-weight: 600; }
-            """.trimIndent()
-            MarkdownTheme.NEWSPRINT -> """
+        """.trimIndent()
+        MarkdownTheme.NEWSPRINT -> """
                 :root.newsprint {
                   --bg-color: #f8f5f0; --text-color: #2c2c2c; --code-bg: #ede8e0;
                   --border-color: #c9c4bc; --link-color: #8b4513; --table-border: #c9c4bc;
@@ -626,8 +622,8 @@ object MarkdownExporter {
                 .newsprint h1, .newsprint h2 { font-family: 'Georgia', serif; border-bottom: 2px solid #2c2c2c; }
                 .newsprint h1 { font-size: 2em; text-transform: uppercase; letter-spacing: 2px; }
                 .newsprint h2 { font-size: 1.5em; }
-            """.trimIndent()
-            MarkdownTheme.NIGHT -> """
+        """.trimIndent()
+        MarkdownTheme.NIGHT -> """
                 :root.night {
                   --bg-color: #1a1a2e; --text-color: #e0e0e0; --code-bg: #16213e;
                   --border-color: #0f3460; --link-color: #e94560; --table-border: #0f3460;
@@ -637,8 +633,8 @@ object MarkdownExporter {
                 .night h1 { color: #e94560; border-bottom: 1px solid #0f3460; }
                 .night h2 { color: #e94560; border-bottom: 1px solid #0f3460; }
                 .night a { color: #e94560; }
-            """.trimIndent()
-            MarkdownTheme.PIXY -> """
+        """.trimIndent()
+        MarkdownTheme.PIXY -> """
                 :root.pixy {
                   --bg-color: #fef6f0; --text-color: #5b5ea6; --code-bg: #f0e6f6;
                   --border-color: #d4b8e0; --link-color: #9b59b6; --table-border: #d4b8e0;
@@ -647,8 +643,8 @@ object MarkdownExporter {
                 }
                 .pixy h1 { color: #9b59b6; }
                 .pixy h2 { color: #8e44ad; }
-            """.trimIndent()
-            MarkdownTheme.ACADEMIC -> """
+        """.trimIndent()
+        MarkdownTheme.ACADEMIC -> """
                 :root.academic {
                   --bg-color: #ffffff; --text-color: #333333; --code-bg: #f5f5f5;
                   --border-color: #cccccc; --link-color: #0066cc; --table-border: #cccccc;
@@ -662,8 +658,7 @@ object MarkdownExporter {
                 .academic p { text-align: justify; text-indent: 2em; }
                 .academic p:first-child { text-indent: 0; }
                 .academic table { font-size: 0.9em; }
-            """.trimIndent()
-            MarkdownTheme.DEFAULT -> ""
-        }
+        """.trimIndent()
+        MarkdownTheme.DEFAULT -> ""
     }
 }

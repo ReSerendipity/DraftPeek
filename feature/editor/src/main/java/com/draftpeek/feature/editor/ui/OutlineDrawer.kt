@@ -44,32 +44,32 @@ fun OutlineDrawer(
     onDismiss: () -> Unit,
     backlinks: List<String> = emptyList(),
     onBacklinkClick: (String) -> Unit = {},
-    modifier: Modifier = Modifier,
+    modifier: Modifier = Modifier
 ) {
     ModalBottomSheet(
         onDismissRequest = onDismiss,
         modifier = modifier,
-        containerColor = PrototypeTokens.surface,
+        containerColor = PrototypeTokens.surface
     ) {
         Column(
             modifier = Modifier
                 .fillMaxWidth()
                 .padding(horizontal = 16.dp)
                 .verticalScroll(rememberScrollState())
-                .padding(bottom = 32.dp),
+                .padding(bottom = 32.dp)
         ) {
             Text(
                 text = stringResource(R.string.editor_outline),
                 style = MaterialTheme.typography.titleMedium,
                 color = PrototypeTokens.fg,
-                modifier = Modifier.padding(bottom = 12.dp),
+                modifier = Modifier.padding(bottom = 12.dp)
             )
 
             if (headings.isEmpty()) {
                 Text(
                     text = stringResource(R.string.editor_no_headings),
                     style = MaterialTheme.typography.bodyMedium,
-                    color = PrototypeTokens.fgSoft,
+                    color = PrototypeTokens.fgSoft
                 )
             } else {
                 headings.forEach { heading ->
@@ -84,13 +84,13 @@ fun OutlineDrawer(
                         modifier = Modifier
                             .fillMaxWidth()
                             .clickable { onHeadingClick(heading.lineIndex) }
-                            .padding(start = indent, top = 6.dp, bottom = 6.dp),
+                            .padding(start = indent, top = 6.dp, bottom = 6.dp)
                     ) {
                         Text(
                             text = heading.text,
                             style = style,
                             maxLines = 2,
-                            overflow = TextOverflow.Ellipsis,
+                            overflow = TextOverflow.Ellipsis
                         )
                     }
                 }
@@ -100,13 +100,13 @@ fun OutlineDrawer(
             if (backlinks.isNotEmpty()) {
                 HorizontalDivider(
                     modifier = Modifier.padding(vertical = 12.dp),
-                    color = PrototypeTokens.border,
+                    color = PrototypeTokens.border
                 )
                 Text(
                     text = stringResource(R.string.editor_backlinks),
                     style = MaterialTheme.typography.titleMedium,
                     color = PrototypeTokens.fg,
-                    modifier = Modifier.padding(bottom = 8.dp),
+                    modifier = Modifier.padding(bottom = 8.dp)
                 )
                 backlinks.forEach { source ->
                     Text(
@@ -118,7 +118,7 @@ fun OutlineDrawer(
                         modifier = Modifier
                             .fillMaxWidth()
                             .clickable { onBacklinkClick(source) }
-                            .padding(vertical = 8.dp),
+                            .padding(vertical = 8.dp)
                     )
                 }
             }

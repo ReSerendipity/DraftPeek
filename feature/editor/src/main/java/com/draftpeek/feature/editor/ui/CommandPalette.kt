@@ -78,7 +78,7 @@ data class CommandItem(
     val label: String,
     val category: String,
     val shortcut: String? = null,
-    val action: () -> Unit,
+    val action: () -> Unit
 )
 
 /**
@@ -116,7 +116,7 @@ data class EditorCommandActions(
     /** Ch1 Item 19 (P3): Toggle the symbol panel. */
     val onToggleSymbolPanel: () -> Unit,
     /** Ch6 Item 16 (P3): Show Markdown syntax reference. */
-    val onShowMarkdownCheatSheet: () -> Unit,
+    val onShowMarkdownCheatSheet: () -> Unit
 )
 
 /**
@@ -149,27 +149,123 @@ fun buildEditorCommands(actions: EditorCommandActions): List<CommandItem> {
         CommandItem("edit.replace", stringResource(R.string.editor_replace), edit, "Ctrl+H", actions.onReplace),
         CommandItem("edit.select_all", stringResource(R.string.editor_select_all), edit, "Ctrl+A", actions.onSelectAll),
         // View
-        CommandItem("view.toggle_preview", stringResource(R.string.editor_toggle_preview), view, "Ctrl+P", actions.onTogglePreview),
-        CommandItem("view.toggle_focus_mode", stringResource(R.string.editor_focus_mode), view, null, actions.onToggleFocusMode),
-        CommandItem("view.toggle_line_numbers", stringResource(R.string.editor_show_line_numbers), view, null, actions.onToggleLineNumbers),
-        CommandItem("view.toggle_word_wrap", stringResource(R.string.editor_word_wrap), view, null, actions.onToggleWordWrap),
-        CommandItem("view.toggle_sticky_scroll", stringResource(R.string.editor_sticky_scroll), view, null, actions.onToggleStickyScroll),
-        CommandItem("view.toggle_minimap", stringResource(R.string.editor_command_palette_toggle_minimap), view, null, actions.onToggleMinimap),
-        CommandItem("view.toggle_symbol_panel", stringResource(R.string.editor_command_palette_toggle_symbol_panel), view, null, actions.onToggleSymbolPanel),
+        CommandItem(
+            "view.toggle_preview",
+            stringResource(R.string.editor_toggle_preview),
+            view,
+            "Ctrl+P",
+            actions.onTogglePreview
+        ),
+        CommandItem(
+            "view.toggle_focus_mode",
+            stringResource(R.string.editor_focus_mode),
+            view,
+            null,
+            actions.onToggleFocusMode
+        ),
+        CommandItem(
+            "view.toggle_line_numbers",
+            stringResource(R.string.editor_show_line_numbers),
+            view,
+            null,
+            actions.onToggleLineNumbers
+        ),
+        CommandItem(
+            "view.toggle_word_wrap",
+            stringResource(R.string.editor_word_wrap),
+            view,
+            null,
+            actions.onToggleWordWrap
+        ),
+        CommandItem(
+            "view.toggle_sticky_scroll",
+            stringResource(R.string.editor_sticky_scroll),
+            view,
+            null,
+            actions.onToggleStickyScroll
+        ),
+        CommandItem(
+            "view.toggle_minimap",
+            stringResource(R.string.editor_command_palette_toggle_minimap),
+            view,
+            null,
+            actions.onToggleMinimap
+        ),
+        CommandItem(
+            "view.toggle_symbol_panel",
+            stringResource(R.string.editor_command_palette_toggle_symbol_panel),
+            view,
+            null,
+            actions.onToggleSymbolPanel
+        ),
         // Navigation
-        CommandItem("nav.go_to_line", stringResource(R.string.editor_go_to_line), navigation, "Ctrl+G", actions.onGoToLine),
-        CommandItem("navigation.last_edit_location", stringResource(R.string.editor_command_palette_goto_last_edit), navigation, "Ctrl+Alt+Left", actions.onGoToLastEditLocation),
-        CommandItem("nav.toggle_outline", stringResource(R.string.editor_outline), navigation, "Ctrl+Shift+O", actions.onToggleOutline),
-        CommandItem("nav.next_tab", stringResource(R.string.editor_next_tab), navigation, "Ctrl+Tab", actions.onNextTab),
-        CommandItem("nav.previous_tab", stringResource(R.string.editor_previous_tab), navigation, "Ctrl+Shift+Tab", actions.onPreviousTab),
-        CommandItem("nav.close_tab", stringResource(R.string.editor_command_palette_close_tab), navigation, "Ctrl+W", actions.onCloseTab),
-        CommandItem("nav.close_all_tabs", stringResource(R.string.editor_command_palette_close_all_tabs), navigation, null, actions.onCloseAllTabs),
+        CommandItem(
+            "nav.go_to_line",
+            stringResource(R.string.editor_go_to_line),
+            navigation,
+            "Ctrl+G",
+            actions.onGoToLine
+        ),
+        CommandItem(
+            "navigation.last_edit_location",
+            stringResource(R.string.editor_command_palette_goto_last_edit),
+            navigation,
+            "Ctrl+Alt+Left",
+            actions.onGoToLastEditLocation
+        ),
+        CommandItem(
+            "nav.toggle_outline",
+            stringResource(R.string.editor_outline),
+            navigation,
+            "Ctrl+Shift+O",
+            actions.onToggleOutline
+        ),
+        CommandItem(
+            "nav.next_tab",
+            stringResource(R.string.editor_next_tab),
+            navigation,
+            "Ctrl+Tab",
+            actions.onNextTab
+        ),
+        CommandItem(
+            "nav.previous_tab",
+            stringResource(R.string.editor_previous_tab),
+            navigation,
+            "Ctrl+Shift+Tab",
+            actions.onPreviousTab
+        ),
+        CommandItem(
+            "nav.close_tab",
+            stringResource(R.string.editor_command_palette_close_tab),
+            navigation,
+            "Ctrl+W",
+            actions.onCloseTab
+        ),
+        CommandItem(
+            "nav.close_all_tabs",
+            stringResource(R.string.editor_command_palette_close_all_tabs),
+            navigation,
+            null,
+            actions.onCloseAllTabs
+        ),
         // Tools
         CommandItem("tools.diff", stringResource(R.string.editor_diff), tools, null, actions.onDiff),
         CommandItem("tools.snippet", stringResource(R.string.editor_action_snippets), tools, null, actions.onSnippet),
-        CommandItem("tools.toggle_theme", stringResource(R.string.editor_toggle_theme), tools, null, actions.onToggleTheme),
+        CommandItem(
+            "tools.toggle_theme",
+            stringResource(R.string.editor_toggle_theme),
+            tools,
+            null,
+            actions.onToggleTheme
+        ),
         // Help
-        CommandItem("help.markdown_cheat_sheet", stringResource(R.string.editor_command_markdown_cheat_sheet), help, null, actions.onShowMarkdownCheatSheet),
+        CommandItem(
+            "help.markdown_cheat_sheet",
+            stringResource(R.string.editor_command_markdown_cheat_sheet),
+            help,
+            null,
+            actions.onShowMarkdownCheatSheet
+        )
     )
 }
 
@@ -189,11 +285,7 @@ fun buildEditorCommands(actions: EditorCommandActions): List<CommandItem> {
  * @param modifier 修饰符
  */
 @Composable
-fun CommandPalette(
-    commands: List<CommandItem>,
-    onDismiss: () -> Unit,
-    modifier: Modifier = Modifier,
-) {
+fun CommandPalette(commands: List<CommandItem>, onDismiss: () -> Unit, modifier: Modifier = Modifier) {
     var query by rememberSaveable { mutableStateOf("") }
     var selectedIndex by rememberSaveable { mutableStateOf(0) }
     val focusRequester = remember { FocusRequester() }
@@ -303,7 +395,7 @@ fun CommandPalette(
 
     Dialog(
         onDismissRequest = onDismiss,
-        properties = DialogProperties(usePlatformDefaultWidth = false),
+        properties = DialogProperties(usePlatformDefaultWidth = false)
     ) {
         Box(
             modifier = modifier
@@ -311,9 +403,9 @@ fun CommandPalette(
                 .background(pageBg.copy(alpha = 0.92f))
                 .clickable(
                     interactionSource = remember { MutableInteractionSource() },
-                    indication = null,
+                    indication = null
                 ) { onDismiss() },
-            contentAlignment = Alignment.TopCenter,
+            contentAlignment = Alignment.TopCenter
         ) {
             Surface(
                 shape = BrandShapes.Dialog,
@@ -325,8 +417,8 @@ fun CommandPalette(
                     .fillMaxHeight(0.7f)
                     .clickable(
                         interactionSource = remember { MutableInteractionSource() },
-                        indication = null,
-                    ) {},
+                        indication = null
+                    ) {}
             ) {
                 Column(modifier = Modifier.fillMaxSize()) {
                     // Search field using BrandOutlinedTextField
@@ -337,15 +429,15 @@ fun CommandPalette(
                                 start = 16.dp,
                                 end = 16.dp,
                                 top = 16.dp,
-                                bottom = 8.dp,
+                                bottom = 8.dp
                             ),
-                        verticalAlignment = Alignment.CenterVertically,
+                        verticalAlignment = Alignment.CenterVertically
                     ) {
                         Icon(
                             imageVector = Icons.Filled.Search,
                             contentDescription = stringResource(R.string.editor_command_palette),
                             tint = muted,
-                            modifier = Modifier.size(20.dp),
+                            modifier = Modifier.size(20.dp)
                         )
                         Spacer(modifier = Modifier.width(8.dp))
                         BrandOutlinedTextField(
@@ -363,10 +455,10 @@ fun CommandPalette(
                             placeholder = {
                                 Text(
                                     text = stringResource(R.string.editor_search_commands),
-                                    color = muted,
+                                    color = muted
                                 )
                             },
-                            singleLine = true,
+                            singleLine = true
                         )
                     }
 
@@ -376,7 +468,7 @@ fun CommandPalette(
                             .fillMaxWidth()
                             .padding(horizontal = 16.dp)
                             .heightIn(min = 1.dp, max = 1.dp)
-                            .background(border),
+                            .background(border)
                     )
 
                     // Command list
@@ -385,11 +477,11 @@ fun CommandPalette(
                             modifier = Modifier
                                 .fillMaxSize()
                                 .padding(24.dp),
-                            contentAlignment = Alignment.Center,
+                            contentAlignment = Alignment.Center
                         ) {
                             Text(
                                 text = stringResource(R.string.editor_no_match_found),
-                                style = DraftPeekTypography.bodyMedium.copy(color = muted),
+                                style = DraftPeekTypography.bodyMedium.copy(color = muted)
                             )
                         }
                     } else {
@@ -399,8 +491,8 @@ fun CommandPalette(
                             modifier = Modifier.fillMaxSize(),
                             state = lazyListState,
                             contentPadding = androidx.compose.foundation.layout.PaddingValues(
-                                vertical = 8.dp,
-                            ),
+                                vertical = 8.dp
+                            )
                         ) {
                             flatItems.forEachIndexed { flatIdx, item ->
                                 if (item.category != null) {
@@ -412,8 +504,8 @@ fun CommandPalette(
                                                 .fillMaxWidth()
                                                 .padding(
                                                     horizontal = 16.dp,
-                                                    vertical = 8.dp,
-                                                ),
+                                                    vertical = 8.dp
+                                                )
                                         )
                                     }
                                 } else if (item.command != null) {
@@ -429,7 +521,7 @@ fun CommandPalette(
                                             fg = fg,
                                             muted = muted,
                                             fgSoft = fgSoft,
-                                            accent = accent,
+                                            accent = accent
                                         )
                                     }
                                 }
@@ -467,7 +559,7 @@ private fun CommandRow(
     fg: androidx.compose.ui.graphics.Color,
     muted: androidx.compose.ui.graphics.Color,
     fgSoft: androidx.compose.ui.graphics.Color,
-    accent: androidx.compose.ui.graphics.Color,
+    accent: androidx.compose.ui.graphics.Color
 ) {
     val rowBg = if (isSelected) surfaceHover else androidx.compose.ui.graphics.Color.Transparent
     Row(
@@ -477,14 +569,14 @@ private fun CommandRow(
             .background(rowBg, PrototypeShapes.Small)
             .clickable(onClick = onClick)
             .padding(horizontal = 16.dp, vertical = 10.dp),
-        verticalAlignment = Alignment.CenterVertically,
+        verticalAlignment = Alignment.CenterVertically
     ) {
         Text(
             text = command.label,
             style = DraftPeekTypography.bodyMedium.copy(
-                color = if (isSelected) accent else fg,
+                color = if (isSelected) accent else fg
             ),
-            modifier = Modifier.weight(1f),
+            modifier = Modifier.weight(1f)
         )
         if (command.shortcut != null) {
             Spacer(modifier = Modifier.width(12.dp))
@@ -493,15 +585,15 @@ private fun CommandRow(
                     .clip(PrototypeShapes.Small)
                     .background(surfaceHover)
                     .border(1.dp, border, PrototypeShapes.Small)
-                    .padding(horizontal = 8.dp, vertical = 3.dp),
+                    .padding(horizontal = 8.dp, vertical = 3.dp)
             ) {
                 Text(
                     text = command.shortcut,
                     style = DraftPeekTypography.labelSmall.copy(
                         color = fgSoft,
                         fontFamily = JetBrainsMonoFontFamily,
-                        fontWeight = FontWeight.Medium,
-                    ),
+                        fontWeight = FontWeight.Medium
+                    )
                 )
             }
         }

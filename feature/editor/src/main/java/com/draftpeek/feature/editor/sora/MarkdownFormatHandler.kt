@@ -50,7 +50,11 @@ class MarkdownFormatHandler(private val editor: CodeEditor) {
                 is MarkdownFormatAction.Wrap -> {
                     if (selectedText.isNotEmpty()) {
                         // Wrap the selected text
-                        editor.text?.replace(cursor.getLeft(), cursor.getRight(), action.prefix + selectedText + action.suffix)
+                        editor.text?.replace(
+                            cursor.getLeft(),
+                            cursor.getRight(),
+                            action.prefix + selectedText + action.suffix
+                        )
                     } else {
                         // Insert template with placeholder
                         val insertText = action.prefix + action.placeholder + action.suffix

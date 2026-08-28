@@ -1,17 +1,17 @@
 /**
  * 文件功能：Tree-sitter 语法语言提供者，为支持的文件类型提供基于 Tree-sitter 的 Language 实例
- * 
+ *
  * 主要对象/类：
  * - [TreeSitterLanguageProvider]：Tree-sitter 语言提供者单例对象
  * - [JavaLanguageSpec]：Java 专用的 TsLanguageSpec 实现
- * 
+ *
  * 模块依赖：
  * - com.itsaky.androidide.treesitter：Tree-sitter Android 绑定
  * - io.github.rosemoe.sora.editor.ts：sora-editor Tree-sitter 集成
  * - io.github.rosemoe.sora.lang：sora-editor 语言接口
- * 
+ *
  * 当前状态：试点实现，仅支持 Java 语言。其他语言应回退到 TextMate 语法高亮。
- * 
+ *
  * 架构设计：
  * - 每种支持的语言映射到一个 TsLanguageSpec（语法 + 查询文件）
  * - 主题规则将 Tree-sitter capture 名称映射到 sora-editor 配色方案槽位
@@ -22,7 +22,6 @@ package com.draftpeek.feature.editor.treesitter
 
 import android.content.Context
 import android.util.Log
-import com.itsaky.androidide.treesitter.TSLanguage
 import com.itsaky.androidide.treesitter.java.TSLanguageJava
 import io.github.rosemoe.sora.editor.ts.LocalsCaptureSpec
 import io.github.rosemoe.sora.editor.ts.TsLanguage
@@ -35,13 +34,13 @@ import io.github.rosemoe.sora.widget.schemes.EditorColorScheme
 
 /**
  * Tree-sitter 语言提供者（单例对象）
- * 
+ *
  * 职责：
  * - 管理 Tree-sitter 原生库的加载状态检测
  * - 提供语言支持性检查
  * - 创建和缓存 TsLanguageSpec 实例
  * - 构建主题映射规则
- * 
+ *
  * 失败处理：如果原生库加载失败，设置标志位避免后续重复尝试，防止日志泛滥。
  */
 object TreeSitterLanguageProvider {
@@ -72,7 +71,7 @@ object TreeSitterLanguageProvider {
 
     /**
      * 检查给定语言是否支持 Tree-sitter 高亮
-     * 
+     *
      * @param language 语言标识符（如 "java"）
      * @return 如果支持返回 true，否则返回 false
      */
@@ -84,14 +83,14 @@ object TreeSitterLanguageProvider {
 
     /**
      * 为给定语言标识符创建 Tree-sitter Language 实例
-     * 
+     *
      * 创建流程：
      * 1. 检查 Tree-sitter 是否可用（快速失败路径）
      * 2. 检查语言是否在支持列表中
      * 3. 获取或创建缓存的 TsLanguageSpec
      * 4. 创建 TsLanguage 实例并应用主题
      * 5. 处理异常：如果首次加载失败，标记 treeSitterAvailable 为 false 并清空缓存
-     * 
+     *
      * @param context ApplicationContext 用于加载资产文件
      * @param language 语言标识符（如 "java"）
      * @return TsLanguage 实例，如果语言不支持或初始化失败返回 null
@@ -112,8 +111,11 @@ object TreeSitterLanguageProvider {
         } catch (e: Throwable) {
             if (treeSitterAvailable == null) {
                 treeSitterAvailable = false
-                Log.w(TAG, "TreeSitter native libraries unavailable: ${e.message}. " +
-                    "Falling back to TextMate for all languages.")
+                Log.w(
+                    TAG,
+                    "TreeSitter native libraries unavailable: ${e.message}. " +
+                        "Falling back to TextMate for all languages."
+                )
             }
             specCache.clear()
             null
@@ -122,9 +124,9 @@ object TreeSitterLanguageProvider {
 
     /**
      * 获取或创建给定语言的缓存 TsLanguageSpec
-     * 
+     *
      * 使用双重检查模式（虽然 Kotlin 中 synchronized 保护更简单）。
-     * 
+     *
      * @param context ApplicationContext
      * @param language 语言标识符
      * @return TsLanguageSpec 实例
@@ -144,13 +146,13 @@ object TreeSitterLanguageProvider {
 
     /**
      * 通过从 assets 加载 scm 查询文件创建 Java TsLanguageSpec
-     * 
+     *
      * 加载的查询文件：
      * - highlights.scm：语法高亮规则
      * - blocks.scm：代码块识别
      * - brackets.scm：括号匹配
      * - locals.scm：局部变量/作用域识别
-     * 
+     *
      * @param context ApplicationContext
      * @return Java 语言的 TsLanguageSpec
      */
@@ -165,19 +167,18 @@ object TreeSitterLanguageProvider {
 
     /**
      * 从 assets 读取文本文件内容
-     * 
+     *
      * @param context ApplicationContext
      * @param path 资产文件路径（相对于 assets/ 目录）
      * @return 文件内容字符串
      * @throws java.io.IOException 如果读取失败
      */
-    private fun loadAsset(context: Context, path: String): String {
-        return context.assets.open(path).bufferedReader().use { it.readText() }
-    }
+    private fun loadAsset(context: Context, path: String): String =
+        context.assets.open(path).bufferedReader().use { it.readText() }
 
     /**
      * 释放所有缓存的语言规范
-     * 
+     *
      * 应用终止时调用以释放 Tree-sitter 语法持有的原生内存。
      * 遍历并关闭所有 spec，然后清空缓存。
      */
@@ -195,9 +196,9 @@ object TreeSitterLanguageProvider {
 
 /**
  * Java 专用 TsLanguageSpec
- * 
+ *
  * 使用 TSLanguageJava 和自定义的局部变量捕获规范。
- * 
+ *
  * @param highlightScmSource 高亮查询源代码
  * @param codeBlocksScmSource 代码块查询源代码
  * @param bracketsScmSource 括号查询源代码
@@ -207,7 +208,7 @@ private class JavaLanguageSpec(
     highlightScmSource: String,
     codeBlocksScmSource: String = "",
     bracketsScmSource: String = "",
-    localsScmSource: String = "",
+    localsScmSource: String = ""
 ) : TsLanguageSpec(
     TSLanguageJava.getInstance(),
     highlightScmSource,
@@ -219,7 +220,7 @@ private class JavaLanguageSpec(
 
 /**
  * Java Tree-sitter 查询的局部变量捕获规范
- * 
+ *
  * 将 locals.scm 中的 capture 名称映射到语义类别：
  * - "scope"：作用域
  * - "reference"：引用
@@ -236,9 +237,9 @@ private val JAVA_LOCALS_CAPTURE_SPEC = object : LocalsCaptureSpec() {
 
 /**
  * 构建 Tree-sitter 主题规则，将 capture 名称映射到 sora-editor 配色方案槽位
- * 
+ *
  * 这些槽位与 TextMate 主题使用的槽位相同，确保在 Tree-sitter 和 TextMate 模式切换时视觉一致性。
- * 
+ *
  * 映射规则：
  * - comment → 注释（斜体）
  * - keyword → 关键字（粗体）
@@ -252,16 +253,24 @@ private fun TsThemeBuilder.buildJavaTheme() {
     textStyle(EditorColorScheme.COMMENT, italic = true) applyTo "comment"
     textStyle(EditorColorScheme.KEYWORD, bold = true) applyTo "keyword"
     TextStyle.makeStyle(EditorColorScheme.LITERAL) applyTo arrayOf(
-        "constant.builtin", "string", "number"
+        "constant.builtin",
+        "string",
+        "number"
     )
     TextStyle.makeStyle(EditorColorScheme.IDENTIFIER_VAR) applyTo arrayOf(
-        "variable.builtin", "variable", "constant"
+        "variable.builtin",
+        "variable",
+        "constant"
     )
     TextStyle.makeStyle(EditorColorScheme.IDENTIFIER_NAME) applyTo arrayOf(
-        "type.builtin", "type", "attribute"
+        "type.builtin",
+        "type",
+        "attribute"
     )
     TextStyle.makeStyle(EditorColorScheme.FUNCTION_NAME) applyTo arrayOf(
-        "function.method", "function.builtin", "variable.field"
+        "function.method",
+        "function.builtin",
+        "variable.field"
     )
     TextStyle.makeStyle(EditorColorScheme.OPERATOR) applyTo "operator"
 }

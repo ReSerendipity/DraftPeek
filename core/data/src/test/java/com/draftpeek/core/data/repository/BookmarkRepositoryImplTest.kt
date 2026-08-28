@@ -6,8 +6,8 @@ import io.mockk.coEvery
 import io.mockk.coVerify
 import io.mockk.every
 import io.mockk.mockk
-import kotlinx.coroutines.flow.flowOf
 import kotlinx.coroutines.flow.first
+import kotlinx.coroutines.flow.flowOf
 import kotlinx.coroutines.test.runTest
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertTrue
@@ -49,9 +49,11 @@ class BookmarkRepositoryImplTest {
             repository.addBookmark("uri1", "file.kt", "dir1")
 
             coVerify {
-                dao.insert(match {
-                    it.uri == "uri1" && it.fileName == "file.kt" && it.directoryUri == "dir1"
-                })
+                dao.insert(
+                    match {
+                        it.uri == "uri1" && it.fileName == "file.kt" && it.directoryUri == "dir1"
+                    }
+                )
             }
         }
     }

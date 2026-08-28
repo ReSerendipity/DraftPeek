@@ -12,6 +12,8 @@ package com.draftpeek.feature.editor.tabs
 
 import com.draftpeek.core.common.model.TabId
 import com.draftpeek.feature.editor.model.EditorTab
+import javax.inject.Inject
+import javax.inject.Singleton
 import kotlinx.collections.immutable.ImmutableList
 import kotlinx.collections.immutable.persistentListOf
 import kotlinx.collections.immutable.toImmutableList
@@ -19,8 +21,6 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.update
-import javax.inject.Inject
-import javax.inject.Singleton
 
 /**
  * 编辑器会话的可序列化快照，用于跨应用重启持久化。
@@ -28,10 +28,7 @@ import javax.inject.Singleton
  * @property tabs 打开的标签页列表
  * @property activeTabId 当前活动标签页 ID
  */
-data class SessionData(
-    val tabs: List<SessionTab>,
-    val activeTabId: TabId?,
-)
+data class SessionData(val tabs: List<SessionTab>, val activeTabId: TabId?)
 
 /**
  * [SessionData] 中单个标签页的持久化数据。
@@ -55,7 +52,7 @@ data class SessionTab(
     val cursorLine: Int = 1,
     val cursorColumn: Int = 1,
     val scrollX: Int = 0,
-    val scrollY: Int = 0,
+    val scrollY: Int = 0
 )
 
 /**
@@ -78,10 +75,12 @@ class TabManager @Inject constructor() {
     }
 
     private val _tabs = MutableStateFlow<ImmutableList<EditorTab>>(persistentListOf())
+
     /** 当前打开的标签页不可变列表的 StateFlow */
     val tabs: StateFlow<ImmutableList<EditorTab>> = _tabs.asStateFlow()
 
     private val _activeTabId = MutableStateFlow<TabId?>(null)
+
     /** 当前活动标签页 ID 的 StateFlow */
     val activeTabId: StateFlow<TabId?> = _activeTabId.asStateFlow()
 
@@ -153,7 +152,7 @@ class TabManager @Inject constructor() {
                 uri = uri,
                 fileName = fileName,
                 language = language,
-                isModified = false,
+                isModified = false
             )
             val newTabs = _tabs.value.map { if (it.id == reusableTab.id) updatedTab else it }.toImmutableList()
             _tabs.value = newTabs
@@ -181,7 +180,7 @@ class TabManager @Inject constructor() {
             id = tabId,
             uri = uri,
             fileName = fileName,
-            language = language,
+            language = language
         )
         val newTabs = (_tabs.value + tab).toImmutableList()
         _tabs.value = newTabs
@@ -310,9 +309,7 @@ class TabManager @Inject constructor() {
     /**
      * 通过文件 URI 查找标签页（O(1) 哈希查找）。
      */
-    fun findTabByUri(uri: String): EditorTab? {
-        return uriIndex[uri]
-    }
+    fun findTabByUri(uri: String): EditorTab? = uriIndex[uri]
 
     /**
      * 关闭所有标签页。
@@ -327,19 +324,17 @@ class TabManager @Inject constructor() {
     /**
      * 将当前会话序列化为 [SessionData] 用于持久化。
      */
-    fun serializeSession(): SessionData {
-        return SessionData(
-            tabs = _tabs.value.map { tab ->
-                SessionTab(
-                    id = tab.id,
-                    uri = tab.uri,
-                    fileName = tab.fileName,
-                    language = tab.language,
-                )
-            },
-            activeTabId = _activeTabId.value,
-        )
-    }
+    fun serializeSession(): SessionData = SessionData(
+        tabs = _tabs.value.map { tab ->
+            SessionTab(
+                id = tab.id,
+                uri = tab.uri,
+                fileName = tab.fileName,
+                language = tab.language
+            )
+        },
+        activeTabId = _activeTabId.value
+    )
 
     /**
      * 从 [SessionData] 恢复会话。
@@ -350,7 +345,7 @@ class TabManager @Inject constructor() {
                 id = sessionTab.id,
                 uri = sessionTab.uri,
                 fileName = sessionTab.fileName,
-                language = sessionTab.language,
+                language = sessionTab.language
             )
         }
         val newTabs = restoredTabs.toImmutableList()

@@ -8,16 +8,21 @@
  *
  * 包含字体选项枚举和配置，支持用户自定义应用字体。
  */
+
 package com.draftpeek.core.ui.theme
-
-
 
 /**
  * Backward-compatible re-exports from [com.draftpeek.core.designsystem.theme].
  * New code should import directly from the designsystem module.
  */
-@Deprecated("Use com.draftpeek.core.designsystem.theme.FontOption instead", ReplaceWith("FontOption", "com.draftpeek.core.designsystem.theme"))
+@Deprecated(
+    "Use com.draftpeek.core.designsystem.theme.FontOption instead",
+    ReplaceWith("FontOption", "com.draftpeek.core.designsystem.theme")
+)
 typealias FontOption = com.draftpeek.core.designsystem.theme.FontOption
 
-@Deprecated("Use com.draftpeek.core.designsystem.theme.FontOptions instead", ReplaceWith("FontOptions", "com.draftpeek.core.designsystem.theme"))
+@Deprecated(
+    "Use com.draftpeek.core.designsystem.theme.FontOptions instead",
+    ReplaceWith("FontOptions", "com.draftpeek.core.designsystem.theme")
+)
 val FontOptions = com.draftpeek.core.designsystem.theme.FontOptions

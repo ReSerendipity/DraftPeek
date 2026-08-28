@@ -46,19 +46,19 @@ fun GreetingSection(
     daysSinceFirstUse: Int,
     unlockedAchievements: List<Achievement>,
     onAchievementClick: () -> Unit,
-    modifier: Modifier = Modifier,
+    modifier: Modifier = Modifier
 ) {
     Column(
         modifier = modifier
             .fillMaxWidth()
-            .padding(horizontal = 20.dp),
+            .padding(horizontal = 20.dp)
     ) {
         Text(
             text = stringResource(R.string.stats_greeting_hello, userName),
             style = MaterialTheme.typography.headlineSmall,
             fontWeight = FontWeight.Bold,
             fontSize = 26.sp,
-            color = PrototypeTokens.fg,
+            color = PrototypeTokens.fg
         )
 
         Text(
@@ -75,7 +75,7 @@ fun GreetingSection(
                     withStyle(
                         SpanStyle(
                             color = PrototypeTokens.accent,
-                            fontWeight = FontWeight.Bold,
+                            fontWeight = FontWeight.Bold
                         )
                     ) {
                         append(draftpeek)
@@ -86,7 +86,7 @@ fun GreetingSection(
                         withStyle(
                             SpanStyle(
                                 color = PrototypeTokens.accent,
-                                fontWeight = FontWeight.Bold,
+                                fontWeight = FontWeight.Bold
                             )
                         ) {
                             append(daysStr)
@@ -102,7 +102,7 @@ fun GreetingSection(
             style = MaterialTheme.typography.bodyMedium,
             fontSize = 14.sp,
             color = PrototypeTokens.fgSoft,
-            modifier = Modifier.padding(top = 4.dp),
+            modifier = Modifier.padding(top = 4.dp)
         )
 
         Row(
@@ -110,21 +110,21 @@ fun GreetingSection(
                 .fillMaxWidth()
                 .padding(top = 14.dp)
                 .horizontalScroll(rememberScrollState()),
-            horizontalArrangement = Arrangement.spacedBy(8.dp),
+            horizontalArrangement = Arrangement.spacedBy(8.dp)
         ) {
             if (unlockedAchievements.isEmpty()) {
                 Text(
                     text = stringResource(R.string.stats_achievements_empty),
                     style = MaterialTheme.typography.bodyMedium,
                     fontSize = 13.sp,
-                    color = PrototypeTokens.muted,
+                    color = PrototypeTokens.muted
                 )
             } else {
                 unlockedAchievements.take(8).forEach { achievement ->
                     AchievementBadgeChip(
                         icon = achievement.icon,
                         name = achievement.name,
-                        onClick = onAchievementClick,
+                        onClick = onAchievementClick
                     )
                 }
             }

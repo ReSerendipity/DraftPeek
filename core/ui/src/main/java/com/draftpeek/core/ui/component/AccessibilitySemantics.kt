@@ -37,15 +37,12 @@ import com.draftpeek.core.ui.theme.LocalAccessibilityState
  * @param role 元素角色（按钮、开关等）
  * @param state 元素状态描述（如"已选中"/"未选中"）
  */
-fun Modifier.accessibleClick(
-    description: String,
-    role: Role? = null,
-    state: String? = null,
-): Modifier = this.semantics {
-    contentDescription = description
-    role?.let { this.role = it }
-    state?.let { stateDescription = it }
-}
+fun Modifier.accessibleClick(description: String, role: Role? = null, state: String? = null): Modifier =
+    this.semantics {
+        contentDescription = description
+        role?.let { this.role = it }
+        state?.let { stateDescription = it }
+    }
 
 /**
  * 为标题元素添加 heading 语义，使屏幕阅读器用户可以快速跳转。
@@ -62,9 +59,7 @@ fun Modifier.accessibleHeading(): Modifier = this.semantics {
  *  - [LiveRegionMode.Polite] 等当前朗读结束后再朗读
  *  - [LiveRegionMode.Assertive] 立即打断当前朗读
  */
-fun Modifier.liveRegion(
-    mode: LiveRegionMode = LiveRegionMode.Polite,
-): Modifier = this.semantics {
+fun Modifier.liveRegion(mode: LiveRegionMode = LiveRegionMode.Polite): Modifier = this.semantics {
     liveRegion = mode
 }
 
@@ -74,10 +69,7 @@ fun Modifier.liveRegion(
  * @param label 元素标签
  * @param isChecked 是否已选中
  */
-fun Modifier.accessibleToggle(
-    label: String,
-    isChecked: Boolean,
-): Modifier = this.semantics {
+fun Modifier.accessibleToggle(label: String, isChecked: Boolean): Modifier = this.semantics {
     contentDescription = label
     role = Role.Switch
     stateDescription = if (isChecked) "已开启" else "已关闭"
@@ -92,10 +84,7 @@ fun Modifier.accessibleToggle(
  * @param label 状态文本（如"操作成功"/"操作失败"）
  * @param assertive 是否使用 Assertive 模式（重要通知时使用）
  */
-fun Modifier.accessibleStatus(
-    label: String,
-    assertive: Boolean = false,
-): Modifier = this.semantics {
+fun Modifier.accessibleStatus(label: String, assertive: Boolean = false): Modifier = this.semantics {
     contentDescription = label
     liveRegion = if (assertive) LiveRegionMode.Assertive else LiveRegionMode.Polite
 }
@@ -117,7 +106,7 @@ fun Modifier.accessibleStatus(
 fun Modifier.accessibilityEnhanced(
     role: Role? = null,
     stateDescription: String? = null,
-    contentDescription: String? = null,
+    contentDescription: String? = null
 ): Modifier = composed {
     val state = LocalAccessibilityState.current
     if (!state.screenReaderOptimized) {

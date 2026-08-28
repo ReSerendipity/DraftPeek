@@ -33,6 +33,7 @@ object AchievementCalculator {
 
     /** ISO 日期格式化器 */
     private val dateFormatter = DateTimeFormatter.ISO_LOCAL_DATE
+
     /** 系统默认时区 */
     private val zoneId = ZoneId.systemDefault()
 
@@ -107,12 +108,10 @@ object AchievementCalculator {
     /**
      * 解析日期字符串。
      */
-    private fun parseDate(dateStr: String): LocalDate? {
-        return try {
-            LocalDate.parse(dateStr, dateFormatter)
-        } catch (e: Exception) {
-            null
-        }
+    private fun parseDate(dateStr: String): LocalDate? = try {
+        LocalDate.parse(dateStr, dateFormatter)
+    } catch (e: Exception) {
+        null
     }
 
     /**
@@ -181,10 +180,7 @@ object AchievementCalculator {
      * @param recentFiles 最近文件列表
      * @return 各时段活跃天数
      */
-    private fun calculateTimeSessions(
-        activeDates: Set<LocalDate>,
-        recentFiles: List<RecentFile>
-    ): TimeSessions {
+    private fun calculateTimeSessions(activeDates: Set<LocalDate>, recentFiles: List<RecentFile>): TimeSessions {
         if (recentFiles.isEmpty()) {
             return TimeSessions(0, 0, 0, 0, 0, 0)
         }
@@ -235,11 +231,7 @@ object AchievementCalculator {
      * @param today 当前日期
      * @return 完美周数量
      */
-    private fun calculatePerfectWeeks(
-        activeDates: Set<LocalDate>,
-        firstDate: LocalDate,
-        today: LocalDate
-    ): Int {
+    private fun calculatePerfectWeeks(activeDates: Set<LocalDate>, firstDate: LocalDate, today: LocalDate): Int {
         var count = 0
         var current = firstDate.with(java.time.DayOfWeek.MONDAY)
 
@@ -274,11 +266,7 @@ object AchievementCalculator {
      * @param today 当前日期
      * @return Pair(达标月数量, 完美月数量)
      */
-    private fun calculateMonths(
-        activeDates: Set<LocalDate>,
-        firstDate: LocalDate,
-        today: LocalDate
-    ): Pair<Int, Int> {
+    private fun calculateMonths(activeDates: Set<LocalDate>, firstDate: LocalDate, today: LocalDate): Pair<Int, Int> {
         var perfectMonths = 0
         var fullMonths = 0
 
@@ -337,13 +325,11 @@ object AchievementCalculator {
     private fun calculateHolidays(activeDates: Set<LocalDate>): Holidays {
         val years = activeDates.map { it.year }.toSet()
 
-        fun hasHoliday(month: Int, day: Int): Boolean {
-            return years.any { year ->
-                try {
-                    activeDates.contains(LocalDate.of(year, month, day))
-                } catch (e: Exception) {
-                    false
-                }
+        fun hasHoliday(month: Int, day: Int): Boolean = years.any { year ->
+            try {
+                activeDates.contains(LocalDate.of(year, month, day))
+            } catch (e: Exception) {
+                false
             }
         }
 

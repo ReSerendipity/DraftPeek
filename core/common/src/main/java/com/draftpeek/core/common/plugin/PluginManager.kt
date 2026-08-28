@@ -120,16 +120,16 @@ object PluginManager {
      * @param pluginId 插件ID
      * @param extensions 需要自动注册的扩展列表
      */
-    private fun autoRegisterExtensions(
-        pluginId: String,
-        extensions: List<AutoRegisteredExtension>,
-    ) {
+    private fun autoRegisterExtensions(pluginId: String, extensions: List<AutoRegisteredExtension>) {
         for (extension in extensions) {
             try {
                 when (extension) {
                     is AutoRegisteredExtension.Language -> {
                         if (registry.hasLanguage(extension.languageId)) {
-                            Log.w(TAG, "Language ${extension.languageId} already registered, skipping auto-registration from $pluginId")
+                            Log.w(
+                                TAG,
+                                "Language ${extension.languageId} already registered, skipping auto-registration from $pluginId"
+                            )
                         } else {
                             registry.registerLanguage(extension.languageId, extension.provider)
                             Log.d(TAG, "Auto-registered language: ${extension.languageId} from $pluginId")
@@ -137,7 +137,10 @@ object PluginManager {
                     }
                     is AutoRegisteredExtension.Theme -> {
                         if (registry.hasTheme(extension.themeId)) {
-                            Log.w(TAG, "Theme ${extension.themeId} already registered, skipping auto-registration from $pluginId")
+                            Log.w(
+                                TAG,
+                                "Theme ${extension.themeId} already registered, skipping auto-registration from $pluginId"
+                            )
                         } else {
                             registry.registerTheme(extension.themeId, extension.provider)
                             Log.d(TAG, "Auto-registered theme: ${extension.themeId} from $pluginId")
@@ -216,16 +219,14 @@ object PluginManager {
      * @param themeId 主题标识符
      * @return 主题提供者，如果未找到则返回null
      */
-    fun findThemeById(themeId: String): ThemeExtensionProvider? =
-        registry.getThemeProviders()[themeId]
+    fun findThemeById(themeId: String): ThemeExtensionProvider? = registry.getThemeProviders()[themeId]
 
     /**
      * 获取所有已注册插件的元数据信息。
      *
      * @return 所有插件的PluginInfo列表
      */
-    fun getPluginInfos(): List<PluginInfo> =
-        plugins.values.map { it.info }
+    fun getPluginInfos(): List<PluginInfo> = plugins.values.map { it.info }
 
     /**
      * 检查具有给定ID的插件是否已注册。
@@ -233,8 +234,7 @@ object PluginManager {
      * @param pluginId 插件ID
      * @return 已注册返回true，否则返回false
      */
-    fun isPluginRegistered(pluginId: String): Boolean =
-        plugins.containsKey(pluginId)
+    fun isPluginRegistered(pluginId: String): Boolean = plugins.containsKey(pluginId)
 
     /**
      * 检查插件是否启用。
@@ -243,24 +243,21 @@ object PluginManager {
      * @param pluginId 插件ID
      * @return 启用返回true，禁用返回false
      */
-    fun isEnabled(pluginId: String): Boolean =
-        enabledState[pluginId] ?: true
+    fun isEnabled(pluginId: String): Boolean = enabledState[pluginId] ?: true
 
     /**
      * 获取所有当前启用的插件。
      *
      * @return 启用插件的PluginInfo列表
      */
-    fun getEnabledPlugins(): List<PluginInfo> =
-        plugins.values.filter { isEnabled(it.info.id) }.map { it.info }
+    fun getEnabledPlugins(): List<PluginInfo> = plugins.values.filter { isEnabled(it.info.id) }.map { it.info }
 
     /**
      * 获取所有当前禁用的插件。
      *
      * @return 禁用插件的PluginInfo列表
      */
-    fun getDisabledPlugins(): List<PluginInfo> =
-        plugins.values.filter { !isEnabled(it.info.id) }.map { it.info }
+    fun getDisabledPlugins(): List<PluginInfo> = plugins.values.filter { !isEnabled(it.info.id) }.map { it.info }
 
     /**
      * 设置插件的启用状态。
@@ -428,9 +425,8 @@ internal class PluginExtensionRegistry : ExtensionRegistry {
      * @param extension 文件扩展名
      * @return (pluginId, LanguageExtensionProvider)对，未找到返回null
      */
-    fun findLanguageByExtension(extension: String): Pair<String, LanguageExtensionProvider>? {
-        return languages.values.find { it.second.fileExtensions.contains(extension) }
-    }
+    fun findLanguageByExtension(extension: String): Pair<String, LanguageExtensionProvider>? =
+        languages.values.find { it.second.fileExtensions.contains(extension) }
 
     /**
      * 通过语言ID获取语言提供者。
@@ -438,56 +434,49 @@ internal class PluginExtensionRegistry : ExtensionRegistry {
      * @param languageId 语言ID
      * @return LanguageExtensionProvider，未找到返回null
      */
-    fun getLanguageProvider(languageId: String): LanguageExtensionProvider? =
-        languages[languageId]?.second
+    fun getLanguageProvider(languageId: String): LanguageExtensionProvider? = languages[languageId]?.second
 
     /**
      * 获取所有已注册的语言扩展。
      *
      * @return languageId → LanguageExtensionProvider映射
      */
-    fun getLanguageProviders(): Map<String, LanguageExtensionProvider> =
-        languages.mapValues { it.value.second }
+    fun getLanguageProviders(): Map<String, LanguageExtensionProvider> = languages.mapValues { it.value.second }
 
     /**
      * 获取所有已注册的命令。
      *
      * @return commandId → (label, handler)映射
      */
-    fun getCommands(): Map<String, Pair<String, () -> Unit>> =
-        commands.mapValues { it.value.second }
+    fun getCommands(): Map<String, Pair<String, () -> Unit>> = commands.mapValues { it.value.second }
 
     /**
      * 获取所有已注册的主题提供者。
      *
      * @return themeId → ThemeExtensionProvider映射
      */
-    fun getThemeProviders(): Map<String, ThemeExtensionProvider> =
-        themes.mapValues { it.value.second }
+    fun getThemeProviders(): Map<String, ThemeExtensionProvider> = themes.mapValues { it.value.second }
 
     /**
      * 获取所有已注册的面板提供者。
      *
      * @return panelId → PanelExtensionProvider映射
      */
-    fun getPanelProviders(): Map<String, PanelExtensionProvider> =
-        panels.mapValues { it.value.second }
+    fun getPanelProviders(): Map<String, PanelExtensionProvider> = panels.mapValues { it.value.second }
 
     /**
      * 获取所有已注册的导出处理器。
      *
      * @return formatId → ExportHandlerProvider映射
      */
-    fun getExportHandlers(): Map<String, ExportHandlerProvider> =
-        exportHandlers.mapValues { it.value.second }
+    fun getExportHandlers(): Map<String, ExportHandlerProvider> = exportHandlers.mapValues { it.value.second }
 
     /**
      * 获取所有类型的已注册扩展总数。
      *
      * @return 扩展总数
      */
-    fun getExtensionCount(): Int =
-        languages.size + commands.size + themes.size + panels.size + exportHandlers.size
+    fun getExtensionCount(): Int = languages.size + commands.size + themes.size + panels.size + exportHandlers.size
 
     /**
      * 清除所有已注册的扩展。

@@ -75,7 +75,7 @@ fun BrandOutlinedTextField(
     minLines: Int = 1,
     visualTransformation: VisualTransformation = VisualTransformation.None,
     textStyle: TextStyle = TextStyle(),
-    shape: Shape = OutlinedTextFieldDefaults.shape,
+    shape: Shape = OutlinedTextFieldDefaults.shape
 ) {
     OutlinedTextField(
         value = value,
@@ -106,7 +106,7 @@ fun BrandOutlinedTextField(
             unfocusedContainerColor = PrototypeTokens.elevated,
             cursorColor = PrototypeTokens.accent,
             focusedTextColor = PrototypeTokens.fg,
-            unfocusedTextColor = PrototypeTokens.fg,
-        ),
+            unfocusedTextColor = PrototypeTokens.fg
+        )
     )
 }

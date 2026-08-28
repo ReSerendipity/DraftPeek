@@ -11,17 +11,15 @@ package com.draftpeek.core.data.usecase
 
 import com.draftpeek.core.data.entity.RecentFile
 import com.draftpeek.core.data.repository.RecentFilesRepository
-import kotlinx.coroutines.flow.Flow
 import javax.inject.Inject
+import kotlinx.coroutines.flow.Flow
 
 /**
  * 获取最近文件用例。
  *
  * @property repository 最近文件仓库实例
  */
-class GetRecentFilesUseCase @Inject constructor(
-    private val repository: RecentFilesRepository,
-) {
+class GetRecentFilesUseCase @Inject constructor(private val repository: RecentFilesRepository) {
     /**
      * 获取所有最近文件（含收藏）的 Flow。
      * @return 最近文件列表流，按最后打开时间倒序排列

@@ -1,10 +1,10 @@
 /**
  * 文件功能：保存到应用内部存储的底部表单
- * 
+ *
  * 主要类/函数：
  * - [SaveDirectory]：保存目录数据类
  * - [SaveToAppSheet]：保存文件到应用的底部表单 Composable
- * 
+ *
  * 模块依赖：
  * - core/ui/theme：设计系统令牌（颜色、字体、形状）
  * - Jetpack Compose Material3：ModalBottomSheet、Icon、Text 等组件
@@ -24,13 +24,13 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Folder
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.ModalBottomSheet
 import androidx.compose.material3.Text
 import androidx.compose.material3.rememberModalBottomSheetState
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.Folder
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableIntStateOf
@@ -43,7 +43,6 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import com.draftpeek.core.ui.theme.CodeTextStyle
 import com.draftpeek.core.ui.theme.DraftPeekTypography
 import com.draftpeek.core.ui.theme.MetaStyle
 import com.draftpeek.core.ui.theme.PrototypeShapes
@@ -52,20 +51,17 @@ import com.draftpeek.core.ui.theme.SemanticColors
 
 /**
  * 可保存的目录数据类
- * 
+ *
  * @property name 目录显示名称
  * @property path 目录完整路径
  */
-data class SaveDirectory(
-    val name: String,
-    val path: String,
-)
+data class SaveDirectory(val name: String, val path: String)
 
 /**
  * 保存到应用内部存储的底部表单
- * 
+ *
  * 允许用户选择保存目录，处理文件名冲突，并提供保存/另存为/取消操作。
- * 
+ *
  * @param fileName 要保存的文件名
  * @param directories 可选的保存目录列表
  * @param hasConflict 是否存在文件名冲突
@@ -83,7 +79,7 @@ fun SaveToAppSheet(
     conflictName: String = "",
     onSave: (String) -> Unit,
     onSaveAs: (String) -> Unit,
-    onDismiss: () -> Unit,
+    onDismiss: () -> Unit
 ) {
     val sheetState = rememberModalBottomSheetState(skipPartiallyExpanded = true)
     val surface = PrototypeTokens.surface
@@ -102,28 +98,28 @@ fun SaveToAppSheet(
         onDismissRequest = onDismiss,
         sheetState = sheetState,
         containerColor = surface,
-        shape = RoundedCornerShape(topStart = 20.dp, topEnd = 20.dp),
+        shape = RoundedCornerShape(topStart = 20.dp, topEnd = 20.dp)
     ) {
         Column(
             modifier = Modifier
                 .fillMaxWidth()
                 .padding(horizontal = 20.dp)
-                .padding(bottom = 20.dp),
+                .padding(bottom = 20.dp)
         ) {
             Text(
                 text = "Save to DraftPeek",
                 style = DraftPeekTypography.titleMedium.copy(
                     color = fg,
                     fontWeight = FontWeight.SemiBold,
-                    fontSize = 16.sp,
-                ),
+                    fontSize = 16.sp
+                )
             )
 
             Spacer(modifier = Modifier.height(14.dp))
 
             Text(
                 text = "FILE NAME",
-                style = MetaStyle.copy(color = muted),
+                style = MetaStyle.copy(color = muted)
             )
             Spacer(modifier = Modifier.height(6.dp))
             Box(
@@ -132,11 +128,11 @@ fun SaveToAppSheet(
                     .clip(PrototypeShapes.Small)
                     .background(elevated)
                     .border(1.dp, border, PrototypeShapes.Small)
-                    .padding(horizontal = 14.dp, vertical = 12.dp),
+                    .padding(horizontal = 14.dp, vertical = 12.dp)
             ) {
                 Text(
                     text = fileName,
-                    style = DraftPeekTypography.bodyMedium.copy(color = fg),
+                    style = DraftPeekTypography.bodyMedium.copy(color = fg)
                 )
             }
 
@@ -144,7 +140,7 @@ fun SaveToAppSheet(
 
             Text(
                 text = "SAVE TO",
-                style = MetaStyle.copy(color = muted),
+                style = MetaStyle.copy(color = muted)
             )
             Spacer(modifier = Modifier.height(6.dp))
             Column(
@@ -153,7 +149,7 @@ fun SaveToAppSheet(
                     .clip(PrototypeShapes.Card)
                     .background(surface)
                     .border(1.dp, border, PrototypeShapes.Card)
-                    .padding(horizontal = 4.dp, vertical = 8.dp),
+                    .padding(horizontal = 4.dp, vertical = 8.dp)
             ) {
                 directories.forEachIndexed { index, dir ->
                     Row(
@@ -163,21 +159,21 @@ fun SaveToAppSheet(
                             .background(if (index == selectedDirIndex) accentSoft else Color.Transparent)
                             .clickable { selectedDirIndex = index }
                             .padding(horizontal = 12.dp, vertical = 8.dp),
-                        verticalAlignment = Alignment.CenterVertically,
+                        verticalAlignment = Alignment.CenterVertically
                     ) {
                         Icon(
                             imageVector = Icons.Filled.Folder,
                             contentDescription = null,
                             tint = if (index == selectedDirIndex) accent else muted,
-                            modifier = Modifier.size(16.dp),
+                            modifier = Modifier.size(16.dp)
                         )
                         Spacer(modifier = Modifier.size(8.dp))
                         Text(
                             text = dir.name,
                             style = DraftPeekTypography.bodySmall.copy(
                                 color = if (index == selectedDirIndex) accent else fg,
-                                fontWeight = if (index == selectedDirIndex) FontWeight.Medium else FontWeight.Normal,
-                            ),
+                                fontWeight = if (index == selectedDirIndex) FontWeight.Medium else FontWeight.Normal
+                            )
                         )
                     }
                 }
@@ -191,11 +187,11 @@ fun SaveToAppSheet(
                         .clip(RoundedCornerShape(8.dp))
                         .background(warning.copy(alpha = 0.06f))
                         .border(1.dp, warning.copy(alpha = 0.12f), RoundedCornerShape(8.dp))
-                        .padding(10.dp, 12.dp),
+                        .padding(10.dp, 12.dp)
                 ) {
                     Text(
                         text = "A file named \"$fileName\" already exists. It will be renamed to \"$conflictName\".",
-                        style = DraftPeekTypography.bodySmall.copy(color = warning, lineHeight = 18.sp),
+                        style = DraftPeekTypography.bodySmall.copy(color = warning, lineHeight = 18.sp)
                     )
                 }
             }
@@ -204,7 +200,7 @@ fun SaveToAppSheet(
 
             Row(
                 modifier = Modifier.fillMaxWidth(),
-                horizontalArrangement = Arrangement.spacedBy(10.dp),
+                horizontalArrangement = Arrangement.spacedBy(10.dp)
             ) {
                 Box(
                     modifier = Modifier
@@ -213,14 +209,14 @@ fun SaveToAppSheet(
                         .clip(PrototypeShapes.Medium)
                         .border(1.dp, border, PrototypeShapes.Medium)
                         .clickable { onDismiss() },
-                    contentAlignment = Alignment.Center,
+                    contentAlignment = Alignment.Center
                 ) {
                     Text(
                         text = "Cancel",
                         style = DraftPeekTypography.bodyMedium.copy(
                             color = fgSoft,
-                            fontWeight = FontWeight.Medium,
-                        ),
+                            fontWeight = FontWeight.Medium
+                        )
                     )
                 }
                 Box(
@@ -230,14 +226,14 @@ fun SaveToAppSheet(
                         .clip(PrototypeShapes.Medium)
                         .background(accent)
                         .clickable { onSave(directories[selectedDirIndex].path) },
-                    contentAlignment = Alignment.Center,
+                    contentAlignment = Alignment.Center
                 ) {
                     Text(
                         text = "Save",
                         style = DraftPeekTypography.bodyMedium.copy(
                             color = Color.White,
-                            fontWeight = FontWeight.SemiBold,
-                        ),
+                            fontWeight = FontWeight.SemiBold
+                        )
                     )
                 }
                 Box(
@@ -247,15 +243,15 @@ fun SaveToAppSheet(
                         .clip(PrototypeShapes.Medium)
                         .border(1.dp, border, PrototypeShapes.Medium)
                         .clickable { onSaveAs(directories[selectedDirIndex].path) },
-                    contentAlignment = Alignment.Center,
+                    contentAlignment = Alignment.Center
                 ) {
                     Text(
                         text = "Save As",
                         style = DraftPeekTypography.bodyMedium.copy(
                             color = fgSoft,
                             fontWeight = FontWeight.Medium,
-                            fontSize = 12.sp,
-                        ),
+                            fontSize = 12.sp
+                        )
                     )
                 }
             }

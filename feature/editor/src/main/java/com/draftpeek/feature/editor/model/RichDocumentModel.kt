@@ -35,7 +35,7 @@ import kotlinx.collections.immutable.persistentListOf
  */
 @Immutable
 data class RichDocument(
-    val paragraphs: ImmutableList<RichParagraph> = kotlinx.collections.immutable.persistentListOf(),
+    val paragraphs: ImmutableList<RichParagraph> = kotlinx.collections.immutable.persistentListOf()
 ) {
     /** 所有段落的总字符数。 */
     val charCount: Int get() = paragraphs.sumOf { it.charCount }
@@ -67,7 +67,7 @@ data class RichDocument(
 data class RichParagraph(
     val spans: ImmutableList<RichSpan> = kotlinx.collections.immutable.persistentListOf(),
     val blockType: BlockType = BlockType.Paragraph,
-    val lineNumber: Int = 0,
+    val lineNumber: Int = 0
 ) {
     /** 该段落的总字符数。 */
     val charCount: Int get() = spans.sumOf { it.text.length }
@@ -85,20 +85,27 @@ data class RichParagraph(
 enum class BlockType {
     /** 普通段落 */
     Paragraph,
+
     /** 标题块 */
     Heading,
+
     /** 代码块 */
     CodeBlock,
+
     /** 引用块 */
     Blockquote,
+
     /** 列表项 */
     List,
+
     /** 分隔线 */
     ThematicBreak,
+
     /** 表格 */
     Table,
+
     /** HTML 块 */
-    HtmlBlock,
+    HtmlBlock
 }
 
 /**
@@ -127,7 +134,7 @@ sealed class RichSpan {
     data class Text(
         override val text: String,
         override val startIndex: Int = 0,
-        override val endIndex: Int = text.length,
+        override val endIndex: Int = text.length
     ) : RichSpan()
 
     /**
@@ -143,7 +150,7 @@ sealed class RichSpan {
         override val text: String,
         val level: Int,
         override val startIndex: Int = 0,
-        override val endIndex: Int = text.length,
+        override val endIndex: Int = text.length
     ) : RichSpan()
 
     /**
@@ -153,7 +160,7 @@ sealed class RichSpan {
     data class Bold(
         override val text: String,
         override val startIndex: Int = 0,
-        override val endIndex: Int = text.length,
+        override val endIndex: Int = text.length
     ) : RichSpan()
 
     /**
@@ -163,7 +170,7 @@ sealed class RichSpan {
     data class Italic(
         override val text: String,
         override val startIndex: Int = 0,
-        override val endIndex: Int = text.length,
+        override val endIndex: Int = text.length
     ) : RichSpan()
 
     /**
@@ -173,7 +180,7 @@ sealed class RichSpan {
     data class Code(
         override val text: String,
         override val startIndex: Int = 0,
-        override val endIndex: Int = text.length,
+        override val endIndex: Int = text.length
     ) : RichSpan()
 
     /**
@@ -186,7 +193,7 @@ sealed class RichSpan {
         override val text: String,
         val url: String,
         override val startIndex: Int = 0,
-        override val endIndex: Int = text.length,
+        override val endIndex: Int = text.length
     ) : RichSpan()
 
     /**
@@ -199,7 +206,7 @@ sealed class RichSpan {
         override val text: String,
         val url: String,
         override val startIndex: Int = 0,
-        override val endIndex: Int = text.length,
+        override val endIndex: Int = text.length
     ) : RichSpan()
 
     /**
@@ -209,7 +216,7 @@ sealed class RichSpan {
     data class Strikethrough(
         override val text: String,
         override val startIndex: Int = 0,
-        override val endIndex: Int = text.length,
+        override val endIndex: Int = text.length
     ) : RichSpan()
 }
 
@@ -263,11 +270,11 @@ object RichDocumentParser {
                             spans = kotlinx.collections.immutable.persistentListOf(
                                 RichSpan.Code(
                                     text = codeBlockBuffer.toString().trimEnd(),
-                                    startIndex = 0,
+                                    startIndex = 0
                                 )
                             ),
                             blockType = BlockType.CodeBlock,
-                            lineNumber = codeBlockStartLine,
+                            lineNumber = codeBlockStartLine
                         )
                     )
                 }
@@ -292,11 +299,11 @@ object RichDocumentParser {
                             RichSpan.Heading(
                                 text = headingText,
                                 level = level,
-                                startIndex = headingMatch.range.first,
+                                startIndex = headingMatch.range.first
                             )
                         ),
                         blockType = BlockType.Heading,
-                        lineNumber = index,
+                        lineNumber = index
                     )
                 )
                 continue
@@ -309,17 +316,21 @@ object RichDocumentParser {
                     spans = spans,
                     blockType = when {
                         line.startsWith("> ") -> BlockType.Blockquote
-                        line.startsWith("- ") || line.startsWith("* ") || Regex("^\\d+\\.\\s").matches(line) -> BlockType.List
+                        line.startsWith(
+                            "- "
+                        ) ||
+                            line.startsWith("* ") ||
+                            Regex("^\\d+\\.\\s").matches(line) -> BlockType.List
                         line.trim() == "---" || line.trim() == "***" -> BlockType.ThematicBreak
                         else -> BlockType.Paragraph
                     },
-                    lineNumber = index,
+                    lineNumber = index
                 )
             )
         }
 
         return RichDocument(
-            paragraphs = paragraphs.toImmutableList(),
+            paragraphs = paragraphs.toImmutableList()
         )
     }
 
@@ -338,11 +349,11 @@ object RichDocumentParser {
         // 行内格式正则：按优先级匹配（粗斜体 > 粗体 > 斜体 > 代码 > 链接 > 删除线）
         val inlinePattern = Regex(
             """(\*\*\*(.+?)\*\*\*)|""" +
-            """(\*\*(.+?)\*\*)|""" +
-            """(\*(.+?)\*)|""" +
-            """(`(.+?)`)|""" +
-            """(\[(.+?)\]\((.+?)\))|""" +
-            """(~~(.+?)~~)"""
+                """(\*\*(.+?)\*\*)|""" +
+                """(\*(.+?)\*)|""" +
+                """(`(.+?)`)|""" +
+                """(\[(.+?)\]\((.+?)\))|""" +
+                """(~~(.+?)~~)"""
         )
 
         var lastEnd = 0
@@ -370,17 +381,21 @@ object RichDocumentParser {
                     spans.add(RichSpan.Code(text = match.groupValues[8], startIndex = match.range.first))
                 }
                 match.groupValues[10].isNotEmpty() -> {
-                    spans.add(RichSpan.Link(
-                        text = match.groupValues[10],
-                        url = match.groupValues[11],
-                        startIndex = match.range.first,
-                    ))
+                    spans.add(
+                        RichSpan.Link(
+                            text = match.groupValues[10],
+                            url = match.groupValues[11],
+                            startIndex = match.range.first
+                        )
+                    )
                 }
                 match.groupValues[13].isNotEmpty() -> {
-                    spans.add(RichSpan.Strikethrough(
-                        text = match.groupValues[13],
-                        startIndex = match.range.first,
-                    ))
+                    spans.add(
+                        RichSpan.Strikethrough(
+                            text = match.groupValues[13],
+                            startIndex = match.range.first
+                        )
+                    )
                 }
             }
 
@@ -423,29 +438,27 @@ object RichDocumentWriter {
      * @param document 富文档树
      * @return Markdown 格式的文本字符串
      */
-    fun toMarkdown(document: RichDocument): String {
-        return document.paragraphs.joinToString("\n\n") { paragraph ->
-            when (paragraph.blockType) {
-                BlockType.Heading -> {
-                    val heading = paragraph.spans.firstOrNull() as? RichSpan.Heading
-                    if (heading != null) {
-                        "${"#".repeat(heading.level)} ${heading.text}"
-                    } else {
-                        paragraph.text
-                    }
+    fun toMarkdown(document: RichDocument): String = document.paragraphs.joinToString("\n\n") { paragraph ->
+        when (paragraph.blockType) {
+            BlockType.Heading -> {
+                val heading = paragraph.spans.firstOrNull() as? RichSpan.Heading
+                if (heading != null) {
+                    "${"#".repeat(heading.level)} ${heading.text}"
+                } else {
+                    paragraph.text
                 }
-                BlockType.CodeBlock -> {
-                    "```\n${paragraph.text}\n```"
-                }
-                BlockType.Blockquote -> {
-                    "> ${paragraph.spans.joinToString("") { spanToMarkdown(it) }}"
-                }
-                BlockType.List -> {
-                    "- ${paragraph.spans.joinToString("") { spanToMarkdown(it) }}"
-                }
-                else -> {
-                    paragraph.spans.joinToString("") { spanToMarkdown(it) }
-                }
+            }
+            BlockType.CodeBlock -> {
+                "```\n${paragraph.text}\n```"
+            }
+            BlockType.Blockquote -> {
+                "> ${paragraph.spans.joinToString("") { spanToMarkdown(it) }}"
+            }
+            BlockType.List -> {
+                "- ${paragraph.spans.joinToString("") { spanToMarkdown(it) }}"
+            }
+            else -> {
+                paragraph.spans.joinToString("") { spanToMarkdown(it) }
             }
         }
     }

@@ -15,8 +15,8 @@ import com.draftpeek.feature.terminal.emulator.TerminalSessionManager
 import dagger.Module
 import dagger.Provides
 import dagger.hilt.InstallIn
-import dagger.hilt.components.SingletonComponent
 import dagger.hilt.android.qualifiers.ApplicationContext
+import dagger.hilt.components.SingletonComponent
 import javax.inject.Singleton
 
 /**
@@ -33,19 +33,13 @@ object TerminalModule {
      */
     @Provides
     @Singleton
-    fun provideProotSessionManager(
-        @ApplicationContext context: Context,
-    ): ProotSessionManager {
-        return ProotSessionManager(context)
-    }
+    fun provideProotSessionManager(@ApplicationContext context: Context): ProotSessionManager =
+        ProotSessionManager(context)
 
     @Provides
     @Singleton
-    fun provideTerminalSessionManager(
-        prootSessionManager: ProotSessionManager,
-    ): TerminalSessionManager {
-        return TerminalSessionManager(prootSessionManager)
-    }
+    fun provideTerminalSessionManager(prootSessionManager: ProotSessionManager): TerminalSessionManager =
+        TerminalSessionManager(prootSessionManager)
 
     /**
      * 提供带安全验证管道的CommandExecutor单例。
@@ -54,9 +48,6 @@ object TerminalModule {
      */
     @Provides
     @Singleton
-    fun provideCommandExecutor(
-        sessionManager: TerminalSessionManager,
-    ): CommandExecutor {
-        return CommandExecutor(sessionManager)
-    }
+    fun provideCommandExecutor(sessionManager: TerminalSessionManager): CommandExecutor =
+        CommandExecutor(sessionManager)
 }

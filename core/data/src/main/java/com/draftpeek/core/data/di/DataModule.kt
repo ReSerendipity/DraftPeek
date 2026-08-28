@@ -19,45 +19,45 @@
 package com.draftpeek.core.data.di
 
 import android.content.Context
+import android.net.ConnectivityManager
+import android.net.NetworkCapabilities
 import android.util.Log
 import androidx.room.Room
+import com.draftpeek.core.common.util.NetworkConnectivityChecker
+import com.draftpeek.core.common.vcs.CredentialProvider
 import com.draftpeek.core.data.dao.BookmarkDao
 import com.draftpeek.core.data.dao.LinkDao
 import com.draftpeek.core.data.dao.RecentFileDao
+import com.draftpeek.core.data.dao.SecurityEventDao
 import com.draftpeek.core.data.dao.SnippetDao
 import com.draftpeek.core.data.dao.UserActivityDao
-import com.draftpeek.core.data.dao.SecurityEventDao
 import com.draftpeek.core.data.db.AppDatabase
 import com.draftpeek.core.data.repository.BookmarkRepository
 import com.draftpeek.core.data.repository.BookmarkRepositoryImpl
+import com.draftpeek.core.data.repository.EditorFileRepository
+import com.draftpeek.core.data.repository.EditorFileRepositoryImpl
 import com.draftpeek.core.data.repository.LinkRepository
 import com.draftpeek.core.data.repository.LinkRepositoryImpl
 import com.draftpeek.core.data.repository.RecentFilesRepository
 import com.draftpeek.core.data.repository.RecentFilesRepositoryImpl
+import com.draftpeek.core.data.repository.SecurityEventRepository
+import com.draftpeek.core.data.repository.SecurityEventRepositoryImpl
 import com.draftpeek.core.data.repository.SnippetRepository
 import com.draftpeek.core.data.repository.SnippetRepositoryImpl
 import com.draftpeek.core.data.repository.UserActivityRepository
 import com.draftpeek.core.data.repository.UserActivityRepositoryImpl
-import com.draftpeek.core.data.repository.EditorFileRepository
-import com.draftpeek.core.data.repository.EditorFileRepositoryImpl
-import com.draftpeek.core.data.repository.SecurityEventRepository
-import com.draftpeek.core.data.repository.SecurityEventRepositoryImpl
-import com.draftpeek.core.common.util.NetworkConnectivityChecker
-import com.draftpeek.core.common.vcs.CredentialProvider
 import com.draftpeek.core.data.security.CredentialManager
 import com.draftpeek.core.data.security.DatabaseKeyManager
+import com.draftpeek.core.data.security.DatabaseKeyManager.DatabaseLockedException
 import dagger.Binds
 import dagger.Module
 import dagger.Provides
 import dagger.hilt.InstallIn
 import dagger.hilt.android.qualifiers.ApplicationContext
 import dagger.hilt.components.SingletonComponent
-import android.net.ConnectivityManager
-import android.net.NetworkCapabilities
-import com.draftpeek.core.data.security.DatabaseKeyManager.DatabaseLockedException
-import net.zetetic.database.sqlcipher.SupportOpenHelperFactory
 import java.io.File
 import javax.inject.Singleton
+import net.zetetic.database.sqlcipher.SupportOpenHelperFactory
 
 @Module
 @InstallIn(SingletonComponent::class)
@@ -119,9 +119,7 @@ abstract class DataModule {
          */
         @Provides
         @Singleton
-        fun provideAppDatabase(
-            @ApplicationContext context: Context,
-        ): AppDatabase {
+        fun provideAppDatabase(@ApplicationContext context: Context): AppDatabase {
             // SECURITY: 显式加载 SQLCipher native 库。
             // sqlcipher-android 4.6.0 的自动加载机制在某些设备/ROM 上可能失败,
             // 导致 UnsatisfiedLinkError。显式调用 System.loadLibrary 确保库已加载。
@@ -136,8 +134,12 @@ abstract class DataModule {
             } catch (e: DatabaseLockedException) {
                 // SECURITY: 旧 DB 已永久不可读。删除数据库文件 + WAL + SHM 后重试。
                 // 重试时 getOrCreatePassphrase 会走"全新设备"路径重新生成密钥。
-                Log.w("DataModule", "Keystore invalidated; rebuilding database. " +
-                    "User recent-file index will be lost.", e)
+                Log.w(
+                    "DataModule",
+                    "Keystore invalidated; rebuilding database. " +
+                        "User recent-file index will be lost.",
+                    e
+                )
                 deleteDatabaseFiles(context, DB_NAME)
                 DatabaseKeyManager.getOrCreatePassphrase(context)
             }
@@ -158,7 +160,7 @@ abstract class DataModule {
                     AppDatabase.MIGRATION_8_9,
                     AppDatabase.MIGRATION_9_10,
                     AppDatabase.MIGRATION_10_11,
-                    AppDatabase.MIGRATION_11_12,
+                    AppDatabase.MIGRATION_11_12
                 )
                 .fallbackToDestructiveMigrationOnDowngrade(dropAllTables = true)
                 // 不使用 fallbackToDestructiveMigration —— 升级迁移失败时应抛出异常
@@ -173,8 +175,12 @@ abstract class DataModule {
          */
         private fun deleteDatabaseFiles(context: Context, dbName: String) {
             val dbFile = context.getDatabasePath(dbName)
-            listOf(dbFile, File(dbFile.absolutePath + "-wal"), File(dbFile.absolutePath + "-shm"),
-                File(dbFile.absolutePath + "-journal")).forEach { f ->
+            listOf(
+                dbFile,
+                File(dbFile.absolutePath + "-wal"),
+                File(dbFile.absolutePath + "-shm"),
+                File(dbFile.absolutePath + "-journal")
+            ).forEach { f ->
                 runCatching { if (f.exists()) f.delete() }
             }
         }
@@ -203,14 +209,13 @@ abstract class DataModule {
          */
         @Provides
         @Singleton
-        fun provideNetworkConnectivityChecker(
-            @ApplicationContext context: Context,
-        ): NetworkConnectivityChecker = NetworkConnectivityChecker {
-            val cm = context.getSystemService(Context.CONNECTIVITY_SERVICE)
-                as? ConnectivityManager ?: return@NetworkConnectivityChecker false
-            val network = cm.activeNetwork ?: return@NetworkConnectivityChecker false
-            val caps = cm.getNetworkCapabilities(network) ?: return@NetworkConnectivityChecker false
-            caps.hasCapability(NetworkCapabilities.NET_CAPABILITY_INTERNET)
-        }
+        fun provideNetworkConnectivityChecker(@ApplicationContext context: Context): NetworkConnectivityChecker =
+            NetworkConnectivityChecker {
+                val cm = context.getSystemService(Context.CONNECTIVITY_SERVICE)
+                    as? ConnectivityManager ?: return@NetworkConnectivityChecker false
+                val network = cm.activeNetwork ?: return@NetworkConnectivityChecker false
+                val caps = cm.getNetworkCapabilities(network) ?: return@NetworkConnectivityChecker false
+                caps.hasCapability(NetworkCapabilities.NET_CAPABILITY_INTERNET)
+            }
     }
 }

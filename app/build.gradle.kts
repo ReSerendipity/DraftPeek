@@ -1,6 +1,6 @@
-import java.util.Properties
 import java.security.KeyStore
 import java.security.MessageDigest
+import java.util.Properties
 
 plugins {
     id("com.android.application")
@@ -51,23 +51,23 @@ android {
         buildConfigField(
             "String",
             "OFFICIAL_SIGNATURE_SHA256",
-            "\"${fetchOfficialSignatureSha256()}\"",
+            "\"${fetchOfficialSignatureSha256()}\""
         )
         buildConfigField(
             "long",
             "DEX_CRC_BASELINE",
-            "${computeDexCrcBaseline()}",
+            "${computeDexCrcBaseline()}"
         )
         buildConfigField(
             "String",
             "LEGAL_NOTICE_HASH",
-            "\"${computeLegalNoticeHash()}\"",
+            "\"${computeLegalNoticeHash()}\""
         )
         // AI 防护回滚开关
         buildConfigField(
             "boolean",
             "AI_PROTECTION_ENABLED",
-            "${project.findProperty("draftpeek.aiProtection.enabled") ?: "true"}",
+            "${project.findProperty("draftpeek.aiProtection.enabled") ?: "true"}"
         )
 
         // SECURITY VULN-005: Native C-layer anti-detection
@@ -186,14 +186,16 @@ android {
         if (metricsEnabled) {
             compilerOptions {
                 val buildDir = project.layout.buildDirectory.asFile.get().absolutePath
-                freeCompilerArgs.addAll(listOf(
-                    "-P",
-                    "plugin:androidx.compose.compiler.plugins.kotlin:metricsDestination=" +
-                        buildDir + "/compose-metrics",
-                    "-P",
-                    "plugin:androidx.compose.compiler.plugins.kotlin:reportsDestination=" +
-                        buildDir + "/compose-reports",
-                ))
+                freeCompilerArgs.addAll(
+                    listOf(
+                        "-P",
+                        "plugin:androidx.compose.compiler.plugins.kotlin:metricsDestination=" +
+                            buildDir + "/compose-metrics",
+                        "-P",
+                        "plugin:androidx.compose.compiler.plugins.kotlin:reportsDestination=" +
+                            buildDir + "/compose-reports"
+                    )
+                )
             }
         }
     }
@@ -232,7 +234,8 @@ configurations.all {
     exclude(group = "com.atlassian.commonmark")
 }
 
-dependencies {    implementation(project(":core:common"))
+dependencies {
+    implementation(project(":core:common"))
     implementation(project(":core:ui"))
     implementation(project(":core:designsystem"))
     implementation(project(":core:data"))

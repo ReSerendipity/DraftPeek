@@ -27,14 +27,19 @@ import com.draftpeek.feature.editor.R
 enum class MarkdownTheme(@param:StringRes val displayNameResId: Int) {
     /** 默认主题 */
     DEFAULT(R.string.editor_theme_default),
+
     /** GitHub 风格主题 */
     GITHUB(R.string.editor_theme_github),
+
     /** 报纸风格主题 */
     NEWSPRINT(R.string.editor_theme_newsprint),
+
     /** 夜间暗色主题 */
     NIGHT(R.string.editor_theme_night),
+
     /** Pixy 可爱风格主题 */
     PIXY(R.string.editor_theme_pixy),
+
     /** 学术风格主题 */
-    ACADEMIC(R.string.editor_theme_academic),
+    ACADEMIC(R.string.editor_theme_academic)
 }

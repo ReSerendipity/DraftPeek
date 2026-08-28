@@ -23,12 +23,12 @@ package com.draftpeek.feature.terminal.emulator
 
 import android.content.Context
 import android.util.Log
+import java.io.File
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.withContext
-import java.io.File
 
 /**
  * 基于proot的终端会话管理器。
@@ -44,10 +44,12 @@ import java.io.File
 class ProotSessionManager(private val context: Context) {
 
     private val _setupState = MutableStateFlow<ProotSetupState>(ProotSetupState.NotChecked)
+
     /** proot设置状态流 */
     val setupState: StateFlow<ProotSetupState> = _setupState.asStateFlow()
 
     private val _prootSessions = MutableStateFlow<List<ProotSession>>(emptyList())
+
     /** 活动proot会话列表流 */
     val prootSessions: StateFlow<List<ProotSession>> = _prootSessions.asStateFlow()
 
@@ -110,7 +112,7 @@ class ProotSessionManager(private val context: Context) {
             rootfsReady = rootfsExists && rootfsValid,
             prootPath = if (binaryReady) prootBinary.absolutePath else null,
             rootfsPath = if (rootfsExists) rootfsDir.absolutePath else null,
-            needsExtraction = !rootfsValid || !binaryReady,
+            needsExtraction = !rootfsValid || !binaryReady
         )
 
         if (availability.isReady) {
@@ -131,9 +133,7 @@ class ProotSessionManager(private val context: Context) {
      * @param onProgress 解压进度回调（0.0到1.0）
      * @return 解压成功返回true
      */
-    suspend fun extractRootfs(
-        onProgress: (Float) -> Unit = {},
-    ): Boolean = withContext(Dispatchers.IO) {
+    suspend fun extractRootfs(onProgress: (Float) -> Unit = {}): Boolean = withContext(Dispatchers.IO) {
         _setupState.value = ProotSetupState.Extracting(0f)
 
         try {
@@ -179,8 +179,8 @@ class ProotSessionManager(private val context: Context) {
                             ProotAvailability(
                                 prootBinaryReady = prootBinary.exists(),
                                 rootfsReady = false,
-                                needsExtraction = true,
-                            ),
+                                needsExtraction = true
+                            )
                         )
                         return@withContext false
                     }
@@ -214,7 +214,7 @@ class ProotSessionManager(private val context: Context) {
      */
     suspend fun createProotSession(
         shell: String = DEFAULT_SHELL,
-        env: Map<String, String> = emptyMap(),
+        env: Map<String, String> = emptyMap()
     ): ProotSession? = withContext(Dispatchers.IO) {
         val availability = checkProotAvailable()
         if (!availability.isReady) {
@@ -258,7 +258,7 @@ class ProotSessionManager(private val context: Context) {
                 id = java.util.UUID.randomUUID().toString(),
                 process = process,
                 shell = actualShell,
-                rootfsPath = rootfsPath,
+                rootfsPath = rootfsPath
             )
 
             _prootSessions.value = _prootSessions.value + session
@@ -311,7 +311,9 @@ class ProotSessionManager(private val context: Context) {
             }
         } catch (e: Exception) {
             Log.w(TAG, "销毁proot会话错误 $sessionId", e)
-            try { process.destroyForcibly() } catch (_: Exception) {}
+            try {
+                process.destroyForcibly()
+            } catch (_: Exception) {}
         }
     }
 
@@ -334,14 +336,15 @@ class ProotSessionManager(private val context: Context) {
         prootPath: String,
         rootfsPath: String,
         shell: String,
-        env: Map<String, String>,
+        env: Map<String, String>
     ): List<String> {
         val cmd = mutableListOf(
             prootPath,
-            "-0",  // 模拟root
-            "-r", rootfsPath,  // 根文件系统
-            "--link2symlink",  // Android兼容性
-            "--kill-on-exit",  // 退出时清理
+            "-0", // 模拟root
+            "-r",
+            rootfsPath, // 根文件系统
+            "--link2symlink", // Android兼容性
+            "--kill-on-exit" // 退出时清理
         )
 
         // 绑定挂载必要的Android目录
@@ -374,11 +377,7 @@ class ProotSessionManager(private val context: Context) {
     /**
      * 递归解压assets目录到文件系统。
      */
-    private fun extractAssetDir(
-        assetPath: String,
-        targetDir: File,
-        onProgress: (Float) -> Unit,
-    ) {
+    private fun extractAssetDir(assetPath: String, targetDir: File, onProgress: (Float) -> Unit) {
         val list = context.assets.list(assetPath) ?: return
 
         for ((index, name) in list.withIndex()) {
@@ -429,7 +428,7 @@ data class ProotAvailability(
     val rootfsReady: Boolean,
     val prootPath: String? = null,
     val rootfsPath: String? = null,
-    val needsExtraction: Boolean = false,
+    val needsExtraction: Boolean = false
 ) {
     /** proot是否完全就绪可用 */
     val isReady: Boolean get() = prootBinaryReady && rootfsReady
@@ -441,16 +440,22 @@ data class ProotAvailability(
 sealed class ProotSetupState {
     /** 未检查 */
     data object NotChecked : ProotSetupState()
+
     /** 正在检查 */
     data object Checking : ProotSetupState()
+
     /** 未设置，包含可用性信息 */
     data class NotSetup(val availability: ProotAvailability) : ProotSetupState()
+
     /** 正在解压，包含进度 */
     data class Extracting(val progress: Float) : ProotSetupState()
+
     /** 就绪 */
     data object Ready : ProotSetupState()
+
     /** 运行中，包含会话ID */
     data class Running(val sessionId: String) : ProotSetupState()
+
     /** 错误，包含错误消息 */
     data class Error(val message: String) : ProotSetupState()
 }
@@ -463,12 +468,7 @@ sealed class ProotSetupState {
  * @property shell 使用的shell路径
  * @property rootfsPath rootfs路径
  */
-data class ProotSession(
-    val id: String,
-    val process: Process,
-    val shell: String,
-    val rootfsPath: String,
-) {
+data class ProotSession(val id: String, val process: Process, val shell: String, val rootfsPath: String) {
     /** 进程是否存活 */
     val isAlive: Boolean get() = process.isAlive
 }

@@ -54,7 +54,7 @@ class DexIntegrityCheckerTest {
                 name = "classes.dex",
                 crc32 = 12345L,
                 sha256 = "ABCDEF",
-                size = 1024L,
+                size = 1024L
             )
             assertEquals("classes.dex", info.name)
             assertEquals(12345L, info.crc32)

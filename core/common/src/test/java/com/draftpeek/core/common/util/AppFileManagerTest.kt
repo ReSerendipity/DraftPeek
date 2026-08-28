@@ -1,5 +1,7 @@
 package com.draftpeek.core.common.util
 
+import java.io.File
+import java.nio.file.Path
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertFalse
 import org.junit.jupiter.api.Assertions.assertTrue
@@ -8,8 +10,6 @@ import org.junit.jupiter.api.DisplayName
 import org.junit.jupiter.api.Nested
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.io.TempDir
-import java.io.File
-import java.nio.file.Path
 
 /**
  * Pure JVM unit tests for [AppFileManager]. Methods that require an Android
@@ -66,7 +66,7 @@ class AppFileManagerTest {
             val uri = AppFileManager.fileToInternalUri(target)
             assertTrue(
                 AppFileManager.isInternalUri(uri),
-                "Expected true for path under user_files: $uri",
+                "Expected true for path under user_files: $uri"
             )
         }
 
@@ -84,7 +84,7 @@ class AppFileManagerTest {
             val uri = AppFileManager.fileToInternalUri(target)
             assertTrue(
                 AppFileManager.isInternalUri(uri),
-                "Expected true for deep path under user_files: $uri",
+                "Expected true for deep path under user_files: $uri"
             )
         }
 
@@ -99,7 +99,7 @@ class AppFileManagerTest {
             val uri = AppFileManager.fileToInternalUri(outside)
             assertFalse(
                 AppFileManager.isInternalUri(uri),
-                "Expected false for path outside user_files: $uri",
+                "Expected false for path outside user_files: $uri"
             )
         }
 

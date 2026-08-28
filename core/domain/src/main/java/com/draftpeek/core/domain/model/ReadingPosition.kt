@@ -20,10 +20,4 @@ package com.draftpeek.core.domain.model
  * @property scrollX 水平滚动偏移量
  * @property scrollY 垂直滚动偏移量
  */
-data class ReadingPosition(
-    val uri: String,
-    val line: Int,
-    val column: Int,
-    val scrollX: Int,
-    val scrollY: Int,
-)
+data class ReadingPosition(val uri: String, val line: Int, val column: Int, val scrollX: Int, val scrollY: Int)

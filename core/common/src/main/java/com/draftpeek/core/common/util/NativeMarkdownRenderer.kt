@@ -17,11 +17,11 @@ package com.draftpeek.core.common.util
 import org.commonmark.Extension
 import org.commonmark.ext.autolink.AutolinkExtension
 import org.commonmark.ext.gfm.strikethrough.StrikethroughExtension
+import org.commonmark.ext.gfm.tables.TablesExtension
 import org.commonmark.ext.task.list.items.TaskListItemsExtension
 import org.commonmark.node.Node
 import org.commonmark.parser.Parser
 import org.commonmark.renderer.html.HtmlRenderer
-import org.commonmark.ext.gfm.tables.TablesExtension
 
 /**
  * 原生Markdown渲染器对象。
@@ -35,7 +35,7 @@ object NativeMarkdownRenderer {
         StrikethroughExtension.create(),
         TablesExtension.create(),
         AutolinkExtension.create(),
-        TaskListItemsExtension.create(),
+        TaskListItemsExtension.create()
     )
 
     private val parser: Parser = Parser.builder()
@@ -94,9 +94,7 @@ object NativeMarkdownRenderer {
      * @param markdown 要解析的Markdown文本
      * @return (级别, 文本)对列表
      */
-    fun extractHeadings(markdown: String): List<Pair<Int, String>> {
-        return CommonMarkParser.extractHeadings(markdown)
-    }
+    fun extractHeadings(markdown: String): List<Pair<Int, String>> = CommonMarkParser.extractHeadings(markdown)
 
     /**
      * 从Markdown文本中提取目录。
@@ -104,9 +102,7 @@ object NativeMarkdownRenderer {
      * @param markdown 要解析的Markdown文本
      * @return 格式化的目录字符串
      */
-    fun extractTableOfContents(markdown: String): String {
-        return CommonMarkParser.extractTableOfContents(markdown)
-    }
+    fun extractTableOfContents(markdown: String): String = CommonMarkParser.extractTableOfContents(markdown)
 
     /**
      * 统计Markdown文本中的单词数（忽略语法标记）。
@@ -114,9 +110,7 @@ object NativeMarkdownRenderer {
      * @param markdown 要分析的Markdown文本
      * @return 单词数量
      */
-    fun countWords(markdown: String): Int {
-        return CommonMarkParser.countWords(markdown)
-    }
+    fun countWords(markdown: String): Int = CommonMarkParser.countWords(markdown)
 
     /**
      * 统计Markdown文本中的行数。
@@ -124,9 +118,7 @@ object NativeMarkdownRenderer {
      * @param markdown 要分析的Markdown文本
      * @return 行数
      */
-    fun countLines(markdown: String): Int {
-        return CommonMarkParser.countLines(markdown)
-    }
+    fun countLines(markdown: String): Int = CommonMarkParser.countLines(markdown)
 
     /**
      * 从Markdown文本中提取所有链接。
@@ -134,9 +126,7 @@ object NativeMarkdownRenderer {
      * @param markdown 要解析的Markdown文本
      * @return (文本, URL)对列表
      */
-    fun extractLinks(markdown: String): List<Pair<String, String>> {
-        return CommonMarkParser.extractLinks(markdown)
-    }
+    fun extractLinks(markdown: String): List<Pair<String, String>> = CommonMarkParser.extractLinks(markdown)
 
     private const val LIGHT_THEME_CSS = """
         body {

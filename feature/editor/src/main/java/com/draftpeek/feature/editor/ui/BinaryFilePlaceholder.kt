@@ -1,10 +1,10 @@
 /**
  * 文件功能：二进制文件占位符界面
- * 
+ *
  * 主要函数：
  * - [BinaryFilePlaceholder]：二进制文件占位 Composable
  * - [formatFileSize]：文件大小格式化工具函数
- * 
+ *
  * 模块依赖：
  * - core/ui/theme：PrototypeTokens 设计系统令牌
  * - Jetpack Compose Material3：UI 组件
@@ -34,67 +34,63 @@ import com.draftpeek.feature.editor.R
 
 /**
  * 二进制文件占位符界面
- * 
+ *
  * 当打开二进制文件（可执行文件、压缩包、数据库等）时显示，
  * 展示友好提示信息而非乱码文本。
- * 
+ *
  * @param fileName 二进制文件名
  * @param fileSize 文件大小（字节）
  * @param modifier 容器修饰符
  */
 @Composable
-fun BinaryFilePlaceholder(
-    fileName: String,
-    fileSize: Long,
-    modifier: Modifier = Modifier,
-) {
+fun BinaryFilePlaceholder(fileName: String, fileSize: Long, modifier: Modifier = Modifier) {
     Column(
         modifier = modifier
             .fillMaxSize()
             .padding(32.dp),
         horizontalAlignment = Alignment.CenterHorizontally,
-        verticalArrangement = Arrangement.Center,
+        verticalArrangement = Arrangement.Center
     ) {
         Icon(
             imageVector = Icons.Filled.Block,
             contentDescription = null,
             modifier = Modifier.size(64.dp),
-            tint = PrototypeTokens.fgSoft.copy(alpha = 0.6f),
+            tint = PrototypeTokens.fgSoft.copy(alpha = 0.6f)
         )
         Spacer(modifier = Modifier.height(24.dp))
         Text(
             text = stringResource(R.string.editor_cannot_display_file),
             style = MaterialTheme.typography.headlineSmall,
             color = PrototypeTokens.fg,
-            textAlign = TextAlign.Center,
+            textAlign = TextAlign.Center
         )
         Spacer(modifier = Modifier.height(8.dp))
         Text(
             text = fileName,
             style = MaterialTheme.typography.bodyLarge,
             color = PrototypeTokens.accent,
-            textAlign = TextAlign.Center,
+            textAlign = TextAlign.Center
         )
         Spacer(modifier = Modifier.height(16.dp))
         Text(
             text = stringResource(R.string.editor_binary_file_message),
             style = MaterialTheme.typography.bodyMedium,
             color = PrototypeTokens.fgSoft,
-            textAlign = TextAlign.Center,
+            textAlign = TextAlign.Center
         )
         Spacer(modifier = Modifier.height(8.dp))
         Text(
             text = stringResource(R.string.editor_file_size, formatFileSize(fileSize)),
             style = MaterialTheme.typography.bodySmall,
             color = PrototypeTokens.fgSoft.copy(alpha = 0.7f),
-            textAlign = TextAlign.Center,
+            textAlign = TextAlign.Center
         )
     }
 }
 
 /**
  * 格式化文件大小为人类可读格式
- * 
+ *
  * @param bytes 文件大小（字节）
  * @return 格式化后的大小字符串（如 "1.5 MB"、"256 KB"）
  */

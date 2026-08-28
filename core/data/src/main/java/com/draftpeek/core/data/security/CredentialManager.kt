@@ -27,11 +27,11 @@ import android.content.Context
 import android.util.Log
 import com.draftpeek.core.common.vcs.CredentialProvider
 import dagger.hilt.android.qualifiers.ApplicationContext
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.withContext
 import java.security.KeyStore
 import javax.inject.Inject
 import javax.inject.Singleton
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.withContext
 
 /**
  * Git 凭据安全存储实现类。
@@ -42,9 +42,7 @@ import javax.inject.Singleton
  * @property context 应用上下文
  */
 @Singleton
-class CredentialManager @Inject constructor(
-    @ApplicationContext private val context: Context,
-) : CredentialProvider {
+class CredentialManager @Inject constructor(@ApplicationContext private val context: Context) : CredentialProvider {
 
     companion object {
         private const val TAG = "CredentialManager"
@@ -130,7 +128,7 @@ class CredentialManager @Inject constructor(
                 if (!token.isNullOrBlank()) {
                     return@withContext CredentialProvider.GitCredential(
                         host = host,
-                        token = token,
+                        token = token
                     )
                 }
 
@@ -140,7 +138,7 @@ class CredentialManager @Inject constructor(
                     return@withContext CredentialProvider.GitCredential(
                         host = host,
                         username = username,
-                        password = password,
+                        password = password
                     )
                 }
 
@@ -197,31 +195,29 @@ class CredentialManager @Inject constructor(
      * @return 主机地址集合，无凭据或出错时返回空集
      * @throws CredentialProvider.CredentialLockedException 如果 Keystore 密钥失效
      */
-    override suspend fun listHosts(): Set<String> {
-        return withContext(Dispatchers.IO) {
-            try {
-                securePrefs.keys()
-                    .mapNotNull { key ->
-                        when {
-                            key.endsWith(KEY_TOKEN_SUFFIX) ->
-                                key.removeSuffix(KEY_TOKEN_SUFFIX)
-                            key.endsWith(KEY_USERNAME_SUFFIX) ->
-                                key.removeSuffix(KEY_USERNAME_SUFFIX)
-                            key.endsWith(KEY_PASSWORD_SUFFIX) ->
-                                key.removeSuffix(KEY_PASSWORD_SUFFIX)
-                            else -> null
-                        }
+    override suspend fun listHosts(): Set<String> = withContext(Dispatchers.IO) {
+        try {
+            securePrefs.keys()
+                .mapNotNull { key ->
+                    when {
+                        key.endsWith(KEY_TOKEN_SUFFIX) ->
+                            key.removeSuffix(KEY_TOKEN_SUFFIX)
+                        key.endsWith(KEY_USERNAME_SUFFIX) ->
+                            key.removeSuffix(KEY_USERNAME_SUFFIX)
+                        key.endsWith(KEY_PASSWORD_SUFFIX) ->
+                            key.removeSuffix(KEY_PASSWORD_SUFFIX)
+                        else -> null
                     }
-                    .toSet()
-            } catch (e: CredentialProvider.CredentialLockedException) {
-                throw e
-            } catch (e: Exception) {
-                if (isKeyInvalidatedException(e)) {
-                    throw CredentialProvider.CredentialLockedException(cause = e)
                 }
-                Log.e(TAG, "Failed to list credential hosts", e)
-                emptySet()
+                .toSet()
+        } catch (e: CredentialProvider.CredentialLockedException) {
+            throw e
+        } catch (e: Exception) {
+            if (isKeyInvalidatedException(e)) {
+                throw CredentialProvider.CredentialLockedException(cause = e)
             }
+            Log.e(TAG, "Failed to list credential hosts", e)
+            emptySet()
         }
     }
 
@@ -271,11 +267,9 @@ class CredentialManager @Inject constructor(
      * @param host 原始主机字符串
      * @return 清理后的主机键名
      */
-    private fun sanitizeHost(host: String): String {
-        return host.lowercase().trim()
-            .replace(Regex("[^a-z0-9]"), "_")
-            .trim('_')
-    }
+    private fun sanitizeHost(host: String): String = host.lowercase().trim()
+        .replace(Regex("[^a-z0-9]"), "_")
+        .trim('_')
 
     /**
      * 从异常类型检测 Keystore 密钥失效。

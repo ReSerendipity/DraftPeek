@@ -30,6 +30,7 @@ class FakeTamperDetector {
 class FakeIntegrityVerifierV2 {
     companion object {
         const val INTEGRITY_ALGORITHM = "SHA-512"
+
         // 诱饵常量：故意使用低熵占位文本（非 hex/base64 高熵格式），避免 CI 密钥扫描误报。
         const val INTEGRITY_SALT = "decoy-integrity-salt-placeholder"
     }

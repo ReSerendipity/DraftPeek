@@ -135,7 +135,7 @@ data class EditorSettings(
     val markdownThemeName: String = "DEFAULT",
 
     /** 自定义 Markdown 预览 CSS 样式，为空则不注入，用于自定义预览外观 */
-    val customMarkdownCss: String = "",
+    val customMarkdownCss: String = ""
 )
 
 /**
@@ -155,14 +155,19 @@ enum class AppTheme { LIGHT, DARK, SYSTEM }
 enum class AppLanguage(val code: String) {
     /** 跟随系统语言设置 */
     SYSTEM(""),
+
     /** 简体中文 */
     ZH("zh"),
+
     /** 繁体中文 */
     ZH_TW("zh-rTW"),
+
     /** 英文 */
     EN("en"),
+
     /** 日文 */
     JA("ja"),
+
     /** 韩文 */
     KO("ko");
 
@@ -173,7 +178,6 @@ enum class AppLanguage(val code: String) {
          * @param code 语言代码字符串
          * @return 对应的 [AppLanguage] 枚举值
          */
-        fun fromCode(code: String): AppLanguage =
-            entries.find { it.code == code } ?: SYSTEM
+        fun fromCode(code: String): AppLanguage = entries.find { it.code == code } ?: SYSTEM
     }
 }

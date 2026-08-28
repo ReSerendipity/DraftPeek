@@ -26,7 +26,7 @@ import androidx.room.PrimaryKey
     tableName = "bookmarks",
     indices = [
         Index(value = ["uri"], unique = true),
-        Index(value = ["directoryUri"]),
+        Index(value = ["directoryUri"])
     ]
 )
 data class BookmarkEntity(
@@ -34,5 +34,5 @@ data class BookmarkEntity(
     val uri: String,
     val fileName: String,
     val directoryUri: String,
-    val addedAt: Long = System.currentTimeMillis(),
+    val addedAt: Long = System.currentTimeMillis()
 )

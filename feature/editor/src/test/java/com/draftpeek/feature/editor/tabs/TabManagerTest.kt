@@ -1,9 +1,6 @@
 package com.draftpeek.feature.editor.tabs
 
-import app.cash.turbine.test
 import com.draftpeek.core.common.model.TabId
-import com.draftpeek.feature.editor.model.EditorTab
-import kotlinx.coroutines.test.runTest
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertFalse
 import org.junit.jupiter.api.Assertions.assertNotNull

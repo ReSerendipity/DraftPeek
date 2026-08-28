@@ -34,7 +34,7 @@ private val COMMON_EMOJIS = listOf(
     "✅", "❌", "⭐", "📌", "💡", "🚀", "🐛", "📝", "🎯", "⚡",
     "🎉", "💪", "🙌", "👀", "🙏", "💯", "📱", "💻", "🔧", "⚙️",
     "📖", "📚", "🎓", "🏆", "💰", "🏠", "🌍", "🎵", "📷", "🔒",
-    "⚠️", "🚫", "♻️", "🌟", "💎", "🎨", "🏗️", "📊", "🗂️", "📁",
+    "⚠️", "🚫", "♻️", "🌟", "💎", "🎨", "🏗️", "📊", "🗂️", "📁"
 )
 
 /**
@@ -48,25 +48,21 @@ private val COMMON_EMOJIS = listOf(
  */
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun EmojiPicker(
-    onEmojiSelected: (String) -> Unit,
-    onDismiss: () -> Unit,
-    modifier: Modifier = Modifier,
-) {
+fun EmojiPicker(onEmojiSelected: (String) -> Unit, onDismiss: () -> Unit, modifier: Modifier = Modifier) {
     ModalBottomSheet(
         onDismissRequest = onDismiss,
         modifier = modifier,
-        containerColor = PrototypeTokens.surface,
+        containerColor = PrototypeTokens.surface
     ) {
         Column(
             modifier = Modifier
                 .fillMaxWidth()
-                .padding(bottom = 32.dp),
+                .padding(bottom = 32.dp)
         ) {
             Text(
                 text = stringResource(R.string.editor_emoji_title),
                 style = MaterialTheme.typography.titleMedium,
-                modifier = Modifier.padding(horizontal = 16.dp, vertical = 8.dp),
+                modifier = Modifier.padding(horizontal = 16.dp, vertical = 8.dp)
             )
             LazyVerticalGrid(
                 columns = GridCells.Fixed(10),
@@ -74,7 +70,7 @@ fun EmojiPicker(
                     .fillMaxWidth()
                     .heightIn(max = 300.dp)
                     .padding(horizontal = 8.dp),
-                horizontalArrangement = Arrangement.Center,
+                horizontalArrangement = Arrangement.Center
             ) {
                 items(COMMON_EMOJIS, key = { it }) { emoji ->
                     Text(
@@ -83,7 +79,7 @@ fun EmojiPicker(
                         textAlign = TextAlign.Center,
                         modifier = Modifier
                             .clickable { onEmojiSelected(emoji) }
-                            .padding(4.dp),
+                            .padding(4.dp)
                     )
                 }
             }

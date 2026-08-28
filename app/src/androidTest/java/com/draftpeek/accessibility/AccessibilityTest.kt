@@ -31,7 +31,7 @@ class AccessibilityTest {
             androidx.compose.material3.Surface {
                 androidx.compose.material3.Text(
                     text = "Accessible Text",
-                    modifier = androidx.compose.ui.Modifier,
+                    modifier = androidx.compose.ui.Modifier
                 )
             }
         }
@@ -53,7 +53,7 @@ class AccessibilityTest {
             androidx.compose.material3.Surface {
                 androidx.compose.material3.Button(
                     onClick = {},
-                    modifier = androidx.compose.ui.Modifier,
+                    modifier = androidx.compose.ui.Modifier
                 ) {
                     androidx.compose.material3.Text("Action")
                 }
@@ -95,7 +95,7 @@ class AccessibilityTest {
 
         val ratioLight = contrastRatio(
             relativeLuminance(onSurfaceLight),
-            relativeLuminance(surfaceLight),
+            relativeLuminance(surfaceLight)
         )
 
         // WCAG 2.1 AA 标准：正常文本对比度 ≥ 4.5:1
@@ -109,7 +109,7 @@ class AccessibilityTest {
 
         val ratioDark = contrastRatio(
             relativeLuminance(onSurfaceDark),
-            relativeLuminance(surfaceDark),
+            relativeLuminance(surfaceDark)
         )
 
         assert(ratioDark >= 4.5f) {
@@ -125,7 +125,7 @@ class AccessibilityTest {
 
         val ratio = contrastRatio(
             relativeLuminance(onPrimary),
-            relativeLuminance(primary),
+            relativeLuminance(primary)
         )
 
         // 白字在朱砂红背景上，应 ≥ 4.5:1 (AA 标准)
@@ -142,7 +142,7 @@ class AccessibilityTest {
 
         val ratio = contrastRatio(
             relativeLuminance(onPrimaryDark),
-            relativeLuminance(primaryDark),
+            relativeLuminance(primaryDark)
         )
 
         // 白字在琥珀金背景上，应 ≥ 4.5:1 (AA 标准)
@@ -171,12 +171,10 @@ class AccessibilityTest {
     /**
      * 将 sRGB 通道值 [0, 1] 转换为线性 RGB 通道值（用于亮度计算）。
      */
-    private fun channelLuminance(channelValue: Double): Double {
-        return if (channelValue <= 0.03928) {
-            channelValue / 12.92
-        } else {
-            Math.pow((channelValue + 0.055) / 1.055, 2.4)
-        }
+    private fun channelLuminance(channelValue: Double): Double = if (channelValue <= 0.03928) {
+        channelValue / 12.92
+    } else {
+        Math.pow((channelValue + 0.055) / 1.055, 2.4)
     }
 
     /**

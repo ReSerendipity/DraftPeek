@@ -14,7 +14,6 @@ import android.net.Uri
 import android.util.Log
 import android.widget.MediaController
 import android.widget.VideoView
-import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
@@ -29,7 +28,6 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
-import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.verticalScroll
@@ -38,7 +36,6 @@ import androidx.compose.material.icons.filled.ErrorOutline
 import androidx.compose.material.icons.filled.MusicNote
 import androidx.compose.material.icons.filled.Pause
 import androidx.compose.material.icons.filled.PlayArrow
-import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.Icon
 import androidx.compose.material3.LinearProgressIndicator
 import androidx.compose.material3.Text
@@ -87,18 +84,14 @@ private const val TAG = "MediaViewer"
  * @param modifier 修饰符
  */
 @Composable
-fun MediaViewerScreen(
-    fileUri: Uri,
-    documentType: DocumentType,
-    modifier: Modifier = Modifier,
-) {
+fun MediaViewerScreen(fileUri: Uri, documentType: DocumentType, modifier: Modifier = Modifier) {
     val pageBg = PrototypeTokens.pageBackground
     val fgSoft = PrototypeTokens.fgSoft
 
     Box(
         modifier = modifier
             .fillMaxSize()
-            .background(pageBg),
+            .background(pageBg)
     ) {
         when (documentType) {
             DocumentType.IMAGE -> ImageViewer(fileUri = fileUri, modifier = Modifier.fillMaxSize())
@@ -109,7 +102,7 @@ fun MediaViewerScreen(
                     Text(
                         text = stringResource(R.string.editor_unsupported_media),
                         style = DraftPeekTypography.bodyLarge,
-                        color = fgSoft,
+                        color = fgSoft
                     )
                 }
             }
@@ -128,10 +121,7 @@ fun MediaViewerScreen(
  * @param modifier 修饰符
  */
 @Composable
-private fun ImageViewer(
-    fileUri: Uri,
-    modifier: Modifier = Modifier,
-) {
+private fun ImageViewer(fileUri: Uri, modifier: Modifier = Modifier) {
     val context = LocalContext.current
     var loadError by remember { mutableStateOf<String?>(null) }
 
@@ -166,14 +156,14 @@ private fun ImageViewer(
                         scale = (scale * zoom).coerceIn(0.5f, 5f)
                         offset = Offset(
                             x = offset.x + pan.x,
-                            y = offset.y + pan.y,
+                            y = offset.y + pan.y
                         )
                     }
                 },
             onError = { state ->
                 loadError = state.result.throwable?.message
                     ?: context.getString(R.string.editor_image_load_failed)
-            },
+            }
         )
 
         if (loadError != null) {
@@ -182,19 +172,19 @@ private fun ImageViewer(
                     imageVector = Icons.Filled.ErrorOutline,
                     contentDescription = null,
                     modifier = Modifier.size(48.dp),
-                    tint = errorColor,
+                    tint = errorColor
                 )
                 Spacer(modifier = Modifier.height(12.dp))
                 Text(
                     text = stringResource(R.string.editor_image_load_failed),
                     style = DraftPeekTypography.bodyLarge,
-                    color = errorColor,
+                    color = errorColor
                 )
                 Text(
                     text = loadError ?: "",
                     style = DraftPeekTypography.bodySmall,
                     color = fgSoft,
-                    modifier = Modifier.padding(horizontal = 32.dp, vertical = 8.dp),
+                    modifier = Modifier.padding(horizontal = 32.dp, vertical = 8.dp)
                 )
             }
         }
@@ -211,10 +201,7 @@ private fun ImageViewer(
  * @param modifier 修饰符
  */
 @Composable
-private fun AudioPlayer(
-    fileUri: Uri,
-    modifier: Modifier = Modifier,
-) {
+private fun AudioPlayer(fileUri: Uri, modifier: Modifier = Modifier) {
     val context = LocalContext.current
     var mediaPlayer by remember { mutableStateOf<MediaPlayer?>(null) }
     var isPlaying by remember { mutableStateOf(false) }
@@ -297,18 +284,18 @@ private fun AudioPlayer(
                     imageVector = Icons.Filled.ErrorOutline,
                     contentDescription = null,
                     modifier = Modifier.size(48.dp),
-                    tint = errorColor,
+                    tint = errorColor
                 )
                 Spacer(modifier = Modifier.height(12.dp))
                 Text(
                     text = stringResource(R.string.editor_audio_load_failed),
                     style = DraftPeekTypography.bodyLarge,
-                    color = errorColor,
+                    color = errorColor
                 )
                 Text(
                     text = loadError ?: "",
                     style = DraftPeekTypography.bodySmall,
-                    color = fgSoft,
+                    color = fgSoft
                 )
             }
         }
@@ -319,7 +306,7 @@ private fun AudioPlayer(
         modifier = modifier
             .fillMaxSize()
             .verticalScroll(rememberScrollState()),
-        contentAlignment = Alignment.Center,
+        contentAlignment = Alignment.Center
     ) {
         Box(
             modifier = Modifier
@@ -327,28 +314,29 @@ private fun AudioPlayer(
                 .fillMaxWidth()
                 .clip(PrototypeShapes.Card)
                 .border(1.dp, border, PrototypeShapes.Card)
-                .background(surface),
+                .background(surface)
         ) {
             Column(
                 modifier = Modifier
                     .fillMaxWidth()
                     .padding(32.dp),
                 horizontalAlignment = Alignment.CenterHorizontally,
-                verticalArrangement = Arrangement.Center,
+                verticalArrangement = Arrangement.Center
             ) {
                 Icon(
                     imageVector = Icons.Filled.MusicNote,
                     contentDescription = null,
                     modifier = Modifier.size(72.dp),
-                    tint = accent,
+                    tint = accent
                 )
 
                 Spacer(modifier = Modifier.height(24.dp))
 
-                val fileName = fileUri.lastPathSegment?.substringAfterLast('/') ?: stringResource(R.string.editor_audio_file)
+                val fileName =
+                    fileUri.lastPathSegment?.substringAfterLast('/') ?: stringResource(R.string.editor_audio_file)
                 Text(
                     text = fileName,
-                    style = DraftPeekTypography.titleMedium.copy(color = fg),
+                    style = DraftPeekTypography.titleMedium.copy(color = fg)
                 )
 
                 Spacer(modifier = Modifier.height(24.dp))
@@ -358,24 +346,24 @@ private fun AudioPlayer(
                     progress = { progress },
                     modifier = Modifier.fillMaxWidth(),
                     color = accent,
-                    trackColor = border,
+                    trackColor = border
                 )
 
                 Spacer(modifier = Modifier.height(8.dp))
 
                 Row(
                     modifier = Modifier.fillMaxWidth(),
-                    horizontalArrangement = Arrangement.SpaceBetween,
+                    horizontalArrangement = Arrangement.SpaceBetween
                 ) {
                     Text(
                         text = formatDuration(currentPosition),
                         style = DraftPeekTypography.bodySmall,
-                        color = fgSoft,
+                        color = fgSoft
                     )
                     Text(
                         text = formatDuration(duration),
                         style = DraftPeekTypography.bodySmall,
-                        color = fgSoft,
+                        color = fgSoft
                     )
                 }
 
@@ -396,13 +384,13 @@ private fun AudioPlayer(
                                 isPlaying = true
                             }
                         },
-                    contentAlignment = Alignment.Center,
+                    contentAlignment = Alignment.Center
                 ) {
                     Icon(
                         imageVector = if (isPlaying) Icons.Filled.Pause else Icons.Filled.PlayArrow,
                         contentDescription = if (isPlaying) "暂停" else "播放",
                         modifier = Modifier.size(32.dp),
-                        tint = onPrimary,
+                        tint = onPrimary
                     )
                 }
             }
@@ -420,10 +408,7 @@ private fun AudioPlayer(
  * @param modifier 修饰符
  */
 @Composable
-private fun VideoPlayer(
-    fileUri: Uri,
-    modifier: Modifier = Modifier,
-) {
+private fun VideoPlayer(fileUri: Uri, modifier: Modifier = Modifier) {
     val context = LocalContext.current
     var loadError by remember { mutableStateOf<String?>(null) }
 
@@ -437,18 +422,18 @@ private fun VideoPlayer(
                     imageVector = Icons.Filled.ErrorOutline,
                     contentDescription = null,
                     modifier = Modifier.size(48.dp),
-                    tint = errorColor,
+                    tint = errorColor
                 )
                 Spacer(modifier = Modifier.height(12.dp))
                 Text(
                     text = "视频加载失败",
                     style = DraftPeekTypography.bodyLarge,
-                    color = errorColor,
+                    color = errorColor
                 )
                 Text(
                     text = loadError ?: "",
                     style = DraftPeekTypography.bodySmall,
-                    color = fgSoft,
+                    color = fgSoft
                 )
             }
         } else {
@@ -464,7 +449,8 @@ private fun VideoPlayer(
                             when {
                                 resolvedUri.startsWith("file:///android_asset/") -> {
                                     val assetPath = resolvedUri.removePrefix("file:///android_asset/")
-                                    val cacheFile = File(context.cacheDir, "temp_video_${assetPath.substringAfterLast('/')}")
+                                    val cacheFile =
+                                        File(context.cacheDir, "temp_video_${assetPath.substringAfterLast('/')}")
                                     if (!cacheFile.exists()) {
                                         context.assets.open(assetPath).use { input ->
                                             cacheFile.outputStream().use { output ->
@@ -484,7 +470,7 @@ private fun VideoPlayer(
                         }
                     }
                 },
-                modifier = Modifier.fillMaxSize(),
+                modifier = Modifier.fillMaxSize()
             )
         }
     }

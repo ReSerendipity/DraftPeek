@@ -58,7 +58,7 @@ object StatsExporter {
     fun exportToCsv(
         context: Context,
         activities: List<UserActivity>,
-        fileName: String = "draftpeek_stats_${timestamp()}.csv",
+        fileName: String = "draftpeek_stats_${timestamp()}.csv"
     ): String? {
         if (!SecurityGate.isOperationAllowed()) return null
         if (Build.VERSION.SDK_INT < Build.VERSION_CODES.Q) {
@@ -81,7 +81,9 @@ object StatsExporter {
                 OutputStreamWriter(outputStream, Charsets.UTF_8).use { writer ->
                     writer.write("date,file_open_count,text_edit_count,other_operation_count,total_intensity\n")
                     for (activity in activities) {
-                        writer.write("${activity.date},${activity.fileOpenCount},${activity.textEditCount},${activity.otherOperationCount},${activity.totalIntensity()}\n")
+                        writer.write(
+                            "${activity.date},${activity.fileOpenCount},${activity.textEditCount},${activity.otherOperationCount},${activity.totalIntensity()}\n"
+                        )
                     }
                 }
             }
@@ -92,7 +94,9 @@ object StatsExporter {
 
             return uri.toString()
         } catch (e: Exception) {
-            try { resolver.delete(uri, null, null) } catch (e2: Exception) {
+            try {
+                resolver.delete(uri, null, null)
+            } catch (e2: Exception) {
                 Log.w(TAG, "Failed to clean up CSV export URI", e2)
             }
             return null
@@ -116,7 +120,7 @@ object StatsExporter {
     fun exportBitmapAsPng(
         context: Context,
         bitmap: Bitmap,
-        fileName: String = "draftpeek_calendar_${timestamp()}.png",
+        fileName: String = "draftpeek_calendar_${timestamp()}.png"
     ): String? {
         if (!SecurityGate.isOperationAllowed()) return null
         if (Build.VERSION.SDK_INT < Build.VERSION_CODES.Q) {
@@ -145,7 +149,9 @@ object StatsExporter {
 
             return uri.toString()
         } catch (e: Exception) {
-            try { resolver.delete(uri, null, null) } catch (e2: Exception) {
+            try {
+                resolver.delete(uri, null, null)
+            } catch (e2: Exception) {
                 Log.w(TAG, "Failed to clean up PNG export URI", e2)
             }
             return null
@@ -157,7 +163,5 @@ object StatsExporter {
      *
      * @return 格式为 yyyyMMdd_HHmmss 的时间戳字符串
      */
-    private fun timestamp(): String {
-        return SimpleDateFormat("yyyyMMdd_HHmmss", Locale.US).format(Date())
-    }
+    private fun timestamp(): String = SimpleDateFormat("yyyyMMdd_HHmmss", Locale.US).format(Date())
 }

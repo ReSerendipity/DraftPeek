@@ -31,5 +31,5 @@ data class EditorFile(
     val fileSize: Long,
     val isReadOnly: Boolean = false,
     val detectedEncoding: String = "UTF-8",
-    val isBinary: Boolean = false,
+    val isBinary: Boolean = false
 )

@@ -10,21 +10,19 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.Coffee
-import androidx.compose.material.icons.filled.Description
-import androidx.compose.material.icons.filled.Code
-import androidx.compose.material.icons.filled.Computer
-import androidx.compose.material.icons.filled.DataUsage
-import androidx.compose.material.icons.filled.Devices
 import androidx.compose.material.icons.automirrored.filled.FormatAlignLeft
+import androidx.compose.material.icons.filled.Code
+import androidx.compose.material.icons.filled.Coffee
+import androidx.compose.material.icons.filled.Computer
+import androidx.compose.material.icons.filled.Description
+import androidx.compose.material.icons.filled.Devices
 import androidx.compose.material.icons.filled.Functions
 import androidx.compose.material.icons.filled.Http
 import androidx.compose.material.icons.filled.Language
 import androidx.compose.material.icons.filled.Memory
 import androidx.compose.material.icons.filled.Palette
-import androidx.compose.material.icons.filled.PieChart
 import androidx.compose.material.icons.filled.PictureAsPdf
-import androidx.compose.material.icons.filled.QueryStats
+import androidx.compose.material.icons.filled.PieChart
 import androidx.compose.material.icons.filled.Rocket
 import androidx.compose.material.icons.filled.Security
 import androidx.compose.material.icons.filled.Slideshow
@@ -33,9 +31,7 @@ import androidx.compose.material.icons.filled.Star
 import androidx.compose.material.icons.filled.Style
 import androidx.compose.material.icons.filled.TableChart
 import androidx.compose.material.icons.filled.Terminal
-import androidx.compose.material.icons.filled.TextFields
 import androidx.compose.material.icons.filled.TipsAndUpdates
-import androidx.compose.material.icons.filled.Translate
 import androidx.compose.material3.Icon
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -53,38 +49,36 @@ import com.draftpeek.core.ui.theme.LocalDarkTheme
 import com.draftpeek.core.ui.theme.MonoLabelStyle
 
 @Composable
-private fun getLanguageIcon(extension: String): ImageVector? {
-    return when (extension.lowercase()) {
-        "java" -> Icons.Filled.Coffee
-        "kt", "kotlin" -> Icons.Filled.Code
-        "py" -> Icons.Filled.Code
-        "js" -> Icons.Filled.TipsAndUpdates
-        "jsx" -> Icons.Filled.Devices
-        "ts" -> Icons.Filled.TipsAndUpdates
-        "tsx" -> Icons.Filled.TipsAndUpdates
-        "c" -> Icons.Filled.Memory
-        "cpp" -> Icons.Filled.Memory
-        "cs" -> Icons.Filled.Computer
-        "go" -> Icons.Filled.Speed
-        "rs" -> Icons.Filled.Security
-        "php" -> Icons.Filled.Language
-        "swift" -> Icons.Filled.Rocket
-        "html" -> Icons.Filled.Http
-        "css" -> Icons.Filled.Style
-        "md" -> Icons.AutoMirrored.Filled.FormatAlignLeft
-        "sh", "bash" -> Icons.Filled.Terminal
-        "lua" -> Icons.Filled.Star
-        "rb" -> Icons.Filled.Palette
-        "dart" -> Icons.Filled.Devices
-        "scala" -> Icons.Filled.Functions
-        "groovy" -> Icons.Filled.Code
-        "r" -> Icons.Filled.PieChart
-        "pdf" -> Icons.Filled.PictureAsPdf
-        "doc", "docx" -> Icons.Filled.Description
-        "xls", "xlsx" -> Icons.Filled.TableChart
-        "ppt", "pptx" -> Icons.Filled.Slideshow
-        else -> null
-    }
+private fun getLanguageIcon(extension: String): ImageVector? = when (extension.lowercase()) {
+    "java" -> Icons.Filled.Coffee
+    "kt", "kotlin" -> Icons.Filled.Code
+    "py" -> Icons.Filled.Code
+    "js" -> Icons.Filled.TipsAndUpdates
+    "jsx" -> Icons.Filled.Devices
+    "ts" -> Icons.Filled.TipsAndUpdates
+    "tsx" -> Icons.Filled.TipsAndUpdates
+    "c" -> Icons.Filled.Memory
+    "cpp" -> Icons.Filled.Memory
+    "cs" -> Icons.Filled.Computer
+    "go" -> Icons.Filled.Speed
+    "rs" -> Icons.Filled.Security
+    "php" -> Icons.Filled.Language
+    "swift" -> Icons.Filled.Rocket
+    "html" -> Icons.Filled.Http
+    "css" -> Icons.Filled.Style
+    "md" -> Icons.AutoMirrored.Filled.FormatAlignLeft
+    "sh", "bash" -> Icons.Filled.Terminal
+    "lua" -> Icons.Filled.Star
+    "rb" -> Icons.Filled.Palette
+    "dart" -> Icons.Filled.Devices
+    "scala" -> Icons.Filled.Functions
+    "groovy" -> Icons.Filled.Code
+    "r" -> Icons.Filled.PieChart
+    "pdf" -> Icons.Filled.PictureAsPdf
+    "doc", "docx" -> Icons.Filled.Description
+    "xls", "xlsx" -> Icons.Filled.TableChart
+    "ppt", "pptx" -> Icons.Filled.Slideshow
+    else -> null
 }
 
 /**
@@ -142,11 +136,7 @@ private fun languageCodeFor(extension: String): String = when (extension.lowerca
 }
 
 @Composable
-fun FileTypeIcon(
-    extension: String,
-    modifier: Modifier = Modifier,
-    showExtension: Boolean = true,
-) {
+fun FileTypeIcon(extension: String, modifier: Modifier = Modifier, showExtension: Boolean = true) {
     val isDark = LocalDarkTheme.current
     val accessibilityState = LocalAccessibilityState.current
     val color = FileTypeColors.forExtension(extension, isDark)
@@ -166,7 +156,7 @@ fun FileTypeIcon(
             .size(DraftPeekSpacing.FileTypeBadgeSize)
             .clip(RoundedCornerShape(6.dp))
             .background(bgColor),
-        contentAlignment = Alignment.Center,
+        contentAlignment = Alignment.Center
     ) {
         if (showText) {
             val label = if (accessibilityState.nonColorIndicators) {
@@ -179,7 +169,7 @@ fun FileTypeIcon(
                 color = textColor,
                 style = MonoLabelStyle,
                 textAlign = TextAlign.Center,
-                maxLines = 1,
+                maxLines = 1
             )
         } else {
             val icon = getLanguageIcon(extension)
@@ -187,17 +177,14 @@ fun FileTypeIcon(
                 imageVector = icon ?: Icons.Filled.Description,
                 contentDescription = null,
                 tint = textColor,
-                modifier = Modifier.padding(4.dp),
+                modifier = Modifier.padding(4.dp)
             )
         }
     }
 }
 
 @Composable
-fun FileTypeColorIndicator(
-    extension: String,
-    modifier: Modifier = Modifier,
-) {
+fun FileTypeColorIndicator(extension: String, modifier: Modifier = Modifier) {
     val isDark = LocalDarkTheme.current
     val color = FileTypeColors.forExtension(extension, isDark)
 
@@ -205,6 +192,6 @@ fun FileTypeColorIndicator(
         modifier = modifier
             .width(3.dp)
             .fillMaxHeight()
-            .background(color),
+            .background(color)
     )
 }

@@ -7,13 +7,13 @@ import com.draftpeek.feature.browser.model.FileItem
 import com.jcraft.jsch.ChannelSftp
 import com.jcraft.jsch.JSch
 import com.jcraft.jsch.Session
+import java.io.ByteArrayOutputStream
+import java.util.Properties
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.flow
 import kotlinx.coroutines.flow.flowOn
 import kotlinx.coroutines.withContext
-import java.io.ByteArrayOutputStream
-import java.util.Properties
 
 /**
  * SFTP 文件系统提供者，使用 JSch 库实现
@@ -39,9 +39,7 @@ import java.util.Properties
  * - SSH_FX_PERMISSION_DENIED → PERMISSION_DENIED
  * - SSH_FX_FILE_ALREADY_EXISTS → ALREADY_EXISTS
  */
-class SftpFileSystemProvider(
-    private val config: RemoteFileSystemConfig,
-) : FileSystemProvider {
+class SftpFileSystemProvider(private val config: RemoteFileSystemConfig) : FileSystemProvider {
 
     override val scheme: String = "sftp"
     override val displayName: String = "SFTP — ${config.host}"
@@ -127,103 +125,98 @@ class SftpFileSystemProvider(
                 uri = Uri.parse("sftp://${config.host}$remotePath/$filename"),
                 isDirectory = attrs.isDir,
                 size = attrs.size,
-                lastModified = (attrs.mTime * 1000L),
+                lastModified = (attrs.mTime * 1000L)
             )
         }.sortedWith(compareBy({ !it.isDirectory }, { it.name.lowercase() }))
 
         emit(files)
     }.flowOn(Dispatchers.IO)
 
-    override suspend fun readFile(uri: String): FileSystemResult<FileContent> =
-        withContext(Dispatchers.IO) {
-            try {
-                val sftp = ensureConnected()
-                val remotePath = extractPath(uri)
-                val outputStream = ByteArrayOutputStream()
-                sftp.get(remotePath, outputStream)
-                val content = outputStream.toString("UTF-8")
-
-                FileSystemResult.Success(
-                    FileContent(
-                        content = content,
-                    ),
-                )
-            } catch (e: com.jcraft.jsch.SftpException) {
-                Log.e(TAG, "SFTP 读取失败: $uri", e)
-                mapSftpError(e)
-            } catch (e: Exception) {
-                Log.e(TAG, "SFTP 读取错误: $uri", e)
-                FileSystemResult.Error(
-                    message = "读取文件失败: ${e.message}",
-                    cause = e,
-                    errorCode = FileSystemResult.ErrorCode.NETWORK_ERROR,
-                )
-            }
-        }
-
-    override suspend fun writeFile(uri: String, content: String): FileSystemResult<Unit> =
-        withContext(Dispatchers.IO) {
-            try {
-                val sftp = ensureConnected()
-                val remotePath = extractPath(uri)
-                val inputStream = content.byteInputStream(Charsets.UTF_8)
-                sftp.put(inputStream, remotePath, ChannelSftp.OVERWRITE)
-                FileSystemResult.Success(Unit)
-            } catch (e: com.jcraft.jsch.SftpException) {
-                Log.e(TAG, "SFTP 写入失败: $uri", e)
-                mapSftpError(e)
-            } catch (e: Exception) {
-                Log.e(TAG, "SFTP 写入错误: $uri", e)
-                FileSystemResult.Error(
-                    message = "写入文件失败: ${e.message}",
-                    cause = e,
-                    errorCode = FileSystemResult.ErrorCode.NETWORK_ERROR,
-                )
-            }
-        }
-
-    override suspend fun createDirectory(
-        parentUri: String,
-        dirName: String,
-    ): FileSystemResult<String> = withContext(Dispatchers.IO) {
+    override suspend fun readFile(uri: String): FileSystemResult<FileContent> = withContext(Dispatchers.IO) {
         try {
             val sftp = ensureConnected()
-            val parentPath = extractPath(parentUri)
-            val newPath = "$parentPath/$dirName"
-            sftp.mkdir(newPath)
-            FileSystemResult.Success("sftp://${config.host}$newPath")
+            val remotePath = extractPath(uri)
+            val outputStream = ByteArrayOutputStream()
+            sftp.get(remotePath, outputStream)
+            val content = outputStream.toString("UTF-8")
+
+            FileSystemResult.Success(
+                FileContent(
+                    content = content
+                )
+            )
         } catch (e: com.jcraft.jsch.SftpException) {
+            Log.e(TAG, "SFTP 读取失败: $uri", e)
             mapSftpError(e)
         } catch (e: Exception) {
+            Log.e(TAG, "SFTP 读取错误: $uri", e)
             FileSystemResult.Error(
-                message = "创建目录失败: ${e.message}",
+                message = "读取文件失败: ${e.message}",
                 cause = e,
+                errorCode = FileSystemResult.ErrorCode.NETWORK_ERROR
             )
         }
     }
 
-    override suspend fun delete(uri: String): FileSystemResult<Unit> =
+    override suspend fun writeFile(uri: String, content: String): FileSystemResult<Unit> = withContext(Dispatchers.IO) {
+        try {
+            val sftp = ensureConnected()
+            val remotePath = extractPath(uri)
+            val inputStream = content.byteInputStream(Charsets.UTF_8)
+            sftp.put(inputStream, remotePath, ChannelSftp.OVERWRITE)
+            FileSystemResult.Success(Unit)
+        } catch (e: com.jcraft.jsch.SftpException) {
+            Log.e(TAG, "SFTP 写入失败: $uri", e)
+            mapSftpError(e)
+        } catch (e: Exception) {
+            Log.e(TAG, "SFTP 写入错误: $uri", e)
+            FileSystemResult.Error(
+                message = "写入文件失败: ${e.message}",
+                cause = e,
+                errorCode = FileSystemResult.ErrorCode.NETWORK_ERROR
+            )
+        }
+    }
+
+    override suspend fun createDirectory(parentUri: String, dirName: String): FileSystemResult<String> =
         withContext(Dispatchers.IO) {
             try {
                 val sftp = ensureConnected()
-                val remotePath = extractPath(uri)
-
-                val attrs = sftp.stat(remotePath)
-                if (attrs.isDir) {
-                    sftp.rmdir(remotePath)
-                } else {
-                    sftp.rm(remotePath)
-                }
-                FileSystemResult.Success(Unit)
+                val parentPath = extractPath(parentUri)
+                val newPath = "$parentPath/$dirName"
+                sftp.mkdir(newPath)
+                FileSystemResult.Success("sftp://${config.host}$newPath")
             } catch (e: com.jcraft.jsch.SftpException) {
                 mapSftpError(e)
             } catch (e: Exception) {
                 FileSystemResult.Error(
-                    message = "删除失败: ${e.message}",
-                    cause = e,
+                    message = "创建目录失败: ${e.message}",
+                    cause = e
                 )
             }
         }
+
+    override suspend fun delete(uri: String): FileSystemResult<Unit> = withContext(Dispatchers.IO) {
+        try {
+            val sftp = ensureConnected()
+            val remotePath = extractPath(uri)
+
+            val attrs = sftp.stat(remotePath)
+            if (attrs.isDir) {
+                sftp.rmdir(remotePath)
+            } else {
+                sftp.rm(remotePath)
+            }
+            FileSystemResult.Success(Unit)
+        } catch (e: com.jcraft.jsch.SftpException) {
+            mapSftpError(e)
+        } catch (e: Exception) {
+            FileSystemResult.Error(
+                message = "删除失败: ${e.message}",
+                cause = e
+            )
+        }
+    }
 
     override suspend fun exists(uri: String): Boolean = withContext(Dispatchers.IO) {
         try {
@@ -236,32 +229,31 @@ class SftpFileSystemProvider(
         }
     }
 
-    override suspend fun getFileInfo(uri: String): FileSystemResult<FileItem> =
-        withContext(Dispatchers.IO) {
-            try {
-                val sftp = ensureConnected()
-                val remotePath = extractPath(uri)
-                val attrs = sftp.stat(remotePath)
-                val fileName = remotePath.substringAfterLast('/')
+    override suspend fun getFileInfo(uri: String): FileSystemResult<FileItem> = withContext(Dispatchers.IO) {
+        try {
+            val sftp = ensureConnected()
+            val remotePath = extractPath(uri)
+            val attrs = sftp.stat(remotePath)
+            val fileName = remotePath.substringAfterLast('/')
 
-                FileSystemResult.Success(
-                    FileItem(
-                        name = fileName,
-                        uri = Uri.parse(uri),
-                        isDirectory = attrs.isDir,
-                        size = attrs.size,
-                        lastModified = attrs.mTime * 1000L,
-                    ),
+            FileSystemResult.Success(
+                FileItem(
+                    name = fileName,
+                    uri = Uri.parse(uri),
+                    isDirectory = attrs.isDir,
+                    size = attrs.size,
+                    lastModified = attrs.mTime * 1000L
                 )
-            } catch (e: com.jcraft.jsch.SftpException) {
-                mapSftpError(e)
-            } catch (e: Exception) {
-                FileSystemResult.Error(
-                    message = "获取文件信息失败: ${e.message}",
-                    cause = e,
-                )
-            }
+            )
+        } catch (e: com.jcraft.jsch.SftpException) {
+            mapSftpError(e)
+        } catch (e: Exception) {
+            FileSystemResult.Error(
+                message = "获取文件信息失败: ${e.message}",
+                cause = e
+            )
         }
+    }
 
     override suspend fun testConnection(): Boolean = withContext(Dispatchers.IO) {
         try {
@@ -312,7 +304,7 @@ class SftpFileSystemProvider(
         return FileSystemResult.Error(
             message = e.message ?: "SFTP 错误",
             cause = e,
-            errorCode = errorCode,
+            errorCode = errorCode
         )
     }
 

@@ -115,10 +115,7 @@ sealed class AutoRegisteredExtension {
      * @param languageId 唯一语言标识符（如 "rust"、"kotlin"、"python"）
      * @param provider 创建语言实例的工厂
      */
-    data class Language(
-        val languageId: String,
-        val provider: LanguageExtensionProvider,
-    ) : AutoRegisteredExtension()
+    data class Language(val languageId: String, val provider: LanguageExtensionProvider) : AutoRegisteredExtension()
 
     /**
      * 自动注册的主题扩展。
@@ -126,10 +123,7 @@ sealed class AutoRegisteredExtension {
      * @param themeId 唯一主题标识符（如 "monokai-pro"、"solarized-dark"）
      * @param provider 创建主题定义的工厂
      */
-    data class Theme(
-        val themeId: String,
-        val provider: ThemeExtensionProvider,
-    ) : AutoRegisteredExtension()
+    data class Theme(val themeId: String, val provider: ThemeExtensionProvider) : AutoRegisteredExtension()
 
     /**
      * 自动注册的命令面板命令。
@@ -138,11 +132,7 @@ sealed class AutoRegisteredExtension {
      * @param label 用户可见的标签
      * @param handler 命令触发时调用的回调
      */
-    data class Command(
-        val commandId: String,
-        val label: String,
-        val handler: () -> Unit,
-    ) : AutoRegisteredExtension()
+    data class Command(val commandId: String, val label: String, val handler: () -> Unit) : AutoRegisteredExtension()
 
     /**
      * 自动注册的侧边栏面板。
@@ -150,10 +140,7 @@ sealed class AutoRegisteredExtension {
      * @param panelId 唯ー面板标识符
      * @param provider 创建面板内容的工厂
      */
-    data class Panel(
-        val panelId: String,
-        val provider: PanelExtensionProvider,
-    ) : AutoRegisteredExtension()
+    data class Panel(val panelId: String, val provider: PanelExtensionProvider) : AutoRegisteredExtension()
 
     /**
      * 自动注册的文件导出处理器。
@@ -161,10 +148,7 @@ sealed class AutoRegisteredExtension {
      * @param formatId 唯一格式标识符（如 "html"、"pdf"）
      * @param provider 创建导出处理器的工厂
      */
-    data class ExportHandler(
-        val formatId: String,
-        val provider: ExportHandlerProvider,
-    ) : AutoRegisteredExtension()
+    data class ExportHandler(val formatId: String, val provider: ExportHandlerProvider) : AutoRegisteredExtension()
 }
 
 /**

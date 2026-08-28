@@ -6,7 +6,6 @@ import com.draftpeek.feature.editor.model.MarkdownTheme
 import com.draftpeek.feature.editor.model.MarkdownViewMode
 import com.draftpeek.feature.editor.tabs.TabManager
 import kotlinx.coroutines.test.runTest
-import kotlin.time.Duration.Companion.seconds
 import org.junit.jupiter.api.AfterEach
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertFalse
@@ -58,7 +57,7 @@ class EditorViewModelTest {
                 stateManager.loadContent(
                     content = "hello world",
                     language = "kotlin",
-                    fileName = "Test.kt",
+                    fileName = "Test.kt"
                 )
 
                 val state = awaitItem()
@@ -461,7 +460,7 @@ class EditorViewModelTest {
                 scrollX = 50,
                 scrollY = 100,
                 language = "python",
-                fileName = "main.py",
+                fileName = "main.py"
             )
 
             stateManager.uiState.test {

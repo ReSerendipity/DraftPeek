@@ -69,6 +69,7 @@ import com.draftpeek.core.common.vcs.GitStatus
 import com.draftpeek.feature.browser.R
 import dagger.hilt.android.lifecycle.HiltViewModel
 import dagger.hilt.android.qualifiers.ApplicationContext
+import javax.inject.Inject
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -80,7 +81,6 @@ import kotlinx.coroutines.launch
 import kotlinx.coroutines.sync.Mutex
 import kotlinx.coroutines.sync.withLock
 import kotlinx.coroutines.withContext
-import javax.inject.Inject
 
 private const val TAG = "GitViewModel"
 
@@ -111,7 +111,7 @@ data class GitUiState(
     val isCommitting: Boolean = false,
     val isPushing: Boolean = false,
     val isPulling: Boolean = false,
-    val isFetching: Boolean = false,
+    val isFetching: Boolean = false
 )
 
 /**
@@ -135,19 +135,22 @@ sealed class GitEvent {
 @HiltViewModel
 class GitViewModel @Inject constructor(
     private val gitManager: GitManager,
-    @param:ApplicationContext private val context: Context,
+    @param:ApplicationContext private val context: Context
 ) : ViewModel() {
 
     private val _uiState = MutableStateFlow(GitUiState())
+
     /** Git 面板 UI 状态流 */
     val uiState: StateFlow<GitUiState> = _uiState.asStateFlow()
 
     private val _events = MutableSharedFlow<GitEvent>()
+
     /** Git 一次性事件流（成功/错误提示） */
     val events: SharedFlow<GitEvent> = _events.asSharedFlow()
 
     @Volatile
     private var currentGitRepo: GitRepository? = null
+
     /** Git 仓库访问互斥锁 */
     private val gitRepoMutex = Mutex()
 
@@ -209,7 +212,7 @@ class GitViewModel @Inject constructor(
                 lastCommitMessage = repoInfo.lastCommitMessage,
                 fileStatuses = statuses,
                 modifiedCount = modifiedCount,
-                isGitRepo = true,
+                isGitRepo = true
             )
         } catch (e: kotlinx.coroutines.CancellationException) {
             throw e
@@ -267,9 +270,11 @@ class GitViewModel @Inject constructor(
                     throw e
                 } catch (e: Exception) {
                     Log.e(TAG, "Commit failed", e)
-                    _events.emit(GitEvent.ShowError(
-                        context.getString(R.string.browser_git_commit_failed, e.message ?: "")
-                    ))
+                    _events.emit(
+                        GitEvent.ShowError(
+                            context.getString(R.string.browser_git_commit_failed, e.message ?: "")
+                        )
+                    )
                 } finally {
                     _uiState.value = _uiState.value.copy(isCommitting = false)
                 }
@@ -301,9 +306,11 @@ class GitViewModel @Inject constructor(
                     throw e
                 } catch (e: Exception) {
                     Log.e(TAG, "Push failed", e)
-                    _events.emit(GitEvent.ShowError(
-                        context.getString(R.string.browser_git_push_failed, e.message ?: "")
-                    ))
+                    _events.emit(
+                        GitEvent.ShowError(
+                            context.getString(R.string.browser_git_push_failed, e.message ?: "")
+                        )
+                    )
                 } finally {
                     _uiState.value = _uiState.value.copy(isPushing = false)
                 }
@@ -335,9 +342,11 @@ class GitViewModel @Inject constructor(
                     throw e
                 } catch (e: Exception) {
                     Log.e(TAG, "Pull failed", e)
-                    _events.emit(GitEvent.ShowError(
-                        context.getString(R.string.browser_git_pull_failed, e.message ?: "")
-                    ))
+                    _events.emit(
+                        GitEvent.ShowError(
+                            context.getString(R.string.browser_git_pull_failed, e.message ?: "")
+                        )
+                    )
                 } finally {
                     _uiState.value = _uiState.value.copy(isPulling = false)
                 }
@@ -369,9 +378,11 @@ class GitViewModel @Inject constructor(
                     throw e
                 } catch (e: Exception) {
                     Log.e(TAG, "Fetch failed", e)
-                    _events.emit(GitEvent.ShowError(
-                        context.getString(R.string.browser_git_fetch_failed, e.message ?: "")
-                    ))
+                    _events.emit(
+                        GitEvent.ShowError(
+                            context.getString(R.string.browser_git_fetch_failed, e.message ?: "")
+                        )
+                    )
                 } finally {
                     _uiState.value = _uiState.value.copy(isFetching = false)
                 }
@@ -396,17 +407,21 @@ class GitViewModel @Inject constructor(
 
                     repo.checkout(branch)
 
-                    _events.emit(GitEvent.ShowMessage(
-                        context.getString(R.string.browser_git_checkout_success, branch)
-                    ))
+                    _events.emit(
+                        GitEvent.ShowMessage(
+                            context.getString(R.string.browser_git_checkout_success, branch)
+                        )
+                    )
                     loadGitStatusInternal(currentDirectoryPath ?: return@withContext)
                 } catch (e: kotlinx.coroutines.CancellationException) {
                     throw e
                 } catch (e: Exception) {
                     Log.e(TAG, "Checkout failed", e)
-                    _events.emit(GitEvent.ShowError(
-                        context.getString(R.string.browser_git_checkout_failed, e.message ?: "")
-                    ))
+                    _events.emit(
+                        GitEvent.ShowError(
+                            context.getString(R.string.browser_git_checkout_failed, e.message ?: "")
+                        )
+                    )
                 }
             }
         }

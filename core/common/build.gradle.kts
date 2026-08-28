@@ -98,11 +98,11 @@ tasks.register<JacocoReport>("jacocoTestReport") {
     }
 
     sourceDirectories.setFrom(files("$projectDir/src/main/java", "$projectDir/src/main/kotlin"))
-    
+
     val classDirs = fileTree("$buildDir/intermediates/classes/debug") {
         exclude("**/R.class", "**/R\$*.class", "**/BuildConfig.*", "**/Manifest.*")
     }
     classDirectories.setFrom(classDirs)
-    
+
     executionData.setFrom(files("$buildDir/outputs/unit_test_code_coverage/debugUnitTest/testDebugUnitTest.exec"))
 }

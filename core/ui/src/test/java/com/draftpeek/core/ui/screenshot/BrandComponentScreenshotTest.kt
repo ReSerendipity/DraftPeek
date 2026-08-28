@@ -24,7 +24,7 @@ class BrandComponentScreenshotTest {
     @get:Rule
     val paparazzi = Paparazzi(
         deviceConfig = app.cash.paparazzi.DeviceConfig.PIXEL_5,
-        theme = "android:Theme.Material.Light.NoActionBar",
+        theme = "android:Theme.Material.Light.NoActionBar"
     )
 
     @Test
@@ -33,7 +33,7 @@ class BrandComponentScreenshotTest {
             Surface {
                 Column(
                     modifier = Modifier.padding(16.dp),
-                    verticalArrangement = Arrangement.spacedBy(8.dp),
+                    verticalArrangement = Arrangement.spacedBy(8.dp)
                 ) {
                     Text("DraftPeek Screenshot Test")
                     Text("Secondary text line")
@@ -48,7 +48,7 @@ class BrandComponentScreenshotTest {
             Surface {
                 Column(
                     modifier = Modifier.padding(16.dp),
-                    verticalArrangement = Arrangement.spacedBy(8.dp),
+                    verticalArrangement = Arrangement.spacedBy(8.dp)
                 ) {
                     Text("Brand Button Placeholder")
                     Text("Save")

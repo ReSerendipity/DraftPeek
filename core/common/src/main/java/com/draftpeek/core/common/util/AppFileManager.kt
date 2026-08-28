@@ -65,9 +65,7 @@ object AppFileManager {
      * @return 文件内容字符串
      * @throws java.io.IOException 如果文件读取失败
      */
-    fun readUserFile(file: File): String {
-        return file.readText(Charsets.UTF_8)
-    }
+    fun readUserFile(file: File): String = file.readText(Charsets.UTF_8)
 
     /**
      * 写入内容到用户文件（UTF-8编码，覆盖原有内容）。
@@ -86,9 +84,7 @@ object AppFileManager {
      * @param file 要删除的文件
      * @return 删除成功返回 `true`，失败返回 `false`
      */
-    fun deleteUserFile(file: File): Boolean {
-        return file.delete()
-    }
+    fun deleteUserFile(file: File): Boolean = file.delete()
 
     /**
      * 列出用户文件目录下的所有文件和子目录。
@@ -100,7 +96,8 @@ object AppFileManager {
      */
     fun listUserFiles(context: Context): List<File> {
         val dir = getUserFilesDir(context)
-        return dir.listFiles()?.filter { it.isFile || it.isDirectory }?.sortedByDescending { it.lastModified() } ?: emptyList()
+        return dir.listFiles()?.filter { it.isFile || it.isDirectory }?.sortedByDescending { it.lastModified() }
+            ?: emptyList()
     }
 
     /**
@@ -244,7 +241,5 @@ object AppFileManager {
      * @param file 要转换的文件
      * @return file://开头的绝对路径URI
      */
-    fun fileToInternalUri(file: File): String {
-        return "file://${file.absolutePath}"
-    }
+    fun fileToInternalUri(file: File): String = "file://${file.absolutePath}"
 }

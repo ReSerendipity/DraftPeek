@@ -14,9 +14,9 @@ import android.util.Log
 import android.webkit.CookieManager
 import android.webkit.WebStorage
 import android.webkit.WebView
+import java.io.File
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
-import java.io.File
 
 /**
  * 应用缓存管理工具对象。

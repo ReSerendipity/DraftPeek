@@ -52,12 +52,7 @@ object SecurityEventRecorder {
      * 由 app 层实现并注入。
      */
     fun interface Sink {
-        suspend fun record(
-            eventType: String,
-            threatLevel: String,
-            signalsMask: Int,
-            responseLevel: String,
-        )
+        suspend fun record(eventType: String, threatLevel: String, signalsMask: Int, responseLevel: String)
     }
 
     @Volatile
@@ -81,7 +76,7 @@ object SecurityEventRecorder {
                     eventType = "DETECTION",
                     threatLevel = state.threatLevel.name,
                     signalsMask = state.signalsToMask(),
-                    responseLevel = state.responseLevel.name,
+                    responseLevel = state.responseLevel.name
                 )
             } catch (e: Exception) {
                 Log.w(TAG, "Failed to record detection event", e)
@@ -100,7 +95,7 @@ object SecurityEventRecorder {
                     eventType = "RESPONSE",
                     threatLevel = "",
                     signalsMask = 0,
-                    responseLevel = level.name,
+                    responseLevel = level.name
                 )
             } catch (e: Exception) {
                 Log.w(TAG, "Failed to record response event", e)
@@ -119,7 +114,7 @@ object SecurityEventRecorder {
                     eventType = "INTEGRITY_VERIFY",
                     threatLevel = if (passed) "SAFE" else "HOSTILE",
                     signalsMask = 0,
-                    responseLevel = "NONE",
+                    responseLevel = "NONE"
                 )
             } catch (e: Exception) {
                 Log.w(TAG, "Failed to record integrity verify event", e)
@@ -138,7 +133,7 @@ object SecurityEventRecorder {
                     eventType = "USER_ACK",
                     threatLevel = threatLevel.name,
                     signalsMask = 0,
-                    responseLevel = if (acceptedRisk) "WARNING" else "NONE",
+                    responseLevel = if (acceptedRisk) "WARNING" else "NONE"
                 )
             } catch (e: Exception) {
                 Log.w(TAG, "Failed to record user ack event", e)
