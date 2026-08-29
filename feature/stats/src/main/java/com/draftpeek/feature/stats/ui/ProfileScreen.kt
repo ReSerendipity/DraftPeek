@@ -21,6 +21,7 @@ package com.draftpeek.feature.stats.ui
 
 import android.annotation.SuppressLint
 import android.app.Activity
+import android.content.ActivityNotFoundException
 import android.content.Context
 import android.content.Intent
 import android.graphics.BitmapFactory
@@ -625,19 +626,18 @@ fun ProfileScreen(
             return
         }
 
-        val pm = context.packageManager
         val httpUri = Uri.parse(platform.url)
         val tag = "SocialUrlLauncher"
 
         fun tryIntent(intent: Intent, strategyName: String): Boolean = try {
-            if (intent.resolveActivity(pm) != null) {
-                context.startActivity(intent)
-                Log.d(tag, "Successfully opened ${platform.name} via: $strategyName")
-                true
-            } else {
-                Log.w(tag, "Failed to open ${platform.name} via $strategyName: no activity resolved")
-                false
-            }
+            // 不再用 resolveActivity 预判：Android 11+ 包可见性受限时常量返回 null，
+            // 直接 startActivity，由系统真正解析；无匹配 Activity 时抛 ActivityNotFoundException
+            context.startActivity(intent)
+            Log.d(tag, "Successfully opened ${platform.name} via: $strategyName")
+            true
+        } catch (e: ActivityNotFoundException) {
+            Log.w(tag, "Failed to open ${platform.name} via $strategyName: no activity resolved")
+            false
         } catch (e: Exception) {
             Log.w(tag, "Failed to open ${platform.name} via $strategyName", e)
             false

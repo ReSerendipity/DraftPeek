@@ -1,8 +1,8 @@
 # DraftPeek AGENTS.md — AI 辅助开发指南
 
-> 🧬 **自进化协议版本**：v1.3  
-> 📅 **最后更新日期**：2026-08-27  
-> 🎯 **对应项目版本**：v1.2.0 (10200)
+> 🧬 **自进化协议版本**：v1.5  
+> 📅 **最后更新日期**：2026-08-29  
+> 🎯 **对应项目版本**：v1.0.30 (10030)
 
 ---
 
@@ -52,8 +52,8 @@ AI Agent 打开本文件后的**第一件事**是执行下面的「🧪 自进�
 
 | 项目 | 数值 |
 |------|------|
-| 包名 / ApplicationId | `net.apricotforest.draftpeek` |
-| 当前版本 | `v1.2.0` (`versionCode = 10200`, `versionName = "1.2.0"`) |
+| 包名 / ApplicationId | `com.draftpeek`（dev/staging 变体带 `.dev` / `.staging` 后缀；2026-08-29 按 `app/build.gradle.kts` 实测修正，旧值 `net.apricotforest.draftpeek` 已废弃） |
+| 当前版本 | `v1.0.30`（`versionCode = 10030`；版本号集中管理于 `gradle.properties` 的 `draftpeek.version.major/minor/patch`，`versionCode = major*10000 + minor*100 + patch`，由 `app/build.gradle.kts` 计算） |
 | minSdk | `26` (Android 8.0) |
 | targetSdk / compileSdk | `35` (Android 15) |
 | AGP 版本 | `8.7.3` (`com.android.application` 插件) |
@@ -96,7 +96,7 @@ Android / androidx.*
 kotlinx.* / coroutine.*
 java.* / javax.*
 第三方库（com.squareup.* / io.noties.* 等）
-本地项目（net.apricotforest.draftpeek.*）
+本地项目（com.draftpeek.*）
 ```
 
 ### 2.5 格式化 & Lint
@@ -354,15 +354,15 @@ Type 列表：`feat`、`fix`、`docs`、`style`、`refactor`、`perf`、`test`�
 
 ## 9. 版本号同步修改清单（🚫 发版时必须全部改）
 
-发版（v1.x.x → v1.y.y）时，**必须同步修改以下 2 个位置的 3 个字段**，漏改任何一个都会导致版本不一致：
+发版（v1.x.y → v1.z.0）时，版本号集中管理于 `gradle.properties`（2026-08-29 按代码实测修正：`app/build.gradle.kts` 只负责计算 `versionCode = major*10000 + minor*100 + patch` 与 `versionName`，**不再手改**）：
 
-| # | 文件路径 | 要改的字段 | 示例（1.2.0 → 1.3.0） |
+| # | 文件路径 | 要改的字段 | 示例（1.0.30 → 1.1.0） |
 |---|---------|-----------|---------------------|
-| 1 | `app/build.gradle.kts` | `versionCode`（int，每次 +100，大版本 +1000） | `10200` → `10300` |
-| 2 | `app/build.gradle.kts` | `versionName`（string，和 Git Tag 一致） | `"1.2.0"` → `"1.3.0"` |
-| 3 | `CHANGELOG.md` 顶部标题 | `## [v1.x.x] - YYYY-MM-DD` | `## [v1.2.0] - 2026-xx-xx` → `## [v1.3.0] - 2026-xx-xx` |
+| 1 | `gradle.properties` | `draftpeek.version.major` / `.minor` / `.patch` 三行 | `0` → `1`（minor），`patch` 归 `0` |
+| 1' | （推荐替代） | `./gradlew bumpVersion -Pbump=minor`（自动回写上面三行并打印新版本） | — |
+| 2 | `CHANGELOG.md` 顶部标题 | `## [1.x.y] - YYYY-MM-DD` | `## [1.0.30]` → `## [1.1.0] - 2026-xx-xx` |
 
-> Git Tag 命名必须和 versionName **完全一致**：`git tag -a v1.3.0 -m "Release v1.3.0"`
+> Git Tag 命名必须和 versionName **完全一致**：`git tag -a v1.1.0 -m "Release v1.1.0"`
 
 ---
 
@@ -490,6 +490,7 @@ GitHub Actions 配置文件存 `.github/workflows/`，共 2 个：
 | 23 | **JUnit5 注解不能与 Robolectric `@RunWith` 混用** | 在 unit test 里用 `@RunWith(RobolectricTestRunner)` + JUnit5 的 `@Nested`/`@DisplayName`/`org.junit.jupiter.api.Test` | 跑 `:app:testDebugUnitTest` 报 `InvalidTestClassError`；或 JVM 下 `android.os.Build.BRAND` 为 null 导致 NPE | 需要 `Build.*` 有值的测试统一用 **JUnit4 风格**：`@RunWith(RobolectricTestRunner)` + `org.junit.Test@Test` + 扁平方法（禁 `@Nested`/`@DisplayName`）；纯逻辑测试用 JUnit5。见 `AntiDebugTest`/`RouteTest`（2026-08-26 修复范式） | 2026-08-26 |
 | 24 | **Room 加表必须同时更新 schema 迁移 + AndroidTest 校验** | 新增 `links` 双向链接表升 DB version 11→12，只改 Entity/@Database/`MIGRATION_11_12` 却漏注册到 `DataModule.addMigrations` | 升级到 v12 时 `IllegalStateException: Room cannot verify the data integrity` 或 `no migration path 11→12` | Entity + @Database version+1 + MIGRATION + **在 `DataModule.provideAppDatabase().addMigrations(...)` 列表加新迁移**，缺一不可；schema 文件会自动导出到 `core/data/schemas/` | 2026-08-26 |
 | 25 | **main/public 双分支绝对禁止混淆** | AI 在 `git push` 前没有检查当前分支状态；或在 public 分支提交源代码 | ❌ **源代码泄露到 GitHub 仓库**；❌ 敏感密钥被公开 | **日常开发只在 main 分支** → 只做 `add` + `commit`，不要 `push`；**推送到远程前必须先 `git checkout public`** → 验证不包含 `.kt/.java/src/` → `git push origin public` 是唯一允许的 push 操作；详见第 8 节 | 2026-08-26 |
+| 26 | **Android 11+ 包可见性：`resolveActivity()` 恒为 null** | 真机安装后在「我的/关于」页点社交链接跳转外部 App（`ProfileScreen.openSocialUrl` 先 `intent.resolveActivity(pm)` 预判再 startActivity），而 `app/src/main/AndroidManifest.xml` 缺少 `<queries>` 声明（注释写了要声明但块被删了） | 手机已装浏览器/对应 App 仍提示「无法打开该应用」（`profile_social_open_failed`），全部策略 1-3 静默失败；单测/lint/低版本模拟器均测不出 | ① manifest 必须声明 `<queries>`（VIEW+http/https intent + 需显式跳转的第三方 `<package>`）；② **不要把 `resolveActivity` 当作能否打开的判据**，直接 `startActivity()` 并捕获 `ActivityNotFoundException` 让系统真正解析；二者缺一不可 | 2026-08-29 |
 
 ---
 
@@ -506,7 +507,7 @@ GitHub Actions 配置文件存 `.github/workflows/`，共 2 个：
 -keep class androidx.room.** { *; }
 -keep @androidx.room.Entity class * { *; }
 -keep @androidx.room.Dao interface * { *; }
--keep class net.apricotforest.draftpeek.core.data.db.entity.** { *; }   # 为什么 keep：Room 反射用
+-keep class com.draftpeek.core.data.entity.** { *; }   # 为什么 keep：Room 反射用（与 app/proguard-rules.pro 实际规则一致）
 -keep class * extends androidx.room.RoomDatabase { @androidx.room.Database *; }
 
 # ===== SQLCipher (JNI 加载) =====
@@ -561,6 +562,8 @@ GitHub Actions 配置文件存 `.github/workflows/`，共 2 个：
 
 | v1.2 | 2026-08-27 | **家族规范完整性审计（Phase B · B4）：自进化协议打补丁（第 6 条铁律 + 修订表已校验列）** | ① 新增第 6 条铁律「证据绑定（Evidence Binding）」：可执行路径必须当时可验证存在、未实现项须显式标注、禁止虚构 CI 门禁；② 自检清单追加两项：路径真实存在校验（跑 `python scripts/check_spec_refs.py`）与 pre-commit 双向一致校验；③ 修订记录表增加「已校验」列，历史行统一填 `—`（未校验），新条目须填 `✓ (check_spec_refs)` 或 `✗`；④ 本仓新增 `scripts/check_spec_refs.py` 家族审计 wrapper 与 `.github/workflows/docs-consistency.yml`（本地/含审计器环境强校验，纯 CI 环境找不到审计器时降级跳过保持绿）。本行即首个填写「已校验」的条目 | v1.2.0| ✓ (check_spec_refs) |
 | v1.3 | 2026-08-27 | **家族规范治理 Phase C/D/E 落地（一致性·补齐·账本）** | C0 未入库 docs 链接标注；D1 §0 仲裁节；D2 docs/adr/ 架构决策记录（README 提交，ADR 内容受 .gitignore *.md 限制为本地文档）；D3 FILEMAP+同步脚本；D4 禁区章节；D7 LOCAL_RULES.md 变更隔离；D8 安全审计报告。注：多数治理 .md 受 .gitignore:128 *.md 限制为本地文档，属用户 C0 有意策略 | v1.2.0 | ✓ (check_spec_refs) |
+| v1.4 | 2026-08-29 | **真机社交链接「无法打开该应用」修复** | 新增 Gotcha #26（Android 11+ 包可见性致 `resolveActivity()` 恒 null）；修复：`app/src/main/AndroidManifest.xml` 补 `<queries>`（VIEW+http/https + bili/douyin/xhs/kuaishou 包名，属禁区变更待人工 review）+ `ProfileScreen.openSocialUrl` 改为直接 `startActivity` 捕获 `ActivityNotFoundException` | v1.2.0 | ✓ (check_spec_refs) |
+| v1.5 | 2026-08-29 | **铁律 #1 事实同步：包名/版本过期修正** | 按代码实测（`app/build.gradle.kts` + `gradle.properties` + merged manifest + CHANGELOG）修正：§1 ApplicationId `net.apricotforest.draftpeek`→`com.draftpeek`（含 .dev/.staging 后缀）、当前版本 v1.2.0(10200)→v1.0.30(10030)；§9 版本清单改为 gradle.properties 集中管理 + `bumpVersion` task（build.gradle.kts 仅计算不再手改）；§2.4 导入示例与 §13 R8 示例块包名同步（实际 `app/proguard-rules.pro` 本无旧包名，仅文档示例过期）；新增 `docs/plans/android-emulator-testing-guide.md`（模拟器测试工作流，移植自 SpiritPal 并按本工程适配） | v1.0.30 | ✓ (check_spec_refs) |
 
 <!-- 🔄 下次更新 AGENTS.md 时，在上面表格末尾追加新一行，不要删除历史记录 -->
 
