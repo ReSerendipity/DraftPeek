@@ -185,6 +185,7 @@ jobs:
   # Instrumented 测试 — 在 Android 模拟器上运行 Compose UI 测试和 DAO 测试
   # 多 API 级别矩阵：覆盖 minSdk(26)、中间版本(30)、高版本(34)
   instrumented-tests:
+    if: github.event_name == 'workflow_dispatch'
     name: Instrumented Tests (API ${{ matrix.api-level }})
     runs-on: ubuntu-latest
     timeout-minutes: 45
@@ -336,6 +337,7 @@ jobs:
   # 注意：AGP 8.7.x 有 Baseline Profile 生成器崩溃已知问题（Gotcha #13），
   #       因此仅运行 benchmark 测试，不生成 Baseline Profile。
   macrobenchmark:
+    if: github.event_name == 'workflow_dispatch'
     name: Macrobenchmark (API ${{ matrix.api-level }})
     runs-on: ubuntu-latest
     timeout-minutes: 45
