@@ -34,7 +34,10 @@ jobs:
   build-and-test:
     name: Build & Test
     runs-on: ubuntu-latest
-    timeout-minutes: 30
+    # 30 分钟在 Gradle 8.12 + 全量 lint/build/单测下容易触顶被 cancel（见 run 33536584657）：
+    # spotless(~2m)+lint(~7m)+build(~5m)+unit tests(~14m)+uploads 合计已逼近 30m 上限，
+    # 即使单测通过也会在收尾阶段被超时取消，造成“假红”。提到 45 分钟留出余量。
+    timeout-minutes: 45
 
     steps:
       - name: Checkout
