@@ -342,7 +342,6 @@ jobs:
     runs-on: ubuntu-latest
     timeout-minutes: 45
     needs: build-and-test
-    if: github.ref == 'refs/heads/main'
     strategy:
       fail-fast: false
       matrix:
