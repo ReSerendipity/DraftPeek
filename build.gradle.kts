@@ -10,6 +10,23 @@ plugins {
     jacoco
 }
 
+// JaCoCo 版本统一钉死（CI 事故修复）
+// WHY：Gradle 8.14.1 内置的 jacoco 插件默认 toolVersion 为 0.8.13，而
+// app/gradle.lockfile 的依赖锁定把 org.jacoco:org.jacoco.agent 钉在
+// strictly 0.8.12。app 模块只声明了 `jacoco` 插件、未显式设置 toolVersion，
+// 于是解析出 0.8.13 与锁定冲突，:app:testDevBetaUnitTest 在写配置缓存时
+// 直接失败，Build & Test 每次推送都报红。
+// 此处以回调方式对**所有**模块（app 与各 library）统一注入目录版本，既修掉
+// 当前冲突，也避免今后新增模块重蹈覆辙；子模块里散落的硬编码 toolVersion
+// 会写入同一个值，无副作用。
+allprojects {
+    plugins.withId("jacoco") {
+        extensions.configure<org.gradle.testing.jacoco.plugins.JacocoPluginExtension>("jacoco") {
+            toolVersion = libs.versions.jacoco.get()
+        }
+    }
+}
+
 spotless {
     kotlin {
         target("**/*.kt")
