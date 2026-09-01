@@ -114,6 +114,8 @@ DraftPeek/
 ├── scripts/                # 辅助脚本（构建、测试、安装）
 ├── gradle/                 # Gradle 版本目录（libs.versions.toml）
 ├── repos/                  # 竞品/参考仓库源码（调研用，不参与编译）
+├── server/                 # Python CRDT 同步服务（server/crdt_server.py + pytest 测试）
+├── migrations/             # SQL 迁移脚本（含知识图谱建表）
 ├── AGENTS.md               # AI 辅助开发指南
 ├── FILEMAP.md              # 完整文件清单
 └── CHANGELOG.md            # 更新日志
