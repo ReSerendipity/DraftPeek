@@ -42,6 +42,7 @@ node_modules/
 *.log
 log.txt
 build_error.log
+dp_release_log.txt
 
 # 临时构建与测试日志（防止误提交根目录 .txt 日志文件）
 build-*.txt
