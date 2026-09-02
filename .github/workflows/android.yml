@@ -157,20 +157,20 @@ jobs:
         run: |
           REPORT_FILE="app/build/reports/jacoco/jacocoTestReport/jacocoTestReport.xml"
           if [ ! -f "$REPORT_FILE" ]; then
-            echo "[WARN] JaCoCo report not found at $REPORT_FILE — skipping coverage gate."
-            exit 0
+            echo "[FAIL] JaCoCo report not found at $REPORT_FILE — coverage gate cannot verify, failing."
+            exit 1
           fi
           # 解析 XML 中的覆盖率百分比（instruction coverage）
           COVERED=$(grep -o 'covered="[0-9]*"' "$REPORT_FILE" | head -1 | grep -o '[0-9]*')
           MISSED=$(grep -o 'missed="[0-9]*"' "$REPORT_FILE" | head -1 | grep -o '[0-9]*')
           if [ -z "$COVERED" ] || [ -z "$MISSED" ]; then
-            echo "[WARN] Could not parse coverage from $REPORT_FILE — skipping."
-            exit 0
+            echo "[FAIL] Could not parse coverage from $REPORT_FILE — failing."
+            exit 1
           fi
           TOTAL=$((COVERED + MISSED))
           if [ "$TOTAL" -eq 0 ]; then
-            echo "[WARN] No coverage data — skipping."
-            exit 0
+            echo "[FAIL] No coverage data — failing."
+            exit 1
           fi
           PCT=$((COVERED * 100 / TOTAL))
           echo "Project coverage: ${PCT}% (covered=$COVERED, missed=$MISSED, total=$TOTAL)"
