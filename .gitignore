@@ -130,7 +130,6 @@ design_system_draft.md
 # Additional Chinese markdown files (development notes)
 *.md
 !README.md
-!AGENTS.md
 !SECURITY.md
 !CHANGELOG.md
 !TESTING_SUMMARY.md
@@ -148,7 +147,7 @@ __pycache__/
 .pytest_tmp/
 .pytest_cache/
 
-# 本地规则（仅本地保留、不入库；AGENTS.md 已作为跟踪文件入库到 private，故此处不再忽略）
+# 本地规则（仅本地保留、不入库；AGENTS.md 经 *.md 规则忽略，同家族约定）
 LOCAL_RULES.md
 
 # 本地预检脚本（不入库）
