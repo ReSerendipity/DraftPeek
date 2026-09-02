@@ -66,6 +66,16 @@ dependencies {
     testImplementation(libs.mockk)
     testImplementation(libs.turbine)
     testImplementation(libs.kotlinx.coroutines.test)
+    // Robolectric + AndroidX Test 支撑 JUnit4 风格测试（如 DataStoreRoundTripTest，
+    // 遵循 AGENTS.md Gotcha #23）。缺这些依赖会导致 beta 等变体的单元测试编译失败、
+    // 整个 Android CI 假红。配置与 core/data 模块保持一致。
+    testImplementation(libs.robolectric)
+    // AndroidX test core 提供 ApplicationProvider（Robolectric 测试需要）
+    testImplementation("androidx.test:core:1.6.1")
+    // 提供 org.junit.* (JUnit4) 注解，供 Robolectric @RunWith 测试使用
+    testImplementation("androidx.test.ext:junit:1.2.1")
+    // JUnit Vintage 引擎：在 useJUnitPlatform() 下运行 JUnit4 @RunWith 测试
+    testRuntimeOnly("org.junit.vintage:junit-vintage-engine:5.11.3")
 
     // Android instrumented test dependencies (Compose UI Test)
     androidTestImplementation(platform(libs.compose.bom))
