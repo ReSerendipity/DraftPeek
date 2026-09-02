@@ -312,14 +312,16 @@ scripts\run-unit-tests.bat
 
 ### 📋 分支定义
 
-| 分支名称 | 位置 | 用途 | 能否推送到 GitHub | 包含内容 |
-|---------|------|------|------------------|---------|
-| **main** | 仅本地存在 | 日常开发与私有工作的主分支 | ❌ **禁止推送** | 完整源代码、加密密钥、敏感配置、所有功能实现代码 |
-| **public** | 本地 + 远程 (`origin/public`) | GitHub 仓库可见内容（`https://github.com/ReSerendipity/DraftPeek`） | ✅ **唯一允许推送的分支** | README、截图、构建脚本、示例配置、文档（**不包含任何 `.kt/.java` 源代码**） |
+| 分支名称 | 位置 | 用途 | 推送远程 | 包含内容 |
+|---------|------|------|---------|---------|
+| **main** | 本地 + `private` 私有远程 | 日常开发与私有工作的主分支 | ✅ 仅 `git push private main`；🛑 禁止 `git push origin main` | 完整源代码、加密密钥、敏感配置、所有功能实现代码 |
+| **public** | 本地 + 远程 (`origin/public`) | 公开仓库可见内容（`https://github.com/ReSerendipity/DraftPeek`） | ✅ **唯一允许推送到公开 origin 的分支**（`git push origin public`） | README、截图、构建脚本、示例配置、文档（**不包含任何 `.kt/.java` 源代码**） |
+
+> 本地当前无 `public` 分支时，先 `git checkout -b public origin/public` 建立，再 cherry-pick 非敏感内容后推送。
 
 ### 🛑 绝对禁止的行为（会导致源代码或密钥泄露）
 
-- ❌ `git push origin main` —— **会立即将私有源代码上传到 GitHub！**
+- ❌ `git push origin main`（或 `git push origin main:public`）—— **会立即将私有源代码上传到 GitHub！**
 - ❌ 在 `public` 分支提交 `.kt` / `.java` / `.cpp` 等源代码文件
 - ❌ 将 `local.properties`（含签名密钥）、`keystore/` 目录添加到 public 分支
 - ❌ 把 secret/key/password 硬编码提交到 Git 历史中
@@ -336,8 +338,9 @@ git checkout main
 git add .
 git commit -m "feat(editor): 实现 xx 功能"
 
-# ⚠️ 注意：只执行 add+commit，不要执行 git push！
-# 你的代码会保留在本地，不会被上传到 GitHub
+# ⚠️ 注意：只推送到 private 私有远程（git push private main），
+# 绝不执行 git push origin main（会把私有代码上传到公开 GitHub）
+git push private main
 ```
 
 #### 同步公共内容到 GitHub（手动操作，谨慎执行）
