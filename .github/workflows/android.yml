@@ -310,13 +310,16 @@ jobs:
       - name: Generate CI test signing keystore
         # 生成 CI 专用的测试签名密钥（非发布密钥），用于验证 release 构建流程。
         # 此密钥仅用于 CI 验证，不用于正式发布。正式发布仍需 release.jks。
+        # 注意：app 模块的 release 签名配置把 RELEASE_STORE_FILE 当成相对路径，
+        # 解析基址是 app/ 模块目录（故查找 app/ci-release.jks），因此密钥必须
+        # 生成在 app/ 下，否则 validateSigningXxxRelease 会因找不到密钥而失败。
         run: |
           keytool -genkeypair \
             -alias ci-test \
             -keyalg RSA \
             -keysize 2048 \
             -validity 10000 \
-            -keystore ci-release.jks \
+            -keystore app/ci-release.jks \
             -storepass citest123 \
             -keypass citest123 \
             -dname "CN=CI Test, OU=Dev, O=DraftPeek, L=CI, ST=CI, C=CN"
