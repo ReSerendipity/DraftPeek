@@ -1,0 +1,15 @@
+# NOTICE
+
+## 本仓库代码许可
+
+本仓库（DraftPeek）自身的源代码、前端资产与测试，除特别注明外，
+均以 [Apache License 2.0](LICENSE) 授权，Copyright © 2026 ReSerendipity。
+
+## 第三方组件与许可
+
+- **sora-editor / language-textmate / language-treesitter（LGPL-2.1）**：以可替换方式链接，主程序无需开源；再分发须随附许可文本（见 `THIRD_PARTY_NOTICES.md`）；
+- **Android 生态（Jetpack / Compose / Room / Hilt 等）**：Apache-2.0；
+- **随包前端资源（KaTeX / Mermaid / marked / highlight.js 等）**：MIT/BSD-3-Clause，见 `THIRD_PARTY_NOTICES.md`；
+- **字体（Inter / JetBrains Mono）**：SIL OFL-1.1，许可全文见 `app/src/main/assets/licenses/`。
+
+> 完整第三方组件清单见 [THIRD_PARTY_NOTICES.md](THIRD_PARTY_NOTICES.md)。
