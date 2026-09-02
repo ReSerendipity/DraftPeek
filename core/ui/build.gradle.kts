@@ -53,21 +53,12 @@ dependencies {
     testImplementation(libs.paparazzi)
 }
 
-// ===== Paparazzi / compileSdk 36 兼容修复 =====
-// WHY：DraftPeek 已将 compileSdk/targetSdk 升到 36（Android 16）。Paparazzi 1.3.5
-// 内置的 LayoutLib 仅支持到 SDK 35；在 SDK 36 上 Renderer.configureBuildProperties
-// 通过反射访问已移除的 android.os._Original_Build.VERSION_CODES_FULL 时抛
-// NoSuchElementException，导致 sessionParamsBuilder 未能初始化，截图测试
-// （BrandComponentScreenshotTest）随即抛 UninitializedPropertyAccessException，
-// 使整条 CI 报红（Paparazzi issue #1877）。
-// 官方临时修复：将 LayoutLib 强制钉到 15.2.2（含 SDK 36 反射修复）。本模块没有
-// gradle.lockfile，故不会与依赖锁定冲突。待升级到 Paparazzi 2.0.0-alpha02+ 后即可移除。
-configurations.all {
-    resolutionStrategy {
-        force(
-            "com.android.tools.layoutlib:layoutlib:15.2.2",
-            "com.android.tools.layoutlib:layoutlib-resources:15.2.2",
-            "com.android.tools.layoutlib:layoutlib-runtime:15.2.2"
-        )
-    }
-}
+// ===== Paparazzi / compileSdk 36 兼容说明 =====
+// 在 compileSdk 36 上，Paparazzi 1.3.5 的 Renderer.configureBuildProperties 会反射已移除的
+// android.os._Original_Build.VERSION_CODES_FULL 而崩溃，并连锁导致 sessionParamsBuilder
+// 未初始化（Paparazzi issue #1877）。
+// 曾尝试强制钉住 LayoutLib 15.2.2 作为临时方案（经 CI run 33541705813 验证未能解决：
+// 崩溃仅从 NoSuchElementException 变为 IllegalStateException at Renderer.kt:96），
+// 因为真正的修复在 Paparazzi 自身的 Renderer.kt 中，且官方未向 1.3.x 回移植。
+// 故改为升级到 Paparazzi 2.0.0-alpha02（自带 LayoutLib 15.2.3，含 SDK 36 修复），
+// 并配套升级 AGP 8.10.1 / Gradle 8.14.2 以满足其版本矩阵要求。
