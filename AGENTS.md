@@ -1,7 +1,7 @@
 # DraftPeek AGENTS.md — AI 辅助开发指南
 
-> 🧬 **自进化协议版本**：v1.5  
-> 📅 **最后更新日期**：2026-08-29  
+> 🧬 **自进化协议版本**：v1.7  
+> 📅 **最后更新日期**：2026-09-02  
 > 🎯 **对应项目版本**：v1.0.30 (10030)
 
 ---
@@ -564,6 +564,8 @@ GitHub Actions 配置文件存 `.github/workflows/`，共 2 个：
 | v1.3 | 2026-08-27 | **家族规范治理 Phase C/D/E 落地（一致性·补齐·账本）** | C0 未入库 docs 链接标注；D1 §0 仲裁节；D2 docs/adr/ 架构决策记录（README 提交，ADR 内容受 .gitignore *.md 限制为本地文档）；D3 FILEMAP+同步脚本；D4 禁区章节；D7 LOCAL_RULES.md 变更隔离；D8 安全审计报告。注：多数治理 .md 受 .gitignore:128 *.md 限制为本地文档，属用户 C0 有意策略 | v1.2.0 | ✓ (check_spec_refs) |
 | v1.4 | 2026-08-29 | **真机社交链接「无法打开该应用」修复** | 新增 Gotcha #26（Android 11+ 包可见性致 `resolveActivity()` 恒 null）；修复：`app/src/main/AndroidManifest.xml` 补 `<queries>`（VIEW+http/https + bili/douyin/xhs/kuaishou 包名，属禁区变更待人工 review）+ `ProfileScreen.openSocialUrl` 改为直接 `startActivity` 捕获 `ActivityNotFoundException` | v1.2.0 | ✓ (check_spec_refs) |
 | v1.5 | 2026-08-29 | **铁律 #1 事实同步：包名/版本过期修正** | 按代码实测（`app/build.gradle.kts` + `gradle.properties` + merged manifest + CHANGELOG）修正：§1 ApplicationId `net.apricotforest.draftpeek`→`com.draftpeek`（含 .dev/.staging 后缀）、当前版本 v1.2.0(10200)→v1.0.30(10030)；§9 版本清单改为 gradle.properties 集中管理 + `bumpVersion` task（build.gradle.kts 仅计算不再手改）；§2.4 导入示例与 §13 R8 示例块包名同步（实际 `app/proguard-rules.pro` 本无旧包名，仅文档示例过期）；新增 `docs/plans/android-emulator-testing-guide.md`（模拟器测试工作流，移植自 SpiritPal 并按本工程适配） | v1.0.30 | ✓ (check_spec_refs) |
+| v1.6 | 2026-09-02 | 家族相互借鉴：落 DOD 完成定义（全家族推广） | 新增 `docs/DOD.md`（完成定义，源自 SpiritPal definition-of-done.md 泛化 + 本仓本地化）；登记到 §文档放置规范 docs/ 分类 | v1.0.30 | — |
+| v1.7 | 2026-09-02 | 家族防回归：规范文件禁用指向 gitignored 本地资源的链接 | 归档「禁止事项」新增：规范 markdown 不得用相对链接/内嵌图片指向 `.gitignore` 忽略的本地保留资源（否则 CI 死链反复返工）。源自家亲 Image/TTS README 截图死链清理经验 | v1.0.30 | — |
 
 <!-- 🔄 下次更新 AGENTS.md 时，在上面表格末尾追加新一行，不要删除历史记录 -->
 
@@ -587,6 +589,7 @@ GitHub Actions 配置文件存 `.github/workflows/`，共 2 个：
 - ❌ 一次性图标/调试脚本、预览 HTML、build 日志 → 放 `docs/_devarchive/icons/` 或 `scripts/`，**绝不再堆在根目录**（本次已清理 28 个）
 - ❌ 文档散落到 app/tests/feature 等业务目录 → 归入 `docs/` 对应分类
 - ❌ 移动/删除 gitignored 运行时产物（`.gradle`、`build/`、`local.properties` 等）
+- ❌ **在规范 markdown（README / AGENTS / docs 等被家族审计器扫描的文件）里用相对链接或内嵌图片指向 `.gitignore` 忽略的本地保留资源**（如整目录 `docs/`）。这类文件不入库，CI checkout 中必然死链，触发 `check_spec_refs` 死链门禁导致 docs-consistency 红，还需返工。正确做法：① 改为纯文本说明并标注「本地保留、未随仓库发布」；② 或把资源移入入库目录（如 `docs/screenshots/` 改入随仓发布的路径）。
 - ❌ 删除旧版本文档 → 需要留档移入 `docs/_devarchive/`
 
 > 本仓库特别说明：**`release.jks` 是 App 签名密钥，敏感，严禁删除/外传/提交**，保留根目录仅供本地构建；
