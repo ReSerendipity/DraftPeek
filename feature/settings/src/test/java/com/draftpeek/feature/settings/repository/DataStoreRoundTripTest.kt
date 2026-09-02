@@ -6,6 +6,7 @@ import androidx.datastore.preferences.core.booleanPreferencesKey
 import androidx.datastore.preferences.core.edit
 import androidx.datastore.preferences.core.intPreferencesKey
 import androidx.datastore.preferences.core.stringPreferencesKey
+import androidx.datastore.preferences.preferencesDataStore
 import androidx.test.core.app.ApplicationProvider
 import app.cash.turbine.test
 import com.draftpeek.feature.settings.model.AppTheme
@@ -20,6 +21,10 @@ import org.junit.Test
 import org.junit.runner.RunWith
 import org.robolectric.RobolectricTestRunner
 import org.robolectric.annotation.Config
+
+// 与 SettingsModule.kt 保持一致的偏好 DataStore 委托（Robolectric 提供 Application Context）
+private val android.content.Context.testDataStore: DataStore<Preferences>
+    by preferencesDataStore(name = "test_settings")
 
 /**
  * DataStore 持久化往返测试（P2-11）。
@@ -41,9 +46,8 @@ class DataStoreRoundTripTest {
     @Before
     fun setUp() {
         val context = ApplicationProvider.getApplicationContext<android.content.Context>()
-        // 使用 Robolectric 提供的 Context 创建 DataStore
-        val prefsDataStore = androidx.datastore.preferences.preferencesDataStore
-        dataStore = prefsDataStore.getValue(context, { "test_settings" })
+        // 使用 Robolectric 提供的 Context 创建 DataStore（与 SettingsModule 同款委托）
+        dataStore = context.testDataStore
     }
 
     @After
