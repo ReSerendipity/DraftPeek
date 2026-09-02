@@ -47,7 +47,8 @@ import javax.crypto.spec.PBEKeySpec
  *
  * 取而代之：抛出 [DatabaseLockedException]，调用方应：
  * 1. 提示用户"安全凭据已失效，需重新选择文件"；
- * 2. 删除旧 DB 文件（已不可恢复）后重建。
+ * 2. 删除旧 DB 文件（已不可恢复），并调用 [resetPassphraseStorage] 清除旧
+ *    passphrase 文件后重建（否则重试仍会命中旧密文，二次解密失败）。
  *
  * PBKDF2 回退**仅**用于首次启动即无 Keystore 的新装设备（极少数 ROM 缺陷场景）。
  */
@@ -149,6 +150,25 @@ object DatabaseKeyManager {
             usingKeystore = false
             generateFallbackPassphrase(context)
         }
+    }
+
+    /**
+     * 清除所有已存储的 passphrase 材料（含写入中途残留的 .tmp 文件）。
+     *
+     * 调用方在确认旧 DB 已不可恢复并删除后调用本方法，使下一次
+     * [getOrCreatePassphrase] 能真正走"全新设备"路径（路径 B）重新生成
+     * 密钥与 passphrase。只删 DB 文件不删 passphrase 文件时，路径 A 仍然
+     * 命中旧密文，重试必然二次解密失败。
+     *
+     * 注意：Android Keystore 中的旧密钥别名保留不动——新 passphrase 会复用
+     * 该密钥重新加密；只有当别名本身不可用（getKey 返回 null）时才会重建。
+     */
+    @Synchronized
+    fun resetPassphraseStorage(context: Context) {
+        runCatching { File(context.filesDir, PASSPHRASE_FILE).delete() }
+        runCatching { File(context.filesDir, "$PASSPHRASE_FILE.tmp").delete() }
+        usingKeystore = false
+        keystoreInvalidated = false
     }
 
     /**

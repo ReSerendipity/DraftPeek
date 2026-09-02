@@ -132,8 +132,9 @@ abstract class DataModule {
             val passphrase = try {
                 DatabaseKeyManager.getOrCreatePassphrase(context)
             } catch (e: DatabaseLockedException) {
-                // SECURITY: 旧 DB 已永久不可读。删除数据库文件 + WAL + SHM 后重试。
-                // 重试时 getOrCreatePassphrase 会走"全新设备"路径重新生成密钥。
+                // SECURITY: 旧 DB 已永久不可读。删除数据库文件 + WAL + SHM，
+                // 并清除旧 passphrase 文件后重试，重试才会走"全新设备"路径重建密钥。
+                // 仅删 DB 不够：passphrase 文件仍会被路径 A 命中，必须先 resetPassphraseStorage。
                 Log.w(
                     "DataModule",
                     "Keystore invalidated; rebuilding database. " +
@@ -141,6 +142,10 @@ abstract class DataModule {
                     e
                 )
                 deleteDatabaseFiles(context, DB_NAME)
+                // 关键：必须同时清除 Keystore 无法解密的旧 passphrase 文件，
+                // 否则重试仍命中旧密文二次抛出异常，直接崩溃在 Application.onCreate
+                // （2026-09-02 真机闪退根因）。
+                DatabaseKeyManager.resetPassphraseStorage(context)
                 DatabaseKeyManager.getOrCreatePassphrase(context)
             }
             val passphraseBytes = String(passphrase).toByteArray(Charsets.UTF_8)
