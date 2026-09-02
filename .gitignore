@@ -156,3 +156,6 @@ precheck.ps1
 
 # CI 修复交接日志（本地）
 FIX_LOG.md
+
+# AI 调试产物（qoder harness，仅本地保留，不上远程）
+docs/_devarchive/
