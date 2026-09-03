@@ -89,6 +89,9 @@ android {
     buildTypes {
         debug {
             resValue("bool", "leak_canary_add_launcher_icon", "false")
+            // 启用 debug 变体单元测试覆盖率采集（JaCoCo .exec），
+            // 否则单元测试虽跑但通过，却不产出覆盖率数据，导致覆盖率门禁“无数据即绿”。
+            enableUnitTestCoverage = true
         }
         release {
             signingConfig = signingConfigs.getByName("release")
@@ -318,6 +321,52 @@ dependencies {
 
 tasks.withType<Test>().configureEach {
     useJUnitPlatform()
+}
+
+// ===== JaCoCo 单元测试覆盖率报告 =====
+// 注册 jacocoTestReport 任务，汇总所有变体单元测试产生的 .exec 执行数据，
+// 生成 app/build/reports/jacoco/jacocoTestReport/jacocoTestReport.xml，
+// 供「Check Coverage Threshold」门禁读取。
+// 修复前：未启用 enableUnitTestCoverage 且未注册该任务，报告从不生成，
+// 覆盖率门禁因「无数据即绿」被绕过（exit 0）。
+tasks.register<JacocoReport>("jacocoTestReport") {
+    group = "Verification"
+    // 依赖全部单元测试任务，确保覆盖率执行数据已落盘
+    dependsOn(tasks.withType<Test>())
+
+    reports {
+        xml.required.set(true)
+        xml.outputLocation.set(
+            layout.buildDirectory.file("reports/jacoco/jacocoTestReport/jacocoTestReport.xml")
+        )
+        html.required.set(true)
+    }
+
+    // 采集所有变体单元测试产生的 JaCoCo .exec 执行数据
+    executionData.setFrom(
+        fileTree(layout.buildDirectory.asFile) { include("**/*.exec") }
+    )
+
+    // 源码目录（主源集 + 各 flavor 源集）
+    sourceDirectories.setFrom(
+        files(
+            "src/main/java",
+            "src/main/kotlin",
+            "src/debug/java",
+            "src/debug/kotlin",
+            "src/dev/java",
+            "src/dev/kotlin",
+            "src/devDebug/java",
+            "src/devDebug/kotlin"
+        )
+    )
+
+    // 编译后的 class 文件（Kotlin 输出到 tmp/kotlin-classes/<variant>）
+    classDirectories.setFrom(
+        fileTree(layout.buildDirectory.dir("tmp/kotlin-classes")) {
+            include("**/*.class")
+        }
+    )
 }
 
 // ===== AI 对抗：构建期基线计算函数 =====
