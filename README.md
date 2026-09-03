@@ -4,7 +4,7 @@
 
 ## 界面预览
 
-> 截图请见 [`docs/screenshots/`](docs/screenshots/) 目录。
+> 界面截图存放于本地 `docs/screenshots/` 目录（本地保留、未随公开仓库发布）。
 
 ## 项目简介
 
@@ -226,9 +226,9 @@ scripts\run-unit-tests.bat
 
 ## 相关文档
 
-- [AGENTS.md](AGENTS.md) — AI 辅助开发指南与快速参考
+- `AGENTS.md`（本地文档，未随仓库发布）— AI 辅助开发指南与快速参考
 - [FILEMAP.md](FILEMAP.md) — 完整文件清单
 - [CHANGELOG.md](CHANGELOG.md) — 更新日志
-- [docs/ARCHITECTURE.md](docs/ARCHITECTURE.md) — 架构设计文档
-- [docs/CODE_QUALITY_REPORT.md](docs/CODE_QUALITY_REPORT.md) — 代码质量报告
-- [docs/LARGE_FILE_SUPPORT.md](docs/LARGE_FILE_SUPPORT.md) — 大文件支持方案
+- `docs/ARCHITECTURE.md`（本地文档，未随仓库发布）— 架构设计文档
+- `docs/CODE_QUALITY_REPORT.md`（本地文档，未随仓库发布）— 代码质量报告
+- `docs/LARGE_FILE_SUPPORT.md`（本地文档，未随仓库发布）— 大文件支持方案
