@@ -18,6 +18,7 @@
 - 新增 `.env.example` 环境变量模板
 - 清理根目录 40+ 临时日志文件
 - 更新 `.gitignore` 排除临时日志文件
+- 交叉补齐文档锚点（D2）：README 项目结构树补列 `core/crdt`、`core/sync`、`feature/knowledge`（标记未接入 settings.gradle）；模块依赖图对齐实际 `build.gradle.kts` 声明依赖；修正 `FILEMAP.md` 路径、`repos/`（计划未实现）、`scripts/coverage.sh`（不存在）与 `core-network`（无对应模块）等不一致
 
 ## [1.0.30] - 2026-08-10
 
