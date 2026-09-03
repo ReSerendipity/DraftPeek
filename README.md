@@ -102,6 +102,8 @@ DraftPeek/
 │   ├── data/               #   Room + SQLCipher + DataStore、DAO、Repository
 │   ├── designsystem/       #   设计 Token（字体、色彩、形状、间距）
 │   ├── domain/             #   UseCase + 领域模型
+│   ├── crdt/               #   CRDT 同步核心（对应 ADR-0002；当前为脚手架，尚未接入 settings.gradle.kts）
+│   ├── sync/               #   同步链路能力封装（当前为脚手架，尚未接入 settings.gradle.kts）
 │   ├── testing/            #   测试 Fixtures
 │   └── ui/                 #   品牌组件（BrandButton 等）、主题、自适应布局
 ├── feature/                # 功能层（按业务领域拆分）
@@ -109,15 +111,16 @@ DraftPeek/
 │   ├── editor/             #   编辑器核心（sora-editor、Markdown、LSP、多标签页）
 │   ├── settings/           #   设置数据层
 │   ├── stats/              #   统计 UI、成就系统
+│   ├── knowledge/          #   知识图谱（建表见 migrations/；当前为脚手架，尚未接入 settings.gradle.kts）
 │   └── terminal/           #   终端模拟器（Proot 会话/命令执行）
 ├── docs/                   # 文档目录
 ├── scripts/                # 辅助脚本（构建、测试、安装）
 ├── gradle/                 # Gradle 版本目录（libs.versions.toml）
-├── repos/                  # 竞品/参考仓库源码（调研用，不参与编译）
+├── repos/                  # 竞品/参考仓库源码（调研用，不参与编译）（计划，未实现：当前仓库无此目录）
 ├── server/                 # Python CRDT 同步服务（server/crdt_server.py + pytest 测试）
 ├── migrations/             # SQL 迁移脚本（含知识图谱建表）
 ├── AGENTS.md               # AI 辅助开发指南
-├── FILEMAP.md              # 完整文件清单
+├── docs/FILEMAP.md         # 完整文件清单（位于 docs/ 下）
 └── CHANGELOG.md            # 更新日志
 ```
 
@@ -126,10 +129,10 @@ DraftPeek/
 ```
 app/ ──→ feature/* ──→ core/*
                     │
-                    ├── feature/stats    depends on feature/settings + core/data
-                    ├── feature/browser  depends on core/data + core/common + feature/settings
-                    ├── feature/editor   depends on core/common + core/data + feature/settings
-                    ├── feature/settings depends on core/common + core/ui
+                    ├── feature/stats    depends on core/common + core/ui + core/designsystem + core/data + feature/editor + feature/settings
+                    ├── feature/browser  depends on core/common + core/ui + core/designsystem + core/data + core/domain + feature/settings
+                    ├── feature/editor   depends on core/common + core/ui + core/designsystem + core/data + core/domain + feature/settings
+                    ├── feature/settings depends on core/common + core/designsystem + core/ui
                     └── feature/terminal depends on core/common + core/ui
 ```
 
@@ -163,8 +166,8 @@ app/ ──→ feature/* ──→ core/*
 # Windows
 scripts\coverage.bat
 
-# Linux/macOS
-./scripts/coverage.sh
+# Linux/macOS：当前未提供 scripts/coverage.sh，请改用 Gradle 任务
+./gradlew jacocoTestReport
 
 # 手动生成
 ./gradlew jacocoTestReport
@@ -202,7 +205,7 @@ DraftPeek 遵循测试金字塔模型：
 | 项目整体 | 60% |
 | core-common | 70% |
 | core-data | 75% |
-| core-network | 80% |
+| core-network（计划，未实现） | 80% |
 | feature-editor | 60% |
 | feature-browser | 60% |
 | app | 50% |
