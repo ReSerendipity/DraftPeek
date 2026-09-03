@@ -138,6 +138,9 @@ design_system_draft.md
 !THIRD_PARTY_NOTICES.md
 !PRIVACY_POLICY.md
 !SECURITY_AUDIT_DraftPeek.md
+!.github/PULL_REQUEST_TEMPLATE.md
+!.github/SUPPORT.md
+!.github/ISSUE_TEMPLATE/*.md
 !/TESTING_SUMMARY.md
 !docs/project/ADR-001-CRDT-vs-OT-Selection.md
 !docs/VERSIONING.md
