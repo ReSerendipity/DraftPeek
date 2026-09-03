@@ -15,7 +15,7 @@ DraftPeek 团队重视安全问题。如果您发现安全漏洞，请按以下�
 
 1. **首选**：发送邮件至 `security@draftpeek.com`，主题以 `[SECURITY]` 开头。
 2. **备选**：通过 GitHub 私密安全公告（Security Advisory）提交。
-   - 访问 https://github.com/Doro/draftpeek/security/advisories/new
+   - 访问 https://github.com/ReSerendipity/DraftPeek/security/advisories/new
    - 选择 "Report a vulnerability"
 
 ### 报告内容
