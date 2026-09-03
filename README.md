@@ -302,8 +302,8 @@ scripts\run-unit-tests.bat
 
 ## 相关文档
 
-- [AGENTS.md](AGENTS.md) — AI 辅助开发指南与快速参考
-- [docs/FILEMAP.md（本地文档，未随仓库发布）](docs/FILEMAP.md) — 完整文件清单
+- `AGENTS.md`（本地文档，未随仓库发布）— AI 辅助开发指南与快速参考
+- `docs/FILEMAP.md`（本地文档，未随仓库发布）— 完整文件清单
 - [CHANGELOG.md](CHANGELOG.md) — 更新日志
 
 ## ⚠️ Git 分支与仓库安全策略（🚨 **必读，防止源代码泄露**）
@@ -383,4 +383,4 @@ git checkout main
 
 ### 📖 详细说明文档
 
-更多关于双分支安全策略的详细说明，请参阅 [`AGENTS.md`](AGENTS.md) 的第 8 节「Git / 提交规范 & 分支策略」。
+更多关于双分支安全策略的详细说明，请参阅本地文档 `AGENTS.md` 的第 8 节「Git / 提交规范 & 分支策略」（AGENTS.md 为本地文档，未随仓库发布）。

@@ -138,7 +138,7 @@ design_system_draft.md
 !THIRD_PARTY_NOTICES.md
 !PRIVACY_POLICY.md
 !SECURITY_AUDIT_DraftPeek.md
-!TESTING_SUMMARY.md
+!/TESTING_SUMMARY.md
 !docs/project/ADR-001-CRDT-vs-OT-Selection.md
 !docs/VERSIONING.md
 !docs/DATABASE_MIGRATION_STRATEGY.md
