@@ -155,10 +155,11 @@ jobs:
           hide_comments: orphaned
           test_changes_limit: 10
 
-      # 覆盖率门禁 — 检查项目整体覆盖率是否达到 60% 阈值
+      # 覆盖率门禁 — 检查项目整体覆盖率是否达到 ${THRESHOLD}% 阈值
       - name: Check Coverage Threshold
         run: |
           REPORT_FILE="app/build/reports/jacoco/jacocoTestReport/jacocoTestReport.xml"
+          THRESHOLD=10
           if [ ! -f "$REPORT_FILE" ]; then
             echo "[FAIL] JaCoCo report not found at $REPORT_FILE — coverage gate cannot verify, failing."
             exit 1
@@ -184,11 +185,11 @@ jobs:
           fi
           PCT=$((COVERED * 100 / TOTAL))
           echo "Project coverage: ${PCT}% (covered=$COVERED, missed=$MISSED, total=$TOTAL)"
-          if [ "$PCT" -lt 10 ]; then
-            echo "[FAIL] Coverage ${PCT}% is below 10% threshold."
+          if [ "$PCT" -lt "$THRESHOLD" ]; then
+            echo "[FAIL] Coverage ${PCT}% is below ${THRESHOLD}% threshold."
             exit 1
           fi
-          echo "[PASS] Coverage ${PCT}% meets 60% threshold."
+          echo "[PASS] Coverage ${PCT}% meets ${THRESHOLD}% threshold."
 
       # Codecov 覆盖率上传 — 可视化覆盖率变化趋势
       - name: Upload Coverage to Codecov
