@@ -362,8 +362,12 @@ tasks.register<JacocoReport>("jacocoTestReport") {
     )
 
     // 编译后的 class 文件（Kotlin 输出到 tmp/kotlin-classes/<variant>）
+    // 关键修复：必须限定到单一变体目录（devDebug）。
+    // 若用 tmp/kotlin-classes/** 通配，会把 devDebug/stagingDebug/productionDebug
+    // 等变体编译出的同名类（如 com/draftpeek/MainActivity）全部纳入，
+    // JaCoCo 报 "Can't add different class with same name" 而失败。
     classDirectories.setFrom(
-        fileTree(layout.buildDirectory.dir("tmp/kotlin-classes")) {
+        fileTree(layout.buildDirectory.dir("tmp/kotlin-classes/devDebug")) {
             include("**/*.class")
         }
     )

@@ -161,8 +161,11 @@ jobs:
             exit 1
           fi
           # 解析 XML 中的覆盖率百分比（instruction coverage）
-          COVERED=$(grep -o 'covered="[0-9]*"' "$REPORT_FILE" | head -1 | grep -o '[0-9]*')
-          MISSED=$(grep -o 'missed="[0-9]*"' "$REPORT_FILE" | head -1 | grep -o '[0-9]*')
+          # 取报告级（最后一个）INSTRUCTION 计数器作为项目整体覆盖率，
+          # 避免 head -1 误取某方法级计数器导致数值失真（假绿）。
+          INSTR=$(grep -o 'type="INSTRUCTION" covered="[0-9]*" missed="[0-9]*"' "$REPORT_FILE" | tail -1)
+          COVERED=$(echo "$INSTR" | grep -o 'covered="[0-9]*"' | grep -o '[0-9]*')
+          MISSED=$(echo "$INSTR" | grep -o 'missed="[0-9]*"' | grep -o '[0-9]*')
           if [ -z "$COVERED" ] || [ -z "$MISSED" ]; then
             echo "[FAIL] Could not parse coverage from $REPORT_FILE — failing."
             exit 1
