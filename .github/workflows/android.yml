@@ -164,11 +164,15 @@ jobs:
             exit 1
           fi
           # 解析 XML 中的覆盖率百分比（instruction coverage）
-          # 取报告级（最后一个）INSTRUCTION 计数器作为项目整体覆盖率，
-          # 避免 head -1 误取某方法级计数器导致数值失真（假绿）。
-          INSTR=$(grep -o 'type="INSTRUCTION" covered="[0-9]*" missed="[0-9]*"' "$REPORT_FILE" | tail -1)
-          COVERED=$(echo "$INSTR" | grep -o 'covered="[0-9]*"' | grep -o '[0-9]*')
-          MISSED=$(echo "$INSTR" | grep -o 'missed="[0-9]*"' | grep -o '[0-9]*')
+          # 取报告级（最后一个）INSTRUCTION 计数器所在行作为项目整体覆盖率。
+          # 关键：JaCoCo 实际写入顺序为 missed 在前、covered 在后
+          #   <counter type="INSTRUCTION" missed="N" covered="M"/>
+          # 因此分别提取两个属性（顺序无关），避免依赖属性顺序导致匹配失败。
+          # 同时给每个命令替换加 || true，避免 GitHub Actions 默认 bash -e
+          # 在 grep 无匹配时静默中断脚本、连错误信息都不打印就 exit 1（假红）。
+          INSTR_LINE=$(grep -o 'type="INSTRUCTION"[^>]*' "$REPORT_FILE" | tail -1) || true
+          COVERED=$(echo "$INSTR_LINE" | grep -o 'covered="[0-9]*"' | grep -o '[0-9]*') || true
+          MISSED=$(echo "$INSTR_LINE" | grep -o 'missed="[0-9]*"' | grep -o '[0-9]*') || true
           if [ -z "$COVERED" ] || [ -z "$MISSED" ]; then
             echo "[FAIL] Could not parse coverage from $REPORT_FILE — failing."
             exit 1
