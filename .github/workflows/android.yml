@@ -94,9 +94,11 @@ jobs:
       - name: Run Unit Tests
         run: ./gradlew test --stacktrace --no-configuration-cache
 
+      # 覆盖率报告生成是真实门禁的前置条件：必须与 Check Coverage Threshold 保持一致，
+      # 失败即红，不得用 || echo 吞掉（否则会掩盖 JaCoCo 任务本身的错误，造成假绿）。
       - name: Generate Coverage Report
         if: always()
-        run: ./gradlew jacocoTestReport --stacktrace --no-configuration-cache || echo "[WARN] Coverage report generation failed (non-blocking)"
+        run: ./gradlew jacocoTestReport --stacktrace --no-configuration-cache
 
       - name: Upload Debug APK
         if: always()
