@@ -1,0 +1,111 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>DraftPeek — 下载</title>
+<style>
+  :root {
+    --bg: #f6f7f9; --card: #ffffff; --ink: #1c2330; --muted: #5b6575;
+    --accent: #2f6fed; --accent-ink: #ffffff; --line: #e3e7ee; --ok: #1c7c46;
+  }
+  * { box-sizing: border-box; }
+  body {
+    margin: 0; background: var(--bg); color: var(--ink);
+    font-family: "Segoe UI", "PingFang SC", "Microsoft YaHei", sans-serif;
+    display: flex; justify-content: center; padding: 40px 16px;
+  }
+  .wrap { width: 100%; max-width: 560px; }
+  header { text-align: center; margin-bottom: 28px; }
+  header h1 { margin: 0 0 6px; font-size: 28px; letter-spacing: .5px; }
+  header p { margin: 0; color: var(--muted); }
+  .card {
+    background: var(--card); border: 1px solid var(--line); border-radius: 14px;
+    padding: 24px; margin-bottom: 16px;
+  }
+  .row { display: flex; justify-content: space-between; gap: 12px; padding: 8px 0; border-bottom: 1px dashed var(--line); }
+  .row:last-child { border-bottom: none; }
+  .row .k { color: var(--muted); flex-shrink: 0; }
+  .row .v { text-align: right; word-break: break-all; }
+  .btn {
+    display: block; width: 100%; text-align: center; text-decoration: none;
+    background: var(--accent); color: var(--accent-ink); font-size: 17px; font-weight: 600;
+    padding: 14px; border-radius: 10px; border: none; cursor: pointer;
+  }
+  .btn:disabled { background: #9db4e8; cursor: wait; }
+  .hint { color: var(--muted); font-size: 13px; line-height: 1.7; margin-top: 14px; }
+  .sha { font-family: Consolas, monospace; font-size: 12px; word-break: break-all; color: var(--muted); }
+  .status { text-align: center; color: var(--muted); font-size: 14px; padding: 12px 0; }
+  .err { color: #b3261e; }
+  footer { text-align: center; color: var(--muted); font-size: 12px; margin-top: 24px; }
+  footer a { color: var(--accent); text-decoration: none; }
+</style>
+</head>
+<body>
+<div class="wrap">
+  <header>
+    <h1>DraftPeek</h1>
+    <p>在手机上写完文档，立刻预览成品</p>
+  </header>
+
+  <div class="card">
+    <div class="status" id="status">正在获取最新版本…</div>
+    <div id="meta" hidden>
+      <div class="row"><span class="k">版本</span><span class="v" id="v-name">—</span></div>
+      <div class="row"><span class="k">发布日期</span><span class="v" id="v-date">—</span></div>
+      <div class="row"><span class="k">系统要求</span><span class="v" id="v-min">—</span></div>
+      <div class="row"><span class="k">SHA256</span><span class="v sha" id="v-sha">—</span></div>
+    </div>
+    <div style="margin-top:18px">
+      <a class="btn" id="dl" href="#" hidden>下载 APK</a>
+    </div>
+    <div class="hint">
+      下载后请校验文件完整性（Android 上可用终端执行
+      <span class="sha">sha256sum -c &lt;文件&gt;.sha256</span>；桌面端
+      <span class="sha">certutil -hashfile &lt;文件&gt; SHA256</span>）。
+      安装时系统可能提示「未知来源」，属正常现象——本应用使用正式密钥签名，
+      首次启动会自动运行签名与完整性自检。
+    </div>
+  </div>
+
+  <footer>
+    更新检测契约见仓库 <span class="sha">docs/deploy-download-page/latest.json.example</span>
+    · <a href="#" id="repo-link">GitHub</a>
+  </footer>
+</div>
+
+<script>
+// 部署说明：
+//   1. 将本目录部署到任意静态服务器（Nginx / Caddy / GitHub Pages 均可）。
+//   2. 把 latest.json.example 复制为 latest.json 并随每次发版更新；
+//      APK 放在 ./apk/ 下（或修改 apkUrl 指向对象存储/CDN）。
+//   3. apkUrl / changelogUrl 为相对或绝对 URL 均可。
+const REPO_URL = "https://github.com/ReSerendipity/DraftPeek-private/releases";
+document.getElementById("repo-link").href = REPO_URL;
+
+(async function () {
+  const $ = (id) => document.getElementById(id);
+  try {
+    const res = await fetch("latest.json", { cache: "no-store" });
+    if (!res.ok) throw new Error("HTTP " + res.status);
+    const m = await res.json();
+
+    $("v-name").textContent = m.versionName + "  (versionCode " + m.versionCode + ")";
+    $("v-date").textContent = m.releasedAt || "—";
+    $("v-min").textContent = m.minAndroid || "Android 8.0+";
+    $("v-sha").textContent = m.sha256 || "—";
+    $("meta").hidden = false;
+
+    const dl = $("dl");
+    dl.href = m.apkUrl;
+    dl.hidden = false;
+    $("status").textContent = "";
+  } catch (e) {
+    const s = $("status");
+    s.textContent = "无法获取版本信息（latest.json 缺失或不可达）：" + e.message;
+    s.classList.add("err");
+  }
+})();
+</script>
+</body>
+</html>

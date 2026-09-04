@@ -1,0 +1,67 @@
+# ============================================================
+# DraftPeek Server CI (Python)
+# ============================================================
+# 覆盖 server/ 下的 Python 协作同步服务（crdt_server / integrity_server /
+# sync_server）。作为评估报告中 P0-1 / Q3 的最低成本质量门禁：
+#   - ruff      静态检查（F/E/I，见 server/ruff.toml）
+#   - pytest    功能测试（server/tests，pytest.ini 已配 asyncio auto）
+#   - pip-audit 依赖漏洞审计（仅对 requirements.txt 的精确 pin 生效）
+#
+# 注意：这是独立于 Kotlin 主链路的辅助门禁，仅在 server/ 变更时触发。
+# ============================================================
+
+name: Server CI (Python)
+
+on:
+  push:
+    branches: [main, develop]
+    paths:
+      - 'server/**'
+      - '.github/workflows/server-ci.yml'
+  pull_request:
+    branches: [main, develop]
+    paths:
+      - 'server/**'
+      - '.github/workflows/server-ci.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: server-ci-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  python-quality:
+    name: Lint + Test + Dependency Audit
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    defaults:
+      run:
+        working-directory: server
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+
+      - name: Install dependencies
+        run: |
+          python -m pip install --upgrade pip
+          pip install -r requirements.txt
+          pip install -r requirements-dev.txt
+
+      - name: Ruff lint
+        run: ruff check .
+
+      - name: Run tests
+        run: pytest tests -q
+
+      - name: Dependency audit (pip-audit)
+        # 仅对 critical 级别失败，避免被传递依赖的 moderate 问题误伤；
+        # 首次全绿后可收紧为 --fail-on high。
+        run: pip-audit -r requirements.txt --fail-on critical

@@ -4,8 +4,13 @@
 
 | Version | Supported          |
 | ------- | ------------------ |
-| 1.0.x   | ✅ 安全更新         |
+| 1.0.x（最新发布版） | ✅ 安全更新         |
+| 更早的 1.0.x | ❌ 仅严重问题时考虑 backport |
 | < 1.0   | ❌ 不再支持         |
+
+**维护责任**：「最新 1.0.x」以 [CHANGELOG.md](../CHANGELOG.md) 最新发布条目为准。
+本表由维护者**每次发版时复核**（对应 `docs/RELEASE_CHECKLIST.md` §6 固定检查项），
+避免支持版本表随版本发布而过期失效。
 
 ## Reporting a Vulnerability
 
@@ -41,6 +46,10 @@ DraftPeek 团队重视安全问题。如果您发现安全漏洞，请按以下�
 - 请勿在公开 Issue 中报告安全漏洞。
 - 我们承诺在修复发布前不公开漏洞详情。
 - 遵循负责任披露（Responsible Disclosure）原则。
+- **密钥泄露**（`release.jks` / CI Secrets）请单独标注 `KEY-COMPROMISE` 并说明泄露范围；
+  轮换依赖 APK Signature Scheme v3（`app/signing.gradle`）。
+- 涉及 `server/`（Python 同步服务）时请注明监听地址与是否启用鉴权
+  （已知遗留风险见 `SECURITY_AUDIT_DraftPeek.md`）。
 
 ## Security Measures
 

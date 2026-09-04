@@ -20,6 +20,20 @@
 - 更新 `.gitignore` 排除临时日志文件
 - 交叉补齐文档锚点（D2）：README 项目结构树补列 `core/crdt`、`core/sync`、`feature/knowledge`（标记未接入 settings.gradle）；模块依赖图对齐实际 `build.gradle.kts` 声明依赖；修正 `FILEMAP.md` 路径、`repos/`（计划未实现）、`scripts/coverage.sh`（不存在）与 `core-network`（无对应模块）等不一致
 
+### Changed
+- 依赖坐标全面集中至 `gradle/libs.versions.toml`：清除 7 个模块 12 处硬编码版本，并对齐 `androidx.test.ext:junit`（benchmark 1.1.5 → 1.2.1）与 `androidx.test:runner`（benchmark 1.5.2 → 1.6.2）跨模块漂移
+- 依赖锁定升级为 `LockMode.STRICT`：为全部 15 个项目生成 `gradle.lockfile`（此前仅 app 与 root 有锁，其余模块缺锁静默通过），新依赖绕过版本目录将直接构建失败
+- README 环境要求与实际工具链对齐（AGP 8.8.0→8.10.1、Gradle 8.13→8.14.3、Android Studio Meerkat 2024.3.2+）
+- `bumpVersion` 任务输出提示：tag 推送目标由 `origin` 改为 `private` 远程（原提示若照做会把私有 main 历史带入公开仓库）
+- 数据库迁移策略 §5 紧急回滚改写：移除不存在的 Play Console 能力，按真实分发渠道（GitHub Release）重写止损步骤
+
+### Security
+- 修复发版链路签名缺陷：`release.yml` keystore 解码路径与 `app/signing.gradle` 的 app/ 相对解析不一致（旧实现解码到仓库根，正式发版必然找不到密钥）
+- CI 新增三处版本一致性硬门禁（`scripts/check_version_consistency.py`：tag == CHANGELOG == gradle.properties == README 声明 == versionCode 公式），并前移到 test/lint 之前 fail-fast
+- APK 签名默认仅启用 v2+v3（关闭 minSdk 26 下冗余的 v1/JAR 签名）
+- pre-push hook 新增红线硬拦截：拒绝向 `origin` 推送 `main`（任何方向），防止 2026-09-02 类误推事故复发
+- 新增自托管下载页基座与版本更新清单契约（`docs/deploy-download-page/`），渠道决策待定
+
 ## [1.0.30] - 2026-08-10
 
 ### Added

@@ -25,13 +25,18 @@ DraftPeek 是一款功能强大的 Android 原生文本/代码编辑器，主要
 
 | 依赖 | 版本 |
 |------|------|
-| Android Studio | Ladybug 2024.2.1+ (或任意支持 AGP 8.8.0 的版本) |
+| Android Studio | Meerkat 2024.3.2+ (首个支持 AGP 8.10 的版本，或任意支持 AGP 8.10.1 的版本) |
 | JDK | 17 |
 | Android SDK | compileSdk 36, targetSdk 36, minSdk 26 (Android 8.0+) |
-| Gradle | 8.13 (由 gradle-wrapper 管理，无需手动安装) |
-| AGP | 8.8.0 |
+| Gradle | 8.14.3 (由 gradle-wrapper 管理，无需手动安装) |
+| AGP | 8.10.1 |
 | Kotlin | 2.2.21 |
 | Build Tools | 36.1.0 |
+
+> 版本一致性由 `scripts/check_version_consistency.py` 在 CI 中强制校验：
+> 上表 AGP / Gradle / Kotlin / Build Tools 的值必须与 `gradle/libs.versions.toml`
+> 及 `gradle/wrapper/gradle-wrapper.properties` 实际取值一致，否则 CI 失败。
+> 本地自查：`python scripts/check_version_consistency.py`
 
 **支持的 ABI**：`arm64-v8a`、`armeabi-v7a`、`x86`、`x86_64`
 
@@ -117,7 +122,7 @@ DraftPeek/
 ├── scripts/                # 辅助脚本（构建、测试、安装）
 ├── gradle/                 # Gradle 版本目录（libs.versions.toml）
 ├── repos/                  # 竞品/参考仓库源码（调研用，不参与编译）（计划，未实现：当前仓库无此目录）
-├── server/                 # Python CRDT 同步服务（server/crdt_server.py + pytest 测试）
+├── server/                 # Python 协作同步服务（实验性/可选，非生产部署；crdt_server / integrity_server / sync_server + pytest 测试）
 ├── migrations/             # SQL 迁移脚本（含知识图谱建表）
 ├── AGENTS.md               # AI 辅助开发指南
 ├── docs/FILEMAP.md         # 完整文件清单（位于 docs/ 下）

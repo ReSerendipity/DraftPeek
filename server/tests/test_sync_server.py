@@ -10,10 +10,8 @@ These tests verify the P1-P2 fixes applied to server/sync_server/main.py:
 Run: python -m pytest server/tests/test_sync_server.py -v
 """
 
-import asyncio
 import os
 import sys
-import tempfile
 from pathlib import Path
 
 import pytest
@@ -46,6 +44,7 @@ def client(temp_storage):
     """Create a FastAPI test client with temp storage."""
     # Re-import after setting env vars
     import importlib
+
     import sync_server.main as sync_module
     importlib.reload(sync_module)
     with TestClient(sync_module.app) as c:

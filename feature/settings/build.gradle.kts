@@ -71,9 +71,9 @@ dependencies {
     // 整个 Android CI 假红。配置与 core/data 模块保持一致。
     testImplementation(libs.robolectric)
     // AndroidX test core 提供 ApplicationProvider（Robolectric 测试需要）
-    testImplementation("androidx.test:core:1.6.1")
+    testImplementation(libs.androidx.test.core)
     // 提供 org.junit.* (JUnit4) 注解，供 Robolectric @RunWith 测试使用
-    testImplementation("androidx.test.ext:junit:1.2.1")
+    testImplementation(libs.androidx.test.ext.junit)
     // JUnit Vintage 引擎：在 useJUnitPlatform() 下运行 JUnit4 @RunWith 测试
     testRuntimeOnly("org.junit.vintage:junit-vintage-engine:5.11.3")
 

@@ -2468,44 +2468,16 @@ private fun EditorContentArea(
                                     minRatio = 0.2f,
                                     maxRatio = 0.8f,
                                     first = {
+                                        // 统一桥接（SoraEditorBridge）：收敛复用挂载 / 主题同步 / IME 焦点 / 滚动阈值
                                         Box(modifier = Modifier.fillMaxSize()) {
-                                            if (wrapper.isUsable()) {
-                                                AndroidView(
-                                                    factory = { ctx ->
-                                                        try {
-                                                            wrapper.editor.apply {
-                                                                (parent as? android.view.ViewGroup)?.removeView(this)
-                                                                setOnKeyListener { _, keyCode, event ->
-                                                                    shortcutHandler.handleKeyEvent(event)
-                                                                }
-                                                                layoutParams = android.view.ViewGroup.LayoutParams(
-                                                                    android.view.ViewGroup.LayoutParams.MATCH_PARENT,
-                                                                    android.view.ViewGroup.LayoutParams.MATCH_PARENT
-                                                                )
-                                                            }
-                                                        } catch (e: Exception) {
-                                                            Log.e(
-                                                                TAG,
-                                                                "AndroidView factory configuration failed (split-stream)",
-                                                                e
-                                                            )
-                                                            try {
-                                                                wrapper.editor
-                                                            } catch (_: Exception) {
-                                                                android.view.View(ctx)
-                                                            }
-                                                        }
-                                                    },
-                                                    modifier = Modifier.fillMaxSize(),
-                                                    update = { view ->
-                                                        hasScrolledPastThreshold = try {
-                                                            wrapper.isUsable() && wrapper.editor.firstVisibleLine > 5
-                                                        } catch (_: Exception) {
-                                                            false
-                                                        }
-                                                    }
-                                                )
-                                            }
+                                            SoraEditorBridge(
+                                                wrapper = wrapper,
+                                                shortcutHandler = shortcutHandler,
+                                                darkTheme = darkTheme,
+                                                errorLabel = SORA_SLOT_SPLIT_STREAM,
+                                                modifier = Modifier.fillMaxSize(),
+                                                onScrollPastThresholdChanged = { hasScrolledPastThreshold = it }
+                                            )
                                         }
                                     },
                                     second = {
@@ -2544,44 +2516,16 @@ private fun EditorContentArea(
                                     minRatio = 0.2f,
                                     maxRatio = 0.8f,
                                     first = {
+                                        // 统一桥接（SoraEditorBridge）：收敛复用挂载 / 主题同步 / IME 焦点 / 滚动阈值
                                         Box(modifier = Modifier.fillMaxSize()) {
-                                            if (wrapper.isUsable()) {
-                                                AndroidView(
-                                                    factory = { ctx ->
-                                                        try {
-                                                            wrapper.editor.apply {
-                                                                (parent as? android.view.ViewGroup)?.removeView(this)
-                                                                setOnKeyListener { _, keyCode, event ->
-                                                                    shortcutHandler.handleKeyEvent(event)
-                                                                }
-                                                                layoutParams = android.view.ViewGroup.LayoutParams(
-                                                                    android.view.ViewGroup.LayoutParams.MATCH_PARENT,
-                                                                    android.view.ViewGroup.LayoutParams.MATCH_PARENT
-                                                                )
-                                                            }
-                                                        } catch (e: Exception) {
-                                                            Log.e(
-                                                                TAG,
-                                                                "AndroidView factory configuration failed (split)",
-                                                                e
-                                                            )
-                                                            try {
-                                                                wrapper.editor
-                                                            } catch (_: Exception) {
-                                                                android.view.View(ctx)
-                                                            }
-                                                        }
-                                                    },
-                                                    modifier = Modifier.fillMaxSize(),
-                                                    update = { view ->
-                                                        hasScrolledPastThreshold = try {
-                                                            wrapper.isUsable() && wrapper.editor.firstVisibleLine > 5
-                                                        } catch (_: Exception) {
-                                                            false
-                                                        }
-                                                    }
-                                                )
-                                            }
+                                            SoraEditorBridge(
+                                                wrapper = wrapper,
+                                                shortcutHandler = shortcutHandler,
+                                                darkTheme = darkTheme,
+                                                errorLabel = SORA_SLOT_SPLIT,
+                                                modifier = Modifier.fillMaxSize(),
+                                                onScrollPastThresholdChanged = { hasScrolledPastThreshold = it }
+                                            )
                                         }
                                     },
                                     second = {
@@ -2643,38 +2587,16 @@ private fun EditorContentArea(
                             }
                             else -> {
                                 Box(modifier = Modifier.fillMaxSize()) {
+                                    // 统一桥接（SoraEditorBridge）：收敛复用挂载 / 主题同步 / IME 焦点 / 滚动阈值
+                                    SoraEditorBridge(
+                                        wrapper = wrapper,
+                                        shortcutHandler = shortcutHandler,
+                                        darkTheme = darkTheme,
+                                        errorLabel = SORA_SLOT_EDITOR,
+                                        modifier = Modifier.fillMaxSize(),
+                                        onScrollPastThresholdChanged = { hasScrolledPastThreshold = it }
+                                    )
                                     if (wrapper.isUsable()) {
-                                        AndroidView(
-                                            factory = { ctx ->
-                                                try {
-                                                    wrapper.editor.apply {
-                                                        (parent as? android.view.ViewGroup)?.removeView(this)
-                                                        setOnKeyListener { _, keyCode, event ->
-                                                            shortcutHandler.handleKeyEvent(event)
-                                                        }
-                                                        layoutParams = android.view.ViewGroup.LayoutParams(
-                                                            android.view.ViewGroup.LayoutParams.MATCH_PARENT,
-                                                            android.view.ViewGroup.LayoutParams.MATCH_PARENT
-                                                        )
-                                                    }
-                                                } catch (e: Exception) {
-                                                    Log.e(TAG, "AndroidView factory configuration failed", e)
-                                                    try {
-                                                        wrapper.editor
-                                                    } catch (_: Exception) {
-                                                        android.view.View(ctx)
-                                                    }
-                                                }
-                                            },
-                                            modifier = Modifier.fillMaxSize(),
-                                            update = { view ->
-                                                hasScrolledPastThreshold = try {
-                                                    wrapper.isUsable() && wrapper.editor.firstVisibleLine > 5
-                                                } catch (_: Exception) {
-                                                    false
-                                                }
-                                            }
-                                        )
                                         ScrollToTopButton(
                                             editor = wrapper.editor,
                                             hasScrolled = hasScrolledPastThreshold,

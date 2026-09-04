@@ -17,6 +17,7 @@ import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.layout.Box
+import androidx.compose.ui.semantics.Role
 import androidx.compose.foundation.layout.offset
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.shape.CircleShape
@@ -29,6 +30,7 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.draw.shadow
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.dp
+import com.draftpeek.core.ui.modifier.minimumTouchTarget
 import com.draftpeek.core.ui.theme.PrototypeSpacing
 import com.draftpeek.core.ui.theme.PrototypeTokens
 
@@ -53,16 +55,20 @@ fun BrandSwitch(checked: Boolean, onCheckedChange: (Boolean) -> Unit, modifier: 
     )
 
     Box(
+        // 修饰符顺序不可调换：clickable 在最外层以覆盖 48dp 触摸区，
+        // minimumTouchTarget 外扩触摸区但不撑大 30dp 的轨道视觉尺寸。
         modifier = modifier
+            .clickable(
+                interactionSource = remember { MutableInteractionSource() },
+                indication = null,
+                role = Role.Switch,
+                onClick = { onCheckedChange(!checked) }
+            )
+            .minimumTouchTarget()
             .size(width = PrototypeSpacing.SwitchWidth, height = PrototypeSpacing.SwitchHeight)
             .clip(RoundedCornerShape(999.dp))
             .background(trackColor)
             .border(1.5.dp, borderColor, RoundedCornerShape(999.dp))
-            .clickable(
-                interactionSource = remember { MutableInteractionSource() },
-                indication = null,
-                onClick = { onCheckedChange(!checked) }
-            )
     ) {
         Box(
             modifier = Modifier
