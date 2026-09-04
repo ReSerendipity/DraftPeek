@@ -51,6 +51,10 @@ dependencies {
 
     // Screenshot testing
     testImplementation(libs.paparazzi)
+
+    // Behavior testing (Compose UI Test — 行为/交互验证，需 Android 设备/模拟器运行)
+    debugImplementation(libs.compose.ui.test.manifest)
+    androidTestImplementation(libs.compose.ui.test.junit4)
 }
 
 // ===== Paparazzi / compileSdk 36 兼容说明 =====

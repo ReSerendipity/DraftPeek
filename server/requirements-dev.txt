@@ -1,0 +1,10 @@
+# Dev / test dependencies for server/ (NOT required at runtime)
+# Install: pip install -r server/requirements-dev.txt
+#
+# Kept separate from requirements.txt so production installs stay minimal.
+# Versions are exact-pinned (==) for reproducible CI.
+
+pytest==9.1.1
+pytest-asyncio==1.4.0
+ruff==0.16.6
+pip-audit==2.10.1

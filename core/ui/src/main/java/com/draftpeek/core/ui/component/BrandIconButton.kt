@@ -20,6 +20,7 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import com.draftpeek.core.ui.modifier.minimumTouchTarget
 import com.draftpeek.core.ui.modifier.pressScaleEffect
 import com.draftpeek.core.ui.theme.BrandShapes
 import com.draftpeek.core.ui.theme.MonoLabelStyle
@@ -49,15 +50,18 @@ fun BrandIconButton(
 ) {
     val interactionSource = remember { MutableInteractionSource() }
     Box(
+        // clickable 置于最外层使触摸区覆盖 48dp；minimumTouchTarget 只外扩触摸区，
+        // 不改变 40dp 的图标视觉尺寸（图标按钮在工具栏中密度较高）。
         modifier = modifier
-            .size(PrototypeSpacing.IconButtonSize)
-            .clip(BrandShapes.IconButton)
-            .pressScaleEffect()
             .clickable(
                 interactionSource = interactionSource,
                 indication = null,
                 onClick = onClick
-            ),
+            )
+            .minimumTouchTarget()
+            .size(PrototypeSpacing.IconButtonSize)
+            .clip(BrandShapes.IconButton)
+            .pressScaleEffect(),
         contentAlignment = Alignment.Center
     ) {
         Icon(

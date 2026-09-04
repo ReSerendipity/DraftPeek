@@ -37,8 +37,12 @@ android {
                 keyPassword = keyPass
                 // SECURITY VULN-010: 启用 APK Signature Scheme v3
                 // v3 支持密钥轮换（key rotation），允许用新密钥更新 APK
-                // 而旧版本 APK 仍可验证。v1 (JAR signing) 和 v2 也保留启用。
-                enableV1Signing = true
+                // 而旧版本 APK 仍可验证。
+                // P2（发布管理评估 2026-09-04）：关闭 v1（JAR 签名）。
+                // minSdk=26（Android 8.0）的设备全部支持 v2，v1 冗余且扩大攻击面
+                // （v1 不保护 APK 完整性、允许META-INF后注入）。如需回退，
+                // 改回 enableV1Signing = true 并重新发版验证。
+                enableV1Signing = false
                 enableV2Signing = true
                 enableV3Signing = true
             }

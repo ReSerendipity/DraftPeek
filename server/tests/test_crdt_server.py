@@ -12,11 +12,7 @@ These tests verify the P0-P3 fixes applied to server/crdt_server.py:
 Run: python -m pytest server/tests/test_crdt_server.py -v
 """
 
-import asyncio
-import json
-import os
 import sys
-import tempfile
 from pathlib import Path
 from unittest.mock import AsyncMock, MagicMock, patch
 
@@ -26,31 +22,28 @@ import pytest
 sys.path.insert(0, str(Path(__file__).parent.parent))
 
 # Import the module — if ypy is installed (required), this succeeds
-import crdt_server
 from crdt_server import (
-    RateLimiter,
-    Room,
-    rooms,
-    encode_error,
-    encode_sync_step2,
-    encode_sync_update,
-    decode_sync_payload,
-    MSG_SYNC,
+    ERR_RATE_LIMITED,
+    ERR_SYNC_STEP2_FAILED,
     MSG_ERROR,
+    MSG_SYNC,
+    PERSISTENCE_DIR,
+    PING_INTERVAL,
+    PING_TIMEOUT,
     SYNC_STEP1,
     SYNC_STEP2,
     SYNC_UPDATE,
-    ERR_SYNC_STEP2_FAILED,
-    ERR_RATE_LIMITED,
-    ERR_INVALID_MESSAGE,
-    YPY_AVAILABLE,
-    PING_INTERVAL,
-    PING_TIMEOUT,
     TLS_CERT,
     TLS_KEY,
-    PERSISTENCE_DIR,
+    YPY_AVAILABLE,
+    RateLimiter,
+    Room,
+    _extract_room_id,
+    _is_token_valid,
+    decode_sync_payload,
+    encode_error,
+    rooms,
 )
-
 
 # ─── P0: ypy hard dependency ─────────────────────────────────────────────
 
@@ -100,7 +93,6 @@ def test_rate_limiter_blocks_over_burst():
 
 def test_rate_limiter_refills_over_time():
     """P1 fix: rate limiter refills tokens over time."""
-    import time as _time
     limiter = RateLimiter(rate=100.0, burst=2)
     limiter.acquire()
     limiter.acquire()
@@ -179,7 +171,6 @@ async def test_broadcast_concurrent():
 @pytest.mark.asyncio
 async def test_broadcast_handles_disconnection():
     """P1 fix: broadcast should clean up disconnected clients."""
-    import websockets
     room = Room("test_disconnect")
     rooms["test_disconnect"] = room
 
@@ -258,6 +249,70 @@ async def test_reply_sync_step2_paginated_large_warning():
         assert mock_logger.warning.called
 
     del rooms["test_pagination"]
+
+
+# ─── P1-3: Per-room token auth (§④ threat model) ───────────────────────────
+
+def test_extract_room_id():
+    """_extract_room_id parses /yjs/<document_id> correctly."""
+    assert _extract_room_id("/yjs/doc_42?token=abc") == "doc_42"
+    assert _extract_room_id("/yjs/doc_42") == "doc_42"
+    # No document id -> the trailing path segment becomes the room id.
+    assert _extract_room_id("/yjs/") == "yjs"
+
+
+def test_token_valid_shared():
+    """Shared CRDT_TOKEN: only the shared token is accepted."""
+    import crdt_server
+    saved = (crdt_server.AUTH_TOKEN, crdt_server.ROOM_TOKENS, crdt_server.AUTH_ENABLED)
+    try:
+        crdt_server.AUTH_TOKEN = "shared-secret"
+        crdt_server.ROOM_TOKENS = {}
+        crdt_server.AUTH_ENABLED = True
+        assert _is_token_valid("shared-secret", "any-room") is True
+        assert _is_token_valid("wrong", "any-room") is False
+    finally:
+        crdt_server.AUTH_TOKEN, crdt_server.ROOM_TOKENS, crdt_server.AUTH_ENABLED = saved
+
+
+def test_token_valid_per_room():
+    """Per-room tokens: a room token is only valid for its own room."""
+    import crdt_server
+    saved = (crdt_server.AUTH_TOKEN, crdt_server.ROOM_TOKENS, crdt_server.AUTH_ENABLED)
+    try:
+        crdt_server.AUTH_TOKEN = ""
+        crdt_server.ROOM_TOKENS = {"doc_a": "secret_a", "doc_b": "secret_b"}
+        crdt_server.AUTH_ENABLED = True
+        assert _is_token_valid("secret_a", "doc_a") is True
+        assert _is_token_valid("secret_a", "doc_b") is False  # token leaks across rooms
+        assert _is_token_valid("secret_b", "doc_b") is True
+        assert _is_token_valid("anything", "doc_c") is False  # unknown room
+    finally:
+        crdt_server.AUTH_TOKEN, crdt_server.ROOM_TOKENS, crdt_server.AUTH_ENABLED = saved
+
+
+# ─── §④: Persistence round-trip (save → rebuild → state equivalence) ───────
+
+def test_persistence_roundtrip():
+    """A saved room's document state must be exactly restored on reload."""
+    import time
+
+    import pycrdt
+
+    room_id = f"roundtrip_{int(time.time() * 1000)}"
+    room1 = Room(room_id)
+    text1 = room1.doc.get("content", type=pycrdt.Text)
+    text1.insert(0, "hello CRDT world")
+    room1._save_state()
+
+    # Simulate a restart: a brand-new Room with the same id reloads from disk.
+    room2 = Room(room_id)
+    assert str(room2.doc.get("content", type=pycrdt.Text)) == "hello CRDT world"
+
+    # Cleanup the state file we created.
+    state_file = room2._persistence_path_safe()
+    if state_file.exists():
+        state_file.unlink()
 
 
 if __name__ == "__main__":

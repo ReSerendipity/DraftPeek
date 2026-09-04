@@ -1,0 +1,13 @@
+{
+  "versionName": "1.0.30",
+  "versionCode": 10030,
+  "releasedAt": "2026-08-10",
+  "apkUrl": "apk/DraftPeek-1.0.30-release.apk",
+  "sha256": "（发布时填入 APK 的 SHA256，与 GitHub Release 的 .sha256 一致）",
+  "minAndroid": "8.0 (API 26)",
+  "changelogUrl": "https://github.com/ReSerendipity/DraftPeek-private/releases",
+  "notes": [
+    "示例条目：本文件为「版本更新清单」契约示例，部署时复制为 latest.json 并随发版更新。",
+    "in-app 更新检测（规划，未实现）将 GET 本文件，比较 versionCode 后提示升级。"
+  ]
+}

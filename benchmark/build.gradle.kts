@@ -63,17 +63,17 @@ dependencies {
     implementation(libs.hilt.android)
     ksp(libs.hilt.compiler)
     // Hilt testing support (used in FileReadBenchmark)
-    implementation("com.google.dagger:hilt-android-testing:2.58")
+    implementation(libs.hilt.android.testing)
 
     // Benchmark dependencies
-    implementation("androidx.benchmark:benchmark-common:1.2.0")
-    implementation("androidx.benchmark:benchmark-junit4:1.2.0")
-    implementation("androidx.test.ext:junit:1.1.5")
-    implementation("androidx.test:runner:1.5.2")
+    implementation(libs.androidx.benchmark.common)
+    implementation(libs.androidx.benchmark.junit4)
+    implementation(libs.androidx.test.ext.junit)
+    implementation(libs.androidx.test.runner)
 
     // Macro-benchmark for startup and UI benchmarks
-    implementation("androidx.benchmark:benchmark-macro-junit4:1.2.0")
-    implementation("androidx.test.uiautomator:uiautomator:2.2.0")
+    implementation(libs.androidx.benchmark.macro.junit4)
+    implementation(libs.androidx.test.uiautomator)
 
     // Test dependencies
     testImplementation(libs.junit5.api)

@@ -106,9 +106,23 @@ fullMigrationChain_allTablesWork
 
 ## 5. 紧急回滚
 
+> 修正（2026-09-04，发布管理评估 P2）：本项目**未接入 Google Play 分发**
+> （产物仅发布到 GitHub Release，见 `docs/release-version-management-evaluation.md`），
+> 也不存在 Play Console 的「暂停发布」能力；且 Android 客户端升级后**无法强制降级**。
+> 原文的「Play Console 暂停发布」为不存在的能力，已按真实分发渠道改写。
+
 如果新版本数据库迁移导致严重问题：
 
-1. **立即下架**：在 Google Play Console 暂停发布
-2. **回退版本**：回滚到上一稳定版本的 APK
+1. **停止扩散**（本项目真实可用的手段，按优先级）：
+   - 撤下 GitHub Release：把已发布的 Release 转回 **draft** 或删除（用户不再能下载到坏版本）；
+   - 若使用自托管下载页 / in-app 更新检测：下架对应 APK 并把更新检查指向上一稳定版本；
+   - 在 `CHANGELOG.md` 中标注该版本不推荐使用（Known Issue）。
+2. **止损替代（kill-switch 缺位）**：当前应用**无远程 feature flag / kill-switch**，
+   无法远程关闭出问题的功能。在补上远程配置层之前，schema 事故的止血只能靠
+   「撤分发 + 发 hotfix」，因此 schema 变更的**发版前迁移测试（§3）是唯一防线**，不可跳过。
 3. **数据保护**：`fallbackToDestructiveMigrationOnDowngrade` 确保降级时重建数据库
+   （注意：这是兜底，会丢数据，不作为常规回滚手段宣传）。
 4. **修复迁移**：在 hotfix 分支修复迁移逻辑，发布 hotfix 版本
+   （遵循 `docs/RELEASE_CHECKLIST.md`，tag 只推 `private` 远程）。
+5. **长期方向**：引入 feature flag / 远程配置作为 kill-switch 轻量替代
+   （评估报告 P2 项），使「坏 schema 功能」可被远程关闭而无需撤整个版本。

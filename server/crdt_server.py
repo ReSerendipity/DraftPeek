@@ -18,6 +18,10 @@ Environment variables:
     CRDT_HOST              bind address (default: 127.0.0.1; set to 0.0.0.0 to expose on LAN)
     CRDT_PORT              listen port (default: 8080)
     CRDT_TOKEN             optional shared token for client authentication
+    CRDT_TOKENS            optional JSON object {"<document_id>": "<secret>", ...} for
+                          per-room access control (takes precedence over CRDT_TOKEN).
+                          When ANY auth is configured, WSS (CRDT_TLS_CERT/KEY) is
+                          mandatory — plaintext ws:// connections are rejected (1008).
     CRDT_PERSISTENCE_DIR   directory for document state persistence (default: ./crdt_data)
     CRDT_MAX_MSG_PER_SEC   rate limit: max messages per second per client (default: 100)
     CRDT_MAX_BURST         rate limit: burst capacity (default: 200)
@@ -25,6 +29,13 @@ Environment variables:
     CRDT_PING_TIMEOUT      heartbeat pong timeout in seconds (default: 10)
     CRDT_AUDIT_LOG         path to conflict-resolution audit log file (default: disabled)
     CRDT_MAX_MSG_SIZE      max WebSocket message size in bytes (default: 10 MB)
+
+STATUS:
+    EXPERIMENTAL reference implementation — NOT deployed, NOT production-hardened.
+    DraftPeek is a local-first Android editor; this collaboration server is an
+    OPTIONAL auxiliary service (no wired client in the shipped app, default-off).
+    See 协作同步服务设计评估报告_v1.0.30.md for the threat model and the required
+    hardening: signed per-room tokens + WSS, resource caps, and a Python CI gate.
 
 References:
     - Yjs: https://github.com/yjs/yjs
@@ -48,6 +59,9 @@ Protocol note:
 """
 
 import asyncio
+import base64
+import hashlib
+import hmac
 import json
 import logging
 import os
@@ -96,6 +110,29 @@ logger = logging.getLogger("crdt_server")
 CRDT_HOST = os.environ.get("CRDT_HOST", "127.0.0.1").strip()
 CRDT_PORT = int(os.environ.get("CRDT_PORT", "8080"))
 AUTH_TOKEN = os.environ.get("CRDT_TOKEN", "").strip()
+# AUTH_TOKEN is the HMAC SECRET (server-side only). When set, handle_client
+# requires WSS and a valid per-room signed token (see mint_room_token /
+# verify_room_token below — P1-3 fix).
+AUTH_TOKEN_TTL = int(os.environ.get("CRDT_TOKEN_TTL", "300"))
+
+# ── Per-room token map (P1-3) ─────────────────────────────────────────────
+# Optional JSON object mapping document_id -> secret, enabling per-room access
+# control instead of a single shared token that grants access to every room.
+# Takes precedence over the shared CRDT_TOKEN when set.
+ROOM_TOKENS: Dict[str, str] = {}
+_room_tokens_raw = os.environ.get("CRDT_TOKENS", "").strip()
+if _room_tokens_raw:
+    try:
+        _parsed = json.loads(_room_tokens_raw)
+        if isinstance(_parsed, dict):
+            ROOM_TOKENS = {str(k): str(v) for k, v in _parsed.items()}
+        else:
+            logger.warning("CRDT_TOKENS must be a JSON object; ignored")
+    except Exception as exc:  # noqa: BLE001
+        logger.warning("Failed to parse CRDT_TOKENS: %s", exc)
+
+# Auth is enabled if either a shared token or a per-room token map is configured.
+AUTH_ENABLED = bool(AUTH_TOKEN or ROOM_TOKENS)
 
 # ─── Persistence configuration (P0 fix) ──────────────────────────────────
 PERSISTENCE_DIR = Path(
@@ -130,6 +167,8 @@ MAX_MSG_SIZE = int(os.environ.get("CRDT_MAX_MSG_SIZE", str(10 * 1024 * 1024)))
 # Token passed via query string is only secure over TLS.
 TLS_CERT = os.environ.get("CRDT_TLS_CERT", "").strip()
 TLS_KEY = os.environ.get("CRDT_TLS_KEY", "").strip()
+# TLS/WSS must be enabled whenever auth is enabled (tokens travel on the wire).
+TLS_ENABLED = bool(TLS_CERT and TLS_KEY)
 
 # ─── Room registry ────────────────────────────────────────────────────────
 rooms: Dict[str, "Room"] = {}
@@ -229,9 +268,11 @@ class Room:
         """Persist the current document state to disk."""
         path = self._persistence_path_safe()
         try:
-            state = self.doc.get_update(b"")  # full state vector = empty bytes
+            # get_update() with no state vector returns the full document state.
+            # (Passing b"" is invalid in pycrdt >= 0.14 and raises.)
+            state = self.doc.get_update()
             path.write_bytes(state)
-        except Exception as exc:
+        except Exception as exc:  # noqa: BLE001
             logger.error(f"Failed to save state for room '{self.room_id}': {exc}")
 
     # ── Audit logging (P1 fix) ──────────────────────────────────────────
@@ -396,27 +437,140 @@ def _extract_client_token(websocket: WebSocketServerProtocol, path: str) -> str:
     return ""
 
 
+def _extract_room_id(path: str) -> str:
+    """Extract the room/document id from the connection path (/yjs/<id>)."""
+    path_no_query = path.split("?", 1)[0]
+    parts = path_no_query.strip("/").split("/")
+    if len(parts) >= 2 and parts[0] == "yjs":
+        return parts[1]
+    return path_no_query.strip("/").split("/")[-1]
+
+
+# ─── Per-room signed token auth (P1-3, preferred scheme) ──────────────────
+# The shared CRDT_TOKEN is treated as an HMAC SECRET (server-side only). The
+# operator / a control plane mints short-lived, room-bound tokens with
+# mint_room_token(); clients present them as ?token=<SIGNED>. This closes the
+# original threat-model gap ("one token reads/writes any document") AND adds
+# expiry, because a token is cryptographically bound to a room_id and a TTL.
+def _b64url_encode(data: bytes) -> str:
+    """URL-safe base64 without padding."""
+    return base64.urlsafe_b64encode(data).rstrip(b"=").decode("ascii")
+
+
+def _b64url_decode(data: str) -> bytes:
+    """Inverse of _b64url_encode (re-pads)."""
+    padded = data + "=" * (-len(data) % 4)
+    return base64.urlsafe_b64decode(padded)
+
+
+def mint_room_token(room_id: str, secret: str, ttl: int = 300, now: Optional[float] = None) -> str:
+    """Mint an HMAC-signed, short-lived token bound to ``room_id``.
+
+    Token format: ``<payload>.<signature>`` where
+      payload   = base64url( ``f"{room_id}|{exp}"`` )
+      signature = HMAC-SHA256(secret, payload)  (base64url)
+
+    Returns a string the client passes as ``?token=<signed>``.
+    """
+    if not secret:
+        raise ValueError("a non-empty secret is required to mint a room token")
+    now = time.time() if now is None else float(now)
+    exp = int(now) + int(ttl)
+    payload = _b64url_encode(f"{room_id}|{exp}".encode("utf-8"))
+    signature = hmac.new(
+        secret.encode("utf-8"), payload.encode("ascii"), hashlib.sha256
+    ).digest()
+    return f"{payload}.{_b64url_encode(signature)}"
+
+
+def verify_room_token(token: str, room_id: str, secret: str, now: Optional[float] = None):
+    """Verify a per-room signed token.
+
+    Returns ``(ok: bool, reason: str)``. Fails when the token is missing,
+    malformed, has a bad signature, is bound to a different room, or expired.
+    """
+    if not secret:
+        return False, "server misconfiguration: no secret set"
+    if not token:
+        return False, "missing token"
+    try:
+        payload_b64, signature_b64 = token.split(".", 1)
+    except ValueError:
+        return False, "malformed token"
+    expected = hmac.new(
+        secret.encode("utf-8"), payload_b64.encode("ascii"), hashlib.sha256
+    ).digest()
+    try:
+        provided = _b64url_decode(signature_b64)
+    except Exception:
+        return False, "malformed signature"
+    if not hmac.compare_digest(expected, provided):
+        return False, "bad signature"
+    try:
+        decoded = _b64url_decode(payload_b64).decode("utf-8")
+        token_room, exp_str = decoded.split("|", 1)
+    except Exception:
+        return False, "malformed payload"
+    if token_room != room_id:
+        return False, "room mismatch"
+    now = time.time() if now is None else float(now)
+    if int(exp_str) < int(now):
+        return False, "expired"
+    return True, "ok"
+
+
+def _is_token_valid(client_token: str, room_id: str) -> bool:
+    """Validate a presented token against the configured auth policy (P1-3).
+
+    A token is accepted if ANY holds:
+    - No auth configured -> always allowed.
+    - It is a valid HMAC-signed short-lived token bound to ``room_id``
+      (minted with the shared CRDT_TOKEN secret via mint_room_token). [preferred]
+    - Per-room static secrets (CRDT_TOKENS) are configured and the token equals
+      the secret bound to ``room_id``.
+    - Only a shared token (CRDT_TOKEN) is configured and the token equals it
+      (legacy, non-expiring fallback).
+    """
+    if not AUTH_ENABLED:
+        return True
+    # (1) Signed, short-lived, room-bound token — preferred scheme.
+    if AUTH_TOKEN and verify_room_token(client_token, room_id, AUTH_TOKEN)[0]:
+        return True
+    # (2) Per-room static secrets.
+    if ROOM_TOKENS:
+        expected = ROOM_TOKENS.get(room_id)
+        return expected is not None and client_token == expected
+    # (3) Legacy shared token (no per-room map).
+    return client_token == AUTH_TOKEN
+
+
 # ─── Connection handler (with rate limiting + heartbeat + error frames) ──
 async def handle_client(websocket: WebSocketServerProtocol, path: str = ""):
     """Handle a WebSocket client connection.
 
     Path format: /yjs/<document_id>[?token=<CRDT_TOKEN>]
     """
-    # ── Authentication ─────────────────────────────────────────────────
-    if AUTH_TOKEN:
+    # ── Extract room ID ────────────────────────────────────────────────
+    room_id = _extract_room_id(path)
+
+    # ── Authentication (P1-3: per-room tokens + forced WSS) ────────────
+    if AUTH_ENABLED:
+        # A token on a plaintext ws:// connection is visible to network observers.
+        # WSS is mandatory whenever authentication is enabled.
+        if not TLS_ENABLED:
+            logger.warning(
+                "Rejected connection to room '%s': auth enabled but WSS not configured",
+                room_id[:120],
+            )
+            await websocket.close(code=1008, reason="wss-required")
+            return
         client_token = _extract_client_token(websocket, path)
-        if client_token != AUTH_TOKEN:
-            logger.warning("Rejected client without valid token (path='%s')", path[:120])
+        if not _is_token_valid(client_token, room_id):
+            logger.warning(
+                "Rejected client with invalid token (room='%s')", room_id[:120]
+            )
             await websocket.close(code=1008, reason="unauthorized")
             return
-
-    # ── Extract room ID ────────────────────────────────────────────────
-    path_no_query = path.split("?", 1)[0]
-    parts = path_no_query.strip("/").split("/")
-    if len(parts) >= 2 and parts[0] == "yjs":
-        room_id = parts[1]
-    else:
-        room_id = path_no_query.strip("/").split("/")[-1]
 
     room = get_or_create_room(room_id)
     await room.add_client(websocket)
@@ -534,17 +688,24 @@ async def main():
             "Binding to 0.0.0.0 WITHOUT TLS or token authentication — "
             "server is exposed to the network!"
         )
-    elif AUTH_TOKEN and not use_tls:
+    elif AUTH_ENABLED and not use_tls:
         logger.warning(
-            "Token authentication over plain ws:// — token is visible on the wire. "
-            "Set CRDT_TLS_CERT/CRDT_TLS_KEY for secure token transport."
+            "Authentication is ENABLED but WSS is NOT configured — all client "
+            "connections will be rejected (code 1008, 'wss-required'). "
+            "Set CRDT_TLS_CERT/CRDT_TLS_KEY to serve authenticated rooms over wss://."
         )
     if AUDIT_LOG_PATH:
         logger.info(f"Audit log: {AUDIT_LOG_PATH}")
-    if AUTH_TOKEN:
-        logger.info("Token authentication: ENABLED (clients must pass ?token=<CRDT_TOKEN>)")
+    if AUTH_ENABLED:
+        if ROOM_TOKENS:
+            logger.info(
+                "Token authentication: ENABLED (per-room tokens for %d room(s); WSS required)",
+                len(ROOM_TOKENS),
+            )
+        else:
+            logger.info("Token authentication: ENABLED (shared CRDT_TOKEN; WSS required)")
     else:
-        logger.info("Token authentication: disabled (CRDT_TOKEN not set)")
+        logger.info("Token authentication: disabled (CRDT_TOKEN / CRDT_TOKENS not set)")
     logger.info(f"Connect with: {scheme}://{host}:{port}/yjs/<document_id>")
 
     serve_kwargs = dict(

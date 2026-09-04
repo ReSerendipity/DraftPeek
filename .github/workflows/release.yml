@@ -52,12 +52,21 @@ jobs:
           restore-keys: |
             gradle-${{ runner.os }}-
 
+      # FIX(P1-1): keystore 必须落在 app/ 目录下。
+      # app/signing.gradle 用 file(storeFilePath) 解析，基址是 **app/ 模块目录**
+      # 而非仓库根（与 android.yml 的 app/ci-release.jks 写法一致）。
+      # 旧实现解码到仓库根 release.jks，会导致 assembleRelease 找不到 keystore 而失败。
       - name: Decode signing keystore
         env:
           RELEASE_STORE_FILE_BASE64: ${{ secrets.RELEASE_STORE_FILE_BASE64 }}
         run: |
           if [ -n "$RELEASE_STORE_FILE_BASE64" ]; then
-            echo "$RELEASE_STORE_FILE_BASE64" | base64 -d > release.jks
+            mkdir -p app
+            echo "$RELEASE_STORE_FILE_BASE64" | base64 -d > app/release.jks
+            echo "Keystore decoded to app/release.jks ($(stat -c%s app/release.jks) bytes)"
+          else
+            echo "::error::RELEASE_STORE_FILE_BASE64 secret is not set; release build cannot be signed."
+            exit 1
           fi
 
       - name: Configure local.properties
@@ -75,21 +84,22 @@ jobs:
       - name: Grant execute permission for gradlew
         run: chmod +x ./gradlew
 
+      # FIX(P1-2): 三处版本一致性硬门禁（tag == CHANGELOG == gradle.properties）。
+      # 前移到 test/lint 之前：版本漂移属于配置错误，无需先烧掉十几分钟构建。
+      # 与 docs-consistency.yml 复用同一脚本 scripts/check_version_consistency.py
+      # （单一事实来源），此处以 --strict 强制 tag 与版本完全对齐。
+      - name: Verify version consistency (tag / CHANGELOG / gradle.properties)
+        # 注意用 python3：ubuntu runner 仅保证 python3 存在（脚本仅依赖标准库）
+        run: |
+          python3 scripts/check_version_consistency.py \
+            --strict \
+            --tag "${GITHUB_REF#refs/tags/}"
+
       - name: Run Tests
         run: ./gradlew test --stacktrace
 
       - name: Run Lint Check
         run: ./gradlew lint --stacktrace
-
-      - name: Verify CHANGELOG version matches tag
-        run: |
-          VERSION="${GITHUB_REF#refs/tags/v}"
-          if ! grep -q "## \[$VERSION\]" CHANGELOG.md; then
-            echo "ERROR: CHANGELOG.md does not contain entry for version $VERSION"
-            echo "Please add '## [$VERSION] - YYYY-MM-DD' to CHANGELOG.md before tagging."
-            exit 1
-          fi
-          echo "CHANGELOG version matches tag: $VERSION"
 
       - name: Build Release APK
         run: ./gradlew assembleRelease --stacktrace

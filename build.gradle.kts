@@ -153,7 +153,10 @@ tasks.register("bumpVersion") {
         println("  1. Update CHANGELOG.md with the new version entry")
         println("  2. Commit the changes: git add gradle.properties CHANGELOG.md")
         println("  3. Tag the release: git tag v$newVersionName")
-        println("  4. Push: git push origin v$newVersionName")
+        // SECURITY(红线): tag 必须推到 private 远程。若照旧推 origin，tag 会把
+        // 私有 main 的完整提交历史带入公开仓库（与 2026-09-02 误推事故同源）。
+        println("  4. Push the tag to the PRIVATE remote: git push private v$newVersionName")
+        println("     (NEVER 'git push origin v...' — it would leak main history to the public repo)")
     }
 }
 
@@ -165,6 +168,11 @@ tasks.register("bumpVersion") {
 allprojects {
     dependencyLocking {
         lockAllConfigurations()
+        // P1-4: STRICT 模式 —— 缺锁文件 / 引入未锁定依赖一律构建失败，
+        // 防止新依赖绕过 libs.versions.toml 静默溜入。
+        // 前提：全部 15 个项目的 gradle.lockfile 已生成并入库（2026-09-04 完成）。
+        // 依赖变更后的更新流程：./gradlew <project>:dependencies --write-locks
+        lockMode.set(org.gradle.api.artifacts.dsl.LockMode.STRICT)
     }
 }
 

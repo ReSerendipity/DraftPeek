@@ -1,7 +1,17 @@
 name: Docs Consistency
 on:
   pull_request:
-    paths: ['**/*.md', '.pre-commit-config.yaml', 'package.json', '.github/workflows/**']
+    # 必须覆盖版本相关文件：否则「改了 gradle.properties / 版本目录 / wrapper
+    # / 校验脚本」的 PR 不会触发本 workflow，版本门禁形同虚设。
+    paths:
+      - '**/*.md'
+      - '.pre-commit-config.yaml'
+      - 'package.json'
+      - '.github/workflows/**'
+      - 'gradle.properties'
+      - 'gradle/libs.versions.toml'
+      - 'gradle/wrapper/gradle-wrapper.properties'
+      - 'scripts/check_version_consistency.py'
   push:
     branches: [main]
 permissions:
@@ -16,3 +26,18 @@ jobs:
           python-version: '3.12'
       - name: Audit spec references
         run: python scripts/check_spec_refs.py
+
+  # P1-2: 版本一致性门禁（PR 期宽容模式）
+  # 与 release.yml 的 tag 期严格模式共用 scripts/check_version_consistency.py，
+  # 避免两处各写一份判定逻辑而再次漂移。
+  # 这里只拦截「CHANGELOG 超前 / 版本回退」「README 版本声明漂移」「versionCode 公式变更」；
+  # 「CHANGELOG 尚未更新」仅告警（开发期正常），打 tag 时由 release.yml 的 --strict 兜底为硬失败。
+  version-consistency:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - name: Check version consistency
+        run: python scripts/check_version_consistency.py
