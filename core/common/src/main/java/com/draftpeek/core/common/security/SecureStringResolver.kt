@@ -11,6 +11,11 @@
  * 所有 @EncryptedString 标注的字符串在编译期不会被加密，运行时解密器不被调用。
  * 此文件作为 B 层基础设施预留，方案 C 启用 OLLVM 时激活。
  *
+ * R8 (2026-09-04) 现状核验：B 层字符串加密整体为「计划未实现」的脚手架——
+ * StringEncIrGenerationExtension 从未被注册、Transformer 为 no-op、本解密器无调用方；
+ * keyFragment3 在 native 侧恒为全零占位（BUILD_PERIOD_REPLACE 未接线）。
+ * 启用前须端到端实装，勿据本文件宣称已具备字符串加密能力。
+ *
  * @author DraftPeek Team
  * @since 1.0.30
  */
