@@ -1,21 +1,29 @@
 package com.draftpeek.feature.terminal.viewmodel
 
 import android.content.Context
+import app.cash.turbine.test
 import com.draftpeek.feature.terminal.emulator.ProotSessionManager
 import com.draftpeek.feature.terminal.emulator.ProotSetupState
 import com.draftpeek.feature.terminal.emulator.TerminalKey
 import com.draftpeek.feature.terminal.emulator.TerminalSessionManager
+import com.draftpeek.feature.terminal.model.TerminalConfig
 import com.draftpeek.feature.terminal.model.TerminalSession
 import com.draftpeek.feature.terminal.model.TerminalTheme
 import io.mockk.every
 import io.mockk.mockk
 import io.mockk.verify
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.test.UnconfinedTestDispatcher
+import kotlinx.coroutines.test.resetMain
+import kotlinx.coroutines.test.runTest
+import kotlinx.coroutines.test.setMain
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertFalse
 import org.junit.jupiter.api.Assertions.assertNotNull
 import org.junit.jupiter.api.Assertions.assertNull
 import org.junit.jupiter.api.Assertions.assertTrue
+import org.junit.jupiter.api.AfterEach
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.DisplayName
 import org.junit.jupiter.api.Test
@@ -32,8 +40,14 @@ class TerminalViewModelTest {
     private val activeSessionFlow = MutableStateFlow<TerminalSession?>(null)
     private val prootSetupStateFlow = MutableStateFlow<ProotSetupState>(ProotSetupState.NotChecked)
 
+    // viewModelScope 依赖 Dispatchers.Main：必须在 VM 构造之前 setMain（构造时即捕获），
+    // 用 UnconfinedTestDispatcher 让 viewModelScope 内的派发急切执行，JVM 单测无需 Looper。
+    private val mainDispatcher = UnconfinedTestDispatcher()
+
     @BeforeEach
     fun setUp() {
+        Dispatchers.setMain(mainDispatcher)
+
         sessionManager = mockk(relaxed = true)
         prootSessionManager = mockk(relaxed = true)
         context = mockk(relaxed = true)
@@ -48,6 +62,11 @@ class TerminalViewModelTest {
         // (TerminalNavigationData singleton removed — cwd is now passed as parameter)
 
         viewModel = TerminalViewModel(sessionManager, context)
+    }
+
+    @AfterEach
+    fun tearDown() {
+        Dispatchers.resetMain()
     }
 
     @Test
@@ -208,5 +227,34 @@ class TerminalViewModelTest {
     @DisplayName("cwdConsumed is false initially")
     fun cwdConsumedFalseInitially() {
         assertFalse(viewModel.cwdConsumed.value)
+    }
+
+    // ---- Turbine：验证异步派生 Flow 的事件序列 ----
+    // outputBuffer 是 activeSession --flatMapLatest--> 会话输出缓冲 的异步派生 StateFlow，
+    // 之前的用例只读 .value（同步快照），无法覆盖「会话切换 → 缓冲流切换 → 内容更新 →
+    // 会话关闭回落空串」的发射顺序。这里用 Turbine 逐事件断言。
+    // Main 调度器指向 testScheduler（viewModelScope 依赖 Main），测试结束必须 resetMain。
+
+    @Test
+    @DisplayName("outputBuffer follows activeSession: switch → update → close（Turbine 序列）")
+    fun outputBufferFollowsActiveSessionWithTurbine() = runTest {
+        val session = TerminalSession(id = "session-1", config = TerminalConfig())
+        val bufferFlow = MutableStateFlow("hello")
+        every { sessionManager.getOutputBuffer("session-1") } returns bufferFlow
+
+        viewModel.outputBuffer.test {
+            assertEquals("", awaitItem()) // stateIn 初始值
+
+            activeSessionFlow.value = session
+            assertEquals("hello", awaitItem()) // 切换会话后接入其输出缓冲
+
+            bufferFlow.value = "hello world"
+            assertEquals("hello world", awaitItem()) // 缓冲内容更新透传
+
+            activeSessionFlow.value = null
+            assertEquals("", awaitItem()) // 无活动会话回落空串
+
+            cancelAndIgnoreRemainingEvents()
+        }
     }
 }

@@ -84,4 +84,88 @@ class AiDetectorTest {
         // 关键断言：方法不抛异常，且返回值为合法 Set。
         assertNotNull(result, "detectReflectionTimingAnomaly() must return a non-null Set")
     }
+
+    // ---- 负向 / 边界用例（测试体系评估报告 P1-6）----
+    // 原则：不使用 mockkStatic(Build)（全局静态 mock 在并行 JVM 下易抖动，且污染同进程
+    // 其他测试）；正向爆发类断言依赖真实时钟（100ms 窗口），在慢机器上会假阴/假阳，
+    // 一律不做。以下用例全部基于纯函数输入输出，完全确定。
+
+    @Test
+    fun `sandbox touch timing - exactly 15 regular samples detected`() {
+        // 阈值上界：恰好 15 个样本（size < 15 才短路），间隔恒定必须触发
+        val timestamps = (0 until 15).map { 1000L + it * 5L }
+        val result = AiDetector.detectSandboxTouchTiming(timestamps)
+        assertTrue(
+            AiDetectionSignal.SANDBOX_TOUCH_TIMING in result,
+            "阈值边界（恰好 15 个样本）且间隔规律应触发 SANDBOX_TOUCH_TIMING"
+        )
+    }
+
+    @Test
+    fun `sandbox touch timing - 14 samples below threshold returns empty`() {
+        // 阈值下界：14 个样本必须走短路分支，不做统计、不抛异常
+        val timestamps = (0 until 14).map { 1000L + it * 5L }
+        val result = AiDetector.detectSandboxTouchTiming(timestamps)
+        assertTrue(
+            result.isEmpty(),
+            "14 个样本（阈值下界 -1）应直接返回空集合"
+        )
+    }
+
+    @Test
+    fun `sandbox touch timing - exactly 15 irregular samples not detected`() {
+        // 阈值上界 + 负向：恰好 15 个样本但间隔无规律，不应误报
+        val timestamps = listOf(
+            1000L, 1050L, 1100L, 1180L, 1250L, 1400L, 1450L, 1600L,
+            1700L, 1850L, 1900L, 2050L, 2200L, 2300L, 2500L
+        )
+        val result = AiDetector.detectSandboxTouchTiming(timestamps)
+        assertFalse(
+            AiDetectionSignal.SANDBOX_TOUCH_TIMING in result,
+            "阈值边界（恰好 15 个样本）且间隔无规律不应触发"
+        )
+    }
+
+    @Test
+    fun `sandbox touch timing - empty input returns empty`() {
+        assertTrue(
+            AiDetector.detectSandboxTouchTiming(emptyList()).isEmpty(),
+            "空输入应返回空集合而非抛异常"
+        )
+    }
+
+    @Test
+    fun `sandbox touch timing - zero variance duplicate timestamps detected`() {
+        // 病理输入：全部时间戳相同（脚本重放特征），stddev = 0 必须触发
+        val timestamps = List(20) { 1000L }
+        val result = AiDetector.detectSandboxTouchTiming(timestamps)
+        assertTrue(
+            AiDetectionSignal.SANDBOX_TOUCH_TIMING in result,
+            "全零间隔（stddev=0）应触发 SANDBOX_TOUCH_TIMING"
+        )
+    }
+
+    @Test
+    fun `sandbox touch timing - descending timestamps evaluated on interval variance`() {
+        // 固化当前行为：检测器不校验时间戳单调性，均匀递减（间隔恒为 -5ms）
+        // 方差同样为 0 并触发。输入单调性责任在埋点侧——若未来加了单调性校验，
+        // 本用例失败即为有意的行为变更提醒。
+        val timestamps = (0 until 20).map { 1000L - it * 5L }
+        val result = AiDetector.detectSandboxTouchTiming(timestamps)
+        assertTrue(
+            AiDetectionSignal.SANDBOX_TOUCH_TIMING in result,
+            "均匀递减时间戳（方差 0）按当前实现应触发"
+        )
+    }
+
+    @Test
+    fun `classloading burst - fewer than 20 recorded loads returns empty`() {
+        // 负向：记录数 < 20 时走短路分支（不依赖时钟窗口）
+        repeat(5) { AiDetector.recordClassLoad() }
+        val result = AiDetector.detectClassloadingBurst()
+        assertFalse(
+            AiDetectionSignal.CLASSLOADING_BURST in result,
+            "记录数 < 20 应直接返回空集合"
+        )
+    }
 }
