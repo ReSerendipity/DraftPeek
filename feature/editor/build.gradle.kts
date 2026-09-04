@@ -72,8 +72,8 @@ dependencies {
     implementation(libs.windowmanager)
 
     // Native Android code editor replacing WebView + CodeMirror
-    implementation("io.github.rosemoe:editor:0.24.6")
-    implementation("io.github.rosemoe:language-textmate:0.24.6")
+    implementation(libs.sora.editor)
+    implementation(libs.sora.language.textmate)
 
     // TreeSitter incremental parsing (Phase 4.1 — pilot: Java only)
     implementation(libs.sora.language.treesitter)
@@ -102,8 +102,10 @@ dependencies {
     testImplementation(libs.mockk)
     testImplementation(libs.turbine)
     testImplementation(libs.kotlinx.coroutines.test)
+    // 复用 core:testing 的 Fake/TestDataFactory（消除「孤儿测试模块」——此前全仓 0 引用）
+    testImplementation(project(":core:testing"))
     // 真实 org.json 实现：JVM 单元测试中 android.jar 的 org.json 是桩（length() 恒为 0）
-    testImplementation("org.json:json:20240303")
+    testImplementation(libs.json)
 
     // Android instrumented test dependencies (Compose UI Test)
     androidTestImplementation(platform(libs.compose.bom))
