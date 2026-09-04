@@ -11,9 +11,21 @@ android {
     compileSdk = libs.versions.compileSdk.get().toInt()
     buildToolsVersion = libs.versions.buildTools.get()
 
+    // R1: 生成 BuildConfig，用于注入远程策略 Ed25519 公钥
+    buildFeatures {
+        buildConfig = true
+    }
+
     defaultConfig {
         minSdk = libs.versions.minSdk.get().toInt()
         consumerProguardFiles("consumer-rules.pro")
+
+        // R1: 远程策略验签公钥（X.509 DER base64）。为空 → verifySignature fail-closed。
+        buildConfigField(
+            "String",
+            "POLICY_ED25519_PUBLIC_KEY",
+            "\"${project.findProperty("policyEd25519PublicKey") ?: ""}\""
+        )
     }
 
     compileOptions {
@@ -76,7 +88,7 @@ dependencies {
     testImplementation(libs.kotlinx.coroutines.test)
     testImplementation(libs.turbine)
     testImplementation(libs.mockwebserver)
-    testImplementation("org.json:json:20240303")
+    testImplementation(libs.json)
 }
 
 tasks.withType<Test>().configureEach {
