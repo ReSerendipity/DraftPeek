@@ -14,6 +14,8 @@ android {
     defaultConfig {
         minSdk = libs.versions.minSdk.get().toInt()
         consumerProguardFiles("consumer-rules.pro")
+        // MigrationTestHelper 需要 Instrumentation，必须跑在 androidTest
+        testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
     }
 
     compileOptions {
@@ -31,6 +33,15 @@ android {
         unitTests {
             isIncludeAndroidResources = true
             isReturnDefaultValues = true
+        }
+    }
+
+    // MigrationTestHelper 需要从测试 APK 的 assets 读取 Room 导出的 schema JSON
+    // （路径：<db canonical name 的 '.' 换成 '/'>/<version>.json）。
+    // 这里把 schema 导出目录注入 androidTest assets，否则 schema 校验会被静默跳过。
+    sourceSets {
+        getByName("androidTest") {
+            assets.srcDirs(files("$projectDir/schemas"))
         }
     }
 }
@@ -78,10 +89,16 @@ dependencies {
     testImplementation(libs.turbine)
     testImplementation(libs.robolectric)
     // AndroidX test core for ApplicationProvider (Robolectric tests)
-    testImplementation("androidx.test:core:1.6.1")
-    testImplementation("androidx.test.ext:junit:1.2.1")
+    testImplementation(libs.androidx.test.core)
+    testImplementation(libs.androidx.test.ext.junit)
     // JUnit Vintage engine for JUnit 4 tests (Robolectric @RunWith)
     testRuntimeOnly("org.junit.vintage:junit-vintage-engine:5.11.3")
+
+    // ===== androidTest（插桩测试）=====
+    // Room 迁移 schema 校验：MigrationTestHelper 依赖 Instrumentation，只能放 androidTest
+    androidTestImplementation(libs.room.testing)
+    androidTestImplementation(libs.androidx.test.runner)
+    androidTestImplementation(libs.androidx.test.ext.junit)
 }
 
 tasks.withType<Test>().configureEach {

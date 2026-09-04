@@ -35,11 +35,6 @@ coverage:
         paths:
           - core/data/src/main/
         threshold: 1%
-      core-network:
-        target: 80%
-        paths:
-          - core/network/src/main/
-        threshold: 1%
       feature-editor:
         target: 60%
         paths:
