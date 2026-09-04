@@ -30,15 +30,11 @@ import androidx.compose.material.icons.filled.Refresh
 import androidx.compose.material.icons.filled.Source
 import androidx.compose.material.icons.filled.Sync
 import androidx.compose.material3.CircularProgressIndicator
-import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
-import androidx.compose.material3.IconButton
 import androidx.compose.material3.Tab
 import androidx.compose.material3.TabRow
 import androidx.compose.material3.Text
-import androidx.compose.material3.TopAppBar
-import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
@@ -63,7 +59,9 @@ import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.draftpeek.core.common.vcs.GitFileStatus
 import com.draftpeek.core.common.vcs.GitStatus
 import com.draftpeek.core.ui.component.BrandFilledButton
+import com.draftpeek.core.ui.component.BrandIconButton
 import com.draftpeek.core.ui.component.BrandOutlinedTextField
+import com.draftpeek.core.ui.component.BrandTopBar
 import com.draftpeek.core.ui.theme.DraftPeekTypography
 import com.draftpeek.core.ui.theme.MonoLabelStyle
 import com.draftpeek.core.ui.theme.PrototypeSpacing
@@ -89,7 +87,6 @@ import com.draftpeek.feature.browser.viewmodel.GitViewModel
  * @param onNavigateBack 返回导航回调
  * @param viewModel Git 操作 ViewModel
  */
-@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun GitScreen(treeUri: Uri, onNavigateBack: () -> Unit, viewModel: GitViewModel = hiltViewModel()) {
     val uiState by viewModel.uiState.collectAsStateWithLifecycle()
@@ -115,33 +112,18 @@ fun GitScreen(treeUri: Uri, onNavigateBack: () -> Unit, viewModel: GitViewModel 
             .background(surface)
     ) {
         // Top bar
-        TopAppBar(
-            title = {
-                Text(
-                    text = stringResource(R.string.browser_git_screen_title),
-                    style = DraftPeekTypography.titleMedium,
-                    color = fg
-                )
-            },
-            navigationIcon = {
-                IconButton(onClick = onNavigateBack) {
-                    Icon(
-                        imageVector = Icons.AutoMirrored.Filled.ArrowBack,
-                        contentDescription = stringResource(android.R.string.cancel),
-                        tint = fg
-                    )
-                }
-            },
+        BrandTopBar(
+            title = stringResource(R.string.browser_git_screen_title),
+            onBack = onNavigateBack,
             actions = {
-                IconButton(onClick = { viewModel.refresh() }) {
+                BrandIconButton(onClick = { viewModel.refresh() }) {
                     Icon(
                         imageVector = Icons.Filled.Refresh,
                         contentDescription = stringResource(R.string.browser_git_action_fetch),
                         tint = muted
                     )
                 }
-            },
-            colors = TopAppBarDefaults.topAppBarColors(containerColor = surface)
+            }
         )
 
         // Branch info bar

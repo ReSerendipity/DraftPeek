@@ -13,17 +13,17 @@ import androidx.compose.animation.fadeIn
 import androidx.compose.animation.fadeOut
 import androidx.compose.animation.slideInVertically
 import androidx.compose.animation.slideOutVertically
+import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.KeyboardArrowUp
-import androidx.compose.material3.FloatingActionButton
-import androidx.compose.material3.FloatingActionButtonDefaults
 import androidx.compose.material3.Icon
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
+import com.draftpeek.core.ui.component.BrandIconButton
 import com.draftpeek.core.ui.theme.PrototypeTokens
 import com.draftpeek.feature.editor.R
 import io.github.rosemoe.sora.widget.CodeEditor
@@ -48,22 +48,16 @@ fun ScrollToTopButton(editor: CodeEditor, hasScrolled: Boolean, modifier: Modifi
         exit = fadeOut() + slideOutVertically { it },
         modifier = modifier
     ) {
-        FloatingActionButton(
-            onClick = {
-                editor.jumpToLine(0)
-            },
-            containerColor = PrototypeTokens.accentSoft,
-            contentColor = PrototypeTokens.accent,
-            elevation = FloatingActionButtonDefaults.elevation(
-                defaultElevation = 4.dp,
-                pressedElevation = 8.dp
-            ),
-            shape = CircleShape,
-            modifier = Modifier.size(48.dp)
+        BrandIconButton(
+            onClick = { editor.jumpToLine(0) },
+            modifier = Modifier
+                .size(48.dp)
+                .background(PrototypeTokens.accentSoft, CircleShape)
         ) {
             Icon(
                 imageVector = Icons.Filled.KeyboardArrowUp,
-                contentDescription = stringResource(R.string.editor_scroll_to_top)
+                contentDescription = stringResource(R.string.editor_scroll_to_top),
+                tint = PrototypeTokens.accent
             )
         }
     }

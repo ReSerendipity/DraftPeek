@@ -260,6 +260,8 @@ dependencies {
     implementation(libs.androidx.activity.compose)
     implementation(libs.androidx.appcompat)
     implementation(libs.datastore.preferences)
+    // Global Coil ImageLoaderFactory implementation in DraftPeekApp.
+    implementation(libs.coil)
 
     implementation(platform(libs.compose.bom))
     implementation(libs.compose.ui)

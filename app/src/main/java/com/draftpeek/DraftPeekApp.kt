@@ -16,6 +16,10 @@
 package com.draftpeek
 
 import android.app.Application
+import coil.ImageLoader
+import coil.ImageLoaderFactory
+import coil.disk.DiskCache
+import coil.memory.MemoryCache
 import androidx.appcompat.app.AppCompatDelegate
 import androidx.core.os.LocaleListCompat
 import androidx.datastore.core.DataStore
@@ -63,7 +67,27 @@ import timber.log.Timber
  * @see HiltAndroidApp
  */
 @HiltAndroidApp
-class DraftPeekApp : Application() {
+class DraftPeekApp : Application(), ImageLoaderFactory {
+
+    /**
+     * 全局 Coil 配置：限制图片缓存规模，统一内存/磁盘缓存目录，避免 Markdown
+     * 媒体预览在长会话中无限持有 Bitmap。
+     */
+    override fun newImageLoader(): ImageLoader = ImageLoader.Builder(this)
+        .memoryCache {
+            MemoryCache.Builder(this)
+                .maxSizePercent(0.20)
+                .build()
+        }
+        .diskCache {
+            DiskCache.Builder()
+                .directory(cacheDir.resolve("image_cache"))
+                .maxSizeBytes(64L * 1024 * 1024)
+                .build()
+        }
+        .crossfade(200)
+        .respectCacheHeaders(false)
+        .build()
 
     companion object {
         /**

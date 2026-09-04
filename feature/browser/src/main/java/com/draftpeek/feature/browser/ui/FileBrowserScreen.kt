@@ -76,7 +76,6 @@ import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
-import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.PlainTooltip
 import androidx.compose.material3.Text
@@ -138,6 +137,7 @@ import com.draftpeek.core.common.vcs.GitStatus
 import com.draftpeek.core.data.entity.RecentFile
 import com.draftpeek.core.ui.component.BrandChip
 import com.draftpeek.core.ui.component.BrandDialog
+import com.draftpeek.core.ui.component.BrandIconButton
 import com.draftpeek.core.ui.component.BrandDirectoryCard
 import com.draftpeek.core.ui.component.BrandFAB
 import com.draftpeek.core.ui.component.BrandFileCard
@@ -960,7 +960,7 @@ fun FileBrowserScreen(
                 },
                 actions = {
                     if (isGitRepo && gitUiEnabled) {
-                        IconButton(
+                        BrandIconButton(
                             onClick = {
                                 showGitActionSheet = true
                             },
@@ -4858,7 +4858,7 @@ private fun TooltipIconButton(
         tooltip = { PlainTooltip { Text(tooltip) } },
         state = rememberTooltipState()
     ) {
-        IconButton(onClick = onClick, modifier = modifier.minimumTouchTarget()) {
+        BrandIconButton(onClick = onClick, modifier = modifier) {
             content()
         }
     }

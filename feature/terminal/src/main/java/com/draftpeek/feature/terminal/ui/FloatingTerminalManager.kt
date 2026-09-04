@@ -34,9 +34,9 @@ import androidx.compose.material.icons.filled.Close
 import androidx.compose.material.icons.filled.Minimize
 import androidx.compose.material.icons.filled.OpenInFull
 import androidx.compose.material3.Icon
-import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
+import com.draftpeek.core.ui.component.BrandIconButton
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
@@ -449,14 +449,14 @@ private fun FloatingTerminalContent(
                             color = MaterialTheme.colorScheme.onSurfaceVariant
                         )
                         Spacer(modifier = Modifier.weight(1f))
-                        IconButton(onClick = onMinimize, modifier = Modifier.size(32.dp)) {
+                        BrandIconButton(onClick = onMinimize, modifier = Modifier.size(32.dp)) {
                             Icon(
                                 Icons.Default.Minimize,
                                 contentDescription = stringResource(R.string.terminal_minimize),
                                 modifier = Modifier.size(16.dp)
                             )
                         }
-                        IconButton(onClick = onClose, modifier = Modifier.size(32.dp)) {
+                        BrandIconButton(onClick = onClose, modifier = Modifier.size(32.dp)) {
                             Icon(
                                 Icons.Default.Close,
                                 contentDescription = stringResource(R.string.terminal_floating_close),
