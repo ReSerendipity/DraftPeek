@@ -84,6 +84,10 @@ android {
 
     lint {
         disable += setOf("MissingTranslation", "ExtraTranslation")
+        // 冻结存量 lint 债务（测试体系评估报告 P2-8）：基线中记录当前全部存量问题，
+        // CI 的 lint 门禁此后只对新代码引入的问题报警——「存量冻结、增量收紧」。
+        // 存量清偿后可用 ./gradlew :app:updateLintBaseline<Variant> 重新生成收窄基线。
+        baseline = file("lint-baseline.xml")
     }
 
     buildTypes {
@@ -313,8 +317,8 @@ dependencies {
     testImplementation(libs.turbine)
     testImplementation(libs.robolectric)
     // AndroidX test core for ApplicationProvider (Robolectric tests)
-    testImplementation("androidx.test:core:1.6.1")
-    testImplementation("androidx.test.ext:junit:1.2.1")
+    testImplementation(libs.androidx.test.core)
+    testImplementation(libs.androidx.test.ext.junit)
     // JUnit Vintage engine for JUnit 4 tests (Robolectric @RunWith)
     testRuntimeOnly("org.junit.vintage:junit-vintage-engine:5.11.3")
 }
