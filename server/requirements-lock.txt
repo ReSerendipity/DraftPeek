@@ -1,0 +1,32 @@
+# DraftPeek Server — transitive dependency lock (R7)
+# Generated from a verified-working environment (server pytest suite: 37 passed).
+# Direct dependencies are pinned in server/requirements.txt; this file additionally
+# pins their transitive closure for reproducible installs:
+#   pip install -r server/requirements-lock.txt
+#
+# Generated: 2026-09-04
+#
+# NOTE: websockets is forced to 13.1 here to stay consistent with
+# server/requirements.txt (crdt_server.py uses the legacy API; do not bump).
+#
+aiosqlite==0.22.1
+annotated_doc==0.0.5
+annotated_types==0.8.0
+anyio==4.14.2
+certifi==2026.7.22
+click==8.4.2
+colorama==0.4.6
+fastapi==0.141.1
+h11==0.16.0
+httpcore==1.0.9
+httpx==0.28.1
+idna==3.18
+pycrdt==0.14.4
+pydantic==2.13.4
+pydantic_core==2.46.4
+python_multipart==0.0.32
+starlette==1.6.0
+typing_extensions==4.16.0
+typing_inspection==0.4.2
+uvicorn==0.52.4
+websockets==13.1

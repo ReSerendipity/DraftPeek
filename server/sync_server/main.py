@@ -46,12 +46,13 @@ import hmac
 import logging
 import os
 import time
-from datetime import datetime
+from contextlib import asynccontextmanager
+from datetime import datetime, timezone
 from pathlib import Path
 from typing import Optional
 
 import aiosqlite
-from fastapi import FastAPI, File, Form, HTTPException, Request, UploadFile, Depends
+from fastapi import Depends, FastAPI, File, Form, HTTPException, Request, UploadFile
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import JSONResponse, Response
 from pydantic import BaseModel
@@ -66,14 +67,33 @@ logger = logging.getLogger("sync_server")
 app = FastAPI(
     title="DraftPeek Sync Server",
     description="Cloud synchronization server for DraftPeek",
-    version="1.1.0"
+    version="1.1.0",
 )
 
+
+# ─── Lifespan (replaces deprecated @app.on_event) ──────────────────────────
+@asynccontextmanager
+async def lifespan(app: FastAPI):
+    await init_db()
+    yield
+    await close_db()
+
+
 # ─── CORS ─────────────────────────────────────────────────────────────────
+# Never combine a wildcard origin with allow_credentials: browsers reject it
+# and it is a known CORS misconfiguration (sync report P1-5). When
+# SYNC_ALLOWED_ORIGINS is unset (the default for this experimental, off-by-
+# default service) the allow-list is empty, so cross-origin requests are
+# refused rather than wide open.
+ALLOWED_ORIGINS = [
+    o.strip()
+    for o in os.environ.get("SYNC_ALLOWED_ORIGINS", "").split(",")
+    if o.strip()
+]
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["*"],  # Production: restrict to known origins
-    allow_credentials=True,
+    allow_origins=ALLOWED_ORIGINS,
+    allow_credentials=bool(ALLOWED_ORIGINS),
     allow_methods=["*"],
     allow_headers=["*"],
 )
@@ -87,6 +107,31 @@ MAX_UPLOAD_SIZE = int(os.environ.get("SYNC_MAX_UPLOAD_BYTES", str(100 * 1024 * 1
 # ─── Auth ──────────────────────────────────────────────────────────────────
 _AUTH_USER = os.environ.get("SYNC_AUTH_USERNAME", "").strip()
 _AUTH_PASS = os.environ.get("SYNC_AUTH_PASSWORD", "").strip()
+
+# R2 整改：绑定地址与鉴权策略
+# 原实现在凭据为空时 `_verify_basic_auth` 直接返回 True（fail-open），
+# 一旦以 SYNC_HOST=0.0.0.0 启动即成为无鉴权的开放服务。
+# 现改为：默认仅监听回环地址；监听非回环地址**必须**配置凭据，否则拒绝启动。
+SYNC_HOST = os.environ.get("SYNC_HOST", "127.0.0.1").strip()
+_SYNC_REQUIRE_AUTH = os.environ.get(
+    "SYNC_REQUIRE_AUTH", ""
+).lower() in ("1", "true", "yes")
+
+_LOOPBACK_HOSTS = frozenset({"127.0.0.1", "localhost", "::1"})
+
+
+def _is_loopback_bind() -> bool:
+    """是否仅监听回环地址。"""
+    return SYNC_HOST in _LOOPBACK_HOSTS
+
+
+def _auth_required() -> bool:
+    """是否强制鉴权：非回环地址一律强制；回环地址可用 SYNC_REQUIRE_AUTH 强制。"""
+    return _SYNC_REQUIRE_AUTH or not _is_loopback_bind()
+
+
+def _credentials_configured() -> bool:
+    return bool(_AUTH_USER and _AUTH_PASS)
 
 # ─── Rate limiting (P1 fix) ───────────────────────────────────────────────
 RATE_LIMIT_PER_MINUTE = int(os.environ.get("SYNC_RATE_LIMIT_PER_MIN", "60"))
@@ -132,9 +177,15 @@ def _check_magic(ext: str, content: bytes) -> bool:
 
 
 def _verify_basic_auth(authorization: str | None) -> bool:
-    """Verify Basic Auth credentials (constant-time comparison)."""
+    """Verify Basic Auth credentials (constant-time comparison).
+
+    R2 整改（fail-open → fail-closed）：
+    原实现在凭据未配置时直接 return True。若以 SYNC_HOST=0.0.0.0 启动，
+    即成为完全无鉴权的开放服务。现改为：仅当监听回环地址（本地开发）且未显式
+    强制鉴权时才允许免鉴权；监听非回环地址时，凭据缺失 → 拒绝全部请求。
+    """
     if not _AUTH_USER or not _AUTH_PASS:
-        return True
+        return not _auth_required()
     if not authorization or not authorization.startswith("Basic "):
         return False
     try:
@@ -241,16 +292,6 @@ async def get_db() -> aiosqlite.Connection:
     return _db
 
 
-@app.on_event("startup")
-async def startup():
-    await init_db()
-
-
-@app.on_event("shutdown")
-async def shutdown():
-    await close_db()
-
-
 # ─── Pydantic models ──────────────────────────────────────────────────────
 class FileMeta(BaseModel):
     path: str
@@ -314,7 +355,7 @@ async def middleware(request: Request, call_next):
 # ─── Endpoints ─────────────────────────────────────────────────────────────
 @app.get("/sync/health")
 async def health_check():
-    return {"status": "healthy", "timestamp": datetime.utcnow().isoformat()}
+    return {"status": "healthy", "timestamp": datetime.now(timezone.utc).isoformat()}
 
 
 @app.post("/sync/upload", response_model=SyncResponse)
@@ -367,7 +408,7 @@ async def upload_file(
     safe_path.write_bytes(content)
 
     new_version = meta_version + 1
-    now = datetime.utcnow().isoformat()
+    now = datetime.now(timezone.utc).isoformat()
 
     # Upsert metadata (P2 fix: SQLite with proper transaction)
     await db.execute(
@@ -496,7 +537,7 @@ async def batch_sync(request: Request, db: aiosqlite.Connection = Depends(get_db
                     safe_path.parent.mkdir(parents=True, exist_ok=True)
                     safe_path.write_bytes(content)
                     new_version = meta_version + 1
-                    now = datetime.utcnow().isoformat()
+                    now = datetime.now(timezone.utc).isoformat()
 
                     await db.execute(
                         """
@@ -536,15 +577,29 @@ async def batch_sync(request: Request, db: aiosqlite.Connection = Depends(get_db
 if __name__ == "__main__":
     import uvicorn
 
-    host = os.environ.get("SYNC_HOST", "127.0.0.1")
+    host = SYNC_HOST
     port = int(os.environ.get("SYNC_PORT", "8000"))
+
+    # R2 fail-fast：监听非回环地址但未配置凭据 → 拒绝启动，杜绝无鉴权开放服务。
+    # （_verify_basic_auth 内亦有 fail-closed 兜底，覆盖 uvicorn 外部启动的场景）
+    if _auth_required() and not _credentials_configured():
+        logger.error(
+            "SECURITY: refusing to start. Sync server is bound to '%s' (non-loopback) but "
+            "SYNC_AUTH_USERNAME / SYNC_AUTH_PASSWORD are not configured. "
+            "Set credentials, or bind to 127.0.0.1 for local-only use.",
+            host,
+        )
+        raise SystemExit(2)
 
     logger.info(f"Starting DraftPeek Sync Server on {host}:{port}")
     logger.info(f"Storage directory: {STORAGE_DIR.absolute()}")
     logger.info(f"Database: {DB_PATH}")
     logger.info(f"Max upload size: {MAX_UPLOAD_SIZE} bytes")
     logger.info(f"Rate limit: {RATE_LIMIT_PER_MINUTE} req/min")
-    logger.info(f"Basic Auth: {'enabled' if _AUTH_USER else 'disabled (local-only default)'}")
+    logger.info(
+        f"Basic Auth: {'enabled' if _credentials_configured() else 'disabled (loopback-only)'}"
+        f" | bind={host} | authRequired={_auth_required()}"
+    )
     logger.info(f"Magic whitelist: {sorted(_MAGIC_EXTS) if _MAGIC_EXTS else 'disabled (arbitrary file sync)'}")
 
     uvicorn.run(app, host=host, port=port)
