@@ -218,7 +218,10 @@ class DraftPeekApp : Application() {
                         SecurityGate.updateEnvironmentSafe(false)
                     }
                     AntiDebug.SecurityLevel.SAFE -> {
-                        SecurityGate.updateEnvironmentSafe(true)
+                        // R4 配套修复：完整性判定为篡改时，不得把 environmentSafe 复位为 true。
+                        // 否则 performIntegrityCheck() 设置的全量降级（写禁用）
+                        // 会在下一轮周期性检测的 SAFE 结果中被覆盖而失效。
+                        SecurityGate.updateEnvironmentSafe(isIntegrityVerified)
                     }
                 }
             }
@@ -267,7 +270,28 @@ class DraftPeekApp : Application() {
                     Timber.w("Security code integrity check failed: $securityCodeResult")
                 }
 
-                // 功能降级：SecurityGate 会阻止敏感操作（保存、导出、创建文件）
+                // ===== R4 整改：完整性失败不再是"仅日志" =====
+                // 原实现只打日志 + updateIntegrity(false)，主完整性路径对 Tampered 无实际阻断动作。
+                // 现按评估报告的"至少 SecurityGate 全量降级（写禁用）"落地：
+                //   - 确定性篡改（Tampered）→ updateIntegrity(false) 已置位，
+                //     再置 updateEnvironmentSafe(false)，使
+                //     SecurityGate.isOperationAllowed() = integrityOk && environmentSafe = false，
+                //     实现写禁用（保存/导出/新建被拦）。
+                //   - 瞬时错误（Error，如 I/O 异常）→ 仅降级完整性门，避免误伤正常用户。
+                //
+                // 此处刻意**不** killProcess：ApkIntegrityChecker 在构建期基线
+                // OFFICIAL_SIGNATURE_SHA256 为空（CI / 未签名构建）时同样会返回 Tampered，
+                // 直接终止会误杀未签名构建。进程终止由 AiDetector 的 SIGNATURE_MISMATCH
+                // 路径负责（该路径已校验构建期基线存在，见 AiDetector.verifyOfficialSignature）。
+                val definitiveTamper =
+                    signatureResult is ApkIntegrityChecker.IntegrityResult.Tampered ||
+                        dexResult is DexIntegrityChecker.DexResult.Tampered ||
+                        securityCodeResult is SecurityIntegrityChecker.IntegrityCheckResult.Tampered
+
+                if (definitiveTamper) {
+                    Timber.w("Integrity: definitive tampering detected — enforcing full SecurityGate lockdown")
+                    SecurityGate.updateEnvironmentSafe(false)
+                }
             }
         }
     }

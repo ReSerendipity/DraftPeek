@@ -281,10 +281,17 @@ static jint native_perform_security_check(
 /*
  * B 层精选：字符串加密密钥片 3/3
  * P2-1: Dynamically registered via RegisterNatives.
+ *
+ * R8 (2026-09-04): 计划未实现 —— BUILD_PERIOD_REPLACE 构建期替换步骤尚未接线，
+ * 本函数恒返回全零占位。B 层字符串加密整体为脚手架：IR 插件
+ * （StringEncIrGenerationExtension）从未被注册、Transformer 为 no-op、
+ * SecureStringResolver 无调用方，故此占位不影响任何实际功能。
+ * 启用 B 层前须同时完成：构建期替换本分片 + IR 插件使用相同分片，
+ * 否则密钥不一致将导致解密失败。
  */
 static jbyteArray native_get_key_fragment3(
     JNIEnv *env, jobject thiz) {
-    /* BUILD_PERIOD_REPLACE: KEY_FRAGMENT_3_BYTES */
+    /* BUILD_PERIOD_REPLACE: KEY_FRAGMENT_3_BYTES（计划未实现，R8） */
     jbyte placeholder[] = {0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
                            0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00};
     jbyteArray result = (*env)->NewByteArray(env, 16);
