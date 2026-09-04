@@ -109,6 +109,7 @@ import com.draftpeek.core.common.util.FileUtils
 import com.draftpeek.core.data.entity.Snippet
 import com.draftpeek.core.ui.component.BrandDialog
 import com.draftpeek.core.ui.component.BrandFilledButton
+import com.draftpeek.core.ui.component.BrandIconButton
 import com.draftpeek.core.ui.component.BrandFilterChip
 import com.draftpeek.core.ui.component.BrandOutlinedButton
 import com.draftpeek.core.ui.component.BrandOutlinedTextField
@@ -1816,7 +1817,7 @@ private fun TooltipIconButton(
         tooltip = { PlainTooltip { Text(tooltip) } },
         state = rememberTooltipState()
     ) {
-        IconButton(onClick = onClick, modifier = modifier) {
+        BrandIconButton(onClick = onClick, modifier = modifier) {
             content()
         }
     }

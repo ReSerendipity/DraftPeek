@@ -8,8 +8,6 @@ package com.draftpeek.feature.stats.ui.component
 
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.KeyboardArrowDown
-import androidx.compose.material3.Button
-import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.DropdownMenu
 import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.Icon
@@ -21,7 +19,7 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
-import com.draftpeek.core.ui.theme.BrandShapes
+import com.draftpeek.core.ui.component.BrandTonalButton
 import com.draftpeek.core.ui.theme.PrototypeTokens
 
 /**
@@ -40,23 +38,12 @@ fun YearSelector(selectedYear: Int, onYearSelected: (Int) -> Unit, modifier: Mod
     val currentYear = java.time.LocalDate.now().year
     val years = (currentYear - 4..currentYear).toList().reversed()
 
-    Button(
+    BrandTonalButton(
         onClick = { expanded = true },
-        modifier = modifier,
-        shape = BrandShapes.Card,
-        colors = ButtonDefaults.buttonColors(
-            containerColor = PrototypeTokens.accentSoft,
-            contentColor = PrototypeTokens.accent
-        )
+        modifier = modifier
     ) {
-        Text(
-            text = "$selectedYear",
-            style = typography.labelLarge
-        )
-        Icon(
-            imageVector = Icons.Default.KeyboardArrowDown,
-            contentDescription = null
-        )
+        Text(text = "$selectedYear", style = typography.labelLarge)
+        Icon(imageVector = Icons.Default.KeyboardArrowDown, contentDescription = null)
     }
 
     DropdownMenu(

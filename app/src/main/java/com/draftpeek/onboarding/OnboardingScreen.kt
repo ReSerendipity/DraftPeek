@@ -30,6 +30,8 @@ import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import com.draftpeek.core.ui.component.BrandFilledButton
+import com.draftpeek.core.ui.component.BrandOutlinedButton
 import com.draftpeek.core.ui.theme.*
 import kotlin.random.Random
 import kotlinx.coroutines.delay
@@ -309,15 +311,9 @@ private fun InkStampStep4(onComplete: () -> Unit, onStartOver: () -> Unit) {
 
         Spacer(Modifier.height(24.dp))
 
-        Button(
+        BrandFilledButton(
             onClick = onComplete,
-            shape = PrototypeShapes.Pill,
-            colors = ButtonDefaults.buttonColors(
-                containerColor = accent,
-                contentColor = onPrimary
-            ),
             modifier = Modifier
-                .height(48.dp)
                 .width(200.dp)
                 .graphicsLayer { alpha = opacity.value }
         ) {
@@ -600,11 +596,9 @@ private fun PageTurnStep4(onComplete: () -> Unit, onStartOver: () -> Unit) {
             modifier = Modifier.graphicsLayer { alpha = opacity.value }
         )
         Spacer(Modifier.height(24.dp))
-        Button(
+        BrandFilledButton(
             onClick = onComplete,
-            shape = PrototypeShapes.Pill,
-            colors = ButtonDefaults.buttonColors(containerColor = accent, contentColor = onPrimary),
-            modifier = Modifier.height(48.dp).width(200.dp).graphicsLayer { alpha = opacity.value }
+            modifier = Modifier.width(200.dp).graphicsLayer { alpha = opacity.value }
         ) {
             Text("Start Exploring", fontWeight = FontWeight.SemiBold, fontSize = 15.sp)
         }
@@ -872,15 +866,9 @@ private fun MinimalStep4(onComplete: () -> Unit, onStartOver: () -> Unit) {
             modifier = Modifier.graphicsLayer { alpha = opacity.value }
         )
         Spacer(Modifier.height(24.dp))
-        OutlinedButton(
+        BrandOutlinedButton(
             onClick = onComplete,
-            shape = PrototypeShapes.Pill,
-            border = BorderStroke(2.dp, accent),
-            colors = ButtonDefaults.outlinedButtonColors(
-                contentColor = accent
-            ),
             modifier = Modifier
-                .height(48.dp)
                 .width(200.dp)
                 .graphicsLayer { alpha = opacity.value }
         ) {

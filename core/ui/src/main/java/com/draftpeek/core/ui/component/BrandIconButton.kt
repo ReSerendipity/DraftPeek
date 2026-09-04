@@ -4,6 +4,7 @@ import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.BoxScope
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.shape.CircleShape
@@ -90,4 +91,31 @@ fun BrandIconButton(
             }
         }
     }
+}
+
+/**
+ * Brand icon button overload for custom vector/icon content.
+ * Use this when the icon is provided by the app's StrokeIcon system.
+ */
+@Composable
+fun BrandIconButton(
+    onClick: () -> Unit,
+    modifier: Modifier = Modifier,
+    content: @Composable BoxScope.() -> Unit
+) {
+    val interactionSource = remember { MutableInteractionSource() }
+    Box(
+        modifier = modifier
+            .clickable(
+                interactionSource = interactionSource,
+                indication = null,
+                onClick = onClick
+            )
+            .minimumTouchTarget()
+            .size(PrototypeSpacing.IconButtonSize)
+            .clip(BrandShapes.IconButton)
+            .pressScaleEffect(),
+        contentAlignment = Alignment.Center,
+        content = content
+    )
 }

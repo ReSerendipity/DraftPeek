@@ -15,8 +15,11 @@
  */
 package com.draftpeek.core.designsystem.theme
 
+import android.os.Build
 import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.dynamicDarkColorScheme
+import androidx.compose.material3.dynamicLightColorScheme
 import androidx.compose.material3.darkColorScheme
 import androidx.compose.material3.lightColorScheme
 import androidx.compose.runtime.Composable
@@ -349,11 +352,19 @@ fun DraftPeekTheme(
     darkTheme: Boolean = isSystemInDarkTheme(),
     accessibilityState: AccessibilityState = AccessibilityState.Default,
     appFonts: AppFonts = AppFonts(),
+    dynamicColor: Boolean = true,
     content: @Composable () -> Unit
 ) {
-    val baseScheme = if (darkTheme) DarkColorScheme else LightColorScheme
+    val context = androidx.compose.ui.platform.LocalContext.current
+    val systemScheme = if (dynamicColor && Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
+        if (darkTheme) dynamicDarkColorScheme(context) else dynamicLightColorScheme(context)
+    } else {
+        null
+    }
+    val baseScheme = systemScheme ?: if (darkTheme) DarkColorScheme else LightColorScheme
 
     // 高对比度模式：使用专门的高对比度配色方案
+    // 高对比度和色盲模式优先于系统动态取色，确保无障碍设置具有确定性。
     val colorScheme = if (accessibilityState.highContrastMode) {
         HighContrastScheme.scheme(darkTheme)
     } else {

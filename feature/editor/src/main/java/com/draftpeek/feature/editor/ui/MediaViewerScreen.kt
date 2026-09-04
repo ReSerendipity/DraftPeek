@@ -131,6 +131,8 @@ private fun ImageViewer(fileUri: Uri, modifier: Modifier = Modifier) {
     val imageRequest = remember(fileUri) {
         ImageRequest.Builder(context)
             .data(fileUri)
+            // 限制解码尺寸，避免高分辨率 Markdown 图片按原始尺寸占满堆内存。
+            .size(1920, 1920)
             .crossfade(true)
             .build()
     }

@@ -23,8 +23,8 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.material3.IconButton
 import androidx.compose.material3.Text
+import com.draftpeek.core.ui.component.BrandIconButton
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -98,7 +98,7 @@ fun MarkdownContextBar(
                     textDecoration = TextDecoration.LineThrough,
                     onClick = { onFormatAction(MarkdownFormatAction.Wrap("~~", "~~", "")) }
                 )
-                IconButton(onClick = {
+                BrandIconButton(onClick = {
                     onFormatAction(MarkdownFormatAction.Wrap("==", "==", ""))
                 }, modifier = Modifier.size(36.dp)) {
                     StrokeIcon(
@@ -107,7 +107,7 @@ fun MarkdownContextBar(
                         modifier = Modifier.size(18.dp)
                     )
                 }
-                IconButton(onClick = {
+                BrandIconButton(onClick = {
                     onFormatAction(MarkdownFormatAction.Wrap("`", "`", ""))
                 }, modifier = Modifier.size(36.dp)) {
                     StrokeIcon(
@@ -118,7 +118,7 @@ fun MarkdownContextBar(
                 }
 
                 // Structure group
-                IconButton(onClick = {
+                BrandIconButton(onClick = {
                     onFormatAction(MarkdownFormatAction.LinePrefix("> "))
                 }, modifier = Modifier.size(36.dp)) {
                     StrokeIcon(
@@ -127,7 +127,7 @@ fun MarkdownContextBar(
                         modifier = Modifier.size(18.dp)
                     )
                 }
-                IconButton(onClick = {
+                BrandIconButton(onClick = {
                     onFormatAction(MarkdownFormatAction.Insert("[", 1))
                 }, modifier = Modifier.size(36.dp)) {
                     StrokeIcon(
