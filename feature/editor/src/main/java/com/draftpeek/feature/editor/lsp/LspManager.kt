@@ -100,6 +100,12 @@ class LspManager @Inject constructor(
 
     private val scope = CoroutineScope(SupervisorJob() + Dispatchers.IO)
 
+    /**
+     * 专用于关闭流程的作用域。与 [scope] 独立，[shutdownAll] 会取消 [scope]，
+     * 因此关闭任务必须跑在不会被自己取消的作用域里。
+     */
+    private val shutdownScope = CoroutineScope(SupervisorJob() + Dispatchers.IO)
+
     private val clients = mutableMapOf<String, LspClient>()
 
     private val clientMutex = Mutex()
@@ -673,8 +679,14 @@ class LspManager @Inject constructor(
      * 关闭所有 LSP 客户端并释放资源。
      * 取消所有进行中的协程，关闭所有客户端，清理所有缓存状态。
      * 应在应用终止时调用以确保资源正确释放。
+     *
+     * **挂起函数（非 `runBlocking`）**：关闭客户端本身是挂起操作，调用方必须处于协程中。
+     * 原先这里用 `runBlocking` 在已取消的 [scope] 上强行同步等待，属于铁律违规
+     * （主代码阻塞线程 + 在已取消作用域内执行）；现改为「先摘取客户端快照 → 再关闭 →
+     * 最后取消 [scope]」，顺序调整后无需任何阻塞桥接。
+     * 非挂起上下文的调用方请改用 [shutdownAllAsync]。
      */
-    fun shutdownAll() {
+    suspend fun shutdownAll() {
         // 清理所有补全代次计数器（使所有进行中的请求在返回时视为过期）
         completionGenerations.clear()
 
@@ -682,24 +694,44 @@ class LspManager @Inject constructor(
         clientInitJobs.values.forEach { it.cancel() }
         clientInitJobs.clear()
 
-        // 取消协程作用域中的所有子协程
-        scope.cancel()
+        // 先在锁内摘出待关闭客户端的快照并清空注册表，
+        // 这样后续关闭过程不再依赖 [scope]，也避免关闭期间又有人拿到已关闭的客户端。
+        val clientsToShutdown = clientMutex.withLock {
+            val snapshot = clients.values.toList()
+            clients.clear()
+            snapshot
+        }
 
-        // 在当前协程上下文中同步关闭客户端（避免启动新协程，因为scope已取消）
-        kotlinx.coroutines.runBlocking {
-            clientMutex.withLock {
-                clients.values.forEach { client ->
-                    try {
-                        client.shutdown()
-                    } catch (e: Exception) {
-                        Log.e(TAG, "Error shutting down LSP client", e)
-                    }
-                }
-                clients.clear()
+        clientsToShutdown.forEach { client ->
+            try {
+                client.shutdown()
+            } catch (e: Exception) {
+                Log.e(TAG, "Error shutting down LSP client", e)
             }
         }
+
+        // 客户端全部关闭后再取消作用域，避免"取消在先、关闭在后"导致的竞态
+        scope.cancel()
+
         _clientStatus.value = emptyMap()
         documentVersions.clear()
+    }
+
+    /**
+     * [shutdownAll] 的非挂起入口，供 `onCleared()` 等非协程上下文使用。
+     *
+     * 使用与 [scope] 相互独立的 [shutdownScope]：它不会被 [shutdownAll] 内部的
+     * `scope.cancel()` 取消，因此可以确保关闭流程被完整执行（而不是像旧实现那样
+     * 必须靠 `runBlocking` 强行等待）。
+     *
+     * @return 关闭流程的 [Job]，通常无需 join
+     */
+    fun shutdownAllAsync(): Job = shutdownScope.launch {
+        try {
+            shutdownAll()
+        } catch (e: Exception) {
+            Log.e(TAG, "Error during async LSP shutdown", e)
+        }
     }
 }
 
