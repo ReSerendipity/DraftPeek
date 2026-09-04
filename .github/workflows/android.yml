@@ -17,6 +17,10 @@ name: Android CI
 
 on:
   workflow_dispatch:
+  schedule:
+    # 夜间全量档：每日 02:00 UTC（北京时间 10:00）在默认分支跑全流程，
+    # 使 macrobenchmark（夜间性能基线）与全矩阵 instrumented 测试周期性执行。
+    - cron: '0 2 * * *'
   push:
     branches: [main, develop]
   pull_request:
@@ -86,7 +90,8 @@ jobs:
       - name: Build Debug APK
         run: ./gradlew assembleDebug --stacktrace
 
-      # 单元测试是真正的门禁：546 个用例全部通过即视为构建健康。
+      # 单元测试是真正的门禁：约 1058 个用例（@Test 实测统计，见测试体系评估报告 §0）
+      # 全部通过即视为构建健康。
       # JaCoCo 报告生成与之解耦——历史 run 因未启用 enableUnitTestCoverage
       # 且 productFlavor 改变了测试变体名（testDevDebugUnitTest 而非 testDebugUnitTest），
       # jacocoTestReport 任务找不到 .exec 而失败，导致整条 CI 假红。
@@ -198,27 +203,35 @@ jobs:
           fail_ci_if_error: false
           verbose: true
 
-  # Instrumented 测试 — 在 Android 模拟器上运行 Compose UI 测试和 DAO 测试
-  # 多 API 级别矩阵：覆盖 minSdk(26)、中间版本(30)、高版本(34)
+  # Instrumented 测试矩阵选择器（分级门禁，见测试体系评估报告 Q2）：
+  # - PR 档（pull_request）：只跑 API 30（google_apis）单机型，控制 PR 时长增量约 +20min；
+  # - 全量档（workflow_dispatch / schedule）：API 26 / 30 / 34 全矩阵，发布前或夜间执行。
+  # 动态矩阵必须经由 setup job 的 outputs 注入，strategy.matrix 不支持内联条件。
+  instrumented-matrix:
+    name: Select Instrumented Matrix
+    runs-on: ubuntu-latest
+    needs: build-and-test
+    if: github.event_name == 'pull_request' || github.event_name == 'workflow_dispatch' || github.event_name == 'schedule'
+    outputs:
+      matrix: ${{ steps.set-matrix.outputs.matrix }}
+    steps:
+      - id: set-matrix
+        run: |
+          if [ "${{ github.event_name }}" = "pull_request" ]; then
+            echo 'matrix={"include":[{"api-level":30,"target":"google_apis","arch":"x86_64"}]}' >> "$GITHUB_OUTPUT"
+          else
+            echo 'matrix={"include":[{"api-level":26,"target":"default","arch":"x86_64"},{"api-level":30,"target":"google_apis","arch":"x86_64"},{"api-level":34,"target":"google_apis","arch":"x86_64"}]}' >> "$GITHUB_OUTPUT"
+          fi
+
   instrumented-tests:
-    if: github.event_name == 'workflow_dispatch'
+    if: github.event_name == 'pull_request' || github.event_name == 'workflow_dispatch' || github.event_name == 'schedule'
     name: Instrumented Tests (API ${{ matrix.api-level }})
     runs-on: ubuntu-latest
     timeout-minutes: 45
-    needs: build-and-test
+    needs: [build-and-test, instrumented-matrix]
     strategy:
       fail-fast: false
-      matrix:
-        include:
-          - api-level: 26
-            target: default
-            arch: x86_64
-          - api-level: 30
-            target: google_apis
-            arch: x86_64
-          - api-level: 34
-            target: google_apis
-            arch: x86_64
+      matrix: ${{ fromJSON(needs.instrumented-matrix.outputs.matrix) }}
 
     steps:
       - name: Checkout
@@ -353,10 +366,11 @@ jobs:
 
   # Macrobenchmark 性能测试 — 在 Android 模拟器上运行启动基准测试和文件读取基准测试
   # 使用 Release 构建（minified）以获取真实的性能数据
+  # 档位（测试体系评估报告 Q2）：夜间 schedule 档 + 手动 dispatch 档，不阻塞 PR。
   # 注意：AGP 8.7.x 有 Baseline Profile 生成器崩溃已知问题（Gotcha #13），
   #       因此仅运行 benchmark 测试，不生成 Baseline Profile。
   macrobenchmark:
-    if: github.event_name == 'workflow_dispatch'
+    if: github.event_name == 'workflow_dispatch' || github.event_name == 'schedule'
     name: Macrobenchmark (API ${{ matrix.api-level }})
     runs-on: ubuntu-latest
     timeout-minutes: 45
