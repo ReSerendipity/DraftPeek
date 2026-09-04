@@ -6,7 +6,8 @@
 #   1) dependency-review —— PR 中依赖变更的漏洞审查（GitHub 官方，基于 OSV）
 #   2) CodeQL         —— 静态安全分析（kotlin/java），security-and-quality 套件
 #   3) secret-scan    —— 密钥泄露扫描（Trivy FS，学习 Image_MultiModel）
-#   4) 定时任务       —— 每周定期全量安全扫描
+#   4) python-security —— server/ Python 供应链审计（pip-audit）+ SAST（bandit）（R7 补强）
+#   5) 定时任务       —— 每周定期全量安全扫描
 # ============================================================
 
 name: Security Review
@@ -126,3 +127,36 @@ jobs:
           # mapping.txt 为 R8 混淆映射（115MB，含大量 hex），一并跳过。
           skip-dirs: '_archive, */build, .gradle, .kotlin, .idea, node_modules, logs, .cxx'
           skip-files: '*.log, mapping.txt'
+
+  # ── 4. Python 供应链审计 + SAST（R7 补强）────────────────
+  # 与 CodeQL（仅 java-kotlin）、Trivy（仅 secret）互补：
+  #   pip-audit —— 按 server/requirements-lock.txt 审计已知漏洞
+  #   bandit    —— 对 server/ 做 Python 静态安全扫描
+  python-security:
+    name: Python Security (pip-audit + bandit)
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Set up Python 3.12
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+
+      - name: Install locked server dependencies
+        run: |
+          python -m pip install --upgrade pip
+          pip install -r server/requirements-lock.txt
+
+      - name: pip-audit (known vulnerability scan)
+        run: |
+          pip install pip-audit
+          pip-audit -r server/requirements-lock.txt --strict
+
+      - name: bandit (Python SAST on server/)
+        run: |
+          pip install bandit
+          # -ll 只报 MEDIUM 及以上；排除 tests/（assert 断言属正常用法）
+          bandit -r server --exclude server/tests -ll

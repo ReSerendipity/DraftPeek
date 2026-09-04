@@ -47,15 +47,34 @@ DraftPeek 团队重视安全问题。如果您发现安全漏洞，请按以下�
 DraftPeek 已实施以下安全措施：
 
 - **APK 签名校验**：运行时校验签名证书 SHA-256 指纹
-- **DEX 完整性校验**：构建期基线注入 + 运行时 CRC 校验
+- **DEX 完整性校验**：运行时 CRC 校验框架已实现；构建期基线注入**尚未接线**（`DEX_CRC_BASELINE` 恒为 0，校验自动跳过，属计划未实现项）。当前实际生效的是 APK 签名校验
 - **反调试保护**：多层检测（调试器、Frida、Root、模拟器）
-- **Native C 反检测**：`native_security.so` 提供 C 层反调试
+- **Native C 反检测**：`native_security.so` 提供 C 层反调试（加载失败时显式上报 `THREAT_NATIVE_UNAVAILABLE`，不再静默降级）
 - **AI 对抗防护**：AI 逆向检测 + 三级响应（WARNING/LOCKED/SELF_DEFEND）
 - **SQLCipher 加密数据库**：AES-256 加密本地数据
-- **网络安全配置**：禁止明文 HTTP 流量 + 证书锁定（待启用）
+- **网络安全配置**：全局禁止明文 HTTP 流量；`api.github.com` 证书锁定**已启用**（双 pin 备份，有效期至 2027-08-27）
+- **远程策略验签**：远程安全策略（kill switch）经 Ed25519 验签（构建期注入公钥），验签失败/缺签名/过期一律忽略（fail-closed），防伪造与 MITM
 - **CodeQL 静态分析**：CI 流水线自动安全扫描
 - **Trivy 密钥扫描**：全仓库密钥泄露检测
 - **dependency-review**：PR 依赖变更漏洞审查
+
+### 证书固定轮换 SOP（R3）
+
+`app/src/main/res/xml/network_security_config.xml` 中 `api.github.com` 的 pin 有效期至 **2027-08-27**。pin 过期 = 应用内全部 GitHub 请求失败（可用性事故），必须提前轮换。
+
+| 时间点 | 动作 |
+|---|---|
+| 2027-05-29（到期前 90 天） | 启动轮换：获取 GitHub 当前证书链，计算新的 SPKI SHA-256 |
+| 轮换窗口 | 将新 pin **追加**（而非替换）进 `<pin-set>`（现有双 pin 即此模式），随新版本发布 |
+| 旧证书确认下线后 | 在后续版本中移除旧 pin |
+| 到期前 7 天仍未轮换 | 升级为 P0 发布事故 |
+
+季度人工核验（GitHub 可能提前轮换证书）：
+
+```bash
+openssl s_client -connect api.github.com:443 -servername api.github.com </dev/null 2>/dev/null \
+  | openssl x509 -noout -subject -dates
+```
 
 ## Emergency Contact
 
