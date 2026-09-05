@@ -202,8 +202,27 @@ print("OK: 四语言键集合一致")
 | P1-4 dynamicColor | ✅ | `Theme.kt` 默认 `dynamicColor = true`（Android 12+ 系统取色，低版本回落品牌色板） |
 | P1-5 Brand* 违规 | ✅ | 实测违规 0 处（grep 复核 IconButton/FAB/TopAppBar 直用仅剩模块内私有包装） |
 | P1-6 Coil 配置 | ✅ | DraftPeekApp 全局 ImageLoaderFactory（内存 20% / 磁盘 64MB） |
+| P1-8 增量构建 <120s | ✅（实跑验证） | 目标 <120s，**实测 42–48s**（详见下方「P1-8 实测方法与数据」）：新增/删除/修改 app 源码文件后 `:app:assembleDevDebug` 分别 48s / 42s / 45s。方法论要点：Gradle 按**内容哈希**而非 mtime 判定输入，**`touch` 不会触发重编译**（首轮误测因此得到假的 13s），必须用真实内容变更 |
+| P1-7 配置缓存兼容 | ✅（实跑验证） | 全仓扫描确认无 `afterEvaluate`/`buildFinished`/`addListener` 等执行期 project 捕获；唯一两处违反在根 `build.gradle.kts` 的 `bumpVersion`/`generateChangelog`（`doLast` 内用 `project.findProperty`/`rootProject.file`/`rootDir`），已改为配置期捕获、行为不变（提交 `b788a72`）。**实测**：`./gradlew :feature:browser:compileDebugKotlin --configuration-cache` → `BUILD SUCCESSFUL in 25s` + 日志出现 `Configuration cache entry stored` |
 | P2-9 功能性 @Preview | ✅ | `core/ui/.../BrandComponentPreviews.kt`：6 组件 × 亮暗双主题（PreviewParameter 驱动），新增 ui-tooling-preview 依赖（GOTCHAS #35） |
 | P2-10 a11y 量化 | ✅ | 新增 `scripts/check_a11y.py`：图标/图片 contentDescription 覆盖率 **136/136 = 100%**，已接入 `precheck.ps1`（--strict 阻断）；修复 `TerminalScreen` BasicTextField 无 a11y 名称（semantics.contentDescription） |
 | P2-11 终端主题 token | ✅（豁免） | `TerminalModels.kt` 增加书面豁免声明：16 色 ANSI 调色板与 Material 语义色正交，接入会破坏命令输出着色；品牌一致性由终端容器（Brand* 组件）承担 |
 
-未做（如实记录）：P1-7 配置缓存兼容专项验证、P1-8 增量构建 <120s 优化（环境受限，沙箱长构建不可靠）；Macrobenchmark 阈值断言（需真机基线数据积累后才能定，首轮先出数）。
+未做（如实记录）：Macrobenchmark 阈值断言（需真机基线数据积累后才能定，首轮先出数）。
+
+#### P1-8 实测方法与数据（2026-09-05，:app:assembleDevDebug）
+
+| 轮次 | 变更内容 | 耗时 | 任务情况 |
+|---|---|---|---|
+| 基线 | 本轮首次（配置缓存 cold，需 `stored`） | **125s** | 272 actionable，62 executed |
+| A | 新增 1 个 app 源文件 | **48s** | 14 executed / 258 up-to-date |
+| B | 删除该文件 | **42s** | 12 executed / 2 from cache |
+| C | 修改已有文件 `MainActivity.kt` | **45s** | 18 executed / 254 up-to-date |
+| D | 还原该改动 | **13s** | 11 executed / 7 from cache |
+
+- **测量条件**：`--offline --no-daemon`；配置缓存 **开**（`org.gradle.configuration-cache=true`，即项目默认）、构建缓存 **开**（`org.gradle.caching=true`）。
+- **与旧结论的差异说明**：本报告早先记录「`assembleDevDebug` 增量 240s 内未完成」，当时使用的是沙箱惯例参数 `--no-configuration-cache --no-build-cache`，两大缓存机制均被关闭，与开发者日常构建路径不同，故数值不可比。本次按项目默认配置实测。
+- **方法陷阱（值得记录）**：首轮用 `touch` 改文件测出 13s，是**假数据**——Gradle 以内容哈希判定输入变更，`touch` 只改 mtime 不会使 `compileDevDebugKotlin` 失效，实测退化为一次空跑。已改为真实内容变更后重测。
+- **遗留观察（未修）**：`configureCMakeDebug`/`buildCMakeDebug`（4 个 ABI）在部分轮次中每次都执行、无法进入 UP-TO-DATE，是 13s 空跑轮次里的主要开销；伴随 `CXX5304` 警告（本机 SDK XML 版本 4 > AGP 可识别的 3）。建议后续单独立项。
+
+> **2026-09-05 状态纠偏（铁律 #1 事实同步）**：上一版本本行曾将「P1-7 配置缓存兼容专项验证」列为未做，系报告定稿早于验证完成所致（报告 11:24 定稿，P1-7 实跑验证在其后）。P1-7 现已实测通过并补入上表，此处移除该项，避免与证据冲突。
