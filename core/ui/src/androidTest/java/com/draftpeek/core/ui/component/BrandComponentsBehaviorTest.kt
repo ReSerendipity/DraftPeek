@@ -47,6 +47,10 @@ import androidx.compose.ui.test.performClick
 import androidx.compose.ui.test.performTextInput
 import androidx.compose.ui.unit.Density
 import androidx.compose.ui.unit.dp
+// DpRect 的 width/height 是 androidx.compose.ui.unit 下的扩展属性，必须显式导入，
+// 否则 getUnclippedBoundsInRoot().width 会报 Unresolved reference。
+import androidx.compose.ui.unit.height
+import androidx.compose.ui.unit.width
 import com.draftpeek.core.designsystem.theme.DraftPeekSpacing
 import com.draftpeek.core.designsystem.theme.DraftPeekTheme
 import com.draftpeek.core.ui.modifier.MinimumTouchTargetSize
