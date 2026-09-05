@@ -117,6 +117,18 @@ enum class AnsiColor(val code: Int) {
  * 使用Catppuccin Mocha配色方案，提供深色背景和高对比度文字，
  * 适合长时间代码编辑使用。
  *
+ * ## 品牌 Design System 豁免声明（评估报告 P2⑪）
+ * 本主题**刻意不接入** `PrototypeTokens` / `MaterialTheme.colorScheme` 品牌 token，理由：
+ * 1. **语义正交**：终端必须按 ANSI 转义序列渲染 16 色固定调色板（`ls --color`、vim、
+ *    git diff 着色均依赖它）；Material 色板是按角色命名的语义槽（primary/surface/error），
+ *    二者不是一一映射关系，强行替换会让命令输出的颜色语义失效。
+ * 2. **暗色恒定是功能需求**：终端保持深色与 App 明暗切换无关——浅色终端背景会把
+ *    ANSI 亮色系（如 0xFFA6E3A1 绿）压到不可读对比度。
+ * 3. 品牌一致性体现在终端**容器**（TopBar、按钮、间距均走 Brand* 组件），
+ *    输出区是"内容渲染面"而非"品牌表达面"，与代码编辑器的语法高亮同理。
+ * 结论：维持现状，不接入品牌 token。若未来提供用户可选终端配色，也应保持
+ * 独立调色板体系而不是 Material 色板。
+ *
  * @property background 背景色（ARGB格式Long值）
  * @property foreground 前景文字色
  * @property cursor 光标颜色

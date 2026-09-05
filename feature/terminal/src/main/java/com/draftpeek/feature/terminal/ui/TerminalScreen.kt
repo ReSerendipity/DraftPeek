@@ -44,6 +44,9 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+// 无障碍语义：为无 label 的 BasicTextField 暴露提示文案
+import androidx.compose.ui.semantics.contentDescription
+import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.SolidColor
@@ -388,7 +391,12 @@ fun TerminalScreen(
                         color = onSurface
                     ),
                     cursorBrush = SolidColor(Color(theme.cursor)),
-                    modifier = Modifier.fillMaxWidth(),
+                    // a11y：该输入框没有可见 label（提示语由手写的占位 Text 渲染），
+                    // BasicTextField 虽自带 Editable 语义，但屏幕阅读器只会播报一个无名称的
+                    // 输入框。这里用 semantics 显式补上提示文案作为其无障碍名称。
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .semantics { contentDescription = inputHint },
                     singleLine = true
                 )
             }
