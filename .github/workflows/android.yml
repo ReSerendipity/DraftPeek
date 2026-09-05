@@ -431,7 +431,11 @@ jobs:
           emulator-options: -no-window -gpu swiftshader_indirect -no-snapshot -noaudio -no-boot-anim
           disable-animations: true
           script: |
-            ./gradlew :benchmark:connectedBenchmarkAndroidTest --stacktrace
+            # benchmark 是 library 模块，androidTest 只生成 debug 测试变体——
+            # connectedBenchmarkAndroidTest 任务不存在（2026-09-05 实测 tasks --all 确认）。
+            # 夜间档此前从未真正跑过：先倒在 desugaring 编译错误上，编译修好后
+            # 也会倒在幻影任务名上。被测应用由上一步 assembleRelease 安装。
+            ./gradlew :benchmark:connectedDebugAndroidTest --stacktrace
 
       - name: Upload Benchmark Reports
         if: always()

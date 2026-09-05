@@ -132,7 +132,9 @@ jobs:
           emulator-options: -no-window -gpu swiftshader_indirect -no-snapshot -noaudio -no-boot-anim
           disable-animations: true
           script: |
-            ./gradlew :benchmark:connectedBenchmarkAndroidTest --stacktrace
+            # benchmark 为 library 模块，只有 debugAndroidTest 测试变体，
+            # connectedBenchmarkAndroidTest 不存在（2026-09-05 实测修正，与 android.yml 对齐）
+            ./gradlew :benchmark:connectedDebugAndroidTest --stacktrace
 
       - name: Upload Benchmark Results
         if: always()
