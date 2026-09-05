@@ -80,6 +80,7 @@ aws-s3 = "1.12.658"
 dropbox-core = "5.1.0"
 
 # Testing
+junit4 = "4.13.2"
 junit5 = "5.11.3"
 mockk = "1.13.13"
 turbine = "1.2.0"
@@ -238,7 +239,9 @@ aws-java-sdk-s3 = { module = "com.amazonaws:aws-java-sdk-s3", version.ref = "aws
 # Dropbox SDK (cloud sync backend)
 dropbox-core-sdk = { module = "com.dropbox.core:dropbox-core-sdk", version.ref = "dropbox-core" }
 
-# Testing
+# junit4：供与 Paparazzi 共处同一 test source set 的纯 Kotlin 单测使用。
+# 注意：core:ui 不能加 useJUnitPlatform()，否则 JUnit4 的 Paparazzi 用例会被静默跳过。
+junit4 = { module = "junit:junit", version.ref = "junit4" }
 junit5-api = { module = "org.junit.jupiter:junit-jupiter-api", version.ref = "junit5" }
 junit5-engine = { module = "org.junit.jupiter:junit-jupiter-engine", version.ref = "junit5" }
 junit5-params = { module = "org.junit.jupiter:junit-jupiter-params", version.ref = "junit5" }

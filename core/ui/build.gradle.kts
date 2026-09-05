@@ -14,6 +14,11 @@ android {
     defaultConfig {
         minSdk = libs.versions.minSdk.get().toInt()
         consumerProguardFiles("consumer-rules.pro")
+
+        // 必须显式声明：AGP 默认使用 android.test.InstrumentationTestRunner，
+        // 它不识别 JUnit4 注解，会让 BrandComponentsBehaviorTest 等用例无法执行。
+        // core:ui 此前是全仓唯一漏配该 runner 的模块（其余 8 个模块均已配置）。
+        testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
     }
 
     compileOptions {
@@ -49,12 +54,26 @@ dependencies {
     implementation(libs.windowmanager)
     implementation(libs.kotlinx.collections.immutable)
 
+    // @Preview / @PreviewParameter 注解所在 artifact（BrandComponentPreviews.kt 位于 src/main）。
+    // ui-tooling-preview 在 release 构建里是 no-op 存根，可安全用 implementation 常驻；
+    // 预览的实际渲染工具另用 debugImplementation。
+    implementation(libs.compose.ui.tooling.preview)
+    debugImplementation(libs.compose.ui.tooling)
+
     // Screenshot testing
     testImplementation(libs.paparazzi)
+
+    // 纯 Kotlin 单元测试（RecompositionTracker 等）。
+    // 与 Paparazzi 共处同一 test source set，故统一用 JUnit4 —— 本模块刻意不配置
+    // useJUnitPlatform()，否则 JUnit Platform 在没有 vintage 引擎时会静默跳过 Paparazzi 用例。
+    testImplementation(libs.junit4)
 
     // Behavior testing (Compose UI Test — 行为/交互验证，需 Android 设备/模拟器运行)
     debugImplementation(libs.compose.ui.test.manifest)
     androidTestImplementation(libs.compose.ui.test.junit4)
+    // AndroidJUnit4 runner 与 runner/rules 需显式声明，否则 createComposeRule 无可用 runner
+    androidTestImplementation(libs.androidx.test.ext.junit)
+    androidTestImplementation(libs.androidx.test.runner)
 }
 
 // ===== Paparazzi / compileSdk 36 兼容说明 =====
