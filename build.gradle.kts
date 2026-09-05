@@ -118,9 +118,11 @@ subprojects {
 tasks.register("bumpVersion") {
     group = "draftpeek"
     description = "Increment version number in gradle.properties. Usage: -Pbump=patch|minor|major"
+    // P1-7: 将 project 引用提到配置期捕获，避免 doLast 执行期捕获 project
+    // 触发配置缓存（configuration-cache）违反。
+    val bumpType = (project.findProperty("bump") as? String) ?: "patch"
+    val propsFile = rootProject.file("gradle.properties")
     doLast {
-        val bumpType = (project.findProperty("bump") as? String) ?: "patch"
-        val propsFile = rootProject.file("gradle.properties")
         val content = propsFile.readText()
 
         val majorRegex = Regex("""^draftpeek\.version\.major=(\d+)$""", RegexOption.MULTILINE)
@@ -183,12 +185,18 @@ allprojects {
 tasks.register("generateChangelog") {
     group = "draftpeek"
     description = "Generate CHANGELOG.md entry from conventional commits. Usage: -Pversion=1.0.31"
+    // P1-7: 将 project / rootDir 引用提到配置期捕获，避免 doLast 执行期捕获
+    // project 触发配置缓存（configuration-cache）违反。
+    val version = project.findProperty("version") as? String
+    val scriptFile = rootProject.file("scripts/generate_changelog.py")
+    val rootDirectory = rootDir
     doLast {
-        val version = (project.findProperty("version") as? String)
-            ?: throw GradleException("Usage: ./gradlew generateChangelog -Pversion=1.0.31")
-        val scriptPath = rootProject.file("scripts/generate_changelog.py").absolutePath
+        if (version == null) {
+            throw GradleException("Usage: ./gradlew generateChangelog -Pversion=1.0.31")
+        }
+        val scriptPath = scriptFile.absolutePath
         val process = ProcessBuilder("python3", scriptPath, "--version", version, "--insert")
-            .directory(rootDir)
+            .directory(rootDirectory)
             .redirectErrorStream(true)
             .start()
         val output = process.inputStream.bufferedReader().readText()
