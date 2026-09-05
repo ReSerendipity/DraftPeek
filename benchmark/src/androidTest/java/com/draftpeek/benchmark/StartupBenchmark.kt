@@ -10,7 +10,9 @@ import org.junit.runner.RunWith
  * 应用启动性能基准测试。
  *
  * 测量冷启动和热启动时间，生成 Baseline Profile 用于优化首次启动速度。
- * 运行方式：./gradlew :benchmark:connectedBenchmarkAndroidTest
+ * 运行方式：./gradlew :benchmark:connectedDebugAndroidTest
+ * （本模块只有 debugAndroidTest 一个测试变体，**不存在** connectedBenchmarkAndroidTest 任务；
+ *   被测应用需另装 benchmark 变体：./gradlew :app:assembleBenchmark）
  *
  * 生成的 Baseline Profile 位于 app/src/main/baseline-prof.txt，
  * 安装后首次启动速度可提升 20-40%。

@@ -18,6 +18,10 @@ package com.draftpeek.benchmark
 import androidx.benchmark.junit4.BenchmarkRule
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import androidx.test.platform.app.InstrumentationRegistry
+// measureRepeated 是 BenchmarkRule 的顶层扩展函数（编译产物 BenchmarkRuleKt），
+// 必须显式 import；只 import BenchmarkRule 不会带入它。
+import androidx.benchmark.junit4.measureRepeated
+import com.draftpeek.core.data.repository.EditorFileReadOutcome
 import com.draftpeek.core.data.repository.EditorFileRepository
 import dagger.hilt.android.testing.HiltAndroidRule
 import dagger.hilt.android.testing.HiltAndroidTest
@@ -178,8 +182,8 @@ class FileReadBenchmark {
 
         benchmarkRule.measureRepeated {
             runBlocking {
-                val result = repository.readFile(uri)
-                result.isBinaryFile
+                // readFile 返回 sealed EditorFileReadOutcome，字段在 Success.result 下
+                (repository.readFile(uri) as? EditorFileReadOutcome.Success)?.result?.isBinaryFile ?: false
             }
         }
     }
@@ -196,8 +200,7 @@ class FileReadBenchmark {
 
         benchmarkRule.measureRepeated {
             runBlocking {
-                val result = repository.readFile(uri)
-                result.detectedEncoding
+                (repository.readFile(uri) as? EditorFileReadOutcome.Success)?.result?.detectedEncoding ?: ""
             }
         }
     }
