@@ -20,6 +20,13 @@ android {
     compileOptions {
         sourceCompatibility = JavaVersion.VERSION_17
         targetCompatibility = JavaVersion.VERSION_17
+        // 必须开启：本模块依赖 :feature:editor，后者传递引入
+        // com.itsaky.androidide.treesitter（android-tree-sitter / tree-sitter-java 4.3.2），
+        // 这两个 AAR 的元数据要求启用 core library desugaring。
+        // 未开启时 checkDebugAndroidTestAarMetadata 直接失败，
+        // 导致本模块全部 Macrobenchmark 无法编译（此前长期未被发现——
+        // StartupBenchmark / FileReadBenchmark 也因此从未真正跑起来）。
+        isCoreLibraryDesugaringEnabled = true
     }
 
     kotlin {
@@ -64,6 +71,9 @@ dependencies {
     ksp(libs.hilt.compiler)
     // Hilt testing support (used in FileReadBenchmark)
     implementation(libs.hilt.android.testing)
+
+    // Java 8+ API desugaring (required by tree-sitter AARs pulled in via :feature:editor)
+    coreLibraryDesugaring(libs.desugar)
 
     // Benchmark dependencies
     implementation(libs.androidx.benchmark.common)
