@@ -7,50 +7,93 @@ codecov:
     wait_for_ci: true
 
 # 覆盖率阈值配置
+#
+# ⚠️ 2026-09-05 基线重置说明（改动前必读）：
+#   本仓库的 JaCoCo 报告**历史上从未真正产出过**（根项目没有 jacocoTestReport 任务、
+#   除 core/common 外所有库模块未注册该任务、且未启用 enableUnitTestCoverage →
+#   JacocoReport 被 SKIPPED 而 BUILD 仍 SUCCESSFUL，详见 GOTCHAS #37）。
+#   因此下面所有 target 原本都是**从未被任何一次真实数据验证过的空想值**。
+#
+#   现已修复报告产出链路并实测全模块覆盖率（2026-09-05，LINE 口径）：
+#     app 5.4% | core/common 24.4% | core/data 9.9% | core/domain 100% |
+#     core/ui 100% | feature/browser 2.8% | feature/editor 5.8% |
+#     feature/settings 20.9% | feature/stats 3.7% | feature/terminal 14.8%
+#   全局加权：LINE 7.7% / INSTRUCTION 6.5% / BRANCH 4.9%
+#
+#   故将所有 target 下调为「实测基线」，并采用 **ratchet（只升不降）** 机制：
+#   门禁从此真实生效，可拦住覆盖率归零、报告丢失与任何后续下滑；
+#   日后覆盖率提升时必须同步上调这里的 target，不允许为过 CI 而下调。
+#
+# ⚠️ 另修复一处静默失效：本文件原先存在**两个同名的 `project:` 键**（全局 default
+#   一个、分模块一个），YAML 重复键由后者静默覆盖前者 → 全局 60% 门禁从未生效。
+#   现已合并为单一 project 块。
 coverage:
-  # 全局覆盖率要求
   status:
     project:
       default:
-        # 项目整体覆盖率阈值
-        target: 60%
+        # 项目整体覆盖率阈值（实测加权 LINE 7.7%，取 7% 为基线）
+        target: 7%
         # 允许下降的幅度
-        threshold: 2%
+        threshold: 1%
         # 只检查修改的文件
         only_pulls: false
         # 如果覆盖率低于阈值，标记为失败
         if_not_found: success
         # 信息性检查（不影响 CI 状态）
         informational: false
-    
-    # 按模块划分的覆盖率要求
-    project:
+
+      # ===== 分模块阈值：target = 2026-09-05 实测 LINE 基线（向下取整留余量）=====
       core-common:
-        target: 70%
+        target: 24%
         paths:
           - core/common/src/main/
         threshold: 1%
       core-data:
-        target: 75%
+        target: 9%
         paths:
           - core/data/src/main/
         threshold: 1%
-      feature-editor:
-        target: 60%
+      core-domain:
+        target: 95%
         paths:
-          - feature/editor/src/main/
-        threshold: 2%
+          - core/domain/src/main/
+        threshold: 1%
+      core-ui:
+        target: 95%
+        paths:
+          - core/ui/src/main/
+        threshold: 1%
       feature-browser:
-        target: 60%
+        target: 2%
         paths:
           - feature/browser/src/main/
-        threshold: 2%
+        threshold: 1%
+      feature-editor:
+        target: 5%
+        paths:
+          - feature/editor/src/main/
+        threshold: 1%
+      feature-settings:
+        target: 20%
+        paths:
+          - feature/settings/src/main/
+        threshold: 1%
+      feature-stats:
+        target: 3%
+        paths:
+          - feature/stats/src/main/
+        threshold: 1%
+      feature-terminal:
+        target: 14%
+        paths:
+          - feature/terminal/src/main/
+        threshold: 1%
       app:
-        target: 50%
+        target: 5%
         paths:
           - app/src/main/
-        threshold: 3%
-    
+        threshold: 1%
+
     # Patch 覆盖率（只检查 PR 修改的代码）
     patch:
       default:
