@@ -78,6 +78,18 @@ subprojects {
     plugins.withType<com.android.build.gradle.LibraryPlugin> {
         apply(plugin = "jacoco")
 
+        // 启用 debug 变体单元测试覆盖率采集（JaCoCo .exec）。
+        // 否则 testDebugUnitTest 虽跑但通过、不产出 .exec，
+        // 下方 jacocoTestReport 因无执行数据被 SKIPPED（静默失效，BUILD 仍 SUCCESSFUL），
+        // 正是本次要根治的历史问题。app 模块在 app/build.gradle.kts 已单独开启。
+        configure<com.android.build.gradle.LibraryExtension> {
+            buildTypes {
+                getByName("debug") {
+                    enableUnitTestCoverage = true
+                }
+            }
+        }
+
         tasks.withType<JacocoReport> {
             group = "verification"
             description = "Generate JaCoCo coverage report"
@@ -86,6 +98,52 @@ subprojects {
                 xml.required.set(true)
                 html.required.set(true)
             }
+        }
+
+        // 统一为所有库模块注册 jacocoTestReport（2026-09-05 修复静默失效）。
+        //
+        // 背景：此前只有 core/common 自建过一份，但它的 executionData 指向
+        // build/outputs/unit_test_code_coverage/debugUnitTest/testDebugUnitTest.exec
+        // —— 这是 AGP 4.x 时代的路径，AGP 8 的真实产物在
+        // build/jacoco/<variant>UnitTest.exec。旧路径不存在 → JacocoReport 因无执行数据
+        // 被 **SKIPPED**，而 Gradle 仍报 BUILD SUCCESSFUL：报告从未产出，
+        // 覆盖率数字无从谈起（无任何报错，属静默失效）。其余库模块则根本没有报告任务。
+        //
+        // 现收敛为一份正确实现，覆盖全部库模块。
+        tasks.register<JacocoReport>("jacocoTestReport") {
+            group = "verification"
+            description = "Generate JaCoCo coverage report for this module"
+
+            // 保证 exec 数据是最新的，避免报告基于陈旧数据
+            dependsOn("testDebugUnitTest")
+
+            reports {
+                xml.required.set(true)
+                html.required.set(true)
+            }
+
+            sourceDirectories.setFrom(
+                files("$projectDir/src/main/java", "$projectDir/src/main/kotlin")
+            )
+
+            // AGP 8：Kotlin 与 Java 类最终汇入 intermediates/classes/<variant>
+            // （已过 ASM transform，是 tmp/kotlin-classes 的超集，实测 205 > 201）。
+            classDirectories.setFrom(
+                fileTree(layout.buildDirectory.dir("intermediates/classes/debug")) {
+                    exclude(
+                        "**/R.class",
+                        "**/R\$*.class",
+                        "**/BuildConfig.*",
+                        "**/Manifest.*",
+                    )
+                }
+            )
+
+            executionData.setFrom(
+                fileTree(layout.buildDirectory.dir("jacoco")) {
+                    include("testDebugUnitTest.exec")
+                }
+            )
         }
     }
 
@@ -108,6 +166,25 @@ subprojects {
                 }
             }
         }
+    }
+}
+
+// 根级聚合任务：让 CI 的 `./gradlew jacocoTestReport`（未限定路径）能一次性触发
+// 所有模块（库模块 + app）的覆盖率报告。否则未限定路径的 jacocoTestReport 会因
+// 根项目无此任务而报 “Task 'jacocoTestReport' not found in root project”。
+val jacocoAggregate = tasks.register("jacocoTestReport") {
+    group = "verification"
+    description = "Aggregate JaCoCo coverage reports across all modules"
+}
+// 注意：不能用 subprojects.forEach { it.tasks... } 急切遍历 —— 那会在配置期强制
+// 物化所有子项目的 Task 容器（破坏配置缓存 / 拖慢配置），且库模块的
+// jacocoTestReport 是在 plugins.withType<LibraryPlugin> 回调里**延迟**注册的，
+// 急切遍历时可能还没注册上（漏依赖）。matching{}.configureEach{} 是 live collection，
+// 对后续注册的任务同样生效。
+// 另注：TaskProvider 没有 dependsOn（那是 Task 的方法），必须 .configure { } 内部调用。
+subprojects {
+    tasks.matching { it.name == "jacocoTestReport" }.configureEach {
+        jacocoAggregate.configure { dependsOn(this@configureEach) }
     }
 }
 

@@ -100,21 +100,11 @@ plugins.withType<com.android.build.gradle.LibraryPlugin> {
     apply(plugin = "jacoco")
 }
 
-tasks.register<JacocoReport>("jacocoTestReport") {
-    group = "verification"
-    description = "Generate JaCoCo coverage report for this module"
-
-    reports {
-        xml.required.set(true)
-        html.required.set(true)
-    }
-
-    sourceDirectories.setFrom(files("$projectDir/src/main/java", "$projectDir/src/main/kotlin"))
-
-    val classDirs = fileTree("$buildDir/intermediates/classes/debug") {
-        exclude("**/R.class", "**/R\$*.class", "**/BuildConfig.*", "**/Manifest.*")
-    }
-    classDirectories.setFrom(classDirs)
-
-    executionData.setFrom(files("$buildDir/outputs/unit_test_code_coverage/debugUnitTest/testDebugUnitTest.exec"))
-}
+// jacocoTestReport 任务已上收至根 build.gradle.kts（subprojects + LibraryPlugin），
+// 为所有库模块统一注册。
+//
+// 移除原因（2026-09-05）：本模块原先自建的 executionData 指向
+// build/outputs/unit_test_code_coverage/debugUnitTest/testDebugUnitTest.exec
+// （AGP 4.x 路径），AGP 8 实际产物在 build/jacoco/，旧路径不存在导致任务被
+// SKIPPED 却仍 BUILD SUCCESSFUL —— 覆盖率报告从未真正产出过。
+// 保留此处注释以免有人按旧写法复原。
