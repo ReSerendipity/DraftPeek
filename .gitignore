@@ -42,7 +42,7 @@ node_modules/
 *.log
 log.txt
 build_error.log
-dp_release_log.txt
+_archive/logs/dp_release_log.txt
 
 # 临时构建与测试日志（防止误提交根目录 .txt 日志文件）
 build-*.txt
@@ -170,3 +170,18 @@ docs/_devarchive/
 
 # AGENTS 瘦身重构下沉子文档（仅本地保留，随 AGENTS.md 一起不入库，2026-09-03；*.md 已忽略，此处另加目录级明确规则）
 docs/agents/
+
+# --- 2026-09-06 目录整理补齐（方案 A：路径不动，仅排除）---
+model/
+pretrained_models/
+coverage.xml
+.coverage
+htmlcov/
+.mypy_cache/
+.hypothesis/
+.workbuddy-ai/
+crdt_data/
+
+# --- 2026-09-07 守卫暴露的遗漏（缓存 / 服务端虚拟环境）---
+.venv_srv/
+.ruff_cache/
