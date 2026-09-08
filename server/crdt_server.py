@@ -683,7 +683,7 @@ async def main():
             logger.info("Token authentication: ENABLED (secure over WSS)")
         else:
             logger.warning("WSS enabled but no CRDT_TOKEN set — unauthenticated access")
-    elif host == "0.0.0.0" and not AUTH_TOKEN:
+    elif host == "0.0.0.0" and not AUTH_TOKEN:  # nosec B104 - 仅比较用户显式配置（CRDT_HOST 默认 127.0.0.1），非硬编码绑定
         logger.warning(
             "Binding to 0.0.0.0 WITHOUT TLS or token authentication — "
             "server is exposed to the network!"
