@@ -85,10 +85,11 @@ jobs:
         run: ./gradlew spotlessCheck --stacktrace
 
       - name: Run Lint
-        run: ./gradlew lint --stacktrace
+        # AGP lint model 的 config-cache 存储在 CI 上不稳定（generateDevDebugAndroidTestLintModel 序列化失败），与 test/jacoco 步骤同策略禁用
+        run: ./gradlew lint --stacktrace --no-configuration-cache
 
       - name: Build Debug APK
-        run: ./gradlew assembleDebug --stacktrace
+        run: ./gradlew assembleDebug --stacktrace --no-configuration-cache
 
       # 单元测试是真正的门禁：约 1058 个用例（@Test 实测统计，见测试体系评估报告 §0）
       # 全部通过即视为构建健康。
