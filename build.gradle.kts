@@ -37,7 +37,8 @@ spotless {
         targetExclude(
             "**/build/**",
             "**/.gradle/**",
-            "**/generated/**"
+            "**/generated/**",
+            "_archive/**"
         )
         ktlint(libs.versions.ktlint.get())
             .editorConfigOverride(
@@ -138,7 +139,7 @@ subprojects {
                         "**/R.class",
                         "**/R\$*.class",
                         "**/BuildConfig.*",
-                        "**/Manifest.*",
+                        "**/Manifest.*"
                     )
                 }
             )
