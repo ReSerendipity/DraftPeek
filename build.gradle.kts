@@ -1,3 +1,4 @@
+import com.diffplug.spotless.LineEnding
 plugins {
     alias(libs.plugins.android.application) apply false
     alias(libs.plugins.android.library) apply false
@@ -28,6 +29,9 @@ allprojects {
 }
 
 spotless {
+    // 显式平台行尾策略：默认 GIT_ATTRIBUTES 策略在 Windows 上会扫描/哈希 .gradle 内部锁文件，
+    // 导致 config-cache 存储阶段报 "Failed to create MD5 hash for checksums.lock"（CI Linux 不受影响）。
+    lineEndings = LineEnding.PLATFORM_NATIVE
     kotlin {
         target("**/*.kt")
         targetExclude(
