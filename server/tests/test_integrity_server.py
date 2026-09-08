@@ -1,7 +1,7 @@
 """
 Tests for the Play Integrity verification server (server/integrity_server.py).
 
-These lock in the P1-4 hardening from 协作同步服务设计评估报告_v1.0.30.md:
+These lock in the P1-4 hardening from ../../docs/reports/协作同步服务设计评估报告_v1.0.30.md:
 - Fail-closed: when Google credentials are NOT configured the server must return
   503 (not a mock "UNKNOWN" verdict that could be mistaken for a real check).
 - Nonce freshness: an expired/out-of-window nonce_timestamp is rejected (400).

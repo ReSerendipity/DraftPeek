@@ -1,4 +1,4 @@
-# DraftPeek Server Dependencies (PINNED — see 协作同步服务设计评估报告_v1.0.30.md P0-1)
+# DraftPeek Server Dependencies (PINNED — see ../docs/reports/协作同步服务设计评估报告_v1.0.30.md P0-1)
 # Install: pip install -r server/requirements.txt
 #
 # Security note: all versions are exact-pinned (==) to make the dependency

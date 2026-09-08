@@ -34,7 +34,7 @@ STATUS:
     EXPERIMENTAL reference implementation — NOT deployed, NOT production-hardened.
     DraftPeek is a local-first Android editor; this collaboration server is an
     OPTIONAL auxiliary service (no wired client in the shipped app, default-off).
-    See 协作同步服务设计评估报告_v1.0.30.md for the threat model and the required
+    See ../docs/reports/协作同步服务设计评估报告_v1.0.30.md for the threat model and the required
     hardening: signed per-room tokens + WSS, resource caps, and a Python CI gate.
 
 References:
