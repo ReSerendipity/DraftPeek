@@ -20,12 +20,12 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.ui.test.junit4.createComposeRule
+import java.util.Collections
 import org.junit.After
 import org.junit.Assert.assertEquals
 import org.junit.Before
 import org.junit.Rule
 import org.junit.Test
-import java.util.Collections
 
 /**
  * 重组计数埋点的运行时行为验证。
@@ -179,11 +179,7 @@ class RecompositionCounterBehaviorTest {
      * [sink] 是普通可变列表而非 Compose State，因此组合期写入不会触发新的重组。
      */
     @Composable
-    private fun Probe(
-        tag: String,
-        trigger: Int,
-        sink: MutableList<Int>
-    ) {
+    private fun Probe(tag: String, trigger: Int, sink: MutableList<Int>) {
         sink.add(trackRecomposition(tag))
         Text("trigger=$trigger")
     }

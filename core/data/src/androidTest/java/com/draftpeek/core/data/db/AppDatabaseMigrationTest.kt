@@ -41,7 +41,7 @@ class AppDatabaseMigrationTest {
     @get:Rule
     val helper = MigrationTestHelper(
         InstrumentationRegistry.getInstrumentation(),
-        AppDatabase::class.java,
+        AppDatabase::class.java
     )
 
     @Test
@@ -61,7 +61,7 @@ class AppDatabaseMigrationTest {
             AppDatabase.MIGRATION_8_9,
             AppDatabase.MIGRATION_9_10,
             AppDatabase.MIGRATION_10_11,
-            AppDatabase.MIGRATION_11_12,
+            AppDatabase.MIGRATION_11_12
         )
         dbV12.close()
     }
@@ -78,7 +78,7 @@ class AppDatabaseMigrationTest {
             12,
             true,
             AppDatabase.MIGRATION_10_11,
-            AppDatabase.MIGRATION_11_12,
+            AppDatabase.MIGRATION_11_12
         )
         dbV12.close()
     }
@@ -94,7 +94,7 @@ class AppDatabaseMigrationTest {
             dbName,
             12,
             true,
-            AppDatabase.MIGRATION_11_12,
+            AppDatabase.MIGRATION_11_12
         )
 
         // 显式断言 11→12 的产物：links 表存在，且唯一索引可用
@@ -119,7 +119,7 @@ class AppDatabaseMigrationTest {
                     date, fileOpenCount, textEditCount, otherOperationCount, sessionCount,
                     previewCount, searchCount, snippetCount, diffCount, updatedAt
                 ) VALUES ('2026-01-01', 5, 10, 2, 1, 3, 4, 1, 2, 1000)
-                """.trimIndent(),
+                """.trimIndent()
             )
             close()
         }
@@ -132,7 +132,7 @@ class AppDatabaseMigrationTest {
             AppDatabase.MIGRATION_8_9,
             AppDatabase.MIGRATION_9_10,
             AppDatabase.MIGRATION_10_11,
-            AppDatabase.MIGRATION_11_12,
+            AppDatabase.MIGRATION_11_12
         )
 
         // 8→9 走「建新表→拷数据→DROP 旧表→RENAME」重建，行数与字段值必须原样保留
@@ -140,7 +140,7 @@ class AppDatabaseMigrationTest {
             """
             SELECT fileOpenCount, textEditCount, updatedAt, usageDurationMinutes, fileCreateCount
             FROM user_activity WHERE date = '2026-01-01'
-            """.trimIndent(),
+            """.trimIndent()
         ).use { cursor ->
             assertTrue("迁移后 user_activity 数据应保留", cursor.moveToFirst())
             assertEquals(5, cursor.getInt(0))

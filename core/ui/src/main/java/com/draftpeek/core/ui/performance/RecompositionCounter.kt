@@ -117,11 +117,10 @@ object RecompositionTracker {
      * @param limit 最多返回的条目数，默认全部
      * @return 次数降序的 [RecompositionEntry] 列表
      */
-    fun report(limit: Int = Int.MAX_VALUE): List<RecompositionEntry> =
-        snapshot()
-            .map { (tag, count) -> RecompositionEntry(tag, count) }
-            .sortedWith(compareByDescending<RecompositionEntry> { it.count }.thenBy { it.tag })
-            .take(limit.coerceAtLeast(0))
+    fun report(limit: Int = Int.MAX_VALUE): List<RecompositionEntry> = snapshot()
+        .map { (tag, count) -> RecompositionEntry(tag, count) }
+        .sortedWith(compareByDescending<RecompositionEntry> { it.count }.thenBy { it.tag })
+        .take(limit.coerceAtLeast(0))
 
     /**
      * 生成人类可读的多行报告，用于 logcat / `adb shell` 现场排查。
@@ -167,10 +166,7 @@ object RecompositionTracker {
      * @property tag 埋点标识
      * @property count 累计重组次数
      */
-    data class RecompositionEntry(
-        val tag: String,
-        val count: Long
-    )
+    data class RecompositionEntry(val tag: String, val count: Long)
 }
 
 /**
@@ -200,10 +196,7 @@ object RecompositionTracker {
  *   这样调用方即使直接渲染该值也不会引发额外重组）
  */
 @Composable
-fun trackRecomposition(
-    tag: String,
-    enabled: Boolean = LocalRecompositionTrackingEnabled.current
-): Int {
+fun trackRecomposition(tag: String, enabled: Boolean = LocalRecompositionTrackingEnabled.current): Int {
     if (!enabled) return 0
     val counter = remember(tag) { RecompositionCounter() }
     SideEffect {

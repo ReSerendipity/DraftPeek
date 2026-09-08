@@ -137,11 +137,11 @@ import com.draftpeek.core.common.vcs.GitStatus
 import com.draftpeek.core.data.entity.RecentFile
 import com.draftpeek.core.ui.component.BrandChip
 import com.draftpeek.core.ui.component.BrandDialog
-import com.draftpeek.core.ui.component.BrandIconButton
 import com.draftpeek.core.ui.component.BrandDirectoryCard
 import com.draftpeek.core.ui.component.BrandFAB
 import com.draftpeek.core.ui.component.BrandFileCard
 import com.draftpeek.core.ui.component.BrandFilledButton
+import com.draftpeek.core.ui.component.BrandIconButton
 import com.draftpeek.core.ui.component.BrandOutlinedTextField
 import com.draftpeek.core.ui.component.BrandSearchBar
 import com.draftpeek.core.ui.component.BrandTopBar
@@ -155,7 +155,6 @@ import com.draftpeek.core.ui.layout.FoldInfo
 import com.draftpeek.core.ui.layout.FoldableState
 import com.draftpeek.core.ui.layout.LayoutMode
 import com.draftpeek.core.ui.layout.SplitScreenLayout
-import com.draftpeek.core.ui.modifier.minimumTouchTarget
 import com.draftpeek.core.ui.modifier.pressScaleEffect
 import com.draftpeek.core.ui.theme.BrandShapes
 import com.draftpeek.core.ui.theme.CodeTextStyle

@@ -16,11 +16,9 @@
 package com.draftpeek.benchmark
 
 import androidx.benchmark.junit4.BenchmarkRule
+import androidx.benchmark.junit4.measureRepeated
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import androidx.test.platform.app.InstrumentationRegistry
-// measureRepeated 是 BenchmarkRule 的顶层扩展函数（编译产物 BenchmarkRuleKt），
-// 必须显式 import；只 import BenchmarkRule 不会带入它。
-import androidx.benchmark.junit4.measureRepeated
 import com.draftpeek.core.data.repository.EditorFileReadOutcome
 import com.draftpeek.core.data.repository.EditorFileRepository
 import dagger.hilt.android.testing.HiltAndroidRule
@@ -32,6 +30,8 @@ import org.junit.Before
 import org.junit.Rule
 import org.junit.Test
 import org.junit.runner.RunWith
+// measureRepeated 是 BenchmarkRule 的顶层扩展函数（编译产物 BenchmarkRuleKt），
+// 必须显式 import；只 import BenchmarkRule 不会带入它。
 
 /**
  * 文件读取操作基准测试类。

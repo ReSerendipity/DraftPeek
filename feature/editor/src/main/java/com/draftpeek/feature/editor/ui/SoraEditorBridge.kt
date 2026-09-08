@@ -184,25 +184,23 @@ internal fun mountSoraEditor(
     wrapper: SoraEditorWrapper,
     shortcutHandler: KeyboardShortcutHandler,
     errorLabel: String = SORA_SLOT_EDITOR
-): View {
-    return try {
-        wrapper.editor.apply {
-            // 关键：同一 sora 实例可能在 split/preview/单栏三个槽位间切换宿主，
-            // 挂载前必须先从旧宿主解绑，否则会抛 "has already been added to a parent"。
-            (parent as? ViewGroup)?.removeView(this)
-            setOnKeyListener { _, _, event -> shortcutHandler.handleKeyEvent(event) }
-            layoutParams = ViewGroup.LayoutParams(
-                ViewGroup.LayoutParams.MATCH_PARENT,
-                ViewGroup.LayoutParams.MATCH_PARENT
-            )
-        }
-    } catch (e: Exception) {
-        Log.e(TAG, "AndroidView factory configuration failed [$errorLabel]", e)
-        try {
-            wrapper.editor
-        } catch (_: Exception) {
-            View(context)
-        }
+): View = try {
+    wrapper.editor.apply {
+        // 关键：同一 sora 实例可能在 split/preview/单栏三个槽位间切换宿主，
+        // 挂载前必须先从旧宿主解绑，否则会抛 "has already been added to a parent"。
+        (parent as? ViewGroup)?.removeView(this)
+        setOnKeyListener { _, _, event -> shortcutHandler.handleKeyEvent(event) }
+        layoutParams = ViewGroup.LayoutParams(
+            ViewGroup.LayoutParams.MATCH_PARENT,
+            ViewGroup.LayoutParams.MATCH_PARENT
+        )
+    }
+} catch (e: Exception) {
+    Log.e(TAG, "AndroidView factory configuration failed [$errorLabel]", e)
+    try {
+        wrapper.editor
+    } catch (_: Exception) {
+        View(context)
     }
 }
 

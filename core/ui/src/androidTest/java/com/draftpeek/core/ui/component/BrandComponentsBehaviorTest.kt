@@ -46,9 +46,6 @@ import androidx.compose.ui.test.onNodeWithText
 import androidx.compose.ui.test.performClick
 import androidx.compose.ui.test.performTextInput
 import androidx.compose.ui.unit.Density
-import androidx.compose.ui.unit.dp
-// DpRect 的 width/height 是 androidx.compose.ui.unit 下的扩展属性，必须显式导入，
-// 否则 getUnclippedBoundsInRoot().width 会报 Unresolved reference。
 import androidx.compose.ui.unit.height
 import androidx.compose.ui.unit.width
 import com.draftpeek.core.designsystem.theme.DraftPeekSpacing
@@ -57,6 +54,8 @@ import com.draftpeek.core.ui.modifier.MinimumTouchTargetSize
 import org.junit.Assert.assertTrue
 import org.junit.Rule
 import org.junit.Test
+// DpRect 的 width/height 是 androidx.compose.ui.unit 下的扩展属性，必须显式导入，
+// 否则 getUnclippedBoundsInRoot().width 会报 Unresolved reference。
 
 /**
  * 语义角色匹配器。
@@ -65,8 +64,7 @@ import org.junit.Test
  * [SemanticsMatcher.expectValue] 组合 [SemanticsProperties.Role] 构造，
  * 与测试库内部 `isFocused()` 等过滤器的实现方式一致。
  */
-private fun hasRole(role: Role): SemanticsMatcher =
-    SemanticsMatcher.expectValue(SemanticsProperties.Role, role)
+private fun hasRole(role: Role): SemanticsMatcher = SemanticsMatcher.expectValue(SemanticsProperties.Role, role)
 
 class BrandComponentsBehaviorTest {
 
