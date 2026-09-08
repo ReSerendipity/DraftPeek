@@ -306,7 +306,7 @@ scripts\run-unit-tests.bat
 
 ## 许可证
 
-闭源项目（私有）。
+本项目以 **Apache License 2.0** 开源发布（Copyright 2026 ReSerendipity）。详见 [LICENSE](LICENSE) · [NOTICE](NOTICE) · [THIRD_PARTY_NOTICES.md](THIRD_PARTY_NOTICES.md)。
 
 ## 相关文档
 
@@ -314,81 +314,11 @@ scripts\run-unit-tests.bat
 - `docs/FILEMAP.md`（本地文档，未随仓库发布）— 完整文件清单
 - [CHANGELOG.md](CHANGELOG.md) — 更新日志
 
-## ⚠️ Git 分支与仓库安全策略（🚨 **必读，防止源代码泄露**）
+## 仓库说明（开源模式，2026-09-08 起）
 
-本项目采用 **本地私有主分支 + 远程公开展示分支** 的双分支隔离架构。这是本项目的核心安全机制，所有开发者（包括 AI Assistant）**必须严格遵守**。
+本仓库为**公开仓库**，以 Apache License 2.0 发布（Copyright 2026 ReSerendipity）。原「main 私有开发 / public 公开演示」双仓双分支体系已废止：私有仓已改名为本仓库并全量公开（含完整 main 历史），public 演示分支与演示仓已删除。
 
-### 📋 分支定义
-
-| 分支名称 | 位置 | 用途 | 推送远程 | 包含内容 |
-|---------|------|------|---------|---------|
-| **main** | 本地 + `private` 私有远程 | 日常开发与私有工作的主分支 | ✅ 仅 `git push private main`；🛑 禁止 `git push origin main` | 完整源代码、加密密钥、敏感配置、所有功能实现代码 |
-| **public** | 本地 + 远程 (`origin/public`) | 公开仓库可见内容（`https://github.com/ReSerendipity/DraftPeek`） | ✅ **唯一允许推送到公开 origin 的分支**（`git push origin public`） | README、截图、构建脚本、示例配置、文档（**不包含任何 `.kt/.java` 源代码**） |
-
-> 本地当前无 `public` 分支时，先 `git checkout -b public origin/public` 建立，再 cherry-pick 非敏感内容后推送。
-
-### 🛑 绝对禁止的行为（会导致源代码或密钥泄露）
-
-- ❌ `git push origin main`（或 `git push origin main:public`）—— **会立即将私有源代码上传到 GitHub！**
-- ❌ 在 `public` 分支提交 `.kt` / `.java` / `.cpp` 等源代码文件
-- ❌ 将 `local.properties`（含签名密钥）、`keystore/` 目录添加到 public 分支
-- ❌ 把 secret/key/password 硬编码提交到 Git 历史中
-
-### 🔒 安全工作流程
-
-#### 日常开发（始终在 main 分支）
-
-```bash
-# 1. 确保在 main 分支进行开发
-git checkout main
-
-# 2. 正常开发、提交
-git add .
-git commit -m "feat(editor): 实现 xx 功能"
-
-# ⚠️ 注意：只推送到 private 私有远程（git push private main），
-# 绝不执行 git push origin main（会把私有代码上传到公开 GitHub）
-git push private main
-```
-
-#### 同步公共内容到 GitHub（手动操作，谨慎执行）
-
-```bash
-# 1. 切换到 public 分支
-git checkout public
-
-# 2. 清理当前状态（回到远端最新状态）
-git reset --hard origin/public
-
-# 3. 只添加非敏感文件（README、截图、文档、构建脚本等）
-git add README.md docs/screenshots/ .gitignore *.gradle.kts ...
-
-# 4. 选择性 cherry-pick 公共提交（如 AGENTS.md 的公开部分、CHANGELOG 等）
-git cherry-pick <commit-hash>  # 只选择非源代码的提交
-
-# 5. 验证是否包含敏感文件
-git status   # 确认只有非源代码文件被修改
-git diff --stat  # 确认没有源代码变更
-
-# 6. 推送到远程（这是唯一允许的 push 操作）
-git push origin public
-
-# 7. 切回 main 分支继续开发
-git checkout main
-```
-
-### 🧪 AI 开发时的安全检查清单
-
-每次提交前，AI Agent **必须** 确认：
-
-- [ ] **当前分支是 `main`**（日常开发用）
-- [ ] 没有 `.kt` / `.java` / `.cpp` 源代码文件要被推送到 remote
-- [ ] 没有 `local.properties` / `*.jks` / `keystore/` 等敏感文件
-- [ ] **不会执行 `git push origin main`**
-- [ ] 如果要推送到 GitHub，已经先在 `public` 分支上验证过
-
-**如果不确定某个文件是否应该公开 → 默认视为不可公开 → 先问用户！**
-
-### 📖 详细说明文档
-
-更多关于双分支安全策略的详细说明，请参阅本地文档 `AGENTS.md` 的第 8 节「Git / 提交规范 & 分支策略」（AGENTS.md 为本地文档，未随仓库发布）。
+- `main` 为唯一主分支，push 即发布；push 前需经所有者授权并核对 `git remote -v`，禁止 force push。
+- 敏感文件永不入库：`release.jks` / `keystore/` / `local.properties` / `.env`（.gitignore 已覆盖，全历史已扫描核验）。
+- `server/` 为可选的实验性协作同步服务（非默认启用、非生产部署）；`benchmark/` 为性能基准模块。
+- 安全漏洞请通过 [SECURITY.md](.github/SECURITY.md) 的私密披露渠道报告，勿直接提公开 issue。
