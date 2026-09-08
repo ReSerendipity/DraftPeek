@@ -31,7 +31,7 @@ References:
 Status: Implemented (2026-08-27), EXPERIMENTAL — NOT production-hardened.
         DraftPeek is a local-first Android editor; this server is an OPTIONAL
         auxiliary service (no wired client in the shipped app, default-off).
-        See 协作同步服务设计评估报告_v1.0.30.md for the threat model and the
+        See ../docs/reports/协作同步服务设计评估报告_v1.0.30.md for the threat model and the
         required hardening: server-side nonce freshness/timestamp checks and
         returning 5xx (not a mock verdict) when Google credentials are missing.
 """

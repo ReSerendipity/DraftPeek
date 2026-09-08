@@ -1,4 +1,4 @@
-# Ruff configuration for DraftPeek server/ (see 协作同步服务设计评估报告_v1.0.30.md P0-1)
+# Ruff configuration for DraftPeek server/ (see ../docs/reports/协作同步服务设计评估报告_v1.0.30.md P0-1)
 # Scope is deliberately narrow: catch real errors (F = pyflakes) and import
 # hygiene (I = isort). Style-only / framework-false-positive rules are excluded
 # so the CI lint gate stays meaningful and green for reference-quality code.
