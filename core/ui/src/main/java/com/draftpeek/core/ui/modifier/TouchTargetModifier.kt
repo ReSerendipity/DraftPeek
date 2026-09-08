@@ -50,10 +50,7 @@ fun Modifier.minimumTouchTarget(minSize: Dp = MinimumTouchTargetSize): Modifier 
  */
 private data class MinimumTouchTargetModifier(private val minSize: Dp) : LayoutModifier {
 
-    override fun MeasureScope.measure(
-        measurable: Measurable,
-        constraints: Constraints
-    ): MeasureResult {
+    override fun MeasureScope.measure(measurable: Measurable, constraints: Constraints): MeasureResult {
         val minPx = minSize.roundToPx()
         // 归零最小约束：让子组件（如 40dp 图标按钮 / 30dp 开关轨道）保留自身视觉尺寸
         val relaxed = constraints.copy(minWidth = 0, minHeight = 0)

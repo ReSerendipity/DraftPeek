@@ -231,24 +231,21 @@ object RemotePolicyManager {
      * @param publicKeyDerBase64 X.509 DER base64 公钥
      * @return 验签通过且参数齐备返回 `true`；任何异常 / 算法不可用 → `false`（fail-closed）
      */
-    internal fun verifySignatureWithKey(
-        payload: String,
-        signatureBase64: String,
-        publicKeyDerBase64: String
-    ): Boolean = try {
-        val keyBytes = Base64.getDecoder().decode(publicKeyDerBase64)
-        val publicKey = KeyFactory.getInstance("Ed25519")
-            .generatePublic(X509EncodedKeySpec(keyBytes))
-        val sig = Signature.getInstance("Ed25519")
-        sig.initVerify(publicKey)
-        sig.update(payload.toByteArray(Charsets.UTF_8))
-        sig.verify(Base64.getDecoder().decode(signatureBase64))
-    } catch (e: Exception) {
-        // 包括：公钥格式错误、Ed25519 算法在当前运行环境不可用（极低版本 Android 未提供 Conscrypt）等。
-        // 一律 fail-closed：宁可忽略策略，不应用未验真内容。
-        Log.e(TAG, "Policy signature verification error, rejecting policy", e)
-        false
-    }
+    internal fun verifySignatureWithKey(payload: String, signatureBase64: String, publicKeyDerBase64: String): Boolean =
+        try {
+            val keyBytes = Base64.getDecoder().decode(publicKeyDerBase64)
+            val publicKey = KeyFactory.getInstance("Ed25519")
+                .generatePublic(X509EncodedKeySpec(keyBytes))
+            val sig = Signature.getInstance("Ed25519")
+            sig.initVerify(publicKey)
+            sig.update(payload.toByteArray(Charsets.UTF_8))
+            sig.verify(Base64.getDecoder().decode(signatureBase64))
+        } catch (e: Exception) {
+            // 包括：公钥格式错误、Ed25519 算法在当前运行环境不可用（极低版本 Android 未提供 Conscrypt）等。
+            // 一律 fail-closed：宁可忽略策略，不应用未验真内容。
+            Log.e(TAG, "Policy signature verification error, rejecting policy", e)
+            false
+        }
 
     /**
      * 将策略写入本地缓存（信封格式，含签名供离线复验）。

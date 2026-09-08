@@ -30,7 +30,6 @@ import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Text
-import com.draftpeek.core.ui.component.BrandIconButton
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
@@ -53,6 +52,7 @@ import androidx.compose.ui.unit.IntOffset
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.draftpeek.core.common.model.TabId
+import com.draftpeek.core.ui.component.BrandIconButton
 import com.draftpeek.core.ui.component.ConfirmDialog
 import com.draftpeek.core.ui.icon.StrokeIcon
 import com.draftpeek.core.ui.icon.StrokeIcons

@@ -17,8 +17,7 @@ class RemotePolicyManagerTest {
 
     private fun makeKeyPair() = KeyPairGenerator.getInstance("Ed25519").generateKeyPair()
 
-    private fun pubDerB64(pub: java.security.PublicKey): String =
-        Base64.getEncoder().encodeToString(pub.encoded)
+    private fun pubDerB64(pub: java.security.PublicKey): String = Base64.getEncoder().encodeToString(pub.encoded)
 
     private fun sign(priv: java.security.PrivateKey, payload: String): String {
         val sig = Signature.getInstance("Ed25519")

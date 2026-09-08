@@ -16,16 +16,16 @@
 package com.draftpeek
 
 import android.app.Application
-import coil.ImageLoader
-import coil.ImageLoaderFactory
-import coil.disk.DiskCache
-import coil.memory.MemoryCache
 import androidx.appcompat.app.AppCompatDelegate
 import androidx.core.os.LocaleListCompat
 import androidx.datastore.core.DataStore
 import androidx.datastore.preferences.core.Preferences
 import androidx.datastore.preferences.core.stringPreferencesKey
 import androidx.datastore.preferences.preferencesDataStore
+import coil.ImageLoader
+import coil.ImageLoaderFactory
+import coil.disk.DiskCache
+import coil.memory.MemoryCache
 import com.draftpeek.core.common.event.AppEventBus
 import com.draftpeek.core.common.plugin.PluginManager
 import com.draftpeek.core.common.security.SecurityEventRecorder
@@ -67,7 +67,9 @@ import timber.log.Timber
  * @see HiltAndroidApp
  */
 @HiltAndroidApp
-class DraftPeekApp : Application(), ImageLoaderFactory {
+class DraftPeekApp :
+    Application(),
+    ImageLoaderFactory {
 
     /**
      * 全局 Coil 配置：限制图片缓存规模，统一内存/磁盘缓存目录，避免 Markdown

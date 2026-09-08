@@ -30,9 +30,9 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.tooling.preview.Preview
-import androidx.compose.ui.unit.dp
 import androidx.compose.ui.tooling.preview.PreviewParameter
 import androidx.compose.ui.tooling.preview.PreviewParameterProvider
+import androidx.compose.ui.unit.dp
 import com.draftpeek.core.designsystem.theme.DraftPeekTheme
 
 /**
@@ -49,10 +49,7 @@ private class DarkModeProvider : PreviewParameterProvider<Boolean> {
  * 所有品牌组件预览的统一外框：主题 + Surface + 内边距。
  */
 @Composable
-private fun PreviewFrame(
-    darkTheme: Boolean,
-    content: @Composable () -> Unit
-) {
+private fun PreviewFrame(darkTheme: Boolean, content: @Composable () -> Unit) {
     DraftPeekTheme(darkTheme = darkTheme) {
         Surface(color = MaterialTheme.colorScheme.background) {
             Column(
@@ -153,9 +150,7 @@ private fun BrandPillPreview(@PreviewParameter(DarkModeProvider::class) darkThem
  */
 @Composable
 @Preview(name = "BrandOutlinedTextField", showBackground = true, backgroundColor = 0xFFFFFFFF)
-private fun BrandOutlinedTextFieldPreview(
-    @PreviewParameter(DarkModeProvider::class) darkTheme: Boolean
-) {
+private fun BrandOutlinedTextFieldPreview(@PreviewParameter(DarkModeProvider::class) darkTheme: Boolean) {
     var value by remember { mutableStateOf("draft-peek.md") }
     PreviewFrame(darkTheme = darkTheme) {
         BrandOutlinedTextField(

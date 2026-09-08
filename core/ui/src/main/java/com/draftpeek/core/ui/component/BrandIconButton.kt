@@ -98,11 +98,7 @@ fun BrandIconButton(
  * Use this when the icon is provided by the app's StrokeIcon system.
  */
 @Composable
-fun BrandIconButton(
-    onClick: () -> Unit,
-    modifier: Modifier = Modifier,
-    content: @Composable BoxScope.() -> Unit
-) {
+fun BrandIconButton(onClick: () -> Unit, modifier: Modifier = Modifier, content: @Composable BoxScope.() -> Unit) {
     val interactionSource = remember { MutableInteractionSource() }
     Box(
         modifier = modifier
