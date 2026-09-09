@@ -187,12 +187,17 @@ jobs:
             echo "[FAIL] JaCoCo report not found at $REPORT_FILE — coverage gate cannot verify, failing."
             exit 1
           fi
-          # 解析 XML 中的覆盖率百分比（instruction coverage）
-          # 取报告级（最后一个）INSTRUCTION 计数器作为项目整体覆盖率，
-          # 避免 head -1 误取某方法级计数器导致数值失真（假绿）。
-          INSTR=$(grep -o 'type="INSTRUCTION" covered="[0-9]*" missed="[0-9]*"' "$REPORT_FILE" | tail -1)
-          COVERED=$(echo "$INSTR" | grep -o 'covered="[0-9]*"' | grep -o '[0-9]*')
-          MISSED=$(echo "$INSTR" | grep -o 'missed="[0-9]*"' | grep -o '[0-9]*')
+          # 解析报告级（最后一个）INSTRUCTION 计数器作为项目整体覆盖率。
+          # 旧写法假定属性顺序 covered 在前，但 JaCoCo 实际输出 missed 在前 —— grep
+          # 永远匹配不到，在 -e -o pipefail 下静默退出（2026-09-08 首次真跑暴露），
+          # 门禁从未真正运行过。现改为属性顺序无关提取，并容忍 grep 空匹配。
+          INSTR_LINE=$(grep -o '<counter type="INSTRUCTION"[^>]*>' "$REPORT_FILE" | tail -1) || true
+          if [ -z "$INSTR_LINE" ]; then
+            echo "[FAIL] Could not parse coverage from $REPORT_FILE — failing."
+            exit 1
+          fi
+          COVERED=$(echo "$INSTR_LINE" | grep -o 'covered="[0-9]*"' | grep -o '[0-9]*') || true
+          MISSED=$(echo "$INSTR_LINE" | grep -o 'missed="[0-9]*"' | grep -o '[0-9]*') || true
           if [ -z "$COVERED" ] || [ -z "$MISSED" ]; then
             echo "[FAIL] Could not parse coverage from $REPORT_FILE — failing."
             exit 1
