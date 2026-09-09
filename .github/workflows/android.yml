@@ -449,6 +449,29 @@ jobs:
         run: |
           echo "ci.build=true" > local.properties
 
+      # 被测应用需 release 变体（非 debuggable + minified），CI 无 release.jks ——
+      # 与 release-build job 相同：生成一次性 CI 测试签名（非发布密钥）。
+      # 密钥必须生成在 app/ 下：RELEASE_STORE_FILE 相对路径解析基址是 app/ 模块目录，
+      # 否则 packageDevRelease 会因 SigningConfig 缺 storeFile 失败（2026-09-09 实测）。
+      - name: Generate CI test signing keystore
+        run: |
+          keytool -genkeypair \
+            -alias ci-test \
+            -keyalg RSA \
+            -keysize 2048 \
+            -validity 10000 \
+            -keystore app/ci-release.jks \
+            -storepass citest123 \
+            -keypass citest123 \
+            -dname "CN=CI Test, OU=Dev, O=DraftPeek, L=CI, ST=CI, C=CN"
+
+      - name: Configure local.properties with CI signing credentials
+        run: |
+          echo "RELEASE_STORE_FILE=ci-release.jks" >> local.properties
+          echo "RELEASE_STORE_PASSWORD=citest123" >> local.properties
+          echo "RELEASE_KEY_ALIAS=ci-test" >> local.properties
+          echo "RELEASE_KEY_PASSWORD=citest123" >> local.properties
+
       - name: Grant execute permission for gradlew
         run: chmod +x ./gradlew
 
