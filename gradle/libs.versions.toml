@@ -62,7 +62,7 @@ coil = "2.7.0"
 java-diff-utils = "4.12"
 lsp4j = "0.22.0"
 android-pdf-viewer = "2.0.2"
-pf4j = "3.11.0"
+pf4j = "3.15.1"
 
 # Remote file systems
 commons-net = "3.11.1"    # FTP/FTPS client
