@@ -59,6 +59,7 @@ gitignored_expect:
 root_allowlist:
   - .editorconfig
   - .env.example
+  - .githooks
   - .github
   - .gitignore
   - .pre-commit-config.yaml
