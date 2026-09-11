@@ -66,6 +66,13 @@ jobs:
           languages: ${{ matrix.language }}
           config-file: .github/codeql-config.yml
 
+      # java/kotlin：manual build-mode，必须显式跑构建让 CodeQL 构建追踪器抽取源码。
+      # 上一版用 config 的 build-command 字段，analyze 并未实际执行它 → “no source code seen during build”。
+      # 用 --no-daemon 防止复用预热 daemon（daemon 在未追踪的 JVM 里编译，tracer 抓不到源码）。
+      - name: Build (manual, traced by CodeQL)
+        if: matrix.language == 'java' || matrix.language == 'kotlin'
+        run: ./gradlew assembleDebug --no-daemon --no-configuration-cache --stacktrace
+
       - name: Perform CodeQL Analysis
         uses: github/codeql-action/analyze@v3
         with:
