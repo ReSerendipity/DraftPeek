@@ -40,7 +40,7 @@ jobs:
       # 构建环境：Gradle 多模块 Android 工程必须 JDK17 + Gradle 才能构建，
       # 否则 manual build-mode 下的 ./gradlew assembleDebug 跑不起来（原 stock autobuild 即因此每跑必败）。
       - name: Set up JDK 17
-        uses: actions/setup-java@v4
+        uses: actions/setup-java@v5
         with:
           distribution: temurin
           java-version: 17
