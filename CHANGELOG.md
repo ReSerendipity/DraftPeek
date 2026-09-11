@@ -34,6 +34,9 @@
 - pre-push hook 新增红线硬拦截：拒绝向 `origin` 推送 `main`（任何方向），防止 2026-09-02 类误推事故复发
 - 新增自托管下载页基座与版本更新清单契约（`docs/deploy-download-page/`），渠道决策待定
 
+### Fixed
+- 修复 CodeQL 慢性红灯（创建即红，自 `ci: add codeql analysis` 每跑必败）：manual build-mode 下 `codeql-config.yml` 的 `build-command` 字段不被 `github/codeql-action/analyze` 执行；且 `Cache Gradle wrapper` 步骤恢复的 build cache 让 `compile*Kotlin`/`compile*JavaWithJavac` 命中 `FROM-CACHE`，CodeQL tracer 抓不到源码 → 改为 workflow 内 `Initialize CodeQL` 与 `Perform CodeQL Analysis` 之间显式 `./gradlew assembleDebug --no-daemon --no-build-cache --no-configuration-cache --rerun-tasks`，run `34591254159` 三语言 job 全绿。详见 `docs/agents/GOTCHAS.md` #DP-01 与 `FIX_LOG.md`。（commit `356b289`）
+
 ## [1.0.30] - 2026-08-10
 
 ### Added
