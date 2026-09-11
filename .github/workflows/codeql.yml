@@ -69,9 +69,14 @@ jobs:
       # java/kotlin：manual build-mode，必须显式跑构建让 CodeQL 构建追踪器抽取源码。
       # 上一版用 config 的 build-command 字段，analyze 并未实际执行它 → “no source code seen during build”。
       # 用 --no-daemon 防止复用预热 daemon（daemon 在未追踪的 JVM 里编译，tracer 抓不到源码）。
+      # 关键：--no-build-cache --rerun-tasks 强制真正编译。
+      #   上文 “Cache Gradle wrapper” 步骤会把 ~/.gradle/caches（含 Gradle build cache）恢复回来，
+      #   若不加 --no-build-cache，assembleDebug 的 compile*Kotlin / compile*JavaWithJavac 会命中 FROM-CACHE，
+      #   真正的 javac/kotlinc 进程根本没运行，CodeQL 抽取器报 “no source code seen during build”。
+      #   --rerun-tasks 额外绕过 up-to-date 检查，确保编译进程确实被执行并被 tracer 注入。
       - name: Build (manual, traced by CodeQL)
         if: matrix.language == 'java' || matrix.language == 'kotlin'
-        run: ./gradlew assembleDebug --no-daemon --no-configuration-cache --stacktrace
+        run: ./gradlew assembleDebug --no-daemon --no-build-cache --no-configuration-cache --rerun-tasks --stacktrace
 
       - name: Perform CodeQL Analysis
         uses: github/codeql-action/analyze@v3
