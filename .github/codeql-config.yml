@@ -1,0 +1,18 @@
+name: "CodeQL Config"
+
+# 语言构建模式：
+# - java / kotlin：Gradle 多模块 Android 工程，stock autobuild 解析不到构建图，
+#   导致 CodeQL 在 DraftPeek 上自创建起每次必败（含所有 Dependabot PR）。
+#   改为 manual，由 build-command 驱动 ./gradlew assembleDebug（与 Android CI 同口径），
+#   CodeQL 构建追踪器在构建期内抽取源码。
+# - javascript：纯源码分析，autobuild 已验证通过，保持默认。
+build-mode:
+  java: manual
+  kotlin: manual
+  javascript: autobuild
+
+build-command: ./gradlew assembleDebug --stacktrace --no-configuration-cache
+
+# 复用 Android CI 同款安全+质量查询套件
+queries:
+  - uses: security-and-quality
