@@ -142,7 +142,6 @@ design_system_draft.md
 !.github/SUPPORT.md
 !.github/ISSUE_TEMPLATE/*.md
 !/TESTING_SUMMARY.md
-!docs/project/ADR-001-CRDT-vs-OT-Selection.md
 !docs/VERSIONING.md
 !docs/DATABASE_MIGRATION_STRATEGY.md
 

@@ -304,6 +304,10 @@ scripts\run-unit-tests.bat
 - 数据库使用 SQLCipher 加密
 - 敏感文件支持 AES-256-GCM 密码加密
 
+## 贡献指南
+
+参与贡献请遵循 [组织级贡献指南](https://github.com/ReSerendipity/.github/blob/main/CONTRIBUTING.md)（Conventional Commits + DCO 签名）。
+
 ## 许可证
 
 本项目以 **Apache License 2.0** 开源发布（Copyright 2026 ReSerendipity）。详见 [LICENSE](LICENSE) · [NOTICE](NOTICE) · [THIRD_PARTY_NOTICES.md](THIRD_PARTY_NOTICES.md)。

@@ -1,0 +1,28 @@
+name: Self-Purify Check
+
+# 家族「自净化」检查入口（2026-09-10 建立）。
+# 复用 ReSerendipity/.github 的 self-purify.yml；非阻塞由 org reusable 的
+# job 级 continue-on-error 实现（GitHub 不允许 uses job 携带 continue-on-error），
+# 违规详情见该 job 的 ::error 注解。
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+  schedule:
+    # 每周一 02:00 UTC（北京时间 10:00）例行巡检
+    - cron: "0 2 * * 1"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: self-purify-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  self-purify:
+    name: 自净化检查（非阻塞）
+    uses: ReSerendipity/.github/.github/workflows/self-purify.yml@main
