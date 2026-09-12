@@ -107,8 +107,6 @@ DraftPeek/
 │   ├── data/               #   Room + SQLCipher + DataStore、DAO、Repository
 │   ├── designsystem/       #   设计 Token（字体、色彩、形状、间距）
 │   ├── domain/             #   UseCase + 领域模型
-│   ├── crdt/               #   CRDT 同步核心（对应 ADR-0002；当前为脚手架，尚未接入 settings.gradle.kts）
-│   ├── sync/               #   同步链路能力封装（当前为脚手架，尚未接入 settings.gradle.kts）
 │   ├── testing/            #   测试 Fixtures
 │   └── ui/                 #   品牌组件（BrandButton 等）、主题、自适应布局
 ├── feature/                # 功能层（按业务领域拆分）
