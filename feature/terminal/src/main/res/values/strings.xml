@@ -23,6 +23,8 @@
     <string name="terminal_proot_guide_desc">正在解压 Linux 运行环境（约50MB），完成后可使用完整终端功能。注意：终端可执行任意命令，请仅运行您信任的命令，操作不当可能导致数据丢失</string>
     <string name="terminal_proot_ready">Linux 环境已就绪</string>
     <string name="terminal_proot_error">Linux 环境准备失败</string>
+    <string name="terminal_system_shell_hint">当前为系统 shell (toybox)，部分命令不可用。完整 Linux 环境需安装 proot。</string>
+    <string name="terminal_dismiss">关闭</string>
     <string name="terminal_unavailable_hint">该位置无法打开终端</string>
 
     <!-- Security: Permission for TerminalCommandReceiver (VULN-001) -->

@@ -61,6 +61,13 @@ class AndroidApplicationConventionPlugin : Plugin<Project> {
 
             dependencies {
                 add("coreLibraryDesugaring", libs.findLibrary("desugar").get())
+                // 自定义 Lint 规则 JAR（build-logic/lint）
+                add("lintChecks", files("${rootDir.absolutePath}/build-logic/lint/build/libs/lint.jar"))
+            }
+
+            // 运行 lint 前先构建自定义 lint JAR
+            tasks.matching { it.name.startsWith("lint") }.configureEach {
+                dependsOn(gradle.includedBuild("build-logic").task(":lint:jar"))
             }
         }
     }

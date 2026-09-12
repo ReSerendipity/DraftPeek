@@ -83,6 +83,36 @@ object PluginManager {
      * @param context 应用上下文
      * @return 注册成功返回true，如果已存在相同ID的插件则返回false
      */
+    /**
+     * 扫描并加载应用私有插件目录下的动态插件（DexClassLoader）。
+     *
+     * 由 [Pf4jPluginLoader] 完成 APK/DEX 发现与实例化；随后对每个加载到的插件
+     * 走 [registerPlugin] 生命周期（自动注册扩展 + onCreate）。
+     *
+     * 应在 [initialize] 之后、应用启动早期调用一次。单个插件加载/注册失败不影响其他。
+     *
+     * @param context 应用上下文
+     * @return 成功发现并加载的插件 [PluginInfo] 列表
+     */
+    fun discoverAndLoadDynamicPlugins(context: Context): List<PluginInfo> {
+        if (!initialized) {
+            Log.w(TAG, "PluginManager not initialized; call initialize() first")
+            return emptyList()
+        }
+        return try {
+            val loader = Pf4jPluginLoader(context.applicationContext)
+            val infos = loader.discoverPlugins()
+            loader.getLoadedPlugins().forEach { plugin ->
+                registerPlugin(plugin, context)
+            }
+            Log.d(TAG, "Dynamic plugin discovery loaded ${infos.size} plugin(s)")
+            infos
+        } catch (e: Exception) {
+            Log.w(TAG, "Dynamic plugin discovery failed", e)
+            emptyList()
+        }
+    }
+
     fun registerPlugin(plugin: DraftPeekPlugin, context: Context): Boolean {
         val id = plugin.info.id
         if (plugins.putIfAbsent(id, plugin) != null) {

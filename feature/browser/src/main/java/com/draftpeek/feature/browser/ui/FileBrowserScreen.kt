@@ -112,6 +112,9 @@ import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.platform.LocalWindowInfo
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.AnnotatedString
+import androidx.compose.foundation.text.KeyboardOptions
+import androidx.compose.ui.text.input.KeyboardType
+import androidx.compose.ui.text.input.PasswordVisualTransformation
 import androidx.compose.ui.text.SpanStyle
 import androidx.compose.ui.text.buildAnnotatedString
 import androidx.compose.ui.text.font.FontFamily
@@ -339,6 +342,12 @@ fun FileBrowserScreen(
     var showCreateFolderDialog by rememberSaveable { mutableStateOf(false) }
     var showMoveToDialog by rememberSaveable { mutableStateOf(false) }
     var fileToMove by remember { mutableStateOf<FileItem?>(null) }
+    var fileToEncrypt by remember { mutableStateOf<FileItem?>(null) }
+    var showEncryptExportDialog by rememberSaveable { mutableStateOf(false) }
+    val onEncryptExportFile: (FileItem) -> Unit = { item ->
+        fileToEncrypt = item
+        showEncryptExportDialog = true
+    }
 
     // Search and filter state
     var searchQuery by rememberSaveable { mutableStateOf("") }
@@ -790,6 +799,103 @@ fun FileBrowserScreen(
                         fileToDelete = null
                     }
                 ) {
+                    Text(stringResource(R.string.browser_action_cancel))
+                }
+            }
+        )
+    }
+
+    // Encrypt export password dialog
+    if (showEncryptExportDialog && fileToEncrypt != null) {
+        val encryptFileItem = fileToEncrypt!!
+        var password by rememberSaveable { mutableStateOf("") }
+        var confirmPassword by rememberSaveable { mutableStateOf("") }
+        var passwordError by remember { mutableStateOf(false) }
+        BrandDialog(
+            onDismissRequest = {
+                showEncryptExportDialog = false
+                fileToEncrypt = null
+            },
+            title = {
+                Text(
+                    stringResource(R.string.browser_dialog_encrypt_export_title) +
+                        " · " + encryptFileItem.name
+                )
+            },
+            content = {
+                Column(verticalArrangement = Arrangement.spacedBy(12.dp)) {
+                    BrandOutlinedTextField(
+                        value = password,
+                        onValueChange = {
+                            password = it
+                            passwordError = false
+                        },
+                        label = { Text(stringResource(R.string.browser_dialog_encrypt_export_password)) },
+                        singleLine = true,
+                        visualTransformation = PasswordVisualTransformation(),
+                        keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Password),
+                        isError = passwordError,
+                        modifier = Modifier.fillMaxWidth()
+                    )
+                    BrandOutlinedTextField(
+                        value = confirmPassword,
+                        onValueChange = {
+                            confirmPassword = it
+                            passwordError = false
+                        },
+                        label = { Text(stringResource(R.string.browser_dialog_encrypt_export_confirm)) },
+                        singleLine = true,
+                        visualTransformation = PasswordVisualTransformation(),
+                        keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Password),
+                        isError = passwordError,
+                        supportingText = if (passwordError) {
+                            {
+                                Text(
+                                    if (password.length < 4) {
+                                        stringResource(R.string.browser_encrypt_password_too_short)
+                                    } else {
+                                        stringResource(R.string.browser_encrypt_password_mismatch)
+                                    },
+                                    color = MaterialTheme.colorScheme.error
+                                )
+                            }
+                        } else null,
+                        modifier = Modifier.fillMaxWidth()
+                    )
+                }
+            },
+            confirmButton = {
+                BrandFilledButton(
+                    onClick = {
+                        if (password.length < 4) {
+                            passwordError = true
+                            return@BrandFilledButton
+                        }
+                        if (password != confirmPassword) {
+                            passwordError = true
+                            return@BrandFilledButton
+                        }
+                        scope.launch {
+                            val ok = viewModel.encryptExportFile(encryptFileItem, password)
+                            val msg = if (ok) {
+                                context.getString(R.string.browser_encrypt_export_success)
+                            } else {
+                                context.getString(R.string.browser_encrypt_export_failed)
+                            }
+                            Toast.makeText(context, msg, Toast.LENGTH_SHORT).show()
+                        }
+                        showEncryptExportDialog = false
+                        fileToEncrypt = null
+                    }
+                ) {
+                    Text(stringResource(R.string.browser_action_encrypt_export))
+                }
+            },
+            dismissButton = {
+                TextButton(onClick = {
+                    showEncryptExportDialog = false
+                    fileToEncrypt = null
+                }) {
                     Text(stringResource(R.string.browser_action_cancel))
                 }
             }
@@ -1334,6 +1440,7 @@ fun FileBrowserScreen(
                                                 onTogglePin = { viewModel.togglePin(it) },
                                                 onToggleBookmark = onToggleBookmark,
                                                 onDelete = onDeleteFile,
+                                                onEncryptExport = onEncryptExportFile,
                                                 onMoveTo = { fileItem ->
                                                     fileToMove = fileItem
                                                     showMoveToDialog = true
@@ -1967,6 +2074,7 @@ fun FileBrowserScreen(
                                                             onTogglePin = { viewModel.togglePin(it) },
                                                             onToggleBookmark = onToggleBookmark,
                                                             onDelete = onDeleteFile,
+                                                            onEncryptExport = onEncryptExportFile,
                                                             onMoveTo = { fileItem ->
                                                                 fileToMove = fileItem
                                                                 showMoveToDialog = true
@@ -2349,6 +2457,7 @@ fun FileBrowserScreen(
                                                             onTogglePin = { viewModel.togglePin(it) },
                                                             onToggleBookmark = onToggleBookmark,
                                                             onDelete = onDeleteFile,
+                                                            onEncryptExport = onEncryptExportFile,
                                                             onMoveTo = { fileItem ->
                                                                 fileToMove = fileItem
                                                                 showMoveToDialog = true
@@ -2513,6 +2622,7 @@ fun FileBrowserScreen(
                                 onTogglePin = { viewModel.togglePin(it) },
                                 onToggleBookmark = onToggleBookmark,
                                 onDelete = onDeleteFile,
+                                onEncryptExport = onEncryptExportFile,
                                 onMoveTo = { fileItem ->
                                     fileToMove = fileItem
                                     showMoveToDialog = true
@@ -2547,6 +2657,7 @@ fun FileBrowserScreen(
                                 onTogglePin = { viewModel.togglePin(it) },
                                 onToggleBookmark = onToggleBookmark,
                                 onDelete = onDeleteFile,
+                                onEncryptExport = onEncryptExportFile,
                                 onMoveTo = { fileItem ->
                                     fileToMove = fileItem
                                     showMoveToDialog = true
@@ -2584,6 +2695,7 @@ fun FileBrowserScreen(
                                 onTogglePin = { viewModel.togglePin(it) },
                                 onToggleBookmark = onToggleBookmark,
                                 onDelete = onDeleteFile,
+                                onEncryptExport = onEncryptExportFile,
                                 onMoveTo = { fileItem ->
                                     fileToMove = fileItem
                                     showMoveToDialog = true
@@ -2741,6 +2853,7 @@ fun FileBrowserScreen(
                                                         onTogglePin = { viewModel.togglePin(it) },
                                                         onToggleBookmark = onToggleBookmark,
                                                         onDelete = onDeleteFile,
+                                                        onEncryptExport = onEncryptExportFile,
                                                         onMoveTo = { fileItem ->
                                                             fileToMove = fileItem
                                                             showMoveToDialog = true
@@ -3138,6 +3251,7 @@ private fun FoldableBrowserLayout(
     onToggleBookmark: ((String, String, String) -> Unit)? = null,
     onDelete: ((FileItem) -> Unit)? = null,
     onMoveTo: ((FileItem) -> Unit)? = null,
+    onEncryptExport: ((FileItem) -> Unit)? = null,
     onMultiSelect: (() -> Unit)? = null,
     onToggleSelect: ((String) -> Unit)? = null,
     isMultiSelectMode: Boolean = false,
@@ -3166,6 +3280,7 @@ private fun FoldableBrowserLayout(
                 onTogglePin = onTogglePin,
                 onToggleBookmark = onToggleBookmark,
                 onDelete = onDelete,
+                onEncryptExport = onEncryptExport,
                 onMoveTo = onMoveTo,
                 onMultiSelect = onMultiSelect,
                 onToggleSelect = onToggleSelect,
@@ -3205,6 +3320,7 @@ private fun FoldableBrowserLayout(
                 onTogglePin = onTogglePin,
                 onToggleBookmark = onToggleBookmark,
                 onDelete = onDelete,
+                onEncryptExport = onEncryptExport,
                 onMoveTo = onMoveTo,
                 onMultiSelect = onMultiSelect,
                 onToggleSelect = onToggleSelect,
@@ -3246,6 +3362,7 @@ private fun TwoPaneFileBrowser(
     onToggleBookmark: ((String, String, String) -> Unit)? = null,
     onDelete: ((FileItem) -> Unit)? = null,
     onMoveTo: ((FileItem) -> Unit)? = null,
+    onEncryptExport: ((FileItem) -> Unit)? = null,
     onMultiSelect: (() -> Unit)? = null,
     onToggleSelect: ((String) -> Unit)? = null,
     isMultiSelectMode: Boolean = false,
@@ -3265,6 +3382,7 @@ private fun TwoPaneFileBrowser(
                 onTogglePin = onTogglePin,
                 onToggleBookmark = onToggleBookmark,
                 onDelete = onDelete,
+                onEncryptExport = onEncryptExport,
                 onMoveTo = onMoveTo,
                 onMultiSelect = onMultiSelect,
                 onToggleSelect = onToggleSelect,
@@ -3570,6 +3688,7 @@ private fun FileListContent(
     onToggleBookmark: ((String, String, String) -> Unit)? = null,
     onDelete: ((FileItem) -> Unit)? = null,
     onMoveTo: ((FileItem) -> Unit)? = null,
+    onEncryptExport: ((FileItem) -> Unit)? = null,
     onMultiSelect: (() -> Unit)? = null,
     onToggleSelect: ((String) -> Unit)? = null,
     isMultiSelectMode: Boolean = false,
@@ -3737,6 +3856,7 @@ private fun FileListContent(
                                 onTogglePin = onTogglePin,
                                 onToggleBookmark = onToggleBookmark,
                                 onDelete = onDelete,
+                                onEncryptExport = onEncryptExport,
                                 onMoveTo = onMoveTo,
                                 onMultiSelect = onMultiSelect,
                                 onToggleSelect = onToggleSelect,
@@ -3910,6 +4030,7 @@ fun FileItemComposable(
     onToggleBookmark: ((String, String, String) -> Unit)? = null,
     onDelete: ((FileItem) -> Unit)? = null,
     onMoveTo: ((FileItem) -> Unit)? = null,
+    onEncryptExport: ((FileItem) -> Unit)? = null,
     onMultiSelect: (() -> Unit)? = null,
     onToggleSelect: ((String) -> Unit)? = null,
     currentDirectoryUri: String = "",
@@ -3968,6 +4089,7 @@ fun FileItemComposable(
                 onToggleBookmark != null ||
                 (onDelete != null && isInternalFile) ||
                 onMoveTo != null ||
+                onEncryptExport != null ||
                 onMultiSelect != null
             ) {
                 { showContextMenu = true }
@@ -4075,6 +4197,7 @@ fun FileItemComposable(
                 onToggleBookmark != null ||
                 (onDelete != null && isInternalFile) ||
                 onMoveTo != null ||
+                onEncryptExport != null ||
                 onMultiSelect != null
             )
     ) {
@@ -4160,6 +4283,22 @@ fun FileItemComposable(
                     onClick = {
                         showContextMenu = false
                         onMoveTo.invoke(item)
+                    }
+                )
+            }
+            if (onEncryptExport != null && isInternalFile) {
+                DropdownMenuItem(
+                    text = { Text(stringResource(R.string.browser_action_encrypt_export)) },
+                    leadingIcon = {
+                        Icon(
+                            imageVector = Icons.Filled.Lock,
+                            contentDescription = stringResource(R.string.browser_action_encrypt_export),
+                            tint = PrototypeTokens.accent
+                        )
+                    },
+                    onClick = {
+                        showContextMenu = false
+                        onEncryptExport.invoke(item)
                     }
                 )
             }
