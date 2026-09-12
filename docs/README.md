@@ -1,11 +1,11 @@
 # DraftPeek — 文档与项目速览
 
-> Android 富文本/代码/笔记编辑器（KMP + Jetpack Compose）。支持多语言(i18n)、Markdown、终端、统计、知识图谱、文件同步。
+> Android 富文本/代码/笔记编辑器（KMP + Jetpack Compose）。支持多语言(i18n)、Markdown、终端、统计、文件同步。
 > 入口：Gradle 多模块（应用外壳 `app/`）；启动见 `scripts/` 下的 bat 或 Android Studio。
 > 详细目录放置规则见 `AGENTS.md` 末尾「文件归档与放置规范」。
 
 ## 快速了解本项目
-- **做什么**：移动端富文本编辑器（Markdown WYSIWYG/源码双模式），内置文件管理、收藏/最近、统计看板、终端、知识图谱、端到端同步。
+- **做什么**：移动端富文本编辑器（Markdown WYSIWYG/源码双模式），内置文件管理、收藏/最近、统计看板、终端、端到端同步。
 - **技术栈**：Kotlin · Jetpack Compose · KMP(Core/FE 多模块) · Room · Hilt · 自研 CRDT 同步。
 - **如何构建**：Gradle（`settings.gradle.kts`）；桌面安装脚本见 `scripts/`。
 
@@ -14,11 +14,10 @@
 |---|---|
 | `app/` | **应用主模块**（UI/入口/资源/安全） |
 | `core/` | 跨模块共享库（common/ data/ domain/ designsystem/ testing/ ui/） |
-| `feature/` | 功能模块（browser/ editor/ settings/ stats/ terminal/ knowledge/） |
+| `feature/` | 功能模块（browser/ editor/ settings/ stats/ terminal/） |
 | `benchmark/` | 基准测试（启动/文件读取） |
 | `build-logic/` | Gradle 约定插件 |
 | `gradle/` | Gradle wrapper / 版本目录(libs.versions.toml) |
-| `migrations/` | 数据库迁移（知识图谱 SQL） |
 | `server/` | Python 同步/CRDT 服务 |
 | `tests/` `benchmark/` | 单元/E2E/基准测试 |
 | `docs/` | 项目文档（见下方索引） |

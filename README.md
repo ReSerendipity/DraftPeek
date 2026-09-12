@@ -114,14 +114,11 @@ DraftPeek/
 │   ├── editor/             #   编辑器核心（sora-editor、Markdown、LSP、多标签页）
 │   ├── settings/           #   设置数据层
 │   ├── stats/              #   统计 UI、成就系统
-│   ├── knowledge/          #   知识图谱（建表见 migrations/；当前为脚手架，尚未接入 settings.gradle.kts）
 │   └── terminal/           #   终端模拟器（Proot 会话/命令执行）
 ├── docs/                   # 文档目录
 ├── scripts/                # 辅助脚本（构建、测试、安装）
 ├── gradle/                 # Gradle 版本目录（libs.versions.toml）
-├── repos/                  # 竞品/参考仓库源码（调研用，不参与编译）（计划，未实现：当前仓库无此目录）
 ├── server/                 # Python 协作同步服务（实验性/可选，非生产部署；crdt_server / integrity_server / sync_server + pytest 测试）
-├── migrations/             # SQL 迁移脚本（含知识图谱建表）
 ├── AGENTS.md               # AI 辅助开发指南
 ├── docs/FILEMAP.md         # 完整文件清单（位于 docs/ 下）
 └── CHANGELOG.md            # 更新日志
