@@ -58,7 +58,6 @@ import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
-import androidx.compose.material3.IconButton
 import androidx.compose.material3.LinearProgressIndicator
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.PlainTooltip
@@ -1794,7 +1793,7 @@ private fun ReadOnlyBanner(modifier: Modifier = Modifier, onDismiss: () -> Unit 
 /**
  * 带工具提示的图标按钮。
  *
- * 对 [IconButton] 的封装，在长按（或支持悬停的设备上鼠标悬停）时显示纯文本提示，
+ * 对 [BrandIconButton] 的封装，在长按（或支持悬停的设备上鼠标悬停）时显示纯文本提示，
  * 用于帮助用户理解工具栏图标的功能含义。
  *
  * @param tooltip 提示文本内容

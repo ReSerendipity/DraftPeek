@@ -296,9 +296,6 @@ dependencies {
     //
     // CRDT (real-time collaborative editing) — decided not to implement (see ADR-001); scaffold removed 2026-09-12.
     //
-    // Knowledge Graph (optional graph database backend):
-    // implementation(libs.neo4j.ogm.core)
-    //
     // Cloud Sync (choose one or both storage backends):
     // implementation(libs.aws.java.sdk.s3)
     // implementation(libs.dropbox.core.sdk)

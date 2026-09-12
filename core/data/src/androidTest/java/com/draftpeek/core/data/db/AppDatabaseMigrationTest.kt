@@ -15,9 +15,7 @@
  *
  * 说明：
  * - 早期版本（1-6）schema 未导出，最早可创建的版本为 7；后续新增迁移时
- *   必须同时提交 schema JSON，并在本测试追加对应 Migration 对象；
- * - `migrations/001_create_knowledge_graph.sql` 为独立 SQL 文档（未绑定 Room
- *   版本步骤），Room 实际迁移以 AppDatabase.MIGRATION_* 为准。
+ *   必须同时提交 schema JSON，并在本测试追加对应 Migration 对象。
  *
  * 运行：`./gradlew :core:data:connectedDevDebugAndroidTest`（需设备/模拟器）
  *

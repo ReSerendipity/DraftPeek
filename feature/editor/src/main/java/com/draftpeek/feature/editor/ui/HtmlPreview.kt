@@ -89,6 +89,10 @@ fun HtmlPreview(
         )
 
         // Convert to Markdown FAB
+        // 例外保留 M3 SmallFloatingActionButton：BrandFAB 是带展开速度拨号菜单的复合组件，
+        // 固定展示 + 图标、56dp 尺寸且要求传入 List<FABMenuItem>，无法覆盖此场景的
+        // 单动作小型 FAB（40dp、自定义 containerColor、自定义 Transform 图标）。
+        // 详见 task rule 7：Brand* 完全无法覆盖时保留 M3 用法。
         if (onConvertToMarkdown != null) {
             SmallFloatingActionButton(
                 onClick = onConvertToMarkdown,

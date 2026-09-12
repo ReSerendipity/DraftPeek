@@ -144,6 +144,8 @@ design_system_draft.md
 !/TESTING_SUMMARY.md
 !docs/VERSIONING.md
 !docs/DATABASE_MIGRATION_STRATEGY.md
+!学习成果落地分析报告.md
+!docs/repo-analysis/**
 
 # Cloned learning repos (research reference only, not part of project)
 references/
@@ -184,3 +186,16 @@ crdt_data/
 # --- 2026-09-07 守卫暴露的遗漏（缓存 / 服务端虚拟环境）---
 .venv_srv/
 .ruff_cache/
+
+# --- 2026-09-11 软删除回收站（scripts/trash.sh|bat 落盘，永不入库）---
+.trash/
+
+# 本地 git 目录备份（scripts 备份工具产物，不入库，2026-09-12）
+backups/
+# 本地运维脚本（备份/清理/回收站工具，均不入库）
+scripts/backup_data.bat
+scripts/backup_data.sh
+scripts/safe-clean.bat
+scripts/safe-clean.sh
+scripts/trash.bat
+scripts/trash.sh
