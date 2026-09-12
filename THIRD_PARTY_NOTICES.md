@@ -72,6 +72,8 @@ DraftPeek 终端模块实现了基于 proot 的会话管理框架（ProotSession
 
 ## 6. 调研用源码目录（repos/）
 
+> ⚠️ **当前 `repos/` 目录不存在，为规划状态**（`.gitignore` 第95行已预留排除规则 `repos/`）。以下许可规则待目录实际落地后生效。
+
 `repos/` 下 30+ 竞品/参考仓库源码仅作本地调研（已 gitignore、不参与编译、不随 APK 分发），不构成再分发，无许可义务；**禁止将其中 GPL 许可项目的代码片段直接复制进主代码库**（如 termux-app 为 GPL-3.0、Xed-Editor 为 GPL-3.0，仅可参考思路）。
 
 ## 7. 其他

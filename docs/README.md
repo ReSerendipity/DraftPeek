@@ -26,7 +26,7 @@
 ## docs/ 索引（本目录）
 | 子目录/文件 | 存什么 |
 |---|---|
-| `repo-analysis/` | 参考仓库学习报告（editor/termux/笔记协作，约35篇） |
+| `repo-analysis/` | 参考仓库学习报告（editor/termux/笔记协作）。因 `.gitignore` 第131行 `*.md` 规则仅本地保留，当前 clone 不包含原文；共 33 份技术报告 + 5 份汇总文档 |
 | `reports/` | 测试摘要(TESTING_SUMMARY)等报告 |
 | `_devarchive/` | 历史/一次性产物（icons/ logs/ trae-documents/ qoder/） |
 | `FILEMAP.md` | 文件结构地图 |

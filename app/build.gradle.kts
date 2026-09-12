@@ -294,8 +294,7 @@ dependencies {
     // Note: These dependencies are defined in libs.versions.toml.
     // Uncomment when the corresponding feature modules are integrated into Gradle.
     //
-    // CRDT (real-time collaborative editing):
-    // implementation("io.github.jan-tennert:simple-yjs:1.0.0")  // May not exist in Maven; see core/crdt/CrdtDocument.kt
+    // CRDT (real-time collaborative editing) — decided not to implement (see ADR-001); scaffold removed 2026-09-12.
     //
     // Knowledge Graph (optional graph database backend):
     // implementation(libs.neo4j.ogm.core)
