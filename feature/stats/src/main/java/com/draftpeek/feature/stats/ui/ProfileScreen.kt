@@ -78,6 +78,8 @@ import androidx.compose.material.icons.filled.Image
 import androidx.compose.material.icons.filled.Info
 import androidx.compose.material.icons.filled.Language
 import androidx.compose.material.icons.filled.Link
+import androidx.compose.material.icons.filled.Map
+import androidx.compose.material.icons.filled.Palette
 import androidx.compose.material.icons.filled.PushPin
 import androidx.compose.material.icons.filled.Reorder
 import androidx.compose.material.icons.filled.Restore
@@ -155,6 +157,7 @@ import com.draftpeek.feature.stats.ui.component.YearHeatmapNew
 import com.draftpeek.feature.stats.util.AchievementDefinitions
 import com.draftpeek.feature.stats.viewmodel.StatsMessage
 import com.draftpeek.feature.stats.viewmodel.StatsViewModel
+import com.draftpeek.feature.stats.viewmodel.ThemeManageViewModel
 import java.util.Locale
 import kotlinx.coroutines.launch
 
@@ -194,6 +197,8 @@ fun ProfileScreen(
     val unlockedAchievements by viewModel.unlockedAchievements.collectAsStateWithLifecycle()
     val yearActivities by viewModel.yearActivities.collectAsStateWithLifecycle()
     val settings by settingsViewModel.settings.collectAsStateWithLifecycle()
+    val themeManageViewModel: ThemeManageViewModel = hiltViewModel()
+    val importedThemes by themeManageViewModel.customThemes.collectAsStateWithLifecycle()
     val context = LocalContext.current
     val isDark = LocalDarkTheme.current
 
@@ -233,6 +238,7 @@ fun ProfileScreen(
     }
     var showVerifyAppDialog by remember { mutableStateOf(false) }
     var showOpenSourceDialog by remember { mutableStateOf(false) }
+    var showThemeManageDialog by remember { mutableStateOf(false) }
     var verifyAppState by remember { mutableStateOf<VerifyAppState>(VerifyAppState.Idle) }
 
     LaunchedEffect(Unit) {
@@ -835,6 +841,15 @@ fun ProfileScreen(
         )
     }
 
+    if (showThemeManageDialog) {
+        ThemeManageDialog(
+            themeManageViewModel = themeManageViewModel,
+            currentEditorThemeId = settings.editorThemeId,
+            onThemeSelected = { themeId -> settingsViewModel.updateEditorThemeId(themeId) },
+            onDismiss = { showThemeManageDialog = false }
+        )
+    }
+
     if (uiState.selectedDay != null) {
         val detail = viewModel.getDayDetail(uiState.selectedDay!!)
         if (detail != null) {
@@ -1113,6 +1128,22 @@ fun ProfileScreen(
                 label = stringResource(R.string.profile_setting_sticky_scroll),
                 checked = settings.stickyScroll,
                 onCheckedChange = { settingsViewModel.updateStickyScroll(it) },
+                showDivider = true
+            )
+
+            BrandSwitchSettingRow(
+                icon = Icons.Filled.Map,
+                label = stringResource(R.string.profile_setting_show_minimap),
+                checked = settings.showMinimap,
+                onCheckedChange = { settingsViewModel.updateShowMinimap(it) },
+                showDivider = true
+            )
+
+            BrandSettingRow(
+                icon = Icons.Filled.Palette,
+                label = stringResource(R.string.profile_setting_theme_manage),
+                value = stringResource(R.string.profile_theme_import_count, importedThemes.size),
+                onClick = { showThemeManageDialog = true },
                 showDivider = true
             )
             val resolvedMarkdownTheme = try {
