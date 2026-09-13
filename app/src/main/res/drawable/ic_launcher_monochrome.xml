@@ -1,18 +1,18 @@
 <?xml version="1.0" encoding="utf-8"?>
-<!-- DraftPeek launcher foreground · G34R 红弦 · 主题单色层 (system tints, color ignored) -->
-<!-- 内容包络半径 31.1dp,在 66dp 安全圆内;single-tone: only geometry matters -->
+<!-- DraftPeek monochrome · G34O(系统着色,仅保留轮廓) -->
 <vector xmlns:android="http://schemas.android.com/apk/res/android"
     android:width="108dp"
     android:height="108dp"
     android:viewportWidth="108"
     android:viewportHeight="108">
-    <path android:pathData="M67.50,79.60L67.50,28.40" android:strokeColor="#FF000000" android:strokeWidth="4.32" android:strokeLineCap="round"/>
-    <path android:pathData="M57.93,82.67L75.44,34.56" android:strokeColor="#FF000000" android:strokeWidth="4.32" android:strokeLineCap="round"/>
-    <path android:pathData="M47.89,82.29L80.79,43.07" android:strokeColor="#FF000000" android:strokeWidth="4.32" android:strokeLineCap="round"/>
-    <path android:pathData="M38.58,78.49L82.92,52.89" android:strokeColor="#FF000000" android:strokeWidth="4.32" android:strokeLineCap="round"/>
-    <path android:pathData="M31.14,71.74L81.55,62.85" android:strokeColor="#FF000000" android:strokeWidth="4.32" android:strokeLineCap="round"/>
-    <path android:pathData="M26.45,62.85L76.86,71.74" android:strokeColor="#FF000000" android:strokeWidth="4.32" android:strokeLineCap="round"/>
-    <path android:pathData="M25.08,52.89L69.42,78.49" android:strokeColor="#FF000000" android:strokeWidth="4.32" android:strokeLineCap="round"/>
-    <path android:pathData="M27.21,43.07L60.11,82.29" android:strokeColor="#FF000000" android:strokeWidth="4.32" android:strokeLineCap="round"/>
-    <path android:pathData="M32.56,34.56L50.07,82.67" android:strokeColor="#FF000000" android:strokeWidth="4.32" android:strokeLineCap="round"/>
+    <path android:pathData="M69.14,78.92L76.75,35.76" android:strokeColor="#FF000000" android:strokeWidth="3.89" android:strokeLineCap="round"/>
+    <path android:pathData="M54.36,83.16L79.44,39.75" android:strokeColor="#FF000000" android:strokeWidth="3.89" android:strokeLineCap="round"/>
+    <path android:pathData="M41.26,77.98L81.46,44.19" android:strokeColor="#FF000000" android:strokeWidth="3.89" android:strokeLineCap="round"/>
+    <path android:pathData="M31.10,68.26L82.80,49.44" android:strokeColor="#FF000000" android:strokeWidth="3.89" android:strokeLineCap="round"/>
+    <path android:pathData="M24.89,55.62L83.11,55.62" android:strokeColor="#FF000000" android:strokeWidth="3.89" android:strokeLineCap="round"/>
+    <path android:pathData="M26.99,43.02L81.75,62.95" android:strokeColor="#FF000000" android:strokeWidth="3.89" android:strokeLineCap="round"/>
+    <path android:pathData="M33.26,33.50L77.76,70.90" android:strokeColor="#FF000000" android:strokeWidth="3.89" android:strokeLineCap="round"/>
+    <path android:pathData="M41.12,27.84L70.23,78.23" android:strokeColor="#FF000000" android:strokeWidth="3.89" android:strokeLineCap="round"/>
+    <path android:pathData="M48.84,25.30L58.97,82.73" android:strokeColor="#FF000000" android:strokeWidth="3.89" android:strokeLineCap="round"/>
+    <path android:pathData="M59.40,44.28a4.32,4.32 0 1,0 8.64,0a4.32,4.32 0 1,0 -8.64,0" android:fillColor="#FF000000"/>
 </vector>
