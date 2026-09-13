@@ -28,9 +28,7 @@ import kotlinx.coroutines.withContext
  * 通过 Hilt 注入 [CustomThemeRepository]（其绑定位于 feature/editor 的 EditorModule）。
  */
 @HiltViewModel
-class ThemeManageViewModel @Inject constructor(
-    private val customThemeRepository: CustomThemeRepository
-) : ViewModel() {
+class ThemeManageViewModel @Inject constructor(private val customThemeRepository: CustomThemeRepository) : ViewModel() {
 
     /** 已导入自定义主题的响应式列表。 */
     val customThemes: StateFlow<List<ThemeMetadata>> =
@@ -45,18 +43,16 @@ class ThemeManageViewModel @Inject constructor(
      *
      * @return 导入成功的主题元数据；JSON 非法或写入失败时返回 null。
      */
-    suspend fun importTheme(json: String, fileName: String?): ThemeMetadata? =
-        withContext(Dispatchers.IO) {
-            customThemeRepository.importTheme(json, fileName)
-        }
+    suspend fun importTheme(json: String, fileName: String?): ThemeMetadata? = withContext(Dispatchers.IO) {
+        customThemeRepository.importTheme(json, fileName)
+    }
 
     /**
      * 按 ID 删除已导入主题。在 [Dispatchers.IO] 上执行。
      *
      * @return true 表示主题存在且已删除。
      */
-    suspend fun deleteTheme(themeId: String): Boolean =
-        withContext(Dispatchers.IO) {
-            customThemeRepository.deleteTheme(themeId)
-        }
+    suspend fun deleteTheme(themeId: String): Boolean = withContext(Dispatchers.IO) {
+        customThemeRepository.deleteTheme(themeId)
+    }
 }
