@@ -137,6 +137,7 @@ import com.draftpeek.core.common.util.ValidationResult
 import com.draftpeek.core.common.vcs.GitFileStatus
 import com.draftpeek.core.common.vcs.GitHubFileEntry
 import com.draftpeek.core.common.vcs.GitStatus
+import com.draftpeek.core.data.security.FileCipher
 import com.draftpeek.core.data.entity.RecentFile
 import com.draftpeek.core.ui.component.BrandChip
 import com.draftpeek.core.ui.component.BrandDialog
@@ -344,6 +345,8 @@ fun FileBrowserScreen(
     var fileToMove by remember { mutableStateOf<FileItem?>(null) }
     var fileToEncrypt by remember { mutableStateOf<FileItem?>(null) }
     var showEncryptExportDialog by rememberSaveable { mutableStateOf(false) }
+    var fileToDecrypt by remember { mutableStateOf<FileItem?>(null) }
+    var showDecryptDialog by rememberSaveable { mutableStateOf(false) }
     val onEncryptExportFile: (FileItem) -> Unit = { item ->
         fileToEncrypt = item
         showEncryptExportDialog = true
@@ -361,7 +364,12 @@ fun FileBrowserScreen(
     val snippetViewModel: com.draftpeek.feature.browser.viewmodel.SnippetViewModel = hiltViewModel()
 
     // Wrap file-open callbacks so the ViewModel can record activity stats.
-    val onOpenFile: (FileItem) -> Unit = { item ->
+    val onOpenFile: (FileItem) -> Unit = onOpenFileLabel@{ item ->
+        if (FileCipher.isEncryptedExport(item.name)) {
+            fileToDecrypt = item
+            showDecryptDialog = true
+            return@onOpenFileLabel
+        }
         viewModel.recordFileOpen()
         onFileClick(item)
     }
@@ -895,6 +903,86 @@ fun FileBrowserScreen(
                 TextButton(onClick = {
                     showEncryptExportDialog = false
                     fileToEncrypt = null
+                }) {
+                    Text(stringResource(R.string.browser_action_cancel))
+                }
+            }
+        )
+    }
+
+    // Decrypt-open password dialog
+    if (showDecryptDialog && fileToDecrypt != null) {
+        val decryptFileItem = fileToDecrypt!!
+        var password by rememberSaveable { mutableStateOf("") }
+        var passwordError by remember { mutableStateOf(false) }
+        BrandDialog(
+            onDismissRequest = {
+                showDecryptDialog = false
+                fileToDecrypt = null
+            },
+            title = {
+                Text(
+                    stringResource(R.string.browser_dialog_decrypt_title) +
+                        " · " + decryptFileItem.name
+                )
+            },
+            content = {
+                Column(verticalArrangement = Arrangement.spacedBy(12.dp)) {
+                    BrandOutlinedTextField(
+                        value = password,
+                        onValueChange = {
+                            password = it
+                            passwordError = false
+                        },
+                        label = { Text(stringResource(R.string.browser_dialog_decrypt_password)) },
+                        singleLine = true,
+                        visualTransformation = PasswordVisualTransformation(),
+                        keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Password),
+                        isError = passwordError,
+                        supportingText = if (passwordError) {
+                            {
+                                Text(
+                                    stringResource(R.string.browser_decrypt_failed),
+                                    color = MaterialTheme.colorScheme.error
+                                )
+                            }
+                        } else null,
+                        modifier = Modifier.fillMaxWidth()
+                    )
+                }
+            },
+            confirmButton = {
+                BrandFilledButton(
+                    onClick = {
+                        scope.launch {
+                            val decryptedItem = viewModel.decryptAndOpenFile(decryptFileItem, password)
+                            if (decryptedItem != null) {
+                                Toast.makeText(
+                                    context,
+                                    context.getString(R.string.browser_decrypt_success),
+                                    Toast.LENGTH_SHORT
+                                ).show()
+                                showDecryptDialog = false
+                                fileToDecrypt = null
+                                onFileClick(decryptedItem)
+                            } else {
+                                passwordError = true
+                                Toast.makeText(
+                                    context,
+                                    context.getString(R.string.browser_decrypt_failed),
+                                    Toast.LENGTH_SHORT
+                                ).show()
+                            }
+                        }
+                    }
+                ) {
+                    Text(stringResource(R.string.browser_dialog_decrypt_title))
+                }
+            },
+            dismissButton = {
+                TextButton(onClick = {
+                    showDecryptDialog = false
+                    fileToDecrypt = null
                 }) {
                     Text(stringResource(R.string.browser_action_cancel))
                 }
