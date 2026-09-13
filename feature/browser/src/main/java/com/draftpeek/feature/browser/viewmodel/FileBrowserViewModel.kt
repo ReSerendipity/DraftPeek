@@ -1353,6 +1353,38 @@ class FileBrowserViewModel @Inject constructor(
      * @param uriString 文件 URI 字符串
      * @return 前 5 行文本，失败或非文本文件返回 null
      */
+    suspend fun decryptAndOpenFile(item: FileItem, password: String): FileItem? {
+        return withContext(Dispatchers.IO) {
+            runCatching {
+                val inputStream = context.contentResolver.openInputStream(item.uri)
+                    ?: run {
+                        Log.w(TAG, "Cannot open input stream for uri: ${item.uri}")
+                        return@runCatching null
+                    }
+                val cipherBytes = inputStream.use { it.readBytes() }
+                val plaintext = FileCipher.decrypt(cipherBytes, password)
+
+                val originalName = FileCipher.originalNameFromEncrypted(item.name)
+                val tempFile = File(
+                    context.cacheDir,
+                    "decrypted_${System.currentTimeMillis()}_$originalName"
+                )
+                tempFile.outputStream().use { it.write(plaintext) }
+
+                Log.d(TAG, "Decrypted file written to cache: ${tempFile.name}")
+                FileItem(
+                    name = originalName,
+                    uri = Uri.fromFile(tempFile),
+                    isDirectory = false,
+                    size = plaintext.size.toLong()
+                )
+            }.getOrElse { e ->
+                Log.w(TAG, "Failed to decrypt file: ${item.name}", e)
+                null
+            }
+        }
+    }
+
     suspend fun readFilePreview(uriString: String): String? = withContext(Dispatchers.IO) {
         runCatching {
             val result = repository.readFile(Uri.parse(uriString))
