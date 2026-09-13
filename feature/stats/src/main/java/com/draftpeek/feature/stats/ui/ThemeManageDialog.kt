@@ -39,7 +39,6 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -209,12 +208,7 @@ fun ThemeManageDialog(
  * 单个已导入主题的行：名称 + 深/浅标识 + 选中勾选 + 删除按钮。
  */
 @Composable
-private fun ThemeManageRow(
-    theme: ThemeMetadata,
-    selected: Boolean,
-    onClick: () -> Unit,
-    onDelete: () -> Unit
-) {
+private fun ThemeManageRow(theme: ThemeMetadata, selected: Boolean, onClick: () -> Unit, onDelete: () -> Unit) {
     Row(
         modifier = Modifier
             .fillMaxWidth()

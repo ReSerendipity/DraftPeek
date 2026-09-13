@@ -49,6 +49,7 @@ import androidx.compose.foundation.lazy.itemsIndexed
 import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Bookmark
 import androidx.compose.material.icons.filled.CheckCircle
@@ -112,14 +113,13 @@ import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.platform.LocalWindowInfo
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.AnnotatedString
-import androidx.compose.foundation.text.KeyboardOptions
-import androidx.compose.ui.text.input.KeyboardType
-import androidx.compose.ui.text.input.PasswordVisualTransformation
 import androidx.compose.ui.text.SpanStyle
 import androidx.compose.ui.text.buildAnnotatedString
 import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.font.FontStyle
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.input.KeyboardType
+import androidx.compose.ui.text.input.PasswordVisualTransformation
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.text.withStyle
@@ -137,8 +137,8 @@ import com.draftpeek.core.common.util.ValidationResult
 import com.draftpeek.core.common.vcs.GitFileStatus
 import com.draftpeek.core.common.vcs.GitHubFileEntry
 import com.draftpeek.core.common.vcs.GitStatus
-import com.draftpeek.core.data.security.FileCipher
 import com.draftpeek.core.data.entity.RecentFile
+import com.draftpeek.core.data.security.FileCipher
 import com.draftpeek.core.ui.component.BrandChip
 import com.draftpeek.core.ui.component.BrandDialog
 import com.draftpeek.core.ui.component.BrandDirectoryCard
@@ -867,7 +867,9 @@ fun FileBrowserScreen(
                                     color = MaterialTheme.colorScheme.error
                                 )
                             }
-                        } else null,
+                        } else {
+                            null
+                        },
                         modifier = Modifier.fillMaxWidth()
                     )
                 }
@@ -946,7 +948,9 @@ fun FileBrowserScreen(
                                     color = MaterialTheme.colorScheme.error
                                 )
                             }
-                        } else null,
+                        } else {
+                            null
+                        },
                         modifier = Modifier.fillMaxWidth()
                     )
                 }
