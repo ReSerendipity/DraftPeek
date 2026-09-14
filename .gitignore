@@ -199,3 +199,4 @@ scripts/safe-clean.bat
 scripts/safe-clean.sh
 scripts/trash.bat
 scripts/trash.sh
+docs/project/ADR-001-CRDT-vs-OT-Selection.md
