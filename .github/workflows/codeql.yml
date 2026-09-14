@@ -14,9 +14,17 @@ permissions:
   security-events: write
   actions: read
 
+concurrency:
+  group: codeql-${{ github.event.pull_request.number || github.ref }}
+  cancel-in-progress: true
+
 jobs:
   analyze:
     name: Analyze (${{ matrix.language }})
+    # Dependabot PR 只改依赖版本声明、不改第一方源码，而本 job 三种语言各跑一次
+    # assembleDebug --rerun-tasks（单 job 上限 90m），是 Actions 并发额度最主要的消耗来源。
+    # main 分支 push 与每周一 schedule 仍完整覆盖，跳过 PR 档不损失实际扫描范围。
+    if: github.event_name != 'pull_request' || github.actor != 'dependabot[bot]'
     runs-on: ubuntu-latest
     # Gradle 8.x + 全量 assembleDebug + CodeQL 抽取/分析，单语言 job 可能逼近 30m；
     # 提到 90m 避免假超时取消（java/kotlin 各跑一次 assembleDebug）。

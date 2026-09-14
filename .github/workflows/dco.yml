@@ -10,6 +10,10 @@ permissions:
 jobs:
   dco:
     name: DCO Check
+    # DCO 的 Signed-off-by 是对「人类贡献者有权提交该代码」的来源认证，
+    # Dependabot 生成的 commit 结构上无法带签名，每轮升级必然误红。
+    # 本检查不在分支保护的必需检查列表内，跳过只会显示为灰色 skipped。
+    if: github.actor != 'dependabot[bot]'
     runs-on: ubuntu-latest
     timeout-minutes: 10
     steps:
