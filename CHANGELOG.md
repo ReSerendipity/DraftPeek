@@ -24,7 +24,7 @@
 - 依赖坐标全面集中至 `gradle/libs.versions.toml`：清除 7 个模块 12 处硬编码版本，并对齐 `androidx.test.ext:junit`（benchmark 1.1.5 → 1.2.1）与 `androidx.test:runner`（benchmark 1.5.2 → 1.6.2）跨模块漂移
 - 依赖锁定升级为 `LockMode.STRICT`：为全部 15 个项目生成 `gradle.lockfile`（此前仅 app 与 root 有锁，其余模块缺锁静默通过），新依赖绕过版本目录将直接构建失败
 - README 环境要求与实际工具链对齐（AGP 8.8.0→8.10.1、Gradle 8.13→8.14.3、Android Studio Meerkat 2024.3.2+）
-- `bumpVersion` 任务输出提示：tag 推送目标由 `origin` 改为 `private` 远程（原提示若照做会把私有 main 历史带入公开仓库）
+- `bumpVersion` 任务输出提示：tag 推送目标由 `origin` 改为 `private` 远程（原提示若照做会把私有 main 历史带入公开仓库）【注：2026-09 双仓双分支体系已废止、仓库全量公开，本提示与 `private` 远程不再适用】
 - 数据库迁移策略 §5 紧急回滚改写：移除不存在的 Play Console 能力，按真实分发渠道（GitHub Release）重写止损步骤
 
 ### Security

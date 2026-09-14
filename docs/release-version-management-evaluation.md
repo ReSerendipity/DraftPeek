@@ -96,7 +96,7 @@
 | 项 | 文件/命令 |
 |---|---|
 | **建立分发渠道**：当前产物仅落 GitHub Release draft，非开发者用户无法便捷获取。决策渠道（F-Droid / 蒲公英 / 自托管下载页）+ 实现 in-app 更新检查 | 需产品决策；工程侧可加 `docs/deploy-download-page` 与更新检测模块 |
-| **验证并修复发版链路**（因 0 tag，整条 `release.yml` 未跑过）：先修 keystore 路径错配，再打一个测试 tag 跑通全流程 | 见 P1-1；测试 tag：`git tag v0.0.0-dryrun && git push private v0.0.0-dryrun`（私有远程，避免误发公开） |
+| **验证并修复发版链路**（因 0 tag，整条 `release.yml` 未跑过）：先修 keystore 路径错配，再打一个测试 tag 跑通全流程 | 见 P1-1；测试 tag：`git tag v0.0.0-dryrun && git push origin v0.0.0-dryrun`（仓库已全量公开，2026-09 修订：测试 tag 直接推 origin 即可） |
 
 ### P1（应在下个发布前完成）
 | 项 | 文件/命令 |
@@ -126,8 +126,8 @@
 **结论：值得，但分步推进。** 
 - 当前已具备一半基础：`generate_changelog.py` 已解析 Conventional Commits，`bumpVersion` 已存在，CHANGELOG-verify 硬门禁已设计。
 - release-please 价值：自动从 commit 生成 CHANGELOG + 自动 bump 版本 + 自动建 tag/PR，彻底消除"三处人工同步"的人因漂移。
-- **迁移代价（中，约 1–2 天配置 + 团队约定 adoption）**：① 全仓统一 Conventional Commits（已有脚本基础）；② 配 `release-please` action，决策 bump 策略（可取代 `bumpVersion`/`generateChangelog`）；③ **关键难点**：本项目 `main→private` + 公开 `public` 双分支，而 release-please 默认假设单默认分支，需定制使其只在安全分支产生 release，避免触碰 `origin main` 红线。
-- **建议路线**：短期先（a）修好并跑通现有 tag 发版链路；（b）加"gradle.properties==CHANGELOG==tag"CI 门禁。中期再用 release-please 替换手工 bump+CHANGELOG，保留"人工点发布 draft"以契合双分支安全模型。即 release-please 接管"生成/版本/tag"，人工保留"发布"决策。
+- **迁移代价（中，约 1–2 天配置 + 团队约定 adoption）**：① 全仓统一 Conventional Commits（已有脚本基础）；② 配 `release-please` action，决策 bump 策略（可取代 `bumpVersion`/`generateChangelog`）。③ ~~双分支定制难点~~（2026-09 修订：仓库已全量公开、仅单一 `main` 分支，无 public/private 双分支，release-please 可直接按单默认分支配置）。
+- **建议路线**：短期先（a）修好并跑通现有 tag 发版链路；（b）加"gradle.properties==CHANGELOG==tag"CI 门禁。中期再用 release-please 替换手工 bump+CHANGELOG，人工保留"发布"决策（2026-09 修订：不再有双分支安全模型约束，单 main + tag 流程即可）。
 
 ### Q2：若产物仅落 GitHub Release draft，目标用户如何获取？工程还是商业问题？
 **结论：本质是商业/产品决策，但执行是工程缺口，且对当前用户群是 P0 风险。**
@@ -151,7 +151,7 @@
 - **未核实项**（需进一步确认，已标注）：
   1. 公开仓库 `origin` 是否配置了 branch protection / ruleset 拦截 `push origin main`（本地无法验证，需查 GitHub 设置）。
   2. 1.0.30 的**历史真实发布方式**（因无 tag，推测为手工发布或本流水线从未跑过；需向用户确认）。
-  3. `release.yml` 的 keystore 路径错配导致正式发版失败——为**代码静态推演高置信结论**，最终需一次真实 dry-run tag 确认（建议推私有远程测试 tag，勿推公开）。
+  3. `release.yml` 的 keystore 路径错配导致正式发版失败——为**代码静态推演高置信结论**，最终需一次真实 dry-run tag 确认（2026-09 修订：仓库已全量公开，直接推 origin 测试 tag 即可）。
   4. `macrosbenchmark` 是否在某处定义了未在 `release.yml` 体现的阈值（已确认 `release.yml` 内无阈值断言）。
 
 ---
