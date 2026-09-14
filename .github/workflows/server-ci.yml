@@ -20,9 +20,11 @@ on:
       - '.github/workflows/server-ci.yml'
   pull_request:
     branches: [main, develop]
-    paths:
-      - 'server/**'
-      - '.github/workflows/server-ci.yml'
+    # 注意：本工作流是分支保护的必需检查（context "Server CI (Python)"）。
+    # 必需检查的工作流不能带 paths 过滤，否则仅改 .github/ 的 PR（如 Dependabot
+    # 的 actions 升级、CI 配置 PR）永远不会触发该检查，被 GitHub 判定为
+    # "Expected — Waiting for status to be reported" 而永久 BLOCKED。
+    # 因此 PR 档不做路径过滤；main push 档仍保留 paths 节省算力。
   workflow_dispatch:
 
 permissions:
