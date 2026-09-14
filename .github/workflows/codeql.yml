@@ -27,7 +27,7 @@ jobs:
         language: [java, javascript, kotlin]
     steps:
       - name: Checkout
-        uses: actions/checkout@v4
+        uses: actions/checkout@v7
 
       # 构建环境：Gradle 多模块 Android 工程必须 JDK17 + Gradle 才能构建，
       # 否则 manual build-mode 下的 ./gradlew assembleDebug 跑不起来（原 stock autobuild 即因此每跑必败）。
