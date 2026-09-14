@@ -225,6 +225,18 @@
     <string name="browser_delete_success">已删除</string>
     <string name="browser_delete_failed">删除失败</string>
     <string name="browser_action_delete_file">删除</string>
+    <string name="browser_action_encrypt_export">加密导出</string>
+    <string name="browser_dialog_encrypt_export_title">加密导出</string>
+    <string name="browser_dialog_encrypt_export_password">设置密码（至少 4 位）</string>
+    <string name="browser_dialog_encrypt_export_confirm">确认密码</string>
+    <string name="browser_encrypt_password_mismatch">两次输入的密码不一致</string>
+    <string name="browser_encrypt_password_too_short">密码至少 4 位</string>
+    <string name="browser_encrypt_export_success">已加密导出为 .jenc 文件</string>
+    <string name="browser_encrypt_export_failed">加密导出失败</string>
+    <string name="browser_dialog_decrypt_title">解密打开</string>
+    <string name="browser_dialog_decrypt_password">输入密码</string>
+    <string name="browser_decrypt_success">解密成功，已打开文件</string>
+    <string name="browser_decrypt_failed">解密失败：密码错误或文件已损坏</string>
 
     <!-- GitScreen -->
     <string name="browser_git_screen_title">Git 管理</string>
