@@ -1,6 +1,6 @@
 # 安全审计 — DraftPeek
 
-> 只读审计 · 适配版（Android Compose/Kotlin + Gradle + Python CRDT 同步服务，私有仓库）
+> 只读审计 · 适配版（Android Compose/Kotlin + Gradle + Python CRDT 同步服务，公开仓库）
 > 审计日期：2026-09-01 · 审计对象：`server/`（Python）+ `app/feature/core`（Kotlin）
 
 ## 执行摘要（总体评级：中 / Medium）

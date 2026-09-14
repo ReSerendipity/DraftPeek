@@ -30,13 +30,12 @@
 - [ ] `local.properties` 未被意外提交（`git status` 无该文件）
 - [ ] keystore / 密码未出现在任何日志、构建产物或 Release 说明中
 
-## 4. Tag 与远程（🔴 双分支红线，逐字核对）
+## 4. Tag 与远程（✅ 2026-09 修订：双仓体系已废止，全量公开）
 
-- [ ] tag 打在私有 main 提交上：`git tag vX.Y.Z`
-- [ ] **tag 只推私有远程**：`git push private vX.Y.Z`
-- [ ] 🔴 **禁止** `git push origin vX.Y.Z` / `git push origin main` / `git push origin main:public`
-      （会把私有提交历史带入公开仓库，参考 2026-09-02 事故与 `FIX_LOG.md`）
-- [ ] `release.yml` 触发于 `private` 仓库的 Actions 页（tag 触发 `v*`）
+- [ ] tag 打在 main 提交上：`git tag vX.Y.Z`
+- [ ] tag 推送标准远程：`git push origin vX.Y.Z`
+- [ ] `release.yml` 触发于本仓库的 Actions 页（tag 触发 `v*`）
+- [ ] 推送前确认 `git remote -v` 无残留 `private` 远程
 
 ## 5. 产物与分发
 
@@ -75,6 +74,6 @@ python scripts/check_version_consistency.py --strict --tag vX.Y.Z
 ./gradlew signingReport | grep -i "Variant\|Config\|Store"
 sha256sum app/build/outputs/apk/release/*.apk
 
-# 打 tag（🔴 只推 private）
-git tag vX.Y.Z && git push private vX.Y.Z
+# 打 tag（2026-09 修订：双仓体系已废止，推 origin）
+git tag vX.Y.Z && git push origin vX.Y.Z
 ```

@@ -27,7 +27,7 @@
 | tm4e（含 joni/jcodings 传递依赖） | — | TextMate 语法解析（sora-editor 依赖） | EPL-2.0（以仓库为准） | |
 
 > LGPL-2.1 组件以可替换方式链接，主程序无需开源；再分发须随附许可文本、保留版权声明，并保证用户可用修改后的 LGPL 组件替换重新链接（详见 docs/COMPLIANCE_CHECKLIST.md（本地文档，未随仓库发布））。
-> Apache/BSD/MIT/EPL 类为宽松许可，与闭源发布兼容；再分发时保留各库的许可文本与版权声明即可。
+> Apache/BSD/MIT/EPL 类为宽松许可，与本仓库 Apache-2.0 开源发布兼容；再分发时保留各库的许可文本与版权声明即可。
 
 ## 2. 随包分发的前端资源（Markdown 预览）
 

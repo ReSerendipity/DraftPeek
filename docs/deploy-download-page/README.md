@@ -44,5 +44,5 @@ python -m http.server 8080 --directory docs/deploy-download-page
 - 渠道选择（自托管 vs Play vs 蒲公英）= 产品决策，本目录只是基座。
 - in-app 更新检测模块（Kotlin 侧）未实现，属后续工程项；契约已由
   `latest.json` 固化，实现时无需改服务端。
-- 私有仓库的 GitHub Release 无法匿名访问，下载页**不能**直接链接其资产——
-  这正是需要产品决策确认分发渠道的原因之一。
+- 本仓库已全量公开（2026-09 修订）：GitHub Release 资产可匿名下载，下载页可直接链接其资产——
+  分发链路已无私有仓库限制，渠道选择仍属产品决策。
