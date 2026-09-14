@@ -73,9 +73,7 @@ play-integrity = "1.3.0"
 
 # ===== New feature dependencies (全功能实施指南 v1.0) =====
 # CRDT: Yjs collaborative editing (note: simple-yjs may need manual setup)
-# Graph: Neo4j OGM (optional enhancement for knowledge graph)
 # Cloud sync: AWS S3 + Dropbox SDK
-neo4j-ogm = "4.0.4"
 aws-s3 = "1.12.658"
 dropbox-core = "5.1.0"
 
@@ -232,8 +230,6 @@ commonmark-autolink = { module = "org.commonmark:commonmark-ext-autolink", versi
 commonmark-tasklist = { module = "org.commonmark:commonmark-ext-task-list-items", version.ref = "commonmark" }
 
 # ===== New feature libraries (全功能实施指南 v1.0) =====
-# Neo4j OGM (optional: knowledge graph database backend)
-neo4j-ogm-core = { module = "org.neo4j:neo4j-ogm-core", version.ref = "neo4j-ogm" }
 # AWS S3 SDK (cloud sync backend)
 aws-java-sdk-s3 = { module = "com.amazonaws:aws-java-sdk-s3", version.ref = "aws-s3" }
 # Dropbox SDK (cloud sync backend)

@@ -354,6 +354,17 @@ class SettingsViewModel @Inject constructor(private val repository: SettingsRepo
         }
     }
 
+    /** 更新编辑器代码高亮主题 ID */
+    fun updateEditorThemeId(themeId: String) {
+        viewModelScope.launch {
+            try {
+                repository.setEditorThemeId(themeId)
+            } catch (e: Exception) {
+                Log.e(TAG, "Failed to update editorThemeId", e)
+            }
+        }
+    }
+
     /** 更新粘性滚动开关状态 */
     fun updateStickyScroll(enabled: Boolean) {
         viewModelScope.launch {

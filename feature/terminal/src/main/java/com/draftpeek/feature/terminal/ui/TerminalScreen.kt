@@ -38,6 +38,7 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.derivedStateOf
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -100,8 +101,12 @@ fun TerminalScreen(
     val prootGuideDesc = stringResource(R.string.terminal_proot_guide_desc)
     val prootReady = stringResource(R.string.terminal_proot_ready)
     val prootError = stringResource(R.string.terminal_proot_error)
+    val systemShellHint = stringResource(R.string.terminal_system_shell_hint)
+    val dismissDesc = stringResource(R.string.terminal_dismiss)
 
     var inputText by remember { mutableStateOf("") }
+    // 系统 shell 降级提示：用户关闭后本次会话不再显示
+    var systemShellHintDismissed by remember { mutableStateOf(false) }
 
     val surfaceVariant = MaterialTheme.colorScheme.surfaceVariant
     val bg = MaterialTheme.colorScheme.background
@@ -161,6 +166,40 @@ fun TerminalScreen(
                 ),
                 modifier = Modifier.weight(1f)
             )
+        }
+
+        // 系统 shell 降级提示条（proot 未就绪时）
+        val showSystemShellHint = !systemShellHintDismissed &&
+            (prootState is ProotSetupState.NotSetup || prootState is ProotSetupState.NotChecked)
+        AnimatedVisibility(
+            visible = showSystemShellHint,
+            enter = fadeIn(),
+            exit = fadeOut()
+        ) {
+            Row(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .background(tertiary.copy(alpha = 0.12f))
+                    .padding(horizontal = 12.dp, vertical = 5.dp),
+                verticalAlignment = Alignment.CenterVertically
+            ) {
+                Text(
+                    text = systemShellHint,
+                    style = TextStyle.Default.copy(
+                        fontSize = 11.sp,
+                        color = onSurfaceVariant
+                    ),
+                    modifier = Modifier.weight(1f)
+                )
+                StrokeIcon(
+                    icon = StrokeIcons.Close,
+                    contentDescription = dismissDesc,
+                    modifier = Modifier
+                        .size(14.dp)
+                        .clickable { systemShellHintDismissed = true },
+                    tint = onSurfaceVariant.copy(alpha = 0.6f)
+                )
+            }
         }
 
         // Proot 引导态
@@ -326,8 +365,8 @@ fun TerminalScreen(
         }
 
         // 输出显示区域
-        val lines = remember(outputBuffer) {
-            outputBuffer.lines().ifEmpty { listOf("") }
+        val lines by remember {
+            derivedStateOf { outputBuffer.lines().ifEmpty { listOf("") } }
         }
 
         LazyColumn(
