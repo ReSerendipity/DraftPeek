@@ -30,10 +30,9 @@ TYPES = ("LINE", "BRANCH", "INSTRUCTION")
 def gradle_modules():
     """从 settings.gradle.kts 解析真实模块清单。
 
-    不能改用 `glob('core/*')` 之类的目录扫描：仓库里存在被 git 跟踪但**未纳入
-    构建**的死目录（core/crdt、core/sync、feature/knowledge，历史移除自研
-    CRDT / 知识图谱后的遗留）。目录扫描会把它们当成「缺报告的模块」报出来，
-    制造假阳性并掩盖真实缺口。
+    不能改用 `glob('core/*')` 之类的目录扫描：历史上仓库里存在被 git 跟踪但**未纳入
+    构建**的死目录（core/crdt、core/sync、feature/knowledge 脚手架均已于 2026-09-12 移除）。
+    目录扫描会把它们当成「缺报告的模块」报出来，制造假阳性并掩盖真实缺口。
     """
     settings = ROOT / "settings.gradle.kts"
     if not settings.exists():

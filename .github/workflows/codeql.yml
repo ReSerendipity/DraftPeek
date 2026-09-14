@@ -1,0 +1,84 @@
+name: CodeQL
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+  schedule:
+    - cron: "30 2 * * 1"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  security-events: write
+  actions: read
+
+jobs:
+  analyze:
+    name: Analyze (${{ matrix.language }})
+    runs-on: ubuntu-latest
+    # Gradle 8.x + 全量 assembleDebug + CodeQL 抽取/分析，单语言 job 可能逼近 30m；
+    # 提到 90m 避免假超时取消（java/kotlin 各跑一次 assembleDebug）。
+    timeout-minutes: 90
+    strategy:
+      fail-fast: false
+      matrix:
+        language: [java, javascript, kotlin]
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      # 构建环境：Gradle 多模块 Android 工程必须 JDK17 + Gradle 才能构建，
+      # 否则 manual build-mode 下的 ./gradlew assembleDebug 跑不起来（原 stock autobuild 即因此每跑必败）。
+      - name: Set up JDK 17
+        uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: 17
+
+      - name: Set up Gradle
+        uses: gradle/actions/setup-gradle@v4
+        with:
+          cache-read-only: ${{ github.ref != 'refs/heads/main' }}
+          gradle-home-cache-cleanup: true
+
+      - name: Cache Gradle wrapper
+        uses: actions/cache@v4
+        with:
+          path: |
+            ~/.gradle/caches
+            ~/.gradle/wrapper
+          key: gradle-v3-${{ runner.os }}-${{ hashFiles('**/*.gradle*', 'gradle/libs.versions.toml', 'gradle.properties') }}
+          restore-keys: |
+            gradle-v3-${{ runner.os }}-
+
+      - name: Create local.properties (CI fallback)
+        run: |
+          echo "ci.build=true" > local.properties
+
+      - name: Grant execute permission for gradlew
+        run: chmod +x ./gradlew
+
+      - name: Initialize CodeQL
+        uses: github/codeql-action/init@v4
+        with:
+          languages: ${{ matrix.language }}
+          config-file: .github/codeql-config.yml
+
+      # java/kotlin：manual build-mode，必须显式跑构建让 CodeQL 构建追踪器抽取源码。
+      # 上一版用 config 的 build-command 字段，analyze 并未实际执行它 → “no source code seen during build”。
+      # 用 --no-daemon 防止复用预热 daemon（daemon 在未追踪的 JVM 里编译，tracer 抓不到源码）。
+      # 关键：--no-build-cache --rerun-tasks 强制真正编译。
+      #   上文 “Cache Gradle wrapper” 步骤会把 ~/.gradle/caches（含 Gradle build cache）恢复回来，
+      #   若不加 --no-build-cache，assembleDebug 的 compile*Kotlin / compile*JavaWithJavac 会命中 FROM-CACHE，
+      #   真正的 javac/kotlinc 进程根本没运行，CodeQL 抽取器报 “no source code seen during build”。
+      #   --rerun-tasks 额外绕过 up-to-date 检查，确保编译进程确实被执行并被 tracer 注入。
+      - name: Build (manual, traced by CodeQL)
+        if: matrix.language == 'java' || matrix.language == 'kotlin'
+        run: ./gradlew assembleDebug --no-daemon --no-build-cache --no-configuration-cache --rerun-tasks --stacktrace
+
+      - name: Perform CodeQL Analysis
+        uses: github/codeql-action/analyze@v4
+        with:
+          category: "/language:${{ matrix.language }}"

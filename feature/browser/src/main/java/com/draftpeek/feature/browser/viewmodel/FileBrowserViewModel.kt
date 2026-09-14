@@ -30,6 +30,7 @@ import com.draftpeek.core.common.vcs.GitRepository
 import com.draftpeek.core.common.vcs.GitStatus
 import com.draftpeek.core.data.repository.BookmarkRepository
 import com.draftpeek.core.data.repository.UserActivityRepository
+import com.draftpeek.core.data.security.FileCipher
 import com.draftpeek.core.data.usecase.ManageBookmarksUseCase
 import com.draftpeek.core.domain.usecase.RecordUserActivityUseCase
 import com.draftpeek.feature.browser.R
@@ -1284,6 +1285,66 @@ class FileBrowserViewModel @Inject constructor(
     }
 
     /**
+     * 口令加密导出内部文件。
+     *
+     * 读取内部文件的全部字节，使用 [FileCipher.encrypt] 以用户口令派生的
+     * AES-256-GCM 密钥加密，并在同目录写出 `<原文件名>.jenc` 容器。
+     *
+     * 安全约束：
+     * - 仅允许内部 file:// URI（与 [deleteInternalFile] 一致的路径安全校验）
+     * - 输出文件固定追加 [FileCipher.ENCRYPTED_FILE_EXTENSION] 后缀
+     * - 目标已存在时自动追加 _1/_2 后缀，避免覆盖
+     * - 全程在 Dispatchers.IO 执行，异常统一捕获
+     *
+     * @param item 待加密导出的内部文件项
+     * @param password 用户口令（至少 4 位，由 UI 层校验）
+     * @return 加密导出成功返回 true，失败返回 false
+     */
+    suspend fun encryptExportFile(item: FileItem, password: String): Boolean {
+        return withContext(Dispatchers.IO) {
+            runCatching {
+                val uriStr = item.uri.toString()
+                if (!AppFileManager.isInternalUri(uriStr)) {
+                    Log.w(TAG, "Refusing to encrypt-export non-internal file: $uriStr")
+                    return@runCatching false
+                }
+                val sourceFile = AppFileManager.getInternalFileFromUri(context, uriStr)
+                    ?: run {
+                        Log.w(TAG, "Cannot resolve internal file from URI: $uriStr")
+                        return@runCatching false
+                    }
+
+                val plaintext = sourceFile.readBytes()
+                val encrypted = FileCipher.encrypt(plaintext, password)
+
+                val parentDir = sourceFile.parentFile ?: AppFileManager.getUserFilesDir(context)
+                var outFile = File(parentDir, sourceFile.name + FileCipher.ENCRYPTED_FILE_EXTENSION)
+                var counter = 1
+                while (outFile.exists() && counter < MAX_NAME_COLLISION_RETRIES) {
+                    val base = sourceFile.name
+                    outFile = File(
+                        parentDir,
+                        base + "_$counter" + FileCipher.ENCRYPTED_FILE_EXTENSION
+                    )
+                    counter++
+                }
+                if (outFile.exists()) {
+                    Log.w(TAG, "Encrypted export name collision exhausted for ${sourceFile.name}")
+                    return@runCatching false
+                }
+
+                outFile.outputStream().use { it.write(encrypted) }
+                refreshInternalFiles()
+                Log.d(TAG, "Encrypted export written: ${outFile.name}")
+                true
+            }.getOrElse { e ->
+                Log.w(TAG, "Failed to encrypt-export file: ${item.name}", e)
+                false
+            }
+        }
+    }
+
+    /**
      * 读取文件开头内容，用于首页"最近打开"代码预览卡片。
      *
      * 只读取前 5 行并返回，避免大文件造成 IO 开销；读取失败返回 null，
@@ -1292,6 +1353,38 @@ class FileBrowserViewModel @Inject constructor(
      * @param uriString 文件 URI 字符串
      * @return 前 5 行文本，失败或非文本文件返回 null
      */
+    suspend fun decryptAndOpenFile(item: FileItem, password: String): FileItem? {
+        return withContext(Dispatchers.IO) {
+            runCatching {
+                val inputStream = context.contentResolver.openInputStream(item.uri)
+                    ?: run {
+                        Log.w(TAG, "Cannot open input stream for uri: ${item.uri}")
+                        return@runCatching null
+                    }
+                val cipherBytes = inputStream.use { it.readBytes() }
+                val plaintext = FileCipher.decrypt(cipherBytes, password)
+
+                val originalName = FileCipher.originalNameFromEncrypted(item.name)
+                val tempFile = File(
+                    context.cacheDir,
+                    "decrypted_${System.currentTimeMillis()}_$originalName"
+                )
+                tempFile.outputStream().use { it.write(plaintext) }
+
+                Log.d(TAG, "Decrypted file written to cache: ${tempFile.name}")
+                FileItem(
+                    name = originalName,
+                    uri = Uri.fromFile(tempFile),
+                    isDirectory = false,
+                    size = plaintext.size.toLong()
+                )
+            }.getOrElse { e ->
+                Log.w(TAG, "Failed to decrypt file: ${item.name}", e)
+                null
+            }
+        }
+    }
+
     suspend fun readFilePreview(uriString: String): String? = withContext(Dispatchers.IO) {
         runCatching {
             val result = repository.readFile(Uri.parse(uriString))

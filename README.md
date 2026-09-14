@@ -107,8 +107,6 @@ DraftPeek/
 │   ├── data/               #   Room + SQLCipher + DataStore、DAO、Repository
 │   ├── designsystem/       #   设计 Token（字体、色彩、形状、间距）
 │   ├── domain/             #   UseCase + 领域模型
-│   ├── crdt/               #   CRDT 同步核心（对应 ADR-0002；当前为脚手架，尚未接入 settings.gradle.kts）
-│   ├── sync/               #   同步链路能力封装（当前为脚手架，尚未接入 settings.gradle.kts）
 │   ├── testing/            #   测试 Fixtures
 │   └── ui/                 #   品牌组件（BrandButton 等）、主题、自适应布局
 ├── feature/                # 功能层（按业务领域拆分）
@@ -116,14 +114,11 @@ DraftPeek/
 │   ├── editor/             #   编辑器核心（sora-editor、Markdown、LSP、多标签页）
 │   ├── settings/           #   设置数据层
 │   ├── stats/              #   统计 UI、成就系统
-│   ├── knowledge/          #   知识图谱（建表见 migrations/；当前为脚手架，尚未接入 settings.gradle.kts）
 │   └── terminal/           #   终端模拟器（Proot 会话/命令执行）
 ├── docs/                   # 文档目录
 ├── scripts/                # 辅助脚本（构建、测试、安装）
 ├── gradle/                 # Gradle 版本目录（libs.versions.toml）
-├── repos/                  # 竞品/参考仓库源码（调研用，不参与编译）（计划，未实现：当前仓库无此目录）
 ├── server/                 # Python 协作同步服务（实验性/可选，非生产部署；crdt_server / integrity_server / sync_server + pytest 测试）
-├── migrations/             # SQL 迁移脚本（含知识图谱建表）
 ├── AGENTS.md               # AI 辅助开发指南
 ├── docs/FILEMAP.md         # 完整文件清单（位于 docs/ 下）
 └── CHANGELOG.md            # 更新日志
@@ -303,6 +298,10 @@ scripts\run-unit-tests.bat
 - `release.jks` 签名文件已通过 `.gitignore` 排除
 - 数据库使用 SQLCipher 加密
 - 敏感文件支持 AES-256-GCM 密码加密
+
+## 贡献指南
+
+参与贡献请遵循 [组织级贡献指南](https://github.com/ReSerendipity/.github/blob/main/CONTRIBUTING.md)（Conventional Commits + DCO 签名）。
 
 ## 许可证
 

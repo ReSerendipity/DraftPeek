@@ -48,6 +48,18 @@ android {
             isMinifyEnabled = false
         }
     }
+
+    packaging {
+        resources {
+            // org.jspecify:jspecify 与 com.github.mwiede:jsch 都提供
+            // META-INF/versions/9/OSGI-INF/MANIFEST.MF；本模块合并 androidTest
+            // 资源时报 DuplicateRelativeFileException，导致 :benchmark:mergeDebug
+            // AndroidTestJavaResource 失败、Instrumented Tests / Macrobenchmark 全红。
+            // 与 :app 的 packaging 排除口径保持一致（app/build.gradle.kts）。
+            excludes += "META-INF/versions/9/OSGI-INF/MANIFEST.MF"
+            excludes += "META-INF/OSGI-INF/MANIFEST.MF"
+        }
+    }
 }
 
 dependencies {
