@@ -1,42 +1,47 @@
 # DraftPeek — 文档与项目速览
 
-> Android 富文本/代码/笔记编辑器（KMP + Jetpack Compose）。支持多语言(i18n)、Markdown、终端、统计、文件同步。
-> 入口：Gradle 多模块（应用外壳 `app/`）；启动见 `scripts/` 下的 bat 或 Android Studio。
-> 详细目录放置规则见 `AGENTS.md` 末尾「文件归档与放置规范」。
+> Android 原生代码/文本编辑器（Jetpack Compose + Kotlin 多模块）。内置终端、Markdown 预览、多语言语法高亮；`server/` 为可选的实验性 Python 协作同步服务（非默认启用、非生产部署）。
+> 入口：Gradle 多模块（应用壳 `app/`）；构建与脚本见根 `README.md`。版本与发布规范见 `docs/VERSIONING.md`。
 
 ## 快速了解本项目
-- **做什么**：移动端富文本编辑器（Markdown WYSIWYG/源码双模式），内置文件管理、收藏/最近、统计看板、终端、端到端同步。
-- **技术栈**：Kotlin · Jetpack Compose · KMP(Core/FE 多模块) · Room · Hilt · 自研 CRDT 同步。
-- **如何构建**：Gradle（`settings.gradle.kts`）；桌面安装脚本见 `scripts/`。
+
+- **做什么**：Android 原生代码/文本编辑器（40+ 语言高亮、Markdown 编辑/预览、集成终端、FTP/SFTP 文件浏览、Git 集成、实验性 LSP）。
+- **技术栈**：Kotlin · Jetpack Compose · Room(SQLCipher) · Hilt · sora-editor(TextMate + Tree-sitter)；`server/` 为 Python CRDT 同步（实验性）。
+- **如何构建**：`./gradlew assembleDebug`；发布流程见 `docs/VERSIONING.md` 与 `docs/RELEASE_CHECKLIST.md`。
 
 ## 目录结构速览
+
 | 目录 | 内容 |
 |---|---|
-| `app/` | **应用主模块**（UI/入口/资源/安全） |
-| `core/` | 跨模块共享库（common/ data/ domain/ designsystem/ testing/ ui/） |
-| `feature/` | 功能模块（browser/ editor/ settings/ stats/ terminal/） |
-| `benchmark/` | 基准测试（启动/文件读取） |
+| `app/` | 应用壳模块（MainActivity、导航、安全模块、AppWidget） |
+| `core/` | 基础层（common / data / domain / designsystem / testing / ui） |
+| `feature/` | 功能模块（browser / editor / settings / stats / terminal） |
+| `benchmark/` | Macrobenchmark 性能基准 |
 | `build-logic/` | Gradle 约定插件 |
-| `gradle/` | Gradle wrapper / 版本目录(libs.versions.toml) |
-| `server/` | Python 同步/CRDT 服务 |
-| `tests/` `benchmark/` | 单元/E2E/基准测试 |
+| `gradle/` | wrapper 与版本目录（libs.versions.toml） |
+| `migrations/` | 数据库迁移脚本（SQL） |
+| `server/` | 可选实验性 Python 协作同步服务（crdt / integrity / sync + pytest） |
 | `docs/` | 项目文档（见下方索引） |
+| `scripts/` | 构建与辅助脚本 |
 
 ## docs/ 索引（本目录）
-| 子目录/文件 | 存什么 |
+
+| 文件 / 子目录 | 存什么 |
 |---|---|
-| `repo-analysis/` | 参考仓库学习报告（editor/termux/笔记协作）。因 `.gitignore` 第131行 `*.md` 规则仅本地保留，当前 clone 不包含原文；共 33 份技术报告 + 5 份汇总文档 |
-| `reports/` | 测试摘要(TESTING_SUMMARY)等报告 |
-| `_devarchive/` | 历史/一次性产物（icons/ logs/ trae-documents/ qoder/） |
-| `FILEMAP.md` | 文件结构地图 |
-| `COMPLIANCE_CHECKLIST.md` 等 | 合规（根目录） |
+| `VERSIONING.md` | 版本号规范、versionCode 公式、发布/灰度/回滚、hotfix 与 SLA |
+| `RELEASE_CHECKLIST.md` | 发布前人工检查清单（与 CI 门禁分工） |
+| `DATABASE_MIGRATION_STRATEGY.md` | Room / SQLCipher 迁移策略 |
+| `release-version-management-evaluation.md` | 发布版本管理评估（版本集中化改造依据） |
+| `SECURITY_AUDIT_DraftPeek.md` | 安全审计 |
+| `adr/` | 架构决策记录（含 CRDT vs OT 选型） |
+| `deploy-download-page/` | 下载页部署说明 |
+| `icon-design/` | 应用图标设计与导出 |
+| `reports/` | 测试体系 / 前端工程评估报告 |
+| `screenshots/` | 界面截图 |
 
 ## 想找内容？
-- 想改编辑器 → `feature/editor/`
-- 想改统计看板 → `feature/stats/`
-- 想改统一 UI/设计系统 → `core/designsystem/`
-- 想改数据层/数据库 → `core/data/`、`app/src/main/java/.../core/data/db/`
-- 想了解功能范围 → `docs/功能实现状态分析报告.md`（本地文档，未随仓库发布）
 
-> ⚠️ 特别提醒：根目录 `release.jks` 是 **App 签名密钥（敏感，勿删勿外传勿提交）**；
-> `index.html` 是被源码注释引用的 HTML 设计原型，保留。所有改动请遵循 `AGENTS.md` 的归档规则。
+- 改编辑器 → `feature/editor/`；统计看板 → `feature/stats/`；设计系统 → `core/designsystem/`；数据层 → `core/data/`
+- 发版 → `docs/VERSIONING.md` + `docs/RELEASE_CHECKLIST.md`
+
+> 特别提醒：根目录 `release.jks` 是 App 签名密钥（敏感，勿提交勿外传）；`index.html` 是被源码注释引用的 HTML 设计原型，保留。所有改动遵循根 `AGENTS.md`。
