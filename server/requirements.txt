@@ -11,7 +11,7 @@
 
 # ── CRDT Collaboration Server (server/crdt_server.py) ──────────────────────
 # pycrdt is the Python binding for Yjs CRDT (formerly ypy)
-websockets==13.1
+websockets==14.2
 uvicorn==0.52.4
 pycrdt==0.14.5
 
