@@ -56,7 +56,8 @@ on:
 # permissions 的合法 key 不含 administration，写进去会让整个 workflow 文件
 # 解析失败，因此读分支保护 API 这条路走不通（见顶部设计约束 1）。
 permissions:
-  contents: read
+  # contents 需要 write：回收 ci-verify-* 锚定 tag 属于写 ref 操作。
+  contents: write
   actions: write
 
 concurrency:
@@ -191,3 +192,37 @@ jobs:
               --jq '.workflow_runs[] | "\(.event)\t\(.status)\t\(.conclusion // "-")\t\(.name)"'
             echo '```'
           } >> "${GITHUB_STEP_SUMMARY}"
+
+      # automerge.yml 派发时要靠临时 tag ci-verify-<sha7> 锚定 commit，且必须等
+      # runner 完成 checkout 后才能删（提前删会让 job 挂在 couldn't find remote ref）。
+      # 它的 GC 挂在自己的派发流程里，若长期没有 bot 合并就不会执行。本 job 有 schedule
+      # 与 workflow_dispatch 两个入口，在这里再兜一道，保证孤儿 tag 能被独立回收。
+      - name: Reclaim stale anchor tags
+        if: always()
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          set -euo pipefail
+          cutoff="$(date -u -d '6 hours ago' +%Y-%m-%dT%H:%M:%SZ)"
+          reclaimed=0
+          for ref in $(gh api "repos/${GITHUB_REPOSITORY}/git/refs/tags" \
+              --jq '.[].ref' 2>/dev/null | grep '/ci-verify-' || true); do
+            name="${ref##*/}"
+            short="${name#ci-verify-}"
+            when="$(gh api "repos/${GITHUB_REPOSITORY}/commits/${short}" \
+              --jq '.commit.committer.date' 2>/dev/null || true)"
+            if [ -z "${when}" ]; then
+              echo "跳过 ${name}（取不到 commit 日期，可能 commit 已不可达）"
+              continue
+            fi
+            if [[ "${when}" < "${cutoff}" ]]; then
+              if gh api -X DELETE "repos/${GITHUB_REPOSITORY}/git/refs/tags/${name}" \
+                  >/dev/null 2>&1; then
+                echo "回收过期锚定 tag ${name}（commit ${when}）"
+                reclaimed=$((reclaimed + 1))
+              else
+                echo "::warning::删除 ${name} 失败，需人工清理"
+              fi
+            fi
+          done
+          echo "本次回收 ${reclaimed} 个过期锚定 tag。" >> "${GITHUB_STEP_SUMMARY}"
