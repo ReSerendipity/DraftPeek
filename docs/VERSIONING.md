@@ -79,7 +79,7 @@ CHANGELOG.md 遵循 Keep a Changelog 格式：
 
 ```
 1. 确认 [Unreleased] 变更条目完整
-2. 更新 versionCode / versionName（app/build.gradle.kts）
+2. 运行 `./gradlew bumpVersion -Pbump=patch|minor|major`（自动回写 `gradle.properties` 集中版本位；勿手改 `app/build.gradle.kts`，versionCode 由 major*10000+minor*100+patch 自动核算）
 3. 将 [Unreleased] 改为 [VERSION] - DATE
 4. 提交：git commit -m "release(v1.0.31): bump version + changelog"
 5. 打 tag：git tag v1.0.31
@@ -115,9 +115,7 @@ CHANGELOG.md 遵循 Keep a Changelog 格式：
 
 2. 最小化修复（仅修复 P0 问题，不引入新功能）
 
-3. 更新版本号：
-   versionName = 1.0.31.1
-   versionCode += 1
+3. 版本号走集中机制：`./gradlew bumpVersion -Pbump=patch`（如确需四段式 hotfix 版本号，先扩展 `gradle.properties` 集中版本位再使用）
 
 4. 在 CHANGELOG.md 添加 hotfix 条目
 

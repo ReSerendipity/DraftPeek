@@ -18,7 +18,7 @@ DraftPeek 团队重视安全问题。如果您发现安全漏洞，请按以下�
 
 ### 报告渠道
 
-1. **首选**：发送邮件至 `security@draftpeek.com`，主题以 `[SECURITY]` 开头。
+1. **首选**：发送邮件至 `ReSerendipity@outlook.com`，主题以 `[SECURITY]` 开头（2026-09-15 变更：原 `security@draftpeek.com` 域名未能核实归属，统一使用家族联系邮箱）。
 2. **备选**：通过 GitHub 私密安全公告（Security Advisory）提交。
    - 访问 https://github.com/ReSerendipity/DraftPeek/security/advisories/new
    - 选择 "Report a vulnerability"
