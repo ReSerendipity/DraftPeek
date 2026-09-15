@@ -38,7 +38,7 @@ android {
                 "META-INF/OSGI-INF/MANIFEST.MF",
                 "META-INF/*.SF",
                 "META-INF/*.DSA",
-                "META-INF/*.RSA",
+                "META-INF/*.RSA"
             )
         }
     }
