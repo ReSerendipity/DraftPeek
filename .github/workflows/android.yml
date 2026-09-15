@@ -219,7 +219,7 @@ jobs:
       # Codecov 覆盖率上传 — 可视化覆盖率变化趋势
       - name: Upload Coverage to Codecov
         if: always() && github.event_name == 'pull_request'
-        uses: codecov/codecov-action@v4
+        uses: codecov/codecov-action@v6
         with:
           # 补全全部会产出报告的模块（原先只列 5 个，漏了 core/domain、core/ui、
           # feature/settings、feature/stats、feature/terminal —— 这些模块的覆盖率
