@@ -161,6 +161,25 @@ subprojects {
                 disable += setOf("MissingTranslation", "ExtraTranslation")
             }
 
+            // androidTest Java 资源合并排除。
+            // WHY：JUnit 5 的 6 个 artifact（junit-jupiter / -api / -engine / -params、
+            // junit-platform-commons / -engine）各自携带 META-INF/LICENSE.md 与
+            // META-INF/LICENSE-notice.md，AGP 的 MergeJavaRes 遇到「同名不同源」会直接
+            // 抛 DuplicateRelativeFileException 而失败。main c51f9bd 上
+            // :feature:browser:mergeDebugAndroidTestJavaResource 即因此报红，
+            // 并连带整个 instrumented 阶段（API 26/30/34）失败。
+            // 放在根脚本统一注入，所有 library 模块自动继承；此前只在个别模块修过
+            // （app 自带 packaging 块、core/* 单独加过），feature/* 因而漏网——
+            // 逐模块复制正是这类回归的根因，故收敛到此处。
+            packaging {
+                resources {
+                    excludes += setOf(
+                        "META-INF/LICENSE.md",
+                        "META-INF/LICENSE-notice.md",
+                    )
+                }
+            }
+
             // 添加 beta 构建类型（如果不存在）
             buildTypes {
                 if (findByName("beta") == null) {
