@@ -24,10 +24,11 @@
 #      check run 来自 Dependabot 的 dynamic workflow（与质量门禁无关），
 #      按总数判定会被这类噪音骗过，导致守卫永远跳过补跑。
 #
-# 为什么用轮询而不是「合并后立刻派发」：
+# 为什么是「事后守卫」而不是「合并时派发」：
 #   automerge.yml 只负责 `gh pr merge --auto`（打开自动合并开关），真正的合并
 #   由 GitHub 在条件满足时异步完成，那时该 workflow 早已结束，无法原地感知。
-#   轮询式守卫同时能兜住其它漏网场景（手工 bot 操作、CI 配置切换期等）。
+#   因此改由 pull_request.closed 在合并后立刻巡检 main HEAD，schedule 作兜底，
+#   同时也能兜住其它漏网场景（手工 bot 操作、CI 配置切换期等）。
 #
 # 语义边界：
 #   这是「合并后验证 main」，不是 Merge Queue 的「合并前用最新 main 重验」。
@@ -38,9 +39,16 @@
 name: Main Verify
 
 on:
+  # 即时触发：PR 关闭（含被 bot 合并）后立刻巡检 main HEAD。
+  pull_request:
+    types: [closed]
+    branches: [main]
   schedule:
-    # 每 15 分钟巡检一次：把绿勾延迟从「最长约 21 小时（等夜间全量档）」
-    # 压到「最长 15 分钟 + 一次构建时长」。
+    # 兜底档。实测本仓库的 schedule 存在约 5.5 小时的系统性延迟——9/14 全部
+    # schedule run 比 cron 声明晚 4h43m~5h45m（Android CI 02:00→07:24、
+    # Stale 03:00→08:20），9/9~9/14 每天都稳定落在 06:5x~08:2x 区间。所以
+    # 不能把本 cron 当作实时保障，它只在 pull_request.closed 也被
+    # GITHUB_TOKEN 抑制时提供最终一致性。
     - cron: '*/15 * * * *'
   workflow_dispatch:
 
