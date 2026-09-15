@@ -4,6 +4,9 @@ on:
   push:
     branches: [main]
   pull_request:
+  # 供 main-verify.yml 用 workflow_dispatch 补跑必需检查：automerge 以
+  # GITHUB_TOKEN 身份合并 PR 时，main push 事件被 GitHub 抑制，需显式派发。
+  workflow_dispatch:
 
 permissions:
   contents: read
