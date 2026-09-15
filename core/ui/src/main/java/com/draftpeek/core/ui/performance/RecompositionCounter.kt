@@ -197,7 +197,14 @@ object RecompositionTracker {
  */
 @Composable
 fun trackRecomposition(tag: String, enabled: Boolean = LocalRecompositionTrackingEnabled.current): Int {
-    if (!enabled) return 0
+    // 全局开关必须与局部开关同时成立——二者是「与」的关系。
+    // WHY：此前只检查 enabled，全局关闭时仍会注册 SideEffect 并让本地
+    // RecompositionCounter 照常自增；RecompositionTracker.record 虽被全局开关拦住，
+    // 但返回值取自本地 counter，于是第二次组合起开始返回非 0，与「关闭即零记账」
+    // 的语义相悖（RecompositionCounterBehaviorTest 的
+    // globalSwitch_disabledSuppressesEvenLocallyEnabledTracking 因此在 CI 报红）。
+    // 短路置于 remember 之前，使全局关闭时的运行时开销同样为零。
+    if (!enabled || !RecompositionTracker.isGloballyEnabled) return 0
     val counter = remember(tag) { RecompositionCounter() }
     SideEffect {
         counter.increment()
