@@ -1,10 +1,13 @@
-# Composite action：instrumented 测试单次尝试（清理模拟器残留 → 启动模拟器 → connected 测试）。
-# 抽成 action 的目的：android-emulator-runner 无内建重试，android.yml 里通过
-# attempt1 / attempt2 两次调用本 action 实现「失败自动重试一次」。
-# 每次尝试前先强清理 adb/模拟器残留——上一次失败的僵尸模拟器会让重试必然复现
-# "Unable to connect to adb daemon on port: 5037"（2026-09-14 PR #22 三连败实测）。
+# Composite action：instrumented 测试单次尝试（恢复 KVM 权限 → 清理残留 → 启动模拟器 → connected 测试）。
+#
+# 背景（2026-09-15）：GH runner 镜像 20260828.587 起，/dev/kvm 对 runner 用户失去默认访问权限，
+# android-emulator-runner 的 ProbeKVM 探测失败后自动切软件模拟（disable-linux-hw-accel=auto），
+# 造成模拟器软启动 ~8 分钟后在第一条 adb shell settings 上崩溃（Broken pipe）。
+# 实测证据：PR #22 上四个尝试（旧工作流 ×3 + 重试工作流 ×1）全部同型失败。
+# 修复：kvm4all udev 规则（AOSP 社区标准做法）恢复 /dev/kvm 访问权限，恢复硬件加速。
+# 本文件由 #41 建立（重试框架），#42 在此之上加入 KVM 权限修复步骤。
 name: 'Instrumented tests attempt'
-description: 'One instrumented-test attempt: clean adb/emulator residue, boot emulator, run connected tests'
+description: 'One instrumented-test attempt: restore KVM access, clean adb/emulator residue, boot emulator, run connected tests'
 inputs:
   api-level:
     description: 'Android API level for the emulator'
@@ -18,6 +21,14 @@ inputs:
 runs:
   using: 'composite'
   steps:
+    - name: Restore /dev/kvm access (kvm4all udev rule)
+      shell: bash
+      run: |
+        echo 'KERNEL=="kvm", GROUP="kvm", MODE="0666", OPTIONS+="static_node=kvm"' | sudo tee /etc/udev/rules.d/99-kvm4all.rules
+        sudo udevadm control --reload-rules
+        sudo udevadm trigger --name-match=kvm
+        ls -l /dev/kvm || echo "[WARN] /dev/kvm not present on this runner — hardware acceleration unavailable"
+
     - name: Clean up stale adb/emulator state
       shell: bash
       run: |
