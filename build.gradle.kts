@@ -174,8 +174,20 @@ subprojects {
             packaging {
                 resources {
                     excludes += setOf(
+                        // JUnit 5 的每个 artifact 都随包一份同名许可文件
+                        // （实测 5.8.2 版本由传递依赖引入，非版本目录声明的 5.11.3）。
                         "META-INF/LICENSE.md",
                         "META-INF/LICENSE-notice.md",
+                        // 其余 6 条对齐 app 与 core/testing 的已知完备集合：
+                        // bouncycastle / jspecify / jsch / jgit 会带上 OSGI 清单与签名文件。
+                        // MergeJavaRes 是 fail-fast 的——只补 LICENSE.md 会在下一轮才暴露
+                        // OSGI-INF/MANIFEST.MF 冲突（feature/browser 恰好依赖 jsch），故一次补齐。
+                        "META-INF/{AL2.0,LGPL2.1}",
+                        "META-INF/versions/9/OSGI-INF/MANIFEST.MF",
+                        "META-INF/OSGI-INF/MANIFEST.MF",
+                        "META-INF/*.SF",
+                        "META-INF/*.DSA",
+                        "META-INF/*.RSA",
                     )
                 }
             }
