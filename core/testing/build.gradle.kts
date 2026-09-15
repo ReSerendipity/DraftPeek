@@ -22,6 +22,15 @@ android {
             jvmTarget.set(org.jetbrains.kotlin.gradle.dsl.JvmTarget.JVM_17)
         }
     }
+
+    // JUnit 5 各 jar 自带 META-INF/LICENSE.md，androidTest APK 的 Java 资源合并默认
+    // 「只允许一份」会报 DuplicateRelativeFileException（实测 6 份冲突，PR #22 run
+    // 34931393472）——测试 APK 不分发，直接排除即可（含经典配套 LICENSE-notice.md）。
+    packaging {
+        resources {
+            excludes += setOf("META-INF/LICENSE.md", "META-INF/LICENSE-notice.md")
+        }
+    }
 }
 
 dependencies {
