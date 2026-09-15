@@ -1,5 +1,12 @@
 name: Auto-merge
 
+# 合并后必须原地补跑 main CI：本 workflow 用 GITHUB_TOKEN 启用 auto-merge，
+# 合并记录为 merged_by=github-actions[bot]，GitHub 会抑制由 GITHUB_TOKEN 触发的
+# 后续事件——实测 push 与 pull_request.closed 两条路都不再创建 workflow run，
+# 所以 bot 合并进来的 main commit 会 0 check run、UI 无绿勾。唯一不被抑制的是
+# workflow_dispatch，因此由本 job 在确认合并落地后自己派发。
+# （Main Verify 的 schedule 只作兜底：实测本仓库 schedule 有约 5.5 小时系统延迟。）
+
 on:
   pull_request:
     types: [opened, reopened, synchronize, labeled, ready_for_review]
@@ -7,11 +14,18 @@ on:
 permissions:
   contents: write
   pull-requests: write
+  # 派发 main CI 需要 Actions write
+  actions: write
 
 jobs:
   auto-merge:
     runs-on: ubuntu-latest
+    timeout-minutes: 90
     if: github.event.pull_request.draft == false
+    env:
+      PR_URL: ${{ github.event.pull_request.html_url }}
+      GH_TOKEN: ${{ github.token }}
+
     steps:
       - name: Fetch Dependabot metadata
         if: github.event.pull_request.user.login == 'dependabot[bot]'
@@ -25,13 +39,44 @@ jobs:
       - name: Enable auto-merge for non-major Dependabot PRs
         if: github.event.pull_request.user.login == 'dependabot[bot]' && steps.meta.outputs.update-type != 'version-update:semver-major'
         run: gh pr merge --auto --squash "$PR_URL"
-        env:
-          PR_URL: ${{ github.event.pull_request.html_url }}
-          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
       - name: Enable auto-merge for labeled PRs
         if: contains(github.event.pull_request.labels.*.name, 'automerge')
         run: gh pr merge --auto --squash "$PR_URL"
-        env:
-          PR_URL: ${{ github.event.pull_request.html_url }}
-          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+      # 与上面两个「启用开关」步骤同条件。auto-merge 由 GitHub 异步执行，
+      # 本步骤轮询到 PR 真正 MERGED 之后再派发，确保 workflow_dispatch 绑定的是
+      # 本次合并产生的新 main HEAD。
+      - name: Re-dispatch required CI onto main after the merge lands
+        if: (github.event.pull_request.user.login == 'dependabot[bot]' && steps.meta.outputs.update-type != 'version-update:semver-major') || contains(github.event.pull_request.labels.*.name, 'automerge')
+        run: |
+          set -euo pipefail
+
+          merged=false
+          for _ in $(seq 1 160); do
+            state="$(gh pr view "$PR_URL" --json state --jq .state)"
+            if [ "${state}" = "MERGED" ]; then
+              merged=true
+              break
+            fi
+            if [ "${state}" = "CLOSED" ]; then
+              echo "PR 已关闭且未合并，无需补跑。"
+              exit 0
+            fi
+            sleep 30
+          done
+
+          if [ "${merged}" != "true" ]; then
+            echo "::warning::等待 auto-merge 落地超时（约 80 分钟），本轮不补跑，交由 Main Verify 的 schedule 兜底"
+            exit 0
+          fi
+
+          # 让 main ref 更新对 API 可见
+          sleep 5
+          sha="$(gh api "repos/${GITHUB_REPOSITORY}/commits/main" --jq .sha)"
+          echo "PR 已合并，main HEAD = ${sha:0:7}，原地派发必需检查补跑。"
+
+          for wf in android.yml structure-guard.yml; do
+            echo "::notice::派发 ${wf} → main"
+            gh workflow run "${wf}" --ref main
+          done
