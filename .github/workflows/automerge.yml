@@ -78,5 +78,8 @@ jobs:
 
           for wf in android.yml structure-guard.yml; do
             echo "::notice::派发 ${wf} → main"
-            gh workflow run "${wf}" --ref main
+            # 必须显式 --repo：本 workflow 没有 checkout 步骤，workspace 不是 git
+            # 仓库，gh 无法从 remote 推断目标（实测报 failed to run git: fatal:
+            # not a git repository）。
+            gh workflow run "${wf}" --ref main --repo "${GITHUB_REPOSITORY}"
           done
