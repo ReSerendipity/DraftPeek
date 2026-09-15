@@ -13,7 +13,7 @@
 # pycrdt is the Python binding for Yjs CRDT (formerly ypy)
 websockets==13.1
 uvicorn==0.52.4
-pycrdt==0.14.4
+pycrdt==0.14.5
 
 # ── Cloud Sync Server (server/sync_server/main.py) ─────────────────────────
 fastapi==0.141.1
