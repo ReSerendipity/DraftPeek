@@ -120,7 +120,7 @@ DraftPeek/
 ├── gradle/                 # Gradle 版本目录（libs.versions.toml）
 ├── server/                 # Python 协作同步服务（实验性/可选，非生产部署；crdt_server / integrity_server / sync_server + pytest 测试）
 ├── AGENTS.md               # AI 辅助开发指南
-├── docs/FILEMAP.md         # 完整文件清单（位于 docs/ 下）
+├── migrations/             # 数据库迁移脚本（SQL）
 └── CHANGELOG.md            # 更新日志
 ```
 
@@ -310,7 +310,8 @@ scripts\run-unit-tests.bat
 ## 相关文档
 
 - `AGENTS.md`（本地文档，未随仓库发布）— AI 辅助开发指南与快速参考
-- `docs/FILEMAP.md`（本地文档，未随仓库发布）— 完整文件清单
+- `docs/VERSIONING.md` — 版本管理与发布规范
+- `docs/RELEASE_CHECKLIST.md` — 发布前检查清单
 - [CHANGELOG.md](CHANGELOG.md) — 更新日志
 
 ## 仓库说明（开源模式，2026-09-08 起）
