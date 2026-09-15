@@ -23,12 +23,23 @@ android {
         }
     }
 
-    // JUnit 5 各 jar 自带 META-INF/LICENSE.md，androidTest APK 的 Java 资源合并默认
-    // 「只允许一份」会报 DuplicateRelativeFileException（实测 6 份冲突，PR #22 run
-    // 34931393472）——测试 APK 不分发，直接排除即可（含经典配套 LICENSE-notice.md）。
+    // androidTest APK 的 Java 资源合并默认「只允许一份」，而类路径上的
+    // JUnit 5（META-INF/LICENSE.md）与 bouncycastle + jspecify
+    // （META-INF/versions/9/OSGI-INF/MANIFEST.MF）都会触发
+    // DuplicateRelativeFileException（PR #22 / #54 实测）。测试 APK 不对外
+    // 分发，排除集直接对齐 app 模块的已知完备集合。
     packaging {
         resources {
-            excludes += setOf("META-INF/LICENSE.md", "META-INF/LICENSE-notice.md")
+            excludes += setOf(
+                "META-INF/LICENSE.md",
+                "META-INF/LICENSE-notice.md",
+                "META-INF/{AL2.0,LGPL2.1}",
+                "META-INF/versions/9/OSGI-INF/MANIFEST.MF",
+                "META-INF/OSGI-INF/MANIFEST.MF",
+                "META-INF/*.SF",
+                "META-INF/*.DSA",
+                "META-INF/*.RSA"
+            )
         }
     }
 }
