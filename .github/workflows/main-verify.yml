@@ -173,7 +173,8 @@ jobs:
           for wf in ${TARGETS}; do
             echo "::notice::派发 ${wf} → main"
             printf -- '- 派发 `%s`\n' "${wf}" >> "${GITHUB_STEP_SUMMARY}"
-            gh workflow run "${wf}" --ref main
+            # 显式 --repo，与 automerge.yml 一致：不依赖 workspace 是否为 git 仓库。
+            gh workflow run "${wf}" --ref main --repo "${GITHUB_REPOSITORY}"
           done
 
       - name: Show resulting runs on main
