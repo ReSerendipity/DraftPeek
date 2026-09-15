@@ -96,6 +96,25 @@ jobs:
             gh workflow run "${wf}" --ref "${tag}" --repo "${GITHUB_REPOSITORY}"
           done
 
-          sleep 5
-          gh api -X DELETE "repos/${GITHUB_REPOSITORY}/git/refs/tags/${tag}" >/dev/null 2>&1 \
-            || echo "::warning::临时 tag ${tag} 删除失败，需人工清理"
+          # 不能在这里删 tag：actions/checkout 是在 runner 真正起跑时才按 ref 名去
+          # fetch 的，head_sha 固定并不代表 ref 可以提前消失。实测派发后 5 秒删除
+          # 会让排队中的 Build & Test 直接挂在 checkout：
+          #   fatal: couldn't find remote ref refs/tags/ci-verify-fff8410
+          # 所以 tag 保留，只由下面的 GC 回收过期的（Build & Test 上限 45 分钟，
+          # 留 6 小时余量足以覆盖排队与重试）。
+          cutoff="$(date -u -d '6 hours ago' +%Y-%m-%dT%H:%M:%SZ)"
+          for ref in $(gh api "repos/${GITHUB_REPOSITORY}/git/refs/tags" \
+              --jq '.[].ref' 2>/dev/null | grep '/ci-verify-' || true); do
+            name="${ref##*/}"
+            short="${name#ci-verify-}"
+            when="$(gh api "repos/${GITHUB_REPOSITORY}/commits/${short}" \
+              --jq '.commit.committer.date' 2>/dev/null || true)"
+            if [ -z "${when}" ]; then
+              continue
+            fi
+            if [[ "${when}" < "${cutoff}" ]]; then
+              gh api -X DELETE "repos/${GITHUB_REPOSITORY}/git/refs/tags/${name}" \
+                >/dev/null 2>&1 || true
+              echo "回收过期锚定 tag ${name}（commit ${when}）"
+            fi
+          done
