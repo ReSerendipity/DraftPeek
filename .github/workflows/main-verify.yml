@@ -24,11 +24,12 @@
 #      check run 来自 Dependabot 的 dynamic workflow（与质量门禁无关），
 #      按总数判定会被这类噪音骗过，导致守卫永远跳过补跑。
 #
-# 为什么是「事后守卫」而不是「合并时派发」：
-#   automerge.yml 只负责 `gh pr merge --auto`（打开自动合并开关），真正的合并
-#   由 GitHub 在条件满足时异步完成，那时该 workflow 早已结束，无法原地感知。
-#   因此改由 pull_request.closed 在合并后立刻巡检 main HEAD，schedule 作兜底，
-#   同时也能兜住其它漏网场景（手工 bot 操作、CI 配置切换期等）。
+# 职责分工（2026-09-15 实测后确定）：
+#   即时路径在 automerge.yml —— 它在轮询到 PR MERGED 之后自己 workflow_dispatch
+#   补跑，不受事件抑制影响。本 workflow 是第二道防线，覆盖 automerge 之外的漏网
+#   场景：人工合并、automerge job 超时或被取消、CI 配置切换期等。
+#   实测 pull_request.closed 在 bot（GITHUB_TOKEN）合并下同样被抑制，所以这里的
+#   closed 触发只对人工合并生效；schedule 因约 5.5 小时系统延迟只能作最终兜底。
 #
 # 语义边界：
 #   这是「合并后验证 main」，不是 Merge Queue 的「合并前用最新 main 重验」。
