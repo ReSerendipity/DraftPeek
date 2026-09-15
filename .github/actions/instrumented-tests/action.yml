@@ -50,4 +50,8 @@ runs:
         emulator-options: -no-window -gpu swiftshader_indirect -no-snapshot -noaudio -no-boot-anim
         disable-animations: true
         script: |
-          ./gradlew connectedDebugAndroidTest --stacktrace
+          # :benchmark 模块的宏基准测试设计上要求 release（不可调试）构建，
+          # 在 debug 构建上会被 androidx.benchmark 整体拒绝（实测 13 个全失败，
+          # PR #22 run 34924979150）；它由夜间 macrobenchmark job 负责（那里
+          # 会先 assembleRelease）。这里排除之，只跑业务模块的 connected 测试。
+          ./gradlew connectedDebugAndroidTest -x :benchmark:connectedDebugAndroidTest --stacktrace
