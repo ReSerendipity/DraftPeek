@@ -1,0 +1,42 @@
+# Composite action：instrumented 测试单次尝试（清理模拟器残留 → 启动模拟器 → connected 测试）。
+# 抽成 action 的目的：android-emulator-runner 无内建重试，android.yml 里通过
+# attempt1 / attempt2 两次调用本 action 实现「失败自动重试一次」。
+# 每次尝试前先强清理 adb/模拟器残留——上一次失败的僵尸模拟器会让重试必然复现
+# "Unable to connect to adb daemon on port: 5037"（2026-09-14 PR #22 三连败实测）。
+name: 'Instrumented tests attempt'
+description: 'One instrumented-test attempt: clean adb/emulator residue, boot emulator, run connected tests'
+inputs:
+  api-level:
+    description: 'Android API level for the emulator'
+    required: true
+  target:
+    description: 'System image target (google_apis / default)'
+    required: true
+  arch:
+    description: 'Emulator architecture'
+    required: true
+runs:
+  using: 'composite'
+  steps:
+    - name: Clean up stale adb/emulator state
+      shell: bash
+      run: |
+        pkill -f qemu-system 2>/dev/null || true
+        pkill -f 'emulator' 2>/dev/null || true
+        adb kill-server 2>/dev/null || true
+        sleep 2
+        adb start-server 2>/dev/null || true
+
+    - name: Run connected tests (android-emulator-runner)
+      uses: reactivecircus/android-emulator-runner@v2
+      with:
+        api-level: ${{ inputs.api-level }}
+        target: ${{ inputs.target }}
+        arch: ${{ inputs.arch }}
+        profile: pixel_5
+        heap-size: 512M
+        ram-size: 2048M
+        emulator-options: -no-window -gpu swiftshader_indirect -no-snapshot -noaudio -no-boot-anim
+        disable-animations: true
+        script: |
+          ./gradlew connectedDebugAndroidTest --stacktrace

@@ -302,20 +302,30 @@ jobs:
       - name: Grant execute permission for gradlew
         run: chmod +x ./gradlew
 
-      # 使用 android-emulator-runner 运行 instrumented 测试
-      - name: Run Instrumented Tests
-        uses: reactivecircus/android-emulator-runner@v2
+      # 2026-09-14 起 PR 档模拟器 adb 起不来（Unable to connect to adb daemon on
+      # port: 5037）在 PR #22 上三连败，android-emulator-runner 无内建重试。
+      # 拆成 attempt1/attempt2 两次调用同一 composite action（.github/actions/
+      # instrumented-tests）：attempt2 仅在 attempt1 失败时执行，且执行前先强清理
+      # adb/模拟器残留。两次都失败仍然红——只吸收单次基础设施抖动，不掩盖真实回归。
+      # 注意：job 级 timeout-minutes: 45 同时罩住两次尝试，attempt1 若挂满超时则
+      # attempt2 不会执行（fail-fast 语义保持）。
+      - name: Run Instrumented Tests (attempt 1)
+        id: inst_attempt_1
+        uses: ./.github/actions/instrumented-tests
+        continue-on-error: true
         with:
           api-level: ${{ matrix.api-level }}
           target: ${{ matrix.target }}
           arch: ${{ matrix.arch }}
-          profile: pixel_5
-          heap-size: 512M
-          ram-size: 2048M
-          emulator-options: -no-window -gpu swiftshader_indirect -no-snapshot -noaudio -no-boot-anim
-          disable-animations: true
-          script: |
-            ./gradlew connectedDebugAndroidTest --stacktrace
+
+      - name: Run Instrumented Tests (attempt 2, retry after adb/emulator cleanup)
+        id: inst_attempt_2
+        if: steps.inst_attempt_1.outcome == 'failure'
+        uses: ./.github/actions/instrumented-tests
+        with:
+          api-level: ${{ matrix.api-level }}
+          target: ${{ matrix.target }}
+          arch: ${{ matrix.arch }}
 
       - name: Upload Instrumented Test Reports
         if: always()
