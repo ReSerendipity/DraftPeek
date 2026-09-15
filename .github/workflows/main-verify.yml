@@ -14,11 +14,15 @@
 #   显式补跑对应 workflow。workflow_dispatch 属于官方例外，补跑必然生效。
 #
 # 两个关键设计约束：
-#   1) required 清单从分支保护 API 动态读取，不在本文件硬编码。原因是
-#      docs/ci/branch-protection.json 才是单一来源，硬编码会随其漂移而失效。
+#   1) required 清单取自 docs/ci/branch-protection.json（本仓库治理的单一来源）。
+#      不走 branches/main/protection API：读该端点需要 Administration 权限，而
+#      Actions 的 permissions: 合法 key 里根本没有 administration，GITHUB_TOKEN
+#      拿不到这个权限（首版误写 administration: read，导致整个 workflow 文件解析
+#      失败——run 名退化成文件路径、无任何 job 日志）。远端与文件的一致性由
+#      scripts/apply_branch_protection.py 负责，本守卫只管按声明补跑。
 #   2) 判定不能用「check runs 总数 > 0」。实测 main HEAD 25abb17 上唯一的
 #      check run 来自 Dependabot 的 dynamic workflow（与质量门禁无关），
-#      按总数判定会被这类噪音 check 骗过，导致守卫永远跳过补跑。
+#      按总数判定会被这类噪音骗过，导致守卫永远跳过补跑。
 #
 # 为什么用轮询而不是「合并后立刻派发」：
 #   automerge.yml 只负责 `gh pr merge --auto`（打开自动合并开关），真正的合并
@@ -40,12 +44,11 @@ on:
     - cron: '*/15 * * * *'
   workflow_dispatch:
 
+# permissions 的合法 key 不含 administration，写进去会让整个 workflow 文件
+# 解析失败，因此读分支保护 API 这条路走不通（见顶部设计约束 1）。
 permissions:
   contents: read
   actions: write
-  # 读 branches/main/protection/required_status_checks 需要 Administration
-  # read；本文件已显式声明 permissions，未列出的 scope 一律为 none。
-  administration: read
 
 concurrency:
   group: main-verify
@@ -66,6 +69,9 @@ jobs:
         layout=structure-guard.yml
 
     steps:
+      - name: Checkout governance config
+        uses: actions/checkout@v7
+
       - name: Diff required contexts against main HEAD
         id: probe
         env:
@@ -77,16 +83,15 @@ jobs:
           sha="$(gh api "${api}/commits/main" --jq .sha)"
           short="$(printf '%.7s' "${sha}")"
 
-          gh api "${api}/branches/main/protection/required_status_checks" \
-            --jq '.contexts[]' | sort > required.txt
+          jq -r '.contexts[]' docs/ci/branch-protection.json | sort > /tmp/required.txt
           gh api "${api}/commits/${sha}/check-runs?per_page=100" \
-            --jq '.check_runs[].name' | sort > present.txt
+            --jq '.check_runs[].name' | sort > /tmp/present.txt
 
           echo "main HEAD = ${short}"
           echo "required contexts:"
-          sed 's/^/  - /' required.txt
+          sed 's/^/  - /' /tmp/required.txt
           echo "main HEAD 上已报告的 check runs:"
-          sed 's/^/  - /' present.txt
+          sed 's/^/  - /' /tmp/present.txt
 
           targets=""
           missing=""
@@ -94,7 +99,7 @@ jobs:
             if [ -z "${ctx}" ]; then
               continue
             fi
-            if grep -qxF "${ctx}" present.txt; then
+            if grep -qxF "${ctx}" /tmp/present.txt; then
               echo "  [已报告] ${ctx}"
               continue
             fi
@@ -113,7 +118,7 @@ jobs:
             fi
             echo "  [缺失] ${ctx} → 需派发 ${owner}"
             targets="${targets}${owner}"$'\n'
-          done < required.txt
+          done < /tmp/required.txt
 
           targets="$(printf '%s' "${targets}" | sed '/^[[:space:]]*$/d' | sort -u | tr '\n' ' ')"
           targets="$(printf '%s' "${targets}" | sed 's/[[:space:]]*$//')"
@@ -121,8 +126,8 @@ jobs:
 
           {
             echo "#### main HEAD ${short}"
-            echo "- 必需检查：$(tr '\n' ',' < required.txt | sed 's/,$//')"
-            echo "- 已报告：$(tr '\n' ',' < present.txt | sed 's/,$//')（空表示该 commit 完全裸奔）"
+            echo "- 必需检查：$(tr '\n' ',' < /tmp/required.txt | sed 's/,$//')"
+            echo "- 已报告：$(tr '\n' ',' < /tmp/present.txt | sed 's/,$//')（空表示该 commit 完全裸奔）"
             echo "- 缺失必需检查：${missing:-（无）}"
           } >> "${GITHUB_STEP_SUMMARY}"
 
