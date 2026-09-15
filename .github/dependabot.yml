@@ -32,6 +32,14 @@ updates:
         applies-to: version-updates
         update-types: [minor, patch]
         patterns: ["*"]
+    # websockets 故意钉在 13.1：server/crdt_server.py 仍使用 websockets.serve /
+    # WebSocketServerProtocol 旧 API，该 API 在 websockets >= 15 已被移除。未迁移到
+    # websockets.asyncio 之前不要为它开升级 PR（见 server/requirements.txt 顶部注释）。
+    # 只忽略 >= 15，因此 13.x 的 patch 更新仍会正常提醒。
+    ignore:
+      - dependency-name: websockets
+        versions:
+          - ">= 15"
   - package-ecosystem: github-actions
     directory: "/"
     schedule: { interval: monthly }
