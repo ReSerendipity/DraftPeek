@@ -24,6 +24,7 @@ jobs:
     if: github.event.pull_request.draft == false
     env:
       PR_URL: ${{ github.event.pull_request.html_url }}
+      PR_NUMBER: ${{ github.event.pull_request.number }}
       GH_TOKEN: ${{ github.token }}
 
     steps:
@@ -71,15 +72,30 @@ jobs:
             exit 0
           fi
 
-          # 让 main ref 更新对 API 可见
-          sleep 5
-          sha="$(gh api "repos/${GITHUB_REPOSITORY}/commits/main" --jq .sha)"
-          echo "PR 已合并，main HEAD = ${sha:0:7}，原地派发必需检查补跑。"
+          # 精确锚定「本 PR 合并产生的那个 commit」。
+          # 不能用 --ref main：实测 #51 与 #52 在 8:14:19 / 8:14:23 相隔 4 秒合并，
+          # 两个 job 都按 main HEAD 派发，结果检查全打到后合并的 adf9e24 上（重复 4 个
+          # layout），而 #51 自己的 4ef60ae 一个必需检查都没有、永久裸奔。
+          ms="$(gh api "repos/${GITHUB_REPOSITORY}/pulls/${PR_NUMBER}" --jq .merge_commit_sha)"
+          if [ -z "${ms}" ] || [ "${ms}" = "null" ]; then
+            echo "::warning::取不到本 PR 的 merge_commit_sha，退回按 main 派发"
+            ms="$(gh api "repos/${GITHUB_REPOSITORY}/commits/main" --jq .sha)"
+          fi
+          tag="ci-verify-${ms:0:7}"
+          echo "PR 已合并，锚定 commit ${ms:0:7} 派发必需检查。"
+
+          # workflow_dispatch 的 ref 只接受分支/tag，裸 commit SHA 会被拒
+          # （实测 422 No ref found），故先建临时 tag 锚定该 commit。tag 不以 v 开头，
+          # 不会触发 release.yml；run 创建时 head_sha 已固定，所以派发完即可删除。
+          gh api "repos/${GITHUB_REPOSITORY}/git/refs" \
+            -X POST -f "ref=refs/tags/${tag}" -f "sha=${ms}" >/dev/null 2>&1 \
+            || echo "tag ${tag} 已存在，直接复用"
 
           for wf in android.yml structure-guard.yml; do
-            echo "::notice::派发 ${wf} → main"
-            # 必须显式 --repo：本 workflow 没有 checkout 步骤，workspace 不是 git
-            # 仓库，gh 无法从 remote 推断目标（实测报 failed to run git: fatal:
-            # not a git repository）。
-            gh workflow run "${wf}" --ref main --repo "${GITHUB_REPOSITORY}"
+            echo "::notice::派发 ${wf} → ${tag}"
+            gh workflow run "${wf}" --ref "${tag}" --repo "${GITHUB_REPOSITORY}"
           done
+
+          sleep 5
+          gh api -X DELETE "repos/${GITHUB_REPOSITORY}/git/refs/tags/${tag}" >/dev/null 2>&1 \
+            || echo "::warning::临时 tag ${tag} 删除失败，需人工清理"
