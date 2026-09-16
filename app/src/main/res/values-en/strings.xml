@@ -94,4 +94,12 @@
     <string name="widget_loading">Loading…</string>
     <string name="widget_no_recent_files">No recent files</string>
     <string name="widget_recent_files_title">Recent files</string>
+
+    <!-- P1-1 首次使用协议确认（合规整改 2026-09-15） -->
+    <string name="agreement_gate_title">Before You Start</string>
+    <string name="agreement_gate_body">By continuing you confirm you have read and agreed to the User Agreement and Privacy Policy: do not use this tool to infringe rights or break the law; do not restore or distribute content that violates others\\' legitimate rights (including portrait and voice); do not remove content provenance marks or AI labels; when sharing outputs, follow the AI-generated-content labeling rules of your jurisdiction.</string>
+    <string name="agreement_gate_checkbox">I have read and agree to the User Agreement, Privacy Policy and the terms above</string>
+    <string name="agreement_gate_confirm">Agree & Start</string>
+    <string name="agreement_gate_policy">View User Agreement</string>
+    <string name="agreement_gate_privacy">View Privacy Policy</string>
 </resources>

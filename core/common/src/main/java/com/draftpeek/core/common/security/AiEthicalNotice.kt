@@ -50,9 +50,9 @@ object AiEthicalNotice {
         "zh-CN" to """
             ⚠️ 法律后果警告
 
-            根据《中华人民共和国著作权法》第二十四条、第五十二条，
+            根据《中华人民共和国著作权法》第五十二条、第五十三条，
             《计算机软件保护条例》第二十三条、第二十四条，
-            以及《刑法》第二百一十七条（侵犯著作权罪）、第二百八十五条（非法侵入计算机信息系统罪）：
+            以及《刑法》第二百一十七条（侵犯著作权罪）等法律规定：
 
             1. 未经授权逆向分析、修改、破解本软件安全机制，可处三年以下有期徒刑或拘役，
                并处或单处罚金；违法所得数额巨大或有其他特别严重情节的，处三年以上
@@ -61,7 +61,7 @@ object AiEthicalNotice {
             3. 使用 AI 模型辅助上述行为的，AI 请求日志可作为证据追溯行为主体。
 
             如已收到被篡改的非官方 APK，请立即卸载并从官方渠道重新下载：
-            https://draftpeek.com/download
+            https://github.com/ReSerendipity/DraftPeek/releases/latest
         """.trimIndent(),
         "en-US" to """
             ⚠️ Legal Consequences Warning
@@ -79,7 +79,7 @@ object AiEthicalNotice {
 
             If you received a tampered unofficial APK, please uninstall immediately
             and download from the official channel:
-            https://draftpeek.com/download
+            https://github.com/ReSerendipity/DraftPeek/releases/latest
         """.trimIndent(),
         "ja-JP" to """
             ⚠️ 法的責任の警告
@@ -94,7 +94,7 @@ object AiEthicalNotice {
 
             改ざんされた非公式APKを受け取った場合は、直ちにアンインストールし、
             公式チャンネルからダウンロードしてください：
-            https://draftpeek.com/download
+            https://github.com/ReSerendipity/DraftPeek/releases/latest
         """.trimIndent(),
         "ko-KR" to """
             ⚠️ 법적 책임 경고
@@ -109,7 +109,7 @@ object AiEthicalNotice {
 
             변조된 비공식 APK를 받은 경우, 즉시 제거하고
             공식 채널에서 다운로드하세요:
-            https://draftpeek.com/download
+            https://github.com/ReSerendipity/DraftPeek/releases/latest
         """.trimIndent()
     )
 }
