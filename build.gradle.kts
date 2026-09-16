@@ -161,6 +161,37 @@ subprojects {
                 disable += setOf("MissingTranslation", "ExtraTranslation")
             }
 
+            // androidTest Java 资源合并排除。
+            // WHY：JUnit 5 的 6 个 artifact（junit-jupiter / -api / -engine / -params、
+            // junit-platform-commons / -engine）各自携带 META-INF/LICENSE.md 与
+            // META-INF/LICENSE-notice.md，AGP 的 MergeJavaRes 遇到「同名不同源」会直接
+            // 抛 DuplicateRelativeFileException 而失败。main c51f9bd 上
+            // :feature:browser:mergeDebugAndroidTestJavaResource 即因此报红，
+            // 并连带整个 instrumented 阶段（API 26/30/34）失败。
+            // 放在根脚本统一注入，所有 library 模块自动继承；此前只在个别模块修过
+            // （app 自带 packaging 块、core/* 单独加过），feature/* 因而漏网——
+            // 逐模块复制正是这类回归的根因，故收敛到此处。
+            packaging {
+                resources {
+                    excludes += setOf(
+                        // JUnit 5 的每个 artifact 都随包一份同名许可文件
+                        // （实测 5.8.2 版本由传递依赖引入，非版本目录声明的 5.11.3）。
+                        "META-INF/LICENSE.md",
+                        "META-INF/LICENSE-notice.md",
+                        // 其余 6 条对齐 app 与 core/testing 的已知完备集合：
+                        // bouncycastle / jspecify / jsch / jgit 会带上 OSGI 清单与签名文件。
+                        // MergeJavaRes 是 fail-fast 的——只补 LICENSE.md 会在下一轮才暴露
+                        // OSGI-INF/MANIFEST.MF 冲突（feature/browser 恰好依赖 jsch），故一次补齐。
+                        "META-INF/{AL2.0,LGPL2.1}",
+                        "META-INF/versions/9/OSGI-INF/MANIFEST.MF",
+                        "META-INF/OSGI-INF/MANIFEST.MF",
+                        "META-INF/*.SF",
+                        "META-INF/*.DSA",
+                        "META-INF/*.RSA"
+                    )
+                }
+            }
+
             // 添加 beta 构建类型（如果不存在）
             buildTypes {
                 if (findByName("beta") == null) {
