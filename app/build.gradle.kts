@@ -227,6 +227,9 @@ android {
     packaging {
         resources {
             excludes += "/META-INF/{AL2.0,LGPL2.1}"
+            // JUnit 5 各 artifact 均携带同名许可文件，MergeJavaRes 会因重名冲突失败
+            excludes += "META-INF/LICENSE.md"
+            excludes += "META-INF/LICENSE-notice.md"
             // jsch and jspecify both provide META-INF/versions/9/OSGI-INF/MANIFEST.MF
             excludes += "META-INF/versions/9/OSGI-INF/MANIFEST.MF"
             // Generic OSGI manifest duplicates from transitive dependencies

@@ -19,6 +19,7 @@ android {
     }
 
     compileOptions {
+        isCoreLibraryDesugaringEnabled = true
         sourceCompatibility = JavaVersion.VERSION_17
         targetCompatibility = JavaVersion.VERSION_17
     }
@@ -47,6 +48,9 @@ dependencies {
     implementation(project(":core:designsystem"))
     implementation(project(":core:data"))
     implementation(project(":feature:editor"))
+
+    // Java 8+ API desugaring (required by tree-sitter AARs)
+    coreLibraryDesugaring(libs.desugar)
     implementation(project(":feature:settings"))
 
     implementation(platform(libs.compose.bom))

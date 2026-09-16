@@ -19,6 +19,7 @@ android {
     }
 
     compileOptions {
+        isCoreLibraryDesugaringEnabled = true
         sourceCompatibility = JavaVersion.VERSION_17
         targetCompatibility = JavaVersion.VERSION_17
     }
@@ -79,6 +80,9 @@ dependencies {
     implementation(libs.sora.language.treesitter)
     implementation(libs.tree.sitter)
     implementation(libs.tree.sitter.java)
+
+    // Java 8+ API desugaring (required by tree-sitter AARs)
+    coreLibraryDesugaring(libs.desugar)
 
     // Markdown rendering: Markwon removed (P0) — replaced by CommonMark native (via :core:common)
     // + WebView pipeline (MarkdownWebViewPreview). CommonMark provides GFM tables,
