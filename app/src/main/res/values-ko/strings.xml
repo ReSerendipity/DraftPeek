@@ -94,4 +94,12 @@
     <string name="widget_loading">로딩 중…</string>
     <string name="widget_no_recent_files">최근 파일이 없습니다</string>
     <string name="widget_recent_files_title">최근 파일</string>
+
+    <!-- P1-1 首次使用协议确认（合规整改 2026-09-15） -->
+    <string name="agreement_gate_title">사용 전 안내</string>
+    <string name="agreement_gate_body">계속 사용하면 이용약관과 개인정보 처리방침에 동의한 것으로 간주됩니다: 권리 침해나 불법적 용도로 사용 금지; 타인의 초상·음성 등 권리를 침해하는 콘텐츠의 복원·배포 금지; 출처 식별 정보나 AI 표시 제거 금지; 생성물을 공유할 때 관할권의 AI 생성 콘텐츠 표시 규정을 준수할 것.</string>
+    <string name="agreement_gate_checkbox">이용약관·개인정보 처리방침 및 위 조건에 동의합니다</string>
+    <string name="agreement_gate_confirm">동의하고 시작</string>
+    <string name="agreement_gate_policy">이용약관 보기</string>
+    <string name="agreement_gate_privacy">개인정보 처리방침 보기</string>
 </resources>

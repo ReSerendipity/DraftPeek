@@ -98,4 +98,12 @@
     <string name="widget_no_recent_files">暫無最近檔案</string>
     <string name="widget_description">快速存取最近開啟的檔案</string>
     <string name="widget_loading">載入中…</string>
+
+    <!-- P1-1 首次使用协议确认（合规整改 2026-09-15） -->
+    <string name="agreement_gate_title">使用前須知</string>
+    <string name="agreement_gate_body">繼續使用即表示你已閱讀並同意《使用者協議》與《隱私權政策》：不將本工具用於侵權或違法用途；不修復、傳播侵犯他人合法權益（含肖像、聲音）的內容；不去除內容來源標識或 AI 標識；輸出內容對外傳播時，遵守所在司法轄區對 AI 生成合成內容的標識要求。</string>
+    <string name="agreement_gate_checkbox">我已閱讀並同意《使用者協議》《隱私權政策》及上述使用要求</string>
+    <string name="agreement_gate_confirm">同意並開始使用</string>
+    <string name="agreement_gate_policy">查看《使用者協議》</string>
+    <string name="agreement_gate_privacy">查看《隱私權政策》</string>
 </resources>
