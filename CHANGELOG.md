@@ -13,7 +13,7 @@
 - 新增 `README.md` 项目说明文档
 - 新增 `local.properties.example` 配置模板
 - 新增 `CHANGELOG.md` 更新日志
-- 新增 `docs/ARCHITECTURE.md` 架构设计文档
+- 新增 `docs/README.md` 文档索引与目录结构速览（原列 `docs/ARCHITECTURE.md` 实际未创建，2026-09-17 从本清单移除并指正）
 - 新增 `scripts/` 辅助脚本目录（build-debug、build-release、run-unit-tests、install-on-device、clean-project、package-release）
 - 新增 `.env.example` 环境变量模板
 - 清理根目录 40+ 临时日志文件
