@@ -1,0 +1,195 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>DraftPeek · Android 代码编辑器 — 演示页</title>
+<style>
+  :root{
+    --bg:#0f1216; --card:#161b22; --ink:#e6edf3; --ink2:#8b949e; --line:#21262d;
+    --acc:#58a6ff; --ok:#3fb950; --term:#3fb950; --md:#d2a8ff;
+    --kw:#ff7b72; --fn:#d2a8ff; --st:#a5d6ff; --num:#79c0ff; --cm:#8b949e;
+  }
+  *{margin:0;padding:0;box-sizing:border-box}
+  body{font-family:"Segoe UI","Microsoft YaHei","PingFang SC",Arial,sans-serif;background:
+    radial-gradient(900px 420px at 80% -10%,rgba(88,166,255,.10),transparent 60%),var(--bg);color:var(--ink);min-height:100vh}
+  .wrap{max-width:1080px;margin:0 auto;padding:0 24px 44px}
+  header{display:flex;align-items:center;gap:13px;height:60px;border-bottom:1px solid var(--line)}
+  .logo{width:34px;height:34px;border-radius:9px;background:linear-gradient(135deg,#58a6ff,#3fb950);display:flex;align-items:center;justify-content:center}
+  .logo svg{width:18px;height:18px}
+  header h1{font-size:16px;font-weight:700;letter-spacing:.3px}
+  header .sub{font-size:12px;color:var(--ink2)}
+  header .right{margin-left:auto;font-size:12px;color:var(--ink2)}
+  main{display:grid;grid-template-columns:minmax(300px,400px) 1fr;gap:34px;margin-top:28px;align-items:start}
+  @media(max-width:900px){main{grid-template-columns:1fr;justify-items:center}}
+  /* 手机 */
+  .phone{width:100%;max-width:360px;background:#000;border-radius:42px;padding:12px;box-shadow:0 24px 60px rgba(0,0,0,.55),0 0 0 1px #2a2f36}
+  .screen{background:var(--card);border-radius:32px;overflow:hidden;height:680px;display:flex;flex-direction:column;position:relative}
+  .notch{height:26px;display:flex;align-items:center;justify-content:center}
+  .notch i{width:96px;height:22px;background:#000;border-radius:99px}
+  .sbar{display:flex;justify-content:space-between;padding:2px 20px 6px;font-size:10px;color:var(--ink2)}
+  .appbar{display:flex;align-items:center;gap:10px;padding:8px 16px 12px}
+  .appbar .title{font-size:14px;font-weight:700}
+  .appbar .file{font-size:11px;color:var(--ink2);margin-left:auto;display:flex;gap:8px}
+  .body{flex:1;display:flex;flex-direction:column;overflow:hidden}
+  .view{flex:1;overflow:hidden;display:none}
+  .view.on{display:block}
+  /* 编辑器 */
+  .editor{display:flex;height:100%}
+  .gutter{width:44px;flex:0 0 44px;background:#10151b;color:#4d5863;font-size:11px;line-height:1.85;text-align:right;padding:12px 10px 0 0;font-family:Consolas,Menlo,monospace;user-select:none}
+  .code{flex:1;padding:12px 14px;font-family:Consolas,Menlo,monospace;font-size:11.5px;line-height:1.85;overflow:hidden;white-space:pre}
+  .code .kw{color:var(--kw)}.code .fn{color:var(--fn)}.code .st{color:var(--st)}.code .num{color:var(--num)}.code .cm{color:var(--cm);font-style:italic}.code .ty{color:#ffa657}
+  .cursorbar{height:2.5px;background:var(--acc);margin-top:-2px;animation:blink 1s steps(1) infinite}
+  @keyframes blink{50%{opacity:0}}
+  /* 终端 */
+  .term{height:100%;background:#0a0e13;padding:14px;font-family:Consolas,Menlo,monospace;font-size:11px;line-height:1.8;overflow:hidden;color:var(--term)}
+  .term .p{color:#58a6ff}.term .dim{color:#57606a}
+  /* markdown */
+  .md{height:100%;overflow:auto;padding:16px 18px;font-size:13px;line-height:1.75}
+  .md h1{font-size:17px;border-bottom:1px solid var(--line);padding-bottom:7px;margin-bottom:11px}
+  .md h2{font-size:14.5px;margin:13px 0 7px;color:#d2a8ff}
+  .md ul{padding-left:20px;color:#c9d1d9}
+  .md .codeblock{background:#0d1117;border:1px solid var(--line);border-radius:9px;padding:10px 12px;font-family:Consolas,Menlo,monospace;font-size:11px;margin-top:9px;color:#a5d6ff}
+  .md .hl{background:#1c2530;border-left:3px solid #58a6ff;padding:8px 12px;border-radius:0 8px 8px 0;color:#c9d1d9;font-size:12px;margin:9px 0}
+  /* 底部导航 */
+  .nav{display:flex;border-top:1px solid var(--line);background:#10151b}
+  .nav div{flex:1;text-align:center;padding:10px 0 12px;font-size:9.5px;color:var(--ink2);cursor:pointer;transition:color .15s}
+  .nav div svg{width:19px;height:19px;display:block;margin:0 auto 3px;stroke:currentColor;fill:none;stroke-width:1.7;stroke-linecap:round}
+  .nav div.on{color:var(--acc)}
+  /* 说明区 */
+  .info h2{font-size:22px;font-weight:700;letter-spacing:.3px}
+  .info .lead{color:var(--ink2);font-size:13.5px;line-height:1.8;margin:10px 0 20px}
+  .feats{display:grid;grid-template-columns:repeat(2,1fr);gap:11px}
+  @media(max-width:560px){.feats{grid-template-columns:1fr}}
+  .feat{border:1px solid var(--line);border-radius:13px;padding:13px 15px;background:var(--card)}
+  .feat b{display:flex;align-items:center;gap:8px;font-size:13.5px;margin-bottom:5px}
+  .feat b svg{width:16px;height:16px;stroke:var(--acc);fill:none;stroke-width:1.8;stroke-linecap:round}
+  .feat p{font-size:12px;color:var(--ink2);line-height:1.65}
+  .foot{margin-top:30px;text-align:center;font-size:12px;color:var(--ink2)}
+  .foot code{background:rgba(255,255,255,.07);padding:2px 8px;border-radius:6px;font-size:11.5px}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <header>
+    <div class="logo"><svg viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2" stroke-linecap="round"><path d="M8 6l-5 6 5 6M16 6l5 6-5 6M13.5 4l-3 16"/></svg></div>
+    <h1>DraftPeek</h1><span class="sub">Android 代码 / 文本编辑器 · 演示页</span>
+    <span class="right">Kotlin · Jetpack Compose · 整洁架构</span>
+  </header>
+
+  <main>
+    <section class="phone" aria-label="DraftPeek 手机界面模拟">
+      <div class="screen">
+        <div class="notch"><i></i></div>
+        <div class="sbar"><span>9:41</span><span>DraftPeek</span></div>
+        <div class="appbar">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#8b949e" stroke-width="2" stroke-linecap="round"><path d="M15 6l-6 6 6 6"/></svg>
+          <span class="title" id="fileTitle">EditorActivity.kt</span>
+          <span class="file"><span id="langTag">Kotlin</span><span id="saveTag">已保存</span></span>
+        </div>
+        <div class="body">
+          <div class="view on" id="v-editor">
+            <div class="editor">
+              <div class="gutter" id="gutter"></div>
+              <div class="code" id="code"></div>
+            </div>
+            <div class="cursorbar"></div>
+          </div>
+          <div class="view" id="v-term">
+            <div class="term" id="term"></div>
+          </div>
+          <div class="view" id="v-md">
+            <div class="md">
+              <h1>DraftPeek 使用笔记</h1>
+              <p>在手机上快速编辑代码、查看 Markdown 与运行终端命令。</p>
+              <h2>常用操作</h2>
+              <ul><li>底部导航切换 编辑器 / 终端 / Markdown 预览</li><li>支持 40+ 语言语法高亮</li><li>内置终端可直接执行 gradle 等命令</li></ul>
+              <div class="codeblock">val greet = "Hello, DraftPeek!"<br>println(greet)</div>
+              <h2>安全提示</h2>
+              <div class="hl">本应用内置反调试、完整性校验与加密存储，请从可信渠道安装。</div>
+            </div>
+          </div>
+        </div>
+        <div class="nav" id="nav">
+          <div class="on" data-v="editor"><svg viewBox="0 0 24 24"><path d="M8 6l-5 6 5 6M16 6l5 6-5 6M13.5 4l-3 16"/></svg>编辑器</div>
+          <div data-v="term"><svg viewBox="0 0 24 24"><rect x="3" y="4" width="18" height="16" rx="2"/><path d="M7 9l3 3-3 3M13 15h4"/></svg>终端</div>
+          <div data-v="md"><svg viewBox="0 0 24 24"><path d="M4 5h16v14H4z" rx="2"/><path d="M8 9h.01M12 9h.01M16 9h.01M8 13h8M8 16h5"/></svg>Markdown</div>
+        </div>
+      </div>
+    </section>
+
+    <section class="info">
+      <h2>随身代码工作台</h2>
+      <p class="lead">DraftPeek 是一款 Android 原生编辑器：内置终端、Markdown 预览与 40+ 语言语法高亮，用 Jetpack Compose 构建，并通过反调试、完整性校验、加密存储等安全加固保护你的文件。</p>
+      <div class="feats">
+        <div class="feat"><b><svg viewBox="0 0 24 24"><path d="M8 6l-5 6 5 6M16 6l5 6-5 6M13.5 4l-3 16"/></svg>代码高亮</b><p>40+ 语言语法高亮，编辑器与行号联动，支持长文件流畅滚动。</p></div>
+        <div class="feat"><b><svg viewBox="0 0 24 24"><rect x="3" y="4" width="18" height="16" rx="2"/><path d="M7 9l3 3-3 3M13 15h4"/></svg>内置终端</b><p>直接在应用内运行命令，与编辑器同屏切换，输出实时回显。</p></div>
+        <div class="feat"><b><svg viewBox="0 0 24 24"><path d="M4 5h16v14H4z" rx="2"/><path d="M8 9h.01M12 9h.01M16 9h.01M8 13h8M8 16h5"/></svg>Markdown 预览</b><p>编辑与预览双模式，渲染标题、列表、代码块与引用。</p></div>
+        <div class="feat"><b><svg viewBox="0 0 24 24"><rect x="5" y="11" width="14" height="9" rx="2"/><path d="M8 11V8a4 4 0 0 1 8 0v3"/></svg>安全加固</b><p>反调试检测、APK 完整性校验、加密存储与诱导式防护。</p></div>
+      </div>
+    </section>
+  </main>
+
+  <p class="foot">DraftPeek 演示页（前端模拟）· 仓库：<code>github.com/ReSerendipity/DraftPeek</code> · Android 原生 · Jetpack Compose · 整洁架构</p>
+</div>
+
+<script>
+  const SRC = [
+    ["package com.draftpeek.editor","package",1],
+    ["","",0],
+    ["import android.os.Bundle","import",1],
+    ["import androidx.activity.compose.setContent","import",1],
+    ["","",0],
+    ["class EditorActivity : AppCompatActivity() {","class",1],
+    ["  override fun onCreate(saved: Bundle?) {","override",0],
+    ["    super.onCreate(saved)","super",0],
+    ["    setContent {","",0],
+    ["      DraftPeekTheme {","",0],
+    ["        EditorScreen(", "",0],
+    ["          onSave = { file -> persist(file) },","",0],
+    ["          onTerminal = { openTerminal() }","",0],
+    ["        )","",0],
+    ["      }","",0],
+    ["    }","",0],
+    ["  }","",0],
+    ["","",0],
+    ["  private fun persist(file: TextFile) {","persist",0],
+    ["    cipherStore.write(file.id, file.bytes)","cipherStore",0],
+    ["    markSaved()","markSaved",0],
+    ["  }","",0],
+    ["}","",0]
+  ];
+  const g = document.getElementById("gutter"), c = document.getElementById("code");
+  SRC.forEach((r,i)=>{ g.insertAdjacentHTML("beforeend", (i+1)+"<br>"); });
+  const esc = s => s.replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;");
+  c.innerHTML = SRC.map(r=>{
+    let line = esc(r[0]);
+    line = line.replace(/(class|override|fun|val|private|import|package|super)\b/g,'<span class="kw">$1</span>');
+    line = line.replace(/(AppCompatActivity|Bundle|TextFile|DraftPeekTheme|EditorScreen)/g,'<span class="ty">$1</span>');
+    line = line.replace(/(setContent|onCreate|persist|openTerminal|markSaved|write)/g,'<span class="fn">$1</span>');
+    line = line.replace(/([A-Z][A-Za-z]*\(|"[^"]*")/g,'<span class="st">$1</span>');
+    return line;
+  }).join("\n");
+  const TERM = [
+    '<span class="p">draftpeek@device</span> <span class="dim">~</span> $ ./gradlew assembleDebug',
+    '> Task :app:compileDebugKotlin UP-TO-DATE',
+    '> Task :app:lintVitalRelease SKIPPED',
+    '> Task :app:packageDebug UP-TO-DATE',
+    '',
+    'BUILD SUCCESSFUL in 4s',
+    '<span class="p">draftpeek@device</span> <span class="dim">~</span> $ git status',
+    'On branch main · nothing to commit, working tree clean',
+    '<span class="p">draftpeek@device</span> <span class="dim">~</span> $ ▍'
+  ];
+  document.getElementById("term").innerHTML = TERM.join("\n");
+  document.querySelectorAll("#nav div").forEach(d=>d.onclick=()=>{
+    document.querySelectorAll("#nav div").forEach(x=>x.classList.remove("on"));
+    d.classList.add("on");
+    const v = d.dataset.v;
+    ["editor","term","md"].forEach(k=>document.getElementById("v-"+k).classList.toggle("on",k===v));
+    document.getElementById("fileTitle").textContent = v==="editor"?"EditorActivity.kt":v==="term"?"终端 · zsh":"README.md";
+    document.getElementById("langTag").textContent = v==="editor"?"Kotlin":v==="term"?"shell":"Markdown";
+  });
+</script>
+</body>
+</html>
