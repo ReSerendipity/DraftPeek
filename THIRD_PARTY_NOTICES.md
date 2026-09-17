@@ -70,6 +70,14 @@ DraftPeek 终端模块实现了基于 proot 的会话管理框架（ProotSession
 - R8 keep：`app/proguard-rules.pro` 已为 sora-editor（io.github.rosemoe.**）、tree-sitter（com.itsaky.androidide.treesitter.**、io.github.treesitter.**）及 tm4e/joni/jcodings 保留类名与成员（不重命名、不裁剪），满足 LGPL-2.1 第 6 条"用户可用修改后的库版本替换随包版本并重新链接"的要求；
 - 修改后的 LGPL 库重新构建路径见 docs/COMPLIANCE_CHECKLIST.md（本地文档，未随仓库发布）。
 
+## 6. 合规自查要点（择要，P2-5 整改 2026-09-15）
+
+> 原本地文档 `docs/COMPLIANCE_CHECKLIST.md` 未随仓发布；此处公开发布侧最关键四条：
+> 1. **LGPL-2.1**（sora-editor 系列可替换链接）：R8 keep 已配置（见 §5）；再分发随附许可文本；
+> 2. **proot（GPL-2.0）未随包分发**——若未来捆绑，须随附 GPL 全文并提供源码获取方式（§3）；
+> 3. **新增依赖**须同步更新本表与版本号；发布前建议跑依赖许可报告；
+> 4. 应用内「我的 → 关于 → 开源许可」为随包许可文本展示面，发布前确认可打开。
+
 ## 7. 其他
 
 - 图标与品牌资源：DraftPeek 自有，无第三方许可；

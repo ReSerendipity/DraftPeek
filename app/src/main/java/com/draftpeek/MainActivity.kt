@@ -19,14 +19,25 @@
  */
 package com.draftpeek
 
+import android.content.Intent
+import android.net.Uri
 import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.isSystemInDarkTheme
+import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.width
+import androidx.compose.material3.Checkbox
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.Text
+import androidx.compose.material3.TextButton
 import androidx.compose.material3.windowsizeclass.ExperimentalMaterial3WindowSizeClassApi
 import androidx.compose.material3.windowsizeclass.calculateWindowSizeClass
 import androidx.compose.runtime.Composable
@@ -36,10 +47,13 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.toArgb
 import androidx.compose.ui.platform.LocalConfiguration
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.unit.dp
 import androidx.core.view.WindowCompat
 import androidx.core.view.WindowInsetsControllerCompat
 import androidx.hilt.navigation.compose.hiltViewModel
@@ -54,6 +68,7 @@ import androidx.window.layout.FoldingFeature
 import com.draftpeek.core.common.feature.FeatureToggleManager
 import com.draftpeek.core.common.util.FpsMonitor
 import com.draftpeek.core.data.repository.UserActivityRepository
+import com.draftpeek.core.ui.component.BrandDialog
 import com.draftpeek.core.ui.component.BrandToastHost
 import com.draftpeek.core.ui.component.CustomScaffold
 import com.draftpeek.core.ui.component.TabBarItem
@@ -153,6 +168,20 @@ class MainActivity : ComponentActivity() {
                 accessibilityState = accessibilityState,
                 appFonts = appFonts
             ) {
+                // P1-1 首次使用协议确认（合规整改 2026-09-15）：
+                // 未勾选同意当前版本协议前，弹窗常驻（onDismissRequest 为空操作）。
+                val agreementPrefs = getSharedPreferences("agreement", MODE_PRIVATE)
+                var showAgreement by rememberSaveable {
+                    mutableStateOf(!agreementPrefs.getBoolean("accepted_v1", false))
+                }
+                if (showAgreement) {
+                    AgreementGateDialog(
+                        onAccepted = {
+                            agreementPrefs.edit().putBoolean("accepted_v1", true).apply()
+                            showAgreement = false
+                        }
+                    )
+                }
                 val surfaceColor = MaterialTheme.colorScheme.surface.toArgb()
 
                 // 设置系统状态栏和导航栏外观
@@ -277,4 +306,78 @@ private fun DraftPeekContent(layoutMode: LayoutMode, foldInfo: FoldInfo, darkThe
             modifier = Modifier.padding(innerPadding)
         )
     }
+}
+
+/**
+ * P1-1 首次使用协议确认弹窗（合规整改 2026-09-15）。
+ *
+ * 使用 BrandDialog（项目规范禁止原生 AlertDialog）；必须勾选同意后确认按钮可用，
+ * onDismissRequest 为空操作——不勾选无法进入应用。协议文本见仓库根目录
+ * USER_AGREEMENT.md / PRIVACY_POLICY.md（弹窗内按钮跳转 GitHub 查看）。
+ */
+@Composable
+private fun AgreementGateDialog(onAccepted: () -> Unit) {
+    val context = LocalContext.current
+    var checked by rememberSaveable { mutableStateOf(false) }
+
+    fun openPolicy(url: String) {
+        context.startActivity(Intent(Intent.ACTION_VIEW, Uri.parse(url)))
+    }
+
+    BrandDialog(
+        onDismissRequest = { /* P1-1：不勾选不允许关闭 */ },
+        title = {
+            Text(
+                text = stringResource(R.string.agreement_gate_title),
+                style = MaterialTheme.typography.titleMedium
+            )
+        },
+        content = {
+            Column {
+                Text(
+                    text = stringResource(R.string.agreement_gate_body),
+                    style = MaterialTheme.typography.bodySmall
+                )
+                Spacer(modifier = Modifier.height(8.dp))
+                Row(
+                    verticalAlignment = Alignment.CenterVertically,
+                    modifier = Modifier.clickable { checked = !checked }
+                ) {
+                    Checkbox(checked = checked, onCheckedChange = { checked = it })
+                    Text(
+                        text = stringResource(R.string.agreement_gate_checkbox),
+                        style = MaterialTheme.typography.bodySmall
+                    )
+                }
+                Spacer(modifier = Modifier.height(4.dp))
+                Row {
+                    TextButton(onClick = {
+                        openPolicy("https://github.com/ReSerendipity/DraftPeek/blob/main/USER_AGREEMENT.md")
+                    }) {
+                        Text(
+                            text = stringResource(R.string.agreement_gate_policy),
+                            style = MaterialTheme.typography.labelSmall
+                        )
+                    }
+                    Spacer(modifier = Modifier.width(8.dp))
+                    TextButton(onClick = {
+                        openPolicy("https://github.com/ReSerendipity/DraftPeek/blob/main/PRIVACY_POLICY.md")
+                    }) {
+                        Text(
+                            text = stringResource(R.string.agreement_gate_privacy),
+                            style = MaterialTheme.typography.labelSmall
+                        )
+                    }
+                }
+            }
+        },
+        confirmButton = {
+            TextButton(
+                enabled = checked,
+                onClick = onAccepted
+            ) {
+                Text(text = stringResource(R.string.agreement_gate_confirm))
+            }
+        }
+    )
 }
