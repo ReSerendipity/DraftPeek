@@ -50,6 +50,14 @@ logging.basicConfig(
     level=logging.INFO,
     format="%(asctime)s [%(levelname)s] %(name)s: %(message)s",
 )
+try:
+    from _logging_setup import setup_file_logging
+except ImportError:
+    try:
+        from server._logging_setup import setup_file_logging
+    except ImportError:
+        from .._logging_setup import setup_file_logging
+setup_file_logging("integrity_server")
 
 app = FastAPI(
     title="DraftPeek Integrity Server",

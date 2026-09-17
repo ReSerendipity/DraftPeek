@@ -185,6 +185,7 @@ crdt_data/
 
 # --- 2026-09-07 守卫暴露的遗漏（缓存 / 服务端虚拟环境）---
 .venv_srv/
+.venv/
 .ruff_cache/
 
 # --- 2026-09-11 软删除回收站（scripts/trash.sh|bat 落盘，永不入库）---
