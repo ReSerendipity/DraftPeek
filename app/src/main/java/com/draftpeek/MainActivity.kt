@@ -25,8 +25,8 @@ import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
-import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.foundation.clickable
+import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
@@ -47,9 +47,9 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.toArgb
-import androidx.compose.ui.Alignment
 import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
@@ -179,7 +179,7 @@ class MainActivity : ComponentActivity() {
                         onAccepted = {
                             agreementPrefs.edit().putBoolean("accepted_v1", true).apply()
                             showAgreement = false
-                        },
+                        }
                     )
                 }
                 val surfaceColor = MaterialTheme.colorScheme.surface.toArgb()
@@ -308,7 +308,6 @@ private fun DraftPeekContent(layoutMode: LayoutMode, foldInfo: FoldInfo, darkThe
     }
 }
 
-
 /**
  * P1-1 首次使用协议确认弹窗（合规整改 2026-09-15）。
  *
@@ -330,34 +329,44 @@ private fun AgreementGateDialog(onAccepted: () -> Unit) {
         title = {
             Text(
                 text = stringResource(R.string.agreement_gate_title),
-                style = MaterialTheme.typography.titleMedium,
+                style = MaterialTheme.typography.titleMedium
             )
         },
         content = {
             Column {
                 Text(
                     text = stringResource(R.string.agreement_gate_body),
-                    style = MaterialTheme.typography.bodySmall,
+                    style = MaterialTheme.typography.bodySmall
                 )
                 Spacer(modifier = Modifier.height(8.dp))
                 Row(
                     verticalAlignment = Alignment.CenterVertically,
-                    modifier = Modifier.clickable { checked = !checked },
+                    modifier = Modifier.clickable { checked = !checked }
                 ) {
                     Checkbox(checked = checked, onCheckedChange = { checked = it })
                     Text(
                         text = stringResource(R.string.agreement_gate_checkbox),
-                        style = MaterialTheme.typography.bodySmall,
+                        style = MaterialTheme.typography.bodySmall
                     )
                 }
                 Spacer(modifier = Modifier.height(4.dp))
                 Row {
-                    TextButton(onClick = { openPolicy("https://github.com/ReSerendipity/DraftPeek/blob/main/USER_AGREEMENT.md") }) {
-                        Text(text = stringResource(R.string.agreement_gate_policy), style = MaterialTheme.typography.labelSmall)
+                    TextButton(onClick = {
+                        openPolicy("https://github.com/ReSerendipity/DraftPeek/blob/main/USER_AGREEMENT.md")
+                    }) {
+                        Text(
+                            text = stringResource(R.string.agreement_gate_policy),
+                            style = MaterialTheme.typography.labelSmall
+                        )
                     }
                     Spacer(modifier = Modifier.width(8.dp))
-                    TextButton(onClick = { openPolicy("https://github.com/ReSerendipity/DraftPeek/blob/main/PRIVACY_POLICY.md") }) {
-                        Text(text = stringResource(R.string.agreement_gate_privacy), style = MaterialTheme.typography.labelSmall)
+                    TextButton(onClick = {
+                        openPolicy("https://github.com/ReSerendipity/DraftPeek/blob/main/PRIVACY_POLICY.md")
+                    }) {
+                        Text(
+                            text = stringResource(R.string.agreement_gate_privacy),
+                            style = MaterialTheme.typography.labelSmall
+                        )
                     }
                 }
             }
@@ -365,10 +374,10 @@ private fun AgreementGateDialog(onAccepted: () -> Unit) {
         confirmButton = {
             TextButton(
                 enabled = checked,
-                onClick = onAccepted,
+                onClick = onAccepted
             ) {
                 Text(text = stringResource(R.string.agreement_gate_confirm))
             }
-        },
+        }
     )
 }
