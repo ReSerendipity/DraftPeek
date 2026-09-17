@@ -105,6 +105,14 @@ logging.basicConfig(
     format="%(asctime)s [%(levelname)s] %(message)s"
 )
 logger = logging.getLogger("crdt_server")
+try:
+    from _logging_setup import setup_file_logging
+except ImportError:
+    try:
+        from server._logging_setup import setup_file_logging
+    except ImportError:
+        from .._logging_setup import setup_file_logging
+setup_file_logging("crdt_server")
 
 # ─── Server configuration ─────────────────────────────────────────────────
 CRDT_HOST = os.environ.get("CRDT_HOST", "127.0.0.1").strip()

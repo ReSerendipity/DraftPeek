@@ -237,10 +237,11 @@ tasks.register("bumpVersion") {
         println("  1. Update CHANGELOG.md with the new version entry")
         println("  2. Commit the changes: git add gradle.properties CHANGELOG.md")
         println("  3. Tag the release: git tag v$newVersionName")
-        // SECURITY(红线): tag 必须推到 private 远程。若照旧推 origin，tag 会把
-        // 私有 main 的完整提交历史带入公开仓库（与 2026-09-02 误推事故同源）。
-        println("  4. Push the tag to the PRIVATE remote: git push private v$newVersionName")
-        println("     (NEVER 'git push origin v...' — it would leak main history to the public repo)")
+        // 本仓库现为单一公开远程：`git remote -v` 只有 origin，已无 private 远程。
+        // 旧提示指向的 `git push private` 会因远端不存在直接失败，且「禁止推 origin」
+        // 与当前拓扑相反。v* tag 由 .github/workflows/release.yml 消费，产出 draft Release。
+        println("  4. Push the tag: git push origin v$newVersionName")
+        println("     (v* tag 触发 release.yml，产出 draft Release)")
     }
 }
 
