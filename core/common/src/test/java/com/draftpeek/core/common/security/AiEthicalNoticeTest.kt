@@ -35,7 +35,8 @@ class AiEthicalNoticeTest {
         val text = AiEthicalNotice.LEGAL_CONSEQUENCES_TEXT["zh-CN"]!!
         assertTrue(text.contains("著作权法"), "Should reference Copyright Law")
         assertTrue(text.contains("计算机软件保护条例"), "Should reference Software Protection Regulation")
-        assertTrue(text.contains("draftpeek.com"), "Should contain official download URL")
+        // 8547e38 下载死链修复后，官方下载渠道由 draftpeek.com 换为 GitHub Releases，断言随之对齐
+        assertTrue(text.contains("ReSerendipity/DraftPeek/releases"), "Should contain official download URL")
     }
 
     @Test
