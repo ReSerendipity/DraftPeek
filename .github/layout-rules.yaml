@@ -59,9 +59,11 @@ gitignored_expect:
 root_allowlist:
   - .editorconfig
   - .env.example
+  - .gitattributes
   - .githooks
   - .github
   - .gitignore
+  - .workbuddy
   - .pre-commit-config.yaml
   - CHANGELOG.md
   - LICENSE
@@ -78,6 +80,7 @@ root_allowlist:
   - core
   - docs
   - feature
+  - gitleaks.toml
   - gradle
   - gradle.lockfile
   - gradle.properties
