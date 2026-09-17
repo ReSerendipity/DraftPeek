@@ -63,6 +63,14 @@ logging.basicConfig(
     format="%(asctime)s [%(levelname)s] %(message)s"
 )
 logger = logging.getLogger("sync_server")
+try:
+    from _logging_setup import setup_file_logging
+except ImportError:
+    try:
+        from server._logging_setup import setup_file_logging
+    except ImportError:
+        from .._logging_setup import setup_file_logging
+setup_file_logging("sync_server")
 
 app = FastAPI(
     title="DraftPeek Sync Server",
