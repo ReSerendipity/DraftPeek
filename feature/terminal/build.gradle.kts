@@ -67,6 +67,10 @@ dependencies {
     testImplementation(libs.mockk)
     testImplementation(libs.kotlinx.coroutines.test)
     testImplementation(libs.turbine)
+
+    // defaultConfig 声明了 testInstrumentationRunner，runner 类就必须在 androidTest
+    // 类路径里，否则 connectedDebugAndroidTest 在设备侧直接 ClassNotFoundException 崩溃。
+    androidTestImplementation(libs.androidx.test.runner)
 }
 
 tasks.withType<Test>().configureEach {
