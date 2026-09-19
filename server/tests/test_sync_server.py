@@ -243,5 +243,59 @@ def test_checksum_mismatch_returns_structured_error(client):
     assert data["error"]["code"] == "CHECKSUM_MISMATCH"
 
 
+# ─── 安全加固回归（路径校验 / 元数据不可信） ─────────────────────────────
+
+def test_upload_rejects_control_char_path(client):
+    """路径含控制字符必须在任何文件系统写入之前被拒绝。"""
+    response = client.post(
+        "/sync/upload",
+        data={"meta_path": "evil\r\n.txt", "meta_version": 1, "meta_checksum": "x"},
+        files={"file": ("evil.txt", b"payload", "application/octet-stream")},
+    )
+    assert response.status_code == 400
+    assert response.json()["error"]["code"] == "INVALID_PATH"
+
+
+def test_upload_rejects_backslash_traversal(client):
+    """Windows 分隔符形式的 .. 同样不得绕过目录校验。"""
+    response = client.post(
+        "/sync/upload",
+        data={"meta_path": "a\\..\\..\\escape.txt", "meta_version": 1, "meta_checksum": "x"},
+        files={"file": ("escape.txt", b"payload", "application/octet-stream")},
+    )
+    assert response.status_code == 400
+    assert response.json()["error"]["code"] == "INVALID_PATH"
+
+
+def test_download_refuses_tampered_storage_path(client, temp_storage):
+    """DB 的 storage_path 只用于一致性核对，被篡改时不得据此读取其它位置。"""
+    import hashlib
+    import sqlite3
+
+    import sync_server.main as sync_module
+
+    content = b"integrity probe"
+    client.post(
+        "/sync/upload",
+        data={
+            "meta_path": "tampered.txt",
+            "meta_version": 1,
+            "meta_checksum": hashlib.sha256(content).hexdigest(),
+        },
+        files={"file": ("tampered.txt", content, "application/octet-stream")},
+    )
+
+    secret = temp_storage / "should-not-be-served.txt"
+    secret.write_bytes(b"SHOULD NOT BE SERVED")
+    conn = sqlite3.connect(sync_module.DB_PATH)
+    conn.execute("UPDATE files SET storage_path = ? WHERE path = ?", (str(secret), "tampered.txt"))
+    conn.commit()
+    conn.close()
+
+    response = client.get("/sync/download/tampered.txt")
+    assert response.status_code == 404
+    assert response.content != b"SHOULD NOT BE SERVED"
+
+
 if __name__ == "__main__":
     pytest.main([__file__, "-v"])
