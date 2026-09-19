@@ -2,7 +2,6 @@ package com.draftpeek.feature.editor.ui
 
 import androidx.compose.ui.test.junit4.createComposeRule
 import androidx.compose.ui.test.onNodeWithTag
-import androidx.compose.ui.test.onNodeWithText
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import com.draftpeek.core.ui.theme.DraftPeekTheme
 import com.draftpeek.feature.editor.model.MarkdownViewMode
@@ -68,7 +67,7 @@ class WysiwygRenderVerificationTest {
         }
         // 验证组件成功挂载，无异常
         // WebView 组件在测试环境中可能无法真实渲染，但 Compose 层应正常挂载
-        composeTestRule.onNodeWithTag("test_tag_markdown_preview")
+        composeTestRule.onNodeWithTag(EditorTestTags.MARKDOWN_PREVIEW)
             .assertExists()
     }
 
@@ -83,7 +82,7 @@ class WysiwygRenderVerificationTest {
                 )
             }
         }
-        composeTestRule.onNodeWithTag("test_tag_markdown_preview")
+        composeTestRule.onNodeWithTag(EditorTestTags.MARKDOWN_PREVIEW)
             .assertExists()
     }
 
@@ -99,7 +98,7 @@ class WysiwygRenderVerificationTest {
             }
         }
         // SPLIT 模式应渲染两个预览面板
-        composeTestRule.onNodeWithTag("test_tag_markdown_preview")
+        composeTestRule.onNodeWithTag(EditorTestTags.MARKDOWN_PREVIEW)
             .assertExists()
     }
 
@@ -115,7 +114,7 @@ class WysiwygRenderVerificationTest {
             }
         }
         // WYSIWYG 模式应使用 MarkdownRichEditor
-        composeTestRule.onNodeWithTag("test_tag_markdown_rich_editor")
+        composeTestRule.onNodeWithTag(EditorTestTags.MARKDOWN_RICH_EDITOR)
             .assertExists()
     }
 
@@ -133,8 +132,11 @@ class WysiwygRenderVerificationTest {
             }
         }
         // 大文件应显示降级 UI 而非 RichTextEditor
-        composeTestRule.onNodeWithText("Large file")
+        // 用 testTag 而非文案断言：降级提示是硬编码中文，断言英文片段在此设备上永不成立
+        composeTestRule.onNodeWithTag(EditorTestTags.LARGE_CONTENT_FALLBACK)
             .assertExists()
+        composeTestRule.onNodeWithTag(EditorTestTags.MARKDOWN_RICH_EDITOR)
+            .assertDoesNotExist()
     }
 
     @Test
@@ -148,7 +150,7 @@ class WysiwygRenderVerificationTest {
                 )
             }
         }
-        composeTestRule.onNodeWithTag("test_tag_markdown_preview")
+        composeTestRule.onNodeWithTag(EditorTestTags.MARKDOWN_PREVIEW)
             .assertExists()
     }
 
@@ -163,7 +165,7 @@ class WysiwygRenderVerificationTest {
                 )
             }
         }
-        composeTestRule.onNodeWithTag("test_tag_markdown_preview")
+        composeTestRule.onNodeWithTag(EditorTestTags.MARKDOWN_PREVIEW)
             .assertExists()
     }
 
@@ -191,7 +193,7 @@ class WysiwygRenderVerificationTest {
                 )
             }
         }
-        composeTestRule.onNodeWithTag("test_tag_markdown_preview")
+        composeTestRule.onNodeWithTag(EditorTestTags.MARKDOWN_PREVIEW)
             .assertExists()
     }
 }
