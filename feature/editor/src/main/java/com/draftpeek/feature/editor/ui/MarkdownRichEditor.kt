@@ -35,6 +35,7 @@ import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.SpanStyle
 import androidx.compose.ui.text.font.FontStyle
@@ -142,7 +143,7 @@ fun MarkdownRichEditor(
     val fgSoftColor = PrototypeTokens.fgSoft
     val surfaceColor = PrototypeTokens.surface
 
-    Column(modifier = modifier.fillMaxSize()) {
+    Column(modifier = modifier.fillMaxSize().testTag(EditorTestTags.MARKDOWN_RICH_EDITOR)) {
         // Formatting toolbar
         MarkdownRichEditorToolbar(
             richTextState = richTextState,
@@ -190,7 +191,9 @@ private fun LargeContentFallback(contentLength: Int, modifier: Modifier = Modifi
     val fgSoftColor = PrototypeTokens.fgSoft
     val accentColor = PrototypeTokens.accent
     Box(
-        modifier = modifier.fillMaxSize(),
+        modifier = modifier
+            .fillMaxSize()
+            .testTag(EditorTestTags.LARGE_CONTENT_FALLBACK),
         contentAlignment = Alignment.Center
     ) {
         Text(

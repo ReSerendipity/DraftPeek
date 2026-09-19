@@ -201,3 +201,6 @@ scripts/safe-clean.sh
 scripts/trash.bat
 scripts/trash.sh
 docs/project/ADR-001-CRDT-vs-OT-Selection.md
+
+# AI IDE 本地工作目录（仅本地保留，不上远程）
+.qoder/
