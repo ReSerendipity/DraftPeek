@@ -22,12 +22,23 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.material3.Divider
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.unit.dp
 import com.draftpeek.core.ui.theme.LocalDarkTheme
 import com.draftpeek.core.ui.theme.PrototypeTokens
 import com.draftpeek.feature.editor.model.MarkdownViewMode
 
 private const val TAG = "MarkdownPreview"
+
+/**
+ * Compose `testTag` 标识，生产代码与 androidTest 共用同一份常量，
+ * 避免测试断言的 tag 与被测组件漂移。
+ */
+object EditorTestTags {
+    const val MARKDOWN_PREVIEW = "test_tag_markdown_preview"
+    const val MARKDOWN_RICH_EDITOR = "test_tag_markdown_rich_editor"
+    const val LARGE_CONTENT_FALLBACK = "test_tag_large_content_fallback"
+}
 
 /**
  * 增强型 Markdown 预览 Composable，支持多种视图模式。
@@ -53,22 +64,19 @@ fun MarkdownPreview(
     val onSurfaceColor = PrototypeTokens.fg
 
     when (viewMode) {
-        MarkdownViewMode.EDIT -> {
+        MarkdownViewMode.EDIT, MarkdownViewMode.PREVIEW -> {
             // Read-only preview using CommonMark → WebView
-            MarkdownWebViewPreview(
-                markdownContent = markdownContent,
-                isDarkTheme = isDarkTheme,
-                modifier = modifier.fillMaxSize()
-            )
-        }
-
-        MarkdownViewMode.PREVIEW -> {
-            // Read-only preview (same as EDIT)
-            MarkdownWebViewPreview(
-                markdownContent = markdownContent,
-                isDarkTheme = isDarkTheme,
-                modifier = modifier.fillMaxSize()
-            )
+            Box(
+                modifier = modifier
+                    .fillMaxSize()
+                    .testTag(EditorTestTags.MARKDOWN_PREVIEW)
+            ) {
+                MarkdownWebViewPreview(
+                    markdownContent = markdownContent,
+                    isDarkTheme = isDarkTheme,
+                    modifier = Modifier.fillMaxSize()
+                )
+            }
         }
 
         MarkdownViewMode.SPLIT -> {
@@ -76,6 +84,7 @@ fun MarkdownPreview(
             Row(
                 modifier = modifier
                     .fillMaxSize()
+                    .testTag(EditorTestTags.MARKDOWN_PREVIEW)
                     .background(pageBg)
             ) {
                 // Edit pane (plain text)
