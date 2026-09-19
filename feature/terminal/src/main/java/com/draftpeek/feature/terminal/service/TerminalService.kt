@@ -287,7 +287,11 @@ class TerminalService : Service() {
      * 构建前台模式通知。
      */
     private fun buildNotification(): Notification {
-        val launchIntent = packageManager.getLaunchIntentForPackage(packageName)
+        // getLaunchIntentForPackage 解析出的 Intent 只有包内 Activity，显式再限定一次包名，
+        // 避免 PendingIntent 被其它应用以隐式 Intent 接管（PendingIntent hijacking）。
+        val launchIntent = packageManager.getLaunchIntentForPackage(packageName)?.also {
+            it.setPackage(packageName)
+        }
         val pendingIntent = launchIntent?.let {
             PendingIntent.getActivity(
                 this,
@@ -326,7 +330,11 @@ class TerminalService : Service() {
      * 显示不同消息表示终端在后台无活动UI运行。
      */
     private fun buildBackgroundNotification(): Notification {
-        val launchIntent = packageManager.getLaunchIntentForPackage(packageName)
+        // getLaunchIntentForPackage 解析出的 Intent 只有包内 Activity，显式再限定一次包名，
+        // 避免 PendingIntent 被其它应用以隐式 Intent 接管（PendingIntent hijacking）。
+        val launchIntent = packageManager.getLaunchIntentForPackage(packageName)?.also {
+            it.setPackage(packageName)
+        }
         val pendingIntent = launchIntent?.let {
             PendingIntent.getActivity(
                 this,
