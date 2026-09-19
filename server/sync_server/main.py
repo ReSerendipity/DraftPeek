@@ -206,19 +206,31 @@ def _verify_basic_auth(authorization: str | None) -> bool:
     return user_ok and pass_ok
 
 
+def _for_log(value: object, limit: int = 200) -> str:
+    """把外部可控文本压成单行且有界，防止伪造日志条目（log injection）。"""
+    text = "".join(ch if ord(ch) >= 0x20 else " " for ch in str(value))
+    return text if len(text) <= limit else text[:limit] + "..."
+
+
 def _resolve_safe_path(rel_path: str) -> Path:
-    """Resolve client-supplied relative path to safe absolute path within storage."""
-    if "\x00" in rel_path:
-        raise SyncError(400, "INVALID_PATH", "Path contains null byte")
+    """Resolve client-supplied relative path to safe absolute path within storage.
+
+    逐段构造而非整串拼接：控制字符、NUL、盘符、绝对路径与 ``..`` 段都在进入
+    任何文件系统操作之前被拒绝；``resolve()`` + ``is_relative_to`` 再兜住符号链接逃逸。
+    """
+    if "\x00" in rel_path or any(ord(ch) < 0x20 for ch in rel_path):
+        raise SyncError(400, "INVALID_PATH", "Path contains control characters")
     normalized = rel_path.replace("\\", "/")
-    if ".." in normalized.split("/"):
-        raise SyncError(400, "INVALID_PATH", "Directory traversal denied")
-    if normalized.startswith("/") or (len(normalized) > 1 and normalized[1] == ":"):
+    if len(normalized) > 1 and normalized[1] == ":":
         raise SyncError(400, "INVALID_PATH", "Absolute path denied")
 
-    storage_resolved = STORAGE_DIR.resolve()
-    target = (STORAGE_DIR / rel_path).resolve()
-    if not target.is_relative_to(storage_resolved):
+    parts = [seg for seg in normalized.split("/") if seg not in ("", ".")]
+    if not parts or ".." in parts:
+        raise SyncError(400, "INVALID_PATH", "Directory traversal denied")
+
+    storage_root = STORAGE_DIR.resolve()
+    target = storage_root.joinpath(*parts).resolve()
+    if not target.is_relative_to(storage_root):
         raise SyncError(400, "INVALID_PATH", "Path outside storage directory")
     return target
 
@@ -341,7 +353,7 @@ async def http_exception_handler(request: Request, exc: HTTPException):
 @app.exception_handler(Exception)
 async def general_exception_handler(request: Request, exc: Exception):
     """Catch-all for unhandled exceptions (P1 fix)."""
-    logger.error(f"Unhandled exception: {exc}", exc_info=True)
+    logger.error("Unhandled exception: %s", _for_log(exc), exc_info=True)
     return _error_response(500, "INTERNAL_ERROR", "An internal server error occurred")
 
 
@@ -434,7 +446,7 @@ async def upload_file(
     )
     await db.commit()
 
-    logger.info(f"Uploaded: {meta_path} (v{new_version}, {len(content)} bytes)")
+    logger.info("Uploaded: %s (v%d, %d bytes)", _for_log(meta_path), new_version, len(content))
 
     return SyncResponse(status="ok", new_version=new_version, message="File uploaded successfully")
 
@@ -442,7 +454,7 @@ async def upload_file(
 @app.get("/sync/download/{path:path}")
 async def download_file(path: str, db: aiosqlite.Connection = Depends(get_db)):
     """Download a file by path."""
-    _resolve_safe_path(path)
+    safe_path = _resolve_safe_path(path)
 
     async with db.execute("SELECT * FROM files WHERE path = ?", (path,)) as cursor:
         row = await cursor.fetchone()
@@ -450,11 +462,17 @@ async def download_file(path: str, db: aiosqlite.Connection = Depends(get_db)):
     if not row:
         raise SyncError(404, "NOT_FOUND", "File not found")
 
-    storage_path = Path(row["storage_path"])
-    if not storage_path.exists():
+    # 只读取校验后的 safe_path。DB 里的 storage_path 仅做一致性核对（纯字符串比较），
+    # 绝不作为文件系统输入——元数据被篡改时不能把读取路径带出存储目录。
+    if str(row["storage_path"]) != str(safe_path):
+        logger.warning(
+            "storage_path mismatch, refusing alternate location: %s", _for_log(path)
+        )
+        raise SyncError(404, "NOT_FOUND", "File content missing on disk")
+    if not safe_path.exists():
         raise SyncError(404, "NOT_FOUND", "File content missing on disk")
 
-    content = storage_path.read_bytes()
+    content = safe_path.read_bytes()
     response = Response(content=content, media_type="application/octet-stream")
     response.headers["X-File-Version"] = str(row["version"])
     response.headers["X-File-Checksum"] = row["checksum"]
@@ -499,7 +517,7 @@ async def delete_file(path: str, version: int = 0, db: aiosqlite.Connection = De
 
     await db.execute("DELETE FROM files WHERE path = ?", (path,))
     await db.commit()
-    logger.info(f"Deleted: {path} (v{version})")
+    logger.info("Deleted: %s (v%d)", _for_log(path), version)
 
     return SyncResponse(status="ok", message="File deleted successfully")
 
@@ -567,17 +585,19 @@ async def batch_sync(request: Request, db: aiosqlite.Connection = Depends(get_db
 
             except SyncError as e:
                 results.append({"path": path, "status": "error", "message": e.message, "error_code": e.error_code})
-            except Exception as e:
-                results.append({"path": path, "status": "error", "message": str(e)})
+            except Exception:
+                # 异常详情只进服务端日志，不回显给客户端（py/stack-trace-exposure）
+                logger.exception("Batch operation failed for %s", _for_log(path))
+                results.append({"path": path, "status": "error", "message": "Internal error, see server log"})
 
         # P2 fix: single commit for entire batch (atomic)
         await db.commit()
 
-    except Exception as e:
+    except Exception:
         # P2 fix: rollback on failure
         await db.rollback()
-        logger.error(f"Batch sync failed, rolled back: {e}")
-        return _error_response(500, "BATCH_FAILED", f"Batch operation failed: {e}")
+        logger.exception("Batch sync failed, rolled back")
+        return _error_response(500, "BATCH_FAILED", "Batch operation failed")
 
     return JSONResponse(content={"results": results})
 
