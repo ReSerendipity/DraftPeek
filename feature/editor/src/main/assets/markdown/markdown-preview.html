@@ -961,10 +961,31 @@ img{
   (function() {
     var params = new URLSearchParams(window.location.search);
     var fp = params.get('file');
-    if (fp) {
+
+    // 只允许读取本地 .md 临时文件（md_preview_*.md）。
+    // file 参数来自 URL query，若不加约束可被构造成 http(s):// 等可外联地址。
+    function toSafePreviewUrl(raw) {
+      var u;
+      try {
+        u = new URL(raw, window.location.href);
+      } catch (err) {
+        return null;
+      }
+      if (u.protocol !== 'file:') return null;
+      if (u.host) return null; // 拦掉 //evil.example/x.md 这种协议相对写法
+      if (!/\.md$/i.test(u.pathname)) return null;
+      return u.href;
+    }
+
+    var target = fp ? toSafePreviewUrl(fp) : null;
+    if (fp && !target) {
+      showError('', '非法的预览文件路径');
+      return;
+    }
+    if (target) {
       try {
         var xhr = new XMLHttpRequest();
-        xhr.open('GET', fp, false);
+        xhr.open('GET', target, false);
         xhr.send();
         if (xhr.status === 200) {
           window.__mdContent = xhr.responseText;
