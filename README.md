@@ -86,7 +86,7 @@ DraftPeek/
 ├── feature/                # 功能层（browser / editor / settings / stats / terminal）
 ├── docs/  scripts/  gradle/  migrations/
 ├── server/                 # Python 协作同步服务（实验性/可选）
-├── AGENTS.md               # AI 辅助开发指南
+├── AGENTS.md               # AI 辅助开发指南（仅本地保留、不入库；见下方「分发边界」）
 └── CHANGELOG.md            # 更新日志
 ```
 
@@ -145,6 +145,10 @@ scripts\coverage.bat                              # Windows 一键覆盖率
 - `docs/VERSIONING.md` — 版本管理与发布规范
 - `docs/RELEASE_CHECKLIST.md` — 发布前检查清单
 - [CHANGELOG.md](CHANGELOG.md) — 更新日志
+
+### 分发边界（AI 辅助开发文档仅本地保留）
+
+根 `AGENTS.md`（AI 辅助开发指南）及其家族——`feature/editor/AGENTS.md`、`core/common/AGENTS.md`、`docs/agents/**`（GOTCHAS.md 等）、`FIX_LOG.md`、`LOCAL_RULES.md`——为 **仅本地保留、有意不入库** 的维护者上下文（经 `.gitignore` 的 `*.md` 通配规则忽略），**不会出现在 fresh clone 中**。新环境下的 agent 请退回以下**已入库的可分发入口**：本 `README.md`、[`docs/README.md`](docs/README.md)（目录结构 + docs 索引）、[`docs/CODING_STANDARDS.md`](docs/CODING_STANDARDS.md)。缺少 `AGENTS.md` 属预期行为，非错误。
 
 ## 开源模式说明
 
