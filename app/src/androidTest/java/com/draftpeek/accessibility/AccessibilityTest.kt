@@ -1,9 +1,12 @@
 package com.draftpeek.accessibility
 
 import androidx.compose.ui.semantics.SemanticsProperties
+import androidx.compose.ui.semantics.contentDescription
 import androidx.compose.ui.semantics.getOrNull
+import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.test.assertIsDisplayed
 import androidx.compose.ui.test.junit4.createComposeRule
+import androidx.compose.ui.test.onNodeWithContentDescription
 import androidx.compose.ui.test.onNodeWithText
 import androidx.compose.ui.test.onRoot
 import androidx.test.ext.junit.runners.AndroidJUnit4
@@ -81,7 +84,9 @@ class AccessibilityTest {
         // Verify the semantics tree is valid and traversable
         val root = composeRule.onRoot()
         val rootSemantics = root.fetchSemanticsNode()
-        assert(rootSemantics.children.isNotEmpty() || rootSemantics.replacedChildren.isNotEmpty()) {
+        // 原来的 replacedChildren 在 Compose 1.8 已收成 internal，只剩公开的 children 可用；
+        // 该用例 setContent 里确实有子节点，语义不变。
+        assert(rootSemantics.children.isNotEmpty()) {
             "Root semantics tree must contain renderable content"
         }
     }
@@ -223,10 +228,9 @@ class AccessibilityTest {
                         contentDescription = "Settings"
                     }
                 ) {
-                    androidx.compose.material3.Icon(
-                        imageVector = androidx.compose.material.icons.Icons.Default.Settings,
-                        contentDescription = null
-                    )
+                    // 断言的是 IconButton 上的 contentDescription，与子节点画什么无关；
+                    // Icons.Default.* 在 Compose 1.8 的 material-icons 空壳构件里已不存在。
+                    androidx.compose.foundation.layout.Box {}
                 }
             }
         }
