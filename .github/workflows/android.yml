@@ -502,6 +502,11 @@ jobs:
           sleep 2
           adb start-server 2>/dev/null || true
 
+      - name: Restore /dev/kvm access
+        # 与 release.yml 的 benchmark 步骤同源问题：android.yml 的 benchmark job 也从未
+        # 恢复过 kvm（PR #42 当时只打在 instrumented 路径上）。
+        uses: ./.github/actions/restore-kvm
+
       - name: Run Macrobenchmark Tests
         uses: reactivecircus/android-emulator-runner@v2
         with:
