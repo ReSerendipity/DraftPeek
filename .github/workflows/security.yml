@@ -164,8 +164,15 @@ jobs:
       - name: Resolve server/requirements-lock.txt without installing
         run: pip install --dry-run -r server/requirements-lock.txt
 
+  # 2026-09-20：从合并门禁降级为“合并后 + 每周”审计。
+  # 它审计的是整张 lock（pip-audit --strict）并对整个 server/ 跑 bandit，因此一旦
+  # 被设为必需，任何上游新披露的 CVE 都会阻塞与本改动毫无关系的 PR（含纯 Kotlin、
+  # 纯文档）。可安装性由上方 lock-integrity 负责；PR 新增依赖的漏洞由 Dependency
+  # Review（按 diff 判定，fail-on-severity: high）负责。此处保留 push，使 main 每次
+  # 合并后仍会被完整审计一次。
   python-security:
     name: Python Security (pip-audit + bandit)
+    if: github.event_name != 'pull_request'
     runs-on: ubuntu-latest
     timeout-minutes: 15
     steps:
