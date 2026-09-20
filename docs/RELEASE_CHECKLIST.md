@@ -20,7 +20,9 @@
 
 - [ ] `./gradlew test`（全部模块单测）通过
 - [ ] `./gradlew lint` 通过
-- [ ] CI `release.yml` 全链路绿（含 macrobenchmark，报告已人工查看无显著回归）
+- [ ] CI `release.yml` 建 Release 之前的步骤全绿（产物构建 + 验签 + checksums + draft 创建）
+- [ ] macrobenchmark：**当前不是发布门禁**（PR #88 已把它移到 `Create GitHub Release` 之后，
+      且 13/13 受 issue #87 三类原因阻塞）。它转绿后请把本条恢复为门禁项，并补上"报告已人工查看"
 - [ ] `apksigner verify --verbose --print-certs` 输出确认 v2+v3 签名方案生效
 
 ## 3. 签名与密钥（人工确认）
@@ -40,6 +42,9 @@
 ## 5. 产物与分发
 
 - [ ] draft Release 已生成：APK + AAB + `.sha256` 三类附件齐全
+- [ ] 哈希取的是**本次 run** 的资产：重跑 `release.yml` 会覆盖同名资产并换 APK 哈希
+      （同 tag 树两次构建实测：AAB 摘要不变、APK 由 `af76e377…` 变 `ad62508e…`，大小一致）。
+      因此报告/验签前重新下载一次，别引用上一轮的数字
 - [ ] 本地抽查完整性：下载 APK 后 `sha256sum -c *.apk.sha256` 通过
 - [ ] Release 说明中的 SHA256 与 `.sha256` 文件一致
 - [ ] 分发链接已就绪（当前：GitHub Release；若启用自托管下载页/更新检测，须先更新
