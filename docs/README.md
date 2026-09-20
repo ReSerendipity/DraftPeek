@@ -45,3 +45,10 @@
 - 发版 → `docs/VERSIONING.md` + `docs/RELEASE_CHECKLIST.md`
 
 > 特别提醒：根目录 `release.jks` 是 App 签名密钥（敏感，勿提交勿外传）；`index.html` 是被源码注释引用的 HTML 设计原型，保留。所有改动遵循根 `AGENTS.md`。
+
+## 治理与勘误速查（2026-09-18）
+
+- **日志（勘误用）**：`server/logs/{sync_server,crdt_server,integrity_server}.log`（RotatingFileHandler 5MB×3，配置在 `server/_logging_setup.py`；CRDT 服务设 `CRDT_AUDIT_LOG=1` 可输出审计级日志；日志文件在服务首次运行后生成）。
+- **根目录守卫**：新增根目录文件必须登记 `.github/layout-rules.yaml → root_allowlist`（structure-guard；2026-09-17 已补 `.gitattributes` / `.workbuddy` / `gitleaks.toml`）。
+- **提交**：Conventional Commits + DCO（`git commit -s`，commit-msg 钩子校验）。
+- **钩子**：`.githooks/pre-commit` 分发器四级回退；pre-push gitleaks 扫描。
