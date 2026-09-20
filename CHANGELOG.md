@@ -9,7 +9,10 @@
 
 ## [Unreleased] (开发中)
 
+## [1.0.31] - 2026-09-20
+
 ### Added
+- 新增 `.mailmap` 历史身份归并与 `docs/` 治理执行总结（钩子四级回退 / 日志落点 / 约定速查），并在 README 增加「分发边界」小节，说明 `AGENTS.md` 家族为仅本地保留、有意不入库，缺少它属预期行为
 - 新增 `README.md` 项目说明文档
 - 新增 `local.properties.example` 配置模板
 - 新增 `CHANGELOG.md` 更新日志
@@ -21,6 +24,7 @@
 - 交叉补齐文档锚点（D2）：README 项目结构树补列 `core/crdt`、`core/sync`、`feature/knowledge`（标记未接入 settings.gradle）；模块依赖图对齐实际 `build.gradle.kts` 声明依赖；修正 `FILEMAP.md` 路径、`repos/`（计划未实现）、`scripts/coverage.sh`（不存在）与 `core-network`（无对应模块）等不一致
 
 ### Changed
+- 删除根 `CONTRIBUTING.md`，社区健康文件交回组织级 `ReSerendipity/.github` 继承。PR #71 把它加回根目录后，main 的 `自净化检查（非阻塞）` job 持续 failure，只因该 job 非阻塞而 workflow 整体显示 success，长期无人发现
 - 依赖坐标全面集中至 `gradle/libs.versions.toml`：清除 7 个模块 12 处硬编码版本，并对齐 `androidx.test.ext:junit`（benchmark 1.1.5 → 1.2.1）与 `androidx.test:runner`（benchmark 1.5.2 → 1.6.2）跨模块漂移
 - 依赖锁定升级为 `LockMode.STRICT`：为全部 15 个项目生成 `gradle.lockfile`（此前仅 app 与 root 有锁，其余模块缺锁静默通过），新依赖绕过版本目录将直接构建失败
 - README 环境要求与实际工具链对齐（AGP 8.8.0→8.10.1、Gradle 8.13→8.14.3、Android Studio Meerkat 2024.3.2+）
@@ -28,6 +32,8 @@
 - 数据库迁移策略 §5 紧急回滚改写：移除不存在的 Play Console 能力，按真实分发渠道（GitHub Release）重写止损步骤
 
 ### Security
+- 收口 CodeQL error 级告警中的 4 处真实输入面（#73）：`sync_server` 的 `download_file` 原先调用 `_resolve_safe_path()` 却**丢弃返回值**、实际按 DB 里的 `storage_path` 读盘（元数据一旦被改写即可把读取路径带出存储目录），现改为只读校验后的 `safe_path`、DB 值仅作纯字符串核对；路径校验改逐段构造并拒绝控制字符；用户可控值经 `_for_log()` 剥离 CR/LF 与控制字符后再入日志；batch 的两处 `except Exception` 不再把 `str(e)` 回显客户端；`markdown-preview.html` 的 `file` 查询参数加协议 / host / `.md` 三重白名单；`TerminalService` 两处 PendingIntent 显式 `setPackage`。error 级 open 告警 **16 → 0**（14 条由重扫自动判 fixed，9 条按绑定理由记为 mitigated）
+- 新建发布签名密钥并接通发布链路：仓库原 `release.jks` 经全量核查确认不可得（本机全盘无 `.jks`、`local.properties` 无 `RELEASE_*`、GitHub secrets 为空，`release.yml` 在缺 secret 时硬失败），故生成新密钥（RSA-3072 / PKCS12 / 有效期 30 年 / 别名 `draftpeek-release`，证书 SHA-256 指纹 `08:17:77:13:73:A8:95:6F:AB:91:46:0D:CB:E4:F7:46:00:52:8D:9C:E1:83:F2:CC:CC:17:70:6B:C2:B9:FA:64`）并配置 `RELEASE_STORE_FILE_BASE64` / `RELEASE_STORE_PASSWORD` / `RELEASE_KEY_ALIAS` / `RELEASE_KEY_PASSWORD`。**自本版本起为新的签名身份**，此前若有以旧密钥签名的分发件，无法覆盖升级，需卸载重装
 - 修复发版链路签名缺陷：`release.yml` keystore 解码路径与 `app/signing.gradle` 的 app/ 相对解析不一致（旧实现解码到仓库根，正式发版必然找不到密钥）
 - CI 新增三处版本一致性硬门禁（`scripts/check_version_consistency.py`：tag == CHANGELOG == gradle.properties == README 声明 == versionCode 公式），并前移到 test/lint 之前 fail-fast
 - APK 签名默认仅启用 v2+v3（关闭 minSdk 26 下冗余的 v1/JAR 签名）
@@ -35,6 +41,7 @@
 - 新增自托管下载页基座与版本更新清单契约（`docs/deploy-download-page/`），渠道决策待定
 
 ### Fixed
+- 修复 nightly instrumented 的两层确定性失败（#72 / #75）：① `WysiwygRenderVerificationTest` 断言的 `test_tag_markdown_preview` / `test_tag_markdown_rich_editor` 在生产码里从未声明（全仓 `app|core|feature` 的 `src/main` 中 `testTag` 命中数为 0），该类 8 条用例自 2026-08-27 写下起从未通过；② `:feature:terminal` 声明了 `testInstrumentationRunner` 而 androidTest 类路径没有 `androidx.test:runner`，设备侧在 instrumentation 绑定阶段即 `ClassNotFoundException` 崩溃，gradle 中止后连带让 `:app` 永远排不到。判据用同 runner 的 A/B 对照：`feature_editor` 由 `tests=12 failures=8` 变 `failures=0`，main 全矩阵复验中 API 30 / 34 两档首次转绿
 - 修复 CodeQL 慢性红灯（创建即红，自 `ci: add codeql analysis` 每跑必败）：manual build-mode 下 `codeql-config.yml` 的 `build-command` 字段不被 `github/codeql-action/analyze` 执行；且 `Cache Gradle wrapper` 步骤恢复的 build cache 让 `compile*Kotlin`/`compile*JavaWithJavac` 命中 `FROM-CACHE`，CodeQL tracer 抓不到源码 → 改为 workflow 内 `Initialize CodeQL` 与 `Perform CodeQL Analysis` 之间显式 `./gradlew assembleDebug --no-daemon --no-build-cache --no-configuration-cache --rerun-tasks`，run `34591254159` 三语言 job 全绿。详见 `docs/agents/GOTCHAS.md` #DP-01 与 `FIX_LOG.md`。（commit `356b289`）
 
 ## [1.0.30] - 2026-08-10
