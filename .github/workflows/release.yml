@@ -222,12 +222,12 @@ jobs:
             # 自己的测试 APK —— 以前从没人装过被测包，run #4 里 2 个用例因此直接报
             # "Unable to find target package com.draftpeek, is it installed?"。
             # 必须写在 script 里：模拟器由本 action 启动，步骤级 adb install 时还没有设备。
-            APK_PATH=$(find app/build/outputs/apk/production/release -name "*.apk" | head -1)
-            if [ -z "$APK_PATH" ]; then
-              echo "::error::No production release APK available to install"
-              exit 1
-            fi
-            adb install -r -g "$APK_PATH"
+            #
+            # 整段压成一行是硬性要求：本 action 把 script 逐行交给 /usr/bin/sh -c 执行
+            # （run #5 实测 —— 单独执行了 `if [ -z "$APK_PATH" ]; then` 这一行、`fi` 不在
+            # 同一次调用里，报 "Syntax error: end of file unexpected (expecting "fi")" 后
+            # exit 2）。跨行控制流与跨行变量都不可依赖；找不到 APK 时以非零码硬失败。
+            APK_PATH=$(find app/build/outputs/apk/production/release -name '*.apk' | head -1); test -n "$APK_PATH" || { echo '::error::No production release APK available to install'; exit 1; }; adb install -r -g "$APK_PATH"
             # benchmark 为 library 模块，只有 debugAndroidTest 测试变体，
             # connectedBenchmarkAndroidTest 不存在（2026-09-05 实测修正，与 android.yml 对齐）
             ./gradlew :benchmark:connectedDebugAndroidTest --stacktrace
