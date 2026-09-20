@@ -44,7 +44,7 @@
 - 改编辑器 → `feature/editor/`；统计看板 → `feature/stats/`；设计系统 → `core/designsystem/`；数据层 → `core/data/`
 - 发版 → `docs/VERSIONING.md` + `docs/RELEASE_CHECKLIST.md`
 
-> 特别提醒：根目录 `release.jks` 是 App 签名密钥（敏感，勿提交勿外传）；`index.html` 是被源码注释引用的 HTML 设计原型，保留。所有改动遵循根 `AGENTS.md`。
+> 特别提醒：根目录 `release.jks` 是 App 签名密钥（敏感，勿提交勿外传）；`index.html` 是被源码注释引用的 HTML 设计原型，保留。**分发边界**：根 `AGENTS.md` 及其家族（`feature/editor/AGENTS.md`、`core/common/AGENTS.md`、`docs/agents/**`、`FIX_LOG.md`、`LOCAL_RULES.md`）为**仅本地保留、有意不入库**，不会出现在 fresh clone；仓库对外开发规范以本 `docs/README.md` 与 `docs/CODING_STANDARDS.md` 为准，若环境已配置 `AGENTS.md` 则在其基础上叠加。
 
 ## 治理与勘误速查（2026-09-18）
 
