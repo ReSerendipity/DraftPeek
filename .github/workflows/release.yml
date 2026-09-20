@@ -130,6 +130,11 @@ jobs:
           $ANDROID_HOME/build-tools/36.1.0/apksigner verify --verbose --print-certs "$APK_PATH"
           echo "APK signature verified successfully."
 
+      - name: Restore /dev/kvm access
+        # 缺失时模拟器退回软渲染 → 600s 启动超时（release run #2 即此），
+        # 且该步骤失败会连带跳过后续 checksums 与 draft 创建。
+        uses: ./.github/actions/restore-kvm
+
       - name: Run Macrobenchmark (Release Variant)
         # 在 Release 版本上运行基准性能测试，收集性能指标
         # 注意：AGP 8.7.x Baseline Profile 生成器有已知崩溃（Gotcha #13），仅运行 benchmark

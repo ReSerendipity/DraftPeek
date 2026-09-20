@@ -63,6 +63,8 @@ root_allowlist:
   - .githooks
   - .github
   - .gitignore
+  # PR #68 引入的根文件，当时未登记，structure-guard 一直报 Unrecognized root entry
+  - .mailmap
   - .workbuddy
   - .pre-commit-config.yaml
   - CHANGELOG.md
