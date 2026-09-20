@@ -15,6 +15,15 @@ on:
   push:
     tags:
       - 'v*'
+  # 手动派发只解决一个真实痛点：release.yml 自身有 bug 时，改动必须先落到某个 commit，
+  # 而 push(tags) 只读 tag 指向的那棵树——等于逼人去挪 tag。派发时填 tag 名即可
+  # 「用 main 上这份 workflow 定义、构建指定 tag 的代码树」。
+  workflow_dispatch:
+    inputs:
+      tag:
+        description: '要发版的 tag（如 v1.0.31）；留空则取触发 ref 自带的 tag 名'
+        required: false
+        default: ''
 
 permissions:
   contents: write
@@ -24,11 +33,14 @@ jobs:
     name: Build & Release APK
     runs-on: ubuntu-latest
     timeout-minutes: 45
+    env:
+      RELEASE_TAG: ${{ github.event.inputs.tag || github.ref_name }}
 
     steps:
       - name: Checkout
         uses: actions/checkout@v7
         with:
+          ref: ${{ github.event.inputs.tag || github.ref }}
           fetch-depth: 0
 
       - name: Set up JDK 17
@@ -93,7 +105,7 @@ jobs:
         run: |
           python3 scripts/check_version_consistency.py \
             --strict \
-            --tag "${GITHUB_REF#refs/tags/}"
+            --tag "${RELEASE_TAG}"
 
       - name: Run Tests
         run: ./gradlew test --stacktrace
@@ -102,14 +114,14 @@ jobs:
         run: ./gradlew lint --stacktrace
 
       - name: Build Release APK
-        run: ./gradlew assembleRelease --stacktrace
+        run: ./gradlew :app:assembleProductionRelease --stacktrace  # :app 有 dev/staging/production flavor，公开件只发 production
 
       - name: Build Release AAB
-        run: ./gradlew bundleRelease --stacktrace
+        run: ./gradlew :app:bundleProductionRelease --stacktrace
 
       - name: Verify APK Signature
         run: |
-          APK_PATH=$(find app/build/outputs/apk/release -name "*.apk" | head -1)
+          APK_PATH=$(find app/build/outputs/apk/production/release -name "*.apk" | head -1)
           if [ -z "$APK_PATH" ]; then
             echo "ERROR: No APK found"
             exit 1
@@ -150,22 +162,22 @@ jobs:
       - name: Generate SHA256 checksums
         id: checksums
         run: |
-          APK_PATH=$(find app/build/outputs/apk/release -name "*.apk" | head -1)
-          AAB_PATH=$(find app/build/outputs/bundle/release -name "*.aab" | head -1)
-          
+          APK_PATH=$(find app/build/outputs/apk/production/release -name "*.apk" | head -1)
+          AAB_PATH=$(find app/build/outputs/bundle/productionRelease -name "*.aab" | head -1)
+
           APK_SHA256=$(sha256sum "$APK_PATH" | awk '{print $1}')
           echo "APK_SHA256=$APK_SHA256" >> $GITHUB_OUTPUT
           echo "$APK_SHA256" > "${APK_PATH}.sha256"
-          
+
           if [ -n "$AAB_PATH" ]; then
             AAB_SHA256=$(sha256sum "$AAB_PATH" | awk '{print $1}')
             echo "AAB_SHA256=$AAB_SHA256" >> $GITHUB_OUTPUT
             echo "$AAB_SHA256" > "${AAB_PATH}.sha256"
           fi
-          
+
           echo "APK SHA256: $APK_SHA256"
           echo "AAB SHA256: ${AAB_SHA256:-N/A}"
-          
+
           # Display APK file size
           APK_SIZE=$(stat -c%s "$APK_PATH" 2>/dev/null || stat -f%z "$APK_PATH")
           APK_SIZE_MB=$((APK_SIZE / 1048576))
@@ -173,7 +185,7 @@ jobs:
 
       - name: Extract version from tag
         id: version
-        run: echo "VERSION=${GITHUB_REF#refs/tags/}" >> $GITHUB_OUTPUT
+        run: echo "VERSION=${RELEASE_TAG}" >> $GITHUB_OUTPUT
 
       - name: Create GitHub Release
         uses: softprops/action-gh-release@v3
@@ -183,10 +195,10 @@ jobs:
           generate_release_notes: true
           draft: true
           files: |
-            app/build/outputs/apk/release/*.apk
-            app/build/outputs/apk/release/*.apk.sha256
-            app/build/outputs/bundle/release/*.aab
-            app/build/outputs/bundle/release/*.aab.sha256
+            app/build/outputs/apk/production/release/*.apk
+            app/build/outputs/apk/production/release/*.apk.sha256
+            app/build/outputs/bundle/productionRelease/*.aab
+            app/build/outputs/bundle/productionRelease/*.aab.sha256
           body: |
             ## DraftPeek ${{ steps.version.outputs.VERSION }}
 
