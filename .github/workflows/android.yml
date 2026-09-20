@@ -256,7 +256,10 @@ jobs:
           if [ "${{ github.event_name }}" = "pull_request" ]; then
             echo 'matrix={"include":[{"api-level":30,"target":"google_apis","arch":"x86_64"}]}' >> "$GITHUB_OUTPUT"
           else
-            echo 'matrix={"include":[{"api-level":26,"target":"default","arch":"x86_64"},{"api-level":30,"target":"google_apis","arch":"x86_64"},{"api-level":34,"target":"google_apis","arch":"x86_64"}]}' >> "$GITHUB_OUTPUT"
+            # 26 档必须用 google_apis：`default` 镜像不带 WebView provider，
+            # 任何实例化 WebView 的用例都会以
+            # MissingWebViewPackageException: No WebView installed 失败（run 268 实测 6 条）。
+            echo 'matrix={"include":[{"api-level":26,"target":"google_apis","arch":"x86_64"},{"api-level":30,"target":"google_apis","arch":"x86_64"},{"api-level":34,"target":"google_apis","arch":"x86_64"}]}' >> "$GITHUB_OUTPUT"
           fi
 
   instrumented-tests:
@@ -488,6 +491,17 @@ jobs:
       - name: Build Release APK for Benchmark
         run: ./gradlew :app:assembleRelease --stacktrace
 
+      # 与 .github/actions/instrumented-tests 同款清场：本 job 没有 instrumented 那样
+      # 的 attempt1/attempt2 重试，一次 adb 5037 残留就直接红（run 268 即此因）。
+      - name: Clean up stale adb/emulator state
+        shell: bash
+        run: |
+          pkill -f qemu-system 2>/dev/null || true
+          pkill -f 'emulator' 2>/dev/null || true
+          adb kill-server 2>/dev/null || true
+          sleep 2
+          adb start-server 2>/dev/null || true
+
       - name: Run Macrobenchmark Tests
         uses: reactivecircus/android-emulator-runner@v2
         with:
@@ -517,7 +531,3 @@ jobs:
             **/build/outputs/macrobenchmark/**
           retention-days: 14
           if-no-files-found: warn
-
-
-
-
