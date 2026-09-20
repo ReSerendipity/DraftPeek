@@ -137,6 +137,33 @@ jobs:
   # 与 CodeQL（仅 java-kotlin）、Trivy（仅 secret）互补：
   #   pip-audit —— 按 server/requirements-lock.txt 审计已知漏洞
   #   bandit    —— 对 server/ 做 Python 静态安全扫描
+  # ── 5. server lock 可安装性门禁（窄口径，阻塞合并）──────────
+  # 只回答一个问题：server/requirements-lock.txt 里的 pin 之间能否共存。
+  # 刻意不做漏洞审计（那属于下方 python-security 的周期任务）：整表 CVE 扫描一旦
+  # 被设为必需，任何上游新披露都会阻塞与本改动毫无关系的 PR。
+  # --dry-run 会完整跑一遍 pip 解析器但不安装，足以抓出被独立 bump 后自相矛盾的
+  # pin 对（pydantic 2.13.5 要求 pydantic-core==2.46.5，却被组升到 2.49.0，
+  # 见 DraftPeek#92 / TTS_MultiModel#87）。
+  lock-integrity:
+    name: Lock Integrity (server lock resolvability)
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v7
+
+      - name: Set up Python 3.12
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+
+      # 解析器行为随 pip 版本变化，固定为最新以免门禁时好时坏
+      - name: Upgrade pip
+        run: python -m pip install --upgrade pip
+
+      - name: Resolve server/requirements-lock.txt without installing
+        run: pip install --dry-run -r server/requirements-lock.txt
+
   python-security:
     name: Python Security (pip-audit + bandit)
     runs-on: ubuntu-latest
