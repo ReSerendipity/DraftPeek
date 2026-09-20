@@ -130,48 +130,6 @@ jobs:
           $ANDROID_HOME/build-tools/36.1.0/apksigner verify --verbose --print-certs "$APK_PATH"
           echo "APK signature verified successfully."
 
-      - name: Restore /dev/kvm access
-        # 缺失时模拟器退回软渲染 → 600s 启动超时（run #2 即此），该步失败还会连带
-        # 跳过 checksums 与 draft 创建。必须内联、不能 uses 本地 action：本 workflow
-        # 按 tag 检出代码树，run #3 就死在 v1.0.31 那棵树里还没有 restore-kvm 目录
-        # （报 "Can't find 'action.yml' … under .github/actions/restore-kvm"）。
-        # 内容与 .github/actions/instrumented-tests 里的同名步骤逐字一致。
-        shell: bash
-        run: |
-          echo 'KERNEL=="kvm", GROUP="kvm", MODE="0666", OPTIONS+="static_node=kvm"' | sudo tee /etc/udev/rules.d/99-kvm4all.rules
-          sudo udevadm control --reload-rules
-          sudo udevadm trigger --name-match=kvm
-          ls -l /dev/kvm || echo "[WARN] /dev/kvm not present on this runner — hardware acceleration unavailable"
-
-      - name: Run Macrobenchmark (Release Variant)
-        # 在 Release 版本上运行基准性能测试，收集性能指标
-        # 注意：AGP 8.7.x Baseline Profile 生成器有已知崩溃（Gotcha #13），仅运行 benchmark
-        uses: reactivecircus/android-emulator-runner@v2
-        with:
-          api-level: 34
-          target: google_apis
-          arch: x86_64
-          profile: pixel_5
-          heap-size: 512M
-          ram-size: 2048M
-          emulator-options: -no-window -gpu swiftshader_indirect -no-snapshot -noaudio -no-boot-anim
-          disable-animations: true
-          script: |
-            # benchmark 为 library 模块，只有 debugAndroidTest 测试变体，
-            # connectedBenchmarkAndroidTest 不存在（2026-09-05 实测修正，与 android.yml 对齐）
-            ./gradlew :benchmark:connectedDebugAndroidTest --stacktrace
-
-      - name: Upload Benchmark Results
-        if: always()
-        uses: actions/upload-artifact@v4
-        with:
-          name: release-benchmark-results
-          path: |
-            **/build/outputs/macrobenchmark/**
-            **/build/reports/androidTest/**
-          retention-days: 30
-          if-no-files-found: warn
-
       - name: Generate SHA256 checksums
         id: checksums
         run: |
@@ -229,3 +187,58 @@ jobs:
 
             ---
             *此 Release 由 GitHub Actions 自动生成，请手动验证后发布。*
+
+      # 基准测试刻意排在 Create GitHub Release 之后：它排在前面时（release run #2~#4）
+      # 任何一次失败都会连带跳过 checksums 与 draft 创建，等于"性能测试卡住发版"。
+      # 移到后面后 draft 先落地，benchmark 变红只影响本步与产物上传。
+      - name: Restore /dev/kvm access
+        # 缺失时模拟器退回软渲染 → 轮询 sys.boot_completed 到超时、runner 以 exit 224 收场。
+        # 必须内联、不能 uses 本地 action：本 workflow 按 tag 检出代码树，run #3 就死在
+        # v1.0.31 那棵树里还没有 restore-kvm 目录（报 "Can't find 'action.yml'"）。
+        # 内容与 .github/actions/instrumented-tests 里的同名步骤逐字一致。
+        shell: bash
+        run: |
+          echo 'KERNEL=="kvm", GROUP="kvm", MODE="0666", OPTIONS+="static_node=kvm"' | sudo tee /etc/udev/rules.d/99-kvm4all.rules
+          sudo udevadm control --reload-rules
+          sudo udevadm trigger --name-match=kvm
+          ls -l /dev/kvm || echo "[WARN] /dev/kvm not present on this runner — hardware acceleration unavailable"
+
+      - name: Run Macrobenchmark (Release Variant)
+        # 在 Release 版本上运行基准性能测试，收集性能指标
+        # 注意：AGP 8.7.x Baseline Profile 生成器有已知崩溃（Gotcha #13），仅运行 benchmark
+        uses: reactivecircus/android-emulator-runner@v2
+        with:
+          api-level: 34
+          target: google_apis
+          arch: x86_64
+          profile: pixel_5
+          heap-size: 512M
+          ram-size: 2048M
+          emulator-options: -no-window -gpu swiftshader_indirect -no-snapshot -noaudio -no-boot-anim
+          disable-animations: true
+          script: |
+            # 先安装被测应用：benchmark 的 target 包名是 com.draftpeek
+            # （EditorBenchmarkSupport.kt:30），而 connectedDebugAndroidTest 只安装 benchmark
+            # 自己的测试 APK —— 以前从没人装过被测包，run #4 里 2 个用例因此直接报
+            # "Unable to find target package com.draftpeek, is it installed?"。
+            # 必须写在 script 里：模拟器由本 action 启动，步骤级 adb install 时还没有设备。
+            APK_PATH=$(find app/build/outputs/apk/production/release -name "*.apk" | head -1)
+            if [ -z "$APK_PATH" ]; then
+              echo "::error::No production release APK available to install"
+              exit 1
+            fi
+            adb install -r -g "$APK_PATH"
+            # benchmark 为 library 模块，只有 debugAndroidTest 测试变体，
+            # connectedBenchmarkAndroidTest 不存在（2026-09-05 实测修正，与 android.yml 对齐）
+            ./gradlew :benchmark:connectedDebugAndroidTest --stacktrace
+
+      - name: Upload Benchmark Results
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: release-benchmark-results
+          path: |
+            **/build/outputs/macrobenchmark/**
+            **/build/reports/androidTest/**
+          retention-days: 30
+          if-no-files-found: warn
