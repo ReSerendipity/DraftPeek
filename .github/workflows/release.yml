@@ -131,9 +131,17 @@ jobs:
           echo "APK signature verified successfully."
 
       - name: Restore /dev/kvm access
-        # 缺失时模拟器退回软渲染 → 600s 启动超时（release run #2 即此），
-        # 且该步骤失败会连带跳过后续 checksums 与 draft 创建。
-        uses: ./.github/actions/restore-kvm
+        # 缺失时模拟器退回软渲染 → 600s 启动超时（run #2 即此），该步失败还会连带
+        # 跳过 checksums 与 draft 创建。必须内联、不能 uses 本地 action：本 workflow
+        # 按 tag 检出代码树，run #3 就死在 v1.0.31 那棵树里还没有 restore-kvm 目录
+        # （报 "Can't find 'action.yml' … under .github/actions/restore-kvm"）。
+        # 内容与 .github/actions/instrumented-tests 里的同名步骤逐字一致。
+        shell: bash
+        run: |
+          echo 'KERNEL=="kvm", GROUP="kvm", MODE="0666", OPTIONS+="static_node=kvm"' | sudo tee /etc/udev/rules.d/99-kvm4all.rules
+          sudo udevadm control --reload-rules
+          sudo udevadm trigger --name-match=kvm
+          ls -l /dev/kvm || echo "[WARN] /dev/kvm not present on this runner — hardware acceleration unavailable"
 
       - name: Run Macrobenchmark (Release Variant)
         # 在 Release 版本上运行基准性能测试，收集性能指标
