@@ -28,6 +28,13 @@
         <package android:name="com.smile.gifmaker" />        <!-- 快手 -->
     </queries>
 
+    <!-- macrobenchmark：release 构建非 debuggable，需声明允许 shell profiling，
+         否则 :benchmark 的 macrobenchmark 用例报
+         "Target app ... is not debuggable nor profileable"（issue #87）。
+         API < 29 的平台会忽略此元素，无运行时影响。 -->
+    <profileable
+        android:shell="true" />
+
     <application
         android:name=".DraftPeekApp"
         android:allowBackup="false"

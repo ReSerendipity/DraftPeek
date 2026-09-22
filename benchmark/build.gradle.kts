@@ -81,8 +81,6 @@ dependencies {
     // Hilt (required by feature modules that depend on Hilt)
     implementation(libs.hilt.android)
     ksp(libs.hilt.compiler)
-    // Hilt testing support (used in FileReadBenchmark)
-    implementation(libs.hilt.android.testing)
 
     // Java 8+ API desugaring (required by tree-sitter AARs pulled in via :feature:editor)
     coreLibraryDesugaring(libs.desugar)
