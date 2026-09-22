@@ -28,13 +28,6 @@
         <package android:name="com.smile.gifmaker" />        <!-- 快手 -->
     </queries>
 
-    <!-- macrobenchmark：release 构建非 debuggable，需声明允许 shell profiling，
-         否则 :benchmark 的 macrobenchmark 用例报
-         "Target app ... is not debuggable nor profileable"（issue #87）。
-         API < 29 的平台会忽略此元素，无运行时影响。 -->
-    <profileable
-        android:shell="true" />
-
     <application
         android:name=".DraftPeekApp"
         android:allowBackup="false"
@@ -47,6 +40,14 @@
         android:supportsRtl="true"
         android:theme="@style/Theme.DraftPeek"
         android:usesCleartextTraffic="false">
+
+        <!-- macrobenchmark：release 构建非 debuggable，需声明允许 shell profiling，
+             否则 :benchmark 的 macrobenchmark 用例报
+             "Target app ... is not debuggable nor profileable"（issue #87）。
+             注意 <profileable> 必须是 <application> 的子元素（CI AAPT 实测：
+             放在 manifest 直下会报 unexpected element）。API < 29 平台忽略。 -->
+        <profileable
+            android:shell="true" />
 
         <!-- Splash: first activity shown on launch.
              configChanges lets the activity survive foldable hinge
