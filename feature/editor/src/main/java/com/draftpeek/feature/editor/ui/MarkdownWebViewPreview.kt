@@ -39,7 +39,6 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.toArgb
-import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
@@ -156,7 +155,6 @@ fun MarkdownWebViewPreview(
     // 双保险：① 组装前轻量探测 provider（快路径）；② 探测通过但构造仍
     // 失败时由 factory 的 catch 兜底翻转状态。降级渲染复用
     // LazyMarkdownPreview（纯 Compose、无 WebView 开销），并明示功能损失。
-    val appContext = LocalContext.current.applicationContext
     val webViewProviderUsable = remember { hasWebViewProvider() }
     var webViewCreationFailed by remember { mutableStateOf(false) }
 
