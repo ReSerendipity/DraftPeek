@@ -382,4 +382,7 @@ graph TD
 
     <!-- Emoji Picker -->
     <string name="editor_emoji_title">이모지</string>
+
+    <!-- #80: WebView provider 不可用时的降级提示 -->
+    <string name="editor_preview_no_webview">이 기기에는 사용 가능한 WebView가 없어 네이티브 미리보기로 전환했습니다(수식/다이어그램/코드 강조 사용 불가)</string>
 </resources>

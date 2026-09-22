@@ -388,5 +388,7 @@ graph TD
 
     <!-- Emoji Picker -->
     <string name="editor_emoji_title">表情</string>
-</resources>
 
+    <!-- #80: WebView provider 不可用时的降级提示 -->
+    <string name="editor_preview_no_webview">当前设备没有可用的 WebView，已切换为原生预览（公式 / 流程图 / 代码高亮暂不可用）</string>
+</resources>

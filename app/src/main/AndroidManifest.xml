@@ -41,6 +41,14 @@
         android:theme="@style/Theme.DraftPeek"
         android:usesCleartextTraffic="false">
 
+        <!-- macrobenchmark：release 构建非 debuggable，需声明允许 shell profiling，
+             否则 :benchmark 的 macrobenchmark 用例报
+             "Target app ... is not debuggable nor profileable"（issue #87）。
+             注意 <profileable> 必须是 <application> 的子元素（CI AAPT 实测：
+             放在 manifest 直下会报 unexpected element）。API < 29 平台忽略。 -->
+        <profileable
+            android:shell="true" />
+
         <!-- Splash: first activity shown on launch.
              configChanges lets the activity survive foldable hinge
              transitions, rotation, font scale and locale changes without

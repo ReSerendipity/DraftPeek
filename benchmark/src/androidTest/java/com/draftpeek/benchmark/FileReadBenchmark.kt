@@ -21,10 +21,8 @@ import androidx.test.ext.junit.runners.AndroidJUnit4
 import androidx.test.platform.app.InstrumentationRegistry
 import com.draftpeek.core.data.repository.EditorFileReadOutcome
 import com.draftpeek.core.data.repository.EditorFileRepository
-import dagger.hilt.android.testing.HiltAndroidRule
-import dagger.hilt.android.testing.HiltAndroidTest
+import com.draftpeek.core.data.repository.EditorFileRepositoryImpl
 import java.io.File
-import javax.inject.Inject
 import kotlinx.coroutines.runBlocking
 import org.junit.Before
 import org.junit.Rule
@@ -36,10 +34,14 @@ import org.junit.runner.RunWith
 /**
  * 文件读取操作基准测试类。
  *
- * 使用 Android Benchmark 框架和 Hilt 依赖注入，对 EditorFileRepository 的各项文件操作进行性能基准测试。
+ * 使用 Android Benchmark 框架，对 EditorFileRepository 的各项文件操作进行性能基准测试。
  * 测试前会创建各种大小和类型的测试文件，用于模拟真实使用场景。
+ *
+ * 注意：本类不使用 Hilt（issue #87）。macrobenchmark 的被测对象是独立进程中的 target
+ * 应用，测试 APK 自身再配 HiltTestApplication 既别扭又易碎（缺 Hilt 测试应用配置时
+ * 直接 IllegalStateException）。EditorFileRepositoryImpl 只依赖 Context，
+ * 直接构造即可。
  */
-@HiltAndroidTest
 @RunWith(AndroidJUnit4::class)
 class FileReadBenchmark {
 
@@ -47,13 +49,8 @@ class FileReadBenchmark {
     @get:Rule
     val benchmarkRule = BenchmarkRule()
 
-    /** Hilt 依赖注入规则 */
-    @get:Rule
-    val hiltRule = HiltAndroidRule(this)
-
-    /** 文件仓库实例，通过 Hilt 注入 */
-    @Inject
-    lateinit var repository: EditorFileRepository
+    /** 文件仓库实例，直接构造（不经 Hilt，见类注释） */
+    private lateinit var repository: EditorFileRepository
 
     /** 应用上下文 */
     private lateinit var context: android.content.Context
@@ -64,12 +61,12 @@ class FileReadBenchmark {
     /**
      * 测试前初始化方法。
      *
-     * 执行 Hilt 依赖注入，获取应用上下文，创建测试目录并生成测试文件。
+     * 获取应用上下文，直接构造被测仓库，创建测试目录并生成测试文件。
      */
     @Before
     fun setup() {
-        hiltRule.inject()
         context = InstrumentationRegistry.getInstrumentation().targetContext
+        repository = EditorFileRepositoryImpl(context.applicationContext)
         testDir = File(context.cacheDir, "benchmark_files")
         testDir.mkdirs()
         createTestFiles()
