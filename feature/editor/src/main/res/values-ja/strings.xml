@@ -372,4 +372,7 @@ graph TD
 
     <!-- Emoji Picker -->
     <string name="editor_emoji_title">絵文字</string>
+
+    <!-- #80: WebView provider 不可用时的降级提示 -->
+    <string name="editor_preview_no_webview">この端末には利用可能な WebView がないため、ネイティブプレビューに切り替えました（数式・図・コードハイライトは利用できません）</string>
 </resources>

@@ -38,6 +38,9 @@ object EditorTestTags {
     const val MARKDOWN_PREVIEW = "test_tag_markdown_preview"
     const val MARKDOWN_RICH_EDITOR = "test_tag_markdown_rich_editor"
     const val LARGE_CONTENT_FALLBACK = "test_tag_large_content_fallback"
+
+    /** #80: WebView provider 不可用时降级到原生预览的容器标记 */
+    const val NO_WEBVIEW_FALLBACK = "test_tag_no_webview_fallback"
 }
 
 /**
