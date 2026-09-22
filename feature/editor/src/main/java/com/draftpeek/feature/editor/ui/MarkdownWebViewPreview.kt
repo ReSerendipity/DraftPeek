@@ -12,6 +12,7 @@ package com.draftpeek.feature.editor.ui
 
 import android.os.Handler
 import android.os.Looper
+import android.util.AndroidRuntimeException
 import android.util.Log
 import android.view.View
 import android.view.ViewGroup
@@ -22,7 +23,13 @@ import android.webkit.WebResourceRequest
 import android.webkit.WebSettings
 import android.webkit.WebView
 import android.webkit.WebViewClient
+import androidx.compose.foundation.background
+import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.padding
+import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.LaunchedEffect
@@ -32,7 +39,10 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.toArgb
+import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.unit.dp
 import androidx.compose.ui.viewinterop.AndroidView
 import com.draftpeek.core.common.util.ContentChecksum
 import com.draftpeek.core.common.util.MarkdownSanitizer
@@ -134,103 +144,168 @@ fun MarkdownWebViewPreview(
         }
     }
 
+    // ===== #80: 无 WebView provider 设备的降级路径 =====
+    //
+    // minSdk 26，但国内不少 ROM 裁剪/禁用系统 WebView（无 GMS 设备尤甚），
+    // API 26 default 模拟器镜像同样不带 provider。此类设备上 WebView 构造
+    // 直接抛 AndroidRuntimeException(MissingWebViewPackageException)，而本
+    // 组件是 EDIT/PREVIEW/SPLIT 三种模式唯一的 Markdown 渲染路径——不降级
+    // 就是点开预览即崩（run 268 的 WysiwygRenderVerificationTest 六连失败
+    // 即该异常，issue #80）。
+    //
+    // 双保险：① 组装前轻量探测 provider（快路径）；② 探测通过但构造仍
+    // 失败时由 factory 的 catch 兜底翻转状态。降级渲染复用
+    // LazyMarkdownPreview（纯 Compose、无 WebView 开销），并明示功能损失。
+    val appContext = LocalContext.current.applicationContext
+    val webViewProviderUsable = remember { hasWebViewProvider() }
+    var webViewCreationFailed by remember { mutableStateOf(false) }
+
+    if (!webViewProviderUsable || webViewCreationFailed) {
+        Column(
+            modifier = modifier
+                .fillMaxSize()
+                .testTag(EditorTestTags.NO_WEBVIEW_FALLBACK)
+        ) {
+            Text(
+                text = stringResource(R.string.editor_preview_no_webview),
+                style = MaterialTheme.typography.labelSmall,
+                color = PrototypeTokens.fgSoft,
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .background(PrototypeTokens.surface)
+                    .padding(horizontal = 12.dp, vertical = 8.dp)
+            )
+            LazyMarkdownPreview(
+                markdownContent = currentMarkdown,
+                modifier = Modifier.fillMaxSize(),
+                isDarkTheme = isDarkTheme
+            )
+        }
+        return
+    }
+
     if (!rendererCrashed) {
         AndroidView(
             factory = { context ->
-                WebView(context).apply {
-                    settings.apply {
-                        javaScriptEnabled = true
-                        domStorageEnabled = true
-                        setGeolocationEnabled(false)
-                        mediaPlaybackRequiresUserGesture = false
-                        mixedContentMode = WebSettings.MIXED_CONTENT_NEVER_ALLOW
+                // #80: 双保险——provider 预检通过但构造仍失败（OEM 禁用、数据
+                // 被清等场景）时，不能让 AndroidRuntimeException 冒出 factory
+                // 崩掉预览。这里捕获并 post 一帧翻转降级状态；本帧先返回空
+                // View 占位，下一帧由顶部 !webViewCreationFailed 分支接管。
+                val createdView: View = try {
+                    WebView(context)
+                } catch (e: AndroidRuntimeException) {
+                    Log.w(TAG, "WebView 构造失败，降级为原生 Markdown 渲染", e)
+                    mainHandler.post { webViewCreationFailed = true }
+                    View(context)
+                }
+                if (createdView is WebView) {
+                    createdView.apply {
+                        settings.apply {
+                            javaScriptEnabled = true
+                            domStorageEnabled = true
+                            setGeolocationEnabled(false)
+                            mediaPlaybackRequiresUserGesture = false
+                            mixedContentMode = WebSettings.MIXED_CONTENT_NEVER_ALLOW
 
-                        // Allow file access for temp file content loading
-                        @Suppress("DEPRECATION")
-                        allowFileAccessFromFileURLs = true
-                        allowFileAccess = true
-                        allowContentAccess = false
-                    }
-                    setLayerType(View.LAYER_TYPE_NONE, null)
-                    webChromeClient = VideoWebChromeClient(this)
-                    webViewClient = object : WebViewClient() {
-                        override fun onPageFinished(view: WebView?, url: String?) {
-                            super.onPageFinished(view, url)
-                            pageLoaded = true
-                            rendererCrashed = false
-                            // If there's a pending file, use loadUrl() to navigate (more reliable than evaluateJavascript)
-                            pendingFilePath?.let { filePath ->
+                            // Allow file access for temp file content loading
+                            @Suppress("DEPRECATION")
+                            allowFileAccessFromFileURLs = true
+                            allowFileAccess = true
+                            allowContentAccess = false
+                        }
+                        setLayerType(View.LAYER_TYPE_NONE, null)
+                        webChromeClient = VideoWebChromeClient(this)
+                        webViewClient = object : WebViewClient() {
+                            override fun onPageFinished(view: WebView?, url: String?) {
+                                super.onPageFinished(view, url)
+                                pageLoaded = true
+                                rendererCrashed = false
+                                // If there's a pending file, use loadUrl() to navigate (more reliable than evaluateJavascript)
+                                pendingFilePath?.let { filePath ->
+                                    pendingFilePath = null
+                                    val darkParam = if (isDarkTheme) "1" else "0"
+                                    val themeParam = theme.name.lowercase()
+                                    val encodedUrl = URLEncoder.encode(filePath, "UTF-8")
+                                    view?.loadUrl(
+                                        "file:///android_asset/markdown/markdown-preview.html?file=$encodedUrl&dark=$darkParam&theme=$themeParam"
+                                    )
+                                    // 延迟恢复滚动位置，等待内容渲染完成
+                                    if (savedScrollY > 0) {
+                                        view?.postDelayed({
+                                            view.scrollTo(0, savedScrollY)
+                                        }, 500)
+                                    }
+                                } ?: run {
+                                    // 页面直接加载完成（无pending文件），恢复滚动位置
+                                    if (savedScrollY > 0) {
+                                        view?.postDelayed({
+                                            view.scrollTo(0, savedScrollY)
+                                        }, 300)
+                                    }
+                                }
+                            }
+
+                            override fun shouldOverrideUrlLoading(
+                                view: WebView?,
+                                request: WebResourceRequest?
+                            ): Boolean {
+                                val url = request?.url?.toString() ?: return true
+                                // Allow asset files AND temp files in cache dir
+                                return !url.startsWith("file:///android_asset/") &&
+                                    !url.startsWith("file:///data/")
+                            }
+
+                            override fun onRenderProcessGone(
+                                view: WebView?,
+                                detail: RenderProcessGoneDetail?
+                            ): Boolean {
+                                Log.w(TAG, "WebView renderer crashed (crashed=${detail?.didCrash()})")
+                                rendererCrashed = true
+                                pageLoaded = false
                                 pendingFilePath = null
-                                val darkParam = if (isDarkTheme) "1" else "0"
-                                val themeParam = theme.name.lowercase()
-                                val encodedUrl = URLEncoder.encode(filePath, "UTF-8")
-                                view?.loadUrl(
-                                    "file:///android_asset/markdown/markdown-preview.html?file=$encodedUrl&dark=$darkParam&theme=$themeParam"
-                                )
-                                // 延迟恢复滚动位置，等待内容渲染完成
-                                if (savedScrollY > 0) {
-                                    view?.postDelayed({
-                                        view.scrollTo(0, savedScrollY)
-                                    }, 500)
-                                }
-                            } ?: run {
-                                // 页面直接加载完成（无pending文件），恢复滚动位置
-                                if (savedScrollY > 0) {
-                                    view?.postDelayed({
-                                        view.scrollTo(0, savedScrollY)
-                                    }, 300)
-                                }
-                            }
-                        }
-
-                        override fun shouldOverrideUrlLoading(view: WebView?, request: WebResourceRequest?): Boolean {
-                            val url = request?.url?.toString() ?: return true
-                            // Allow asset files AND temp files in cache dir
-                            return !url.startsWith("file:///android_asset/") &&
-                                !url.startsWith("file:///data/")
-                        }
-
-                        override fun onRenderProcessGone(view: WebView?, detail: RenderProcessGoneDetail?): Boolean {
-                            Log.w(TAG, "WebView renderer crashed (crashed=${detail?.didCrash()})")
-                            rendererCrashed = true
-                            pageLoaded = false
-                            pendingFilePath = null
-                            lastRenderedChecksum = 0L
-                            savedScrollY = 0
-                            try {
-                                view?.let {
-                                    it.stopLoading()
-                                    it.destroy()
-                                }
-                            } catch (e: Exception) {
-                                Log.w(TAG, "Error destroying crashed WebView", e)
-                            }
-                            return true
-                        }
-                    }
-                    isHorizontalScrollBarEnabled = false
-                    setBackgroundColor(surfaceColor.toArgb())
-                    addJavascriptInterface(
-                        WebViewCallback(
-                            onCheckboxChanged = { statesJson ->
+                                lastRenderedChecksum = 0L
+                                savedScrollY = 0
                                 try {
-                                    val newContent = applyCheckboxStates(currentMarkdown, statesJson)
-                                    onContentChanged?.invoke(newContent)
+                                    view?.let {
+                                        it.stopLoading()
+                                        it.destroy()
+                                    }
                                 } catch (e: Exception) {
-                                    Log.w(TAG, "Checkbox sync failed", e)
+                                    Log.w(TAG, "Error destroying crashed WebView", e)
                                 }
-                            },
-                            onPreviewClick = onPreviewClick,
-                            onHeadingClick = onHeadingClick
-                        ),
-                        "Android"
-                    )
-                    loadUrl("file:///android_asset/markdown/markdown-preview.html")
-                    webView = this
+                                return true
+                            }
+                        }
+                        isHorizontalScrollBarEnabled = false
+                        setBackgroundColor(surfaceColor.toArgb())
+                        addJavascriptInterface(
+                            WebViewCallback(
+                                onCheckboxChanged = { statesJson ->
+                                    try {
+                                        val newContent = applyCheckboxStates(currentMarkdown, statesJson)
+                                        onContentChanged?.invoke(newContent)
+                                    } catch (e: Exception) {
+                                        Log.w(TAG, "Checkbox sync failed", e)
+                                    }
+                                },
+                                onPreviewClick = onPreviewClick,
+                                onHeadingClick = onHeadingClick
+                            ),
+                            "Android"
+                        )
+                        loadUrl("file:///android_asset/markdown/markdown-preview.html")
+                        webView = this
+                    }
+                } else {
+                    createdView
                 }
             },
             modifier = modifier.fillMaxSize(),
             update = { view ->
+                // #80: factory 降级分支返回普通 View 占位；下方的渲染逻辑只对
+                // 真正的 WebView 执行（同名局部 val 智能转换，正文保持不动）。
+                @Suppress("NAME_SHADOWING")
+                val view = view as? WebView ?: return@AndroidView
                 view.setBackgroundColor(surfaceColor.toArgb())
 
                 // 使用CRC32校验和高效检测内容变化，避免大字符串直接比较
@@ -398,4 +473,17 @@ private class VideoWebChromeClient(private val webView: WebView) : WebChromeClie
         callback?.onCustomViewHidden()
         callback = null
     }
+}
+
+/**
+ * #80: 轻量探测 WebView provider 是否可用（快路径）。
+ *
+ * ``WebView.getCurrentWebViewPackage()``（API 26+）在无 provider 的设备上
+ * 返回 null 或抛异常，两种情况都视为不可用；不真正构造完整 WebView。
+ * 探测通过但构造仍失败的场景由 factory 内的 catch 兜底（双保险）。
+ */
+private fun hasWebViewProvider(): Boolean = try {
+    WebView.getCurrentWebViewPackage() != null
+} catch (_: Throwable) {
+    false
 }
