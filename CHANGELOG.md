@@ -9,6 +9,25 @@
 
 ## [Unreleased] (开发中)
 
+### Added
+- `app` 的 release 清单声明 `<profileable android:shell="true"/>`，让 Macrobenchmark 能在非 debuggable 的 release 包上读帧（仅声明、不改运行行为，API < 29 平台忽略）（#98）
+- CI 门禁 `server` 依赖锁可解析性检查（blocking），用于把"锁文件写坏"挡在合并前；`security.yml`（#94）
+- GPG Release 分离签名链路与公开验证密钥 `release-signing-public-key.asc`（`gpg-signed-release.yml` 在 `GPG_PRIVATE_KEY` 未配置时以 notice 跳过，不影响发版）（#89、#84）
+- 版本一致性本地预检 `precheck.ps1` 与其测试覆盖 `tests/test_version_consistency.py`（#84）
+
+### Changed
+- 发布链路顺序调整：`release.yml` 先产出 draft Release（APK + AAB + `.sha256` + Release 正文），再跑 Macrobenchmark。此前 benchmark 排在创建 Release 之前，它一红就连带跳过 checksums 与 draft 生成，等于性能测试卡住发版（#88）
+- Macrobenchmark 用例不再依赖 Hilt：`FileReadBenchmark` 去掉 `@HiltAndroidTest` / `HiltAndroidRule` / `@Inject`，改为直接构造 `EditorFileRepositoryImpl`；`:benchmark` 相应摘除 `hilt-android-testing` 与失活的 multidex 并重建 `gradle.lockfile`（#98）
+- `docs/RELEASE_CHECKLIST.md` §2 改口径：把"release.yml 全链路绿（含 macrobenchmark）"拆成"建 Release 之前全绿"为真门禁，benchmark 明确标注当前不是门禁（#91）
+- Dependabot：`/server` 的 minor-and-patch 组 3 项依赖升级（#92）；全量 `pip-audit` 从合并门禁降为非阻塞提示，避免上游 advisory 阻塞与锁无关的 PR（#97）
+
+### Fixed
+- 编辑器 Markdown 预览在**没有 WebView provider 的设备**上不再一点开就崩：检测 provider 不可用时降级为原生预览并提示「当前设备没有可用的 WebView，已切换为原生预览（公式 / 流程图 / 代码高亮暂不可用）」，新增 `editor_preview_no_webview` 文案并同步 zh / zh-TW / en / ja / ko 五个 locale；同时补上 WebView 渲染进程崩溃后的恢复路径（`onRenderProcessGone` 后复位状态并允许重渲染）（#80，#98）
+- `release.yml` 按 flavor 取构建产物路径（有 `productFlavors` 后 `app/build/outputs/apk/release/*.apk` 这一层不存在，产物上传与校验都取不到文件），并新增 `workflow_dispatch(tag)` 逃生口，使 workflow 自身修复不必再靠挪 tag（#83）
+- `/dev/kvm` 权限恢复补齐到 `android.yml` 的 Macrobenchmark job 与 `release.yml` 的 benchmark 步骤（此前只写在 `.github/actions/instrumented-tests` 里）。缺失时模拟器退回软渲染、轮询 `sys.boot_completed` 到超时并以 exit 224 收场，长期被当成随机抖动；`release.yml` 侧改为内联执行，因其按 tag 树检出、无法引用该 tag 里尚不存在的本地 action（#85、#86）
+- `release.yml` 的 benchmark `script:` 压成单行自闭合命令：`android-emulator-runner` 会把 `script:` 逐行交给 `/usr/bin/sh -c`，跨行 `if/fi` 被拆进两次调用后报 `Syntax error: end of file unexpected` 并以 exit 2 收场，脚本从未真正执行过安装（#90）
+- `server` 依赖锁中 `pydantic` 与 `pydantic-core` 的配对被分组升级拆坏，并在 `.github/dependabot.yml` 增加忽略规则防止复发（#93）
+
 ## [1.0.31] - 2026-09-20
 
 ### Added
