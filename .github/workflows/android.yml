@@ -522,7 +522,19 @@ jobs:
             # benchmark 是 library 模块，androidTest 只生成 debug 测试变体——
             # connectedBenchmarkAndroidTest 任务不存在（2026-09-05 实测 tasks --all 确认）。
             # 夜间档此前从未真正跑过：先倒在 desugaring 编译错误上，编译修好后
-            # 也会倒在幻影任务名上。被测应用由上一步 assembleRelease 安装。
+            # 也会倒在幻影任务名上。
+            #
+            # 被测应用必须由本步显式安装：上一步 `:app:assembleRelease` 只构建、不安装
+            # （此处旧注释「被测应用由上一步 assembleRelease 安装」是错的，夜间档因此长期
+            # 停在 5 条 "Unable to find target package com.draftpeek, is it installed?"，
+            # 见 schedule run 35829798988 / 35697952911）。production flavor 无
+            # applicationId 后缀，包名才是 benchmark 要的 com.draftpeek
+            # （benchmark/src/androidTest/.../EditorBenchmarkSupport.kt:30）。
+            # 整段压成一行是硬性要求：android-emulator-runner 把 script 逐行交给
+            # /usr/bin/sh -c 执行，跨行控制流与跨行变量都不可依赖
+            # （release.yml run #5 实测：if/fi 被拆进两次调用 → "end of file unexpected"、
+            # exit 2）。同一条单行写法在 release.yml run #6 已验证有效。
+            APK_PATH=$(find app/build/outputs/apk/production/release -name '*.apk' | head -1); test -n "$APK_PATH" || { echo '::error::No production release APK available to install'; exit 1; }; adb install -r -g "$APK_PATH"
             ./gradlew :benchmark:connectedDebugAndroidTest --stacktrace
 
       - name: Upload Benchmark Reports
