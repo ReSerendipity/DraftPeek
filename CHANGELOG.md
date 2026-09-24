@@ -9,6 +9,11 @@
 
 ## [Unreleased] (开发中)
 
+## [1.0.32] - 2026-09-24
+
+> 本版收录 `v1.0.31`（tag `74e4a8a`）之后的 14 个 PR。`v1.0.31` 的 draft Release 从未发布，
+> 因为它构建自的 tag 树不含下面第一条（无 WebView 设备的预览降级）——用户拍板不发旧包，改切本版。
+
 ### Added
 - `app` 的 release 清单声明 `<profileable android:shell="true"/>`，让 Macrobenchmark 能在非 debuggable 的 release 包上读帧（仅声明、不改运行行为，API < 29 平台忽略）（#98）
 - CI 门禁 `server` 依赖锁可解析性检查（blocking），用于把"锁文件写坏"挡在合并前；`security.yml`（#94）
@@ -27,6 +32,7 @@
 - `/dev/kvm` 权限恢复补齐到 `android.yml` 的 Macrobenchmark job 与 `release.yml` 的 benchmark 步骤（此前只写在 `.github/actions/instrumented-tests` 里）。缺失时模拟器退回软渲染、轮询 `sys.boot_completed` 到超时并以 exit 224 收场，长期被当成随机抖动；`release.yml` 侧改为内联执行，因其按 tag 树检出、无法引用该 tag 里尚不存在的本地 action（#85、#86）
 - `release.yml` 的 benchmark `script:` 压成单行自闭合命令：`android-emulator-runner` 会把 `script:` 逐行交给 `/usr/bin/sh -c`，跨行 `if/fi` 被拆进两次调用后报 `Syntax error: end of file unexpected` 并以 exit 2 收场，脚本从未真正执行过安装（#90）
 - `server` 依赖锁中 `pydantic` 与 `pydantic-core` 的配对被分组升级拆坏，并在 `.github/dependabot.yml` 增加忽略规则防止复发（#93）
+- 夜间档 Macrobenchmark 的 job 从未安装被测应用：它只跑 `:app:assembleRelease`（只构建不安装），而 `:benchmark` 是自 instrument 的 library 模块、`connectedDebugAndroidTest` 只装测试 APK，因此 target 包 `com.draftpeek` 一直缺席，13 条用例成批报 `Unable to find target package com.draftpeek, is it installed?`；`android.yml` 里那句「被测应用由上一步 assembleRelease 安装」是假注释。现按 `release.yml` 已验证的单行写法在 `script:` 内安装 production release APK，并订正注释（#99）
 
 ## [1.0.31] - 2026-09-20
 
