@@ -164,8 +164,11 @@ private fun UiDevice.diagnoseInaccessible(launchOutput: String): String =
 private fun UiDevice.shellProbe(command: String, vararg tokens: String): String = try {
     val raw = executeShellCommand(command)
     val hits = raw.lines().map { it.trim() }.filter { line -> tokens.any { line.contains(it) } }
-    if (hits.isNotEmpty()) flat(hits.joinToString(";"), 190)
-    else "(无匹配行;${raw.length}B head=${flat(raw, 60)})"
+    if (hits.isNotEmpty()) {
+        flat(hits.joinToString(";"), 190)
+    } else {
+        "(无匹配行;${raw.length}B head=${flat(raw, 60)})"
+    }
 } catch (t: Throwable) {
     "(异常 ${t.javaClass.simpleName}:${t.message})"
 }
@@ -173,12 +176,10 @@ private fun UiDevice.shellProbe(command: String, vararg tokens: String): String 
 private fun UiDevice.resumedActivity(): String =
     shellProbe("dumpsys activity activities", "ResumedActivity", "topResumedActivity", "mResumed")
 
-private fun UiDevice.focusedWindow(): String =
-    shellProbe("dumpsys window", "mCurrentFocus", "mFocusedApp")
+private fun UiDevice.focusedWindow(): String = shellProbe("dumpsys window", "mCurrentFocus", "mFocusedApp")
 
 /** 压成一行并截断，保证诊断不会把关键证据挤到报告的第二行之后。 */
-private fun flat(value: String, limit: Int): String =
-    value.replace('\n', ' ').replace("\r", "").trim().take(limit)
+private fun flat(value: String, limit: Int): String = value.replace('\n', ' ').replace("\r", "").trim().take(limit)
 
 /**
  * 按文案或内容描述查找元素。
