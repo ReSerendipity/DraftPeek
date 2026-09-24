@@ -44,6 +44,13 @@ internal const val INPUT_BURST = "fun benchmarkFrameTimingUnderTyping(): Int = 4
 /** 「新建文件」在四语言下的文案，用于跨语言定位 FAB 菜单项。 */
 internal val NEW_FILE_LABELS = listOf("新建文件", "New file", "新規ファイル", "새 파일")
 
+/** 主 FAB 折叠 / 展开态的图标语义（core/ui BrandFAB.kt:183 硬编码英文）。 */
+private const val FAB_COLLAPSED_DESC = "Add"
+private const val FAB_EXPANDED_DESC = "Close menu"
+
+/** 等展开确认的上限：200ms 旋转 + 每项 40ms 错峰 + 150ms 淡入，留足一倍余量。 */
+private const val SPEED_DIAL_EXPAND_TIMEOUT_MS = 2_000L
+
 /**
  * 等待编辑器出现并返回它。
  *
@@ -62,7 +69,7 @@ internal fun UiDevice.requireEditor(): UiObject2 {
 }
 
 /**
- * 确保界面已进入编辑器；若停在文件浏览器，则通过 FAB 新建一个文件。
+ * 确保界面已进入编辑器：直启主界面 → 必要时展开 speed-dial FAB → 点「新建文件」。
  *
  * 之所以要兼容「启动后已在编辑器」的情况：Macrobenchmark 以 WARM 模式重启 Activity，
  * 系统可能恢复到上次离开时的界面。
@@ -73,23 +80,61 @@ internal fun UiDevice.ensureEditorOpen() {
     // 全新安装的首屏是引导页：路由只在 SplashActivity 上做拦截
     // （SplashActivity.kt:142-143 读 DataStore onboarding/completed 决定去
     // OnboardingActivity 还是 MainActivity，:87-89 执行跳转），MainActivity 自身不拦。
-    // 所以显式直启 MainActivity 即可绕开引导，既不用点 UI 也不用伪造 protobuf 文件。
+    // 显式直启 MainActivity 绕开引导，不点 UI、也不在设备外伪造 protobuf。
     val launchOutput = launchMainActivityDirectly()
 
-    val newFile = NEW_FILE_LABELS.firstNotNullOfOrNull { label -> findByTextOrDesc(label) }
-        ?: error(diagnoseInaccessible(launchOutput))
+    // 「新建文件」是 speed-dial 的菜单项，折叠态被 AnimatedVisibility 摘出无障碍树
+    // （core/ui BrandFAB.kt:97-98），所以必须先展开主 FAB 才可能找到它。
+    var newFile: UiObject2? = findNewFileEntry()
+    if (newFile == null && expandSpeedDial()) newFile = findNewFileEntry()
+    if (newFile == null) error(diagnoseInaccessible(launchOutput))
 
     newFile.click()
     waitForIdle()
     requireEditor()
 }
 
+/** 「新建文件」菜单项：展开后 label 落在文案上、mini 图标落在 content-desc 上。 */
+private fun UiDevice.findNewFileEntry(): UiObject2? =
+    NEW_FILE_LABELS.firstNotNullOfOrNull { label -> findByTextOrDesc(label) }
+
+/**
+ * 展开主 FAB，返回是否展开成功。
+ *
+ * 把手取主 FAB 自己的图标语义：`core/ui/.../BrandFAB.kt:183` 的
+ * `contentDescription = if (expanded) "Close menu" else "Add"`。这两串是硬编码英文，
+ * 不随 zh / en / ja / ko 漂移，因此比按坐标或按 `FABSize` 折算屏幕位置稳。
+ * 展开态本身用 "Close menu" 或菜单项出现来确认，不靠 sleep 猜动画时长。
+ */
+private fun UiDevice.expandSpeedDial(): Boolean {
+    val collapsedHandle = findObject(By.desc(FAB_COLLAPSED_DESC))
+    if (collapsedHandle == null) {
+        // 主 FAB 不在折叠态：可能已展开，也可能当前界面根本没有 speed-dial。
+        return speedDialExpanded()
+    }
+    collapsedHandle.click()
+    wait(Until.hasObject(By.desc(FAB_EXPANDED_DESC)), SPEED_DIAL_EXPAND_TIMEOUT_MS)
+    waitForIdle()
+    return speedDialExpanded()
+}
+
+/** speed-dial 是否处于展开态（图标变 Close menu，或菜单项已进无障碍树）。 */
+private fun UiDevice.speedDialExpanded(): Boolean =
+    findObject(By.desc(FAB_EXPANDED_DESC)) != null || findNewFileEntry() != null
+
+/** 主 FAB 当前可观测状态，供失败诊断分辨"停在别的页面"与"展开失败"。 */
+private fun UiDevice.fabState(): String = when {
+    findObject(By.desc(FAB_EXPANDED_DESC)) != null -> FAB_EXPANDED_DESC
+    findObject(By.desc(FAB_COLLAPSED_DESC)) != null -> FAB_COLLAPSED_DESC
+    else -> "absent"
+}
+
 /**
  * 显式启动 `com.draftpeek/com.draftpeek.MainActivity`，返回 `am start` 的原始输出。
  *
- * 依赖 CI 镜像是 `google_apis`（userdebug，shell 持有 `START_ANY_ACTIVITY`）才能启动
- * 非 exported 的 Activity；这一前提若被破坏，[diagnoseInaccessible] 会把 `am start`
- * 的拒绝原文连同当前 focus 组件一起报出来，不静默降级。
+ * 依赖 CI 镜像是 `google_apis`（userdebug，shell 持 `START_ANY_ACTIVITY`）才能启动
+ * 非 exported 的 Activity；上一轮 run 35970870476 的实测原文是
+ * `Starting: Intent { cmp=com.draftpeek/.MainActivity }`，无 Permission Denial，前提成立。
  */
 private fun UiDevice.launchMainActivityDirectly(): String = try {
     executeShellCommand("am start -n $TARGET_PACKAGE/.MainActivity")
@@ -98,31 +143,42 @@ private fun UiDevice.launchMainActivityDirectly(): String = try {
 }
 
 /**
- * 组装失败诊断：`am start` 原文 + 当前 focus/ resumed 组件。
- *
- * 有了这两项就能一步区分三种可能：Permission Denial（镜像不满足前提）、
- * 已进 MainActivity 但「新建文件」藏在折叠的 speed-dial FAB 里
- * （FileBrowserScreen.kt:3056 起是 expandable speed-dial 菜单）、以及仍停在引导页。
+ * 失败诊断。第一行就把全部证据排完 —— AGP 的文本报告只打印异常message 的前两行，
+ * 证据放在第 3 行等于没有（上一轮的「窗口焦点」正是这样丢的）。
  */
 private fun UiDevice.diagnoseInaccessible(launchOutput: String): String =
-    "既未发现编辑器，也未找到「新建文件」入口（已尝试 ${NEW_FILE_LABELS.joinToString()}）。\n" +
-        "直启输出: ${launchOutput.replace("\n", " ").trim().take(300)}\n" +
-        "窗口焦点: ${focusedWindow()}\n" +
-        "判读: 输出含 Permission Denial ⇒ 镜像 shell 无权启动非 exported 组件；" +
-        "焦点已是 $TARGET_PACKAGE/.MainActivity ⇒ 入口被折叠在 speed-dial FAB 内，需先展开；" +
-        "焦点是 OnboardingActivity ⇒ 仍被引导页挡住，直启未生效。"
+    "既未发现编辑器也未找到「新建文件」入口 | resumed=" + resumedActivity() +
+        " | focus=" + focusedWindow() +
+        " | fab=" + fabState() +
+        " | launch=" + flat(launchOutput, 140) + "\n" +
+        "判读: launch 含 Permission Denial ⇒ 镜像 shell 无权启动非 exported 组件；" +
+        "fab=" + FAB_COLLAPSED_DESC + " ⇒ 已在带 speed-dial 的界面但展开失败；" +
+        "fab=" + FAB_EXPANDED_DESC + " ⇒ 展开成功而菜单文案不匹配；" +
+        "fab=absent ⇒ 当前界面没有 FAB（多半仍不在 MainActivity）。" +
+        "resumed/focus 若显示为「无匹配行」，看括号里的字节数与 head 判断是截断还是没有该字段。"
 
-private fun UiDevice.focusedWindow(): String = try {
-    executeShellCommand("dumpsys window windows")
-        .lines()
-        .filter { "mCurrentFocus" in it || "mFocusedApp" in it }
-        .joinToString(" | ")
-        .trim()
-        .take(240)
-        .ifBlank { "(dumpsys window 无 mCurrentFocus 行)" }
+/**
+ * 取一条 shell 输出里的关键行；取不到时**必须**报告输出规模与开头若干字节，
+ * 否则"探针空"与"环境真的没这行"分不清 —— 上一轮就栽在这里。
+ */
+private fun UiDevice.shellProbe(command: String, vararg tokens: String): String = try {
+    val raw = executeShellCommand(command)
+    val hits = raw.lines().map { it.trim() }.filter { line -> tokens.any { line.contains(it) } }
+    if (hits.isNotEmpty()) flat(hits.joinToString(";"), 190)
+    else "(无匹配行;${raw.length}B head=${flat(raw, 60)})"
 } catch (t: Throwable) {
-    "dumpsys 异常: ${t.message}"
+    "(异常 ${t.javaClass.simpleName}:${t.message})"
 }
+
+private fun UiDevice.resumedActivity(): String =
+    shellProbe("dumpsys activity activities", "ResumedActivity", "topResumedActivity", "mResumed")
+
+private fun UiDevice.focusedWindow(): String =
+    shellProbe("dumpsys window", "mCurrentFocus", "mFocusedApp")
+
+/** 压成一行并截断，保证诊断不会把关键证据挤到报告的第二行之后。 */
+private fun flat(value: String, limit: Int): String =
+    value.replace('\n', ' ').replace("\r", "").trim().take(limit)
 
 /**
  * 按文案或内容描述查找元素。
