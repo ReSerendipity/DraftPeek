@@ -48,9 +48,6 @@ internal val NEW_FILE_LABELS = listOf("新建文件", "New file", "新規ファ�
 private const val FAB_COLLAPSED_DESC = "Add"
 private const val FAB_EXPANDED_DESC = "Close menu"
 
-/** 等展开确认的上限：200ms 旋转 + 每项 40ms 错峰 + 150ms 淡入，留足一倍余量。 */
-private const val SPEED_DIAL_EXPAND_TIMEOUT_MS = 2_000L
-
 /**
  * 等待编辑器出现并返回它。
  *
@@ -69,25 +66,28 @@ internal fun UiDevice.requireEditor(): UiObject2 {
 }
 
 /**
- * 确保界面已进入编辑器：直启主界面 → 必要时展开 speed-dial FAB → 点「新建文件」。
+ * 确保界面已进入编辑器：以新任务直启主界面 → 点「新建文件」→ 等编辑器。
  *
  * 之所以要兼容「启动后已在编辑器」的情况：Macrobenchmark 以 WARM 模式重启 Activity，
  * 系统可能恢复到上次离开时的界面。
+ *
+ * 曾假设失败点是 speed-dial FAB 折叠，被 run 36017565614 的诊断否掉：`resumed` 与
+ * `focus` 两次（t8/t9）都停在 `com.draftpeek/.onboarding.OnboardingActivity`，
+ * 界面上压根没有那个 FAB。故展开 FAB 的代码已撤除，问题回到"MainActivity 上不来"。
  */
 internal fun UiDevice.ensureEditorOpen() {
     if (wait(Until.hasObject(By.clazz(SORA_EDITOR_CLASS)), 3_000L)) return
 
-    // 全新安装的首屏是引导页：路由只在 SplashActivity 上做拦截
-    // （SplashActivity.kt:142-143 读 DataStore onboarding/completed 决定去
-    // OnboardingActivity 还是 MainActivity，:87-89 执行跳转），MainActivity 自身不拦。
-    // 显式直启 MainActivity 绕开引导，不点 UI、也不在设备外伪造 protobuf。
+    // 路由判定在 SplashActivity（:142-143 读 DataStore onboarding/completed，
+    // :87-89 决定去 OnboardingActivity 还是 MainActivity），所以直启主界面绕开它。
+    // 带 --activity-clear-task 是本次返工的关键差异：上一次实测 `am start` 被接受
+    // （输出只有 `Starting: Intent { cmp=com.draftpeek/.MainActivity }`，无 Error 尾巴、
+    // 也非 Permission Denial）但顶层仍是 OnboardingActivity —— 三个 activity 都没声明
+    // launchMode（app/src/main/AndroidManifest.xml:56-77），故排除"被压在既有任务顶上"
+    // 只能靠新任务 + 下一轮看 crash/栈证据定性。
     val launchOutput = launchMainActivityDirectly()
 
-    // 「新建文件」是 speed-dial 的菜单项，折叠态被 AnimatedVisibility 摘出无障碍树
-    // （core/ui BrandFAB.kt:97-98），所以必须先展开主 FAB 才可能找到它。
-    var newFile: UiObject2? = findNewFileEntry()
-    if (newFile == null && expandSpeedDial()) newFile = findNewFileEntry()
-    if (newFile == null) error(diagnoseInaccessible(launchOutput))
+    val newFile = findNewFileEntry() ?: error(diagnoseInaccessible(launchOutput))
 
     newFile.click()
     waitForIdle()
@@ -98,31 +98,7 @@ internal fun UiDevice.ensureEditorOpen() {
 private fun UiDevice.findNewFileEntry(): UiObject2? =
     NEW_FILE_LABELS.firstNotNullOfOrNull { label -> findByTextOrDesc(label) }
 
-/**
- * 展开主 FAB，返回是否展开成功。
- *
- * 把手取主 FAB 自己的图标语义：`core/ui/.../BrandFAB.kt:183` 的
- * `contentDescription = if (expanded) "Close menu" else "Add"`。这两串是硬编码英文，
- * 不随 zh / en / ja / ko 漂移，因此比按坐标或按 `FABSize` 折算屏幕位置稳。
- * 展开态本身用 "Close menu" 或菜单项出现来确认，不靠 sleep 猜动画时长。
- */
-private fun UiDevice.expandSpeedDial(): Boolean {
-    val collapsedHandle = findObject(By.desc(FAB_COLLAPSED_DESC))
-    if (collapsedHandle == null) {
-        // 主 FAB 不在折叠态：可能已展开，也可能当前界面根本没有 speed-dial。
-        return speedDialExpanded()
-    }
-    collapsedHandle.click()
-    wait(Until.hasObject(By.desc(FAB_EXPANDED_DESC)), SPEED_DIAL_EXPAND_TIMEOUT_MS)
-    waitForIdle()
-    return speedDialExpanded()
-}
-
-/** speed-dial 是否处于展开态（图标变 Close menu，或菜单项已进无障碍树）。 */
-private fun UiDevice.speedDialExpanded(): Boolean =
-    findObject(By.desc(FAB_EXPANDED_DESC)) != null || findNewFileEntry() != null
-
-/** 主 FAB 当前可观测状态，供失败诊断分辨"停在别的页面"与"展开失败"。 */
+/** 主 FAB 可观测状态，仅供诊断分辨"当前页面到底有没有 speed-dial"。 */
 private fun UiDevice.fabState(): String = when {
     findObject(By.desc(FAB_EXPANDED_DESC)) != null -> FAB_EXPANDED_DESC
     findObject(By.desc(FAB_COLLAPSED_DESC)) != null -> FAB_COLLAPSED_DESC
@@ -130,16 +106,20 @@ private fun UiDevice.fabState(): String = when {
 }
 
 /**
- * 显式启动 `com.draftpeek/com.draftpeek.MainActivity`，返回 `am start` 的原始输出。
+ * 以新任务显式启动 `com.draftpeek/com.draftpeek.MainActivity`，返回 `am start` 原始输出。
  *
- * 依赖 CI 镜像是 `google_apis`（userdebug，shell 持 `START_ANY_ACTIVITY`）才能启动
- * 非 exported 的 Activity；上一轮 run 35970870476 的实测原文是
- * `Starting: Intent { cmp=com.draftpeek/.MainActivity }`，无 Permission Denial，前提成立。
+ * CI 镜像是 `google_apis`（userdebug，shell 持 `START_ANY_ACTIVITY`）所以能启动
+ * 非 exported 的组件 —— run 36017565614 的原文只有 `Starting: Intent {...}`，
+ * 既无 Permission Denial 也无 Error 尾巴，前提已被实测确认。
  */
-private fun UiDevice.launchMainActivityDirectly(): String = try {
-    executeShellCommand("am start -n $TARGET_PACKAGE/.MainActivity")
-} catch (t: Throwable) {
-    "executeShellCommand 异常: ${t.message}"
+private fun UiDevice.launchMainActivityDirectly(): String {
+    val output = try {
+        executeShellCommand("am start --activity-clear-task -n $TARGET_PACKAGE/.MainActivity")
+    } catch (t: Throwable) {
+        "executeShellCommand 异常: ${t.message}"
+    }
+    waitForIdle()
+    return output
 }
 
 /**
@@ -150,12 +130,21 @@ private fun UiDevice.diagnoseInaccessible(launchOutput: String): String =
     "既未发现编辑器也未找到「新建文件」入口 | resumed=" + resumedActivity() +
         " | focus=" + focusedWindow() +
         " | fab=" + fabState() +
+        " | crash=" + crashLog() +
+        " | stack=" + activityStack() +
         " | launch=" + flat(launchOutput, 140) + "\n" +
-        "判读: launch 含 Permission Denial ⇒ 镜像 shell 无权启动非 exported 组件；" +
-        "fab=" + FAB_COLLAPSED_DESC + " ⇒ 已在带 speed-dial 的界面但展开失败；" +
-        "fab=" + FAB_EXPANDED_DESC + " ⇒ 展开成功而菜单文案不匹配；" +
-        "fab=absent ⇒ 当前界面没有 FAB（多半仍不在 MainActivity）。" +
-        "resumed/focus 若显示为「无匹配行」，看括号里的字节数与 head 判断是截断还是没有该字段。"
+        "判读: crash 非空 ⇒ MainActivity 起来即崩（属生产缺陷，该修 app 而非测试）；" +
+        "stack 里只有 OnboardingActivity ⇒ 直启没落地（看 launch 的 Error/Warning 尾巴）；" +
+        "stack 有 MainActivity 而 resumed 是 Onboarding ⇒ MainActivity 被立即 finish；" +
+        "launch 含 Permission Denial ⇒ 镜像 shell 无权启动非 exported 组件；" +
+        "fab≠absent ⇒ 已在 MainActivity，此时才轮到 speed-dial/文案这一层。" +
+        "任一探针显示「无匹配行」时看括号里的字节数与 head，判断是输出被截断还是真没有该字段。"
+
+/** 崩溃缓冲：MainActivity 若在 release 构建里起不来，这是唯一的直接证据。 */
+private fun UiDevice.crashLog(): String = shellProbe("logcat -d -b crash -t 200", "com.draftpeek", "FATAL")
+
+/** 目标包当前在 activity 栈里的记录，用于判断 MainActivity 到底有没有被创建。 */
+private fun UiDevice.activityStack(): String = shellProbe("dumpsys activity activities", "u0 $TARGET_PACKAGE/")
 
 /**
  * 取一条 shell 输出里的关键行；取不到时**必须**报告输出规模与开头若干字节，
