@@ -15,6 +15,18 @@ android {
         minSdk = libs.versions.minSdk.get().toInt()
         consumerProguardFiles("consumer-rules.pro")
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
+        // CI 上的模拟器只作 smoke test（用例跑不跑得起来），不作性能基线：
+        // 硬基线只认专用设备 runner（真机 / Cuttlefish），模拟器读数没有可比性。
+        // androidx.benchmark 默认会用断言拒绝在受污染的测量环境下出数，三条各自的来源：
+        //   EMULATOR        —— 5 条 macro 用例（Startup×3 / EditorScroll / EditorInput）
+        //   ACTIVITY-MISSING —— 8 条 FileRead*：:benchmark 是自 instrument 的 library，
+        //                       microbenchmark 全程不启动 Activity
+        //   DEBUGGABLE      —— 同上 8 条：未配 android.testBuildType，androidTest 只能跟
+        //                       debug 变体走，被测进程必然带 FLAG_DEBUGGABLE
+        // 只抑制 EMULATOR 的话那 8 条仍会红，故三条一起列。本行不改变任何被测代码路径，
+        // 也不放宽发布产物口径（release 包仍走 release.yml 的 apksigner 校验）。
+        testInstrumentationRunnerArguments["androidx.benchmark.suppressErrors"] =
+            "EMULATOR,DEBUGGABLE,ACTIVITY-MISSING"
     }
 
     compileOptions {
