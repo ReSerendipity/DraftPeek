@@ -516,7 +516,11 @@ jobs:
           profile: pixel_5
           heap-size: 512M
           ram-size: 2048M
-          emulator-options: -no-window -gpu swiftshader_indirect -no-snapshot -noaudio -no-boot-anim
+          # headed 模拟器（去掉 -no-window）：无头模式下 app resumed 但 input focus
+          # 停在 launcher，UiAutomator 点击被 launcher 吞掉（run 36120757720 实测
+          # CodeEditor 15s 超时）。reactivecircus action 在 Linux runner 上需 xvfb
+          # 提供虚拟显示。
+          emulator-options: -gpu swiftshader_indirect -no-snapshot -noaudio -no-boot-anim
           disable-animations: true
           script: |
             # benchmark 是 library 模块，androidTest 只生成 debug 测试变体——

@@ -113,6 +113,9 @@ internal fun UiDevice.ensureEditorOpen() {
     if (newFile == null && expandSpeedDial()) newFile = findNewFileEntry()
     if (newFile == null) error(diagnoseInaccessible("展开 speed-dial 后仍无「新建文件」入口"))
 
+    // ③ 无头模拟器（-no-window）下 launcher 持有 input focus，app 虽 resumed 但点击落空。
+    // headed 模式下先确保被测窗口拿到焦点，再发点击。
+    waitForIdle()
     newFile.click()
     waitForIdle()
     requireEditor()
