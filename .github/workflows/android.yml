@@ -535,6 +535,13 @@ jobs:
             # （release.yml run #5 实测：if/fi 被拆进两次调用 → "end of file unexpected"、
             # exit 2）。同一条单行写法在 release.yml run #6 已验证有效。
             APK_PATH=$(find app/build/outputs/apk/production/release -name '*.apk' | head -1); test -n "$APK_PATH" || { echo '::error::No production release APK available to install'; exit 1; }; adb install -r -g "$APK_PATH"
+            # A' 方案：预置两道首启门（引导页 DataStore onboarding/completed + 协议弹窗
+            # SharedPreferences agreement/accepted_v1），让用例走真实用户的 LAUNCHER 路径
+            # 由 SplashActivity 自己导航进 MainActivity —— 不再直启、也不再点 UI 走引导。
+            # 逻辑必须落在文件里：本 action 把 script 逐行交给 /usr/bin/sh -c，多步 shell
+            # （root 断言、写完回读自证、fail-closed 三件套）在跨行上下文里活不下来。
+            # 顺序要求：被测包先装（/data/data/com.draftpeek 由安装产生）再预置。
+            bash benchmark/ci/preseed-onboarding-gate.sh
             ./gradlew :benchmark:connectedDebugAndroidTest --stacktrace
 
       - name: Upload Benchmark Reports

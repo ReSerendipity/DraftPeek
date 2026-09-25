@@ -71,30 +71,28 @@ internal fun UiDevice.requireEditor(): UiObject2 {
  * 之所以要兼容「启动后已在编辑器」的情况：Macrobenchmark 以 WARM 模式重启 Activity，
  * 系统可能恢复到上次离开时的界面。
  *
- * 曾假设失败点是 speed-dial FAB 折叠，被 run 36017565614 的诊断否掉：`resumed` 与
- * `focus` 两次（t8/t9）都停在 `com.draftpeek/.onboarding.OnboardingActivity`，
- * 界面上压根没有那个 FAB。故展开 FAB 的代码已撤除，问题回到"MainActivity 上不来"。
+ * 前置：两道"首启门"由 CI 在跑用例前预置成已过状态 —— 引导页
+ * （DataStore onboarding/completed，读点 SplashActivity.kt:141-143）与协议弹窗
+ * （SharedPreferences agreement/accepted_v1，读点 MainActivity.kt:173-175，未同意时
+ * AgreementGateDialog 常驻、点不到「新建文件」）。见 benchmark/ci/preseed-onboarding-gate.sh。
+ * 因此这里**不再**直启 MainActivity，也不再点 UI 走引导：setupBlock 的
+ * pressHome + startActivityAndWait 走的是真实用户的 LAUNCHER 路径，由 Splash 自己导航。
+ *
+ * 历史：曾假设是 speed-dial FAB 折叠（run 36017565614 否掉：resumed/focus 都是
+ * OnboardingActivity、fab=absent）；又试过 `am start --activity-clear-task` 直启
+ * （run 36029759144 否掉：am start 被接受但栈内无 MainActivity record、焦点在桌面）。
  */
 internal fun UiDevice.ensureEditorOpen() {
     if (wait(Until.hasObject(By.clazz(SORA_EDITOR_CLASS)), 3_000L)) return
 
-    // 路由判定在 SplashActivity（:142-143 读 DataStore onboarding/completed，
-    // :87-89 决定去 OnboardingActivity 还是 MainActivity），所以直启主界面绕开它。
-    // 带 --activity-clear-task 是本次返工的关键差异：上一次实测 `am start` 被接受
-    // （输出只有 `Starting: Intent { cmp=com.draftpeek/.MainActivity }`，无 Error 尾巴、
-    // 也非 Permission Denial）但顶层仍是 OnboardingActivity —— 三个 activity 都没声明
-    // launchMode（app/src/main/AndroidManifest.xml:56-77），故排除"被压在既有任务顶上"
-    // 只能靠新任务 + 下一轮看 crash/栈证据定性。
-    val launchOutput = launchMainActivityDirectly()
-
-    val newFile = findNewFileEntry() ?: error(diagnoseInaccessible(launchOutput))
+    val newFile = findNewFileEntry() ?: error(diagnoseInaccessible())
 
     newFile.click()
     waitForIdle()
     requireEditor()
 }
 
-/** 「新建文件」菜单项：展开后 label 落在文案上、mini 图标落在 content-desc 上。 */
+/** 「新建文件」菜单项：label 落在文案上、mini 图标落在 content-desc 上。 */
 private fun UiDevice.findNewFileEntry(): UiObject2? =
     NEW_FILE_LABELS.firstNotNullOfOrNull { label -> findByTextOrDesc(label) }
 
@@ -106,39 +104,19 @@ private fun UiDevice.fabState(): String = when {
 }
 
 /**
- * 以新任务显式启动 `com.draftpeek/com.draftpeek.MainActivity`，返回 `am start` 原始输出。
- *
- * CI 镜像是 `google_apis`（userdebug，shell 持 `START_ANY_ACTIVITY`）所以能启动
- * 非 exported 的组件 —— run 36017565614 的原文只有 `Starting: Intent {...}`，
- * 既无 Permission Denial 也无 Error 尾巴，前提已被实测确认。
- */
-private fun UiDevice.launchMainActivityDirectly(): String {
-    val output = try {
-        executeShellCommand("am start --activity-clear-task -n $TARGET_PACKAGE/.MainActivity")
-    } catch (t: Throwable) {
-        "executeShellCommand 异常: ${t.message}"
-    }
-    waitForIdle()
-    return output
-}
-
-/**
  * 失败诊断。第一行就把全部证据排完 —— AGP 的文本报告只打印异常message 的前两行，
  * 证据放在第 3 行等于没有（上一轮的「窗口焦点」正是这样丢的）。
  */
-private fun UiDevice.diagnoseInaccessible(launchOutput: String): String =
-    "既未发现编辑器也未找到「新建文件」入口 | resumed=" + resumedActivity() +
-        " | focus=" + focusedWindow() +
-        " | fab=" + fabState() +
-        " | crash=" + crashLog() +
-        " | stack=" + activityStack() +
-        " | launch=" + flat(launchOutput, 140) + "\n" +
-        "判读: crash 非空 ⇒ MainActivity 起来即崩（属生产缺陷，该修 app 而非测试）；" +
-        "stack 里只有 OnboardingActivity ⇒ 直启没落地（看 launch 的 Error/Warning 尾巴）；" +
-        "stack 有 MainActivity 而 resumed 是 Onboarding ⇒ MainActivity 被立即 finish；" +
-        "launch 含 Permission Denial ⇒ 镜像 shell 无权启动非 exported 组件；" +
-        "fab≠absent ⇒ 已在 MainActivity，此时才轮到 speed-dial/文案这一层。" +
-        "任一探针显示「无匹配行」时看括号里的字节数与 head，判断是输出被截断还是真没有该字段。"
+private fun UiDevice.diagnoseInaccessible(): String = "既未发现编辑器也未找到「新建文件」入口 | resumed=" + resumedActivity() +
+    " | focus=" + focusedWindow() +
+    " | fab=" + fabState() +
+    " | crash=" + crashLog() +
+    " | stack=" + activityStack() + "\n" +
+    "判读（A' 预置已跑过的前提下）：resumed 仍是 .onboarding.OnboardingActivity ⇒ 引导门没预置成功" +
+    "（查 preseed 步骤的 ls -lZ/od -c 回读输出）；resumed 是 .MainActivity 而 fab=absent 且入口找不到" +
+    "⇒ 协议弹窗仍在（查 agreement/accepted_v1）或 FAB 折叠；crash 非空 ⇒ MainActivity 起来即崩，" +
+    "属生产缺陷、停手修 app；focus 是 Launcher ⇒ 应用根本没在前台，是启动时序问题不是门的问题。" +
+    "任一探针显示「无匹配行」时看括号里的字节数与 head，判断是输出被截断还是真没有该字段。"
 
 /** 崩溃缓冲：MainActivity 若在 release 构建里起不来，这是唯一的直接证据。 */
 private fun UiDevice.crashLog(): String = shellProbe("logcat -d -b crash -t 200", "com.draftpeek", "FATAL")
