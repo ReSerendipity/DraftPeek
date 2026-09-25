@@ -516,11 +516,12 @@ jobs:
           profile: pixel_5
           heap-size: 512M
           ram-size: 2048M
-          # headed 模拟器（去掉 -no-window）：无头模式下 app resumed 但 input focus
-          # 停在 launcher，UiAutomator 点击被 launcher 吞掉（run 36120757720 实测
-          # CodeEditor 15s 超时）。reactivecircus action 在 Linux runner 上需 xvfb
-          # 提供虚拟显示。
-          emulator-options: -gpu swiftshader_indirect -no-snapshot -noaudio -no-boot-anim
+          # 必须保留 -no-window：runner 上没有 X。全仓 .github 里 "xvfb" 只出现在
+          # 1d36408 加的那句注释文字中，没有任何安装/启动 Xvfb 的步骤，另两处 emulator
+          # 路径（actions/instrumented-tests、release.yml）也都带着 -no-window。
+          # 1d36408 改走 headed 的尝试按 2026-09-25 裁决复原；无头档的焦点问题不需要 headed 来绕 ——
+          # macro 改为消费 CI 预置的种子文件（benchmark/ci/preseed-onboarding-gate.sh 步骤②d）。
+          emulator-options: -no-window -gpu swiftshader_indirect -no-snapshot -noaudio -no-boot-anim
           disable-animations: true
           script: |
             # benchmark 是 library 模块，androidTest 只生成 debug 测试变体——

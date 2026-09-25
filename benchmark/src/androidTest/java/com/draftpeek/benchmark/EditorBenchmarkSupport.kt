@@ -9,8 +9,9 @@
  * 因此 UiAutomator 可以直接按类名命中，不受系统语言、字号、主题影响。
  *
  * 反之，纯 Compose 节点只能借助无障碍语义树（文案 / contentDescription）定位，
- * 而这些字符串会随系统语言漂移——本项目支持 zh/en/ja/ko 四语言，
- * 所以凡是必须按文案查找的地方，都改成遍历 [NEW_FILE_LABELS] 四语言候选。
+ * 而这些字符串会随系统语言漂移（本项目支持 zh / en / ja / ko / zh-rTW）。
+ * 因此本文件里唯一按文案定位的地方用的是**文件名** [SEED_FILE_NAME] —— 它由 CI 自己写入，
+ * 不是本地化文案，天然不随语言漂移。
  *
  * ## 运行前提（CI 与本地一致）
  * 1. 安装 production release 变体的应用（CI 由 `android.yml` 的 Macrobenchmark job
@@ -20,11 +21,14 @@
  * 3. 首启两道门由 CI 在跑用例前预置成已过状态（`benchmark/ci/preseed-onboarding-gate.sh`：
  *    DataStore `onboarding/completed` + SharedPreferences `agreement/accepted_v1`），
  *    因此用例走真实用户的 LAUNCHER 路径，不直启 Activity、也不点 UI 走引导；
- * 4. 预置过后 `MainActivity` 的**初始态是折叠的 speed-dial FAB**，菜单项不在无障碍树里，
- *    所以展开 FAB 属于用例前置的一部分（见 [ensureEditorOpen]），不是失败兜底。
+ * 4. 同一脚本还往 `files/user_files/` 播一个 [SEED_FILE_NAME]，用例点它的列表行进编辑器：
+ *    性能腿不背「新建文件」对话框（其主按钮 `enabled = filename.isNotBlank()`）与无头档
+ *    IME 注入的不确定性。新建链路的功能断言在
+ *    `feature/browser/src/androidTest/.../CreateFileDialogFlowTest.kt`，两边不可互相冒充。
  */
 package com.draftpeek.benchmark
 
+import android.util.Log
 import androidx.test.platform.app.InstrumentationRegistry
 import androidx.test.uiautomator.By
 import androidx.test.uiautomator.UiDevice
@@ -43,10 +47,20 @@ internal const val FIND_OBJECT_TIMEOUT_MS = 15_000L
 /** 单次测量中连续输入的字符数，模拟一次中等长度的连续键入。 */
 internal const val INPUT_BURST = "fun benchmarkFrameTimingUnderTyping(): Int = 42\n"
 
-/** 「新建文件」在四语言下的文案，用于跨语言定位 FAB 菜单项。 */
-internal val NEW_FILE_LABELS = listOf("新建文件", "New file", "新規ファイル", "새 파일")
+/**
+ * CI 预置进 `files/user_files/` 的种子文件名。
+ *
+ * 写入方与回读自证在 `benchmark/ci/preseed-onboarding-gate.sh` 步骤②d/②e；两侧必须同名，
+ * 改名要同时改两处。生产依据：`AppFileManager.kt:23,33-37`（`filesDir/user_files`）、
+ * 该目录即浏览器默认根（`FileBrowserScreen.kt:1560` 走 `internalFiles`）⇒ 只需 1 次点击。
+ * `aaa` 前缀是为了在默认排序 NAME_ASC 下落在首屏（`FileSortOption.kt:44-46`）。
+ */
+internal const val SEED_FILE_NAME = "aaa_bench_seed.kt"
 
-/** 主 FAB 折叠 / 展开态的图标语义（core/ui BrandFAB.kt:183 硬编码英文）。 */
+/** 取证行的双通道标签（println + Log.i，某一条不落进 CI 产物时还有另一条）。 */
+private const val TAG = "DraftPeekBench"
+
+/** 主 FAB 折叠 / 展开态的图标语义（core/ui BrandFAB.kt:183 硬编码英文），仅用于诊断定位停在哪个页面。 */
 private const val FAB_COLLAPSED_DESC = "Add"
 private const val FAB_EXPANDED_DESC = "Close menu"
 
@@ -59,46 +73,65 @@ private const val FAB_EXPANDED_DESC = "Close menu"
  */
 private const val APP_WINDOW_TIMEOUT_MS = 10_000L
 
-/** 等 speed-dial 展开确认的上限：200ms 旋转 + 每项 40ms 错峰 + 150ms 淡入，留一倍余量。 */
-private const val SPEED_DIAL_EXPAND_TIMEOUT_MS = 2_000L
-
 /**
  * 等待编辑器出现并返回它。
  *
- * @throws IllegalStateException 超时未找到时抛出，附可操作的排查指引
+ * 成功时也打一行取证（`DRAFTPEEK_BENCH editor-ok`）。run 36120757720 暴露的盲区：取证只挂在
+ * 失败分支上，于是"红点前移到 requireEditor"那一轮反而**没有**任何焦点/可见性读数可看。
+ * 性能腿必须能自证"真的进了 CodeEditor"，不能只在摔倒时才有仪表。
  */
 internal fun UiDevice.requireEditor(): UiObject2 {
     wait(Until.hasObject(By.clazz(SORA_EDITOR_CLASS)), FIND_OBJECT_TIMEOUT_MS)
-    return findObject(By.clazz(SORA_EDITOR_CLASS))
-        ?: error(
-            "在 ${FIND_OBJECT_TIMEOUT_MS}ms 内未找到 $SORA_EDITOR_CLASS。请确认：\n" +
-                "1) 安装的是 production release 包（CI 由 android.yml 的 Macrobenchmark job 装）；\n" +
-                "2) 设备已解锁且在桌面无锁屏遮挡；\n" +
-                "3) 「新建文件」入口能点进编辑器（它是 FileBrowserScreen.kt:3056 起的 " +
-                "speed-dial 菜单项，折叠态下按文案找不到）。"
-        )
+    val editor = findObject(By.clazz(SORA_EDITOR_CLASS))
+    if (editor != null) {
+        val line = "editor-ok | seed=$SEED_FILE_NAME | visibleBounds=${editor.visibleBounds} | " + evidenceLine()
+        println("DRAFTPEEK_BENCH $line")
+        Log.i(TAG, line)
+        return editor
+    }
+    error(
+        "在 ${FIND_OBJECT_TIMEOUT_MS}ms 内未找到 $SORA_EDITOR_CLASS | " + evidenceLine() + "\n" +
+            "点了列表项仍没有 CodeEditor 时按这行判读：seed 与 preseed 步骤②d 不一致 ⇒ 找错了行；" +
+            "resumed 不是 .MainActivity ⇒ 点击把界面带去了别处；win 里 isVisible=false ⇒ 编辑器页" +
+            "没上屏；win 里可见但 hasFocus=false ⇒ 点击没落到 app 窗口；crash 非空 ⇒ 编辑器初始化" +
+            "崩了（wrapperError 分支会渲染 EditorInitErrorScreen，那属生产缺陷，该修 app 不是修测试）。"
+    )
 }
 
 /**
- * 确保界面已进入编辑器：等应用窗口可交互 → 展开 speed-dial → 点「新建文件」。
+ * 确保界面已进入编辑器：等应用窗口可交互 → 点 CI 预置的种子文件行 → 等 CodeEditor。
  *
- * 之所以要兼容「启动后已在编辑器」的情况：Macrobenchmark 以 WARM 模式重启 Activity，
+ * 之所以兼容「启动后已在编辑器」：Macrobenchmark 以 WARM 模式重启 Activity，
  * 系统可能恢复到上次离开时的界面。
  *
- * 前置：两道"首启门"由 CI 在跑用例前预置成已过状态 —— 引导页
- * （DataStore onboarding/completed，读点 SplashActivity.kt:141-143）与协议弹窗
- * （SharedPreferences agreement/accepted_v1，读点 MainActivity.kt:173-175）。
- * 见 benchmark/ci/preseed-onboarding-gate.sh；run 36104204506 已用设备侧回读证实两者生效
- * （`resumed` 变为 `.MainActivity`、`od -c` 17 字节、属主/SELinux 标签正确）。
- * 因此这里**不**直启 MainActivity、也**不**点 UI 走引导：setupBlock 的
- * pressHome + startActivityAndWait 走真实用户的 LAUNCHER 路径，由 Splash 自己导航。
+ * ## 为什么点列表项，而不走「新建文件」
+ * 新建链路是 FAB → CreateFileDialog 输文件名 → 「创建并打开」→ 才导航到编辑器
+ * （FileBrowserScreen.kt:3060 只把 showCreateFileDialog 置 true；CreateFileDialog.kt:198
+ * 的主按钮 enabled = filename.isNotBlank()）。run 36120757720 实测正卡在这：点了菜单项
+ * 之后 15s 内永远等不到 CodeEditor，因为对话框还在等输入。让性能基线背这条 UI 链与无头档
+ * IME 注入的不确定性只会造出假红，所以这里改为消费 CI 预置的文件；
+ * **新建链路自身的功能覆盖在 feature/browser/src/androidTest/.../CreateFileDialogFlowTest.kt**，
+ * 两者不可互相冒充。
  *
- * 历史（三条被实测处理掉的假设）：
- * - 「停在引导页」：预置后已不复现（run 36017565614 时是它，run 36104204506 已穿过去）。
+ * ## 前置（三项都由 benchmark/ci/preseed-onboarding-gate.sh 完成并回读自证）
+ * 1. 引导页 DataStore `onboarding/completed`（读点 SplashActivity.kt:141-143）；
+ * 2. 协议弹窗 SharedPreferences `agreement/accepted_v1`（读点 MainActivity.kt:173-175）；
+ *    以上两项 run 36104204506 已用设备侧回读证实生效（resumed 变 .MainActivity、od -c 17 字节）；
+ * 3. 种子文件 [SEED_FILE_NAME] 落在 `files/user_files/`，该目录即浏览器默认根，1 次点击可达。
+ * 预置后应用走真实用户的 LAUNCHER 路径、由 Splash 自己导航；本文件不直启 Activity。
+ *
+ * ## 幂等
+ * 编辑器只在显式保存动作时落盘（saveFile 的调用点只有保存按钮 / 另存 / 编码对话框：
+ * EditorScreen.kt:361,879,1091 与 EditorViewModel.kt:1134），没有 onPause 自动保存。
+ * 键入只改内存文档，WARM 重启后从盘重读 ⇒ 每轮迭代初始内容一致，无需逐轮复位。
+ *
+ * ## 历史（四条被实测处理掉的假设）
+ * - 「停在引导页」：预置后不复现（run 36017565614 是它，36104204506 已穿过去）。
  * - 「`am start --activity-clear-task` 直启」：run 36029759144 否掉（被接受但栈内无
  *   MainActivity record、焦点在桌面）。
- * - 「折叠 FAB 无需处理」：run 36104204506 反否 —— `fab=Add` 且菜单项不在树里，
- *   展开它是到达「新建文件」的必经前置，故本函数把展开写成正路而非兜底。
+ * - 「展开 FAB 就到新建文件」：展开本身确实生效（run 36120757720 里入口被找到并点了），
+ *   但点了之后还有对话框 —— 这条路对性能腿太长，按裁决放弃。
+ * - 「改 headed 模拟器绕焦点」：1d36408 试过，按 2026-09-25 裁决复原（runner 上没有 X）。
  */
 internal fun UiDevice.ensureEditorOpen() {
     if (wait(Until.hasObject(By.clazz(SORA_EDITOR_CLASS)), 3_000L)) return
@@ -108,44 +141,35 @@ internal fun UiDevice.ensureEditorOpen() {
         error(diagnoseInaccessible("${APP_WINDOW_TIMEOUT_MS}ms 内应用无可交互窗口"))
     }
 
-    // ② 控件层：折叠态的菜单项被 AnimatedVisibility 摘出无障碍树（BrandFAB.kt:97-98）。
-    var newFile = findNewFileEntry()
-    if (newFile == null && expandSpeedDial()) newFile = findNewFileEntry()
-    if (newFile == null) error(diagnoseInaccessible("展开 speed-dial 后仍无「新建文件」入口"))
+    // ② 列表层：按种子文件名命中行（preseed 步骤②e 已断言该目录下 .kt 唯一，故无歧义）。
+    val row = findSeededFileRow()
+        ?: error(diagnoseInaccessible("列表里找不到预置文件 $SEED_FILE_NAME，查 preseed ②d/②e 输出"))
 
-    // ③ 无头模拟器（-no-window）下 launcher 持有 input focus，app 虽 resumed 但点击落空。
-    // headed 模式下先确保被测窗口拿到焦点，再发点击。
-    waitForIdle()
-    newFile.click()
+    row.click()
     waitForIdle()
     requireEditor()
 }
 
-/** 「新建文件」菜单项：label 落在文案上、mini 图标落在 content-desc 上。 */
-private fun UiDevice.findNewFileEntry(): UiObject2? =
-    NEW_FILE_LABELS.firstNotNullOfOrNull { label -> findByTextOrDesc(label) }
-
 /**
- * 展开主 FAB，返回是否展开成功。
+ * 种子文件的列表行。
  *
- * 把手取主 FAB 自己的图标语义：`core/ui/.../BrandFAB.kt:183` 的
- * `contentDescription = if (expanded) "Close menu" else "Add"`。这两串硬编码英文，
- * 不随 zh / en / ja / ko 漂移，比按坐标或按 `FABSize` 折算屏幕位置稳。
- * 展开态用 "Close menu" 或菜单项入树来确认，不靠 sleep 猜动画时长。
+ * 行内文件名是可见文案且含扩展名（BrandFileCard.kt:168），整行是 Compose `Card`
+ * （无障碍类名 `android.view.View`、可点击）。用 textContains 而不是精确匹配：同一行还有
+ * 文件大小与相对时间（BrandFileCard.kt:189），后者随语言与时钟变化。
  */
-private fun UiDevice.expandSpeedDial(): Boolean {
-    val collapsedHandle = findObject(By.desc(FAB_COLLAPSED_DESC))
-    if (collapsedHandle == null) return speedDialExpanded()
-
-    collapsedHandle.click()
-    wait(Until.hasObject(By.desc(FAB_EXPANDED_DESC)), SPEED_DIAL_EXPAND_TIMEOUT_MS)
-    waitForIdle()
-    return speedDialExpanded()
+private fun UiDevice.findSeededFileRow(): UiObject2? {
+    val selector = By.pkg(TARGET_PACKAGE).textContains(SEED_FILE_NAME)
+    wait(Until.hasObject(selector), FIND_OBJECT_TIMEOUT_MS)
+    return findObject(selector)
 }
 
-/** speed-dial 是否处于展开态（图标翻成 Close menu，或菜单项已进无障碍树）。 */
-private fun UiDevice.speedDialExpanded(): Boolean =
-    findObject(By.desc(FAB_EXPANDED_DESC)) != null || findNewFileEntry() != null
+/** 一行现场取证：焦点 / 窗口可见性 / FAB / 崩溃缓冲 / activity 栈。成功与失败两条路共用。 */
+private fun UiDevice.evidenceLine(): String = "resumed=" + resumedActivity() +
+    " | focus=" + focusedWindow() +
+    " | win=" + appWindowState() +
+    " | fab=" + fabState() +
+    " | crash=" + crashLog() +
+    " | stack=" + activityStack()
 
 /** 探针取不到值时的标记前缀：让"设备侧命令失败"与"环境里真没这行"在报告里长得不一样。 */
 private const val ShellFailurePrefix = "(异常"
@@ -164,12 +188,7 @@ private fun UiDevice.fabState(): String = when {
  * `win=` 一列专门用来分开两种"找不到"：窗口压根没上屏（isVisible=false）与
  * 上屏了但焦点仍在 launcher（isVisible=true 而 hasFocus=false ⇒ 点了也不落）。
  */
-private fun UiDevice.diagnoseInaccessible(reason: String): String = "前置未成立：$reason | resumed=" + resumedActivity() +
-    " | focus=" + focusedWindow() +
-    " | win=" + appWindowState() +
-    " | fab=" + fabState() +
-    " | crash=" + crashLog() +
-    " | stack=" + activityStack() + "\n" +
+private fun UiDevice.diagnoseInaccessible(reason: String): String = "前置未成立：$reason | " + evidenceLine() + "\n" +
     "判读（A' 两道门已由 run 36104204506 的设备侧回读证实已过）：resumed 仍是 " +
     ".onboarding.OnboardingActivity ⇒ 预置回退，查 preseed 的 od -c 输出；" +
     "win 里 isVisible=false ⇒ 应用窗口没上屏，属启动时序而非控件契约；" +
