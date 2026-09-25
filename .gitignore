@@ -142,6 +142,9 @@ design_system_draft.md
 !.github/SUPPORT.md
 !.github/ISSUE_TEMPLATE/*.md
 !/TESTING_SUMMARY.md
+# AGENTS.md 分发边界声明的可分发权威入口，显式豁免 *.md 通配（2026-09-21）
+!docs/CODING_STANDARDS.md
+!docs/README.md
 !docs/VERSIONING.md
 !docs/DATABASE_MIGRATION_STRATEGY.md
 !学习成果落地分析报告.md
