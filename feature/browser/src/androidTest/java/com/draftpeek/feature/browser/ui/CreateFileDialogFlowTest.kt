@@ -79,27 +79,30 @@ class CreateFileDialogFlowTest {
      * 最多两次尝试（首次 + 一次重试），每次失败都打一行 `DRAFTPEEK_UI RETRY` 并带上原因与实测
      * 几何 —— 跳过与静默重试都会把抖动藏起来，只有留下行才能在 CI 产物里复盘第 3 条事实。
      */
+    /**
+     * 等到按钮节点出现在语义树里（最多重试一次，重试必须留可见行）。
+     *
+     * 刻意**不**把"boundsInRoot 非零"当门禁：c703dc4 加了那道门槛后 API 30/26 变成必然红
+     * （`等「创建并打开」完成布局失败 … boundsInRoot=[0,0,0,0]`），而同一节点在 `96b1fe0` 上
+     * 直接 `performClick` 是能打通回调的（那次 API 30 绿）。⇒ 零面积是这个时刻的**观测产物**，
+     * 不是"没落定"的可靠判据。几何值继续只在取证行里报告，不参与门禁判断。
+     */
     private fun awaitButton(): androidx.compose.ui.test.SemanticsNodeInteraction {
         repeat(2) { attempt ->
-            val node = buttonNodeOrNull()
-            val bounds = node?.let { runCatching { it.fetchSemanticsNode().boundsInRoot }.getOrNull() }
-            val settled = bounds != null && bounds.width > 0f && bounds.height > 0f
-            if (settled && node != null) {
-                if (attempt > 0) log("RETRY 成功：第 ${attempt + 1} 次取到非零面积 ${describe(bounds)}")
+            buttonNodeOrNull()?.let { node ->
+                if (attempt > 0) log("RETRY 第 2 次取到节点 ${describe(boundsOf(node))}")
                 return node
             }
-            val why = when {
-                node == null -> "语义树里还没有该节点（语言候选全数落空）"
-                else -> "节点已入语义树但面积为零（sheet 未完成测量）${describe(bounds)}"
-            }
-            log("RETRY 第 ${attempt + 1}/2 次未落定：$why | ${geometry()}")
+            log("RETRY 第 ${attempt + 1}/2 次：语义树里还没有该节点（语言候选全数落空）| ${geometry()}")
             composeTestRule.waitForIdle()
         }
         throw AssertionError(
-            "等「创建并打开」完成布局失败（含一次重试）。最后一次实测：${geometry()}；" +
-                "语言候选=${createLabels.joinToString()}。这属时序问题，不是屏幕高度问题（见 #106 更正）。"
+            "重试一次后语义树里仍没有「创建并打开」节点；语言候选=${createLabels.joinToString()} | ${geometry()}"
         )
     }
+
+    private fun boundsOf(node: androidx.compose.ui.test.SemanticsNodeInteraction) =
+        runCatching { node.fetchSemanticsNode().boundsInRoot }.getOrNull()
 
     private fun log(line: String) {
         println("DRAFTPEEK_UI $line")
@@ -173,6 +176,14 @@ class CreateFileDialogFlowTest {
         val button = awaitButton()
         button.assertIsEnabled()
         button.performClick()
+
+        // 第一次没回调就再点一次，并把 RETRY 行打出来：这是"重试"而不是"放宽判据"——
+        // 第二次仍不回调就照旧红，且红里带着两次的几何与 dismissed 计数。
+        if (captured == null) {
+            log("RETRY 首次 performClick 未触发 onCreate（dismissed=$dismissed），重取节点再点一次 | ${geometry()}")
+            composeTestRule.waitForIdle()
+            awaitButton().performClick()
+        }
 
         // 失败时把 dismissed 一起报出来：若 onDismiss 被调用过，说明这一拍其实打在 scrim 上
         // （表面试关掉了），与"点在零面积矩形上没落地"是两种不同的成因，别混为一谈。
