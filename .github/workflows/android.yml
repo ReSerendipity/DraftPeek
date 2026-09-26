@@ -409,9 +409,13 @@ jobs:
         uses: actions/upload-artifact@v4
         with:
           name: draftpeek-release-apk
-          path: app/build/outputs/apk/release/*.apk
+          # 真实目录带 flavor 段：app/build/outputs/apk/production/release/。原来写的
+          # apk/release/*.apk 匹配不到任何文件，而 if-no-files-found: warn 下步骤结论仍是
+          # success —— run 36209028174 里这一步"绿"着却没有 draftpeek-release-apk 产物。
+          # 改 error：空匹配不再可能装成成功（macrobenchmark job 现在依赖这个产物）。
+          path: app/build/outputs/apk/production/release/*.apk
           retention-days: 7
-          if-no-files-found: warn
+          if-no-files-found: error
 
   # Macrobenchmark 性能测试 — 在 Android 模拟器上运行启动基准测试和文件读取基准测试
   # 使用 Release 构建（minified）以获取真实的性能数据
@@ -423,7 +427,9 @@ jobs:
     name: Macrobenchmark (API ${{ matrix.api-level }})
     runs-on: ubuntu-latest
     timeout-minutes: 45
-    needs: build-and-test
+    # release-build 提供被测 release APK（见下面的 Download Release APK），少掉一次 21m51s
+    # 的重复编译；build-and-test 仍是既有前置。
+    needs: [build-and-test, release-build]
     strategy:
       fail-fast: false
       matrix:
@@ -488,8 +494,17 @@ jobs:
       - name: Grant execute permission for gradlew
         run: chmod +x ./gradlew
 
-      - name: Build Release APK for Benchmark
-        run: ./gradlew :app:assembleRelease --stacktrace
+      # 被测 release APK 不再在本 job 里重编：run 36209028174 实测 `:app:assembleRelease`
+      # 单步 21m51s，把 macro job 的 45 分钟预算吃掉近一半，connectedDebugAndroidTest
+      # 到 02:16:09 才开始、02:32:22 被 timeout 取消（两个用例当时都还在出 editor-ok）。
+      # 同一个 run 的 release-build job 已经编过这个 APK，直接取产物即可。
+      - name: Download Release APK (built by release-build job)
+        uses: actions/download-artifact@v4
+        with:
+          name: draftpeek-release-apk
+          path: downloaded-release-apk
+          run-id: ${{ github.run_id }}
+          github-token: ${{ secrets.GITHUB_TOKEN }}
 
       # 与 .github/actions/instrumented-tests 同款清场：本 job 没有 instrumented 那样
       # 的 attempt1/attempt2 重试，一次 adb 5037 残留就直接红（run 268 即此因）。
@@ -539,7 +554,7 @@ jobs:
             # /usr/bin/sh -c 执行，跨行控制流与跨行变量都不可依赖
             # （release.yml run #5 实测：if/fi 被拆进两次调用 → "end of file unexpected"、
             # exit 2）。同一条单行写法在 release.yml run #6 已验证有效。
-            APK_PATH=$(find app/build/outputs/apk/production/release -name '*.apk' | head -1); test -n "$APK_PATH" || { echo '::error::No production release APK available to install'; exit 1; }; adb install -r -g "$APK_PATH"
+            APK_PATH=$(find downloaded-release-apk -name '*.apk' | head -1); test -n "$APK_PATH" || { echo '::error::No production release APK available to install（release-build 的 draftpeek-release-apk 产物是空的？）'; exit 1; }; adb install -r -g "$APK_PATH"
             # A' 方案：预置两道首启门（引导页 DataStore onboarding/completed + 协议弹窗
             # SharedPreferences agreement/accepted_v1），让用例走真实用户的 LAUNCHER 路径
             # 由 SplashActivity 自己导航进 MainActivity —— 不再直启、也不再点 UI 走引导。
