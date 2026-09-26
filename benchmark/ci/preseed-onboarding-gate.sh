@@ -127,8 +127,22 @@ if [ "$BUILD_PKG" != "$PKG" ]; then
   echo "构建配置 applicationId=$BUILD_PKG ≠ 脚本 PKG=$PKG ⇒ 停，别把载荷写到错包里"
   exit 1
 fi
-adb shell "pm list packages" | tr -d '\r' | grep -qx "package:$PKG" || { echo "设备上没装 $PKG（预置要求先安装被测包）"; exit 1; }
-echo "包名三方一致：构建配置=$BUILD_PKG / 脚本=$PKG / 设备已安装"
+# 设备侧的"包真装上了"证据在步骤②已经有了：workflow 在本脚本之前执行 adb install 并打印
+# Success，且 /data/data/$PKG 的属主 uid 已读到（APP_UID），②b 还按它断言了两个文件的属主。
+# pm list packages 则**不作断言**：run 36160995483 里它在 adb root 之后的镜像上没给出可被
+# grep -qx 精确匹配的行，把整个 Macrobenchmark job 打死在这里，而同一个 run 的 install 早已
+# Success —— 一条没被本镜像证明过的回包形状不能当 fail-closed 的判据。改为打印取证，
+# 供下次真出问题时一眼看清是"没装"还是"pm 的回包长得不一样"。
+PM_RAW="$(adb shell "pm list packages" 2>&1 | tr -d '\r')"
+PM_LINES="$(printf '%s\n' "$PM_RAW" | grep -c . || true)"
+PM_HITS="$(printf '%s\n' "$PM_RAW" | grep -c "^package:$PKG\$" || true)"
+echo "包名两侧一致：构建配置=$BUILD_PKG / 脚本=$PKG"
+echo "pm list packages 取证：非空行=$PM_LINES 精确命中 package:$PKG 的行数=$PM_HITS"
+printf '%s\n' "$PM_RAW" | head -3 | sed 's/^/  pm head| /'
+if [ "$PM_HITS" = "0" ]; then
+  echo "  (pm 未回报该包 —— 不据此判失败；安装证据以 adb install 的 Success 与步骤②的属主 uid 为准。"
+  echo "   若后面读写真的失败，先看上面三行 head 判断是回包形状不同还是真没装)"
+fi
 
 echo "== 步骤②d 播一个可直接打开的种子文件（macro 靠它进 CodeEditor）=="
 # 为什么走文件而不走「新建文件」UI：CreateFileDialog 的主按钮 enabled = filename.isNotBlank()

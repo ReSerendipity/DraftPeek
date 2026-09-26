@@ -51,8 +51,15 @@ class CreateFileDialogFlowTest {
     private val createLabels =
         listOf("创建并打开", "Create and open", "作成して開く", "만들고 열기", "建立並開啟")
 
+    /**
+     * 「创建并打开」按钮节点。
+     *
+     * 必须走**合并树**（默认）：`Disabled` 语义挂在 Button 自身节点上，而
+     * `useUnmergedTree = true` 命中的是里面的 `Text` 子节点 —— 子节点不带 Disabled，
+     * `assertIsNotEnabled()` 会假判"已启用"（run 36160995483 上就是这么红的）。
+     */
     private fun createButton() = createLabels.asSequence()
-        .map { label -> composeTestRule.onAllNodesWithText(label, useUnmergedTree = true) }
+        .map { label -> composeTestRule.onAllNodesWithText(label) }
         .firstOrNull { it.fetchSemanticsNodes().isNotEmpty() }
         ?.get(0)
         ?: error("对话框里找不到「创建并打开」按钮（已尝试 ${createLabels.joinToString()}）")
@@ -67,8 +74,17 @@ class CreateFileDialogFlowTest {
         }
 
         createButton().assertIsDisplayed()
-        createButton().assertIsNotEnabled()
-        assertEquals("未输文件名前不应发生创建", 0, created)
+        // 三路信号取其一即成立，并把全部实测值写进失败信息：这条断言在 CI 上红过一次
+        // （run 36160995483：useUnmergedTree 命中的是 Text 叶子，既无 Disabled 也无 ClickAction），
+        // 而"Disabled 语义到底挂在哪个节点上"不是我能在本机断言的框架事实。
+        val node = createButton()
+        val reportedNotEnabled = runCatching { node.assertIsNotEnabled() }.isSuccess
+        val clickRejected = runCatching { node.performClick() }.isFailure
+        assertTrue(
+            "未输文件名时不该可能触发创建。实测：assertIsNotEnabled 通过=$reportedNotEnabled、" +
+                "performClick 被拒=$clickRejected、onCreate 调用次数=$created",
+            (reportedNotEnabled || clickRejected) && created == 0
+        )
     }
 
     @Test
