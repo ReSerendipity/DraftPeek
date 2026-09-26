@@ -164,7 +164,10 @@ class CreateFileDialogFlowTest {
                 onCreate = { name, language, content -> captured = Triple(name, language, content) }
             )
         }
-        awaitButton().assertIsEnabled()
+        // 这里只等"落定"，不在输名前断言可用：空文件名时主按钮本就该 disabled，
+        // 提前 assertIsEnabled 会让本用例在三档上必然红（49dddbe 正是这么红的，
+        // run 36220797005 报 `Failed to assert the following: (is enabled)`）。
+        awaitButton()
 
         nameField().performTextInput("  bench_flow  ")
         val button = awaitButton()
