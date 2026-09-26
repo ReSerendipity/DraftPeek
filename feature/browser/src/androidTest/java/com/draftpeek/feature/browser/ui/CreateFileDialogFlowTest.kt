@@ -1,17 +1,21 @@
 package com.draftpeek.feature.browser.ui
 
 import android.content.Context
-import android.graphics.Rect
 import android.util.Log
 import android.view.inputmethod.InputMethodManager
+import androidx.compose.ui.semantics.SemanticsActions
 import androidx.compose.ui.test.assertIsDisplayed
 import androidx.compose.ui.test.assertIsEnabled
 import androidx.compose.ui.test.assertIsNotEnabled
+import androidx.compose.ui.test.click
 import androidx.compose.ui.test.hasSetTextAction
 import androidx.compose.ui.test.junit4.createComposeRule
 import androidx.compose.ui.test.onAllNodesWithText
 import androidx.compose.ui.test.performClick
+import androidx.compose.ui.test.performScrollTo
+import androidx.compose.ui.test.performSemanticsAction
 import androidx.compose.ui.test.performTextInput
+import androidx.compose.ui.test.performTouchInput
 import androidx.test.platform.app.InstrumentationRegistry
 import com.draftpeek.feature.browser.util.FileTemplateProvider
 import org.junit.Assert.assertEquals
@@ -32,26 +36,23 @@ import org.junit.Test
  * `if (filename.isNotBlank())` 二次判空：没名字时点它不会创建任何东西。run 36120757720 里
  * "点了菜单项后 15s 等不到 CodeEditor"就是链路停在这里。
  *
- * ## 三档实测定下来的三条框架事实（都写进过红里，不是推的）
+ * ## 三档实测定下来的框架事实（都写进过红里，不是推的）
  * 1. 按钮必须取**合并树**节点。`useUnmergedTree = true` 命中的是 Button 里的 Text 叶子
- *    （run 36160995483 转储：Actions 只有 SetTextSubstitution 那几个，既无 ClickAction 也无 Disabled）；
- *    API 34 上点叶子靠坐标转发侥幸命中父级，API 30/26 上静默无效。
- * 2. `performTextInput` 走语义 `SetTextAction`，在应用进程内直接改状态、不经软键盘窗口，
- *    所以"输入"这步在无头档可靠 —— 与"macro 要在真 UI 上打字"不是一回事。
- * 3. **语义节点会先于布局出现**。run `36215197822` 的取证行显示红的那一次
- *    `boundsInRoot=[0,0,0,0]` 而 `screen=1080x2208`、未超出屏幕下沿 ⇒ `ModalBottomSheet`
- *    刚把节点登记进语义树、还没测量；此时 `performClick` 点在零面积矩形上，等于没点。
- *    同一条断言在相邻两次 run 里一红一绿 ⇒ 这是时序抖动，不是按屏幕高度分档的稳定缺陷。
+ *    （run 36160995483 转储：Actions 只有 SetTextSubstitution 那几个，既无 ClickAction 也无 Disabled）。
+ * 2. `performTextInput` 走语义 `SetTextAction`，在应用进程内直接改状态、不经软键盘窗口。
+ * 3. 本 compose 版本的 `SemanticsNode` **没有** `visibleBounds` / `unclippedBoundsInWindow`
+ *    （javap 实测），可用的几何读数是 `boundsInRoot / boundsInWindow / touchBoundsInRoot /
+ *    positionOnScreen` —— 取证行报这四个。
  *
- * ## 因此进门先等"落定"，且重试必须可见
- * [awaitButton] 轮询到按钮节点**有非零面积**为止，最多重试一次；每次重试都打一行
- * `DRAFTPEEK_UI RETRY`（带原因与实测几何）。**不用 assume 跳过** —— 跳过会把抖动藏成"没发生"。
+ * ## 不 assume 跳过，也不拿几何读数当门禁
+ * `c703dc4` 曾把"boundsInRoot 非零"当前置，结果 API 30/26 变必然红；而 `96b1fe0` 上同一个
+ * 零面积节点直接 `performClick` 是能打通回调的 ⇒ 零面积只是那一刻的观测产物，只报告不否决。
  *
- * ## 覆盖边界（不含糊过去）
- * 只覆盖对话框的输入 → 创建回调这一段。"MainActivity 点 FAB → 置 showCreateFileDialog" 与
- * "onCreate → SnippetViewModel → 导航到 CodeEditor" 两头仍无设备断言：前者在 FileBrowserScreen
- * 内（默认参数 `hiltViewModel()`，本模块没有 hilt-android-testing），后者要 `:app` 的 instrumented
- * 变体，而 CI 跑 `connectedDebugAndroidTest` 时 `:app` 因 flavor 命名被静默跳过。
+ * ## API 26 点击不回调（#106，本文件的最后一轮定位）
+ * 剔除我自身 bug 的两个 sha 上稳定复现：`96b1fe0`、`2a1c43b` 都是 API 26 红、API 30/34 绿。
+ * 三路取证：A `performClick()`；B `performTouchInput { click() }`（另一条注入路径）；
+ * C 直投语义 `ClickAction` —— **C 触发的回调不算通过**（trigger 记为 probe），它只回答
+ * "坐标打不到"还是"控件本身没接上"。判据不变：必须由真手势（A 或 B）触发 onCreate。
  */
 class CreateFileDialogFlowTest {
 
@@ -62,10 +63,11 @@ class CreateFileDialogFlowTest {
     private val createLabels =
         listOf("创建并打开", "Create and open", "作成して開く", "만들고 열기", "建立並開啟")
 
-    private val screen = Rect().also { rect ->
-        val dm = InstrumentationRegistry.getInstrumentation().targetContext.resources.displayMetrics
-        rect.set(0, 0, dm.widthPixels, dm.heightPixels)
-    }
+    /** 语义节点出现后，等它连续两轮读数一致再动手（布局稳定）。 */
+    private val settleRounds = 3
+
+    private val metrics =
+        InstrumentationRegistry.getInstrumentation().targetContext.resources.displayMetrics
 
     /** 合并树里的按钮节点（见类注释事实 1）；语义树里还没有它就返回 null。 */
     private fun buttonNodeOrNull() = createLabels.asSequence()
@@ -73,56 +75,59 @@ class CreateFileDialogFlowTest {
         .firstOrNull { it.fetchSemanticsNodes().isNotEmpty() }
         ?.get(0)
 
-    /**
-     * 等按钮节点拿到非零面积再动手。
-     *
-     * 最多两次尝试（首次 + 一次重试），每次失败都打一行 `DRAFTPEEK_UI RETRY` 并带上原因与实测
-     * 几何 —— 跳过与静默重试都会把抖动藏起来，只有留下行才能在 CI 产物里复盘第 3 条事实。
-     */
-    /**
-     * 等到按钮节点出现在语义树里（最多重试一次，重试必须留可见行）。
-     *
-     * 刻意**不**把"boundsInRoot 非零"当门禁：c703dc4 加了那道门槛后 API 30/26 变成必然红
-     * （`等「创建并打开」完成布局失败 … boundsInRoot=[0,0,0,0]`），而同一节点在 `96b1fe0` 上
-     * 直接 `performClick` 是能打通回调的（那次 API 30 绿）。⇒ 零面积是这个时刻的**观测产物**，
-     * 不是"没落定"的可靠判据。几何值继续只在取证行里报告，不参与门禁判断。
-     */
+    /** 等到按钮节点进语义树，并等几何读数稳定；重试至多一次，且每次重试留可见行。 */
     private fun awaitButton(): androidx.compose.ui.test.SemanticsNodeInteraction {
         repeat(2) { attempt ->
-            buttonNodeOrNull()?.let { node ->
-                if (attempt > 0) log("RETRY 第 2 次取到节点 ${describe(boundsOf(node))}")
+            val node = buttonNodeOrNull()
+            if (node != null) {
+                awaitStableGeometry(node)
+                if (attempt > 0) log("RETRY 第 2 次才取到节点 | ${geometry(node)}")
                 return node
             }
-            log("RETRY 第 ${attempt + 1}/2 次：语义树里还没有该节点（语言候选全数落空）| ${geometry()}")
+            log("RETRY 第 ${attempt + 1}/2 次：语义树里还没有该节点（语言候选全数落空）")
             composeTestRule.waitForIdle()
         }
         throw AssertionError(
-            "重试一次后语义树里仍没有「创建并打开」节点；语言候选=${createLabels.joinToString()} | ${geometry()}"
+            "重试一次后语义树里仍没有「创建并打开」节点；语言候选=${createLabels.joinToString()}"
         )
     }
 
-    private fun boundsOf(node: androidx.compose.ui.test.SemanticsNodeInteraction) =
-        runCatching { node.fetchSemanticsNode().boundsInRoot }.getOrNull()
+    /** 连续 [settleRounds] 轮读数一致就收；仍在变就逐行打出变化，最后再试一次 performScrollTo。 */
+    private fun awaitStableGeometry(node: androidx.compose.ui.test.SemanticsNodeInteraction) {
+        var previous = geometry(node)
+        repeat(settleRounds) {
+            composeTestRule.waitForIdle()
+            val current = geometry(node)
+            if (current == previous) return
+            log("布局仍在变：$previous → $current")
+            previous = current
+        }
+        runCatching { node.performScrollTo() }
+            .onFailure { t ->
+                log("performScrollTo 不可用(${t.javaClass.simpleName}:${t.message})，用当前读数继续")
+            }
+        composeTestRule.waitForIdle()
+    }
 
     private fun log(line: String) {
         println("DRAFTPEEK_UI $line")
         Log.i(TAG, line)
     }
 
-    private fun describe(bounds: androidx.compose.ui.geometry.Rect?) =
-        bounds?.let { "[l=${it.left},t=${it.top},r=${it.right},b=${it.bottom}]" } ?: "(取不到)"
+    private fun rect(r: androidx.compose.ui.geometry.Rect?) =
+        r?.let { "[l=${it.left},t=${it.top},r=${it.right},b=${it.bottom}]" } ?: "(取不到)"
 
     private fun nameField() = composeTestRule.onNode(hasSetTextAction())
 
     /**
-     * 取证行：屏幕尺寸 + 节点几何 + IME 状态，用来把三种"点了没反应"分开：
-     * 零面积（未测量）、超出屏幕下沿（真被裁切）、`imeAcceptingText=true` 且几何正常（可能被 IME 遮）。
-     * `dumpsys input_method` 是试探性的：测试进程没有 `android.permission.DUMP` 时把失败原文一并打出来，
-     * 免得把"权限不够"读成"IME 没弹"。
+     * 取证行：四个几何读数 + 屏幕与密度 + IME 状态。
+     *
+     * `dumpsys input_method` 是试探性的 —— 测试进程没有 `android.permission.DUMP` 时把失败原文
+     * 一并打出来，免得把"权限不够"读成"IME 没弹"。
      */
-    private fun geometry(): String {
-        val node = buttonNodeOrNull()
-        val bounds = node?.let { runCatching { it.fetchSemanticsNode().boundsInRoot }.getOrNull() }
+    private fun geometry(node: androidx.compose.ui.test.SemanticsNodeInteraction?): String {
+        val sn = (node ?: buttonNodeOrNull())
+            ?.let { runCatching { it.fetchSemanticsNode() }.getOrNull() }
         val imm = InstrumentationRegistry.getInstrumentation().targetContext
             .getSystemService(Context.INPUT_METHOD_SERVICE) as InputMethodManager
         val dumpsys = runCatching {
@@ -132,8 +137,9 @@ class CreateFileDialogFlowTest {
                     .joinToString(";").ifEmpty { "(输出里没有 mInputShown 行)" }
             }
         }.getOrElse { t -> "dumpsys 不可用(${t.javaClass.simpleName})" }
-        return "screen=${screen.width()}x${screen.height()} boundsInRoot=" + describe(bounds) +
-            " 超出屏幕下沿=" + (bounds?.let { it.bottom > screen.height() }?.toString() ?: "?") +
+        return "screen=${metrics.widthPixels}x${metrics.heightPixels} dpi=${metrics.densityDpi}" +
+            " boundsInRoot=${rect(sn?.boundsInRoot)} boundsInWindow=${rect(sn?.boundsInWindow)}" +
+            " touchBoundsInRoot=${rect(sn?.touchBoundsInRoot)} posOnScreen=${sn?.positionOnScreen}" +
             " imeAcceptingText=${imm.isAcceptingText} $dumpsys"
     }
 
@@ -152,43 +158,61 @@ class CreateFileDialogFlowTest {
         val clickRejected = runCatching { node.performClick() }.isFailure
         assertTrue(
             "未输文件名时不该可能触发创建。实测：assertIsNotEnabled 通过=$reportedNotEnabled、" +
-                "performClick 被拒=$clickRejected、onCreate 调用次数=$created | ${geometry()}",
+                "performClick 被拒=$clickRejected、onCreate 调用次数=$created | ${geometry(node)}",
             (reportedNotEnabled || clickRejected) && created == 0
         )
     }
 
     @Test
     fun typedFilenameDrivesCreateCallbackWithKotlinEmptyTemplate() {
+        var probing = false
         var captured: Triple<String, String, String>? = null
+        var trigger = "无"
         var dismissed = 0
         composeTestRule.setContent {
             CreateFileDialog(
                 onDismiss = { dismissed++ },
-                onCreate = { name, language, content -> captured = Triple(name, language, content) }
+                onCreate = { name, language, content ->
+                    captured = Triple(name, language, content)
+                    trigger = if (probing) "probe" else "gesture"
+                }
             )
         }
-        // 这里只等"落定"，不在输名前断言可用：空文件名时主按钮本就该 disabled，
-        // 提前 assertIsEnabled 会让本用例在三档上必然红（49dddbe 正是这么红的，
-        // run 36220797005 报 `Failed to assert the following: (is enabled)`）。
+        // 只等落定，不在输名前断言可用：空文件名时主按钮本该 disabled
+        // （49dddbe 就是那么红的，run 36220797005 报 `Failed to assert (is enabled)`）。
         awaitButton()
 
         nameField().performTextInput("  bench_flow  ")
         val button = awaitButton()
         button.assertIsEnabled()
-        button.performClick()
 
-        // 第一次没回调就再点一次，并把 RETRY 行打出来：这是"重试"而不是"放宽判据"——
-        // 第二次仍不回调就照旧红，且红里带着两次的几何与 dismissed 计数。
-        if (captured == null) {
-            log("RETRY 首次 performClick 未触发 onCreate（dismissed=$dismissed），重取节点再点一次 | ${geometry()}")
-            composeTestRule.waitForIdle()
-            awaitButton().performClick()
+        // A：标准 performClick
+        runCatching { button.performClick() }
+            .onFailure { t -> log("A 路 performClick 抛异常：${t.javaClass.simpleName}:${t.message}") }
+        if (trigger != "gesture") {
+            log("RETRY A 路未走出手势回调（trigger=$trigger dismissed=$dismissed）| ${geometry(button)}")
+
+            // B：另一条注入路径
+            runCatching { button.performTouchInput { click() } }
+                .onFailure { t -> log("B 路 performTouchInput 抛异常：${t.javaClass.simpleName}:${t.message}") }
+        }
+        if (trigger != "gesture") {
+            log("RETRY B 路仍未走出手势回调（trigger=$trigger dismissed=$dismissed）| ${geometry(button)}")
+
+            // C：只作对照，不算通过
+            probing = true
+            val probe = runCatching { button.performSemanticsAction(SemanticsActions.OnClick) }
+            probing = false
+            log(
+                "对照 C 路（直投 ClickAction，不计入通过）：调用成功=${probe.isSuccess} " +
+                    "trigger=$trigger dismissed=$dismissed captured=${captured != null} | ${geometry(button)}"
+            )
         }
 
-        // 失败时把 dismissed 一起报出来：若 onDismiss 被调用过，说明这一拍其实打在 scrim 上
-        // （表面试关掉了），与"点在零面积矩形上没落地"是两种不同的成因，别混为一谈。
-        val result = requireNotNull(captured) {
-            "点了「创建并打开」却没回调 onCreate | dismissed=$dismissed | ${geometry()}"
+        // 判据不变：必须是被真手势（A 或 B）点出来的回调；C 路只用来分辨成因。
+        val result = requireNotNull(captured?.takeIf { trigger == "gesture" }) {
+            "没走手势路径就回调了 onCreate，或根本没回调 | trigger=$trigger " +
+                "captured=${captured != null} dismissed=$dismissed | ${geometry(button)}"
         }
         assertEquals("对话框不该在这次交互里被关掉", 0, dismissed)
         // 对话框只交修剪过的裸名，扩展名由上层按语言补（CreateFileDialog.kt:235-239）
