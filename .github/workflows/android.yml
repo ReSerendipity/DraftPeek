@@ -426,7 +426,15 @@ jobs:
     if: github.event_name == 'workflow_dispatch' || github.event_name == 'schedule'
     name: Macrobenchmark (API ${{ matrix.api-level }})
     runs-on: ubuntu-latest
-    timeout-minutes: 45
+    # 45 → 60：买余量，不是遮红。这条腿跑完 13 个用例的墙钟是拿本仓 API 的 job
+    # started→completed 实测的（不是估的）：自绿 6 次 = 29.3 / 39.3 / 39.9 / 40.5 / 41.1 / 41.7 分钟
+    # （run 36215197822 / 36220797005 / 36244917596 / 36302981374 / 36286919643 / 36237323311），
+    # 另有 3 次卡在 45.1~45.2 分钟被 timeout 取消（run 36209028174 / 36224053483 / 36250773509）。
+    # 最坏的一次自绿 41.7m ⇒ 45 分钟只剩 3.3 分钟余量，模拟器摆动一大就直接撞墙；
+    # 60 = 最坏自绿 + ~44% 余量，并与 release.yml 的 benchmark job（#107 里同为 60）对齐。
+    # 真红仍然会红：用例失败、preseed 失败、进不去编辑器都照旧反映在 job 结论上，
+    # 扩预算只把"没跑完"变成"跑完"，不碰任何判据。
+    timeout-minutes: 60
     # release-build 提供被测 release APK（见下面的 Download Release APK），少掉一次 21m51s
     # 的重复编译；build-and-test 仍是既有前置。
     needs: [build-and-test, release-build]
