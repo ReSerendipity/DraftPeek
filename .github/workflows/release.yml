@@ -1,12 +1,32 @@
 # ============================================================
 # DraftPeek Release Workflow
 # ============================================================
-# 当推送 v* 格式的 tag 时触发，自动构建 Release APK 并创建 GitHub Release。
-# 需在 GitHub Secrets 中配置签名凭据：
-#   RELEASE_STORE_FILE (base64 编码的 keystore)
-#   RELEASE_STORE_PASSWORD
-#   RELEASE_KEY_ALIAS
-#   RELEASE_KEY_PASSWORD
+# 推送 v* tag 时：构建签名过的 Release APK/AAB → 建 **draft** GitHub Release 并上传产物。
+# 签名凭据需在 GitHub Secrets 中配置：
+#   RELEASE_STORE_FILE_BASE64 / RELEASE_STORE_PASSWORD / RELEASE_KEY_ALIAS / RELEASE_KEY_PASSWORD
+#
+# ## 为什么拆成 build / publish / benchmark 三个 job（2026-09-27，#16）
+# 原来是一个 job 从头跑到尾，于是有两件事躲不掉：
+# 1. **workflow_dispatch 不是 dry-run**。`on:` 里既然有 workflow_dispatch，派发就会执行到
+#    `Create GitHub Release`；而 workflow 级 `permissions: contents: write` 让它真能写。
+#    实测：2026-09-20 那 5 次 dispatch（run 35489034318 / 35491063132 / 35491540771 /
+#    35499740678 / 35503589566，head_ref 都是 main）全部**跑过了建 Release 那一步**，
+#    红的是后面的 macro。⇒ 光靠"派发时别手滑"不是保证。
+#    现在：建 Release 的 `publish` job 带 `if: github.event_name == 'push'`，且**全 workflow
+#    只有它**有 `contents: write`；workflow 级降到 `contents: read`。⇒ dispatch 从结构上
+#    就建不出 Release（不是"跳过一步"，是"没有写权限 + 那个 job 不存在"）。
+# 2. **macro 腿与发版共用一个 45 分钟预算**。tag run 35959108195（sha b16b951）的分步实测：
+#    Run Tests 21.23m、Lint 2.62m、assembleRelease 5.5m、bundleRelease 0.3m、建 draft 0.15m
+#    ⇒ 走到第 17 步约 30m；而 macro 腿接上 preseed 后要跑完 13 个用例，按 android.yml 同
+#    一条腿的量级是 41m05s（run 36286919643，Gradle 段 37m55s）。合在一个 job 里
+#    等于必然被 `timeout-minutes: 45` 砍在 macro 中途。拆开各给预算：build 45 / publish 15 /
+#    benchmark 60。
+# 顺带把 macro 腿的被测包改成取 build 的产物（与 android.yml `Download Release APK` 同一套
+# 已验证写法），不再在 emulator 步骤前重编。
+#
+# ## 顺序保证仍在
+# 原来靠"benchmark 排在 Create GitHub Release 之后"保证性能腿不卡发版（run #2~#4 的教训）；
+# 现在是 `publish: needs: build`（不含 benchmark）⇒ benchmark 无论如何红，draft 都已落地。
 # ============================================================
 
 name: Release
@@ -18,23 +38,29 @@ on:
   # 手动派发只解决一个真实痛点：release.yml 自身有 bug 时，改动必须先落到某个 commit，
   # 而 push(tags) 只读 tag 指向的那棵树——等于逼人去挪 tag。派发时填 tag 名即可
   # 「用 main 上这份 workflow 定义、构建指定 tag 的代码树」。
+  # ⚠️ 派发档是 **dry-run**：跑完整的构建 + macro，但不建 Release（见文件头第 1 条）。
   workflow_dispatch:
     inputs:
       tag:
-        description: '要发版的 tag（如 v1.0.31）；留空则取触发 ref 自带的 tag 名'
+        description: '要验证的 tag（如 v1.0.31）；留空则取触发 ref 自带的名字。派发档不建 Release'
         required: false
         default: ''
 
 permissions:
-  contents: write
+  contents: read
 
 jobs:
-  release:
-    name: Build & Release APK
+  build:
+    name: Build Release Artifacts
     runs-on: ubuntu-latest
     timeout-minutes: 45
     env:
       RELEASE_TAG: ${{ github.event.inputs.tag || github.ref_name }}
+    # publish 的 Release 正文要用 APK 摘要，摘要在 build 里算 ⇒ 显式提成 job 输出，
+    # 别让 publish 去猜 build 的步骤输出（跨 job 拿不到就是空字符串，正文里会静默变空）。
+    outputs:
+      apk_sha256: ${{ steps.checksums.outputs.APK_SHA256 }}
+      aab_sha256: ${{ steps.checksums.outputs.AAB_SHA256 }}
 
     steps:
       - name: Checkout
@@ -102,10 +128,25 @@ jobs:
       # （单一事实来源），此处以 --strict 强制 tag 与版本完全对齐。
       - name: Verify version consistency (tag / CHANGELOG / gradle.properties)
         # 注意用 python3：ubuntu runner 仅保证 python3 存在（脚本仅依赖标准库）
+        #
+        # --strict 只在真正的 tag push 时用。派发档的 RELEASE_TAG 是**分支名**，
+        # 而脚本的严格模式干的是 `tag != gradle.properties ⇒ FAIL`
+        # （run 36303803539 实测：`FAIL : tag 与 gradle.properties 不一致：
+        # tag=ci/release-tag-wiring != gradle.properties=1.0.32`，42 秒就死在第 9 步）。
+        # ⇒ 以前派发档想过这一关就必须填真 tag，而一填 tag，Checkout 的 ref 就变成那枚
+        # 旧 tag 的树（没有 benchmark/ci/preseed-onboarding-gate.sh），dry-run 验证不了分支。
+        # 非 tag 事件改跑 PR 档宽容模式（与 docs-consistency.yml 的 version-consistency
+        # 同一条命令）：CHANGELOG 超前/版本回退/README 漂移/versionCode 公式仍是硬失败，
+        # 只有"tag 与版本对齐"这一项留给 tag 事件兜底 —— 发版门禁本身一字未放宽。
         run: |
-          python3 scripts/check_version_consistency.py \
-            --strict \
-            --tag "${RELEASE_TAG}"
+          if [ "$GITHUB_EVENT_NAME" = "push" ]; then
+            python3 scripts/check_version_consistency.py \
+              --strict \
+              --tag "${RELEASE_TAG}"
+          else
+            echo "dry-run（非 tag 事件）：跑 PR 档宽容模式，不比对 tag 与 gradle.properties"
+            python3 scripts/check_version_consistency.py
+          fi
 
       - name: Run Tests
         run: ./gradlew test --stacktrace
@@ -154,30 +195,93 @@ jobs:
           APK_SIZE_MB=$((APK_SIZE / 1048576))
           echo "APK Size: ${APK_SIZE_MB} MB ($APK_SIZE bytes)"
 
-      - name: Extract version from tag
-        id: version
-        run: echo "VERSION=${RELEASE_TAG}" >> $GITHUB_OUTPUT
+      # 缺产物必须硬失败，不能靠下游 glob 静默：softprops 的 files: 匹配不到任何文件时
+      # 照样把 Release 建出来（只是没资产），而 upload-artifact 在 if-no-files-found: warn
+      # 下也是 success —— 同一个洞在 android.yml 的 release-build 上已经踩过一次
+      # （path 写成 apk/release/*.apk，空匹配却仍报 success，见 run 36215197822 那一轮）。
+      - name: Stage release artifacts (fail closed on missing)
+        run: |
+          set -eu
+          APK_PATH=$(find app/build/outputs/apk/production/release -name "*.apk" | head -1)
+          AAB_PATH=$(find app/build/outputs/bundle/productionRelease -name "*.aab" | head -1)
+          test -n "$APK_PATH" || { echo "::error::production release APK 没构建出来，不发布"; exit 1; }
+          test -n "$AAB_PATH" || { echo "::error::production release AAB 没构建出来，不发布"; exit 1; }
+          for f in "$APK_PATH" "$APK_PATH.sha256" "$AAB_PATH" "$AAB_PATH.sha256"; do
+            test -s "$f" || { echo "::error::产物缺失或为空：$f"; exit 1; }
+          done
+          mkdir -p dist-release
+          cp "$APK_PATH" "$APK_PATH.sha256" "$AAB_PATH" "$AAB_PATH.sha256" dist-release/
+          # 拍平到 dist-release/：publish 与 benchmark 都从这里取，glob 不再依赖 gradle 输出目录结构
+          ls -l dist-release
+          echo "已暂存 $(find dist-release -type f | wc -l) 个文件"
+
+      - name: Upload Release Artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: draftpeek-release-artifacts
+          path: dist-release
+          retention-days: 30
+          if-no-files-found: error
+
+  publish:
+    name: Create Draft GitHub Release
+    # needs 里只有 build ⇒ 本 job 与 benchmark 的成败无关；性能腿红不阻塞 draft 落地。
+    needs: build
+    # dry-run 的根据：workflow_dispatch 进不来这个 job，且全 workflow 只有它有 contents: write。
+    if: github.event_name == 'push'
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    env:
+      RELEASE_TAG: ${{ github.event.inputs.tag || github.ref_name }}
+    permissions:
+      contents: write
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v7
+        with:
+          ref: ${{ github.event.inputs.tag || github.ref }}
+
+      - name: Download Release Artifacts
+        uses: actions/download-artifact@v4
+        with:
+          name: draftpeek-release-artifacts
+          path: dist-release
+          run-id: ${{ github.run_id }}
+          github-token: ${{ secrets.GITHUB_TOKEN }}
+
+      # 上游 Stage 步骤已经查过一次，这里再查一遍是因为 download-artifact 与构建之间
+      # 隔了一个 job：产物被清理/名字冲突时会退化成"空目录 + 一个没资产的 Release"。
+      - name: Verify artifacts present
+        run: |
+          set -eu
+          for glob in "*.apk" "*.apk.sha256" "*.aab" "*.aab.sha256"; do
+            n=$(find dist-release -type f -name "$glob" | wc -l)
+            test "$n" -ge 1 || { echo "::error::dist-release 里缺 $glob（匹配 $n 个），拒绝建 Release"; exit 1; }
+          done
+          ls -l dist-release
 
       - name: Create GitHub Release
+        id: create_release
         uses: softprops/action-gh-release@v3
         with:
-          tag_name: ${{ steps.version.outputs.VERSION }}
-          name: DraftPeek ${{ steps.version.outputs.VERSION }}
+          tag_name: ${{ env.RELEASE_TAG }}
+          name: DraftPeek ${{ env.RELEASE_TAG }}
           generate_release_notes: true
           draft: true
           files: |
-            app/build/outputs/apk/production/release/*.apk
-            app/build/outputs/apk/production/release/*.apk.sha256
-            app/build/outputs/bundle/productionRelease/*.aab
-            app/build/outputs/bundle/productionRelease/*.aab.sha256
+            dist-release/*.apk
+            dist-release/*.apk.sha256
+            dist-release/*.aab
+            dist-release/*.aab.sha256
           body: |
-            ## DraftPeek ${{ steps.version.outputs.VERSION }}
+            ## DraftPeek ${{ env.RELEASE_TAG }}
 
             ### 下载
             - 将下方 APK 文件下载到设备安装即可
 
             ### 完整性验证
-            - APK SHA256: `${{ steps.checksums.outputs.APK_SHA256 }}`
+            - APK SHA256: `${{ needs.build.outputs.apk_sha256 }}`
             - 验证命令: `sha256sum -c *.apk.sha256`
             - APK 已使用正式签名密钥签名（APK Signature Scheme v2+v3）
 
@@ -188,11 +292,59 @@ jobs:
             ---
             *此 Release 由 GitHub Actions 自动生成，请手动验证后发布。*
 
-      # 基准测试刻意排在 Create GitHub Release 之后：它排在前面时（release run #2~#4）
-      # 任何一次失败都会连带跳过 checksums 与 draft 创建，等于"性能测试卡住发版"。
-      # 移到后面后 draft 先落地，benchmark 变红只影响本步与产物上传。
+  benchmark:
+    name: Macrobenchmark (Release Variant)
+    needs: build
+    runs-on: ubuntu-latest
+    # 与 publish 同理分开跑：接上 preseed 后这条腿要真跑完 13 个用例（android.yml 同腿
+    # 实测 41m05s），跟构建共用 45 分钟必然被砍。60 = 实测 41m + 取产物/起模拟器/emulator
+    # 冷启动的余量，不是"红了就加时间"。
+    timeout-minutes: 60
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v7
+        with:
+          ref: ${{ github.event.inputs.tag || github.ref }}
+
+      - name: Set up JDK 17
+        uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: 17
+
+      - name: Set up Gradle
+        uses: gradle/actions/setup-gradle@v4
+        with:
+          gradle-home-cache-cleanup: true
+
+      - name: Grant execute permission for gradlew
+        # 每个 job 都是全新 runner + 全新 checkout，可执行位不会跨 job 带过来。
+        # build job 里本来就有这一步，拆出 benchmark job 时漏抄，于是首跑 run 36303983661
+        # 死在 script 第三行：`/usr/bin/sh: 1: ./gradlew: Permission denied` → exit 126
+        # （前两行 `adb install` Success、preseed `A' 预置成功` 都已绿在日志里）。
+        run: chmod +x ./gradlew
+
+      - name: Download Release APK (built by build job)
+        uses: actions/download-artifact@v4
+        with:
+          name: draftpeek-release-artifacts
+          path: downloaded-release-apk
+          run-id: ${{ github.run_id }}
+          github-token: ${{ secrets.GITHUB_TOKEN }}
+
+      # 与 .github/actions/instrumented-tests 同款清场：本 job 没有 attempt1/attempt2 重试，
+      # 一次 adb 5037 残留就直接红。
+      - name: Clean up stale adb/emulator state
+        shell: bash
+        run: |
+          pkill -f qemu-system 2>/dev/null || true
+          pkill -f 'emulator' 2>/dev/null || true
+          adb kill-server 2>/dev/null || true
+          sleep 2
+          adb start-server 2>/dev/null || true
+
       - name: Restore /dev/kvm access
-        # 缺失时模拟器退回软渲染 → 轮询 sys.boot_completed 到超时、runner 以 exit 224 收场。
         # 必须内联、不能 uses 本地 action：本 workflow 按 tag 检出代码树，run #3 就死在
         # v1.0.31 那棵树里还没有 restore-kvm 目录（报 "Can't find 'action.yml'"）。
         # 内容与 .github/actions/instrumented-tests 里的同名步骤逐字一致。
@@ -204,8 +356,8 @@ jobs:
           ls -l /dev/kvm || echo "[WARN] /dev/kvm not present on this runner — hardware acceleration unavailable"
 
       - name: Run Macrobenchmark (Release Variant)
-        # 在 Release 版本上运行基准性能测试，收集性能指标
-        # 注意：AGP 8.7.x Baseline Profile 生成器有已知崩溃（Gotcha #13），仅运行 benchmark
+        # 在 Release 构建上跑基准，收集性能指标。
+        # 注意：AGP 8.7.x Baseline Profile 生成器有已知崩溃（Gotcha #13），仅运行 benchmark。
         uses: reactivecircus/android-emulator-runner@v2
         with:
           api-level: 34
@@ -217,17 +369,23 @@ jobs:
           emulator-options: -no-window -gpu swiftshader_indirect -no-snapshot -noaudio -no-boot-anim
           disable-animations: true
           script: |
-            # 先安装被测应用：benchmark 的 target 包名是 com.draftpeek
-            # （EditorBenchmarkSupport.kt:30），而 connectedDebugAndroidTest 只安装 benchmark
+            # 被测包必须显式安装：benchmark 的 target 包名是 com.draftpeek
+            # （EditorBenchmarkSupport.kt:30），而 connectedDebugAndroidTest 只装 benchmark
             # 自己的测试 APK —— 以前从没人装过被测包，run #4 里 2 个用例因此直接报
             # "Unable to find target package com.draftpeek, is it installed?"。
-            # 必须写在 script 里：模拟器由本 action 启动，步骤级 adb install 时还没有设备。
             #
             # 整段压成一行是硬性要求：本 action 把 script 逐行交给 /usr/bin/sh -c 执行
             # （run #5 实测 —— 单独执行了 `if [ -z "$APK_PATH" ]; then` 这一行、`fi` 不在
             # 同一次调用里，报 "Syntax error: end of file unexpected (expecting "fi")" 后
             # exit 2）。跨行控制流与跨行变量都不可依赖；找不到 APK 时以非零码硬失败。
-            APK_PATH=$(find app/build/outputs/apk/production/release -name '*.apk' | head -1); test -n "$APK_PATH" || { echo '::error::No production release APK available to install'; exit 1; }; adb install -r -g "$APK_PATH"
+            APK_PATH=$(find downloaded-release-apk -name '*.apk' | head -1); test -n "$APK_PATH" || { echo '::error::No production release APK available to install（build job 的 draftpeek-release-artifacts 产物是空的？）'; exit 1; }; adb install -r -g "$APK_PATH"
+            # A' 方案：预置两道首启门（引导页 DataStore onboarding/completed + 协议弹窗
+            # SharedPreferences agreement/accepted_v1）并播一个可打开的 .kt 种子，让用例走
+            # 真实用户的 LAUNCHER 路径进编辑器 —— 以前这条腿在 release.yml 上从没绿过，
+            # 就是卡在首启门上（android.yml 侧的同一修复见 run 36286919643：13/13）。
+            # 逻辑必须落在文件里：跨行 shell 在 sh -c 逐行执行下活不下来。
+            # 顺序要求：被测包先装（/data/data/com.draftpeek 由安装产生）再预置。
+            bash benchmark/ci/preseed-onboarding-gate.sh
             # benchmark 为 library 模块，只有 debugAndroidTest 测试变体，
             # connectedBenchmarkAndroidTest 不存在（2026-09-05 实测修正，与 android.yml 对齐）
             ./gradlew :benchmark:connectedDebugAndroidTest --stacktrace
@@ -240,5 +398,8 @@ jobs:
           path: |
             **/build/outputs/macrobenchmark/**
             **/build/reports/androidTest/**
+            **/build/outputs/androidTest-results/**
           retention-days: 30
-          if-no-files-found: warn
+          # 与文件头那条洞同源：warn 会把"什么都没上传"报成 success，看不出 macro 腿
+          # 其实没跑出报告。路径也补齐了 androidTest-results（原来漏，只在 warn 下看不出来）。
+          if-no-files-found: error
