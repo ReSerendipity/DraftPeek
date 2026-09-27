@@ -128,10 +128,25 @@ jobs:
       # （单一事实来源），此处以 --strict 强制 tag 与版本完全对齐。
       - name: Verify version consistency (tag / CHANGELOG / gradle.properties)
         # 注意用 python3：ubuntu runner 仅保证 python3 存在（脚本仅依赖标准库）
+        #
+        # --strict 只在真正的 tag push 时用。派发档的 RELEASE_TAG 是**分支名**，
+        # 而脚本的严格模式干的是 `tag != gradle.properties ⇒ FAIL`
+        # （run 36303803539 实测：`FAIL : tag 与 gradle.properties 不一致：
+        # tag=ci/release-tag-wiring != gradle.properties=1.0.32`，42 秒就死在第 9 步）。
+        # ⇒ 以前派发档想过这一关就必须填真 tag，而一填 tag，Checkout 的 ref 就变成那枚
+        # 旧 tag 的树（没有 benchmark/ci/preseed-onboarding-gate.sh），dry-run 验证不了分支。
+        # 非 tag 事件改跑 PR 档宽容模式（与 docs-consistency.yml 的 version-consistency
+        # 同一条命令）：CHANGELOG 超前/版本回退/README 漂移/versionCode 公式仍是硬失败，
+        # 只有"tag 与版本对齐"这一项留给 tag 事件兜底 —— 发版门禁本身一字未放宽。
         run: |
-          python3 scripts/check_version_consistency.py \
-            --strict \
-            --tag "${RELEASE_TAG}"
+          if [ "$GITHUB_EVENT_NAME" = "push" ]; then
+            python3 scripts/check_version_consistency.py \
+              --strict \
+              --tag "${RELEASE_TAG}"
+          else
+            echo "dry-run（非 tag 事件）：跑 PR 档宽容模式，不比对 tag 与 gradle.properties"
+            python3 scripts/check_version_consistency.py
+          fi
 
       - name: Run Tests
         run: ./gradlew test --stacktrace
