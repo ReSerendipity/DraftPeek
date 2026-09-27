@@ -318,6 +318,13 @@ jobs:
         with:
           gradle-home-cache-cleanup: true
 
+      - name: Grant execute permission for gradlew
+        # 每个 job 都是全新 runner + 全新 checkout，可执行位不会跨 job 带过来。
+        # build job 里本来就有这一步，拆出 benchmark job 时漏抄，于是首跑 run 36303983661
+        # 死在 script 第三行：`/usr/bin/sh: 1: ./gradlew: Permission denied` → exit 126
+        # （前两行 `adb install` Success、preseed `A' 预置成功` 都已绿在日志里）。
+        run: chmod +x ./gradlew
+
       - name: Download Release APK (built by build job)
         uses: actions/download-artifact@v4
         with:
