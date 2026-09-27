@@ -1,0 +1,43 @@
+name: Doc Export Node Smoke
+
+# 根 package.json 是承载文档导出依赖（docx/exceljs/pdfkit/pptxgenjs）的外围 Node 工具。
+# 本仓主体是 Android Gradle 工程，此前这些依赖没有任何 CI：传递依赖漏洞（如 image-size
+# GHSA-5p2g-fcmc-qvqq / GHSA-w3rx-r6r6-pgpr）只能靠 Dependabot 事后发现，而修复还会被
+# 上游（pptxgenjs 钉死旧版范围）卡住。这里补两道最小闸：依赖树无 high 漏洞 + pptx 生成冒烟。
+on:
+  push:
+    branches: [main]
+    paths:
+      - package.json
+      - package-lock.json
+      - scripts/doc-export-smoke.cjs
+      - .github/workflows/doc-export-smoke.yml
+  pull_request:
+    paths:
+      - package.json
+      - package-lock.json
+      - scripts/doc-export-smoke.cjs
+      - .github/workflows/doc-export-smoke.yml
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  smoke:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "20"
+          cache: npm
+      # npm ci 严格按 lockfile 安装；lockfile 与 package.json 不同步会直接失败
+      - name: Install with locked deps
+        run: npm ci
+      - name: Audit production dependencies (high/critical blocks)
+        run: npm audit --omit=dev --audit-level=high
+      # pptxgenjs 4.0.1 实际不调用 image-size（其 getSizeFromImage 整段为注释死代码），
+      # 但仍要保证 overrides 钉到 image-size 2.x 后库本身可加载、pptx 真能生成。
+      - name: PptxGenJS load + generate smoke
+        run: node scripts/doc-export-smoke.cjs
