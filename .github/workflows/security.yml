@@ -199,3 +199,55 @@ jobs:
           pip install bandit
           # -ll 只报 MEDIUM 及以上；排除 tests/（assert 断言属正常用法）
           bandit -r server --exclude server/tests -ll
+
+  # Node 侧文档导出依赖的最小冒烟。此前全仓没有任何 workflow 跑过 npm
+  # （grep "\bnpm\b" .github/workflows/*.yml 只命中 setup-node 之外零处），
+  # 也就是 package-lock.json 从没被 CI 校验过 —— 本 job 是给 image-size 提版兜底的唯一实测。
+  node-export-smoke:
+    name: Node 导出依赖冒烟 (pptx)
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v7
+
+      - name: Set up Node 22
+        uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+          cache: npm
+
+      - name: npm ci (严格按锁文件，不接受漂移)
+        run: npm ci --no-audit --no-fund
+
+      - name: 依赖树取证 (pptxgenjs 未被降级 + image-size 落在修复版)
+        run: npm ls image-size pptxgenjs uuid
+
+      - name: pptx 导出冒烟 (版本闸门 + image-size 解析 + pptxgenjs addImage 写出)
+        run: npm run smoke:pptx
+
+      - name: 产物必须是可解开的 zip
+        run: |
+          test -s build/pptx-smoke.pptx
+          unzip -l build/pptx-smoke.pptx
+          rm -rf build/unz && unzip -o -q build/pptx-smoke.pptx -d build/unz
+          test -s "build/unz/[Content_Types].xml"
+
+      - name: 采集 npm audit (端点不可用不卡 PR，判定在下一步)
+        run: |
+          mkdir -p build
+          npm audit --json > build/audit.json 2> build/audit.err || true
+          head -c 120 build/audit.json; echo
+
+      - name: 定向确认 image-size 不再被这两条 high 通告命中
+        # 只判 image-size，不设全局 audit 门：registry 不支持 audit 端点时（本机实测
+        # npmmirror 返回 404 NOT_IMPLEMENTED）不该把无关 PR 卡死；
+        # 而"必须落在 2.0.3+"这条硬闸门在冒烟脚本里，失败即红。
+        run: >
+          node -e "const fs=require('fs');let d;
+          try{d=JSON.parse(fs.readFileSync('build/audit.json','utf8'))}catch(e){console.log('WARN npm audit 无可用 JSON，跳过本步判定');process.exit(0)}
+          const v=d.vulnerabilities||{};
+          const hits=Object.keys(v).filter(k=>k==='image-size');
+          const parents=Object.entries(v).filter(([k,x])=>(x.effects||[]).includes('image-size')).map(([k])=>k);
+          console.log('audit image-size 命中='+JSON.stringify(hits)+' 牵连父依赖='+JSON.stringify(parents)+' counts='+JSON.stringify((d.metadata||{}).counts||{}));
+          process.exit(hits.length||parents.length?1:0)"
