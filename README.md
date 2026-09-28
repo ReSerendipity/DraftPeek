@@ -86,7 +86,6 @@ DraftPeek/
 ├── feature/                # 功能层（browser / editor / settings / stats / terminal）
 ├── docs/  scripts/  gradle/  migrations/
 ├── server/                 # Python 协作同步服务（实验性/可选）
-├── AGENTS.md               # AI 辅助开发指南（仅本地保留、不入库；见下方「分发边界」）
 └── CHANGELOG.md            # 更新日志
 ```
 
@@ -146,22 +145,11 @@ scripts\coverage.bat                              # Windows 一键覆盖率
 - `docs/RELEASE_CHECKLIST.md` — 发布前检查清单
 - [CHANGELOG.md](CHANGELOG.md) — 更新日志
 
-### 分发边界（AI 辅助开发文档仅本地保留）
-
-根 `AGENTS.md`（AI 辅助开发指南）及其家族——`feature/editor/AGENTS.md`、`core/common/AGENTS.md`、`docs/agents/**`（GOTCHAS.md 等）、`FIX_LOG.md`、`LOCAL_RULES.md`——为 **仅本地保留、有意不入库** 的维护者上下文（经 `.gitignore` 的 `*.md` 通配规则忽略），**不会出现在 fresh clone 中**。新环境下的 agent 请退回以下**已入库的可分发入口**：本 `README.md`、[`docs/README.md`](docs/README.md)（目录结构 + docs 索引）、[`docs/CODING_STANDARDS.md`](docs/CODING_STANDARDS.md)。缺少 `AGENTS.md` 属预期行为，非错误。
-
-## 开源模式说明
-
-本仓库为**公开仓库**，以 Apache License 2.0 发布（Copyright 2026 ReSerendipity）。原「main 私有开发 / public 公开演示」双仓双分支体系已废止：私有仓已改名为本仓库并全量公开（含完整 main 历史）。
-
-- `main` 为唯一主分支，push 即发布；禁止 force push
-- 敏感文件永不入库：`release.jks` / `keystore/` / `local.properties` / `.env`（.gitignore 已覆盖，全历史已扫描核验）
-- `server/` 为可选的实验性协作同步服务（非默认启用、非生产部署）
-- 安全漏洞请通过 [SECURITY.md](.github/SECURITY.md) 的私密披露渠道报告，勿直接提公开 issue
-
 ## 贡献
 
 参与贡献请遵循 [组织级贡献指南](https://github.com/ReSerendipity/.github/blob/main/CONTRIBUTING.md)（Conventional Commits + DCO 签名）。
+
+安全漏洞请通过 [SECURITY.md](.github/SECURITY.md) 的私密披露渠道报告，勿直接提公开 issue。
 
 ## 许可证
 
