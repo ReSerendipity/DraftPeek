@@ -507,7 +507,7 @@ jobs:
       # 到 02:16:09 才开始、02:32:22 被 timeout 取消（两个用例当时都还在出 editor-ok）。
       # 同一个 run 的 release-build job 已经编过这个 APK，直接取产物即可。
       - name: Download Release APK (built by release-build job)
-        uses: actions/download-artifact@v4
+        uses: actions/download-artifact@v8
         with:
           name: draftpeek-release-apk
           path: downloaded-release-apk
