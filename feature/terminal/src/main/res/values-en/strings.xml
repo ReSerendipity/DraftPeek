@@ -28,4 +28,8 @@
     <string name="terminal_proot_ready">Linux environment ready</string>
     <string name="terminal_proot_error">Linux environment setup failed</string>
     <string name="terminal_unavailable_hint">Cannot open terminal at this location</string>
+
+    <!-- System shell fallback -->
+    <string name="terminal_system_shell_hint">Running the system shell (toybox); some commands are unavailable. Install proot for a full Linux environment.</string>
+    <string name="terminal_dismiss">Dismiss</string>
 </resources>

@@ -258,4 +258,18 @@
     <string name="browser_title_sample_files">Sample files</string>
     <string name="browser_usb_storage">USB storage</string>
     <string name="security_operation_restricted">Security check failed. This action is temporarily unavailable</string>
+
+    <!-- Encrypted export / decrypt -->
+    <string name="browser_action_encrypt_export">Encrypt and export</string>
+    <string name="browser_decrypt_failed">Decryption failed: wrong password or corrupted file</string>
+    <string name="browser_decrypt_success">Decrypted successfully, file opened</string>
+    <string name="browser_dialog_decrypt_password">Enter password</string>
+    <string name="browser_dialog_decrypt_title">Decrypt and open</string>
+    <string name="browser_dialog_encrypt_export_confirm">Confirm password</string>
+    <string name="browser_dialog_encrypt_export_password">Set password (at least 4 characters)</string>
+    <string name="browser_dialog_encrypt_export_title">Encrypt and export</string>
+    <string name="browser_encrypt_export_failed">Encrypted export failed</string>
+    <string name="browser_encrypt_export_success">Exported as an encrypted .jenc file</string>
+    <string name="browser_encrypt_password_mismatch">Passwords do not match</string>
+    <string name="browser_encrypt_password_too_short">Password must be at least 4 characters</string>
 </resources>

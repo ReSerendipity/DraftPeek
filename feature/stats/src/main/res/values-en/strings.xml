@@ -323,4 +323,20 @@
     <string name="stats_unit_hour">h</string>
     <string name="stats_unit_min">min</string>
     <string name="stats_unit_percent">%%</string>
+
+    <!-- Theme management -->
+    <string name="profile_setting_show_minimap">Show minimap (experimental)</string>
+    <string name="profile_setting_theme_manage">Manage themes</string>
+    <string name="profile_theme_dark_badge">Dark</string>
+    <string name="profile_theme_delete_success">Theme deleted</string>
+    <string name="profile_theme_empty">No imported themes yet. Tap the button below to import one.</string>
+    <string name="profile_theme_import">Import theme</string>
+    <string name="profile_theme_import_count">%1$d imported</string>
+    <string name="profile_theme_import_failed">Theme import failed. Check the file format.</string>
+    <string name="profile_theme_import_hint">Select a VS Code / TextMate theme .json file</string>
+    <string name="profile_theme_import_read_failed">Cannot read the selected file</string>
+    <string name="profile_theme_import_success">Theme imported successfully</string>
+    <string name="profile_theme_light_badge">Light</string>
+    <string name="profile_theme_manage_dialog_title">Manage themes</string>
+    <string name="profile_theme_using">In use</string>
 </resources>
