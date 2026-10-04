@@ -154,16 +154,18 @@ subprojects {
                 if (nonEmpty) f else kotlinClassesDir.get().asFile
             }
             classDirectories.setFrom(
-                project.files(classDirProvider.map { root ->
-                    fileTree(root) {
-                        exclude(
-                            "**/R.class",
-                            "**/R\$*.class",
-                            "**/BuildConfig.*",
-                            "**/Manifest.*"
-                        )
+                project.files(
+                    classDirProvider.map { root ->
+                        fileTree(root) {
+                            exclude(
+                                "**/R.class",
+                                "**/R\$*.class",
+                                "**/BuildConfig.*",
+                                "**/Manifest.*"
+                            )
+                        }
                     }
-                })
+                )
             )
 
             // 兼容两种 AGP 版本的 exec 输出路径：
