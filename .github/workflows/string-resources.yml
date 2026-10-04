@@ -1,0 +1,34 @@
+name: string-resources
+
+# 字符串资源的两类问题都在这拦：
+#   1) 占位符缺转换符（`%1` 而非 `%1$d`）—— 真机已因此崩过：进入「Me」主标签
+#      即抛 UnknownFormatConversionException，两个底部主标签之一完全不可用。
+#   2) locale 键缺失 —— 英文界面里混出中文（主题管理那一簇曾缺 14 个 en 键）。
+# aapt 对 1 只给 lint 警告、对 2 完全静默回退，所以必须自己设闸。
+#
+# 与 docs-consistency.yml / structure-guard.yml 保持同一强制等级：无条件执行。
+# 脚本缺失或改名时 python 直接以非零退出使 job 失败，不静默放行。
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+  # 供 main-verify.yml 补跑：automerge 以 GITHUB_TOKEN 身份合并时 push 事件被抑制。
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  strings:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v7
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+      - name: Check format placeholders
+        run: python scripts/check_string_format_args.py .
+      - name: Check locale key parity (ratchet against locale-baseline.json)
+        run: python scripts/check_string_locale_parity.py .
