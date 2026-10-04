@@ -216,16 +216,26 @@ class CreateFileDialogFlowTest {
      * - 跑类时的方法顺序：单跑本条 3/3 红，与顺序无关。
      * - 模拟器/instrumentation 坏了：对照 `FileBrowserSortTest` 同一台机 `OK (4 tests)`。
      *
-     * ## 仍未定的是机制本身
-     * 为什么 `boundsInRoot`/`boundsInWindow` 塌零而 `touchBoundsInRoot` 是真实矩形、且注入被拒。
-     * 待验的候选：`CreateFileDialog` 是 `ModalBottomSheet`（`CreateFileDialog.kt:102`，Material3 把
-     * 内容挂在独立窗口里），而本文件用 `createComposeRule()` + `onRoot()` 只绑到宿主窗口的 root，
-     * 于是节点归属与手势目标都落在另一个 root 上。**这条还没被证明**，别当结论引用。
-     * 另一条同样没量过的候选：失败时 `imeAcceptingText=true`（`performTextInput` 之后键盘已起），
-     * 而注入点 `y=1468` 在 1080x2072 的屏上大概落在键盘覆盖区里（`touchBoundsInRoot` 不会因遮挡收缩）。
-     * 判别很便宜：同一条用例里先收键盘再点，若转绿则遮挡是主因。本轮没跑这个实验。
-     * 同理，"与生产码无关"现在也只是**未证明有关**，不是被排除的结论 —— 同一个 composable 在真机
-     * 是宿主在 `MainActivity` 的窗口层级里显示的，测试宿主与生产宿主不同，这个差异没量过。
+     * ## 本条的红：成因已实测定位为「键盘升起后主按钮不在屏上」
+     * 设备侧 A/B（没改任何码）：把这台 AVD 的两个输入法全 `ime disable`（`ime list -s` 为 0、
+     * `mInputShown=false`）后，本条单跑 **3/3 全绿**；只要有任何输入法可用就 **3/3 红**。
+     * （先只关 Gboard 那次不算对照——系统退回语音输入法，键盘仍在，仍红。）
+     * 键盘升起瞬间截图取证：sheet 不随 IME 缩放，内容被键盘上沿裁掉，「创建并打开」整行不在屏上，
+     * 于是 `posOnScreen=(397,1468)` 这个点是 IME 窗口的地盘，注入被拒 `Failed to inject touch input`。
+     * **这不是测试宿主独有的现象**：同一台机装真实 dev APK，走 FAB →「New file」→ 点输入框打字，
+     * 截图与上面同型，`Create and open` 与 `Cancel` 直接从节点树里消失。⇒ #106 的"与生产码无关"是错的。
+     * 但"键盘升起时主按钮要滚动才够得着"算不算缺陷是**产品交互判断**（sheet 本身可滚、IME 有 ✓ 动作），
+     * 不由本用例替它决定，也不放宽判据去迁就它。
+     *
+     * ## 另一条（`createButtonIsDisabledUntilFilenameEntered`）的红：与键盘无关，机制仍未定
+     * 它不打字，跑前跑后 `mInputShown` 都是 `false`，也没有窗口/进程残留（空闲时属于测试包的窗口数
+     * 为 0、`pidof` 为空），但结果随**开机后累计跑了几次**单调变化：两次独立复现都是
+     * 「冷启动头 3~4 次绿，之后粘住红」（第二次实测 3 绿 → 连跑 8 次全红）。
+     * ⇒ 不是随机抖动，也不在本用例的代码路径里，而是某种设备侧累计状态。机制未定。
+     * 待验候选（未证明，别当结论引用）：`ModalBottomSheet` 内容在自己的窗口里
+     * （`CreateFileDialog.kt:102`），而本文件用 `createComposeRule()` + `onRoot()` 只绑宿主 root，
+     * 于是节点归属与手势目标落在另一个 root 上。要定它得在红的运行里同时取证"节点属于哪个 root"，
+     * 那是改测试码的活，本轮没做。
      *
      * 断言与判据一字未放宽；本条注释只改"为什么这么屏蔽"，不改屏蔽本身。
      */
