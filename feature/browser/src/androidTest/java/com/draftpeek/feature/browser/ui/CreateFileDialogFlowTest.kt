@@ -43,16 +43,13 @@ import org.junit.Test
  *    API 34 上点叶子靠坐标转发侥幸命中父级，API 30/26 上静默无效。
  * 2. `performTextInput` 走语义 `SetTextAction`，在应用进程内直接改状态、不经软键盘窗口，
  *    所以"输入"这步在无头档可靠 —— 与"macro 要在真 UI 上打字"不是一回事。
- * 3. **API 26 上 `performClick` 用的矩形会塌成零面积，真实可点矩形在 `touchBoundsInRoot` 里**。
- *    三次取证一致（run `36215197822` / `36237323311` / `36244917596`）：红的时候
- *    `boundsInRoot == boundsInWindow == [0,0,0,0]`，而 `touchBoundsInRoot=[397,1402,1025,1534]`、
- *    `posOnScreen=(397,1468)`；直投语义 `OnClick` 能让 `onCreate` 回调（`captured=true`、
- *    `dismissed=0`）⇒ 控件与回调都是好的，**是手势坐标打不到**，不是生产缺陷也不是屏幕裁切。
- *    `445582e` 据此在 `typedFilename…` 里按 `touchBoundsInRoot` 中心补一次坐标注入（run
- *    `36250773509`）：坐标算对了（`root(711.0, 1468.0)`，与 `posOnScreen` 一致），但注入本身被拒
- *    —— API 26/API 30 都抛 `AssertionError: Failed to inject touch input.`。⇒ 这一拍连注入通道
- *    都拿不到手势目标。**API 26 上该用例已由 [SdkSuppress] 屏蔽，见 #106**；语义路径与 API 30+
- *    的手势路径都仍然照跑，判据一字未放宽。
+ * 3. **红的时候 `boundsInRoot == boundsInWindow == [0,0,0,0]`，真实矩形只在 `touchBoundsInRoot` 里**。
+ *    三次取证一致（run `36215197822` / `36237323311` / `36244917596`）：`posOnScreen=(397,1468)`；
+ *    直投语义 `OnClick` 能让 `onCreate` 回调（`captured=true`、`dismissed=0`）。
+ *    `445582e` 据此在 `typedFilename…` 里按 `touchBoundsInRoot` 中心补一次坐标注入：坐标算对了
+ *    （`root(711.0, 1468.0)`，与 `posOnScreen` 一致），注入本身被拒 `AssertionError: Failed to inject touch input.`。
+ *    ⚠ **本条当初把它判成"API 26 的手势几何问题、与生产码无关"，那个结论已被 2026-10-04 的实测否证**，
+ *    见 [typedFilenameDrivesCreateCallbackWithKotlinEmptyTemplate] 的注释与 #DP-05。
  *
  * ## 进门先等节点出现，且重试必须可见
  * [awaitButton] 轮询到语义树里出现该节点为止（最多重试一次）；每次重试都打一行
@@ -198,14 +195,39 @@ class CreateFileDialogFlowTest {
     /**
      * 输入文件名 → 点「创建并打开」→ 交回裸名 + 默认语言 + 空模板。
      *
-     * **为什么在 API 26 上屏蔽（只屏蔽这一条用例，#106）**：这三次取证里红都红在手势那一拍，
-     * 不红在判据上 —— 语义 `OnClick` 直投能让 `onCreate` 回调（`captured=true`、`dismissed=0`），
-     * 说明控件、状态、回调链都好；而同一时刻 `boundsInRoot == boundsInWindow == [0,0,0,0]`，
-     * 真实可点矩形只在 `touchBoundsInRoot=[397,1402,1025,1534]`（`posOnScreen=(397,1468)`，
-     * 未超出屏幕下沿）。`445582e` 已按该真实矩形中心补做坐标注入，坐标算对但注入本身被拒：
-     * `AssertionError: Failed to inject touch input.`（run `36250773509`，API 26/30 同型）。
-     * ⇒ 与生产码无关，是这一档上 Compose 1.8.0 的手势注入几何问题；屏蔽只是把它从 CI 挪到
-     * 真机/新版本 Compose 复核，**断言与判据一字未放宽**，API 27+ 仍走真手势路径。
+     * ## `@SdkSuppress(minSdkVersion = 27)` 的原始理由（#106）**已被实测否证**
+     * 原注释写的是"红都红在手势那一拍，不红在判据上 ⇒ 与生产码无关，是这一档上 Compose 1.8.0 的
+     * 手势注入几何问题；API 27+ 仍走真手势路径"。2026-10-04 在 API 30 x86_64 / swiftshader 的
+     * `DraftPeekApi30` AVD 上按用例分别单跑，实测是：
+     * - **本条单跑 3/3 恒红**：红在末尾 `requireNotNull(captured)` 抛的"没回调 onCreate"（取证时栈在 `:248`）；
+     * - **另一条 `createButtonIsDisabledUntilFilenameEntered` 冷启动后单跑 4/4 绿，再连续跑约 9 次后
+     *   3 次里红 2 次** —— 它红在 `node.assertIsDisplayed()`（取证时栈在 `:185`），**那一步没有任何手势**。
+     *   ⇒ "红只在手势那一拍" 不成立；"API 27+ 仍走真手势路径" 也不成立，因为 PR 门禁矩阵只有
+     *   API 30（`.github/workflows/android.yml`），这条屏蔽保护不到任何在跑的门禁。
+     *
+     * ## 已用实测排除的解释（不要再照着它们找）
+     * - 动画没落定：动画缩放为默认 1.0 时整类 2/2 红，把三个缩放全置 0 后整类连跑 3 次仍每次 2/2 红
+     *   ⇒ 两种设置都红过，动画不是那个变量。
+     * - 坐标算错：注入点 `root(711.0, 1468.0)` 正是 `touchBoundsInRoot` 的中心。
+     * - **sheet 窗口没创建**：错。红的那次 `dumpsys window windows` 里同刻有两个
+     *   `.../androidx.activity.ComponentActivity` 窗口（宿主 + `ModalBottomSheet` 自己的窗口）。
+     *   （先前"窗口根本没创建"的结论来自跑起来后第 2.5 s 的**单次**快照，而那一刻连宿主窗口都还没
+     *   出现（实测 ~0.67 s 才出现、sheet ~1.2 s）；单次快照定不了"从不"，只能定"还没"。）
+     * - 跑类时的方法顺序：单跑本条 3/3 红，与顺序无关。
+     * - 模拟器/instrumentation 坏了：对照 `FileBrowserSortTest` 同一台机 `OK (4 tests)`。
+     *
+     * ## 仍未定的是机制本身
+     * 为什么 `boundsInRoot`/`boundsInWindow` 塌零而 `touchBoundsInRoot` 是真实矩形、且注入被拒。
+     * 待验的候选：`CreateFileDialog` 是 `ModalBottomSheet`（`CreateFileDialog.kt:102`，Material3 把
+     * 内容挂在独立窗口里），而本文件用 `createComposeRule()` + `onRoot()` 只绑到宿主窗口的 root，
+     * 于是节点归属与手势目标都落在另一个 root 上。**这条还没被证明**，别当结论引用。
+     * 另一条同样没量过的候选：失败时 `imeAcceptingText=true`（`performTextInput` 之后键盘已起），
+     * 而注入点 `y=1468` 在 1080x2072 的屏上大概落在键盘覆盖区里（`touchBoundsInRoot` 不会因遮挡收缩）。
+     * 判别很便宜：同一条用例里先收键盘再点，若转绿则遮挡是主因。本轮没跑这个实验。
+     * 同理，"与生产码无关"现在也只是**未证明有关**，不是被排除的结论 —— 同一个 composable 在真机
+     * 是宿主在 `MainActivity` 的窗口层级里显示的，测试宿主与生产宿主不同，这个差异没量过。
+     *
+     * 断言与判据一字未放宽；本条注释只改"为什么这么屏蔽"，不改屏蔽本身。
      */
     @Test
     @SdkSuppress(minSdkVersion = 27)

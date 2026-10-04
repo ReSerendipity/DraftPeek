@@ -100,19 +100,18 @@ jobs:
       - name: Run Unit Tests
         run: ./gradlew test --stacktrace --no-configuration-cache
 
-      # 覆盖率报告生成（2026-09-05 重写）：
-      # 原先这里只有一行 `./gradlew jacocoTestReport ... || echo "[WARN]"`，
-      # 而根项目当时**根本没有** jacocoTestReport 任务 → 每轮都报
-      # "Task 'jacocoTestReport' not found in root project" 并被 || 吞掉，
-      # 所有覆盖率报告从未生成过（静默失效，详见 GOTCHAS #37）。
-      # 现分两步：app 报告是下方硬门禁的唯一输入，必须成功（blocking）；
-      # 其余模块报告供 Codecov 分模块门禁使用，best-effort 不阻断主流程。
+      # 覆盖率报告生成（2026-09-29 从 app-only 提升为全模块 blocking）：
+      # 历史（GOTCHAS #37）：报告链路多次静默失效，当时为了不让基础设施问题
+      # 阻断主流程，非 app 模块采用 best-effort。现在下方门禁已接上
+      # coverage-baseline.json 分模块卡到 ≈ 实测 90%，报告缺失会直接导致
+      # 门禁失败——本步骤必须与门禁同优先级，因此一律 blocking：任何报告
+      # 未能产出都是需要当场修的真实问题（exec 路径/classDirectories 配错、
+      # test 任务未启动、依赖锁定冲突等）。
       - name: Generate Coverage Report
         if: always()
         run: |
           ./gradlew :app:jacocoTestReport --stacktrace --no-configuration-cache
-          ./gradlew jacocoTestReport --stacktrace --no-configuration-cache \
-            || echo "[WARN] Non-app coverage reports failed (non-blocking, Codecov only)"
+          ./gradlew jacocoTestReport --stacktrace --no-configuration-cache
 
       - name: Upload Debug APK
         if: always()
@@ -170,51 +169,26 @@ jobs:
           hide_comments: orphaned
           test_changes_limit: 10
 
-      # 覆盖率门禁 — 检查 app 模块指令覆盖率是否达到阈值
+      # 覆盖率质量门禁 —— 分模块 + ratchet（只升不降）
       #
-      # ⚠️ 阈值沿革（改动前必读）：原为 60%，但那是**从未被真实数据验证过的空想值**——
-      # JaCoCo 报告此前从未真正产出过（GOTCHAS #37），这条门禁实际上从未跑过一次。
-      # 2026-09-05 修复产出链路后首次实测：app 指令覆盖率 **4.8%**（行 5.4% / 分支 3.9%），
-      # 全局加权行覆盖 7.7% —— 距 60% 有数量级差距，保留原值等于让每次 CI 必红。
+      # ⚠️ 政策沿革（改动前必读）：
+      #   2026-09-05：首次产出链路修复后实测，取 app INSTRUCTION 4% 作为单模块基线。
+      #   2026-09-29：从管道验证提升为质量门禁：
+      #     • 单一基线文件 coverage-baseline.json 定义全模块阈值，不再只卡 app。
+      #     • 分模块实测（INSTRUCTION）：
+      #         app 4.68 | core/common 28.38 | core/data 13.93 | core/domain 56.19
+      #         core/ui 0.92 | feature/editor 4.01 | feature/browser 2.21
+      #         feature/settings 16.40 | feature/stats 2.38 | feature/terminal 13.51
+      #       阈值取实测的 ≈ 90%，确保回归拦截有意义。
+      #     • bash 整数除法对 < 1% 的模块会截断为 0，因此门禁改用 Python 小数精度。
+      #     • ratchet 机制：Python 脚本对比 origin/main 上的 coverage-baseline.json，
+      #       任一模块 threshold_pct 下降即 CI 失败；新增模块无需 ratchet 检查。
+      #     • 历史陷阱（GOTCHAS #37）“报告丢失 → 无数据即绿”仍适用：本脚本对
+      #       XML 报告缺失/解析失败一律报 FAIL，不兼容静默退出。
       #
-      # 现改为「实测基线 + ratchet（只升不降）」：阈值取 4%（低于实测 4.8%，留 0.8pt 抖动余量）。
-      # 它依然能拦住真实回归：报告丢失 / exec 未生成 / 覆盖率断崖式下跌至 0。
-      # 后续覆盖率提升时，必须同步上调 COVERAGE_MIN，禁止为过 CI 而下调。
+      # 参考：coverage-baseline.json 里的 notes 字段列出完整的 ratchet 规则与升级流程。
       - name: Check Coverage Threshold
-        run: |
-          COVERAGE_MIN=4
-          REPORT_FILE="app/build/reports/jacoco/jacocoTestReport/jacocoTestReport.xml"
-          if [ ! -f "$REPORT_FILE" ]; then
-            echo "[FAIL] JaCoCo report not found at $REPORT_FILE — coverage gate cannot verify, failing."
-            exit 1
-          fi
-          # 解析报告级（最后一个）INSTRUCTION 计数器作为项目整体覆盖率。
-          # 旧写法假定属性顺序 covered 在前，但 JaCoCo 实际输出 missed 在前 —— grep
-          # 永远匹配不到，在 -e -o pipefail 下静默退出（2026-09-08 首次真跑暴露），
-          # 门禁从未真正运行过。现改为属性顺序无关提取，并容忍 grep 空匹配。
-          INSTR_LINE=$(grep -o '<counter type="INSTRUCTION"[^>]*>' "$REPORT_FILE" | tail -1) || true
-          if [ -z "$INSTR_LINE" ]; then
-            echo "[FAIL] Could not parse coverage from $REPORT_FILE — failing."
-            exit 1
-          fi
-          COVERED=$(echo "$INSTR_LINE" | grep -o 'covered="[0-9]*"' | grep -o '[0-9]*') || true
-          MISSED=$(echo "$INSTR_LINE" | grep -o 'missed="[0-9]*"' | grep -o '[0-9]*') || true
-          if [ -z "$COVERED" ] || [ -z "$MISSED" ]; then
-            echo "[FAIL] Could not parse coverage from $REPORT_FILE — failing."
-            exit 1
-          fi
-          TOTAL=$((COVERED + MISSED))
-          if [ "$TOTAL" -eq 0 ]; then
-            echo "[FAIL] No coverage data — failing."
-            exit 1
-          fi
-          PCT=$((COVERED * 100 / TOTAL))
-          echo "Project coverage: ${PCT}% (covered=$COVERED, missed=$MISSED, total=$TOTAL)"
-          if [ "$PCT" -lt "$COVERAGE_MIN" ]; then
-            echo "[FAIL] Coverage ${PCT}% is below ${COVERAGE_MIN}% threshold."
-            exit 1
-          fi
-          echo "[PASS] Coverage ${PCT}% meets ${COVERAGE_MIN}% threshold."
+        run: python3 scripts/check_coverage_gate.py --ratchet
 
       # Codecov 覆盖率上传 — 可视化覆盖率变化趋势
       - name: Upload Coverage to Codecov
