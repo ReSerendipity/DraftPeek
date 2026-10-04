@@ -49,7 +49,7 @@ import org.junit.Test
  *    `445582e` 据此在 `typedFilename…` 里按 `touchBoundsInRoot` 中心补一次坐标注入：坐标算对了
  *    （`root(711.0, 1468.0)`，与 `posOnScreen` 一致），注入本身被拒 `AssertionError: Failed to inject touch input.`。
  *    ⚠ **本条当初把它判成"API 26 的手势几何问题、与生产码无关"，那个结论已被 2026-10-04 的实测否证**，
- *    见 [typedFilenameDrivesCreateCallbackWithKotlinEmptyTemplate] 的注释与 #DP-05。
+ *    见 [typedFilenameDrivesCreateCallbackWithKotlinEmptyTemplate] 的注释与 #DP-05（对外取证见 issue #125）。
  *
  * ## 进门先等节点出现，且重试必须可见
  * [awaitButton] 轮询到语义树里出现该节点为止（最多重试一次）；每次重试都打一行
