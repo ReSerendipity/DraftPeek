@@ -141,7 +141,7 @@
     <string name="profile_theme_dark_badge">深色</string>
     <string name="profile_theme_light_badge">浅色</string>
     <string name="profile_theme_using">使用中</string>
-    <string name="profile_theme_import_count">已导入 %1 个</string>
+    <string name="profile_theme_import_count">已导入 %1$d 个</string>
     <string name="profile_setting_snippets">代码片段</string>
     <string name="profile_auto_save_interval_dialog_title">自动保存间隔</string>
     <string name="profile_footer_made_with">由 DraftPeek 打造</string>
