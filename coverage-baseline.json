@@ -1,0 +1,67 @@
+{
+  "$schema_version": "1.0",
+  "policy": "ratchet_up_only",
+  "metric": "jacoco.instruction.covered_ratio",
+  "last_measured": "2026-09-29",
+  "notes": [
+    "本文件是 DraftPeek 覆盖率质量门禁的唯一阈值来源（single source of truth）。",
+    "所有百分比按 JaCoCo XML 报告的 report-level INSTRUCTION counter 计算：pct = covered * 100 / (covered + missed)。",
+    "measured_pct：最近一次实测值（`./gradlew :app:jacocoTestReport jacocoTestReport`）。",
+    "threshold_pct：CI 阻塞阈值，取实测值的约 90%，用于拦截有意义的回归；低于该值即视为质量门禁失败。",
+    "ratchet 规则：threshold_pct 只允许上调，不允许下调；PR 中任一模块 threshold_pct 相对 main 分支下降将被 CI 硬拒。",
+    "如需真正下调（如移除大模块），必须走 ADR 讨论并在本文件 notes 中记录理由，同时同步更新 android.yml 与本文件。",
+    "当实测覆盖率比 threshold_pct 高出 3pt 以上时，视为债务累积警告，PR 应同步上调 threshold_pct 到新实测的 90%。"
+  ],
+  "modules": {
+    "app": {
+      "measured_pct": 4.68,
+      "threshold_pct": 4.2,
+      "report_path": "app/build/reports/jacoco/jacocoTestReport/jacocoTestReport.xml"
+    },
+    "core/common": {
+      "measured_pct": 28.38,
+      "threshold_pct": 25.5,
+      "report_path": "core/common/build/reports/jacoco/jacocoTestReport/jacocoTestReport.xml"
+    },
+    "core/data": {
+      "measured_pct": 13.93,
+      "threshold_pct": 12.5,
+      "report_path": "core/data/build/reports/jacoco/jacocoTestReport/jacocoTestReport.xml"
+    },
+    "core/domain": {
+      "measured_pct": 56.19,
+      "threshold_pct": 50.5,
+      "report_path": "core/domain/build/reports/jacoco/jacocoTestReport/jacocoTestReport.xml"
+    },
+    "core/ui": {
+      "measured_pct": 0.92,
+      "threshold_pct": 0.8,
+      "report_path": "core/ui/build/reports/jacoco/jacocoTestReport/jacocoTestReport.xml"
+    },
+    "feature/browser": {
+      "measured_pct": 2.21,
+      "threshold_pct": 1.9,
+      "report_path": "feature/browser/build/reports/jacoco/jacocoTestReport/jacocoTestReport.xml"
+    },
+    "feature/editor": {
+      "measured_pct": 4.01,
+      "threshold_pct": 3.6,
+      "report_path": "feature/editor/build/reports/jacoco/jacocoTestReport/jacocoTestReport.xml"
+    },
+    "feature/settings": {
+      "measured_pct": 16.4,
+      "threshold_pct": 14.7,
+      "report_path": "feature/settings/build/reports/jacoco/jacocoTestReport/jacocoTestReport.xml"
+    },
+    "feature/stats": {
+      "measured_pct": 2.38,
+      "threshold_pct": 2.1,
+      "report_path": "feature/stats/build/reports/jacoco/jacocoTestReport/jacocoTestReport.xml"
+    },
+    "feature/terminal": {
+      "measured_pct": 13.51,
+      "threshold_pct": 12.1,
+      "report_path": "feature/terminal/build/reports/jacoco/jacocoTestReport/jacocoTestReport.xml"
+    }
+  }
+}

@@ -8,6 +8,12 @@ codecov:
 
 # 覆盖率阈值配置
 #
+# 🔗 与 android.yml 内的硬性门禁互补关系：
+#   • 硬门禁（阻塞合并）：coverage-baseline.json + scripts/check_coverage_gate.py，
+#     基于 JaCoCo XML 的 INSTRUCTION counter，实测 90% 作为 threshold。
+#   • 本文件（Codecov PR 注释/展示）：基于 LINE counter，与上面不同指标，
+#     但同样采用 ratchet（只升不降）策略；下调需走 ADR。
+#
 # ⚠️ 2026-09-05 基线重置说明（改动前必读）：
 #   本仓库的 JaCoCo 报告**历史上从未真正产出过**（根项目没有 jacocoTestReport 任务、
 #   除 core/common 外所有库模块未注册该任务、且未启用 enableUnitTestCoverage →
@@ -19,6 +25,11 @@ codecov:
 #     core/ui 100% | feature/browser 2.8% | feature/editor 5.8% |
 #     feature/settings 20.9% | feature/stats 3.7% | feature/terminal 14.8%
 #   全局加权：LINE 7.7% / INSTRUCTION 6.5% / BRANCH 4.9%
+#
+#   ⚠️ 2026-09-29 实测修正：core/ui 与 core/domain 历史标记 100% 因报告 SKIPPED
+#   导致样本极少，实际 JaCoCo INSTRUCTION 覆写后：core/domain 56.19%，core/ui 0.92%。
+#   新硬门禁（coverage-baseline.json）已使用真实值；本文件保留历史 target 作为
+#   Codecov PR 注释参考，不阻塞主流程。
 #
 #   故将所有 target 下调为「实测基线」，并采用 **ratchet（只升不降）** 机制：
 #   门禁从此真实生效，可拦住覆盖率归零、报告丢失与任何后续下滑；

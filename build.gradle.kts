@@ -79,6 +79,12 @@ spotless {
 }
 
 // JaCoCo 代码覆盖率配置
+//
+// 🔗 与质量门禁的链路：
+//   • 本报告产出后，`.github/workflows/android.yml` 的 "Check Coverage Threshold"
+//     步骤会调用 `scripts/check_coverage_gate.py`，对 coverage-baseline.json 中
+//     列出的每个模块执行分模块 INSTRUCTION 覆盖率卡卡（ratchet：阈值只升不降）。
+//   • 本文件只负责正确产出报告；具体阀值数字不在这里，避免多处维护。
 subprojects {
     plugins.withType<com.android.build.gradle.LibraryPlugin> {
         apply(plugin = "jacoco")
@@ -105,16 +111,17 @@ subprojects {
             }
         }
 
-        // 统一为所有库模块注册 jacocoTestReport（2026-09-05 修复静默失效）。
+        // 统一为所有库模块注册 jacocoTestReport（2026-09-05 修复静默失效；2026-09-29 修正 exec 路径）。
         //
-        // 背景：此前只有 core/common 自建过一份，但它的 executionData 指向
-        // build/outputs/unit_test_code_coverage/debugUnitTest/testDebugUnitTest.exec
-        // —— 这是 AGP 4.x 时代的路径，AGP 8 的真实产物在
-        // build/jacoco/<variant>UnitTest.exec。旧路径不存在 → JacocoReport 因无执行数据
-        // 被 **SKIPPED**，而 Gradle 仍报 BUILD SUCCESSFUL：报告从未产出，
-        // 覆盖率数字无从谈起（无任何报错，属静默失效）。其余库模块则根本没有报告任务。
+        // 历史背景：此前只有 core/common 自建过一份，但它的 executionData 指向
+        // build/outputs/unit_test_code_coverage/debugUnitTest/testDebugUnitTest.exec（AGP 4.x 时代的路径），
+        // 当时 AGP 8 的产物已迁到 build/jacoco/<variant>UnitTest.exec。旧路径不存在 → JacocoReport
+        // 因无执行数据被 SKIPPED，而 Gradle 仍报 BUILD SUCCESSFUL（GOTCHAS #37）。
         //
-        // 现收敛为一份正确实现，覆盖全部库模块。
+        // 2026-09-29 实测发现行为反转：AGP 8.10 + Gradle 8.14 下，enableUnitTestCoverage = true
+        // 的产物实际回到 build/outputs/unit_test_code_coverage/debugUnitTest/，build/jacoco/
+        // 对大部分库模块为空。为了兼容不同 AGP 小版本的差异，下方 executionData 同时包含
+        // 两个候选路径，取实际存在的那一个。
         tasks.register<JacocoReport>("jacocoTestReport") {
             group = "verification"
             description = "Generate JaCoCo coverage report for this module"
@@ -131,22 +138,43 @@ subprojects {
                 files("$projectDir/src/main/java", "$projectDir/src/main/kotlin")
             )
 
-            // AGP 8：Kotlin 与 Java 类最终汇入 intermediates/classes/<variant>
-            // （已过 ASM transform，是 tmp/kotlin-classes 的超集，实测 205 > 201）。
+            // AGP 8 class 输出位置因模块而不同：
+            // - 含 ASM transform 的模块（如 Hilt/kapt）：intermediates/classes/debug（已重写，是超集）
+            // - 纯 Kotlin 模块（如 core/domain、core/ui）：tmp/kotlin-classes/debug
+            // 两者同名不同内容 → 不能同时包含，否则 JaCoCo 报
+            // "Can't add different class with same name"。优先取 intermediates，
+            // 为空时回退到 kotlin-classes（懒求值 provider，执行时才确定）。
+            val intermediatesDir = layout.buildDirectory.dir("intermediates/classes/debug")
+            val kotlinClassesDir = layout.buildDirectory.dir("tmp/kotlin-classes/debug")
+            val classDirProvider = intermediatesDir.map { dir ->
+                val f = dir.asFile
+                // 目录存在且非空 → 使用 intermediates（Hilt 重写后的超集）；
+                // 否则 → 回退到 tmp/kotlin-classes（纯 Kotlin 模块的编译输出）。
+                val nonEmpty = f.isDirectory && (f.list()?.isNotEmpty() == true)
+                if (nonEmpty) f else kotlinClassesDir.get().asFile
+            }
             classDirectories.setFrom(
-                fileTree(layout.buildDirectory.dir("intermediates/classes/debug")) {
-                    exclude(
-                        "**/R.class",
-                        "**/R\$*.class",
-                        "**/BuildConfig.*",
-                        "**/Manifest.*"
-                    )
-                }
+                project.files(classDirProvider.map { root ->
+                    fileTree(root) {
+                        exclude(
+                            "**/R.class",
+                            "**/R\$*.class",
+                            "**/BuildConfig.*",
+                            "**/Manifest.*"
+                        )
+                    }
+                })
             )
 
+            // 兼容两种 AGP 版本的 exec 输出路径：
+            // - AGP 8.x 标准 JaCoCo plugin：build/jacoco/testDebugUnitTest.exec
+            // - AGP enableUnitTestCoverage：build/outputs/unit_test_code_coverage/debugUnitTest/testDebugUnitTest.exec
             executionData.setFrom(
-                fileTree(layout.buildDirectory.dir("jacoco")) {
-                    include("testDebugUnitTest.exec")
+                fileTree(layout.buildDirectory.get().asFile) {
+                    include(
+                        "jacoco/testDebugUnitTest.exec",
+                        "outputs/unit_test_code_coverage/debugUnitTest/testDebugUnitTest.exec"
+                    )
                 }
             )
         }
