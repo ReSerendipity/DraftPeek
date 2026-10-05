@@ -153,6 +153,10 @@ graph TD
 <string name="editor_action_open_terminal">Terminal</string>
     <string name="editor_more">More</string>
     <string name="editor_quick_settings">Quick Settings</string>
+    <string name="editor_status_unsaved">Unsaved</string>
+    <string name="editor_menu_group_edit">Edit</string>
+    <string name="editor_menu_group_tools">Tools</string>
+    <string name="editor_menu_group_file">File</string>
     <string name="editor_cross_file_search">Cross-file Search</string>
     <string name="editor_reopen_with_encoding">Reopen with Encoding</string>
     <string name="editor_save_with_encoding">Save with Encoding</string>
