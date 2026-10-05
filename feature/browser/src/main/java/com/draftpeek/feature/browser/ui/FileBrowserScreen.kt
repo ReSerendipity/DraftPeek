@@ -4341,7 +4341,7 @@ fun FileItemComposable(
                 onMoveTo != null ||
                 onEncryptExport != null ||
                 onMultiSelect != null
-        )
+            )
 
     val displayName = if (compareIndex > 0) "$compareIndex. ${item.name}" else item.name
     val metaText = if (!item.isDirectory) {
