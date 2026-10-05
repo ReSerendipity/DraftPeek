@@ -5,9 +5,11 @@ import android.util.Log
 import androidx.datastore.preferences.core.edit
 import androidx.datastore.preferences.core.stringPreferencesKey
 import androidx.datastore.preferences.preferencesDataStore
+import com.draftpeek.core.common.util.AppFileManager
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.map
+import java.io.File
 
 private const val TAG = "SampleFileManager"
 
@@ -153,4 +155,29 @@ object SampleFileManager {
             prefs[SAMPLE_ORDER_KEY] = orderedNames.joinToString(",")
         }
     }
+
+    /**
+     * 把内置示例复制到应用内部存储（用户文件目录）。
+     *
+     * 同名时追加 ` (n)` 后缀：`AppFileManager.createUserFile` 在目标已存在时会直接返回旧文件，
+     * 不覆盖也不新建 —— 若不先改名，用户点「复制」会看起来成功、实际什么都没发生。
+     *
+     * @return 新建文件的显示名（含扩展名）；读资产或写文件失败时返回 null
+     */
+    fun copySampleToUserFiles(context: Context, sample: SampleFile): String? = runCatching {
+        val content = context.assets.open(sample.assetPath).bufferedReader().use { it.readText() }
+        val extension = sample.name.substringAfterLast('.', "").ifBlank { "txt" }
+        val baseName = sample.name.substringBeforeLast('.', sample.name)
+        val dir = AppFileManager.getUserFilesDir(context)
+
+        var candidate = baseName
+        var index = 1
+        while (File(dir, "$candidate.$extension").exists()) {
+            candidate = "$baseName ($index)"
+            index++
+        }
+        AppFileManager.createUserFile(context, candidate, extension, content).name
+    }.onFailure { e ->
+        Log.w(TAG, "复制示例文件失败: ${sample.name}", e)
+    }.getOrNull()
 }

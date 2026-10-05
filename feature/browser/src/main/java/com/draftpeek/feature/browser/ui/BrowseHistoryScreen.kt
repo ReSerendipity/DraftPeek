@@ -3,6 +3,7 @@ package com.draftpeek.feature.browser.ui
 import android.text.format.DateUtils
 import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.background
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.combinedClickable
 import androidx.compose.foundation.horizontalScroll
 import androidx.compose.foundation.interaction.MutableInteractionSource
@@ -21,10 +22,11 @@ import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.automirrored.filled.KeyboardArrowRight
 import androidx.compose.material.icons.filled.Delete
 import androidx.compose.material.icons.filled.History
+import androidx.compose.material.icons.filled.MoreVert
 import androidx.compose.material.icons.filled.Star
+import androidx.compose.material3.DropdownMenu
 import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
@@ -53,6 +55,8 @@ import com.draftpeek.core.ui.component.BrandFilterChip
 import com.draftpeek.core.ui.component.BrandIconButton
 import com.draftpeek.core.ui.component.BrandTopBar
 import com.draftpeek.core.ui.component.FileTypeIcon
+import com.draftpeek.core.ui.icon.StrokeIcon
+import com.draftpeek.core.ui.icon.StrokeIcons
 import com.draftpeek.core.ui.modifier.pressScaleEffect
 import com.draftpeek.core.ui.theme.FileMetaStyle
 import com.draftpeek.core.ui.theme.JetBrainsMonoFontFamily
@@ -219,6 +223,7 @@ fun BrowseHistoryScreen(
 
     var selectedFilter by rememberSaveable { mutableStateOf(HistoryFilter.All) }
     var showClearAllDialog by rememberSaveable { mutableStateOf(false) }
+    var showHistoryMenu by rememberSaveable { mutableStateOf(false) }
     var showRecentFileMenu by rememberSaveable { mutableStateOf<RecentFile?>(null) }
 
     val pageBg = PrototypeTokens.pageBackground
@@ -332,12 +337,40 @@ fun BrowseHistoryScreen(
             title = stringResource(R.string.browser_title_history),
             titleStyle = HistoryTitleStyle,
             actions = {
-                BrandIconButton(
-                    icon = Icons.Filled.Delete,
-                    onClick = { showClearAllDialog = true },
-                    contentDescription = stringResource(R.string.browser_content_desc_clear_history),
-                    tint = fgSoft
-                )
+                // 破坏性动作收进「⋮」，不再以垃圾桶图标直白暴露在顶栏
+                // （实施指导书 §2.9 屏 09 + §3.2 高危操作隔离）。
+                Box {
+                    BrandIconButton(
+                        icon = Icons.Filled.MoreVert,
+                        onClick = { showHistoryMenu = true },
+                        contentDescription = stringResource(R.string.browser_action_more),
+                        tint = fgSoft
+                    )
+                    DropdownMenu(
+                        expanded = showHistoryMenu,
+                        onDismissRequest = { showHistoryMenu = false }
+                    ) {
+                        DropdownMenuItem(
+                            text = {
+                                Text(
+                                    text = stringResource(R.string.browser_action_clear_history),
+                                    color = PrototypeTokens.error
+                                )
+                            },
+                            leadingIcon = {
+                                Icon(
+                                    imageVector = Icons.Filled.Delete,
+                                    contentDescription = null,
+                                    tint = PrototypeTokens.error
+                                )
+                            },
+                            onClick = {
+                                showHistoryMenu = false
+                                showClearAllDialog = true
+                            }
+                        )
+                    }
+                }
             }
         )
 
@@ -412,18 +445,21 @@ fun BrowseHistoryScreen(
                         val filesInSection = groupedFiles[section] ?: return@forEach
                         if (filesInSection.isEmpty()) return@forEach
 
-                        // Section header
-                        item(key = "header_${section.name}") {
+                        // Section header — 吸顶，长列表滚动时仍能看清分组（实施指导书 §2.9 屏 09）
+                        stickyHeader(key = "header_${section.name}") {
                             Text(
                                 text = stringResource(section.labelRes),
                                 style = MonoUppercaseSectionStyle,
                                 color = muted,
-                                modifier = Modifier.padding(
-                                    start = PrototypeSpacing.ScreenHorizontal,
-                                    end = PrototypeSpacing.ScreenHorizontal,
-                                    top = 16.dp,
-                                    bottom = 4.dp
-                                )
+                                modifier = Modifier
+                                    .fillMaxWidth()
+                                    .background(pageBg)
+                                    .padding(
+                                        start = PrototypeSpacing.ScreenHorizontal,
+                                        end = PrototypeSpacing.ScreenHorizontal,
+                                        top = 16.dp,
+                                        bottom = 4.dp
+                                    )
                             )
                         }
 
@@ -475,7 +511,6 @@ fun BrowseHistoryScreen(
 private fun RecentFileRow(recentFile: RecentFile, onClick: () -> Unit, onLongClick: () -> Unit) {
     val fg = PrototypeTokens.fg
     val muted = PrototypeTokens.muted
-    val mutedSoft = PrototypeTokens.mutedSoft
 
     val ext = recentFile.fileName.substringAfterLast('.', "")
 
@@ -544,13 +579,25 @@ private fun RecentFileRow(recentFile: RecentFile, onClick: () -> Unit, onLongCli
 
         Spacer(modifier = Modifier.width(8.dp))
 
-        // Trailing chevron (faint)
-        Icon(
-            imageVector = Icons.AutoMirrored.Filled.KeyboardArrowRight,
-            contentDescription = null,
-            tint = mutedSoft.copy(alpha = 0.4f),
-            modifier = Modifier.size(16.dp)
-        )
+        // 「↺ 重新打开」直达（实施指导书 §2.9 屏 09）：行本身也可点，这里再给一个
+        // 语义明确的动作入口，避免用户以为整行只是展示。
+        Box(
+            modifier = Modifier
+                .size(32.dp)
+                .clickable(
+                    interactionSource = remember { MutableInteractionSource() },
+                    indication = null,
+                    onClick = onClick
+                ),
+            contentAlignment = Alignment.Center
+        ) {
+            StrokeIcon(
+                icon = StrokeIcons.Refresh,
+                contentDescription = stringResource(R.string.browser_action_reopen),
+                tint = PrototypeTokens.accent,
+                modifier = Modifier.size(16.dp)
+            )
+        }
     }
 }
 
