@@ -100,6 +100,9 @@
     <string name="agreement_gate_body">継続使用により、利用規約とプライバシーポリシーに同意したものとみなされます：権利侵害や違法な目的での使用をしないこと；他人の肖像・声を含む権利を侵害するコンテンツの修復・拡散をしないこと；出所識別や AI 表示を削除しないこと；生成物を共有する際は管轄域の AI 生成コンテンツ表示規則に従うこと。</string>
     <string name="agreement_gate_checkbox">利用規約・プライバシーポリシーおよび上記の条件に同意します</string>
     <string name="agreement_gate_confirm">同意して開始</string>
-    <string name="agreement_gate_policy">利用規約を見る</string>
-    <string name="agreement_gate_privacy">プライバシーポリシーを見る</string>
+    <string name="agreement_gate_summary">続ける前に、以下の規約とポリシーをお読みいただき、同意してください。</string>
+    <string name="agreement_gate_expand_terms">全文を表示</string>
+    <string name="agreement_gate_collapse_terms">全文を隠す</string>
+    <string name="agreement_gate_policy">利用規約</string>
+    <string name="agreement_gate_privacy">プライバシーポリシー</string>
 </resources>
