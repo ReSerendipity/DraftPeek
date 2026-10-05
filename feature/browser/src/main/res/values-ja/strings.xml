@@ -30,6 +30,7 @@
     <string name="browser_action_create">作成</string>
     <string name="browser_action_create_open">作成して開く</string>
     <string name="browser_action_delete">削除</string>
+    <string name="browser_action_more">その他の操作</string>
     <string name="browser_action_delete_file">削除</string>
     <string name="browser_action_deselect_all">すべて選択解除</string>
     <string name="browser_action_drag_reorder">ドラッグして並べ替え</string>
@@ -57,6 +58,10 @@
     <string name="browser_action_select_all">すべて選択</string>
     <string name="browser_action_select_directory">ディレクトリを選択</string>
     <string name="browser_action_snippets">コードスニペット</string>
+    <string name="browser_snippet_search_hint">スニペットを検索…</string>
+    <string name="browser_snippet_search_mode_fulltext">全文一致</string>
+    <string name="browser_snippet_search_mode_substring">部分一致</string>
+    <string name="browser_snippet_insert">挿入</string>
     <string name="browser_action_sort_by">並び替え</string>
     <string name="browser_action_unbookmark">ブックマークを解除</string>
     <string name="browser_action_unfavorite">お気に入りを解除</string>
@@ -104,6 +109,7 @@
     <string name="browser_fab_import_file">内部にインポート</string>
     <string name="browser_fab_new_file">新規ファイル</string>
     <string name="browser_fab_new_folder">新規フォルダ</string>
+    <string name="browser_fab_import">インポート…</string>
     <string name="browser_fab_open_file">外部ファイルを開く</string>
     <string name="browser_fab_samples">サンプルファイル</string>
     <string name="browser_fab_terminal">ターミナル</string>

@@ -96,11 +96,16 @@
     <string name="browser_history_content_desc">歷史記錄</string>
     <string name="browser_fab_new_file">新建檔案</string>
     <string name="browser_fab_new_folder">新建資料夾</string>
+    <string name="browser_fab_import">匯入…</string>
     <string name="browser_fab_import_file">匯入到內部</string>
     <string name="browser_fab_open_file">開啟外部檔案</string>
     <string name="browser_fab_terminal">終端機</string>
     <string name="browser_fab_samples">範例檔案</string>
     <string name="browser_action_snippets">程式碼片段</string>
+    <string name="browser_snippet_search_hint">搜尋片段…</string>
+    <string name="browser_snippet_search_mode_fulltext">全文比對</string>
+    <string name="browser_snippet_search_mode_substring">子字串比對</string>
+    <string name="browser_snippet_insert">插入</string>
     <string name="browser_action_pin">釘選</string>
     <string name="browser_action_unpin">取消釘選</string>
     <string name="browser_action_bookmark">加入書籤</string>
@@ -144,6 +149,7 @@
     <string name="browser_dialog_delete_snippet_title">刪除程式碼片段</string>
     <string name="browser_dialog_delete_snippet_message">確定要刪除「%s」嗎？</string>
     <string name="browser_action_delete">刪除</string>
+    <string name="browser_action_more">更多操作</string>
     <string name="browser_hint_search_snippets">搜尋程式碼片段…</string>
     <string name="browser_content_desc_search">搜尋</string>
     <string name="browser_action_add_snippet">加入程式碼片段</string>

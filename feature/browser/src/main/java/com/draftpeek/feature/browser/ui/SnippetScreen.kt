@@ -8,6 +8,7 @@ import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.combinedClickable
 import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.layout.Arrangement
@@ -69,9 +70,12 @@ import com.draftpeek.feature.browser.R
 import com.draftpeek.feature.browser.viewmodel.FileCreateInfo
 import com.draftpeek.feature.browser.viewmodel.SnippetViewModel
 
+// 「清除语言筛选」的哨兵值：计数为 0 时也必须保持可用，否则用户会被困在空筛选里
+private const val ALL_LANGUAGES = "All"
+
 // 代码片段筛选器中显示的预定义语言列表
 private val SNIPPET_LANGUAGES = listOf(
-    "All",
+    ALL_LANGUAGES,
     "Kotlin",
     "Java",
     "Python",
@@ -296,7 +300,7 @@ fun SnippetScreen(
         Column(modifier = Modifier.fillMaxSize()) {
             // Top bar — root level (no back button), mono uppercase title
             BrandTopBar(
-                title = "SNIPPETS",
+                title = stringResource(R.string.browser_action_snippets),
                 titleStyle = MonoUppercaseTitleStyle
             )
 
@@ -311,7 +315,7 @@ fun SnippetScreen(
                 BrandSearchBar(
                     value = searchQuery,
                     onValueChange = { viewModel.search(it) },
-                    placeholder = "Search snippets..."
+                    placeholder = stringResource(R.string.browser_snippet_search_hint)
                 )
 
                 Spacer(modifier = Modifier.height(8.dp))
@@ -321,12 +325,12 @@ fun SnippetScreen(
                     horizontalArrangement = Arrangement.spacedBy(6.dp)
                 ) {
                     BrandChip(
-                        text = "FTS4",
+                        text = stringResource(R.string.browser_snippet_search_mode_fulltext),
                         selected = searchMode == SnippetViewModel.SearchMode.SMART,
                         onClick = { viewModel.setSearchMode(SnippetViewModel.SearchMode.SMART) }
                     )
                     BrandChip(
-                        text = "Substring",
+                        text = stringResource(R.string.browser_snippet_search_mode_substring),
                         selected = searchMode == SnippetViewModel.SearchMode.SUBSTRING,
                         onClick = { viewModel.setSearchMode(SnippetViewModel.SearchMode.SUBSTRING) }
                     )
@@ -345,7 +349,10 @@ fun SnippetScreen(
                         BrandChip(
                             text = label,
                             selected = selectedLanguage == lang,
-                            onClick = { selectedLanguage = lang }
+                            onClick = { selectedLanguage = lang },
+                            // 零计数的语言没有可筛内容，置灰不可点（实施指导书 §2.9 屏 11）；
+                            // 「All」是清除筛选的入口，计数为 0 时仍须可用。
+                            enabled = lang == ALL_LANGUAGES || count > 0
                         )
                     }
                 }
@@ -381,6 +388,9 @@ fun SnippetScreen(
                                         if (onInsertSnippet == null) {
                                             showDeleteDialog = snippet
                                         }
+                                    },
+                                    onInsert = onInsertSnippet?.let { insert ->
+                                        { insert(snippet) }
                                     }
                                 )
                             }
@@ -423,7 +433,12 @@ fun SnippetScreen(
  */
 @OptIn(androidx.compose.foundation.ExperimentalFoundationApi::class)
 @Composable
-private fun SnippetCard(snippet: Snippet, onClick: () -> Unit, onLongClick: () -> Unit) {
+private fun SnippetCard(
+    snippet: Snippet,
+    onClick: () -> Unit,
+    onLongClick: () -> Unit,
+    onInsert: (() -> Unit)? = null
+) {
     val fg = PrototypeTokens.fg
     val fgSoft = PrototypeTokens.fgSoft
     val muted = PrototypeTokens.muted
@@ -551,13 +566,35 @@ private fun SnippetCard(snippet: Snippet, onClick: () -> Unit, onLongClick: () -
 
             Spacer(modifier = Modifier.width(8.dp))
 
-            // Right: chevron
-            Icon(
-                imageVector = Icons.AutoMirrored.Filled.KeyboardArrowRight,
-                contentDescription = null,
-                tint = muted,
-                modifier = Modifier.size(18.dp)
-            )
+            // Right: 有编辑器上下文时给「插入」直达按钮，否则退化为 chevron
+            // （实施指导书 §2.9 屏 11：片段卡片加「插入」直达按钮）。
+            if (onInsert != null) {
+                Box(
+                    modifier = Modifier
+                        .clip(BrandShapes.Chip)
+                        .background(PrototypeTokens.accentSoft)
+                        .clickable(
+                            interactionSource = remember { MutableInteractionSource() },
+                            indication = null,
+                            onClick = onInsert
+                        )
+                        .padding(horizontal = 10.dp, vertical = 5.dp),
+                    contentAlignment = Alignment.Center
+                ) {
+                    Text(
+                        text = stringResource(R.string.browser_snippet_insert),
+                        style = ChipTextStyle,
+                        color = PrototypeTokens.accent
+                    )
+                }
+            } else {
+                Icon(
+                    imageVector = Icons.AutoMirrored.Filled.KeyboardArrowRight,
+                    contentDescription = null,
+                    tint = muted,
+                    modifier = Modifier.size(18.dp)
+                )
+            }
         }
     }
 }

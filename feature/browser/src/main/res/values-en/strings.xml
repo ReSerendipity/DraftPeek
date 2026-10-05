@@ -48,6 +48,7 @@
     <string name="browser_action_create">Create</string>
     <string name="browser_action_create_open">Create and open</string>
     <string name="browser_action_delete">Delete</string>
+    <string name="browser_action_more">More actions</string>
     <string name="browser_action_delete_file">Delete</string>
     <string name="browser_action_drag_reorder">Drag to reorder</string>
     <string name="browser_action_export_as_file">Export as file</string>
@@ -69,6 +70,10 @@
     <string name="browser_action_select">Select</string>
     <string name="browser_action_select_directory">Select directory</string>
     <string name="browser_action_snippets">Snippets</string>
+    <string name="browser_snippet_search_hint">Search snippets…</string>
+    <string name="browser_snippet_search_mode_fulltext">Full-text</string>
+    <string name="browser_snippet_search_mode_substring">Substring</string>
+    <string name="browser_snippet_insert">Insert</string>
     <string name="browser_action_sort_by">Sort by</string>
     <string name="browser_action_unbookmark">Remove bookmark</string>
     <string name="browser_action_unfavorite">Unfavorite</string>
@@ -112,6 +117,7 @@
     <string name="browser_fab_import_file">Import to internal storage</string>
     <string name="browser_fab_new_file">New file</string>
     <string name="browser_fab_new_folder">New folder</string>
+    <string name="browser_fab_import">Import…</string>
     <string name="browser_fab_open_file">Open external file</string>
     <string name="browser_fab_samples">Sample files</string>
     <string name="browser_fab_terminal">Terminal</string>

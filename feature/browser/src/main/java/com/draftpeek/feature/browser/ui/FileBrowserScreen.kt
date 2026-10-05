@@ -78,11 +78,13 @@ import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.ModalBottomSheet
 import androidx.compose.material3.PlainTooltip
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.material3.TooltipBox
 import androidx.compose.material3.TooltipDefaults
+import androidx.compose.material3.rememberModalBottomSheetState
 import androidx.compose.material3.rememberTooltipState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
@@ -154,6 +156,7 @@ import com.draftpeek.core.ui.component.FileTypeIcon
 import com.draftpeek.core.ui.component.accessibilityEnhanced
 import com.draftpeek.core.ui.composition.isFeatureEnabled
 import com.draftpeek.core.ui.icon.StrokeIcon
+import com.draftpeek.core.ui.icon.StrokeIconDef
 import com.draftpeek.core.ui.icon.StrokeIcons
 import com.draftpeek.core.ui.layout.FoldInfo
 import com.draftpeek.core.ui.layout.FoldableState
@@ -177,6 +180,7 @@ import com.draftpeek.core.ui.theme.SemanticColors
 import com.draftpeek.feature.browser.R
 import com.draftpeek.feature.browser.model.BrowserUiState
 import com.draftpeek.feature.browser.model.FileItem
+import com.draftpeek.feature.browser.model.FileSortOption
 import com.draftpeek.feature.browser.model.GitHubImportState
 import com.draftpeek.feature.browser.viewmodel.FileBrowserViewModel
 import com.draftpeek.feature.browser.viewmodel.GitEvent
@@ -336,6 +340,7 @@ fun FileBrowserScreen(
     var hasSafPermission by rememberSaveable { mutableStateOf(false) }
     var selectedFile by remember { mutableStateOf<FileItem?>(null) }
     var showCreateFileDialog by rememberSaveable { mutableStateOf(false) }
+    var showImportSheet by rememberSaveable { mutableStateOf(false) }
     var showCreateSnippetDialog by rememberSaveable { mutableStateOf(false) }
     var showGitHubImportDialog by rememberSaveable { mutableStateOf(false) }
     var showGitActionSheet by rememberSaveable { mutableStateOf(false) }
@@ -766,6 +771,29 @@ fun FileBrowserScreen(
         )
     }
 
+    // 「导入…」二级弹层（实施指导书 §2.2：FAB 只留创建类，导入类收进二级表）
+    if (showImportSheet) {
+        ImportActionsSheet(
+            onDismiss = { showImportSheet = false },
+            onSamples = {
+                showImportSheet = false
+                onNavigateToSamples()
+            },
+            onImportFromGitHub = {
+                showImportSheet = false
+                showGitHubImportDialog = true
+            },
+            onOpenExternalFile = {
+                showImportSheet = false
+                openFileLauncher.launch(arrayOf("*/*"))
+            },
+            onImportToInternal = {
+                showImportSheet = false
+                importFileLauncher.launch(arrayOf("*/*"))
+            }
+        )
+    }
+
     // Delete file confirmation dialog
     if (showDeleteConfirmDialog && fileToDelete != null) {
         val fileItem = fileToDelete!!
@@ -1182,6 +1210,47 @@ fun FileBrowserScreen(
                                 } else {
                                     PrototypeTokens.muted
                                 }
+                            )
+                        }
+                    }
+
+                    // 浏览类入口升为顶栏常驻图标（实施指导书 §2.2）：History / Snippets 不再藏在 FAB 里
+                    BrandIconButton(
+                        onClick = onNavigateToHistory,
+                        modifier = Modifier.accessibilityEnhanced(
+                            contentDescription = stringResource(R.string.browser_history_content_desc)
+                        )
+                    ) {
+                        StrokeIcon(
+                            icon = StrokeIcons.Clock,
+                            contentDescription = stringResource(R.string.browser_history_content_desc),
+                            tint = PrototypeTokens.muted
+                        )
+                    }
+                    BrandIconButton(
+                        onClick = onNavigateToSnippets,
+                        modifier = Modifier.accessibilityEnhanced(
+                            contentDescription = stringResource(R.string.browser_action_snippets)
+                        )
+                    ) {
+                        StrokeIcon(
+                            icon = StrokeIcons.Braces,
+                            contentDescription = stringResource(R.string.browser_action_snippets),
+                            tint = PrototypeTokens.muted
+                        )
+                    }
+                    // 终端从 FAB 迁出后落在这里（仅 flag 打开时出现），保证 FAB 只有 3 项
+                    if (terminalEnabled) {
+                        BrandIconButton(
+                            onClick = { onNavigateToTerminal(null) },
+                            modifier = Modifier.accessibilityEnhanced(
+                                contentDescription = stringResource(R.string.browser_fab_terminal)
+                            )
+                        ) {
+                            StrokeIcon(
+                                icon = StrokeIcons.Terminal,
+                                contentDescription = stringResource(R.string.browser_fab_terminal),
+                                tint = PrototypeTokens.muted
                             )
                         }
                     }
@@ -2634,27 +2703,8 @@ fun FileBrowserScreen(
                         } else {
                             NoPermissionContent(
                                 onSelectDirectory = { safLauncher.launch(null) },
-                                onOpenFile = {
-                                    openFileLauncher.launch(
-                                        arrayOf(
-                                            "text/*",
-                                            "application/json",
-                                            "application/xml",
-                                            "application/pdf",
-                                            "application/msword",
-                                            "application/vnd.openxmlformats-officedocument.wordprocessingml.document",
-                                            "application/vnd.ms-excel",
-                                            "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
-                                            "application/vnd.ms-powerpoint",
-                                            "application/vnd.openxmlformats-officedocument.presentationml.presentation",
-                                            "image/*",
-                                            "audio/*",
-                                            "video/*",
-                                            "application/octet-stream"
-                                        )
-                                    )
-                                },
-                                onNavigateToSamples = onNavigateToSamples,
+                                onImportFromGitHub = { showGitHubImportDialog = true },
+                                onNewFile = { showCreateFileDialog = true },
                                 modifier = Modifier
                                     .fillMaxSize()
                                     .padding(horizontal = PrototypeSpacing.ScreenHorizontal)
@@ -2709,6 +2759,8 @@ fun FileBrowserScreen(
                                 files = files,
                                 onFileClick = onCompareFileClick,
                                 compareSelection = compareSelection,
+                                currentSortOption = currentSortOption,
+                                onSortOptionChange = { viewModel.changeSortOption(it) },
                                 gitFileStatuses = gitFileStatuses,
                                 isGitRepo = isGitRepo,
                                 onTogglePin = { viewModel.togglePin(it) },
@@ -3052,72 +3104,41 @@ fun FileBrowserScreen(
             }
         }
 
-        // ---- FAB with expandable speed-dial menu ----
-        val fabItems = mutableListOf(
-            FABMenuItem(
-                icon = StrokeIcons.Plus,
-                label = stringResource(R.string.browser_fab_new_file),
-                onClick = { showCreateFileDialog = true }
-            ),
-            FABMenuItem(
-                icon = StrokeIcons.FolderOutline,
-                label = stringResource(R.string.browser_fab_new_folder),
-                onClick = { showCreateFolderDialog = true }
-            ),
-            FABMenuItem(
-                icon = StrokeIcons.Upload,
-                label = stringResource(R.string.browser_fab_import_file),
-                onClick = { importFileLauncher.launch(arrayOf("*/*")) }
-            ),
-            FABMenuItem(
-                icon = StrokeIcons.FolderOutline,
-                label = stringResource(R.string.browser_fab_open_file),
-                onClick = { openFileLauncher.launch(arrayOf("*/*")) }
-            ),
-            FABMenuItem(
-                icon = StrokeIcons.Download,
-                label = stringResource(R.string.browser_github_import),
-                onClick = { showGitHubImportDialog = true }
-            )
-        )
-        if (terminalEnabled) {
-            fabItems.add(
+        // ---- FAB：仅创建（新建文件 / 新建文件夹 / 导入…）----
+        // 导入类入口收进「导入…」二级弹层；History / Snippets 升为顶栏常驻图标；
+        // 未授权目录时（空态授权卡）隐藏 FAB，避免与卡片上的「选择文件夹」主 CTA 重复
+        // （实施指导书 §2.2 / §2.8 与待决策项 D1-A）。
+        val showFab = currentTreeUri != null
+
+        if (showFab) {
+            val fabItems = listOf(
                 FABMenuItem(
-                    icon = StrokeIcons.Terminal,
-                    label = stringResource(R.string.browser_fab_terminal),
-                    onClick = { onNavigateToTerminal(null) }
+                    icon = StrokeIcons.Plus,
+                    label = stringResource(R.string.browser_fab_new_file),
+                    onClick = { showCreateFileDialog = true }
+                ),
+                FABMenuItem(
+                    icon = StrokeIcons.FolderOutline,
+                    label = stringResource(R.string.browser_fab_new_folder),
+                    onClick = { showCreateFolderDialog = true }
+                ),
+                FABMenuItem(
+                    icon = StrokeIcons.Download,
+                    label = stringResource(R.string.browser_fab_import),
+                    onClick = { showImportSheet = true }
                 )
+            )
+            BrandFAB(
+                items = fabItems,
+                modifier = Modifier
+                    .align(Alignment.BottomEnd)
+                    .navigationBarsPadding()
+                    .padding(
+                        end = PrototypeSpacing.FABRight,
+                        bottom = 16.dp
+                    )
             )
         }
-        fabItems.addAll(
-            listOf(
-                FABMenuItem(
-                    icon = StrokeIcons.Braces,
-                    label = stringResource(R.string.browser_action_snippets),
-                    onClick = onNavigateToSnippets
-                ),
-                FABMenuItem(
-                    icon = StrokeIcons.File,
-                    label = stringResource(R.string.browser_fab_samples),
-                    onClick = onNavigateToSamples
-                ),
-                FABMenuItem(
-                    icon = StrokeIcons.Clock,
-                    label = stringResource(R.string.browser_history_content_desc),
-                    onClick = onNavigateToHistory
-                )
-            )
-        )
-        BrandFAB(
-            items = fabItems,
-            modifier = Modifier
-                .align(Alignment.BottomEnd)
-                .navigationBarsPadding()
-                .padding(
-                    end = PrototypeSpacing.FABRight,
-                    bottom = 16.dp
-                )
-        )
     }
 }
 
@@ -3126,7 +3147,12 @@ fun FileBrowserScreen(
 // ============================================================
 
 @Composable
-private fun SectionMonoHeader(title: String, modifier: Modifier = Modifier, count: Int? = null) {
+private fun SectionMonoHeader(
+    title: String,
+    modifier: Modifier = Modifier,
+    count: Int? = null,
+    action: @Composable (() -> Unit)? = null
+) {
     val muted = PrototypeTokens.muted
     Row(
         modifier = modifier
@@ -3148,13 +3174,76 @@ private fun SectionMonoHeader(title: String, modifier: Modifier = Modifier, coun
                 color = muted.copy(alpha = 0.6f)
             )
         }
+        Spacer(modifier = Modifier.weight(1f))
+        action?.invoke()
     }
 }
 
 // ============================================================
 // Breadcrumb bar for subdirectory navigation
 // ============================================================
+// Sort control — 文件分组行右侧的排序入口（屏 07）
+// ============================================================
 
+/**
+ * 排序控件。
+ *
+ * 复用 ViewModel 中早已实现、此前从未接到 UI 的 `changeSortOption`，以及仓库里既有的
+ * `browser_sort_*` 词条（原先全为未引用状态）。
+ */
+@Composable
+private fun SortOptionMenu(current: FileSortOption, onSelect: (FileSortOption) -> Unit) {
+    var expanded by remember { mutableStateOf(false) }
+    val accent = PrototypeTokens.accent
+    val muted = PrototypeTokens.muted
+
+    Box {
+        Row(
+            modifier = Modifier
+                .clip(PrototypeShapes.Pill)
+                .clickable { expanded = true }
+                .padding(horizontal = 8.dp, vertical = 4.dp),
+            verticalAlignment = Alignment.CenterVertically
+        ) {
+            Text(
+                text = stringResource(R.string.browser_action_sort_by),
+                style = MonoLabelStyle,
+                color = muted
+            )
+            Spacer(modifier = Modifier.width(4.dp))
+            Text(text = "▾", style = MonoLabelStyle, color = accent)
+        }
+        DropdownMenu(expanded = expanded, onDismissRequest = { expanded = false }) {
+            FileSortOption.entries.forEach { option ->
+                DropdownMenuItem(
+                    text = { Text(fileSortOptionLabel(option)) },
+                    onClick = {
+                        expanded = false
+                        onSelect(option)
+                    }
+                )
+            }
+        }
+    }
+}
+
+/** [FileSortOption] 的本地化标签。 */
+@Composable
+private fun fileSortOptionLabel(option: FileSortOption): String = stringResource(
+    when (option) {
+        FileSortOption.NAME_ASC -> R.string.browser_sort_name_asc
+        FileSortOption.NAME_DESC -> R.string.browser_sort_name_desc
+        FileSortOption.SIZE_DESC -> R.string.browser_sort_size_desc
+        FileSortOption.SIZE_ASC -> R.string.browser_sort_size_asc
+        FileSortOption.MODIFIED_DESC -> R.string.browser_sort_modified_desc
+        FileSortOption.MODIFIED_ASC -> R.string.browser_sort_modified_asc
+        FileSortOption.TYPE_ASC -> R.string.browser_sort_type
+    }
+)
+
+// ============================================================
+// Breadcrumb bar for subdirectory navigation
+// ============================================================
 @Composable
 private fun BreadcrumbBar(path: String, onNavigateUp: () -> Unit, modifier: Modifier = Modifier) {
     val muted = PrototypeTokens.muted
@@ -3195,6 +3284,99 @@ private fun BreadcrumbBar(path: String, onNavigateUp: () -> Unit, modifier: Modi
             maxLines = 1,
             overflow = TextOverflow.Ellipsis,
             modifier = Modifier.weight(1f, fill = false)
+        )
+    }
+}
+
+// ============================================================
+// Import actions sheet — 「导入…」二级弹层（屏 08）
+// ============================================================
+
+/**
+ * 「导入…」二级底部弹层。
+ *
+ * FAB 只保留创建类动作（新建文件 / 新建文件夹 / 导入…），四类导入入口收进这里，
+ * 避免一钮展开八项混排（实施指导书 §2.2）。
+ */
+@OptIn(ExperimentalMaterial3Api::class)
+@Composable
+private fun ImportActionsSheet(
+    onDismiss: () -> Unit,
+    onSamples: () -> Unit,
+    onImportFromGitHub: () -> Unit,
+    onOpenExternalFile: () -> Unit,
+    onImportToInternal: () -> Unit
+) {
+    val sheetState = rememberModalBottomSheetState(skipPartiallyExpanded = true)
+
+    ModalBottomSheet(
+        onDismissRequest = onDismiss,
+        sheetState = sheetState,
+        containerColor = PrototypeTokens.surface,
+        shape = RoundedCornerShape(topStart = 20.dp, topEnd = 20.dp)
+    ) {
+        Column(
+            modifier = Modifier
+                .fillMaxWidth()
+                .navigationBarsPadding()
+                .padding(horizontal = 20.dp)
+                .padding(bottom = 20.dp)
+        ) {
+            Text(
+                text = stringResource(R.string.browser_fab_import),
+                style = DraftPeekTypography.titleMedium.copy(
+                    color = PrototypeTokens.fg,
+                    fontWeight = FontWeight.SemiBold,
+                    fontSize = 16.sp
+                )
+            )
+            Spacer(modifier = Modifier.height(12.dp))
+
+            ImportActionRow(
+                icon = StrokeIcons.File,
+                label = stringResource(R.string.browser_fab_samples),
+                onClick = onSamples
+            )
+            ImportActionRow(
+                icon = StrokeIcons.Download,
+                label = stringResource(R.string.browser_github_import),
+                onClick = onImportFromGitHub
+            )
+            ImportActionRow(
+                icon = StrokeIcons.FolderOutline,
+                label = stringResource(R.string.browser_fab_open_file),
+                onClick = onOpenExternalFile
+            )
+            ImportActionRow(
+                icon = StrokeIcons.Upload,
+                label = stringResource(R.string.browser_fab_import_file),
+                onClick = onImportToInternal
+            )
+        }
+    }
+}
+
+/** 「导入…」弹层中的单行动作。 */
+@Composable
+private fun ImportActionRow(icon: StrokeIconDef, label: String, onClick: () -> Unit) {
+    Row(
+        modifier = Modifier
+            .fillMaxWidth()
+            .clip(PrototypeShapes.Medium)
+            .clickable(onClick = onClick)
+            .padding(horizontal = 12.dp, vertical = 14.dp),
+        verticalAlignment = Alignment.CenterVertically,
+        horizontalArrangement = Arrangement.spacedBy(12.dp)
+    ) {
+        StrokeIcon(
+            icon = icon,
+            modifier = Modifier.size(20.dp),
+            tint = PrototypeTokens.accent,
+            contentDescription = null
+        )
+        Text(
+            text = label,
+            style = DraftPeekTypography.bodyMedium.copy(color = PrototypeTokens.fg)
         )
     }
 }
@@ -3618,12 +3800,11 @@ private fun FileInfoRow(label: String, value: String) {
 @Composable
 private fun NoPermissionContent(
     onSelectDirectory: () -> Unit,
-    onOpenFile: () -> Unit,
-    onNavigateToSamples: () -> Unit,
+    onImportFromGitHub: () -> Unit,
+    onNewFile: () -> Unit,
     modifier: Modifier = Modifier
 ) {
     val elevated = PrototypeTokens.elevated
-    val surface = PrototypeTokens.surface
     val border = PrototypeTokens.border
     val accent = PrototypeTokens.accent
     val accentSoft = PrototypeTokens.accentSoft
@@ -3662,7 +3843,7 @@ private fun NoPermissionContent(
             }
             Spacer(modifier = Modifier.height(12.dp))
             Text(
-                text = stringResource(R.string.browser_open_from_device),
+                text = stringResource(R.string.browser_no_files_yet),
                 style = DraftPeekTypography.bodyLarge.copy(
                     color = fg,
                     fontWeight = FontWeight.SemiBold,
@@ -3694,19 +3875,29 @@ private fun NoPermissionContent(
                     )
                 )
             }
-        }
-        Spacer(modifier = Modifier.height(12.dp))
-        Column(
-            modifier = Modifier
-                .fillMaxWidth()
-                .clip(RoundedCornerShape(10.dp))
-                .background(info.copy(alpha = 0.06f))
-                .border(1.dp, info.copy(alpha = 0.12f), RoundedCornerShape(10.dp))
-                .padding(12.dp)
-        ) {
+            Spacer(modifier = Modifier.height(12.dp))
+            // 只读说明并入卡内小字（实施指导书 §2.8）
             Text(
                 text = stringResource(R.string.browser_external_readonly_hint),
-                style = DraftPeekTypography.bodySmall.copy(color = info, lineHeight = 18.sp)
+                style = DraftPeekTypography.bodySmall.copy(color = info, lineHeight = 18.sp),
+                textAlign = TextAlign.Center
+            )
+        }
+        Spacer(modifier = Modifier.height(14.dp))
+        // 次级入口降为文字链（实施指导书 §2.8）：不再与主 CTA / FAB 并列争入口
+        Row(
+            horizontalArrangement = Arrangement.spacedBy(20.dp),
+            verticalAlignment = Alignment.CenterVertically
+        ) {
+            Text(
+                text = stringResource(R.string.browser_github_import),
+                style = DraftPeekTypography.bodySmall.copy(color = accent),
+                modifier = Modifier.clickable { onImportFromGitHub() }
+            )
+            Text(
+                text = stringResource(R.string.browser_fab_new_file),
+                style = DraftPeekTypography.bodySmall.copy(color = accent),
+                modifier = Modifier.clickable { onNewFile() }
             )
         }
     }
@@ -3788,7 +3979,9 @@ private fun FileListContent(
     currentDirectoryUri: String = "",
     layoutMode: LayoutMode = LayoutMode.COMPACT,
     onSaveExternalFile: (FileItem) -> Unit = {},
-    onOpenTerminal: ((FileItem) -> Unit)? = null
+    onOpenTerminal: ((FileItem) -> Unit)? = null,
+    currentSortOption: FileSortOption = FileSortOption.NAME_ASC,
+    onSortOptionChange: ((FileSortOption) -> Unit)? = null
 ) {
     val useGrid = layoutMode != LayoutMode.COMPACT && compareSelection.isEmpty()
 
@@ -3922,9 +4115,15 @@ private fun FileListContent(
 
                 if (nonDirs.isNotEmpty()) {
                     item {
+                        val changeSort = onSortOptionChange
                         SectionMonoHeader(
                             title = stringResource(R.string.browser_files_section),
-                            count = nonDirs.size
+                            count = nonDirs.size,
+                            action = if (changeSort != null) {
+                                { SortOptionMenu(current = currentSortOption, onSelect = changeSort) }
+                            } else {
+                                null
+                            }
                         )
                     }
                     items(nonDirs, key = { it.uri.toString() }) { item ->
@@ -4133,6 +4332,16 @@ fun FileItemComposable(
     var showContextMenu by remember { mutableStateOf(false) }
     val extension = item.extension
     val isInternalFile = !item.isExternal && !item.isDirectory
+    // 行内「⋮」与长按共用同一套动作；没有可用动作时不渲染入口，避免开出空菜单。
+    val hasContextActions = !item.isDirectory &&
+        (
+            onTogglePin != null ||
+                onToggleBookmark != null ||
+                (onDelete != null && isInternalFile) ||
+                onMoveTo != null ||
+                onEncryptExport != null ||
+                onMultiSelect != null
+        )
 
     val displayName = if (compareIndex > 0) "$compareIndex. ${item.name}" else item.name
     val metaText = if (!item.isDirectory) {
@@ -4272,27 +4481,33 @@ fun FileItemComposable(
                         modifier = Modifier.size(22.dp)
                     )
                 }
-                Spacer(modifier = Modifier.width(4.dp))
-                StrokeIcon(
-                    icon = StrokeIcons.ChevronRight,
-                    contentDescription = stringResource(R.string.browser_action_open_in_editor),
-                    tint = PrototypeTokens.muted.copy(alpha = 0.3f),
-                    modifier = Modifier.size(16.dp)
-                )
+                // 尾部收敛为单一「⋮」行内菜单（实施指导书 §2.9 屏 07）：点它即可看到
+                // 原本只藏在长按里的动作，取代原先语义不明的「›」。
+                if (hasContextActions) {
+                    Spacer(modifier = Modifier.width(4.dp))
+                    Box(
+                        modifier = Modifier
+                            .size(28.dp)
+                            .clickable(
+                                interactionSource = remember { MutableInteractionSource() },
+                                indication = null,
+                                onClick = { showContextMenu = true }
+                            ),
+                        contentAlignment = Alignment.Center
+                    ) {
+                        StrokeIcon(
+                            icon = StrokeIcons.MoreVert,
+                            contentDescription = stringResource(R.string.browser_action_more),
+                            tint = PrototypeTokens.muted,
+                            modifier = Modifier.size(18.dp)
+                        )
+                    }
+                }
             }
         )
     }
 
-    if (!item.isDirectory &&
-        (
-            onTogglePin != null ||
-                onToggleBookmark != null ||
-                (onDelete != null && isInternalFile) ||
-                onMoveTo != null ||
-                onEncryptExport != null ||
-                onMultiSelect != null
-            )
-    ) {
+    if (hasContextActions) {
         DropdownMenu(
             expanded = showContextMenu,
             onDismissRequest = { showContextMenu = false },
