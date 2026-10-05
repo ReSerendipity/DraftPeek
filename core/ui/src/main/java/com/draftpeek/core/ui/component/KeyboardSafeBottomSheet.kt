@@ -39,6 +39,7 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.ModalBottomSheet
+import androidx.compose.material3.SheetValue
 import androidx.compose.material3.rememberModalBottomSheetState
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
@@ -61,6 +62,8 @@ import com.draftpeek.core.ui.theme.PrototypeTokens
  * @param modifier 内容列 Modifier
  * @param containerColor 弹层背景色
  * @param horizontalPadding 内容区左右内边距
+ * @param dismissible 是否允许「点遮罩 / 下滑」关闭。置 false 用于必须显式确认的场景
+ *   （如首次使用的协议确认），此时只有调用方自己的按钮能推进流程。
  * @param header 吸顶区（标题 + 输入）
  * @param body 可压缩滚动的中部区
  */
@@ -72,10 +75,15 @@ fun KeyboardSafeBottomSheet(
     modifier: Modifier = Modifier,
     containerColor: Color = PrototypeTokens.surface,
     horizontalPadding: Dp = 20.dp,
+    dismissible: Boolean = true,
     header: @Composable ColumnScope.() -> Unit = {},
     body: @Composable ColumnScope.() -> Unit = {}
 ) {
-    val sheetState = rememberModalBottomSheetState(skipPartiallyExpanded = true)
+    // 不可关闭时拦住 Hidden 状态，避免用户把弹层拖走却既没确认也没退出。
+    val sheetState = rememberModalBottomSheetState(
+        skipPartiallyExpanded = true,
+        confirmValueChange = { newValue -> dismissible || newValue != SheetValue.Hidden }
+    )
 
     ModalBottomSheet(
         onDismissRequest = onDismissRequest,

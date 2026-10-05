@@ -19,25 +19,21 @@
  */
 package com.draftpeek
 
-import android.content.Intent
-import android.net.Uri
 import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.isSystemInDarkTheme
-import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.width
 import androidx.compose.material3.Checkbox
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
-import androidx.compose.material3.TextButton
 import androidx.compose.material3.windowsizeclass.ExperimentalMaterial3WindowSizeClassApi
 import androidx.compose.material3.windowsizeclass.calculateWindowSizeClass
 import androidx.compose.runtime.Composable
@@ -51,8 +47,14 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.toArgb
 import androidx.compose.ui.platform.LocalConfiguration
-import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.text.LinkAnnotation
+import androidx.compose.ui.text.SpanStyle
+import androidx.compose.ui.text.TextLinkStyles
+import androidx.compose.ui.text.buildAnnotatedString
+import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.style.TextDecoration
+import androidx.compose.ui.text.withLink
 import androidx.compose.ui.unit.dp
 import androidx.core.view.WindowCompat
 import androidx.core.view.WindowInsetsControllerCompat
@@ -68,9 +70,10 @@ import androidx.window.layout.FoldingFeature
 import com.draftpeek.core.common.feature.FeatureToggleManager
 import com.draftpeek.core.common.util.FpsMonitor
 import com.draftpeek.core.data.repository.UserActivityRepository
-import com.draftpeek.core.ui.component.BrandDialog
+import com.draftpeek.core.ui.component.BrandFilledButton
 import com.draftpeek.core.ui.component.BrandToastHost
 import com.draftpeek.core.ui.component.CustomScaffold
+import com.draftpeek.core.ui.component.KeyboardSafeBottomSheet
 import com.draftpeek.core.ui.component.TabBarItem
 import com.draftpeek.core.ui.composition.FoldInfo as CompositionFoldInfo
 import com.draftpeek.core.ui.composition.LocalFeatureToggle
@@ -87,6 +90,7 @@ import com.draftpeek.core.ui.theme.AccessibilityState
 import com.draftpeek.core.ui.theme.AppFonts
 import com.draftpeek.core.ui.theme.DraftPeekTheme
 import com.draftpeek.core.ui.theme.FontOptions
+import com.draftpeek.core.ui.theme.PrototypeTokens
 import com.draftpeek.feature.browser.model.FileItem
 import com.draftpeek.feature.settings.model.AppTheme
 import com.draftpeek.feature.settings.viewmodel.SettingsViewModel
@@ -309,75 +313,100 @@ private fun DraftPeekContent(layoutMode: LayoutMode, foldInfo: FoldInfo, darkThe
 }
 
 /**
- * P1-1 首次使用协议确认弹窗（合规整改 2026-09-15）。
+ * P1-1 首次使用协议确认弹层（合规整改 2026-09-15；2026-10-05 改为底部弹层）。
  *
- * 使用 BrandDialog（项目规范禁止原生 AlertDialog）；必须勾选同意后确认按钮可用，
- * onDismissRequest 为空操作——不勾选无法进入应用。协议文本见仓库根目录
- * USER_AGREEMENT.md / PRIVACY_POLICY.md（弹窗内按钮跳转 GitHub 查看）。
+ * 使用 [KeyboardSafeBottomSheet]（项目规范禁止原生 AlertDialog）；必须勾选同意后主按钮才可用，
+ * 且弹层**不可点外关闭**（dismissible = false）——不勾选无法进入应用。
+ * 协议全文见仓库根目录 USER_AGREEMENT.md / PRIVACY_POLICY.md（摘要里的内嵌链接跳 GitHub 查看）。
  */
 @Composable
 private fun AgreementGateDialog(onAccepted: () -> Unit) {
-    val context = LocalContext.current
     var checked by rememberSaveable { mutableStateOf(false) }
+    var termsExpanded by rememberSaveable { mutableStateOf(false) }
 
-    fun openPolicy(url: String) {
-        context.startActivity(Intent(Intent.ACTION_VIEW, Uri.parse(url)))
-    }
+    val accent = PrototypeTokens.accent
+    val linkStyle = TextLinkStyles(
+        style = SpanStyle(color = accent, textDecoration = TextDecoration.Underline)
+    )
+    val policyUrl = "https://github.com/ReSerendipity/DraftPeek/blob/main/USER_AGREEMENT.md"
+    val privacyUrl = "https://github.com/ReSerendipity/DraftPeek/blob/main/PRIVACY_POLICY.md"
+    // 注意：stringResource 是 @Composable，不能在 buildAnnotatedString 的普通 lambda 里调用，先取出来。
+    val policyLabel = stringResource(R.string.agreement_gate_policy)
+    val privacyLabel = stringResource(R.string.agreement_gate_privacy)
 
-    BrandDialog(
+    KeyboardSafeBottomSheet(
+        // 协议确认场景：点遮罩 / 下滑都不关闭，只有「同意并开始」能推进（实施指导书 §2.4 屏 05）
         onDismissRequest = { /* P1-1：不勾选不允许关闭 */ },
-        title = {
+        dismissible = false,
+        header = {
             Text(
                 text = stringResource(R.string.agreement_gate_title),
-                style = MaterialTheme.typography.titleMedium
+                style = MaterialTheme.typography.titleMedium.copy(fontWeight = FontWeight.SemiBold)
+            )
+            Spacer(modifier = Modifier.height(8.dp))
+            Text(
+                text = stringResource(R.string.agreement_gate_summary),
+                style = MaterialTheme.typography.bodySmall
+            )
+            Spacer(modifier = Modifier.height(6.dp))
+            // 内嵌《用户协议》《隐私政策》链接（实施指导书 §2.4 屏 05）
+            Text(
+                text = buildAnnotatedString {
+                    withLink(LinkAnnotation.Url(policyUrl, linkStyle)) {
+                        append(policyLabel)
+                    }
+                    append("  ·  ")
+                    withLink(LinkAnnotation.Url(privacyUrl, linkStyle)) {
+                        append(privacyLabel)
+                    }
+                },
+                style = MaterialTheme.typography.labelMedium
+            )
+            Spacer(modifier = Modifier.height(8.dp))
+            Text(
+                text = stringResource(
+                    if (termsExpanded) {
+                        R.string.agreement_gate_collapse_terms
+                    } else {
+                        R.string.agreement_gate_expand_terms
+                    }
+                ),
+                style = MaterialTheme.typography.labelMedium.copy(color = accent),
+                modifier = Modifier.clickable { termsExpanded = !termsExpanded }
             )
         },
-        content = {
-            Column {
+        body = {
+            // 折叠的完整条款；收起时 body 为空，弹层自动变矮。
+            // 注：指导书说「3 段」，但把既有合规文案按语言重排会改动已定稿的法务文本，
+            // 故这里保留原始整段（其内部本就是分号分隔的多项要求）。
+            if (termsExpanded) {
                 Text(
                     text = stringResource(R.string.agreement_gate_body),
                     style = MaterialTheme.typography.bodySmall
                 )
-                Spacer(modifier = Modifier.height(8.dp))
-                Row(
-                    verticalAlignment = Alignment.CenterVertically,
-                    modifier = Modifier.clickable { checked = !checked }
-                ) {
-                    Checkbox(checked = checked, onCheckedChange = { checked = it })
-                    Text(
-                        text = stringResource(R.string.agreement_gate_checkbox),
-                        style = MaterialTheme.typography.bodySmall
-                    )
-                }
-                Spacer(modifier = Modifier.height(4.dp))
-                Row {
-                    TextButton(onClick = {
-                        openPolicy("https://github.com/ReSerendipity/DraftPeek/blob/main/USER_AGREEMENT.md")
-                    }) {
-                        Text(
-                            text = stringResource(R.string.agreement_gate_policy),
-                            style = MaterialTheme.typography.labelSmall
-                        )
-                    }
-                    Spacer(modifier = Modifier.width(8.dp))
-                    TextButton(onClick = {
-                        openPolicy("https://github.com/ReSerendipity/DraftPeek/blob/main/PRIVACY_POLICY.md")
-                    }) {
-                        Text(
-                            text = stringResource(R.string.agreement_gate_privacy),
-                            style = MaterialTheme.typography.labelSmall
-                        )
-                    }
-                }
             }
         },
-        confirmButton = {
-            TextButton(
-                enabled = checked,
-                onClick = onAccepted
+        footer = {
+            Row(
+                verticalAlignment = Alignment.CenterVertically,
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .clickable { checked = !checked }
             ) {
-                Text(text = stringResource(R.string.agreement_gate_confirm))
+                Checkbox(checked = checked, onCheckedChange = { checked = it })
+                Text(
+                    text = stringResource(R.string.agreement_gate_checkbox),
+                    style = MaterialTheme.typography.bodySmall
+                )
             }
+            Spacer(modifier = Modifier.height(12.dp))
+            // 全宽填充主按钮，未勾选时置灰不可点（实施指导书 §2.4 屏 05）
+            BrandFilledButton(
+                text = stringResource(R.string.agreement_gate_confirm),
+                onClick = onAccepted,
+                modifier = Modifier.fillMaxWidth(),
+                enabled = checked
+            )
         }
     )
 }
