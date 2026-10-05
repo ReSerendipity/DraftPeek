@@ -227,16 +227,22 @@ class CreateFileDialogFlowTest {
      * 但"键盘升起时主按钮要滚动才够得着"算不算缺陷是**产品交互判断**（sheet 本身可滚、IME 有 ✓ 动作），
      * 不由本用例替它决定，也不放宽判据去迁就它。
      *
-     * ## 另一条（`createButtonIsDisabledUntilFilenameEntered`）的红：语义节点先于布局到位
-     * 它不打字。对一次**红**的运行全程连拍（约 0.5 s 一帧）：断言失败那一刻屏幕上只有宿主的空白窗口，
-     * sheet 是在断言已经失败之后约 1 s 才画出来的 ⇒ [awaitButton] 拿到语义节点时
-     * `ModalBottomSheet` 的窗口还没完成布局/绘制，于是 `assertIsDisplayed()` 判"未显示"、
-     * `boundsInRoot` 为 `[0,0,0,0]`（而 `touchBoundsInRoot` 已是真实矩形）。
+     * ## 另一条（`createButtonIsDisabledUntilFilenameEntered`）的红：节点在 sheet 自己的窗口里，
+     * ## 而 `onRoot()` 视角下它的 `boundsInRoot` 恒为零
+     * 它不打字。两条取证：① 对一次**红**的运行全程连拍（约 0.5 s 一帧）——断言失败那一刻屏幕上只有
+     * 宿主的空白窗口，sheet 约 1 s 后才画出来；② 一次性 spike（未入库）在 `assertIsDisplayed()` 前加
+     * `waitUntil(5_000) { boundsInRoot 非零 }`——红的 13 次**全部 5 s 超时**，绿的那次 53 ms 就满足。
+     * ①+② 合起来 ⇒ sheet 确实画出来了，但它在 `onRoot()` 绑定的宿主 root 视角下**永远**取不到非零
+     * `boundsInRoot`：不是"再等等就好"，是**节点归属另一个 root**，`assertIsDisplayed()` 因此判"未显示"
+     * （而 `touchBoundsInRoot` 是真实矩形，因为它是从节点自己那侧算出来的）。
      * 是概率不是单调：同一台机连跑 14 次 = 7 绿 7 红，红串中间能连出 3 次绿；冷启动后头 3~4 次偏绿，
      * 但**空转 12 分钟不改变下一次结果** ⇒ 不是"设备跑累了"。
      * ⚠ 先前记在这儿的「随累计次数单调变差、之后粘住红」是样本太小得出的错结论，已按这 14 次更正。
-     * 仍未定的是"布局为什么落后于语义组合"（sheet 在自己的窗口里 vs `createComposeRule()` +
-     * `onRoot()` 只绑宿主 root 是候选）；定它要在红的运行里取证"节点属于哪个 root"，那是改测试码的活。
+     * ⇒ 出路只有两条，都不是"加等待"：把查询作用域换到 sheet 自己的窗口/root，或改用不依赖
+     * `boundsInRoot` 的可见性判据。这也解释了 `c703dc4` 为什么"加几何门 ⇒ API 30/26 必然红"——
+     * 那道门在这个测试宿主里根本不可能满足（本 spike 13/13 超时是同一件事的正面复现）。
+     * 一个诚实的限制：spike 本身把红率从 7/14 抬到 13/14（每次多等 5 s 改变了运行节奏），
+     * 所以**红率不能当基线**；站得住的是定性结论"红的时候 `boundsInRoot` 恒零"（13/13 一致）。
      *
      * 断言与判据一字未放宽；本条注释只改"为什么这么屏蔽"，不改屏蔽本身。
      */
