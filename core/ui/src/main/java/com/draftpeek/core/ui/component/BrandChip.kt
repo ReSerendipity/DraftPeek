@@ -29,12 +29,29 @@ import com.draftpeek.core.ui.theme.PrototypeTokens
  * @param text The label to display inside the chip.
  * @param selected Whether this chip is currently selected.
  * @param onClick Called when the chip is tapped.
+ * @param modifier Standard Compose Modifier.
+ * @param enabled When false the chip is greyed out and not clickable (e.g. a filter
+ *   whose count is zero has nothing to filter to).
  */
 @Composable
-fun BrandChip(text: String, selected: Boolean, onClick: () -> Unit, modifier: Modifier = Modifier) {
-    val bgColor = if (selected) PrototypeTokens.accent else PrototypeTokens.surface
-    val textColor = if (selected) Color.White else PrototypeTokens.fgSoft
-    val borderColor = if (selected) PrototypeTokens.accent else PrototypeTokens.border
+fun BrandChip(
+    text: String,
+    selected: Boolean,
+    onClick: () -> Unit,
+    modifier: Modifier = Modifier,
+    enabled: Boolean = true
+) {
+    val bgColor = if (selected && enabled) PrototypeTokens.accent else PrototypeTokens.surface
+    val textColor = when {
+        !enabled -> PrototypeTokens.muted.copy(alpha = 0.4f)
+        selected -> Color.White
+        else -> PrototypeTokens.fgSoft
+    }
+    val borderColor = when {
+        !enabled -> PrototypeTokens.border.copy(alpha = 0.4f)
+        selected -> PrototypeTokens.accent
+        else -> PrototypeTokens.border
+    }
 
     Box(
         modifier = modifier
@@ -45,6 +62,7 @@ fun BrandChip(text: String, selected: Boolean, onClick: () -> Unit, modifier: Mo
             .clickable(
                 interactionSource = remember { MutableInteractionSource() },
                 indication = null,
+                enabled = enabled,
                 onClick = onClick
             )
             .padding(horizontal = PrototypeSpacing.ChipPaddingH),
