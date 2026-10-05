@@ -201,6 +201,7 @@
     <string name="browser_label_extension">Extension</string>
     <string name="browser_label_file_type">File type</string>
     <string name="browser_label_filename">File name</string>
+    <string name="browser_action_all_languages">All languages</string>
     <string name="browser_label_final_filename">Final file name:</string>
     <string name="browser_label_language">Language</string>
     <string name="browser_label_modified_time">Modified</string>

@@ -166,6 +166,7 @@
     <string name="browser_default_filename_untitled">未命名</string>
     <string name="browser_dialog_new_file_title">新建文件</string>
     <string name="browser_label_filename">文件名</string>
+    <string name="browser_action_all_languages">全部语言</string>
     <string name="browser_label_template">模板</string>
     <string name="browser_hint_enter_filename">输入文件名（不含扩展名）</string>
     <string name="browser_label_file_type">文件类型</string>

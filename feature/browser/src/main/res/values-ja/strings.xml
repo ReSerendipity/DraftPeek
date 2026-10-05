@@ -196,6 +196,7 @@
     <string name="browser_label_extension">拡張子</string>
     <string name="browser_label_file_type">ファイルタイプ</string>
     <string name="browser_label_filename">ファイル名</string>
+    <string name="browser_action_all_languages">すべての言語</string>
     <string name="browser_label_final_filename">最終ファイル名:</string>
     <string name="browser_label_language">言語</string>
     <string name="browser_label_modified_time">変更日時</string>
