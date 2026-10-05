@@ -307,13 +307,7 @@ fun CreateFileDialog(
  * @param onClick 点击回调
  */
 @Composable
-private fun AllLanguagesEntry(
-    text: String,
-    accent: Color,
-    border: Color,
-    muted: Color,
-    onClick: () -> Unit
-) {
+private fun AllLanguagesEntry(text: String, accent: Color, border: Color, muted: Color, onClick: () -> Unit) {
     Row(
         modifier = Modifier
             .clip(PrototypeShapes.Pill)
