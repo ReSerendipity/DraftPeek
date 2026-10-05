@@ -113,6 +113,10 @@ graph TD
 <string name="editor_action_open_terminal">ターミナル</string>
     <string name="editor_more">その他</string>
     <string name="editor_quick_settings">クイック設定</string>
+    <string name="editor_status_unsaved">未保存</string>
+    <string name="editor_menu_group_edit">編集</string>
+    <string name="editor_menu_group_tools">ツール</string>
+    <string name="editor_menu_group_file">ファイル</string>
     <string name="editor_cross_file_search">ファイル横断検索</string>
     <string name="editor_reopen_with_encoding">エンコーディングを選択して再開</string>
     <string name="editor_save_with_encoding">エンコーディングを指定して保存</string>

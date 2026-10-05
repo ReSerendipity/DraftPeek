@@ -155,6 +155,10 @@ graph TD
 <string name="editor_action_open_terminal">终端</string>
     <string name="editor_more">更多</string>
     <string name="editor_quick_settings">快捷设置</string>
+    <string name="editor_status_unsaved">未保存</string>
+    <string name="editor_menu_group_edit">编辑</string>
+    <string name="editor_menu_group_tools">工具</string>
+    <string name="editor_menu_group_file">文件</string>
     <string name="editor_cross_file_search">跨文件搜索</string>
     <string name="editor_reopen_with_encoding">选择编码重新打开</string>
     <string name="editor_save_with_encoding">通过编码保存</string>

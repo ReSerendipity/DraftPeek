@@ -150,6 +150,10 @@ graph TD
 <string name="editor_action_open_terminal">터미널</string>
     <string name="editor_more">더보기</string>
     <string name="editor_quick_settings">빠른 설정</string>
+    <string name="editor_status_unsaved">저장되지 않음</string>
+    <string name="editor_menu_group_edit">편집</string>
+    <string name="editor_menu_group_tools">도구</string>
+    <string name="editor_menu_group_file">파일</string>
     <string name="editor_cross_file_search">파일 간 검색</string>
     <string name="editor_reopen_with_encoding">인코딩 선택하여 다시 열기</string>
     <string name="editor_save_with_encoding">인코딩 지정하여 저장</string>

@@ -158,6 +158,10 @@ graph TD
 <string name="editor_action_open_terminal">終端機</string>
     <string name="editor_more">更多</string>
     <string name="editor_quick_settings">快捷設定</string>
+    <string name="editor_status_unsaved">未儲存</string>
+    <string name="editor_menu_group_edit">編輯</string>
+    <string name="editor_menu_group_tools">工具</string>
+    <string name="editor_menu_group_file">檔案</string>
     <string name="editor_cross_file_search">跨檔案搜尋</string>
     <string name="editor_reopen_with_encoding">選擇編碼重新開啟</string>
     <string name="editor_save_with_encoding">透過編碼儲存</string>

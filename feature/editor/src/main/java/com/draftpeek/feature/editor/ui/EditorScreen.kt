@@ -116,6 +116,7 @@ import com.draftpeek.core.ui.component.accessibilityEnhanced
 import com.draftpeek.core.ui.component.rememberHapticController
 import com.draftpeek.core.ui.composition.isFeatureEnabled
 import com.draftpeek.core.ui.icon.StrokeIcon
+import com.draftpeek.core.ui.icon.StrokeIconDef
 import com.draftpeek.core.ui.icon.StrokeIcons
 import com.draftpeek.core.ui.layout.FoldInfo
 import com.draftpeek.core.ui.layout.LayoutMode
@@ -1084,21 +1085,40 @@ fun EditorScreen(
                         compact = true
                     )
                 }
-                // 保存按钮 — 仅内容变更时显示，紧贴三点左侧（§3.8）
-                if (isModified && successState?.isReadOnly != true) {
+                // 保存按钮 — 始终占位，无改动时置灰（实施指导书 §2.3 屏 15）。
+                // 原实现是「无改动就不渲染」，会让按钮位置随状态跳动；改为置灰后位置恒定。
+                if (successState?.isReadOnly != true) {
+                    val canSave = isModified && wrapper.isUsable()
                     TooltipIconButton(
                         tooltip = stringResource(R.string.editor_save),
-                        onClick = { if (wrapper.isUsable()) viewModel.saveFile(wrapper.getContent()) },
+                        onClick = { if (canSave) viewModel.saveFile(wrapper.getContent()) },
                         modifier = Modifier.accessibilityEnhanced(
                             role = Role.Button,
                             contentDescription = stringResource(R.string.editor_save),
-                            stateDescription = "有未保存更改"
+                            stateDescription = if (isModified) "有未保存更改" else "无未保存更改"
                         )
                     ) {
                         StrokeIcon(
                             icon = StrokeIcons.Save,
                             contentDescription = stringResource(R.string.editor_save),
-                            tint = accent
+                            tint = if (canSave) accent else muted.copy(alpha = 0.4f)
+                        )
+                    }
+                }
+                // Quick Settings 从溢出菜单升为顶栏常驻「⚙」（实施指导书 §2.3 屏 15）
+                if (uiState is EditorUiState.Success) {
+                    TooltipIconButton(
+                        tooltip = stringResource(R.string.editor_quick_settings),
+                        onClick = { showQuickSettings = true },
+                        modifier = Modifier.accessibilityEnhanced(
+                            role = Role.Button,
+                            contentDescription = stringResource(R.string.editor_quick_settings)
+                        )
+                    ) {
+                        StrokeIcon(
+                            icon = StrokeIcons.Settings,
+                            contentDescription = stringResource(R.string.editor_quick_settings),
+                            tint = fgSoft
                         )
                     }
                 }
@@ -1124,68 +1144,34 @@ fun EditorScreen(
                             onDismissRequest = { showMoreMenu = false },
                             containerColor = MaterialTheme.colorScheme.surface
                         ) {
-                            DropdownMenuItem(
-                                text = { Text(text = stringResource(R.string.editor_quick_settings), color = fg) },
-                                leadingIcon = {
-                                    StrokeIcon(
-                                        icon = StrokeIcons.Settings,
-                                        contentDescription = null,
-                                        tint = fgSoft
-                                    )
-                                },
-                                onClick = {
-                                    showMoreMenu = false
-                                    showQuickSettings = true
-                                }
-                            )
-                            // Undo (with subtitle)
-                            DropdownMenuItem(
-                                text = {
-                                    Column {
-                                        Text(text = stringResource(R.string.editor_undo), color = fg)
-                                        Text(
-                                            text = stringResource(R.string.editor_menu_undo_desc),
-                                            style = DraftPeekTypography.labelSmall,
-                                            color = muted
-                                        )
-                                    }
-                                },
-                                leadingIcon = {
-                                    StrokeIcon(
-                                        icon = StrokeIcons.Undo,
-                                        contentDescription = null,
-                                        tint = fgSoft
-                                    )
-                                },
-                                onClick = {
-                                    showMoreMenu = false
-                                    if (wrapper.isUsable()) wrapper.undo()
-                                }
-                            )
-                            // Redo (with subtitle)
-                            DropdownMenuItem(
-                                text = {
-                                    Column {
-                                        Text(text = stringResource(R.string.editor_redo), color = fg)
-                                        Text(
-                                            text = stringResource(R.string.editor_menu_redo_desc),
-                                            style = DraftPeekTypography.labelSmall,
-                                            color = muted
-                                        )
-                                    }
-                                },
-                                leadingIcon = {
-                                    StrokeIcon(
-                                        icon = StrokeIcons.Redo,
-                                        contentDescription = null,
-                                        tint = fgSoft
-                                    )
-                                },
-                                onClick = {
-                                    showMoreMenu = false
-                                    if (wrapper.isUsable()) wrapper.redo()
-                                }
-                            )
+                            // ── 编辑 ─────────────────────────────────────────────
+                            EditorMenuSectionLabel(stringResource(R.string.editor_menu_group_edit))
+                            // 撤销 / 重做合并为一行双按钮（实施指导书 §2.3 屏 15–17）
+                            Row(
+                                modifier = Modifier
+                                    .fillMaxWidth()
+                                    .padding(horizontal = 8.dp),
+                                horizontalArrangement = Arrangement.spacedBy(8.dp)
+                            ) {
+                                EditorMenuActionButton(
+                                    icon = StrokeIcons.Undo,
+                                    label = stringResource(R.string.editor_undo),
+                                    onClick = {
+                                        showMoreMenu = false
+                                        if (wrapper.isUsable()) wrapper.undo()
+                                    },
+                                    modifier = Modifier.weight(1f)
+                                )
+                                EditorMenuActionButton(
+                                    icon = StrokeIcons.Redo,
+                                    label = stringResource(R.string.editor_redo),
+                                    onClick = {
+                                        showMoreMenu = false
+                                        if (wrapper.isUsable()) wrapper.redo()
+                                    },
+                                    modifier = Modifier.weight(1f)
+                                )
+                            }
                             // Search (with subtitle, opens search panel)
                             DropdownMenuItem(
                                 text = {
@@ -1210,6 +1196,9 @@ fun EditorScreen(
                                     searchPanelMode = SearchPanelMode.FIND
                                 }
                             )
+                            // ── 工具 ─────────────────────────────────────────────
+                            HorizontalDivider(thickness = 1.dp, color = border)
+                            EditorMenuSectionLabel(stringResource(R.string.editor_menu_group_tools))
                             // Terminal (always shown, with subtitle)
                             DropdownMenuItem(
                                 text = {
@@ -1283,6 +1272,25 @@ fun EditorScreen(
                                     showInsertSnippetDialog = true
                                 }
                             )
+                            // ── 文件 ─────────────────────────────────────────────
+                            HorizontalDivider(thickness = 1.dp, color = border)
+                            EditorMenuSectionLabel(stringResource(R.string.editor_menu_group_file))
+                            if (isInternalFile) {
+                                DropdownMenuItem(
+                                    text = { Text(text = stringResource(R.string.editor_export_file), color = fg) },
+                                    onClick = {
+                                        showMoreMenu = false
+                                        val successState2 = uiState as? EditorUiState.Success
+                                        val fileName2 = successState2?.fileName ?: "file"
+                                        val intent = Intent(Intent.ACTION_CREATE_DOCUMENT).apply {
+                                            addCategory(Intent.CATEGORY_OPENABLE)
+                                            type = "*/*"
+                                            putExtra(Intent.EXTRA_TITLE, fileName2)
+                                        }
+                                        exportLauncher.launch(intent)
+                                    }
+                                )
+                            }
                             DropdownMenuItem(
                                 text = {
                                     Text(text = stringResource(R.string.editor_reopen_with_encoding), color = fg)
@@ -1317,21 +1325,8 @@ fun EditorScreen(
                                     }
                                 )
                             }
+                            // ── 危险区 ───────────────────────────────────────────
                             if (isInternalFile) {
-                                DropdownMenuItem(
-                                    text = { Text(text = stringResource(R.string.editor_export_file), color = fg) },
-                                    onClick = {
-                                        showMoreMenu = false
-                                        val successState2 = uiState as? EditorUiState.Success
-                                        val fileName2 = successState2?.fileName ?: "file"
-                                        val intent = Intent(Intent.ACTION_CREATE_DOCUMENT).apply {
-                                            addCategory(Intent.CATEGORY_OPENABLE)
-                                            type = "*/*"
-                                            putExtra(Intent.EXTRA_TITLE, fileName2)
-                                        }
-                                        exportLauncher.launch(intent)
-                                    }
-                                )
                                 HorizontalDivider(thickness = 1.dp, color = border)
                                 DropdownMenuItem(
                                     text = {
@@ -1433,7 +1428,9 @@ fun EditorScreen(
                     }
                     lineEndingOverride = if (currentEnding == "LF") "CRLF" else "LF"
                     Toast.makeText(context, lineEndingOverride, Toast.LENGTH_SHORT).show()
-                }
+                },
+                // 编码段点击直达「选择编码重新打开」面板（实施指导书 §2.3 屏 15）
+                onEncodingClick = { viewModel.showEncodingSelector() }
             )
 
             // Delete File Confirmation Dialog
@@ -2043,6 +2040,56 @@ private fun EditorSearchPanel(
 }
 
 /**
+ * 溢出菜单内的分组标题（实施指导书 §2.3 屏 15–17）。
+ *
+ * 用弱化的小号文字，避免与菜单项争夺注意力；与 [HorizontalDivider] 一起形成组边界。
+ */
+@Composable
+private fun EditorMenuSectionLabel(text: String) {
+    Text(
+        text = text,
+        style = DraftPeekTypography.labelSmall,
+        color = PrototypeTokens.muted,
+        modifier = Modifier.padding(start = 12.dp, top = 8.dp, bottom = 2.dp)
+    )
+}
+
+/**
+ * 溢出菜单内的「一行双按钮」动作（撤销 / 重做）。
+ *
+ * 与 [DropdownMenuItem] 不同：它是等宽的「图标 + 文字」竖排块，两个并排占满一行，
+ * 比两行菜单项更紧凑。
+ */
+@Composable
+private fun EditorMenuActionButton(
+    icon: StrokeIconDef,
+    label: String,
+    onClick: () -> Unit,
+    modifier: Modifier = Modifier
+) {
+    Column(
+        modifier = modifier
+            .clip(PrototypeShapes.Small)
+            .clickable(onClick = onClick)
+            .padding(vertical = 8.dp),
+        horizontalAlignment = Alignment.CenterHorizontally
+    ) {
+        StrokeIcon(
+            icon = icon,
+            contentDescription = null,
+            tint = PrototypeTokens.fgSoft,
+            modifier = Modifier.size(18.dp)
+        )
+        Spacer(modifier = Modifier.height(4.dp))
+        Text(
+            text = label,
+            style = DraftPeekTypography.labelSmall,
+            color = PrototypeTokens.fgSoft
+        )
+    }
+}
+
+/**
  * 编辑器底部状态栏。
  *
  * 显示当前光标位置（行:列）、文件编码、编程语言、只读状态、修改标记等信息。
@@ -2057,6 +2104,7 @@ private fun EditorSearchPanel(
  * @param onLanguageClick 语言点击回调
  * @param onReadOnlyToggle 只读/编辑切换回调
  * @param onLineEndingClick 行尾符点击回调
+ * @param onEncodingClick 编码段点击回调（直达编码选择面板）
  * @param modifier 修饰符
  */
 @Composable
@@ -2071,6 +2119,7 @@ private fun EditorBottomStatusBar(
     onLanguageClick: () -> Unit = {},
     onReadOnlyToggle: () -> Unit = {},
     onLineEndingClick: () -> Unit = {},
+    onEncodingClick: () -> Unit = {},
     modifier: Modifier = Modifier
 ) {
     val surface = PrototypeTokens.surface
@@ -2123,22 +2172,15 @@ private fun EditorBottomStatusBar(
             )
         )
         Spacer(modifier = Modifier.width(14.dp))
-        // Modified indicator
+        // 未保存提示（实施指导书 §2.3 屏 15）：由「● + 已修改」改为文字，保存后消失。
+        // 注：指导书原文为「未保存 · N 行改动」，但本仓库没有改动行数的数据源
+        // （sora 只暴露 isModified 布尔值），行级 diff 属新功能，故此处先只给文字。
         if (isModified) {
-            Row(verticalAlignment = Alignment.CenterVertically) {
-                Box(
-                    modifier = Modifier
-                        .size(PrototypeSpacing.EditorModifiedDot)
-                        .clip(PrototypeShapes.StatusCircle)
-                        .background(accent)
-                )
-                Spacer(modifier = Modifier.width(5.dp))
-                Text(
-                    text = stringResource(R.string.editor_modified),
-                    style = EditorStatusBarStyle,
-                    color = accent
-                )
-            }
+            Text(
+                text = stringResource(R.string.editor_status_unsaved),
+                style = EditorStatusBarStyle,
+                color = accent
+            )
             Spacer(modifier = Modifier.width(14.dp))
         }
         // Selection count (only when there is a selection)
@@ -2156,7 +2198,7 @@ private fun EditorBottomStatusBar(
             if (lang != null) {
                 val displayLang = if (lang.equals("markdown", ignoreCase = true)) "Markdown" else lang.uppercase()
                 Text(
-                    text = displayLang,
+                    text = "$displayLang ▾",
                     style = EditorStatusBarStyle,
                     color = accent,
                     modifier = Modifier.clickable(
@@ -2175,11 +2217,16 @@ private fun EditorBottomStatusBar(
             color = muted
         )
         Spacer(modifier = Modifier.width(14.dp))
-        // Encoding (UTF-8, etc.)
+        // Encoding (UTF-8, etc.) — 可点击直达编码面板（实施指导书 §2.3 屏 15）
         Text(
-            text = encodingText,
+            text = "$encodingText ▾",
             style = EditorStatusBarStyle,
-            color = muted
+            color = muted,
+            modifier = Modifier.clickable(
+                interactionSource = remember { MutableInteractionSource() },
+                indication = null,
+                onClick = onEncodingClick
+            )
         )
         Spacer(modifier = Modifier.width(14.dp))
         // Line ending (LF / CRLF) — clickable
