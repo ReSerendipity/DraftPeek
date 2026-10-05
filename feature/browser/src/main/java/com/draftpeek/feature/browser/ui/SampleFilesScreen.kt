@@ -1,7 +1,9 @@
 package com.draftpeek.feature.browser.ui
 
+import android.widget.Toast
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
+import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -20,6 +22,8 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
+import androidx.compose.material3.DropdownMenu
+import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.PlainTooltip
@@ -41,8 +45,11 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import com.draftpeek.core.ui.component.BrandSearchBar
 import com.draftpeek.core.ui.component.FileTypeColorIndicator
 import com.draftpeek.core.ui.component.FileTypeIcon
+import com.draftpeek.core.ui.icon.StrokeIcon
+import com.draftpeek.core.ui.icon.StrokeIcons
 import com.draftpeek.core.ui.modifier.pressScaleEffect
 import com.draftpeek.core.ui.theme.BrandShapes
 import com.draftpeek.core.ui.theme.DraftPeekTypography
@@ -79,6 +86,30 @@ fun SampleFilesScreen(onSampleClick: (String) -> Unit, onNavigateUp: () -> Unit,
 
     LaunchedEffect(savedOrder) {
         samples = SampleFileManager.listSamples(context, savedOrder.ifEmpty { null })
+    }
+
+    var searchQuery by remember { mutableStateOf("") }
+
+    // 语言搜索（实施指导书 §2.9 屏 10）：按语言名或文件名过滤
+    val visibleSamples = remember(samples, searchQuery) {
+        val q = searchQuery.trim()
+        if (q.isBlank()) {
+            samples
+        } else {
+            samples.filter {
+                it.language.contains(q, ignoreCase = true) || it.name.contains(q, ignoreCase = true)
+            }
+        }
+    }
+
+    val onCopyToFiles: (SampleFile) -> Unit = { sample ->
+        val created = SampleFileManager.copySampleToUserFiles(context, sample)
+        val msg = if (created != null) {
+            context.getString(R.string.browser_sample_copy_success, created)
+        } else {
+            context.getString(R.string.browser_sample_copy_failed)
+        }
+        Toast.makeText(context, msg, Toast.LENGTH_SHORT).show()
     }
 
     val pageBg = PrototypeTokens.pageBackground
@@ -142,15 +173,24 @@ fun SampleFilesScreen(onSampleClick: (String) -> Unit, onNavigateUp: () -> Unit,
 
             Spacer(modifier = Modifier.height(12.dp))
 
+            BrandSearchBar(
+                value = searchQuery,
+                onValueChange = { searchQuery = it },
+                placeholder = stringResource(R.string.browser_samples_search_hint)
+            )
+
+            Spacer(modifier = Modifier.height(12.dp))
+
             LazyColumn(
                 state = listState,
                 modifier = Modifier.fillMaxSize(),
                 verticalArrangement = Arrangement.spacedBy(4.dp)
             ) {
-                itemsIndexed(samples, key = { _, sample -> sample.uri }) { _, sample ->
+                itemsIndexed(visibleSamples, key = { _, sample -> sample.uri }) { _, sample ->
                     SampleFileCard(
                         sample = sample,
-                        onClick = { onSampleClick(sample.uri) }
+                        onClick = { onSampleClick(sample.uri) },
+                        onCopyToFiles = { onCopyToFiles(sample) }
                     )
                 }
             }
@@ -164,7 +204,13 @@ fun SampleFilesScreen(onSampleClick: (String) -> Unit, onNavigateUp: () -> Unit,
  * 显示示例文件的图标、文件名、扩展名和语言信息。
  */
 @Composable
-private fun SampleFileCard(sample: SampleFile, onClick: () -> Unit, modifier: Modifier = Modifier) {
+private fun SampleFileCard(
+    sample: SampleFile,
+    onClick: () -> Unit,
+    modifier: Modifier = Modifier,
+    onCopyToFiles: (() -> Unit)? = null
+) {
+    var showMenu by remember { mutableStateOf(false) }
     val ext = sample.name.substringAfterLast('.', "")
 
     Card(
@@ -221,6 +267,47 @@ private fun SampleFileCard(sample: SampleFile, onClick: () -> Unit, modifier: Mo
                     .background(PrototypeTokens.mutedSoft)
                     .padding(horizontal = 8.dp, vertical = 4.dp)
             )
+
+            // 行内「⋯」：把示例复制到我的文件（实施指导书 §2.9 屏 10）
+            if (onCopyToFiles != null) {
+                Spacer(modifier = Modifier.width(4.dp))
+                Box {
+                    Box(
+                        modifier = Modifier
+                            .size(28.dp)
+                            .clickable(
+                                interactionSource = remember { MutableInteractionSource() },
+                                indication = null,
+                                onClick = { showMenu = true }
+                            ),
+                        contentAlignment = Alignment.Center
+                    ) {
+                        StrokeIcon(
+                            icon = StrokeIcons.MoreVert,
+                            contentDescription = stringResource(R.string.browser_action_more),
+                            tint = PrototypeTokens.muted,
+                            modifier = Modifier.size(18.dp)
+                        )
+                    }
+                    DropdownMenu(expanded = showMenu, onDismissRequest = { showMenu = false }) {
+                        DropdownMenuItem(
+                            text = { Text(stringResource(R.string.browser_action_copy_to_files)) },
+                            leadingIcon = {
+                                StrokeIcon(
+                                    icon = StrokeIcons.File,
+                                    contentDescription = null,
+                                    tint = PrototypeTokens.accent,
+                                    modifier = Modifier.size(18.dp)
+                                )
+                            },
+                            onClick = {
+                                showMenu = false
+                                onCopyToFiles()
+                            }
+                        )
+                    }
+                }
+            }
         }
     }
 }

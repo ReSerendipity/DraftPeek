@@ -49,6 +49,11 @@
     <string name="browser_action_create_open">Create and open</string>
     <string name="browser_action_delete">Delete</string>
     <string name="browser_action_more">More actions</string>
+    <string name="browser_action_reopen">Reopen</string>
+    <string name="browser_action_copy_to_files">Copy to my files</string>
+    <string name="browser_samples_search_hint">Search languages…</string>
+    <string name="browser_sample_copy_success">Copied as %1$s</string>
+    <string name="browser_sample_copy_failed">Copy failed</string>
     <string name="browser_action_delete_file">Delete</string>
     <string name="browser_action_drag_reorder">Drag to reorder</string>
     <string name="browser_action_export_as_file">Export as file</string>
