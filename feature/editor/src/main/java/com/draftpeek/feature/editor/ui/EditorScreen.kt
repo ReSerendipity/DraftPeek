@@ -45,6 +45,8 @@ import androidx.compose.material.icons.automirrored.filled.Undo
 import androidx.compose.material.icons.filled.Close
 import androidx.compose.material.icons.filled.Code
 import androidx.compose.material.icons.filled.Error
+import androidx.compose.material.icons.filled.KeyboardArrowDown
+import androidx.compose.material.icons.filled.KeyboardArrowUp
 import androidx.compose.material.icons.filled.MoreVert
 import androidx.compose.material.icons.filled.Refresh
 import androidx.compose.material.icons.filled.Save
@@ -112,6 +114,7 @@ import com.draftpeek.core.ui.component.BrandOutlinedButton
 import com.draftpeek.core.ui.component.BrandOutlinedTextField
 import com.draftpeek.core.ui.component.BrandSwitch
 import com.draftpeek.core.ui.component.BrandTopBar
+import com.draftpeek.core.ui.component.KeyboardSafeBottomSheet
 import com.draftpeek.core.ui.component.accessibilityEnhanced
 import com.draftpeek.core.ui.component.rememberHapticController
 import com.draftpeek.core.ui.composition.isFeatureEnabled
@@ -1845,6 +1848,8 @@ private fun EditorSearchPanel(
 ) {
     // Shared state for go-to-line error (must be visible in both content and confirmButton)
     var goToLineError by remember { mutableStateOf("") }
+    // 「全部替换」二次确认
+    var showReplaceAllConfirm by remember { mutableStateOf(false) }
 
     // Live search: re-run search when query or options change (for Find and Replace tabs)
     LaunchedEffect(searchQuery, searchRegex, searchMatchCase, searchWholeWord, mode) {
@@ -1866,9 +1871,10 @@ private fun EditorSearchPanel(
         SearchPanelMode.GOTO to stringResource(R.string.editor_search_tab_goto_line)
     )
 
-    BrandDialog(
+    // 由居中模态改为停靠键盘上方的底部弹层（实施指导书 §2.3 屏 18，复用 §3.1 键盘规范）
+    KeyboardSafeBottomSheet(
         onDismissRequest = onDismiss,
-        title = {
+        header = {
             Row(
                 modifier = Modifier.fillMaxWidth(),
                 horizontalArrangement = Arrangement.spacedBy(2.dp)
@@ -1894,7 +1900,7 @@ private fun EditorSearchPanel(
                 }
             }
         },
-        content = {
+        body = {
             when (mode) {
                 SearchPanelMode.FIND -> {
                     Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
@@ -1922,6 +1928,12 @@ private fun EditorSearchPanel(
                                 text = stringResource(R.string.editor_whole_word),
                                 selected = searchWholeWord,
                                 onClick = { onSearchWholeWordChange(!searchWholeWord) }
+                            )
+                            Spacer(modifier = Modifier.weight(1f))
+                            // ↑↓ 匹配导航（实施指导书 §2.3 屏 18）
+                            SearchNavButtons(
+                                onPrevious = { wrapper.gotoPrevious() },
+                                onNext = { wrapper.gotoNext() }
                             )
                         }
                     }
@@ -1952,6 +1964,12 @@ private fun EditorSearchPanel(
                                 text = stringResource(R.string.editor_whole_word),
                                 selected = searchWholeWord,
                                 onClick = { onSearchWholeWordChange(!searchWholeWord) }
+                            )
+                            Spacer(modifier = Modifier.weight(1f))
+                            // ↑↓ 匹配导航（实施指导书 §2.3 屏 18）
+                            SearchNavButtons(
+                                onPrevious = { wrapper.gotoPrevious() },
+                                onNext = { wrapper.gotoNext() }
                             )
                         }
                         BrandOutlinedTextField(
@@ -1984,59 +2002,123 @@ private fun EditorSearchPanel(
                 }
             }
         },
-        confirmButton = {
-            when (mode) {
-                SearchPanelMode.FIND -> {
-                    BrandFilledButton(text = stringResource(R.string.editor_find), onClick = {
-                        onDismiss()
-                    })
-                }
-                SearchPanelMode.REPLACE -> {
-                    Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
-                        BrandOutlinedButton(text = stringResource(R.string.editor_replace), onClick = {
-                            if (searchQuery.isNotBlank()) {
-                                wrapper.replaceCurrent(replaceText)
-                            }
-                        })
-                        BrandFilledButton(text = stringResource(R.string.editor_replace_all), onClick = {
-                            wrapper.replaceAll(
-                                searchQuery,
-                                replaceText,
-                                regex = searchRegex,
-                                matchCase = searchMatchCase,
-                                wholeWord = searchWholeWord
-                            )
+        footer = {
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                horizontalArrangement = Arrangement.spacedBy(8.dp),
+                verticalAlignment = Alignment.CenterVertically
+            ) {
+                BrandOutlinedButton(text = stringResource(R.string.editor_cancel), onClick = onDismiss)
+                Spacer(modifier = Modifier.weight(1f))
+                when (mode) {
+                    SearchPanelMode.FIND -> {
+                        BrandFilledButton(text = stringResource(R.string.editor_find), onClick = {
                             onDismiss()
                         })
                     }
-                }
-                SearchPanelMode.GOTO -> {
-                    val totalLines = wrapper.getTotalLines()
-                    BrandFilledButton(text = stringResource(R.string.editor_go), onClick = {
-                        val line = goToLineInput.toIntOrNull()
-                        when {
-                            goToLineInput.isBlank() -> {
-                                goToLineError = context.getString(R.string.editor_enter_line_number)
-                            }
-                            line == null || line <= 0 -> {
-                                goToLineError = context.getString(R.string.editor_enter_valid_line)
-                            }
-                            line > totalLines -> {
-                                goToLineError = context.getString(R.string.editor_out_of_range, totalLines)
-                            }
-                            else -> {
-                                wrapper.goToLine(line)
-                                onDismiss()
-                            }
+                    SearchPanelMode.REPLACE -> {
+                        Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+                            BrandOutlinedButton(text = stringResource(R.string.editor_replace), onClick = {
+                                if (searchQuery.isNotBlank()) {
+                                    wrapper.replaceCurrent(replaceText)
+                                }
+                            })
+                            BrandFilledButton(text = stringResource(R.string.editor_replace_all), onClick = {
+                                // 批量替换属破坏性操作，先二次确认（实施指导书 §3.2 高危操作隔离）
+                                showReplaceAllConfirm = true
+                            })
                         }
-                    })
+                    }
+                    SearchPanelMode.GOTO -> {
+                        val totalLines = wrapper.getTotalLines()
+                        BrandFilledButton(text = stringResource(R.string.editor_go), onClick = {
+                            val line = goToLineInput.toIntOrNull()
+                            when {
+                                goToLineInput.isBlank() -> {
+                                    goToLineError = context.getString(R.string.editor_enter_line_number)
+                                }
+                                line == null || line <= 0 -> {
+                                    goToLineError = context.getString(R.string.editor_enter_valid_line)
+                                }
+                                line > totalLines -> {
+                                    goToLineError = context.getString(R.string.editor_out_of_range, totalLines)
+                                }
+                                else -> {
+                                    wrapper.goToLine(line)
+                                    onDismiss()
+                                }
+                            }
+                        })
+                    }
                 }
             }
-        },
-        dismissButton = {
-            BrandOutlinedButton(text = stringResource(R.string.editor_cancel), onClick = onDismiss)
         }
     )
+
+    // 「全部替换」二次确认（实施指导书 §2.3 屏 18）
+    if (showReplaceAllConfirm) {
+        BrandDialog(
+            onDismissRequest = { showReplaceAllConfirm = false },
+            title = { Text(text = stringResource(R.string.editor_replace_all)) },
+            content = {
+                Text(
+                    text = stringResource(R.string.editor_replace_all_confirm, searchQuery),
+                    style = DraftPeekTypography.bodyMedium
+                )
+            },
+            confirmButton = {
+                BrandFilledButton(
+                    text = stringResource(R.string.editor_replace_all),
+                    onClick = {
+                        showReplaceAllConfirm = false
+                        wrapper.replaceAll(
+                            searchQuery,
+                            replaceText,
+                            regex = searchRegex,
+                            matchCase = searchMatchCase,
+                            wholeWord = searchWholeWord
+                        )
+                        onDismiss()
+                    }
+                )
+            },
+            dismissButton = {
+                BrandOutlinedButton(
+                    text = stringResource(R.string.editor_cancel),
+                    onClick = { showReplaceAllConfirm = false }
+                )
+            }
+        )
+    }
+}
+
+/**
+ * 查找面板的 ↑↓ 匹配导航（实施指导书 §2.3 屏 18）。
+ *
+ * 注意：sora 的搜索 API 只返回「是否命中」布尔值，**不暴露匹配总数**，
+ * 故此处只提供上下导航，暂不做「n/N」计数（那需要新的搜索结果统计能力）。
+ */
+@Composable
+private fun SearchNavButtons(onPrevious: () -> Unit, onNext: () -> Unit) {
+    Row(
+        horizontalArrangement = Arrangement.spacedBy(2.dp),
+        verticalAlignment = Alignment.CenterVertically
+    ) {
+        TooltipIconButton(tooltip = stringResource(R.string.editor_find_previous), onClick = onPrevious) {
+            Icon(
+                imageVector = Icons.Filled.KeyboardArrowUp,
+                contentDescription = stringResource(R.string.editor_find_previous),
+                tint = PrototypeTokens.fgSoft
+            )
+        }
+        TooltipIconButton(tooltip = stringResource(R.string.editor_find_next), onClick = onNext) {
+            Icon(
+                imageVector = Icons.Filled.KeyboardArrowDown,
+                contentDescription = stringResource(R.string.editor_find_next),
+                tint = PrototypeTokens.fgSoft
+            )
+        }
+    }
 }
 
 /**

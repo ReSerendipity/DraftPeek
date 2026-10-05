@@ -35,6 +35,9 @@
     <string name="editor_replace">Replace</string>
     <string name="editor_replace_with">Replace with</string>
     <string name="editor_replace_all">Replace all</string>
+    <string name="editor_find_previous">Previous</string>
+    <string name="editor_find_next">Next</string>
+    <string name="editor_replace_all_confirm">Replace all matches of "%1$s" in this file?</string>
     <string name="editor_search">Search</string>
     <string name="editor_search_content">Search content</string>
     <string name="editor_no_match_found">No matching results found</string>
