@@ -32,6 +32,9 @@
     <string name="editor_replace">바꾸기</string>
     <string name="editor_replace_with">바꿀 내용</string>
     <string name="editor_replace_all">모두 바꾸기</string>
+    <string name="editor_find_previous">이전</string>
+    <string name="editor_find_next">다음</string>
+    <string name="editor_replace_all_confirm">이 파일의 "%1$s" 항목을 모두 바꿀까요?</string>
     <string name="editor_search">검색</string>
     <string name="editor_search_content">검색 내용</string>
     <string name="editor_no_match_found">일치하는 결과가 없습니다</string>

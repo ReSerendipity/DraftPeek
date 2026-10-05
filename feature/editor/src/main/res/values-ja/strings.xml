@@ -30,6 +30,9 @@
     <string name="editor_replace">置換</string>
     <string name="editor_replace_with">置換後</string>
     <string name="editor_replace_all">すべて置換</string>
+    <string name="editor_find_previous">前を検索</string>
+    <string name="editor_find_next">次を検索</string>
+    <string name="editor_replace_all_confirm">このファイル内の「%1$s」をすべて置換しますか？</string>
     <string name="editor_search">検索</string>
     <string name="editor_search_content">検索内容</string>
     <string name="editor_no_match_found">一致する結果が見つかりません</string>

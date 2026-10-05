@@ -40,6 +40,9 @@
     <string name="editor_replace">取代</string>
     <string name="editor_replace_with">取代為</string>
     <string name="editor_replace_all">全部取代</string>
+    <string name="editor_find_previous">上一個</string>
+    <string name="editor_find_next">下一個</string>
+    <string name="editor_replace_all_confirm">將取代目前檔案中所有「%1$s」的符合項，是否繼續？</string>
     <string name="editor_search">搜尋</string>
     <string name="editor_search_content">搜尋內容</string>
     <string name="editor_no_match_found">未找到符合結果</string>
