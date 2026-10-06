@@ -795,7 +795,38 @@ fun ProfileScreen(
 
             Spacer(modifier = Modifier.height(20.dp))
 
-            SectionHeader(label = stringResource(R.string.profile_section_activity))
+            // 设置入口（实施指导书 §2.5 屏 20）：四个独立页面的入口归拢成一组。
+            SectionHeader(label = stringResource(R.string.profile_section_settings))
+
+            BrandSettingRow(
+                icon = Icons.Filled.Edit,
+                label = stringResource(R.string.profile_open_editor_settings),
+                onClick = onNavigateToEditorSettings,
+                showDivider = true
+            )
+            BrandSettingRow(
+                icon = Icons.Filled.Flag,
+                label = stringResource(R.string.profile_open_lab),
+                onClick = onNavigateToLab,
+                showDivider = true
+            )
+            BrandSettingRow(
+                icon = Icons.Filled.Accessibility,
+                label = stringResource(R.string.accessibility_page_title),
+                onClick = onNavigateToAccessibility,
+                showDivider = true
+            )
+            BrandSettingRow(
+                icon = Icons.Filled.Security,
+                label = stringResource(R.string.profile_open_about_security),
+                onClick = onNavigateToAboutSecurity,
+                showDivider = false
+            )
+
+            Spacer(modifier = Modifier.height(8.dp))
+
+            // 数据区（只读）：活跃度与成就仅作展示，不在本页编辑。
+            SectionHeader(label = stringResource(R.string.profile_section_stats))
 
             Column(
                 modifier = Modifier
@@ -812,27 +843,18 @@ fun ProfileScreen(
                     isDark = isDark
                 )
             }
-
-            Spacer(modifier = Modifier.height(8.dp))
-
-            SectionHeader(label = stringResource(R.string.profile_section_editor))
-
-            // 编辑器设置已独立成页（实施指导书 §2.5 屏 21）：此处只留入口。
-            // 仍留在本页的编辑器相关项：成就（stats 数据）、主题管理（依赖 ThemeManageViewModel）、
-            // Markdown 预览主题（MarkdownTheme 在 feature/editor，反向依赖会成环）。
-            BrandSettingRow(
-                icon = Icons.Filled.Edit,
-                label = stringResource(R.string.profile_open_editor_settings),
-                onClick = onNavigateToEditorSettings,
-                showDivider = true
-            )
             BrandSettingRow(
                 icon = Icons.Filled.EmojiEvents,
                 label = stringResource(R.string.stats_achievements_title),
                 value = "${unlockedAchievements.size}/${AchievementDefinitions.allAchievements.size}",
                 onClick = onNavigateToAchievements,
-                showDivider = true
+                showDivider = false
             )
+
+            Spacer(modifier = Modifier.height(8.dp))
+
+            SectionHeader(label = stringResource(R.string.profile_section_editor))
+
             BrandSettingRow(
                 icon = Icons.Filled.Palette,
                 label = stringResource(R.string.profile_setting_theme_manage),
@@ -850,27 +872,6 @@ fun ProfileScreen(
                 label = stringResource(R.string.profile_setting_markdown_theme),
                 value = stringResource(resolvedMarkdownTheme.displayNameResId),
                 onClick = { showMarkdownThemeDialog = true },
-                showDivider = true
-            )
-
-            Spacer(modifier = Modifier.height(8.dp))
-
-            SectionHeader(label = stringResource(R.string.profile_section_accessibility))
-
-            BrandSettingRow(
-                icon = Icons.Filled.Accessibility,
-                label = stringResource(R.string.accessibility_page_title),
-                onClick = onNavigateToAccessibility,
-                showDivider = false
-            )
-
-            Spacer(modifier = Modifier.height(8.dp))
-
-            // 功能开关已独立成「实验室」页（实施指导书 §2.5 屏 22）：此处只留入口。
-            BrandSettingRow(
-                icon = Icons.Filled.Flag,
-                label = stringResource(R.string.profile_open_lab),
-                onClick = onNavigateToLab,
                 showDivider = false
             )
 
@@ -891,7 +892,6 @@ fun ProfileScreen(
                 showDivider = false,
                 iconPainter = painterResource(id = R.drawable.ic_social_github)
             )
-
             Spacer(modifier = Modifier.height(8.dp))
 
             SectionHeader(label = stringResource(R.string.profile_section_feedback))
@@ -902,7 +902,6 @@ fun ProfileScreen(
                 onClick = { showFeedbackDialog = true },
                 showDivider = false
             )
-
             Spacer(modifier = Modifier.height(8.dp))
 
             SectionHeader(label = stringResource(R.string.profile_section_social))
@@ -930,16 +929,6 @@ fun ProfileScreen(
                     }
                 }
             }
-
-            Spacer(modifier = Modifier.height(8.dp))
-
-            // 安全状态与关于已独立成页（实施指导书 §2.5 屏 23）：此处只留入口。
-            BrandSettingRow(
-                icon = Icons.Filled.Security,
-                label = stringResource(R.string.profile_open_about_security),
-                onClick = onNavigateToAboutSecurity,
-                showDivider = false
-            )
 
             Spacer(modifier = Modifier.height(8.dp))
 

@@ -6,4 +6,6 @@
     <string name="profile_open_editor_settings">編輯器設定</string>
     <string name="profile_open_lab">實驗室</string>
     <string name="profile_open_about_security">關於與安全性</string>
+    <string name="profile_section_settings">設定</string>
+    <string name="profile_section_stats">統計</string>
 </resources>
