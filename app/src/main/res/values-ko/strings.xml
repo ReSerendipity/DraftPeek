@@ -105,4 +105,8 @@
     <string name="agreement_gate_collapse_terms">전체 약관 접기</string>
     <string name="agreement_gate_policy">이용약관</string>
     <string name="agreement_gate_privacy">개인정보 처리방침</string>
+    <!-- 首次启动引导页（屏 01–04） -->
+    <string name="onboarding_skip">건너뛰기</string>
+    <string name="onboarding_final_title">시작할 준비가 되셨나요?</string>
+    <string name="onboarding_final_button">시작하기</string>
 </resources>

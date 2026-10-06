@@ -105,4 +105,8 @@
     <string name="agreement_gate_collapse_terms">全文を隠す</string>
     <string name="agreement_gate_policy">利用規約</string>
     <string name="agreement_gate_privacy">プライバシーポリシー</string>
+    <!-- 首次启动引导页（屏 01–04） -->
+    <string name="onboarding_skip">スキップ</string>
+    <string name="onboarding_final_title">準備はいいですか？</string>
+    <string name="onboarding_final_button">始める</string>
 </resources>

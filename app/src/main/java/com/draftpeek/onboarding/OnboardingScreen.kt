@@ -26,10 +26,12 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.graphics.*
 import androidx.compose.ui.graphics.drawscope.Stroke
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import com.draftpeek.R
 import com.draftpeek.core.ui.component.BrandFilledButton
 import com.draftpeek.core.ui.component.BrandOutlinedButton
 import com.draftpeek.core.ui.theme.*
@@ -45,6 +47,36 @@ import kotlinx.coroutines.delay
  * - [MinimalReveal]：极简展开风格，打字机效果+圆相笔触
  */
 enum class OnboardingAnimation { InkStamp, PageTurn, MinimalReveal }
+
+// ============================================================
+// 统一规格（阶段 6，屏 01–04）
+// 三套随机风格共用同一套尺寸与间距，只有形状/动画保持各自风格差异，
+// 避免随机到不同风格时观感跳变。所有值在此单一来源。
+// ============================================================
+private val OnboardingCardWidth = 280.dp
+private val OnboardingCardHeight = 200.dp
+private val OnboardingCardPadding = 24.dp
+private val OnboardingTileSize = 80.dp
+private val OnboardingButtonWidth = 200.dp
+private val OnboardingContentSpacing = 32.dp
+private val OnboardingTitleSpacing = 8.dp
+private val OnboardingButtonSpacing = 24.dp
+
+/**
+ * 跳过按钮（三套风格共用）。
+ *
+ * 原先跳过只能靠"点击屏幕任意处"，不可发现；改为右上角常驻按钮。
+ */
+@Composable
+private fun OnboardingSkipButton(onSkip: () -> Unit, modifier: Modifier = Modifier) {
+    TextButton(onClick = onSkip, modifier = modifier) {
+        Text(
+            text = stringResource(R.string.onboarding_skip),
+            style = DraftPeekTypography.bodyMedium,
+            color = PrototypeTokens.fgSoft
+        )
+    }
+}
 
 /**
  * 首次启动引导页 Composable 函数。
@@ -84,7 +116,8 @@ private fun InkStampOnboarding(onComplete: () -> Unit) {
     Box(
         modifier = Modifier
             .fillMaxSize()
-            .background(pageBg),
+            .background(pageBg)
+            .clickable { if (currentStep < 3) currentStep++ else onComplete() },
         contentAlignment = Alignment.Center
     ) {
         when (currentStep) {
@@ -93,6 +126,13 @@ private fun InkStampOnboarding(onComplete: () -> Unit) {
             2 -> InkStampStep3()
             3 -> InkStampStep4(onComplete = onComplete, onStartOver = { currentStep = 0 })
         }
+
+        OnboardingSkipButton(
+            onSkip = onComplete,
+            modifier = Modifier
+                .align(Alignment.TopEnd)
+                .padding(top = 48.dp, end = 20.dp)
+        )
 
         Row(
             modifier = Modifier
@@ -116,17 +156,6 @@ private fun InkStampOnboarding(onComplete: () -> Unit) {
             }
         }
     }
-
-    LaunchedEffect(currentStep) {
-        delay(3000)
-        if (currentStep < 3) currentStep++
-    }
-
-    Box(
-        modifier = Modifier
-            .fillMaxSize()
-            .clickable { if (currentStep < 3) currentStep++ else onComplete() }
-    )
 }
 
 @Composable
@@ -209,7 +238,7 @@ private fun InkStampStep2() {
             }
         )
 
-        Spacer(Modifier.height(32.dp))
+        Spacer(Modifier.height(OnboardingContentSpacing))
 
         Text(
             text = "Elegant Preview",
@@ -249,7 +278,7 @@ private fun InkStampStep3() {
         Box(contentAlignment = Alignment.Center) {
             Box(
                 modifier = Modifier
-                    .size(80.dp)
+                    .size(OnboardingTileSize)
                     .offset(x = (-10).dp)
                     .clip(CircleShape)
                     .background(pageBg, shape = CircleShape)
@@ -257,14 +286,14 @@ private fun InkStampStep3() {
             )
             Box(
                 modifier = Modifier
-                    .size(80.dp)
+                    .size(OnboardingTileSize)
                     .offset(x = 10.dp)
                     .clip(CircleShape)
                     .background(fg)
             )
         }
 
-        Spacer(Modifier.height(32.dp))
+        Spacer(Modifier.height(OnboardingContentSpacing))
 
         Text(
             text = "Light & Dark",
@@ -304,20 +333,24 @@ private fun InkStampStep4(onComplete: () -> Unit, onStartOver: () -> Unit) {
         verticalArrangement = Arrangement.Center
     ) {
         Text(
-            text = "Ready to start?",
+            text = stringResource(R.string.onboarding_final_title),
             style = H1Style.copy(color = fg),
             modifier = Modifier.graphicsLayer { alpha = opacity.value }
         )
 
-        Spacer(Modifier.height(24.dp))
+        Spacer(Modifier.height(OnboardingButtonSpacing))
 
         BrandFilledButton(
             onClick = onComplete,
             modifier = Modifier
-                .width(200.dp)
+                .width(OnboardingButtonWidth)
                 .graphicsLayer { alpha = opacity.value }
         ) {
-            Text("Get Started", fontWeight = FontWeight.SemiBold, fontSize = 15.sp)
+            Text(
+                stringResource(R.string.onboarding_final_button),
+                fontWeight = FontWeight.SemiBold,
+                fontSize = 15.sp
+            )
         }
     }
 }
@@ -350,6 +383,13 @@ private fun PageTurnOnboarding(onComplete: () -> Unit) {
             3 -> PageTurnStep4(onComplete = onComplete, onStartOver = { currentStep = 0 })
         }
 
+        OnboardingSkipButton(
+            onSkip = onComplete,
+            modifier = Modifier
+                .align(Alignment.TopEnd)
+                .padding(top = 48.dp, end = 20.dp)
+        )
+
         Row(
             modifier = Modifier
                 .align(Alignment.BottomCenter)
@@ -372,11 +412,6 @@ private fun PageTurnOnboarding(onComplete: () -> Unit) {
             }
         }
     }
-
-    LaunchedEffect(currentStep) {
-        delay(3000)
-        if (currentStep < 3) currentStep++
-    }
 }
 
 @Composable
@@ -395,7 +430,7 @@ private fun PageTurnStep1() {
 
     Card(
         modifier = Modifier
-            .width(280.dp)
+            .width(OnboardingCardWidth)
             .height(cardHeight.value.dp)
             .graphicsLayer { alpha = opacity.value },
         shape = PrototypeShapes.Card,
@@ -405,7 +440,7 @@ private fun PageTurnStep1() {
         Box(
             modifier = Modifier
                 .fillMaxSize()
-                .padding(24.dp),
+                .padding(OnboardingCardPadding),
             contentAlignment = Alignment.Center
         ) {
             Column(horizontalAlignment = Alignment.CenterHorizontally) {
@@ -445,8 +480,8 @@ private fun PageTurnStep2() {
 
     Card(
         modifier = Modifier
-            .width(280.dp)
-            .height(200.dp)
+            .width(OnboardingCardWidth)
+            .height(OnboardingCardHeight)
             .graphicsLayer {
                 rotationY = cardRotation.value
                 cameraDistance = 12.dp.value * density
@@ -460,7 +495,7 @@ private fun PageTurnStep2() {
         Box(
             modifier = Modifier
                 .fillMaxSize()
-                .padding(24.dp),
+                .padding(OnboardingCardPadding),
             contentAlignment = Alignment.Center
         ) {
             Column(horizontalAlignment = Alignment.CenterHorizontally) {
@@ -521,7 +556,7 @@ private fun PageTurnStep3() {
         Row {
             Box(
                 modifier = Modifier
-                    .size(80.dp)
+                    .size(OnboardingTileSize)
                     .clip(PrototypeShapes.Card)
                     .background(surface)
                     .border(1.dp, border, PrototypeShapes.Card)
@@ -537,7 +572,7 @@ private fun PageTurnStep3() {
             Spacer(Modifier.width(16.dp))
             Box(
                 modifier = Modifier
-                    .size(80.dp)
+                    .size(OnboardingTileSize)
                     .clip(PrototypeShapes.Card)
                     .background(fg)
             ) {
@@ -551,7 +586,7 @@ private fun PageTurnStep3() {
             }
         }
 
-        Spacer(Modifier.height(32.dp))
+        Spacer(Modifier.height(OnboardingContentSpacing))
 
         Text(
             "Dual Themes",
@@ -591,16 +626,20 @@ private fun PageTurnStep4(onComplete: () -> Unit, onStartOver: () -> Unit) {
         verticalArrangement = Arrangement.Center
     ) {
         Text(
-            "Ready to explore?",
+            stringResource(R.string.onboarding_final_title),
             style = H1Style.copy(color = fg),
             modifier = Modifier.graphicsLayer { alpha = opacity.value }
         )
-        Spacer(Modifier.height(24.dp))
+        Spacer(Modifier.height(OnboardingButtonSpacing))
         BrandFilledButton(
             onClick = onComplete,
-            modifier = Modifier.width(200.dp).graphicsLayer { alpha = opacity.value }
+            modifier = Modifier.width(OnboardingButtonWidth).graphicsLayer { alpha = opacity.value }
         ) {
-            Text("Start Exploring", fontWeight = FontWeight.SemiBold, fontSize = 15.sp)
+            Text(
+                stringResource(R.string.onboarding_final_button),
+                fontWeight = FontWeight.SemiBold,
+                fontSize = 15.sp
+            )
         }
     }
 }
@@ -633,6 +672,13 @@ private fun MinimalRevealOnboarding(onComplete: () -> Unit) {
             3 -> MinimalStep4(onComplete = onComplete, onStartOver = { currentStep = 0 })
         }
 
+        OnboardingSkipButton(
+            onSkip = onComplete,
+            modifier = Modifier
+                .align(Alignment.TopEnd)
+                .padding(top = 48.dp, end = 20.dp)
+        )
+
         Row(
             modifier = Modifier
                 .align(Alignment.BottomCenter)
@@ -654,11 +700,6 @@ private fun MinimalRevealOnboarding(onComplete: () -> Unit) {
                 )
             }
         }
-    }
-
-    LaunchedEffect(currentStep) {
-        delay(3000)
-        if (currentStep < 3) currentStep++
     }
 }
 
@@ -777,7 +818,7 @@ private fun MinimalStep2() {
                 .graphicsLayer { alpha = codeOpacity.value }
         )
 
-        Spacer(Modifier.height(24.dp))
+        Spacer(Modifier.height(OnboardingButtonSpacing))
 
         Text(
             "Immersive Reading",
@@ -815,20 +856,20 @@ private fun MinimalStep3() {
         Row {
             Box(
                 modifier = Modifier
-                    .size(80.dp)
+                    .size(OnboardingTileSize)
                     .clip(CircleShape)
                     .background(fg)
             )
             Box(
                 modifier = Modifier
-                    .size(80.dp)
+                    .size(OnboardingTileSize)
                     .offset(x = (-30).dp)
                     .clip(CircleShape)
                     .background(border)
             )
         }
 
-        Spacer(Modifier.height(32.dp))
+        Spacer(Modifier.height(OnboardingContentSpacing))
 
         Text(
             "Two Modes",
@@ -861,18 +902,22 @@ private fun MinimalStep4(onComplete: () -> Unit, onStartOver: () -> Unit) {
         verticalArrangement = Arrangement.Center
     ) {
         Text(
-            "Ready?",
+            stringResource(R.string.onboarding_final_title),
             style = H1Style.copy(color = fg),
             modifier = Modifier.graphicsLayer { alpha = opacity.value }
         )
-        Spacer(Modifier.height(24.dp))
+        Spacer(Modifier.height(OnboardingButtonSpacing))
         BrandOutlinedButton(
             onClick = onComplete,
             modifier = Modifier
-                .width(200.dp)
+                .width(OnboardingButtonWidth)
                 .graphicsLayer { alpha = opacity.value }
         ) {
-            Text("Begin", fontWeight = FontWeight.SemiBold, fontSize = 15.sp)
+            Text(
+                stringResource(R.string.onboarding_final_button),
+                fontWeight = FontWeight.SemiBold,
+                fontSize = 15.sp
+            )
         }
     }
 }
