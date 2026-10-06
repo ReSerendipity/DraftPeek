@@ -320,4 +320,5 @@
 <string name="profile_dialog_confirm">OK</string>
     <string name="profile_open_editor_settings">Editor settings</string>
     <string name="profile_open_lab">Lab</string>
+    <string name="profile_open_about_security">About &amp; security</string>
 </resources>
