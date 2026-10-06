@@ -179,4 +179,58 @@ class SettingsRepositoryRoundTripTest {
         assertEquals("UTF-16", repository.getDefaultEncoding().first())
         assertEquals(AppLanguage.EN, repository.getLanguage().first())
     }
+
+    @Test
+    fun `auto pair completion round trip`() = runTest {
+        repository.setAutoPairCompletion(false)
+        assertEquals(false, repository.getAutoPairCompletion().first())
+    }
+
+    @Test
+    fun `show minimap round trip`() = runTest {
+        repository.setShowMinimap(true)
+        assertEquals(true, repository.getShowMinimap().first())
+    }
+
+    @Test
+    fun `sticky scroll round trip`() = runTest {
+        repository.setStickyScroll(true)
+        assertEquals(true, repository.getStickyScroll().first())
+    }
+
+    @Test
+    fun `screen reader optimized round trip`() = runTest {
+        repository.setScreenReaderOptimized(true)
+        assertEquals(true, repository.getScreenReaderOptimized().first())
+    }
+
+    @Test
+    fun `non color indicators round trip`() = runTest {
+        repository.setNonColorIndicators(true)
+        assertEquals(true, repository.getNonColorIndicators().first())
+    }
+
+    @Test
+    fun `vibration feedback round trip`() = runTest {
+        repository.setVibrationFeedback(false)
+        assertEquals(false, repository.getVibrationFeedback().first())
+    }
+
+    @Test
+    fun `custom markdown css round trip`() = runTest {
+        repository.setCustomMarkdownCss("body { color: red; }")
+        assertEquals("body { color: red; }", repository.getCustomMarkdownCss().first())
+    }
+
+    @Test
+    fun `editor theme id round trip`() = runTest {
+        repository.setEditorThemeId("dracula")
+        assertEquals("dracula", repository.getEditorThemeId().first())
+    }
+
+    @Test
+    fun `markdown theme name round trip`() = runTest {
+        repository.setMarkdownThemeName("GITHUB")
+        assertEquals("GITHUB", repository.getMarkdownThemeName().first())
+    }
 }

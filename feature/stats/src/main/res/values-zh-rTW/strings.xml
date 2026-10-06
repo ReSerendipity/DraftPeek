@@ -3,4 +3,5 @@
     <!-- Markdown Theme & Custom CSS -->
     <string name="profile_setting_markdown_theme">Markdown 預覽主題</string>
 <string name="profile_dialog_confirm">確定</string>
+    <string name="profile_open_editor_settings">編輯器設定</string>
 </resources>
