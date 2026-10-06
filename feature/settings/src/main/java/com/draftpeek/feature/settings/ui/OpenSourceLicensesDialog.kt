@@ -8,7 +8,7 @@
  *           MIT.txt、OFL-1.1.txt、BSD-3-Clause.txt、Apache-2.0.txt）。
  * 与 THIRD_PARTY_NOTICES.md 保持同步；新增/升级第三方依赖时须同步更新 ossComponents。
  */
-package com.draftpeek.feature.stats.ui
+package com.draftpeek.feature.settings.ui
 
 import android.content.Context
 import android.content.Intent
@@ -42,7 +42,7 @@ import com.draftpeek.core.ui.component.BrandDialog
 import com.draftpeek.core.ui.component.BrandFilledButton
 import com.draftpeek.core.ui.component.BrandOutlinedButton
 import com.draftpeek.core.ui.theme.PrototypeTokens
-import com.draftpeek.feature.stats.R
+import com.draftpeek.feature.settings.R
 
 /**
  * 第三方开源组件条目。

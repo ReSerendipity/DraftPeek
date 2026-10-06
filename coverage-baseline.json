@@ -13,7 +13,8 @@
     "当实测覆盖率比 threshold_pct 高出 3pt 以上时，视为债务累积警告，PR 应同步上调 threshold_pct 到新实测的 90%。",
     "2026-10-06（阶段 5 第一批）：无障碍页自 feature/stats 迁入 feature/settings，settings 分母被 Compose 代码生成指令撑大（约 8888），实测 16.4%→25.65% 反而上升 —— 原因是给测试任务补了 isIncludeNoLocationClasses，此前该模块所有 Robolectric 测试（DataStoreRoundTripTest 等）对 JaCoCo 完全不可见，SettingsRepositoryImpl 明明被测到却 covered=0；另新增 SettingsRepositoryRoundTripTest 补 20 组 setter/getter 往返。stats 因迁走该屏实测 2.38%→2.59%。settings 的 threshold_pct 刻意维持 14.7 不上调：后续 5b/5c 还要把编辑器设置 / 实验室 / 关于与安全三页的 UI 分区迁入本模块（均无单测），现在按 90% 规则上调到 23 会让后续批次必然击穿；待三页迁完并补上对应测试后再按规则上调。",
     "2026-10-06（阶段 5 第二批）：编辑器设置页（约 886 行 UI + 8 个对话框）自 stats 迁入 settings，settings 分母 8888→16232，实测一度降到 14.05% 击穿阈值；仍按正向解决 —— SettingsRepositoryRoundTripTest 再补 9 组 setter/getter 往返（autoPairCompletion / showMinimap / stickyScroll / screenReaderOptimized / nonColorIndicators / vibrationFeedback / customMarkdownCss / editorThemeId / markdownThemeName），covered 2280→2880，实测 17.74%。stats 迁走该屏后实测 2.59%→3.21%。threshold_pct 继续维持 14.7 不动（5c/5d 还要迁实验室与关于与安全两页，待全部迁完再按 90% 规则统一上调）。",
-    "2026-10-06（阶段 5 第三批）：实验室页（LabScreen，按 D2 分语言与补全 / Markdown / 版本与运行时三组）自 stats 迁入 settings，settings 分母 16232→16947，实测 16.99%（仍高于阈值 14.7%，本批无需补测试）；stats 迁走后 3.21%→3.24%。threshold_pct 仍维持 14.7（5d/5e 还有关于与安全页与 Me 页重排）。"
+    "2026-10-06（阶段 5 第三批）：实验室页（LabScreen，按 D2 分语言与补全 / Markdown / 版本与运行时三组）自 stats 迁入 settings，settings 分母 16232→16947，实测 16.99%（仍高于阈值 14.7%，本批无需补测试）；stats 迁走后 3.21%→3.24%。threshold_pct 仍维持 14.7（5d/5e 还有关于与安全页与 Me 页重排）。",
+    "2026-10-06（阶段 5 第四批）：关于与安全页（AboutSecurityScreen）+ 开源许可弹窗自 stats 迁入 settings，settings 分母 16947→21136，实测 13.63% 击穿阈值；仍按正向解决 —— SettingsRepositoryRoundTripTest 再补 5 组（pinnedOrder / recentOrder / internalFilesOrder / bookmarkOrder 的 JSON 序列化往返 + directorySortOption 按目录读写），covered 2880→3297，实测 15.60%。stats 迁走后 3.24%→3.71%。threshold_pct 仍维持 14.7（最后一批 5e 是 Me 页重排，不再往 settings 加 UI，之后可按 90% 规则统一上调）。"
   ],
   "modules": {
     "app": {
@@ -52,12 +53,12 @@
       "report_path": "feature/editor/build/reports/jacoco/jacocoTestReport/jacocoTestReport.xml"
     },
     "feature/settings": {
-      "measured_pct": 16.99,
+      "measured_pct": 15.6,
       "threshold_pct": 14.7,
       "report_path": "feature/settings/build/reports/jacoco/jacocoTestReport/jacocoTestReport.xml"
     },
     "feature/stats": {
-      "measured_pct": 3.24,
+      "measured_pct": 3.71,
       "threshold_pct": 2.1,
       "report_path": "feature/stats/build/reports/jacoco/jacocoTestReport/jacocoTestReport.xml"
     },

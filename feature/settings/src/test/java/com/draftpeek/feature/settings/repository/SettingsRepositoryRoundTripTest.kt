@@ -233,4 +233,38 @@ class SettingsRepositoryRoundTripTest {
         repository.setMarkdownThemeName("GITHUB")
         assertEquals("GITHUB", repository.getMarkdownThemeName().first())
     }
+
+    @Test
+    fun `pinned order round trip`() = runTest {
+        val order = listOf("file:///b.txt", "file:///a.txt")
+        repository.setPinnedOrder(order)
+        assertEquals(order, repository.getPinnedOrder().first())
+    }
+
+    @Test
+    fun `recent order round trip`() = runTest {
+        val order = listOf("file:///c.md")
+        repository.setRecentOrder(order)
+        assertEquals(order, repository.getRecentOrder().first())
+    }
+
+    @Test
+    fun `internal files order round trip`() = runTest {
+        val order = listOf("dir:///x", "dir:///y")
+        repository.setInternalFilesOrder(order)
+        assertEquals(order, repository.getInternalFilesOrder().first())
+    }
+
+    @Test
+    fun `bookmark order round trip`() = runTest {
+        val order = listOf("file:///z.kt")
+        repository.setBookmarkOrder(order)
+        assertEquals(order, repository.getBookmarkOrder().first())
+    }
+
+    @Test
+    fun `directory sort option round trip`() = runTest {
+        repository.setDirectorySortOption("content://tree/1", "NAME_ASC")
+        assertEquals("NAME_ASC", repository.getDirectorySortOption("content://tree/1").first())
+    }
 }
