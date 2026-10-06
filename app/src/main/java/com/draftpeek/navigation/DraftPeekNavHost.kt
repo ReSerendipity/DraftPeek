@@ -63,6 +63,7 @@ import com.draftpeek.feature.editor.ui.EditorScreen
 import com.draftpeek.feature.settings.model.AppLanguage
 import com.draftpeek.feature.settings.ui.AccessibilityScreen
 import com.draftpeek.feature.settings.ui.EditorSettingsScreen
+import com.draftpeek.feature.settings.ui.LabScreen
 import com.draftpeek.feature.stats.ui.AchievementScreen
 import com.draftpeek.feature.stats.ui.ProfileScreen
 import com.draftpeek.feature.stats.ui.VerifyAppState
@@ -301,6 +302,9 @@ fun DraftPeekNavHost(
                 onNavigateToEditorSettings = {
                     navController.navigate(Route.EditorSettings.route)
                 },
+                onNavigateToLab = {
+                    navController.navigate(Route.Lab.route)
+                },
                 onVerifyApp = { context ->
                     try {
                         val signatureResult = ApkIntegrityChecker.verify(context)
@@ -365,6 +369,19 @@ fun DraftPeekNavHost(
                     }
                     AppCompatDelegate.setApplicationLocales(localeList)
                 }
+            )
+        }
+
+        // ---- Lab ------------------------------------------------------
+        composable(
+            route = Route.Lab.route,
+            enterTransition = DraftPeekTransitions.sharedAxisVerticalEnter,
+            exitTransition = DraftPeekTransitions.sharedAxisVerticalExit,
+            popEnterTransition = DraftPeekTransitions.sharedAxisVerticalPopEnter,
+            popExitTransition = DraftPeekTransitions.sharedAxisVerticalPopExit
+        ) {
+            LabScreen(
+                onNavigateUp = { navController.navigateUp() }
             )
         }
 

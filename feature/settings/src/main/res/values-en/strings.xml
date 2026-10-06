@@ -121,4 +121,17 @@
 <string name="profile_tab_width_dialog_title">Tab width</string>
 <string name="profile_tab_width_spaces">%d spaces</string>
     <string name="settings_editor_page_title">Editor settings</string>
+    <string name="stats_feature_flags_section">Feature Flags</string>
+    <string name="feature_flag_lsp_client">LSP language server (smart completion)</string>
+    <string name="feature_flag_terminal">Built-in terminal emulator</string>
+    <string name="feature_flag_tree_sitter">Tree-sitter incremental syntax highlighting</string>
+    <string name="feature_flag_markdown_wysiwyg">WYSIWYG Markdown editing</string>
+    <string name="feature_flag_markdown_editor">Markdown editing toolbar</string>
+    <string name="feature_flag_git_ui">Git version control operations</string>
+    <string name="feature_flag_commonmark_parser">CommonMark native Markdown parsing</string>
+    <string name="feature_flag_feature_toggle">Runtime feature toggle system</string>
+    <string name="settings_lab_page_title">Lab</string>
+    <string name="settings_lab_group_language">Language &amp; completion</string>
+    <string name="settings_lab_group_markdown">Markdown</string>
+    <string name="settings_lab_group_runtime">Version &amp; runtime</string>
 </resources>

@@ -121,4 +121,17 @@
 <string name="profile_tab_width_spaces">%d スペース</string>
     <string name="settings_editor_page_title">エディタ設定</string>
     <string name="profile_setting_show_minimap">ミニマップを表示（実験的機能）</string>
+    <string name="stats_feature_flags_section">機能フラグ</string>
+    <string name="feature_flag_lsp_client">LSP 言語サーバー（スマート補完）</string>
+    <string name="feature_flag_terminal">内蔵ターミナルエミュレータ</string>
+    <string name="feature_flag_tree_sitter">Tree-sitter インクリメンタル構文ハイライト</string>
+    <string name="feature_flag_markdown_wysiwyg">WYSIWYG Markdown 編集</string>
+    <string name="feature_flag_markdown_editor">Markdown 編集ツールバー</string>
+    <string name="feature_flag_git_ui">Git バージョン管理操作</string>
+    <string name="feature_flag_commonmark_parser">CommonMark ネイティブMarkdown解析</string>
+    <string name="feature_flag_feature_toggle">実行時フィーチャートグルシステム</string>
+    <string name="settings_lab_page_title">ラボ</string>
+    <string name="settings_lab_group_language">言語と補完</string>
+    <string name="settings_lab_group_markdown">Markdown</string>
+    <string name="settings_lab_group_runtime">バージョンとランタイム</string>
 </resources>

@@ -121,4 +121,17 @@
 <string name="profile_tab_width_spaces">공백 %d개</string>
     <string name="settings_editor_page_title">편집기 설정</string>
     <string name="profile_setting_show_minimap">미니맵 표시(실험적 기능)</string>
+    <string name="stats_feature_flags_section">기능 플래그</string>
+    <string name="feature_flag_lsp_client">LSP 언어 서버(스마트 자동 완성)</string>
+    <string name="feature_flag_terminal">내장 터미널 에뮬레이터</string>
+    <string name="feature_flag_tree_sitter">Tree-sitter 증분 구문 강조</string>
+    <string name="feature_flag_markdown_wysiwyg">WYSIWYG Markdown 편집</string>
+    <string name="feature_flag_markdown_editor">Markdown 편집 도구 모음</string>
+    <string name="feature_flag_git_ui">Git 버전 관리 작업</string>
+    <string name="feature_flag_commonmark_parser">CommonMark 네이티브 Markdown 파싱</string>
+    <string name="feature_flag_feature_toggle">런타임 기능 토글 시스템</string>
+    <string name="settings_lab_page_title">실험실</string>
+    <string name="settings_lab_group_language">언어 및 자동 완성</string>
+    <string name="settings_lab_group_markdown">Markdown</string>
+    <string name="settings_lab_group_runtime">버전 및 런타임</string>
 </resources>

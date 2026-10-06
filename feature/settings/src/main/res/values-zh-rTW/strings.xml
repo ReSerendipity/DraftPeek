@@ -121,4 +121,17 @@
     <string name="profile_setting_theme_system">跟隨系統</string>
     <string name="profile_tab_width_dialog_title">定位元寬度</string>
     <string name="profile_tab_width_spaces">%d 空格</string>
+    <string name="stats_feature_flags_section">功能開關</string>
+    <string name="feature_flag_lsp_client">LSP 語言伺服器（智慧補全）</string>
+    <string name="feature_flag_terminal">內建終端機模擬器</string>
+    <string name="feature_flag_tree_sitter">Tree-sitter 增量語法醒目提示</string>
+    <string name="feature_flag_markdown_wysiwyg">所見即所得 Markdown 編輯</string>
+    <string name="feature_flag_markdown_editor">Markdown 編輯工具列</string>
+    <string name="feature_flag_git_ui">Git 版本控制操作</string>
+    <string name="feature_flag_commonmark_parser">CommonMark 原生 Markdown 解析</string>
+    <string name="feature_flag_feature_toggle">執行階段功能開關系統</string>
+    <string name="settings_lab_page_title">實驗室</string>
+    <string name="settings_lab_group_language">語言與補全</string>
+    <string name="settings_lab_group_markdown">Markdown</string>
+    <string name="settings_lab_group_runtime">版本與執行階段</string>
 </resources>

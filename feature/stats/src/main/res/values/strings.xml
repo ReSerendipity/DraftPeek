@@ -321,4 +321,5 @@
 <string name="profile_dialog_cancel">取消</string>
 <string name="profile_dialog_confirm">确定</string>
     <string name="profile_open_editor_settings">编辑器设置</string>
+    <string name="profile_open_lab">实验室</string>
 </resources>

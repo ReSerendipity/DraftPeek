@@ -121,4 +121,17 @@
 <string name="profile_tab_width_spaces">%d 空格</string>
     <string name="settings_editor_page_title">编辑器设置</string>
     <string name="profile_setting_show_minimap">显示缩略图（实验性功能）</string>
+    <string name="stats_feature_flags_section">功能开关</string>
+    <string name="feature_flag_lsp_client">LSP 语言服务器（智能补全）</string>
+    <string name="feature_flag_terminal">内置终端模拟器</string>
+    <string name="feature_flag_tree_sitter">Tree-sitter 增量语法高亮</string>
+    <string name="feature_flag_markdown_wysiwyg">所见即所得 Markdown 编辑</string>
+    <string name="feature_flag_markdown_editor">Markdown 编辑工具栏</string>
+    <string name="feature_flag_git_ui">Git 版本控制操作</string>
+    <string name="feature_flag_commonmark_parser">CommonMark 原生 Markdown 解析</string>
+    <string name="feature_flag_feature_toggle">运行时功能开关系统</string>
+    <string name="settings_lab_page_title">实验室</string>
+    <string name="settings_lab_group_language">语言与补全</string>
+    <string name="settings_lab_group_markdown">Markdown</string>
+    <string name="settings_lab_group_runtime">版本与运行时</string>
 </resources>

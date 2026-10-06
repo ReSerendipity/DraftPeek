@@ -70,6 +70,9 @@ sealed class Route(val route: String) {
     /** 编辑器设置页面（实施指导书 §2.5 屏 21） */
     data object EditorSettings : Route("editor-settings")
 
+    /** 实验室页面（实施指导书 §2.5 屏 22） */
+    data object Lab : Route("lab")
+
     /** 成就页面 */
     data object Achievements : Route("achievements")
 

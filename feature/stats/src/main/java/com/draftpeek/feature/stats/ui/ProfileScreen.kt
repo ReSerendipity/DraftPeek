@@ -99,7 +99,6 @@ import androidx.compose.ui.unit.sp
 import androidx.core.os.LocaleListCompat
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
-import com.draftpeek.core.common.feature.FeatureFlag
 import com.draftpeek.core.common.security.AiProtectionStateHolder
 import com.draftpeek.core.common.security.AiThreatLevel
 import com.draftpeek.core.ui.component.BrandDialog
@@ -108,10 +107,8 @@ import com.draftpeek.core.ui.component.BrandOutlinedButton
 import com.draftpeek.core.ui.component.BrandOutlinedTextField
 import com.draftpeek.core.ui.component.BrandPill
 import com.draftpeek.core.ui.component.BrandSettingRow
-import com.draftpeek.core.ui.component.BrandSwitchSettingRow
 import com.draftpeek.core.ui.component.BrandTopBar
 import com.draftpeek.core.ui.component.accessibilityEnhanced
-import com.draftpeek.core.ui.composition.LocalFeatureToggle
 import com.draftpeek.core.ui.layout.LayoutMode
 import com.draftpeek.core.ui.theme.JetBrainsMonoFontFamily
 import com.draftpeek.core.ui.theme.LocalDarkTheme
@@ -137,18 +134,6 @@ import com.draftpeek.feature.stats.viewmodel.ThemeManageViewModel
 import java.util.Locale
 import kotlinx.coroutines.launch
 
-@Composable
-private fun FeatureFlag.displayName(): String = when (this) {
-    FeatureFlag.LSP_CLIENT -> stringResource(R.string.feature_flag_lsp_client)
-    FeatureFlag.TERMINAL -> stringResource(R.string.feature_flag_terminal)
-    FeatureFlag.TREE_SITTER -> stringResource(R.string.feature_flag_tree_sitter)
-    FeatureFlag.MARKDOWN_WYSIWYG -> stringResource(R.string.feature_flag_markdown_wysiwyg)
-    FeatureFlag.MARKDOWN_EDITOR -> stringResource(R.string.feature_flag_markdown_editor)
-    FeatureFlag.GIT_UI -> stringResource(R.string.feature_flag_git_ui)
-    FeatureFlag.COMMONMARK_PARSER -> stringResource(R.string.feature_flag_commonmark_parser)
-    FeatureFlag.FEATURE_TOGGLE -> stringResource(R.string.feature_flag_feature_toggle)
-}
-
 @OptIn(ExperimentalMaterial3Api::class, ExperimentalLayoutApi::class)
 @Composable
 fun ProfileScreen(
@@ -160,13 +145,11 @@ fun ProfileScreen(
     onNavigateToAccessibility: () -> Unit = {},
     onNavigateToAchievements: () -> Unit = {},
     onNavigateToEditorSettings: () -> Unit = {},
+    onNavigateToLab: () -> Unit = {},
     onVerifyApp: (suspend (Context) -> VerifyAppState)? = null,
     viewModel: StatsViewModel = hiltViewModel(),
     settingsViewModel: SettingsViewModel = hiltViewModel()
 ) {
-    val featureToggleManager = LocalFeatureToggle.current
-    val flagStates by featureToggleManager?.flagStates?.collectAsStateWithLifecycle()
-        ?: remember { mutableStateOf(FeatureFlag.entries.associateWith { it.defaultEnabled }) }
     val uiState by viewModel.uiState.collectAsStateWithLifecycle()
     val selectedPeriod by viewModel.selectedPeriod.collectAsStateWithLifecycle()
     val periodStats by viewModel.periodStats.collectAsStateWithLifecycle()
@@ -920,25 +903,13 @@ fun ProfileScreen(
 
             Spacer(modifier = Modifier.height(8.dp))
 
-            SectionHeader(label = stringResource(R.string.stats_feature_flags_section))
-
-            // Feature toggle master switch (always shown)
-            val featureToggleEnabled =
-                flagStates[FeatureFlag.FEATURE_TOGGLE] ?: FeatureFlag.FEATURE_TOGGLE.defaultEnabled
-            val visibleFlags = if (featureToggleEnabled) {
-                FeatureFlag.entries.toList()
-            } else {
-                listOf(FeatureFlag.FEATURE_TOGGLE)
-            }
-            visibleFlags.forEachIndexed { index, flag ->
-                BrandSwitchSettingRow(
-                    icon = Icons.Filled.Flag,
-                    label = flag.displayName(),
-                    checked = flagStates[flag] ?: flag.defaultEnabled,
-                    onCheckedChange = { featureToggleManager?.setEnabled(flag, it) },
-                    showDivider = index < visibleFlags.lastIndex
-                )
-            }
+            // 功能开关已独立成「实验室」页（实施指导书 §2.5 屏 22）：此处只留入口。
+            BrandSettingRow(
+                icon = Icons.Filled.Flag,
+                label = stringResource(R.string.profile_open_lab),
+                onClick = onNavigateToLab,
+                showDivider = false
+            )
 
             Spacer(modifier = Modifier.height(8.dp))
 
