@@ -67,6 +67,9 @@ sealed class Route(val route: String) {
     /** 无障碍设置页面 */
     data object Accessibility : Route("accessibility")
 
+    /** 编辑器设置页面（实施指导书 §2.5 屏 21） */
+    data object EditorSettings : Route("editor-settings")
+
     /** 成就页面 */
     data object Achievements : Route("achievements")
 

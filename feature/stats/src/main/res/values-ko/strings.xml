@@ -296,4 +296,5 @@
     <string name="stats_unit_percent">%%</string>
 <string name="profile_dialog_cancel">취소</string>
 <string name="profile_dialog_confirm">확인</string>
+    <string name="profile_open_editor_settings">편집기 설정</string>
 </resources>

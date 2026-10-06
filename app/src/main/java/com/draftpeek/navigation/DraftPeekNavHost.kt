@@ -20,6 +20,7 @@
 package com.draftpeek.navigation
 
 import android.net.Uri
+import androidx.appcompat.app.AppCompatDelegate
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxSize
@@ -38,6 +39,7 @@ import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.sp
+import androidx.core.os.LocaleListCompat
 import androidx.navigation.NavHostController
 import androidx.navigation.NavType
 import androidx.navigation.compose.NavHost
@@ -58,7 +60,9 @@ import com.draftpeek.feature.browser.ui.SnippetScreen
 import com.draftpeek.feature.editor.tabs.TabManager
 import com.draftpeek.feature.editor.ui.DiffScreen
 import com.draftpeek.feature.editor.ui.EditorScreen
+import com.draftpeek.feature.settings.model.AppLanguage
 import com.draftpeek.feature.settings.ui.AccessibilityScreen
+import com.draftpeek.feature.settings.ui.EditorSettingsScreen
 import com.draftpeek.feature.stats.ui.AchievementScreen
 import com.draftpeek.feature.stats.ui.ProfileScreen
 import com.draftpeek.feature.stats.ui.VerifyAppState
@@ -66,6 +70,7 @@ import com.draftpeek.feature.terminal.ui.TerminalScreen
 import com.draftpeek.security.ApkIntegrityChecker
 import com.draftpeek.security.DexIntegrityChecker
 import dagger.hilt.android.EntryPointAccessors
+import java.util.Locale
 
 /**
  * Hilt 入口点接口，用于在 Composable 函数中获取 [TabManager] 实例。
@@ -293,6 +298,9 @@ fun DraftPeekNavHost(
                 onNavigateToAchievements = {
                     navController.navigate(Route.Achievements.route)
                 },
+                onNavigateToEditorSettings = {
+                    navController.navigate(Route.EditorSettings.route)
+                },
                 onVerifyApp = { context ->
                     try {
                         val signatureResult = ApkIntegrityChecker.verify(context)
@@ -331,6 +339,32 @@ fun DraftPeekNavHost(
         ) {
             AccessibilityScreen(
                 onNavigateUp = { navController.navigateUp() }
+            )
+        }
+
+        // ---- Editor Settings ------------------------------------------
+        composable(
+            route = Route.EditorSettings.route,
+            enterTransition = DraftPeekTransitions.sharedAxisVerticalEnter,
+            exitTransition = DraftPeekTransitions.sharedAxisVerticalExit,
+            popEnterTransition = DraftPeekTransitions.sharedAxisVerticalPopEnter,
+            popExitTransition = DraftPeekTransitions.sharedAxisVerticalPopExit
+        ) {
+            EditorSettingsScreen(
+                onNavigateUp = { navController.navigateUp() },
+                // 语言切换需立即生效：应用 locale 走 AppCompatDelegate，属应用级职责，
+                // 故由 app 层注入（feature/settings 不引 appcompat）。
+                onLanguageApplied = { language ->
+                    val localeList = when (language) {
+                        AppLanguage.SYSTEM -> LocaleListCompat.getEmptyLocaleList()
+                        AppLanguage.ZH -> LocaleListCompat.create(Locale.CHINA)
+                        AppLanguage.ZH_TW -> LocaleListCompat.create(Locale.TAIWAN)
+                        AppLanguage.EN -> LocaleListCompat.create(Locale.US)
+                        AppLanguage.JA -> LocaleListCompat.create(Locale.JAPAN)
+                        AppLanguage.KO -> LocaleListCompat.create(Locale.KOREA)
+                    }
+                    AppCompatDelegate.setApplicationLocales(localeList)
+                }
             )
         }
 
