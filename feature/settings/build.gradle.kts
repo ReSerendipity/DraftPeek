@@ -38,6 +38,19 @@ android {
     }
 }
 
+// WHY：本模块的 Robolectric 测试（DataStoreRoundTripTest / SettingsRepositoryRoundTripTest）
+// 之前对 JaCoCo 完全不可见 —— Robolectric 用自己的 SandboxClassLoader 重新加载类，
+// 绕过了默认按「类路径位置」匹配的插桩，导致 SettingsRepositoryImpl 等
+// 明明被测到的类在报告里 covered=0。isIncludeNoLocationClasses 让 agent 不再按位置过滤；
+// excludes 掉 jdk.internal.* 是 JDK 9+ 上的标准配套（否则 agent 会在模块化 JDK 内部类上崩）。
+// 无障碍页迁入后分母被 Compose 代码生成撑大，靠这批仓储测试把覆盖率拉回棘轮阈值之上。
+tasks.withType<Test>().configureEach {
+    configure<org.gradle.testing.jacoco.plugins.JacocoTaskExtension> {
+        isIncludeNoLocationClasses = true
+        excludes = listOf("jdk.internal.*")
+    }
+}
+
 dependencies {
     implementation(project(":core:common"))
     implementation(project(":core:designsystem"))
