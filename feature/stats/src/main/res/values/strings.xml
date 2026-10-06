@@ -110,7 +110,6 @@
     <string name="profile_setting_font_size_format">%dsp</string>
     <string name="profile_setting_tab_width_format">%d格</string>
     <string name="profile_setting_auto_save_interval_format">%d秒</string>
-    <string name="profile_dialog_confirm">确定</string>
     <string name="profile_dialog_close">关闭</string>
     <string name="profile_theme_dialog_title">选择主题</string>
     <string name="profile_language_dialog_title">选择语言</string>
@@ -146,7 +145,6 @@
     <string name="profile_auto_save_interval_dialog_title">自动保存间隔</string>
     <string name="profile_footer_made_with">由 DraftPeek 打造</string>
     <string name="profile_footer_for_devs">为开发者而生</string>
-    <string name="profile_dialog_cancel">取消</string>
     <string name="profile_dialog_reset_title">重置设置</string>
     <string name="profile_dialog_reset_message">确定要将所有设置重置为默认值吗？此操作无法撤销。</string>
     <string name="profile_dialog_reset_confirm">重置</string>
@@ -187,36 +185,17 @@
 
     <!-- Accessibility Settings -->
     <string name="accessibility_page_title">无障碍</string>
-    <string name="accessibility_section_visual">视觉辅助</string>
-    <string name="accessibility_section_hearing">听觉辅助</string>
     <string name="accessibility_section_motor">操作辅助</string>
-    <string name="accessibility_section_screen_reader">屏幕阅读器</string>
 
-    <string name="accessibility_color_blind_mode">色盲模式</string>
-    <string name="accessibility_color_blind_mode_none">关闭</string>
-    <string name="accessibility_color_blind_mode_protanopia">红色盲</string>
-    <string name="accessibility_color_blind_mode_deuteranopia">绿色盲</string>
-    <string name="accessibility_color_blind_mode_tritanopia">蓝色盲</string>
-    <string name="accessibility_color_blind_mode_desc">调整界面色彩以适配不同色盲类型</string>
 
-    <string name="accessibility_high_contrast">高对比度模式</string>
-    <string name="accessibility_high_contrast_desc">增强前景与背景的对比度，符合 WCAG 2.1 AA 标准</string>
 
-    <string name="accessibility_text_scale">界面文字缩放</string>
-    <string name="accessibility_text_scale_desc">调整界面文字的缩放比例</string>
     <string name="accessibility_text_scale_small">小</string>
     <string name="accessibility_text_scale_normal">标准</string>
     <string name="accessibility_text_scale_large">大</string>
     <string name="accessibility_text_scale_xlarge">超大</string>
 
-    <string name="accessibility_non_color_indicators">非色彩标识</string>
-    <string name="accessibility_non_color_indicators_desc">为依赖颜色的界面元素添加图标、形状和文本标签</string>
 
-    <string name="accessibility_screen_reader_optimized">屏幕阅读器优化</string>
-    <string name="accessibility_screen_reader_optimized_desc">增强界面语义信息，适配 TalkBack 等屏幕阅读器</string>
 
-    <string name="accessibility_vibration_feedback">振动反馈</string>
-    <string name="accessibility_vibration_feedback_desc">在重要操作和通知时提供振动提示</string>
 
     <string name="accessibility_visual_cues">视觉提示</string>
     <string name="accessibility_visual_cues_desc">为所有音频信息提供视觉替代方案</string>
@@ -224,8 +203,6 @@
     <string name="accessibility_voice_control">语音控制</string>
     <string name="accessibility_voice_control_desc">支持通过语音指令执行核心操作</string>
 
-    <string name="accessibility_test_vibration">测试振动</string>
-    <string name="accessibility_wcag_info">本应用的无障碍功能遵循 WCAG 2.1 AA 级标准</string>
     <string name="profile_section_accessibility">无障碍</string>
     <string name="profile_section_network">网络</string>
     <string name="profile_setting_github_mirror">GitHub 镜像</string>
@@ -341,4 +318,6 @@
     <string name="profile_custom_css_dialog_title">自定义 CSS</string>
     <string name="profile_custom_css_dialog_hint">输入自定义 CSS</string>
     <string name="profile_custom_css_dialog_description">自定义 CSS 将应用于 Markdown 预览页面</string>
+<string name="profile_dialog_cancel">取消</string>
+<string name="profile_dialog_confirm">确定</string>
 </resources>

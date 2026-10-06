@@ -57,4 +57,27 @@
     <string name="settings_language_en">English</string>
     <string name="settings_language_ja">日本語</string>
     <string name="settings_language_ko">한국어</string>
+<string name="accessibility_page_title">접근성</string>
+<string name="accessibility_section_visual">시각 지원</string>
+<string name="accessibility_section_hearing">청각 지원</string>
+<string name="accessibility_section_screen_reader">화면 판독기</string>
+<string name="accessibility_color_blind_mode">색맹 모드</string>
+<string name="accessibility_color_blind_mode_desc">색각 유형에 맞게 인터페이스 색상 조정</string>
+<string name="accessibility_color_blind_mode_none">꺼짐</string>
+<string name="accessibility_color_blind_mode_protanopia">적색맹</string>
+<string name="accessibility_color_blind_mode_deuteranopia">녹색맹</string>
+<string name="accessibility_color_blind_mode_tritanopia">청색맹</string>
+<string name="accessibility_high_contrast">고대비 모드</string>
+<string name="accessibility_high_contrast_desc">전경과 배경의 대비를 강화, WCAG 2.1 AA 준수</string>
+<string name="accessibility_non_color_indicators">비색상 표시</string>
+<string name="accessibility_non_color_indicators_desc">색상에 의존하는 요소에 아이콘, 도형, 텍스트 라벨 추가</string>
+<string name="accessibility_text_scale">텍스트 크기</string>
+<string name="accessibility_text_scale_desc">인터페이스 텍스트 배율 조정</string>
+<string name="accessibility_vibration_feedback">진동 피드백</string>
+<string name="accessibility_vibration_feedback_desc">중요한 작업 및 알림 시 진동으로 알림</string>
+<string name="accessibility_test_vibration">진동 테스트</string>
+<string name="accessibility_screen_reader_optimized">화면 판독기 최적화</string>
+<string name="accessibility_screen_reader_optimized_desc">TalkBack 등 화면 판독기를 위한 시맨틱 정보 강화</string>
+<string name="accessibility_wcag_info">접근성 기능은 WCAG 2.1 AA 표준을 준수합니다</string>
+<string name="settings_dialog_cancel">취소</string>
 </resources>

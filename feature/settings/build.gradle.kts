@@ -67,8 +67,9 @@ dependencies {
     testImplementation(libs.turbine)
     testImplementation(libs.kotlinx.coroutines.test)
     // Robolectric + AndroidX Test 支撑 JUnit4 风格测试（如 DataStoreRoundTripTest，
-    // 遵循 AGENTS.md Gotcha #23）。缺这些依赖会导致 beta 等变体的单元测试编译失败、
-    // 整个 Android CI 假红。配置与 core/data 模块保持一致。
+    // 依靠下方 junit-vintage-engine 在 useJUnitPlatform() 下被发现）。缺这些依赖会导致
+    // beta 等变体的单元测试编译失败、整个 Android CI 假红。配置与 core/data 模块保持一致；
+    // 平台/注解一致性规则由仓内 scripts/check_junit_platform.py 静态拦截。
     testImplementation(libs.robolectric)
     // AndroidX test core 提供 ApplicationProvider（Robolectric 测试需要）
     testImplementation(libs.androidx.test.core)

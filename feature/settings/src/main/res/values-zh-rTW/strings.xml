@@ -57,4 +57,27 @@
     <string name="settings_language_en">English</string>
     <string name="settings_language_ja">日本語</string>
     <string name="settings_language_ko">한국어</string>
+    <string name="settings_dialog_cancel">取消</string>
+    <string name="accessibility_page_title">無障礙</string>
+    <string name="accessibility_section_visual">視覺輔助</string>
+    <string name="accessibility_section_hearing">聽覺輔助</string>
+    <string name="accessibility_section_screen_reader">螢幕閱讀器</string>
+    <string name="accessibility_color_blind_mode">色盲模式</string>
+    <string name="accessibility_color_blind_mode_desc">調整介面色彩以適應不同色盲類型</string>
+    <string name="accessibility_color_blind_mode_none">關閉</string>
+    <string name="accessibility_color_blind_mode_protanopia">紅色盲</string>
+    <string name="accessibility_color_blind_mode_deuteranopia">綠色盲</string>
+    <string name="accessibility_color_blind_mode_tritanopia">藍色盲</string>
+    <string name="accessibility_high_contrast">高對比模式</string>
+    <string name="accessibility_high_contrast_desc">增強前景與背景的對比，符合 WCAG 2.1 AA 標準</string>
+    <string name="accessibility_non_color_indicators">非色彩標示</string>
+    <string name="accessibility_non_color_indicators_desc">為依賴顏色的介面元素新增圖示、形狀與文字標籤</string>
+    <string name="accessibility_text_scale">介面文字縮放</string>
+    <string name="accessibility_text_scale_desc">調整介面文字的縮放比例</string>
+    <string name="accessibility_vibration_feedback">震動回饋</string>
+    <string name="accessibility_vibration_feedback_desc">在重要操作與通知時提供震動提示</string>
+    <string name="accessibility_test_vibration">測試震動</string>
+    <string name="accessibility_screen_reader_optimized">螢幕閱讀器最佳化</string>
+    <string name="accessibility_screen_reader_optimized_desc">強化介面語義資訊，適配 TalkBack 等螢幕閱讀器</string>
+    <string name="accessibility_wcag_info">本應用的無障礙功能遵循 WCAG 2.1 AA 級標準</string>
 </resources>

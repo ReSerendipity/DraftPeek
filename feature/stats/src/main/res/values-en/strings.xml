@@ -98,7 +98,6 @@
     <string name="profile_setting_font_size_format">%dsp</string>
     <string name="profile_setting_tab_width_format">%d</string>
     <string name="profile_setting_auto_save_interval_format">%ds</string>
-    <string name="profile_dialog_confirm">OK</string>
     <string name="profile_dialog_close">Close</string>
     <string name="profile_theme_dialog_title">Choose theme</string>
     <string name="profile_language_dialog_title">Choose language</string>
@@ -121,36 +120,17 @@
 
     <!-- Accessibility Settings -->
     <string name="accessibility_page_title">Accessibility</string>
-    <string name="accessibility_section_visual">Visual Assistance</string>
-    <string name="accessibility_section_hearing">Hearing Assistance</string>
     <string name="accessibility_section_motor">Motor Assistance</string>
-    <string name="accessibility_section_screen_reader">Screen Reader</string>
 
-    <string name="accessibility_color_blind_mode">Color Blind Mode</string>
-    <string name="accessibility_color_blind_mode_none">Off</string>
-    <string name="accessibility_color_blind_mode_protanopia">Protanopia</string>
-    <string name="accessibility_color_blind_mode_deuteranopia">Deuteranopia</string>
-    <string name="accessibility_color_blind_mode_tritanopia">Tritanopia</string>
-    <string name="accessibility_color_blind_mode_desc">Adjust interface colors for different color vision deficiencies</string>
 
-    <string name="accessibility_high_contrast">High Contrast Mode</string>
-    <string name="accessibility_high_contrast_desc">Enhance foreground-background contrast, WCAG 2.1 AA compliant</string>
 
-    <string name="accessibility_text_scale">Text Size</string>
-    <string name="accessibility_text_scale_desc">Adjust the scaling of interface text</string>
     <string name="accessibility_text_scale_small">Small</string>
     <string name="accessibility_text_scale_normal">Normal</string>
     <string name="accessibility_text_scale_large">Large</string>
     <string name="accessibility_text_scale_xlarge">Extra Large</string>
 
-    <string name="accessibility_non_color_indicators">Non-Color Indicators</string>
-    <string name="accessibility_non_color_indicators_desc">Add icons, shapes, and text labels to color-dependent elements</string>
 
-    <string name="accessibility_screen_reader_optimized">Screen Reader Optimization</string>
-    <string name="accessibility_screen_reader_optimized_desc">Enhance semantic information for TalkBack and other screen readers</string>
 
-    <string name="accessibility_vibration_feedback">Vibration Feedback</string>
-    <string name="accessibility_vibration_feedback_desc">Provide haptic feedback for important actions and notifications</string>
 
     <string name="accessibility_visual_cues">Visual Cues</string>
     <string name="accessibility_visual_cues_desc">Provide visual alternatives for all audio information</string>
@@ -158,8 +138,6 @@
     <string name="accessibility_voice_control">Voice Control</string>
     <string name="accessibility_voice_control_desc">Execute core actions using voice commands</string>
 
-    <string name="accessibility_test_vibration">Test Vibration</string>
-    <string name="accessibility_wcag_info">Accessibility features follow WCAG 2.1 AA standards</string>
     <string name="profile_section_accessibility">Accessibility</string>
     <string name="profile_section_network">Network</string>
     <string name="profile_setting_github_mirror">GitHub Mirror</string>
@@ -222,7 +200,6 @@
     <string name="feature_flag_terminal">Built-in terminal emulator</string>
     <string name="feature_flag_tree_sitter">Tree-sitter incremental syntax highlighting</string>
     <string name="profile_default_user_name">User</string>
-    <string name="profile_dialog_cancel">Cancel</string>
     <string name="profile_dialog_clear_cache_confirm">Clear</string>
     <string name="profile_dialog_clear_cache_message">Clear temporary cache files? This will not delete your documents or settings.</string>
     <string name="profile_dialog_clear_cache_title">Clear cache</string>
@@ -339,4 +316,6 @@
     <string name="profile_theme_light_badge">Light</string>
     <string name="profile_theme_manage_dialog_title">Manage themes</string>
     <string name="profile_theme_using">In use</string>
+<string name="profile_dialog_cancel">Cancel</string>
+<string name="profile_dialog_confirm">OK</string>
 </resources>

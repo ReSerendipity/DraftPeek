@@ -12,7 +12,8 @@
  * - `core/ui`：使用 [SplitScreenLayout]、[LayoutMode]、[FoldInfo] 等布局组件
  * - `feature/browser`：使用 [FileBrowserScreen]、[SnippetScreen]、[SampleFilesScreen] 等页面
  * - `feature/editor`：使用 [EditorScreen]、[DiffScreen]、[TabManager]
- * - `feature/stats`：使用 [ProfileScreen]、[AccessibilityScreen]、[AchievementScreen]
+ * - `feature/stats`：使用 [ProfileScreen]、[AchievementScreen]
+ * - `feature/settings`：使用 [AccessibilityScreen]（无障碍设置，2026-10-06 自 stats 迁入）
  * - `security`：使用 [ApkIntegrityChecker]、[DexIntegrityChecker] 用于应用完整性验证
  * - Navigation Compose + Hilt EntryPoint
  */
@@ -57,7 +58,7 @@ import com.draftpeek.feature.browser.ui.SnippetScreen
 import com.draftpeek.feature.editor.tabs.TabManager
 import com.draftpeek.feature.editor.ui.DiffScreen
 import com.draftpeek.feature.editor.ui.EditorScreen
-import com.draftpeek.feature.stats.ui.AccessibilityScreen
+import com.draftpeek.feature.settings.ui.AccessibilityScreen
 import com.draftpeek.feature.stats.ui.AchievementScreen
 import com.draftpeek.feature.stats.ui.ProfileScreen
 import com.draftpeek.feature.stats.ui.VerifyAppState

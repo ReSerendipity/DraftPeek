@@ -2,4 +2,5 @@
 <resources>
     <!-- Markdown Theme & Custom CSS -->
     <string name="profile_setting_markdown_theme">Markdown 預覽主題</string>
+<string name="profile_dialog_confirm">確定</string>
 </resources>

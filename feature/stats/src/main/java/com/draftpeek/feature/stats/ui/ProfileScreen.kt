@@ -1960,7 +1960,7 @@ private fun ConfirmActionDialog(
 
 @SuppressLint("AppBundleLocaleChanges") // 本地切换 5 种语言，不接入 Play Core 语言包分发
 private fun applyLanguage(language: AppLanguage) {
-    // 与 DraftPeekApp.applySavedLanguage() 保持一致（见 AGENTS.md 规范）：
+    // 与 DraftPeekApp.applySavedLanguage() 保持一致（全仓语言切换统一走同一入口）：
     // 使用 AppCompatDelegate.setApplicationLocales 替代已废弃的
     // Resources.updateConfiguration，该 API 兼容 API 26+ 且能正确触发 Activity 重建。
     val localeList = when (language) {

@@ -92,7 +92,6 @@
     <string name="profile_setting_font_size_format">%dsp</string>
     <string name="profile_setting_tab_width_format">%d칸</string>
     <string name="profile_setting_auto_save_interval_format">%d초</string>
-    <string name="profile_dialog_confirm">확인</string>
     <string name="profile_dialog_close">닫기</string>
     <string name="profile_theme_dialog_title">테마 선택</string>
     <string name="profile_language_dialog_title">언어 선택</string>
@@ -115,36 +114,17 @@
 
     <!-- Accessibility Settings -->
     <string name="accessibility_page_title">접근성</string>
-    <string name="accessibility_section_visual">시각 지원</string>
-    <string name="accessibility_section_hearing">청각 지원</string>
     <string name="accessibility_section_motor">조작 지원</string>
-    <string name="accessibility_section_screen_reader">화면 판독기</string>
 
-    <string name="accessibility_color_blind_mode">색맹 모드</string>
-    <string name="accessibility_color_blind_mode_none">꺼짐</string>
-    <string name="accessibility_color_blind_mode_protanopia">적색맹</string>
-    <string name="accessibility_color_blind_mode_deuteranopia">녹색맹</string>
-    <string name="accessibility_color_blind_mode_tritanopia">청색맹</string>
-    <string name="accessibility_color_blind_mode_desc">색각 유형에 맞게 인터페이스 색상 조정</string>
 
-    <string name="accessibility_high_contrast">고대비 모드</string>
-    <string name="accessibility_high_contrast_desc">전경과 배경의 대비를 강화, WCAG 2.1 AA 준수</string>
 
-    <string name="accessibility_text_scale">텍스트 크기</string>
-    <string name="accessibility_text_scale_desc">인터페이스 텍스트 배율 조정</string>
     <string name="accessibility_text_scale_small">작게</string>
     <string name="accessibility_text_scale_normal">표준</string>
     <string name="accessibility_text_scale_large">크게</string>
     <string name="accessibility_text_scale_xlarge">최대</string>
 
-    <string name="accessibility_non_color_indicators">비색상 표시</string>
-    <string name="accessibility_non_color_indicators_desc">색상에 의존하는 요소에 아이콘, 도형, 텍스트 라벨 추가</string>
 
-    <string name="accessibility_screen_reader_optimized">화면 판독기 최적화</string>
-    <string name="accessibility_screen_reader_optimized_desc">TalkBack 등 화면 판독기를 위한 시맨틱 정보 강화</string>
 
-    <string name="accessibility_vibration_feedback">진동 피드백</string>
-    <string name="accessibility_vibration_feedback_desc">중요한 작업 및 알림 시 진동으로 알림</string>
 
     <string name="accessibility_visual_cues">시각적 신호</string>
     <string name="accessibility_visual_cues_desc">모든 오디오 정보에 시각적 대체 제공</string>
@@ -152,8 +132,6 @@
     <string name="accessibility_voice_control">음성 제어</string>
     <string name="accessibility_voice_control_desc">음성 명령으로 핵심 작업 실행</string>
 
-    <string name="accessibility_test_vibration">진동 테스트</string>
-    <string name="accessibility_wcag_info">접근성 기능은 WCAG 2.1 AA 표준을 준수합니다</string>
     <string name="profile_section_accessibility">접근성</string>
     <string name="profile_section_network">네트워크</string>
     <string name="profile_setting_github_mirror">GitHub 미러</string>
@@ -216,7 +194,6 @@
     <string name="feature_flag_terminal">내장 터미널 에뮬레이터</string>
     <string name="feature_flag_tree_sitter">Tree-sitter 증분 구문 강조</string>
     <string name="profile_default_user_name">사용자</string>
-    <string name="profile_dialog_cancel">취소</string>
     <string name="profile_dialog_clear_cache_confirm">지우기</string>
     <string name="profile_dialog_clear_cache_message">임시 캐시 파일을 지우시겠습니까? 문서나 설정은 삭제되지 않습니다.</string>
     <string name="profile_dialog_clear_cache_title">캐시 지우기</string>
@@ -317,4 +294,6 @@
     <string name="stats_unit_hour">시간</string>
     <string name="stats_unit_min">분</string>
     <string name="stats_unit_percent">%%</string>
+<string name="profile_dialog_cancel">취소</string>
+<string name="profile_dialog_confirm">확인</string>
 </resources>
