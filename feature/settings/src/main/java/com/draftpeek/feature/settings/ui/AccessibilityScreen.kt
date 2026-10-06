@@ -1,4 +1,4 @@
-package com.draftpeek.feature.stats.ui
+package com.draftpeek.feature.settings.ui
 
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
@@ -62,8 +62,8 @@ import com.draftpeek.core.ui.theme.PrototypeShapes
 import com.draftpeek.core.ui.theme.PrototypeTokens
 import com.draftpeek.core.ui.theme.SettingDescStyle
 import com.draftpeek.core.ui.theme.SubPageTopBarTitleStyle
+import com.draftpeek.feature.settings.R
 import com.draftpeek.feature.settings.viewmodel.SettingsViewModel
-import com.draftpeek.feature.stats.R
 
 /**
  * 无障碍设置页面。
@@ -367,7 +367,7 @@ private fun ColorBlindModeDialog(
         confirmButton = {
             androidx.compose.material3.TextButton(onClick = onDismiss) {
                 Text(
-                    stringResource(R.string.profile_dialog_confirm),
+                    stringResource(R.string.settings_dialog_confirm),
                     color = PrototypeTokens.accent
                 )
             }
@@ -483,10 +483,10 @@ private fun TextScaleDialog(currentScale: Float, onScaleChange: (Float) -> Unit,
             }
         },
         confirmButton = {
-            BrandFilledButton(text = stringResource(R.string.profile_dialog_confirm), onClick = onDismiss)
+            BrandFilledButton(text = stringResource(R.string.settings_dialog_confirm), onClick = onDismiss)
         },
         dismissButton = {
-            BrandOutlinedButton(text = stringResource(R.string.profile_dialog_cancel), onClick = onDismiss)
+            BrandOutlinedButton(text = stringResource(R.string.settings_dialog_cancel), onClick = onDismiss)
         }
     )
 }

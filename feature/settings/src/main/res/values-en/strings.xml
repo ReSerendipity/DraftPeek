@@ -57,4 +57,27 @@
     <string name="settings_language_en">English</string>
     <string name="settings_language_ja">日本語</string>
     <string name="settings_language_ko">한국어</string>
+<string name="accessibility_page_title">Accessibility</string>
+<string name="accessibility_section_visual">Visual Assistance</string>
+<string name="accessibility_section_hearing">Hearing Assistance</string>
+<string name="accessibility_section_screen_reader">Screen Reader</string>
+<string name="accessibility_color_blind_mode">Color Blind Mode</string>
+<string name="accessibility_color_blind_mode_desc">Adjust interface colors for different color vision deficiencies</string>
+<string name="accessibility_color_blind_mode_none">Off</string>
+<string name="accessibility_color_blind_mode_protanopia">Protanopia</string>
+<string name="accessibility_color_blind_mode_deuteranopia">Deuteranopia</string>
+<string name="accessibility_color_blind_mode_tritanopia">Tritanopia</string>
+<string name="accessibility_high_contrast">High Contrast Mode</string>
+<string name="accessibility_high_contrast_desc">Enhance foreground-background contrast, WCAG 2.1 AA compliant</string>
+<string name="accessibility_non_color_indicators">Non-Color Indicators</string>
+<string name="accessibility_non_color_indicators_desc">Add icons, shapes, and text labels to color-dependent elements</string>
+<string name="accessibility_text_scale">Text Size</string>
+<string name="accessibility_text_scale_desc">Adjust the scaling of interface text</string>
+<string name="accessibility_vibration_feedback">Vibration Feedback</string>
+<string name="accessibility_vibration_feedback_desc">Provide haptic feedback for important actions and notifications</string>
+<string name="accessibility_test_vibration">Test Vibration</string>
+<string name="accessibility_screen_reader_optimized">Screen Reader Optimization</string>
+<string name="accessibility_screen_reader_optimized_desc">Enhance semantic information for TalkBack and other screen readers</string>
+<string name="accessibility_wcag_info">Accessibility features follow WCAG 2.1 AA standards</string>
+<string name="settings_dialog_cancel">Cancel</string>
 </resources>

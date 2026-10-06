@@ -35,7 +35,9 @@ private val android.content.Context.testDataStore: DataStore<Preferences>
  * 使用 Robolectric 提供 Application Context，
  * 通过 preferencesDataStore 创建真实的 DataStore 实例。
  *
- * 注意：本类使用 JUnit4 + Robolectric 风格（遵循 AGENTS.md Gotcha #23）。
+ * 注意：本类使用 JUnit4 + Robolectric 风格 —— 本模块 `feature/settings/build.gradle.kts`
+ * 配 `useJUnitPlatform()` 并挂 junit-vintage-engine，JUnit4 用例才会被引擎发现；
+ * 平台/注解一致性由仓内 `scripts/check_junit_platform.py` 静态拦截。
  */
 @RunWith(RobolectricTestRunner::class)
 @Config(sdk = [34])

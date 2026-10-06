@@ -57,4 +57,27 @@
     <string name="settings_language_en">English</string>
     <string name="settings_language_ja">日本語</string>
     <string name="settings_language_ko">한국어</string>
+<string name="accessibility_page_title">アクセシビリティ</string>
+<string name="accessibility_section_visual">視覚支援</string>
+<string name="accessibility_section_hearing">聴覚支援</string>
+<string name="accessibility_section_screen_reader">スクリーンリーダー</string>
+<string name="accessibility_color_blind_mode">色覚モード</string>
+<string name="accessibility_color_blind_mode_desc">色覚タイプに合わせてインターフェースの色を調整</string>
+<string name="accessibility_color_blind_mode_none">オフ</string>
+<string name="accessibility_color_blind_mode_protanopia">第一色覚異常</string>
+<string name="accessibility_color_blind_mode_deuteranopia">第二色覚異常</string>
+<string name="accessibility_color_blind_mode_tritanopia">第三色覚異常</string>
+<string name="accessibility_high_contrast">ハイコントラストモード</string>
+<string name="accessibility_high_contrast_desc">前景と背景のコントラストを強化、WCAG 2.1 AA準拠</string>
+<string name="accessibility_non_color_indicators">非色彩識別子</string>
+<string name="accessibility_non_color_indicators_desc">色に依存する要素にアイコン、図形、テキストラベルを追加</string>
+<string name="accessibility_text_scale">テキストサイズ</string>
+<string name="accessibility_text_scale_desc">インターフェースのテキストスケールを調整</string>
+<string name="accessibility_vibration_feedback">振動フィードバック</string>
+<string name="accessibility_vibration_feedback_desc">重要な操作と通知時に振動で通知</string>
+<string name="accessibility_test_vibration">振動テスト</string>
+<string name="accessibility_screen_reader_optimized">スクリーンリーダー最適化</string>
+<string name="accessibility_screen_reader_optimized_desc">TalkBack等のスクリーンリーダー向けにセマンティック情報を強化</string>
+<string name="accessibility_wcag_info">アクセシビリティ機能は WCAG 2.1 AA 標準に準拠</string>
+<string name="settings_dialog_cancel">キャンセル</string>
 </resources>

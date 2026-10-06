@@ -92,7 +92,6 @@
     <string name="profile_setting_font_size_format">%dsp</string>
     <string name="profile_setting_tab_width_format">%d文字</string>
     <string name="profile_setting_auto_save_interval_format">%d秒</string>
-    <string name="profile_dialog_confirm">OK</string>
     <string name="profile_dialog_close">閉じる</string>
     <string name="profile_theme_dialog_title">テーマを選択</string>
     <string name="profile_language_dialog_title">言語を選択</string>
@@ -115,36 +114,17 @@
 
     <!-- Accessibility Settings -->
     <string name="accessibility_page_title">アクセシビリティ</string>
-    <string name="accessibility_section_visual">視覚支援</string>
-    <string name="accessibility_section_hearing">聴覚支援</string>
     <string name="accessibility_section_motor">操作支援</string>
-    <string name="accessibility_section_screen_reader">スクリーンリーダー</string>
 
-    <string name="accessibility_color_blind_mode">色覚モード</string>
-    <string name="accessibility_color_blind_mode_none">オフ</string>
-    <string name="accessibility_color_blind_mode_protanopia">第一色覚異常</string>
-    <string name="accessibility_color_blind_mode_deuteranopia">第二色覚異常</string>
-    <string name="accessibility_color_blind_mode_tritanopia">第三色覚異常</string>
-    <string name="accessibility_color_blind_mode_desc">色覚タイプに合わせてインターフェースの色を調整</string>
 
-    <string name="accessibility_high_contrast">ハイコントラストモード</string>
-    <string name="accessibility_high_contrast_desc">前景と背景のコントラストを強化、WCAG 2.1 AA準拠</string>
 
-    <string name="accessibility_text_scale">テキストサイズ</string>
-    <string name="accessibility_text_scale_desc">インターフェースのテキストスケールを調整</string>
     <string name="accessibility_text_scale_small">小</string>
     <string name="accessibility_text_scale_normal">標準</string>
     <string name="accessibility_text_scale_large">大</string>
     <string name="accessibility_text_scale_xlarge">特大</string>
 
-    <string name="accessibility_non_color_indicators">非色彩識別子</string>
-    <string name="accessibility_non_color_indicators_desc">色に依存する要素にアイコン、図形、テキストラベルを追加</string>
 
-    <string name="accessibility_screen_reader_optimized">スクリーンリーダー最適化</string>
-    <string name="accessibility_screen_reader_optimized_desc">TalkBack等のスクリーンリーダー向けにセマンティック情報を強化</string>
 
-    <string name="accessibility_vibration_feedback">振動フィードバック</string>
-    <string name="accessibility_vibration_feedback_desc">重要な操作と通知時に振動で通知</string>
 
     <string name="accessibility_visual_cues">視覚的キュー</string>
     <string name="accessibility_visual_cues_desc">すべての音声情報に視覚的な代替を提供</string>
@@ -152,8 +132,6 @@
     <string name="accessibility_voice_control">音声操作</string>
     <string name="accessibility_voice_control_desc">音声コマンドで主要操作を実行</string>
 
-    <string name="accessibility_test_vibration">振動テスト</string>
-    <string name="accessibility_wcag_info">アクセシビリティ機能は WCAG 2.1 AA 標準に準拠</string>
     <string name="profile_section_accessibility">アクセシビリティ</string>
     <string name="profile_section_network">ネットワーク</string>
     <string name="profile_setting_github_mirror">GitHub ミラー</string>
@@ -216,7 +194,6 @@
     <string name="feature_flag_terminal">内蔵ターミナルエミュレータ</string>
     <string name="feature_flag_tree_sitter">Tree-sitter インクリメンタル構文ハイライト</string>
     <string name="profile_default_user_name">ユーザー</string>
-    <string name="profile_dialog_cancel">キャンセル</string>
     <string name="profile_dialog_clear_cache_confirm">クリア</string>
     <string name="profile_dialog_clear_cache_message">一時キャッシュファイルをクリアしますか？ドキュメントや設定は削除されません。</string>
     <string name="profile_dialog_clear_cache_title">キャッシュをクリア</string>
@@ -317,4 +294,6 @@
     <string name="stats_unit_hour">時間</string>
     <string name="stats_unit_min">分</string>
     <string name="stats_unit_percent">%%</string>
+<string name="profile_dialog_cancel">キャンセル</string>
+<string name="profile_dialog_confirm">OK</string>
 </resources>
