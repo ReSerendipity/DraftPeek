@@ -298,4 +298,5 @@
 <string name="profile_dialog_confirm">확인</string>
     <string name="profile_open_editor_settings">편집기 설정</string>
     <string name="profile_open_lab">실험실</string>
+    <string name="profile_open_about_security">정보 및 보안</string>
 </resources>
