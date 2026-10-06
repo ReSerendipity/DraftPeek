@@ -21,7 +21,6 @@ package com.draftpeek.feature.stats.ui
 
 import android.annotation.SuppressLint
 import android.content.ActivityNotFoundException
-import android.content.Context
 import android.content.Intent
 import android.graphics.BitmapFactory
 import android.net.Uri
@@ -54,17 +53,14 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Accessibility
-import androidx.compose.material.icons.filled.CheckCircle
 import androidx.compose.material.icons.filled.Close
 import androidx.compose.material.icons.filled.Code
 import androidx.compose.material.icons.filled.DeleteSweep
 import androidx.compose.material.icons.filled.Edit
 import androidx.compose.material.icons.filled.EmojiEvents
-import androidx.compose.material.icons.filled.Error
 import androidx.compose.material.icons.filled.Feedback
 import androidx.compose.material.icons.filled.Flag
 import androidx.compose.material.icons.filled.Image
-import androidx.compose.material.icons.filled.Info
 import androidx.compose.material.icons.filled.Link
 import androidx.compose.material.icons.filled.Palette
 import androidx.compose.material.icons.filled.Restore
@@ -99,8 +95,6 @@ import androidx.compose.ui.unit.sp
 import androidx.core.os.LocaleListCompat
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
-import com.draftpeek.core.common.security.AiProtectionStateHolder
-import com.draftpeek.core.common.security.AiThreatLevel
 import com.draftpeek.core.ui.component.BrandDialog
 import com.draftpeek.core.ui.component.BrandFilledButton
 import com.draftpeek.core.ui.component.BrandOutlinedButton
@@ -146,7 +140,7 @@ fun ProfileScreen(
     onNavigateToAchievements: () -> Unit = {},
     onNavigateToEditorSettings: () -> Unit = {},
     onNavigateToLab: () -> Unit = {},
-    onVerifyApp: (suspend (Context) -> VerifyAppState)? = null,
+    onNavigateToAboutSecurity: () -> Unit = {},
     viewModel: StatsViewModel = hiltViewModel(),
     settingsViewModel: SettingsViewModel = hiltViewModel()
 ) {
@@ -186,10 +180,7 @@ fun ProfileScreen(
             feedbackScreenshots = (feedbackScreenshots + uris).distinct().take(5)
         }
     }
-    var showVerifyAppDialog by remember { mutableStateOf(false) }
-    var showOpenSourceDialog by remember { mutableStateOf(false) }
     var showThemeManageDialog by remember { mutableStateOf(false) }
-    var verifyAppState by remember { mutableStateOf<VerifyAppState>(VerifyAppState.Idle) }
 
     LaunchedEffect(Unit) {
         viewModel.messageEvent.collect { message ->
@@ -655,34 +646,6 @@ fun ProfileScreen(
         )
     }
 
-    if (showVerifyAppDialog) {
-        VerifyAppDialog(
-            verifyAppState = verifyAppState,
-            onVerifyClick = {
-                if (onVerifyApp != null) {
-                    verifyAppState = VerifyAppState.Loading
-                    kotlinx.coroutines.CoroutineScope(kotlinx.coroutines.Dispatchers.IO).launch {
-                        verifyAppState = try {
-                            onVerifyApp(context)
-                        } catch (e: Exception) {
-                            VerifyAppState.Error(e.message ?: "未知错误")
-                        }
-                    }
-                }
-            },
-            onDismiss = {
-                showVerifyAppDialog = false
-                verifyAppState = VerifyAppState.Idle
-            }
-        )
-    }
-
-    if (showOpenSourceDialog) {
-        OpenSourceLicensesDialog(
-            onDismiss = { showOpenSourceDialog = false }
-        )
-    }
-
     if (showThemeManageDialog) {
         ThemeManageDialog(
             themeManageViewModel = themeManageViewModel,
@@ -970,98 +933,11 @@ fun ProfileScreen(
 
             Spacer(modifier = Modifier.height(8.dp))
 
-            // ===== AI Protection: Security Status Section =====
-            SectionHeader(label = stringResource(R.string.security_status_section_title))
-
-            val aiState = AiProtectionStateHolder.current
-            val isSignatureMismatch =
-                com.draftpeek.core.common.security.AiDetectionSignal.SIGNATURE_MISMATCH in aiState.triggeredSignals
-            val isDexTampered =
-                com.draftpeek.core.common.security.AiDetectionSignal.DEX_TAMPERED in aiState.triggeredSignals
-
+            // 安全状态与关于已独立成页（实施指导书 §2.5 屏 23）：此处只留入口。
             BrandSettingRow(
                 icon = Icons.Filled.Security,
-                label = stringResource(
-                    if (isSignatureMismatch) {
-                        R.string.security_status_signature_unverified
-                    } else {
-                        R.string.security_status_signature_verified
-                    }
-                ),
-                onClick = {},
-                showDivider = true
-            )
-            BrandSettingRow(
-                icon = Icons.Filled.Info,
-                label = stringResource(
-                    if (isDexTampered) {
-                        R.string.security_status_dex_failed
-                    } else {
-                        R.string.security_status_dex_passed
-                    }
-                ),
-                onClick = {},
-                showDivider = true
-            )
-            BrandSettingRow(
-                icon = Icons.Filled.Security,
-                label = stringResource(
-                    when (aiState.threatLevel) {
-                        AiThreatLevel.SAFE -> R.string.security_status_environment_safe
-                        AiThreatLevel.SUSPICIOUS -> R.string.security_status_environment_suspicious
-                        AiThreatLevel.HOSTILE -> R.string.security_status_environment_hostile
-                    }
-                ),
-                onClick = {},
-                showDivider = true
-            )
-            BrandSettingRow(
-                icon = Icons.Filled.Info,
-                label = stringResource(R.string.security_status_recheck),
-                onClick = {
-                    // Re-verify is handled at app level; this triggers a toast
-                    Toast.makeText(context, R.string.security_status_recheck, Toast.LENGTH_SHORT).show()
-                },
-                showDivider = true
-            )
-            BrandSettingRow(
-                icon = Icons.Filled.Info,
-                label = stringResource(R.string.security_status_export_report),
-                onClick = {
-                    Toast.makeText(context, R.string.security_status_export_report, Toast.LENGTH_SHORT).show()
-                },
-                showDivider = true
-            )
-            BrandSettingRow(
-                icon = Icons.Filled.DeleteSweep,
-                label = stringResource(R.string.security_status_clear_logs),
-                onClick = {
-                    Toast.makeText(context, R.string.security_status_clear_logs, Toast.LENGTH_SHORT).show()
-                },
-                showDivider = false
-            )
-
-            Spacer(modifier = Modifier.height(8.dp))
-
-            SectionHeader(label = stringResource(R.string.profile_section_about))
-
-            BrandSettingRow(
-                icon = Icons.Filled.Security,
-                label = stringResource(R.string.profile_verify_app),
-                onClick = { showVerifyAppDialog = true },
-                showDivider = true
-            )
-            BrandSettingRow(
-                icon = Icons.Filled.Info,
-                label = stringResource(R.string.profile_setting_version),
-                value = versionName,
-                onClick = {},
-                showDivider = true
-            )
-            BrandSettingRow(
-                icon = Icons.Filled.Link,
-                label = stringResource(R.string.profile_open_source_license),
-                onClick = { showOpenSourceDialog = true },
+                label = stringResource(R.string.profile_open_about_security),
+                onClick = onNavigateToAboutSecurity,
                 showDivider = false
             )
 
@@ -1245,157 +1121,6 @@ private fun applyLanguage(language: AppLanguage) {
 /**
  * 应用验证状态
  */
-sealed class VerifyAppState {
-    data object Idle : VerifyAppState()
-    data object Loading : VerifyAppState()
-    data class Success(val fingerprint: String) : VerifyAppState()
-    data class Failed(val reason: String) : VerifyAppState()
-    data class Error(val message: String) : VerifyAppState()
-}
-
-@Composable
-private fun VerifyAppDialog(verifyAppState: VerifyAppState, onVerifyClick: () -> Unit, onDismiss: () -> Unit) {
-    BrandDialog(
-        onDismissRequest = onDismiss,
-        title = { Text(stringResource(R.string.profile_verify_app_title)) },
-        content = {
-            Column {
-                Text(
-                    text = stringResource(R.string.profile_verify_app_description),
-                    style = androidx.compose.material3.MaterialTheme.typography.bodyMedium,
-                    color = PrototypeTokens.fgSoft
-                )
-
-                Spacer(modifier = Modifier.height(16.dp))
-
-                when (verifyAppState) {
-                    is VerifyAppState.Idle -> {
-                        BrandFilledButton(
-                            text = stringResource(R.string.profile_verify_app_button),
-                            onClick = onVerifyClick,
-                            modifier = Modifier.fillMaxWidth()
-                        )
-                    }
-                    is VerifyAppState.Loading -> {
-                        Row(
-                            modifier = Modifier.fillMaxWidth(),
-                            horizontalArrangement = Arrangement.Center,
-                            verticalAlignment = Alignment.CenterVertically
-                        ) {
-                            androidx.compose.material3.CircularProgressIndicator(
-                                modifier = Modifier.size(24.dp),
-                                color = PrototypeTokens.accent
-                            )
-                            Spacer(modifier = Modifier.width(8.dp))
-                            Text(
-                                text = "验证中...",
-                                color = PrototypeTokens.fg
-                            )
-                        }
-                    }
-                    is VerifyAppState.Success -> {
-                        Column {
-                            Row(
-                                verticalAlignment = Alignment.CenterVertically
-                            ) {
-                                Icon(
-                                    imageVector = Icons.Filled.CheckCircle,
-                                    contentDescription = null,
-                                    tint = SemanticColors.Success,
-                                    modifier = Modifier.size(20.dp)
-                                )
-                                Spacer(modifier = Modifier.width(8.dp))
-                                Text(
-                                    text = stringResource(R.string.profile_verify_app_success),
-                                    color = SemanticColors.Success,
-                                    fontWeight = FontWeight.SemiBold
-                                )
-                            }
-                            Spacer(modifier = Modifier.height(12.dp))
-                            Text(
-                                text = stringResource(R.string.profile_verify_fingerprint_label),
-                                style = androidx.compose.material3.MaterialTheme.typography.bodySmall,
-                                color = PrototypeTokens.muted
-                            )
-                            Spacer(modifier = Modifier.height(4.dp))
-                            Text(
-                                text = verifyAppState.fingerprint,
-                                fontFamily = JetBrainsMonoFontFamily,
-                                fontSize = 10.sp,
-                                color = PrototypeTokens.fg,
-                                modifier = Modifier
-                                    .fillMaxWidth()
-                                    .clip(RoundedCornerShape(8.dp))
-                                    .background(PrototypeTokens.surface)
-                                    .padding(8.dp)
-                            )
-                            Spacer(modifier = Modifier.height(8.dp))
-                            Text(
-                                text = stringResource(R.string.profile_verify_fingerprint_hint),
-                                style = androidx.compose.material3.MaterialTheme.typography.bodySmall,
-                                color = PrototypeTokens.muted
-                            )
-                        }
-                    }
-                    is VerifyAppState.Failed -> {
-                        Row(
-                            verticalAlignment = Alignment.CenterVertically
-                        ) {
-                            Icon(
-                                imageVector = Icons.Filled.Error,
-                                contentDescription = null,
-                                tint = SemanticColors.Danger,
-                                modifier = Modifier.size(20.dp)
-                            )
-                            Spacer(modifier = Modifier.width(8.dp))
-                            Text(
-                                text = stringResource(R.string.profile_verify_app_failed),
-                                color = SemanticColors.Danger,
-                                fontWeight = FontWeight.SemiBold
-                            )
-                        }
-                        Spacer(modifier = Modifier.height(8.dp))
-                        Text(
-                            text = verifyAppState.reason,
-                            style = androidx.compose.material3.MaterialTheme.typography.bodySmall,
-                            color = PrototypeTokens.fgSoft
-                        )
-                    }
-                    is VerifyAppState.Error -> {
-                        Row(
-                            verticalAlignment = Alignment.CenterVertically
-                        ) {
-                            Icon(
-                                imageVector = Icons.Filled.Error,
-                                contentDescription = null,
-                                tint = SemanticColors.Warning,
-                                modifier = Modifier.size(20.dp)
-                            )
-                            Spacer(modifier = Modifier.width(8.dp))
-                            Text(
-                                text = stringResource(R.string.profile_verify_app_error),
-                                color = SemanticColors.Warning,
-                                fontWeight = FontWeight.SemiBold
-                            )
-                        }
-                        Spacer(modifier = Modifier.height(8.dp))
-                        Text(
-                            text = verifyAppState.message,
-                            style = androidx.compose.material3.MaterialTheme.typography.bodySmall,
-                            color = PrototypeTokens.fgSoft
-                        )
-                    }
-                }
-            }
-        },
-        confirmButton = {
-            BrandFilledButton(
-                text = stringResource(R.string.profile_dialog_confirm),
-                onClick = onDismiss
-            )
-        }
-    )
-}
 
 @Composable
 private fun MarkdownThemePickerDialog(

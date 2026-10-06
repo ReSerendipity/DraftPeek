@@ -73,6 +73,9 @@ sealed class Route(val route: String) {
     /** 实验室页面（实施指导书 §2.5 屏 22） */
     data object Lab : Route("lab")
 
+    /** 关于与安全页面（实施指导书 §2.5 屏 23） */
+    data object AboutSecurity : Route("about-security")
+
     /** 成就页面 */
     data object Achievements : Route("achievements")
 

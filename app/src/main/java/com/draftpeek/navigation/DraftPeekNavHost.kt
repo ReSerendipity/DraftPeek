@@ -61,12 +61,13 @@ import com.draftpeek.feature.editor.tabs.TabManager
 import com.draftpeek.feature.editor.ui.DiffScreen
 import com.draftpeek.feature.editor.ui.EditorScreen
 import com.draftpeek.feature.settings.model.AppLanguage
+import com.draftpeek.feature.settings.ui.AboutSecurityScreen
 import com.draftpeek.feature.settings.ui.AccessibilityScreen
 import com.draftpeek.feature.settings.ui.EditorSettingsScreen
 import com.draftpeek.feature.settings.ui.LabScreen
+import com.draftpeek.feature.settings.ui.VerifyAppState
 import com.draftpeek.feature.stats.ui.AchievementScreen
 import com.draftpeek.feature.stats.ui.ProfileScreen
-import com.draftpeek.feature.stats.ui.VerifyAppState
 import com.draftpeek.feature.terminal.ui.TerminalScreen
 import com.draftpeek.security.ApkIntegrityChecker
 import com.draftpeek.security.DexIntegrityChecker
@@ -305,30 +306,8 @@ fun DraftPeekNavHost(
                 onNavigateToLab = {
                     navController.navigate(Route.Lab.route)
                 },
-                onVerifyApp = { context ->
-                    try {
-                        val signatureResult = ApkIntegrityChecker.verify(context)
-                        val dexResult = DexIntegrityChecker.verify(context)
-
-                        when {
-                            signatureResult is ApkIntegrityChecker.IntegrityResult.Verified &&
-                                dexResult is DexIntegrityChecker.DexResult.Verified -> {
-                                val fingerprint = DexIntegrityChecker.computeDexSha256(context)
-                                VerifyAppState.Success(fingerprint ?: "计算中...")
-                            }
-                            signatureResult is ApkIntegrityChecker.IntegrityResult.Tampered -> {
-                                VerifyAppState.Failed("签名证书不匹配")
-                            }
-                            dexResult is DexIntegrityChecker.DexResult.Tampered -> {
-                                VerifyAppState.Failed("DEX 文件已被修改")
-                            }
-                            else -> {
-                                VerifyAppState.Error("验证失败: $signatureResult")
-                            }
-                        }
-                    } catch (e: Exception) {
-                        VerifyAppState.Error(e.message ?: "未知错误")
-                    }
+                onNavigateToAboutSecurity = {
+                    navController.navigate(Route.AboutSecurity.route)
                 }
             )
         }
@@ -382,6 +361,44 @@ fun DraftPeekNavHost(
         ) {
             LabScreen(
                 onNavigateUp = { navController.navigateUp() }
+            )
+        }
+
+        // ---- About & Security ------------------------------------------
+        composable(
+            route = Route.AboutSecurity.route,
+            enterTransition = DraftPeekTransitions.sharedAxisVerticalEnter,
+            exitTransition = DraftPeekTransitions.sharedAxisVerticalExit,
+            popEnterTransition = DraftPeekTransitions.sharedAxisVerticalPopEnter,
+            popExitTransition = DraftPeekTransitions.sharedAxisVerticalPopExit
+        ) {
+            AboutSecurityScreen(
+                onNavigateUp = { navController.navigateUp() },
+                onVerifyApp = { context ->
+                    try {
+                        val signatureResult = ApkIntegrityChecker.verify(context)
+                        val dexResult = DexIntegrityChecker.verify(context)
+
+                        when {
+                            signatureResult is ApkIntegrityChecker.IntegrityResult.Verified &&
+                                dexResult is DexIntegrityChecker.DexResult.Verified -> {
+                                val fingerprint = DexIntegrityChecker.computeDexSha256(context)
+                                VerifyAppState.Success(fingerprint ?: "计算中...")
+                            }
+                            signatureResult is ApkIntegrityChecker.IntegrityResult.Tampered -> {
+                                VerifyAppState.Failed("签名证书不匹配")
+                            }
+                            dexResult is DexIntegrityChecker.DexResult.Tampered -> {
+                                VerifyAppState.Failed("DEX 文件已被修改")
+                            }
+                            else -> {
+                                VerifyAppState.Error("验证失败: $signatureResult")
+                            }
+                        }
+                    } catch (e: Exception) {
+                        VerifyAppState.Error(e.message ?: "未知错误")
+                    }
+                }
             )
         }
 
