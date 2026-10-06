@@ -105,4 +105,8 @@
     <string name="agreement_gate_collapse_terms">Hide full terms</string>
     <string name="agreement_gate_policy">User Agreement</string>
     <string name="agreement_gate_privacy">Privacy Policy</string>
+    <!-- 首次启动引导页（屏 01–04） -->
+    <string name="onboarding_skip">Skip</string>
+    <string name="onboarding_final_title">Ready to start?</string>
+    <string name="onboarding_final_button">Get Started</string>
 </resources>
