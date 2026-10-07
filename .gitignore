@@ -231,3 +231,27 @@ service-account.json
 *.sqlite
 *.sqlite3
 *.db
+
+# --- 敏感信息防泄露 v1.1 补充（2026-10-07，修 *.db 畸形行 + 指南第二章/第八章）---
+*.env
+!.env.sample
+!.env.template
+id_rsa
+id_rsa.*
+id_ed25519
+id_ed25519.*
+credentials.json
+credentials.yaml
+credentials.yml
+secrets.json
+secrets.yaml
+secrets.yml
+service-account.json
+.aws/
+.gcloud/
+*.p12
+*.pem
+*.key
+*.sqlite
+*.sqlite3
+*.db
