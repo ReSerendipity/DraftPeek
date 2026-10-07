@@ -3,7 +3,7 @@
   "private": true,
   "description": "非项目主 manifest。DraftPeek 主体为 Gradle 多模块 Android 工程；本文件仅是承载文档导出依赖（docx、exceljs、pdfkit、pptxgenjs）的外围 Node 工具，不代表项目身份。Playwright 已移除——Android E2E 使用 Macrobenchmark + Firebase Test Lab，不用 Playwright。",
   "dependencies": {
-    "docx": "^9.7.1",
+    "docx": "^9.8.1",
     "exceljs": "^4.4.0",
     "pdfkit": "^0.20.2",
     "pptxgenjs": "^4.0.1"
