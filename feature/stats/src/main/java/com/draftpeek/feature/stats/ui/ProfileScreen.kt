@@ -769,30 +769,6 @@ fun ProfileScreen(
                 )
             }
 
-            Spacer(modifier = Modifier.height(4.dp))
-
-            PeriodChipRow(
-                selectedPeriod = selectedPeriod,
-                onPeriodSelected = { viewModel.selectPeriod(it) }
-            )
-
-            Spacer(modifier = Modifier.height(16.dp))
-
-            StatCardGrid(
-                stats = periodStats,
-                formatDuration = viewModel::formatDuration,
-                formatNumber = viewModel::formatNumber
-            )
-
-            Spacer(modifier = Modifier.height(20.dp))
-
-            GreetingSection(
-                userName = settings.userName,
-                daysSinceFirstUse = viewModel.getTotalDaysSinceFirstUse(),
-                unlockedAchievements = unlockedAchievements,
-                onAchievementClick = onNavigateToAchievements
-            )
-
             Spacer(modifier = Modifier.height(20.dp))
 
             // 设置入口（实施指导书 §2.5 屏 20）：四个独立页面的入口归拢成一组。
@@ -827,6 +803,32 @@ fun ProfileScreen(
 
             // 数据区（只读）：活跃度与成就仅作展示，不在本页编辑。
             SectionHeader(label = stringResource(R.string.profile_section_stats))
+
+            Spacer(modifier = Modifier.height(4.dp))
+
+            PeriodChipRow(
+                selectedPeriod = selectedPeriod,
+                onPeriodSelected = { viewModel.selectPeriod(it) }
+            )
+
+            Spacer(modifier = Modifier.height(16.dp))
+
+            StatCardGrid(
+                stats = periodStats,
+                formatDuration = viewModel::formatDuration,
+                formatNumber = viewModel::formatNumber
+            )
+
+            Spacer(modifier = Modifier.height(20.dp))
+
+            GreetingSection(
+                userName = settings.userName,
+                daysSinceFirstUse = viewModel.getTotalDaysSinceFirstUse(),
+                unlockedAchievements = unlockedAchievements,
+                onAchievementClick = onNavigateToAchievements
+            )
+
+            Spacer(modifier = Modifier.height(20.dp))
 
             Column(
                 modifier = Modifier
