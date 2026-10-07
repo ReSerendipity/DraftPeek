@@ -243,7 +243,7 @@ jobs:
           ref: ${{ github.event.inputs.tag || github.ref }}
 
       - name: Download Release Artifacts
-        uses: actions/download-artifact@v4
+        uses: actions/download-artifact@v8
         with:
           name: draftpeek-release-artifacts
           path: dist-release
@@ -326,7 +326,7 @@ jobs:
         run: chmod +x ./gradlew
 
       - name: Download Release APK (built by build job)
-        uses: actions/download-artifact@v4
+        uses: actions/download-artifact@v8
         with:
           name: draftpeek-release-artifacts
           path: downloaded-release-apk
