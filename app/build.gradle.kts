@@ -333,6 +333,16 @@ dependencies {
 
 tasks.withType<Test>().configureEach {
     useJUnitPlatform()
+
+    // WHY：本模块的 Robolectric 测试（RouteTest / AntiDebug*Test）之前对 JaCoCo 完全不可见 ——
+    // Robolectric 用自己的 SandboxClassLoader 重新加载被测类，绕过了默认按「类路径位置」匹配的
+    // 插桩，于是「明明被测到」的类在报告里 covered=0。isIncludeNoLocationClasses 让 agent 不再
+    // 按位置过滤；excludes 掉 jdk.internal.* 是 JDK 9+ 上的标准配套（否则 agent 会在模块化 JDK
+    // 内部类上崩）。与 feature/settings 同一处理，详见 GOTCHAS #DP-09。
+    configure<org.gradle.testing.jacoco.plugins.JacocoTaskExtension> {
+        isIncludeNoLocationClasses = true
+        excludes = listOf("jdk.internal.*")
+    }
 }
 
 // ===== JaCoCo 单元测试覆盖率报告 =====
