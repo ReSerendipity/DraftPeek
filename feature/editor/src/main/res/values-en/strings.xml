@@ -393,4 +393,6 @@ graph TD
     <!-- #80: WebView provider 不可用时的降级提示 -->
     <string name="editor_preview_no_webview">No usable WebView on this device — switched to native preview (math, diagrams and code highlighting unavailable)</string>
     <string name="editor_status_unsaved_lines">Unsaved · %1$d lines changed</string>
+    <string name="editor_search_match_count">%1$d/%2$d</string>
+    <string name="editor_search_no_match">No match</string>
 </resources>

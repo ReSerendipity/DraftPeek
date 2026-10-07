@@ -1248,6 +1248,31 @@ class SoraEditorWrapper(context: Context) {
         }
     }
 
+    /**
+     * 当前缓冲区全文（用于搜索匹配计数）。编辑器不可用时返回空串。
+     */
+    fun currentTextForSearch(): String = try {
+        editor.text?.toString() ?: ""
+    } catch (e: Exception) {
+        Log.w(TAG, "currentTextForSearch failed", e)
+        ""
+    }
+
+    /**
+     * 当前光标的字符偏移（用于把光标位置映射到第几个搜索匹配）。
+     *
+     * sora 的 `Cursor` 只给「行 + 列」，需经 `text.getIndexer()` 换算成字符偏移
+     * （与 [getSelectionCount] 同一套换算法）。不可用时返回 -1。
+     */
+    fun currentCursorOffset(): Int = try {
+        val cursor = editor.cursor ?: return -1
+        val text = editor.text ?: return -1
+        text.getIndexer().getCharPosition(cursor.leftLine, cursor.leftColumn).index
+    } catch (e: Exception) {
+        Log.w(TAG, "currentCursorOffset failed", e)
+        -1
+    }
+
     // ------------------------------------------------------------------
     // Diagnostics (wavy underlines + tooltip)
     // ------------------------------------------------------------------

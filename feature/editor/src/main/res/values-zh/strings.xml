@@ -399,4 +399,6 @@ graph TD
     <!-- #80: WebView provider 不可用时的降级提示 -->
     <string name="editor_preview_no_webview">当前设备没有可用的 WebView，已切换为原生预览（公式 / 流程图 / 代码高亮暂不可用）</string>
     <string name="editor_status_unsaved_lines">未保存 · %1$d 行改动</string>
+    <string name="editor_search_match_count">%1$d/%2$d</string>
+    <string name="editor_search_no_match">无匹配</string>
 </resources>

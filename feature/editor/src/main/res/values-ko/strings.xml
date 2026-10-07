@@ -393,4 +393,6 @@ graph TD
     <!-- #80: WebView provider 不可用时的降级提示 -->
     <string name="editor_preview_no_webview">이 기기에는 사용 가능한 WebView가 없어 네이티브 미리보기로 전환했습니다(수식/다이어그램/코드 강조 사용 불가)</string>
     <string name="editor_status_unsaved_lines">저장 안 됨 · %1$d줄 변경</string>
+    <string name="editor_search_match_count">%1$d/%2$d</string>
+    <string name="editor_search_no_match">일치 없음</string>
 </resources>
