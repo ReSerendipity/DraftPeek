@@ -17,6 +17,8 @@ package com.draftpeek.feature.editor.viewmodel
 
 import androidx.compose.runtime.Immutable
 import com.draftpeek.core.common.util.ContentChecksum
+import com.draftpeek.core.common.util.DiffEngine
+import com.draftpeek.core.common.util.DiffType
 import com.draftpeek.feature.editor.model.EditorUiState
 import com.draftpeek.feature.editor.model.MarkdownTheme
 import com.draftpeek.feature.editor.model.MarkdownViewMode
@@ -85,6 +87,14 @@ class EditorStateManager @Inject constructor(private val tabManager: TabManager)
 
         /** WYSIWYG 编辑器最大文件大小（字节），超过此大小强制纯文本模式 */
         const val WYSIWYG_FILE_SIZE_LIMIT = 500L * 1024 // 500KB
+
+        /**
+         * 变更行数统计的规模上限（字符）。
+         *
+         * 超过则跳过行级 diff 并返回 -1：防抖窗口内对大文件做全量 diff 会拖慢输入，
+         * 宁可只显示「未保存」也不卡手。
+         */
+        const val MAX_DIFF_CHARS = 200_000
     }
 
     private val _uiState = MutableStateFlow<EditorUiState>(EditorUiState.Loading)
@@ -96,6 +106,18 @@ class EditorStateManager @Inject constructor(private val tabManager: TabManager)
 
     /** 内容是否已修改（未保存）状态流 */
     val isModified: StateFlow<Boolean> = _isModified.asStateFlow()
+
+    /**
+     * 相对「上次保存的基线」的**变更行数**（实施指导书 §2.3 屏 15 的「N 行改动」）。
+     *
+     * - `0`：无变更（或已保存）
+     * - `-1`：文件超过 [MAX_DIFF_CHARS]，跳过统计（UI 只显示「未保存」，不显示行数）
+     *
+     * 与 [isModified] 同样走防抖：真正的 diff 只在 [flushDirtyState] 提交时算一次，
+     * 不会随每次按键全量 diff。
+     */
+    private val _changedLineCount = MutableStateFlow(0)
+    val changedLineCount: StateFlow<Int> = _changedLineCount.asStateFlow()
 
     private val _cursorPosition = MutableStateFlow(CursorPosition())
 
@@ -257,6 +279,10 @@ class EditorStateManager @Inject constructor(private val tabManager: TabManager)
         if (elapsed < dirtyDebounceMs) return
 
         pendingDirty = null
+        val changedLines = if (pending) computeChangedLineCount() else 0
+        if (_changedLineCount.value != changedLines) {
+            _changedLineCount.value = changedLines
+        }
         if (_isModified.value != pending) {
             _isModified.value = pending
             tabManager.getActiveTab()?.id?.let { tabId ->
@@ -266,10 +292,33 @@ class EditorStateManager @Inject constructor(private val tabManager: TabManager)
     }
 
     /**
+     * 计算「相对上次保存基线的变更行数」。
+     *
+     * 用 [DiffEngine] 做行级 diff。**文件超过 [MAX_DIFF_CHARS] 时直接返回 -1**：
+     * 防抖窗口只有 150ms，大文件全量 diff 会拖慢输入，宁可只显示「未保存」也不卡手。
+     *
+     * ⚠️ **不能直接用 `DiffResult.diffCount`**：它只统计**左侧**非相等行
+     * （`resultLeft.count { it.type != DiffType.EQUAL }`，见 DiffEngine 实现），
+     * 而「纯新增行」只在右侧标 INSERT、左侧是 padding ⇒ 新增会被算成 0，
+     * 恰恰漏掉最常见的编辑动作。这里取两侧变更行数的**较大值**，
+     * 使「改一行」与「新增一行」都计为 1。
+     */
+    private fun computeChangedLineCount(): Int {
+        if (baselineContent.length > MAX_DIFF_CHARS || currentContent.length > MAX_DIFF_CHARS) {
+            return -1
+        }
+        val result = DiffEngine.diff(baselineContent, currentContent)
+        val leftChanged = result.leftLines.count { it.type != DiffType.EQUAL }
+        val rightChanged = result.rightLines.count { it.type != DiffType.EQUAL }
+        return maxOf(leftChanged, rightChanged)
+    }
+
+    /**
      * 标记当前内容已保存（用于手动保存标记更新）
      */
     fun markSaved() {
         baselineContent = currentContent
+        _changedLineCount.value = 0
         contentChecksum = ContentChecksum.crc32(currentContent)
         pendingDirty = null
         _isModified.value = false
@@ -287,6 +336,7 @@ class EditorStateManager @Inject constructor(private val tabManager: TabManager)
         currentContent = savedContent
         _liveContent.value = savedContent
         baselineContent = savedContent
+        _changedLineCount.value = 0
         contentChecksum = ContentChecksum.crc32(savedContent)
         pendingDirty = null
         _isModified.value = false
