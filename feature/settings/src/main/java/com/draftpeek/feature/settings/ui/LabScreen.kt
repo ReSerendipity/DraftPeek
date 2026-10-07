@@ -1,5 +1,6 @@
 package com.draftpeek.feature.settings.ui
 
+import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
@@ -78,54 +79,60 @@ fun LabScreen(onNavigateUp: () -> Unit) {
     val masterEnabled = flagStates[FeatureFlag.FEATURE_TOGGLE]
         ?: FeatureFlag.FEATURE_TOGGLE.defaultEnabled
 
-    BrandTopBar(
-        onBack = onNavigateUp,
-        title = stringResource(R.string.settings_lab_page_title),
-        titleStyle = SubPageTopBarTitleStyle
-    )
-
     Column(
         modifier = Modifier
             .fillMaxSize()
-            .verticalScroll(rememberScrollState())
-            .padding(horizontal = 16.dp, vertical = 8.dp)
+            .background(PrototypeTokens.pageBackground)
     ) {
-        // 总开关常驻最上方；关闭时其余开关隐藏（沿用原 ProfileScreen 的行为）
-        BrandSwitchSettingRow(
-            icon = Icons.Filled.Flag,
-            label = FeatureFlag.FEATURE_TOGGLE.displayName(),
-            checked = masterEnabled,
-            onCheckedChange = { featureToggleManager?.setEnabled(FeatureFlag.FEATURE_TOGGLE, it) },
-            showDivider = false
+        BrandTopBar(
+            onBack = onNavigateUp,
+            title = stringResource(R.string.settings_lab_page_title),
+            titleStyle = SubPageTopBarTitleStyle
         )
 
-        if (!masterEnabled) {
-            return@Column
-        }
-
-        LabGroup.entries.forEach { group ->
-            val flags = FeatureFlag.entries.filter {
-                it != FeatureFlag.FEATURE_TOGGLE && it.labGroup() == group
-            }
-            if (flags.isEmpty()) {
-                return@forEach
-            }
-
-            Spacer(modifier = Modifier.height(16.dp))
-            Text(
-                text = stringResource(group.labelRes),
-                style = MonoLabelStyle.copy(fontSize = 10.sp, letterSpacing = 1.2.sp),
-                color = PrototypeTokens.muted,
-                modifier = Modifier.padding(start = 4.dp, bottom = 8.dp)
+        Column(
+            modifier = Modifier
+                .fillMaxSize()
+                .verticalScroll(rememberScrollState())
+                .padding(horizontal = 16.dp, vertical = 8.dp)
+        ) {
+            // 总开关常驻最上方；关闭时其余开关隐藏（沿用原 ProfileScreen 的行为）
+            BrandSwitchSettingRow(
+                icon = Icons.Filled.Flag,
+                label = FeatureFlag.FEATURE_TOGGLE.displayName(),
+                checked = masterEnabled,
+                onCheckedChange = { featureToggleManager?.setEnabled(FeatureFlag.FEATURE_TOGGLE, it) },
+                showDivider = false
             )
-            flags.forEachIndexed { index, flag ->
-                BrandSwitchSettingRow(
-                    icon = Icons.Filled.Flag,
-                    label = flag.displayName(),
-                    checked = flagStates[flag] ?: flag.defaultEnabled,
-                    onCheckedChange = { featureToggleManager?.setEnabled(flag, it) },
-                    showDivider = index < flags.lastIndex
+
+            if (!masterEnabled) {
+                return@Column
+            }
+
+            LabGroup.entries.forEach { group ->
+                val flags = FeatureFlag.entries.filter {
+                    it != FeatureFlag.FEATURE_TOGGLE && it.labGroup() == group
+                }
+                if (flags.isEmpty()) {
+                    return@forEach
+                }
+
+                Spacer(modifier = Modifier.height(16.dp))
+                Text(
+                    text = stringResource(group.labelRes),
+                    style = MonoLabelStyle.copy(fontSize = 10.sp, letterSpacing = 1.2.sp),
+                    color = PrototypeTokens.muted,
+                    modifier = Modifier.padding(start = 4.dp, bottom = 8.dp)
                 )
+                flags.forEachIndexed { index, flag ->
+                    BrandSwitchSettingRow(
+                        icon = Icons.Filled.Flag,
+                        label = flag.displayName(),
+                        checked = flagStates[flag] ?: flag.defaultEnabled,
+                        onCheckedChange = { featureToggleManager?.setEnabled(flag, it) },
+                        showDivider = index < flags.lastIndex
+                    )
+                }
             }
         }
     }

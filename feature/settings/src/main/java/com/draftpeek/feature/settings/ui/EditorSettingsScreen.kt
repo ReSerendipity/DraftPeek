@@ -117,148 +117,154 @@ fun EditorSettingsScreen(
     var customCssText by remember { mutableStateOf(settings.customMarkdownCss) }
     LaunchedEffect(settings.customMarkdownCss) { customCssText = settings.customMarkdownCss }
 
-    BrandTopBar(
-        onBack = onNavigateUp,
-        title = stringResource(R.string.settings_editor_page_title),
-        titleStyle = SubPageTopBarTitleStyle
-    )
-
     Column(
         modifier = Modifier
             .fillMaxSize()
-            .verticalScroll(rememberScrollState())
-            .padding(horizontal = 16.dp, vertical = 8.dp)
+            .background(PrototypeTokens.pageBackground)
     ) {
-        BrandSettingRow(
-            icon = Icons.Filled.FormatSize,
-            label = stringResource(R.string.profile_setting_font_size),
-            value = "${settings.fontSize}sp",
-            onClick = { showFontSizeDialog = true },
-            showDivider = true
-        )
-        BrandSettingRow(
-            icon = Icons.Filled.History,
-            label = stringResource(R.string.profile_setting_recent_files_limit),
-            value = stringResource(R.string.profile_recent_files_limit_count, settings.recentFilesLimit),
-            onClick = { showRecentLimitDialog = true },
-            showDivider = true
-        )
-        BrandSettingRow(
-            icon = Icons.Filled.DarkMode,
-            label = stringResource(R.string.profile_setting_theme),
-            value = when (settings.theme) {
-                AppTheme.LIGHT -> stringResource(R.string.profile_setting_theme_light)
-                AppTheme.DARK -> stringResource(R.string.profile_setting_theme_dark)
-                AppTheme.SYSTEM -> stringResource(R.string.profile_setting_theme_system)
-            },
-            onClick = { showThemeDialog = true },
-            showDivider = true
-        )
-        BrandSettingRow(
-            icon = Icons.Filled.FontDownload,
-            label = stringResource(R.string.profile_setting_font_family),
-            value =
-            stringResource(FontOptions.getCodeFontById(settings.codeFontFamilyId).displayNameResId) + " / " +
-                stringResource(FontOptions.getUiFontById(settings.uiFontFamilyId).displayNameResId),
-            onClick = { showFontSelectionDialog = true },
-            showDivider = true
-        )
-        BrandSwitchSettingRow(
-            icon = Icons.AutoMirrored.Filled.WrapText,
-            label = stringResource(R.string.profile_setting_line_wrapping),
-            checked = settings.lineWrapping,
-            onCheckedChange = { settingsViewModel.updateLineWrapping(it) },
-            showDivider = true
-        )
-        BrandSwitchSettingRow(
-            icon = Icons.Filled.FormatListNumbered,
-            label = stringResource(R.string.profile_setting_show_line_numbers),
-            checked = settings.showLineNumbers,
-            onCheckedChange = { settingsViewModel.updateShowLineNumbers(it) },
-            showDivider = true
-        )
-        BrandSwitchSettingRow(
-            icon = Icons.Filled.Save,
-            label = stringResource(R.string.profile_setting_auto_save),
-            checked = settings.autoSave,
-            onCheckedChange = { settingsViewModel.updateAutoSave(it) },
-            showDivider = true
-        )
-        BrandSwitchSettingRow(
-            icon = Icons.Filled.Edit,
-            label = stringResource(R.string.profile_setting_highlight_current_line),
-            checked = settings.highlightCurrentLine,
-            onCheckedChange = { settingsViewModel.updateHighlightCurrentLine(it) },
-            showDivider = true
-        )
-        BrandSwitchSettingRow(
-            icon = Icons.AutoMirrored.Filled.FormatAlignLeft,
-            label = stringResource(R.string.profile_setting_auto_indent),
-            checked = settings.autoIndent,
-            onCheckedChange = { settingsViewModel.updateAutoIndent(it) },
-            showDivider = true
-        )
-        BrandSettingRow(
-            icon = Icons.Filled.SpaceBar,
-            label = stringResource(R.string.profile_setting_tab_width),
-            value = String.format(stringResource(R.string.profile_tab_width_spaces), settings.tabWidth),
-            onClick = { showTabWidthDialog = true },
-            showDivider = true
-        )
-        BrandSettingRow(
-            icon = Icons.Filled.TextFields,
-            label = stringResource(R.string.profile_setting_encoding),
-            value = settings.defaultEncoding,
-            onClick = { showEncodingDialog = true },
-            showDivider = true
-        )
-        BrandSettingRow(
-            icon = Icons.Filled.Language,
-            label = stringResource(R.string.profile_setting_language),
-            value = when (settings.language) {
-                AppLanguage.SYSTEM -> stringResource(R.string.profile_setting_language_system)
-                AppLanguage.ZH -> stringResource(R.string.profile_setting_language_zh)
-                AppLanguage.ZH_TW -> stringResource(R.string.profile_setting_language_zh_tw)
-                AppLanguage.EN -> stringResource(R.string.profile_setting_language_en)
-                AppLanguage.JA -> stringResource(R.string.profile_setting_language_ja)
-                AppLanguage.KO -> stringResource(R.string.profile_setting_language_ko)
-            },
-            onClick = { showLanguageDialog = true },
-            showDivider = true
-        )
-        BrandSwitchSettingRow(
-            icon = Icons.Filled.Reorder,
-            label = stringResource(R.string.profile_setting_indent_guides),
-            checked = settings.showIndentGuides,
-            onCheckedChange = { settingsViewModel.updateShowIndentGuides(it) },
-            showDivider = true
-        )
-        BrandSwitchSettingRow(
-            icon = Icons.Filled.PushPin,
-            label = stringResource(R.string.profile_setting_sticky_scroll),
-            checked = settings.stickyScroll,
-            onCheckedChange = { settingsViewModel.updateStickyScroll(it) },
-            showDivider = true
+        BrandTopBar(
+            onBack = onNavigateUp,
+            title = stringResource(R.string.settings_editor_page_title),
+            titleStyle = SubPageTopBarTitleStyle
         )
 
-        BrandSwitchSettingRow(
-            icon = Icons.Filled.Map,
-            label = stringResource(R.string.profile_setting_show_minimap),
-            checked = settings.showMinimap,
-            onCheckedChange = { settingsViewModel.updateShowMinimap(it) },
-            showDivider = true
-        )
+        Column(
+            modifier = Modifier
+                .fillMaxSize()
+                .verticalScroll(rememberScrollState())
+                .padding(horizontal = 16.dp, vertical = 8.dp)
+        ) {
+            BrandSettingRow(
+                icon = Icons.Filled.FormatSize,
+                label = stringResource(R.string.profile_setting_font_size),
+                value = "${settings.fontSize}sp",
+                onClick = { showFontSizeDialog = true },
+                showDivider = true
+            )
+            BrandSettingRow(
+                icon = Icons.Filled.History,
+                label = stringResource(R.string.profile_setting_recent_files_limit),
+                value = stringResource(R.string.profile_recent_files_limit_count, settings.recentFilesLimit),
+                onClick = { showRecentLimitDialog = true },
+                showDivider = true
+            )
+            BrandSettingRow(
+                icon = Icons.Filled.DarkMode,
+                label = stringResource(R.string.profile_setting_theme),
+                value = when (settings.theme) {
+                    AppTheme.LIGHT -> stringResource(R.string.profile_setting_theme_light)
+                    AppTheme.DARK -> stringResource(R.string.profile_setting_theme_dark)
+                    AppTheme.SYSTEM -> stringResource(R.string.profile_setting_theme_system)
+                },
+                onClick = { showThemeDialog = true },
+                showDivider = true
+            )
+            BrandSettingRow(
+                icon = Icons.Filled.FontDownload,
+                label = stringResource(R.string.profile_setting_font_family),
+                value =
+                stringResource(FontOptions.getCodeFontById(settings.codeFontFamilyId).displayNameResId) + " / " +
+                    stringResource(FontOptions.getUiFontById(settings.uiFontFamilyId).displayNameResId),
+                onClick = { showFontSelectionDialog = true },
+                showDivider = true
+            )
+            BrandSwitchSettingRow(
+                icon = Icons.AutoMirrored.Filled.WrapText,
+                label = stringResource(R.string.profile_setting_line_wrapping),
+                checked = settings.lineWrapping,
+                onCheckedChange = { settingsViewModel.updateLineWrapping(it) },
+                showDivider = true
+            )
+            BrandSwitchSettingRow(
+                icon = Icons.Filled.FormatListNumbered,
+                label = stringResource(R.string.profile_setting_show_line_numbers),
+                checked = settings.showLineNumbers,
+                onCheckedChange = { settingsViewModel.updateShowLineNumbers(it) },
+                showDivider = true
+            )
+            BrandSwitchSettingRow(
+                icon = Icons.Filled.Save,
+                label = stringResource(R.string.profile_setting_auto_save),
+                checked = settings.autoSave,
+                onCheckedChange = { settingsViewModel.updateAutoSave(it) },
+                showDivider = true
+            )
+            BrandSwitchSettingRow(
+                icon = Icons.Filled.Edit,
+                label = stringResource(R.string.profile_setting_highlight_current_line),
+                checked = settings.highlightCurrentLine,
+                onCheckedChange = { settingsViewModel.updateHighlightCurrentLine(it) },
+                showDivider = true
+            )
+            BrandSwitchSettingRow(
+                icon = Icons.AutoMirrored.Filled.FormatAlignLeft,
+                label = stringResource(R.string.profile_setting_auto_indent),
+                checked = settings.autoIndent,
+                onCheckedChange = { settingsViewModel.updateAutoIndent(it) },
+                showDivider = true
+            )
+            BrandSettingRow(
+                icon = Icons.Filled.SpaceBar,
+                label = stringResource(R.string.profile_setting_tab_width),
+                value = String.format(stringResource(R.string.profile_tab_width_spaces), settings.tabWidth),
+                onClick = { showTabWidthDialog = true },
+                showDivider = true
+            )
+            BrandSettingRow(
+                icon = Icons.Filled.TextFields,
+                label = stringResource(R.string.profile_setting_encoding),
+                value = settings.defaultEncoding,
+                onClick = { showEncodingDialog = true },
+                showDivider = true
+            )
+            BrandSettingRow(
+                icon = Icons.Filled.Language,
+                label = stringResource(R.string.profile_setting_language),
+                value = when (settings.language) {
+                    AppLanguage.SYSTEM -> stringResource(R.string.profile_setting_language_system)
+                    AppLanguage.ZH -> stringResource(R.string.profile_setting_language_zh)
+                    AppLanguage.ZH_TW -> stringResource(R.string.profile_setting_language_zh_tw)
+                    AppLanguage.EN -> stringResource(R.string.profile_setting_language_en)
+                    AppLanguage.JA -> stringResource(R.string.profile_setting_language_ja)
+                    AppLanguage.KO -> stringResource(R.string.profile_setting_language_ko)
+                },
+                onClick = { showLanguageDialog = true },
+                showDivider = true
+            )
+            BrandSwitchSettingRow(
+                icon = Icons.Filled.Reorder,
+                label = stringResource(R.string.profile_setting_indent_guides),
+                checked = settings.showIndentGuides,
+                onCheckedChange = { settingsViewModel.updateShowIndentGuides(it) },
+                showDivider = true
+            )
+            BrandSwitchSettingRow(
+                icon = Icons.Filled.PushPin,
+                label = stringResource(R.string.profile_setting_sticky_scroll),
+                checked = settings.stickyScroll,
+                onCheckedChange = { settingsViewModel.updateStickyScroll(it) },
+                showDivider = true
+            )
 
-        BrandSettingRow(
-            icon = Icons.Filled.Code,
-            label = stringResource(R.string.profile_setting_custom_css),
-            value = settings.customMarkdownCss.ifEmpty { stringResource(R.string.profile_setting_custom_css_hint) },
-            onClick = {
-                customCssText = settings.customMarkdownCss
-                showCustomCssDialog = true
-            },
-            showDivider = false
-        )
+            BrandSwitchSettingRow(
+                icon = Icons.Filled.Map,
+                label = stringResource(R.string.profile_setting_show_minimap),
+                checked = settings.showMinimap,
+                onCheckedChange = { settingsViewModel.updateShowMinimap(it) },
+                showDivider = true
+            )
+
+            BrandSettingRow(
+                icon = Icons.Filled.Code,
+                label = stringResource(R.string.profile_setting_custom_css),
+                value = settings.customMarkdownCss.ifEmpty { stringResource(R.string.profile_setting_custom_css_hint) },
+                onClick = {
+                    customCssText = settings.customMarkdownCss
+                    showCustomCssDialog = true
+                },
+                showDivider = false
+            )
+        }
     }
 
     if (showFontSizeDialog) {
