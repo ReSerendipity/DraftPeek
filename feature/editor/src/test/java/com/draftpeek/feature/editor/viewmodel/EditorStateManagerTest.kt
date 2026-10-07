@@ -541,4 +541,53 @@ class EditorStateManagerTest {
             assertEquals("modified", stateManager.liveContent.value)
         }
     }
+
+    @Nested
+    @DisplayName("changedLineCount（屏 15「未保存 · N 行改动」）")
+    inner class ChangedLineCountTest {
+
+        @Test
+        @DisplayName("初始为 0")
+        fun initiallyZero() {
+            assertEquals(0, stateManager.changedLineCount.value)
+        }
+
+        @Test
+        @DisplayName("保存后归零")
+        fun resetsOnSave() {
+            stateManager.onContentSaved("a\nb\nc")
+            assertEquals(0, stateManager.changedLineCount.value)
+        }
+
+        @Test
+        @DisplayName("改一行 → 1")
+        fun countsOneChangedLine() {
+            stateManager.onContentSaved("a\nb\nc")
+            stateManager.onContentChanged("a\nB\nc")
+            stateManager.flushDirtyState()
+            assertEquals(1, stateManager.changedLineCount.value)
+        }
+
+        @Test
+        @DisplayName("内容回到基线 → 0")
+        fun backToBaselineResetsToZero() {
+            stateManager.onContentSaved("a\nb")
+            stateManager.onContentChanged("a\nb\nc")
+            stateManager.flushDirtyState()
+            assertTrue(stateManager.changedLineCount.value > 0, "改动后应大于 0")
+            stateManager.onContentChanged("a\nb")
+            stateManager.flushDirtyState()
+            assertEquals(0, stateManager.changedLineCount.value)
+        }
+
+        @Test
+        @DisplayName("超过 MAX_DIFF_CHARS → -1（跳过统计，UI 只显示未保存）")
+        fun oversizedContentSkipsCounting() {
+            val big = "x\n".repeat(EditorStateManager.MAX_DIFF_CHARS / 2 + 10)
+            stateManager.onContentSaved(big)
+            stateManager.onContentChanged(big + "y")
+            stateManager.flushDirtyState()
+            assertEquals(-1, stateManager.changedLineCount.value)
+        }
+    }
 }

@@ -197,6 +197,13 @@ class EditorViewModel @Inject constructor(
 
     val uiState: StateFlow<EditorUiState> = editorStateManager.uiState
     val isModified: StateFlow<Boolean> = editorStateManager.isModified
+
+    /**
+     * 相对上次保存的变更行数（屏 15 状态栏「未保存 · N 行改动」）。
+     *
+     * `0` = 无变更；`-1` = 文件过大未统计（此时状态栏只显示「未保存」）。
+     */
+    val changedLineCount: StateFlow<Int> = editorStateManager.changedLineCount
     val cursorPosition: StateFlow<CursorPosition> = editorStateManager.cursorPosition
     val scrollPosition: StateFlow<Pair<Int, Int>> = editorStateManager.scrollPosition
     val outlineItems: StateFlow<ImmutableList<OutlineItem>> = editorStateManager.outlineItems

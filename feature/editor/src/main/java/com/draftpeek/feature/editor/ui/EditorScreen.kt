@@ -237,6 +237,7 @@ fun EditorScreen(
 
     val uiState by viewModel.uiState.collectAsStateWithLifecycle()
     val isModified by viewModel.isModified.collectAsStateWithLifecycle()
+    val changedLineCount by viewModel.changedLineCount.collectAsStateWithLifecycle()
     val cursorPosition by viewModel.cursorPosition.collectAsStateWithLifecycle()
     val markdownViewMode by viewModel.markdownViewMode.collectAsStateWithLifecycle()
     val isLargeMarkdownFile by viewModel.isLargeMarkdownFile.collectAsStateWithLifecycle()
@@ -1406,6 +1407,7 @@ fun EditorScreen(
                 detectedEncoding = detectedEncoding,
                 uiState = uiState,
                 isModified = isModified,
+                changedLineCount = changedLineCount,
                 tabWidth = settings.tabWidth,
                 selectionCount = selectionCount,
                 isReadOnlyOverride = isReadOnlyOverride,
@@ -2195,6 +2197,7 @@ private fun EditorBottomStatusBar(
     detectedEncoding: String?,
     uiState: EditorUiState,
     isModified: Boolean,
+    changedLineCount: Int = 0,
     tabWidth: Int = 4,
     selectionCount: Int = 0,
     isReadOnlyOverride: Boolean = false,
@@ -2255,11 +2258,15 @@ private fun EditorBottomStatusBar(
         )
         Spacer(modifier = Modifier.width(14.dp))
         // 未保存提示（实施指导书 §2.3 屏 15）：由「● + 已修改」改为文字，保存后消失。
-        // 注：指导书原文为「未保存 · N 行改动」，但本仓库没有改动行数的数据源
-        // （sora 只暴露 isModified 布尔值），行级 diff 属新功能，故此处先只给文字。
+        // 变更行数来自 EditorStateManager.changedLineCount（相对上次保存基线做行级 diff，
+        // 与脏标记同走防抖）；-1 表示文件过大未统计，此时只显示「未保存」。
         if (isModified) {
             Text(
-                text = stringResource(R.string.editor_status_unsaved),
+                text = if (changedLineCount >= 0) {
+                    stringResource(R.string.editor_status_unsaved_lines, changedLineCount)
+                } else {
+                    stringResource(R.string.editor_status_unsaved)
+                },
                 style = EditorStatusBarStyle,
                 color = accent
             )
