@@ -140,12 +140,14 @@ import com.draftpeek.feature.editor.model.EditorTab
 import com.draftpeek.feature.editor.model.EditorUiState
 import com.draftpeek.feature.editor.model.MarkdownTheme
 import com.draftpeek.feature.editor.model.MarkdownViewMode
+import com.draftpeek.feature.editor.sora.SearchMatchCounter
 import com.draftpeek.feature.editor.sora.SoraEditorWrapper
 import com.draftpeek.feature.editor.treesitter.TreeSitterLanguageProvider
 import com.draftpeek.feature.editor.viewmodel.CursorPosition
 import com.draftpeek.feature.editor.viewmodel.EditorViewModel
 import com.draftpeek.feature.settings.model.EditorSettings
 import com.draftpeek.feature.settings.viewmodel.SettingsViewModel
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 
 private const val TAG = "EditorScreen"
@@ -1828,6 +1830,9 @@ private fun TooltipIconButton(
  * 替代原来三个独立的 BrandDialog，在单一对话框内通过页签切换。
  * 引擎侧复用 SoraSearchManager 已有的 search/replace/replaceAll/goToLine 能力。
  */
+/** 搜索匹配计数的防抖窗口（毫秒）。 */
+private const val SEARCH_COUNT_DEBOUNCE_MS = 200L
+
 @Composable
 private fun EditorSearchPanel(
     mode: SearchPanelMode,
@@ -1852,6 +1857,30 @@ private fun EditorSearchPanel(
     var goToLineError by remember { mutableStateOf("") }
     // 「全部替换」二次确认
     var showReplaceAllConfirm by remember { mutableStateOf(false) }
+
+    // 匹配计数 n/N（屏 15）。sora 的 searcher 只暴露布尔值，这里在缓冲区文本上
+    // 按同口径复算（见 SearchMatchCounter）。searchNavTick 用于「↑↓ 导航后重新定位序号」。
+    var searchNavTick by remember { mutableStateOf(0) }
+    var matchTotal by remember { mutableStateOf(0) }
+    var matchOrdinal by remember { mutableStateOf(0) }
+    LaunchedEffect(searchQuery, searchRegex, searchMatchCase, searchWholeWord, searchNavTick) {
+        if (searchQuery.isEmpty()) {
+            matchTotal = 0
+            matchOrdinal = 0
+            return@LaunchedEffect
+        }
+        // 防抖：边输边全量计数会很吵，也让大文件不至于每敲一个字就扫一遍
+        delay(SEARCH_COUNT_DEBOUNCE_MS)
+        val matches = SearchMatchCounter.findAll(
+            text = wrapper.currentTextForSearch(),
+            query = searchQuery,
+            regex = searchRegex,
+            matchCase = searchMatchCase,
+            wholeWord = searchWholeWord
+        )
+        matchTotal = matches.size
+        matchOrdinal = SearchMatchCounter.ordinalAt(matches, wrapper.currentCursorOffset())
+    }
 
     // Live search: re-run search when query or options change (for Find and Replace tabs)
     LaunchedEffect(searchQuery, searchRegex, searchMatchCase, searchWholeWord, mode) {
@@ -1933,9 +1962,30 @@ private fun EditorSearchPanel(
                             )
                             Spacer(modifier = Modifier.weight(1f))
                             // ↑↓ 匹配导航（实施指导书 §2.3 屏 18）
+                            if (searchQuery.isNotEmpty()) {
+                                Text(
+                                    text = if (matchTotal == 0) {
+                                        stringResource(R.string.editor_search_no_match)
+                                    } else {
+                                        stringResource(
+                                            R.string.editor_search_match_count,
+                                            matchOrdinal,
+                                            matchTotal
+                                        )
+                                    },
+                                    style = EditorStatusBarStyle,
+                                    color = PrototypeTokens.muted
+                                )
+                            }
                             SearchNavButtons(
-                                onPrevious = { wrapper.gotoPrevious() },
-                                onNext = { wrapper.gotoNext() }
+                                onPrevious = {
+                                    wrapper.gotoPrevious()
+                                    searchNavTick++
+                                },
+                                onNext = {
+                                    wrapper.gotoNext()
+                                    searchNavTick++
+                                }
                             )
                         }
                     }
@@ -1969,9 +2019,30 @@ private fun EditorSearchPanel(
                             )
                             Spacer(modifier = Modifier.weight(1f))
                             // ↑↓ 匹配导航（实施指导书 §2.3 屏 18）
+                            if (searchQuery.isNotEmpty()) {
+                                Text(
+                                    text = if (matchTotal == 0) {
+                                        stringResource(R.string.editor_search_no_match)
+                                    } else {
+                                        stringResource(
+                                            R.string.editor_search_match_count,
+                                            matchOrdinal,
+                                            matchTotal
+                                        )
+                                    },
+                                    style = EditorStatusBarStyle,
+                                    color = PrototypeTokens.muted
+                                )
+                            }
                             SearchNavButtons(
-                                onPrevious = { wrapper.gotoPrevious() },
-                                onNext = { wrapper.gotoNext() }
+                                onPrevious = {
+                                    wrapper.gotoPrevious()
+                                    searchNavTick++
+                                },
+                                onNext = {
+                                    wrapper.gotoNext()
+                                    searchNavTick++
+                                }
                             )
                         }
                         BrandOutlinedTextField(

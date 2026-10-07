@@ -383,4 +383,6 @@ graph TD
     <!-- #80: WebView provider 不可用时的降级提示 -->
     <string name="editor_preview_no_webview">この端末には利用可能な WebView がないため、ネイティブプレビューに切り替えました（数式・図・コードハイライトは利用できません）</string>
     <string name="editor_status_unsaved_lines">未保存 · %1$d 行変更</string>
+    <string name="editor_search_match_count">%1$d/%2$d</string>
+    <string name="editor_search_no_match">一致なし</string>
 </resources>
