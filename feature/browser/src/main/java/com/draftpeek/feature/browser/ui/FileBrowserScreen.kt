@@ -57,6 +57,7 @@ import androidx.compose.material.icons.filled.CloudDownload
 import androidx.compose.material.icons.filled.Delete
 import androidx.compose.material.icons.filled.Description
 import androidx.compose.material.icons.filled.DragHandle
+import androidx.compose.material.icons.filled.Edit
 import androidx.compose.material.icons.filled.FileUpload
 import androidx.compose.material.icons.filled.Folder
 import androidx.compose.material.icons.filled.FolderOff
@@ -348,6 +349,8 @@ fun FileBrowserScreen(
     var showCreateFolderDialog by rememberSaveable { mutableStateOf(false) }
     var showMoveToDialog by rememberSaveable { mutableStateOf(false) }
     var fileToMove by remember { mutableStateOf<FileItem?>(null) }
+    var showRenameDialog by rememberSaveable { mutableStateOf(false) }
+    var fileToRename by remember { mutableStateOf<FileItem?>(null) }
     var fileToEncrypt by remember { mutableStateOf<FileItem?>(null) }
     var showEncryptExportDialog by rememberSaveable { mutableStateOf(false) }
     var fileToDecrypt by remember { mutableStateOf<FileItem?>(null) }
@@ -534,6 +537,66 @@ fun FileBrowserScreen(
     }
 
     // Move to folder dialog
+    if (showRenameDialog && fileToRename != null) {
+        val renameTarget = fileToRename
+        var newName by remember(renameTarget) { mutableStateOf(renameTarget?.name ?: "") }
+        BrandDialog(
+            onDismissRequest = {
+                showRenameDialog = false
+                fileToRename = null
+            },
+            title = { Text(stringResource(R.string.browser_dialog_rename_title)) },
+            content = {
+                BrandOutlinedTextField(
+                    value = newName,
+                    onValueChange = { newName = it },
+                    label = { Text(stringResource(R.string.browser_hint_enter_new_name)) },
+                    singleLine = true,
+                    modifier = Modifier.fillMaxWidth()
+                )
+            },
+            confirmButton = {
+                BrandFilledButton(
+                    text = stringResource(R.string.browser_action_rename),
+                    onClick = {
+                        val item = fileToRename ?: return@BrandFilledButton
+                        val trimmed = newName.trim()
+                        if (trimmed.isEmpty()) {
+                            Toast.makeText(
+                                context,
+                                context.getString(R.string.browser_error_name_empty),
+                                Toast.LENGTH_SHORT
+                            ).show()
+                            return@BrandFilledButton
+                        }
+                        scope.launch {
+                            val ok = viewModel.renameFile(item, trimmed)
+                            Toast.makeText(
+                                context,
+                                context.getString(
+                                    if (ok) R.string.browser_rename_success else R.string.browser_rename_failed
+                                ),
+                                Toast.LENGTH_SHORT
+                            ).show()
+                            if (ok) {
+                                showRenameDialog = false
+                                fileToRename = null
+                            }
+                        }
+                    }
+                )
+            },
+            dismissButton = {
+                TextButton(onClick = {
+                    showRenameDialog = false
+                    fileToRename = null
+                }) {
+                    Text(stringResource(R.string.browser_action_cancel))
+                }
+            }
+        )
+    }
+
     if (showMoveToDialog) {
         val folders = viewModel.getInternalFolders()
         val isMultiSelect = isMultiSelectMode && selectedItems.isNotEmpty()
@@ -1606,6 +1669,10 @@ fun FileBrowserScreen(
                                                     fileToMove = fileItem
                                                     showMoveToDialog = true
                                                 },
+                                                onRename = { fileItem ->
+                                                    fileToRename = fileItem
+                                                    showRenameDialog = true
+                                                },
                                                 onMultiSelect = {
                                                     viewModel.toggleMultiSelectMode()
                                                     viewModel.toggleItemSelected(item.uri.toString())
@@ -2240,6 +2307,10 @@ fun FileBrowserScreen(
                                                                 fileToMove = fileItem
                                                                 showMoveToDialog = true
                                                             },
+                                                            onRename = { fileItem ->
+                                                                fileToRename = fileItem
+                                                                showRenameDialog = true
+                                                            },
                                                             onMultiSelect = {
                                                                 viewModel.toggleMultiSelectMode()
                                                                 viewModel.toggleItemSelected(item.uri.toString())
@@ -2623,6 +2694,10 @@ fun FileBrowserScreen(
                                                                 fileToMove = fileItem
                                                                 showMoveToDialog = true
                                                             },
+                                                            onRename = { fileItem ->
+                                                                fileToRename = fileItem
+                                                                showRenameDialog = true
+                                                            },
                                                             onMultiSelect = {
                                                                 viewModel.toggleMultiSelectMode()
                                                                 viewModel.toggleItemSelected(item.uri.toString())
@@ -2771,6 +2846,10 @@ fun FileBrowserScreen(
                                     fileToMove = fileItem
                                     showMoveToDialog = true
                                 },
+                                onRename = { fileItem ->
+                                    fileToRename = fileItem
+                                    showRenameDialog = true
+                                },
                                 onMultiSelect = {
                                     viewModel.toggleMultiSelectMode()
                                 },
@@ -2805,6 +2884,10 @@ fun FileBrowserScreen(
                                 onMoveTo = { fileItem ->
                                     fileToMove = fileItem
                                     showMoveToDialog = true
+                                },
+                                onRename = { fileItem ->
+                                    fileToRename = fileItem
+                                    showRenameDialog = true
                                 },
                                 onMultiSelect = {
                                     viewModel.toggleMultiSelectMode()
@@ -2843,6 +2926,10 @@ fun FileBrowserScreen(
                                 onMoveTo = { fileItem ->
                                     fileToMove = fileItem
                                     showMoveToDialog = true
+                                },
+                                onRename = { fileItem ->
+                                    fileToRename = fileItem
+                                    showRenameDialog = true
                                 },
                                 onMultiSelect = {
                                     viewModel.toggleMultiSelectMode()
@@ -3001,6 +3088,10 @@ fun FileBrowserScreen(
                                                         onMoveTo = { fileItem ->
                                                             fileToMove = fileItem
                                                             showMoveToDialog = true
+                                                        },
+                                                        onRename = { fileItem ->
+                                                            fileToRename = fileItem
+                                                            showRenameDialog = true
                                                         },
                                                         onMultiSelect = {
                                                             viewModel.toggleMultiSelectMode()
@@ -3525,6 +3616,7 @@ private fun FoldableBrowserLayout(
     onToggleBookmark: ((String, String, String) -> Unit)? = null,
     onDelete: ((FileItem) -> Unit)? = null,
     onMoveTo: ((FileItem) -> Unit)? = null,
+    onRename: ((FileItem) -> Unit)? = null,
     onEncryptExport: ((FileItem) -> Unit)? = null,
     onMultiSelect: (() -> Unit)? = null,
     onToggleSelect: ((String) -> Unit)? = null,
@@ -3556,6 +3648,7 @@ private fun FoldableBrowserLayout(
                 onDelete = onDelete,
                 onEncryptExport = onEncryptExport,
                 onMoveTo = onMoveTo,
+                onRename = onRename,
                 onMultiSelect = onMultiSelect,
                 onToggleSelect = onToggleSelect,
                 isMultiSelectMode = isMultiSelectMode,
@@ -3596,6 +3689,7 @@ private fun FoldableBrowserLayout(
                 onDelete = onDelete,
                 onEncryptExport = onEncryptExport,
                 onMoveTo = onMoveTo,
+                onRename = onRename,
                 onMultiSelect = onMultiSelect,
                 onToggleSelect = onToggleSelect,
                 isMultiSelectMode = isMultiSelectMode,
@@ -3636,6 +3730,7 @@ private fun TwoPaneFileBrowser(
     onToggleBookmark: ((String, String, String) -> Unit)? = null,
     onDelete: ((FileItem) -> Unit)? = null,
     onMoveTo: ((FileItem) -> Unit)? = null,
+    onRename: ((FileItem) -> Unit)? = null,
     onEncryptExport: ((FileItem) -> Unit)? = null,
     onMultiSelect: (() -> Unit)? = null,
     onToggleSelect: ((String) -> Unit)? = null,
@@ -3658,6 +3753,7 @@ private fun TwoPaneFileBrowser(
                 onDelete = onDelete,
                 onEncryptExport = onEncryptExport,
                 onMoveTo = onMoveTo,
+                onRename = onRename,
                 onMultiSelect = onMultiSelect,
                 onToggleSelect = onToggleSelect,
                 isMultiSelectMode = isMultiSelectMode,
@@ -3971,6 +4067,7 @@ private fun FileListContent(
     onToggleBookmark: ((String, String, String) -> Unit)? = null,
     onDelete: ((FileItem) -> Unit)? = null,
     onMoveTo: ((FileItem) -> Unit)? = null,
+    onRename: ((FileItem) -> Unit)? = null,
     onEncryptExport: ((FileItem) -> Unit)? = null,
     onMultiSelect: (() -> Unit)? = null,
     onToggleSelect: ((String) -> Unit)? = null,
@@ -4149,6 +4246,7 @@ private fun FileListContent(
                                 onDelete = onDelete,
                                 onEncryptExport = onEncryptExport,
                                 onMoveTo = onMoveTo,
+                                onRename = onRename,
                                 onMultiSelect = onMultiSelect,
                                 onToggleSelect = onToggleSelect,
                                 currentDirectoryUri = currentDirectoryUri
@@ -4321,6 +4419,7 @@ fun FileItemComposable(
     onToggleBookmark: ((String, String, String) -> Unit)? = null,
     onDelete: ((FileItem) -> Unit)? = null,
     onMoveTo: ((FileItem) -> Unit)? = null,
+    onRename: ((FileItem) -> Unit)? = null,
     onEncryptExport: ((FileItem) -> Unit)? = null,
     onMultiSelect: (() -> Unit)? = null,
     onToggleSelect: ((String) -> Unit)? = null,
@@ -4590,6 +4689,22 @@ fun FileItemComposable(
                     onClick = {
                         showContextMenu = false
                         onMoveTo.invoke(item)
+                    }
+                )
+            }
+            if (onRename != null && isInternalFile) {
+                DropdownMenuItem(
+                    text = { Text(stringResource(R.string.browser_action_rename)) },
+                    leadingIcon = {
+                        Icon(
+                            imageVector = Icons.Filled.Edit,
+                            contentDescription = stringResource(R.string.browser_action_rename),
+                            tint = PrototypeTokens.accent
+                        )
+                    },
+                    onClick = {
+                        showContextMenu = false
+                        onRename.invoke(item)
                     }
                 )
             }

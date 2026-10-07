@@ -1219,6 +1219,39 @@ class FileBrowserViewModel @Inject constructor(
         false
     }
 
+    // ===== 文件重命名 =====
+    /**
+     * 重命名文件或文件夹（屏 07 ⋮ 菜单「重命名」）。
+     *
+     * 分两条路径：
+     * - **内部存储**（[AppFileManager.isInternalUri]）→ [AppFileManager.renameInternalFile]（`File.renameTo`）；
+     * - **SAF 文档** → [FileRepository.renameFile]（`DocumentsContract.renameDocument`）。
+     *
+     * @param newName 新名称；空名、含路径分隔符、与原名相同、同名已存在一律失败
+     * @return 是否改名成功（失败由调用方提示，不静默吞掉）
+     */
+    suspend fun renameFile(item: FileItem, newName: String): Boolean = try {
+        val trimmed = newName.trim()
+        if (trimmed.isEmpty() || trimmed == item.name) {
+            false
+        } else if (AppFileManager.isInternalUri(item.uri.toString())) {
+            val ok = AppFileManager.renameInternalFile(context, item.uri.toString(), trimmed)
+            if (ok) {
+                refreshInternalFiles()
+            }
+            ok
+        } else {
+            val ok = repository.renameFile(item.uri, trimmed).isSuccess
+            if (ok) {
+                refreshInternalFiles()
+            }
+            ok
+        }
+    } catch (e: Exception) {
+        Log.e(TAG, "Failed to rename file: ${item.name}", e)
+        false
+    }
+
     fun getInternalFolders(): List<File> = AppFileManager.listUserFolders(context)
 
     // ===== 文件移动 =====

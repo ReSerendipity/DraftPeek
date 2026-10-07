@@ -4,6 +4,7 @@ import android.content.ContentResolver
 import android.content.Context
 import android.content.Intent
 import android.net.Uri
+import android.provider.DocumentsContract
 import androidx.documentfile.provider.DocumentFile
 import com.draftpeek.core.common.util.EncodingDetector
 import com.draftpeek.core.common.util.LanguageConfig
@@ -127,8 +128,22 @@ class FileRepositoryImpl @Inject constructor(@param:ApplicationContext private v
         }
     }
 
-    // PLATFORM-SPECIFIC: [P1.2] - takePersistableUriPermission/releasePersistableUriPermission
-    // 是 IPC 调用，可能在主线程阻塞。原实现为 suspend 但未切线程，调用方可能
+    // PLATFORM-SPECIFIC: DocumentsContract.renameDocument 是 provider IPC，切到 IO 线程执行。
+    // 并非所有 provider 都支持改名（需 FLAG_SUPPORTS_RENAME）：不支持时会抛
+    // UnsupportedOperationException 或返回 null —— 两种情况都归入 Result.failure，
+    // 由 UI 提示失败，不做静默降级。
+    override suspend fun renameFile(uri: Uri, newName: String): Result<String> = withContext(Dispatchers.IO) {
+        runCatching {
+            val renamed = DocumentsContract.renameDocument(contentResolver, uri, newName)
+                ?: error("Provider refused to rename: $uri")
+            // 回读显示名：部分 provider 会规范化名称（去空格/改扩展名），以回读结果为准。
+            DocumentFile.fromSingleUri(context, renamed)?.name
+                ?: renamed.lastPathSegment
+                ?: newName
+        }
+    }
+
+    // PLATFORM-SPECIFIC: [P1.2] - takePersistableUriPermission/releasePersistableUriPermission    // 是 IPC 调用，可能在主线程阻塞。原实现为 suspend 但未切线程，调用方可能
     // 在主线程触发 ANR。新增 withContext(Dispatchers.IO) 确保 IPC 在 IO 线程执行。
     override suspend fun takeUriPermission(treeUri: Uri) = withContext(Dispatchers.IO) {
         val takeFlags = Intent.FLAG_GRANT_READ_URI_PERMISSION or

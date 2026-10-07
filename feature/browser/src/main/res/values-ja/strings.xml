@@ -268,4 +268,11 @@
     <string name="browser_title_sample_files">サンプルファイル</string>
     <string name="browser_usb_storage">USB ストレージ</string>
     <string name="security_operation_restricted">セキュリティチェックに失敗しました。この操作は一時的に利用できません</string>
+    <!-- 屏 07 ⋮ 菜单：重命名 -->
+    <string name="browser_action_rename">名前を変更</string>
+    <string name="browser_dialog_rename_title">名前を変更</string>
+    <string name="browser_hint_enter_new_name">新しい名前を入力</string>
+    <string name="browser_rename_success">名前を変更しました</string>
+    <string name="browser_rename_failed">名前を変更できませんでした：名前の重複、またはこの場所は未対応</string>
+    <string name="browser_error_name_empty">名前を入力してください</string>
 </resources>
