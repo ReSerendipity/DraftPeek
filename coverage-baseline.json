@@ -15,12 +15,13 @@
     "2026-10-06（阶段 5 第二批）：编辑器设置页（约 886 行 UI + 8 个对话框）自 stats 迁入 settings，settings 分母 8888→16232，实测一度降到 14.05% 击穿阈值；仍按正向解决 —— SettingsRepositoryRoundTripTest 再补 9 组 setter/getter 往返（autoPairCompletion / showMinimap / stickyScroll / screenReaderOptimized / nonColorIndicators / vibrationFeedback / customMarkdownCss / editorThemeId / markdownThemeName），covered 2280→2880，实测 17.74%。stats 迁走该屏后实测 2.59%→3.21%。threshold_pct 继续维持 14.7 不动（5c/5d 还要迁实验室与关于与安全两页，待全部迁完再按 90% 规则统一上调）。",
     "2026-10-06（阶段 5 第三批）：实验室页（LabScreen，按 D2 分语言与补全 / Markdown / 版本与运行时三组）自 stats 迁入 settings，settings 分母 16232→16947，实测 16.99%（仍高于阈值 14.7%，本批无需补测试）；stats 迁走后 3.21%→3.24%。threshold_pct 仍维持 14.7（5d/5e 还有关于与安全页与 Me 页重排）。",
     "2026-10-06（阶段 5 第四批）：关于与安全页（AboutSecurityScreen）+ 开源许可弹窗自 stats 迁入 settings，settings 分母 16947→21136，实测 13.63% 击穿阈值；仍按正向解决 —— SettingsRepositoryRoundTripTest 再补 5 组（pinnedOrder / recentOrder / internalFilesOrder / bookmarkOrder 的 JSON 序列化往返 + directorySortOption 按目录读写），covered 2880→3297，实测 15.60%。stats 迁走后 3.24%→3.71%。threshold_pct 仍维持 14.7（最后一批 5e 是 Me 页重排，不再往 settings 加 UI，之后可按 90% 规则统一上调）。",
-    "2026-10-06（阶段 5 第五批，屏 20 Me 页重排完成）：本批只在 stats 内部重排分区，未往 settings 加 UI，实测 settings 15.60% / stats 3.71% 与上一批一致，数值不变。关于 settings 阈值：按 90% 规则本应上调，但 90%×15.60% = 14.04% 低于现阈值 14.7%，棘轮只许升不许降，故维持 14.7（等于实际上把门槛留在更高处，属更严）。阶段 5（设置三页拆分 + Me 页重排）至此全部完成。"
+    "2026-10-06（阶段 5 第五批，屏 20 Me 页重排完成）：本批只在 stats 内部重排分区，未往 settings 加 UI，实测 settings 15.60% / stats 3.71% 与上一批一致，数值不变。关于 settings 阈值：按 90% 规则本应上调，但 90%×15.60% = 14.04% 低于现阈值 14.7%，棘轮只许升不许降，故维持 14.7（等于实际上把门槛留在更高处，属更严）。阶段 5（设置三页拆分 + Me 页重排）至此全部完成。",
+    "2026-10-07（覆盖率盲区推广，无新功能）：把 feature/settings 上批验证过的 isIncludeNoLocationClasses = true + excludes jdk.internal.* 推广到另外两个仍受 「Robolectric 对 JaCoCo 不可见」影响的模块（见 GOTCHAS #DP-09）。该项只让原本被计为 missed 的指令变为 covered，**分母不变**，纯正向。实测：core/data covered 2289→7744（分母 16430 不变），13.93%→47.13%；app covered 1354→2374（分母因上批引导页改动 28905→29464），4.68%→8.06%。按 AGENTS.md「实测明显上升时须上调 threshold_pct 至新实测 ≈90%」：core/data 12.50→42.4，app 4.20→7.25。app 的分母同时含上批（屏 01–04 引导页）新增的 ~560 条指令。"
   ],
   "modules": {
     "app": {
-      "measured_pct": 4.68,
-      "threshold_pct": 4.2,
+      "measured_pct": 8.06,
+      "threshold_pct": 7.25,
       "report_path": "app/build/reports/jacoco/jacocoTestReport/jacocoTestReport.xml"
     },
     "core/common": {
@@ -29,8 +30,8 @@
       "report_path": "core/common/build/reports/jacoco/jacocoTestReport/jacocoTestReport.xml"
     },
     "core/data": {
-      "measured_pct": 13.93,
-      "threshold_pct": 12.5,
+      "measured_pct": 47.13,
+      "threshold_pct": 42.4,
       "report_path": "core/data/build/reports/jacoco/jacocoTestReport/jacocoTestReport.xml"
     },
     "core/domain": {
