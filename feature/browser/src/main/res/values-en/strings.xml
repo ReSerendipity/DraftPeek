@@ -284,4 +284,11 @@
     <string name="browser_encrypt_export_success">Exported as an encrypted .jenc file</string>
     <string name="browser_encrypt_password_mismatch">Passwords do not match</string>
     <string name="browser_encrypt_password_too_short">Password must be at least 4 characters</string>
+    <!-- 屏 07 ⋮ 菜单：重命名 -->
+    <string name="browser_action_rename">Rename</string>
+    <string name="browser_dialog_rename_title">Rename</string>
+    <string name="browser_hint_enter_new_name">Enter new name</string>
+    <string name="browser_rename_success">Renamed</string>
+    <string name="browser_rename_failed">Rename failed: duplicate name or unsupported here</string>
+    <string name="browser_error_name_empty">Name cannot be empty</string>
 </resources>

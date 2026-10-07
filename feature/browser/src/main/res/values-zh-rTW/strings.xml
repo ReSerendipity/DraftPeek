@@ -302,4 +302,11 @@
     <string name="browser_no_recent_files">暫無最近開啟的檔案</string>
     <string name="browser_no_favorite_files">暫無收藏檔案</string>
     <string name="browser_recent_no_preview">無內容預覽</string>
+    <!-- 屏 07 ⋮ 菜单：重命名 -->
+    <string name="browser_action_rename">重新命名</string>
+    <string name="browser_dialog_rename_title">重新命名</string>
+    <string name="browser_hint_enter_new_name">輸入新名稱</string>
+    <string name="browser_rename_success">已重新命名</string>
+    <string name="browser_rename_failed">重新命名失敗：名稱重複或該位置不支援</string>
+    <string name="browser_error_name_empty">名稱不能為空</string>
 </resources>

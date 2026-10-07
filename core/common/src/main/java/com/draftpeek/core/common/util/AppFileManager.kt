@@ -206,6 +206,33 @@ object AppFileManager {
     }
 
     /**
+     * 重命名内部存储中的文件或文件夹（就地改名，不换目录）。
+     *
+     * 与 [moveInternalFile] 同属「内部存储直改」路径：不走 SAF，直接用 [File.renameTo]。
+     * 仅接受内部 URI（见 [isInternalUri]），否则返回 false 交由调用方走 SAF 分支。
+     *
+     * @param sourceUri 目标文件的内部 URI
+     * @param newName 新名称（会 trim；不允许为空、不允许含路径分隔符）
+     * @return 是否改名成功；同名已存在、非法名称、源不存在等一律返回 false
+     */
+    fun renameInternalFile(context: Context, sourceUri: String, newName: String): Boolean {
+        if (!isInternalUri(sourceUri)) return false
+        val trimmed = newName.trim()
+        if (trimmed.isEmpty() || trimmed.contains('/') || trimmed.contains('\\')) return false
+        return try {
+            val sourceFile = getInternalFileFromUri(context, sourceUri) ?: return false
+            if (!sourceFile.exists()) return false
+            if (trimmed == sourceFile.name) return true
+            val parent = sourceFile.parentFile ?: return false
+            val destFile = File(parent, trimmed)
+            if (destFile.exists()) return false
+            sourceFile.renameTo(destFile)
+        } catch (e: Exception) {
+            false
+        }
+    }
+
+    /**
      * 从内部安全URI获取对应的目录File对象。
      *
      * @param context 应用上下文

@@ -268,4 +268,11 @@
     <string name="browser_title_sample_files">샘플 파일</string>
     <string name="browser_usb_storage">USB 저장소</string>
     <string name="security_operation_restricted">보안 검사에 실패했습니다. 이 작업은 일시적으로 사용할 수 없습니다</string>
+    <!-- 屏 07 ⋮ 菜单：重命名 -->
+    <string name="browser_action_rename">이름 바꾸기</string>
+    <string name="browser_dialog_rename_title">이름 바꾸기</string>
+    <string name="browser_hint_enter_new_name">새 이름 입력</string>
+    <string name="browser_rename_success">이름을 바꿨습니다</string>
+    <string name="browser_rename_failed">이름을 바꾸지 못했습니다: 이름 중복 또는 이 위치에서 지원되지 않음</string>
+    <string name="browser_error_name_empty">이름을 입력하세요</string>
 </resources>
