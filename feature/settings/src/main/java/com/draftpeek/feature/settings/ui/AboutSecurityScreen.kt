@@ -89,111 +89,117 @@ fun AboutSecurityScreen(onNavigateUp: () -> Unit, onVerifyApp: (suspend (Context
     var showOpenSourceDialog by remember { mutableStateOf(false) }
     var verifyAppState by remember { mutableStateOf<VerifyAppState>(VerifyAppState.Idle) }
 
-    BrandTopBar(
-        onBack = onNavigateUp,
-        title = stringResource(R.string.settings_about_security_page_title),
-        titleStyle = SubPageTopBarTitleStyle
-    )
-
     Column(
         modifier = Modifier
             .fillMaxSize()
-            .verticalScroll(rememberScrollState())
-            .padding(horizontal = 16.dp, vertical = 8.dp)
+            .background(PrototypeTokens.pageBackground)
     ) {
-        SectionHeader(label = stringResource(R.string.security_status_section_title))
-
-        val aiState = AiProtectionStateHolder.current
-        val isSignatureMismatch =
-            com.draftpeek.core.common.security.AiDetectionSignal.SIGNATURE_MISMATCH in aiState.triggeredSignals
-        val isDexTampered =
-            com.draftpeek.core.common.security.AiDetectionSignal.DEX_TAMPERED in aiState.triggeredSignals
-
-        BrandSettingRow(
-            icon = Icons.Filled.Security,
-            label = stringResource(
-                if (isSignatureMismatch) {
-                    R.string.security_status_signature_unverified
-                } else {
-                    R.string.security_status_signature_verified
-                }
-            ),
-            onClick = {},
-            showDivider = true
-        )
-        BrandSettingRow(
-            icon = Icons.Filled.Info,
-            label = stringResource(
-                if (isDexTampered) {
-                    R.string.security_status_dex_failed
-                } else {
-                    R.string.security_status_dex_passed
-                }
-            ),
-            onClick = {},
-            showDivider = true
-        )
-        BrandSettingRow(
-            icon = Icons.Filled.Security,
-            label = stringResource(
-                when (aiState.threatLevel) {
-                    AiThreatLevel.SAFE -> R.string.security_status_environment_safe
-                    AiThreatLevel.SUSPICIOUS -> R.string.security_status_environment_suspicious
-                    AiThreatLevel.HOSTILE -> R.string.security_status_environment_hostile
-                }
-            ),
-            onClick = {},
-            showDivider = true
-        )
-        BrandSettingRow(
-            icon = Icons.Filled.Info,
-            label = stringResource(R.string.security_status_recheck),
-            onClick = {
-                // Re-verify is handled at app level; this triggers a toast
-                Toast.makeText(context, R.string.security_status_recheck, Toast.LENGTH_SHORT).show()
-            },
-            showDivider = true
-        )
-        BrandSettingRow(
-            icon = Icons.Filled.Info,
-            label = stringResource(R.string.security_status_export_report),
-            onClick = {
-                Toast.makeText(context, R.string.security_status_export_report, Toast.LENGTH_SHORT).show()
-            },
-            showDivider = true
-        )
-        BrandSettingRow(
-            icon = Icons.Filled.DeleteSweep,
-            label = stringResource(R.string.security_status_clear_logs),
-            onClick = {
-                Toast.makeText(context, R.string.security_status_clear_logs, Toast.LENGTH_SHORT).show()
-            },
-            showDivider = false
+        BrandTopBar(
+            onBack = onNavigateUp,
+            title = stringResource(R.string.settings_about_security_page_title),
+            titleStyle = SubPageTopBarTitleStyle
         )
 
-        Spacer(modifier = Modifier.height(8.dp))
+        Column(
+            modifier = Modifier
+                .fillMaxSize()
+                .verticalScroll(rememberScrollState())
+                .padding(horizontal = 16.dp, vertical = 8.dp)
+        ) {
+            SectionHeader(label = stringResource(R.string.security_status_section_title))
 
-        SectionHeader(label = stringResource(R.string.profile_section_about))
+            val aiState = AiProtectionStateHolder.current
+            val isSignatureMismatch =
+                com.draftpeek.core.common.security.AiDetectionSignal.SIGNATURE_MISMATCH in aiState.triggeredSignals
+            val isDexTampered =
+                com.draftpeek.core.common.security.AiDetectionSignal.DEX_TAMPERED in aiState.triggeredSignals
 
-        BrandSettingRow(
-            icon = Icons.Filled.Security,
-            label = stringResource(R.string.profile_verify_app),
-            onClick = { showVerifyAppDialog = true },
-            showDivider = true
-        )
-        BrandSettingRow(
-            icon = Icons.Filled.Info,
-            label = stringResource(R.string.profile_setting_version),
-            value = versionName,
-            onClick = {},
-            showDivider = true
-        )
-        BrandSettingRow(
-            icon = Icons.Filled.Link,
-            label = stringResource(R.string.profile_open_source_license),
-            onClick = { showOpenSourceDialog = true },
-            showDivider = false
-        )
+            BrandSettingRow(
+                icon = Icons.Filled.Security,
+                label = stringResource(
+                    if (isSignatureMismatch) {
+                        R.string.security_status_signature_unverified
+                    } else {
+                        R.string.security_status_signature_verified
+                    }
+                ),
+                onClick = {},
+                showDivider = true
+            )
+            BrandSettingRow(
+                icon = Icons.Filled.Info,
+                label = stringResource(
+                    if (isDexTampered) {
+                        R.string.security_status_dex_failed
+                    } else {
+                        R.string.security_status_dex_passed
+                    }
+                ),
+                onClick = {},
+                showDivider = true
+            )
+            BrandSettingRow(
+                icon = Icons.Filled.Security,
+                label = stringResource(
+                    when (aiState.threatLevel) {
+                        AiThreatLevel.SAFE -> R.string.security_status_environment_safe
+                        AiThreatLevel.SUSPICIOUS -> R.string.security_status_environment_suspicious
+                        AiThreatLevel.HOSTILE -> R.string.security_status_environment_hostile
+                    }
+                ),
+                onClick = {},
+                showDivider = true
+            )
+            BrandSettingRow(
+                icon = Icons.Filled.Info,
+                label = stringResource(R.string.security_status_recheck),
+                onClick = {
+                    // Re-verify is handled at app level; this triggers a toast
+                    Toast.makeText(context, R.string.security_status_recheck, Toast.LENGTH_SHORT).show()
+                },
+                showDivider = true
+            )
+            BrandSettingRow(
+                icon = Icons.Filled.Info,
+                label = stringResource(R.string.security_status_export_report),
+                onClick = {
+                    Toast.makeText(context, R.string.security_status_export_report, Toast.LENGTH_SHORT).show()
+                },
+                showDivider = true
+            )
+            BrandSettingRow(
+                icon = Icons.Filled.DeleteSweep,
+                label = stringResource(R.string.security_status_clear_logs),
+                onClick = {
+                    Toast.makeText(context, R.string.security_status_clear_logs, Toast.LENGTH_SHORT).show()
+                },
+                showDivider = false
+            )
+
+            Spacer(modifier = Modifier.height(8.dp))
+
+            SectionHeader(label = stringResource(R.string.profile_section_about))
+
+            BrandSettingRow(
+                icon = Icons.Filled.Security,
+                label = stringResource(R.string.profile_verify_app),
+                onClick = { showVerifyAppDialog = true },
+                showDivider = true
+            )
+            BrandSettingRow(
+                icon = Icons.Filled.Info,
+                label = stringResource(R.string.profile_setting_version),
+                value = versionName,
+                onClick = {},
+                showDivider = true
+            )
+            BrandSettingRow(
+                icon = Icons.Filled.Link,
+                label = stringResource(R.string.profile_open_source_license),
+                onClick = { showOpenSourceDialog = true },
+                showDivider = false
+            )
+        }
     }
 
     if (showVerifyAppDialog) {
