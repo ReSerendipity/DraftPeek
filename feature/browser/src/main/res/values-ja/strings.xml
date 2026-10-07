@@ -275,4 +275,5 @@
     <string name="browser_rename_success">名前を変更しました</string>
     <string name="browser_rename_failed">名前を変更できませんでした：名前の重複、またはこの場所は未対応</string>
     <string name="browser_error_name_empty">名前を入力してください</string>
+    <string name="browser_action_manual_order">手動並べ替え</string>
 </resources>

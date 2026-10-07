@@ -291,4 +291,5 @@
     <string name="browser_rename_success">Renamed</string>
     <string name="browser_rename_failed">Rename failed: duplicate name or unsupported here</string>
     <string name="browser_error_name_empty">Name cannot be empty</string>
+    <string name="browser_action_manual_order">Manual order</string>
 </resources>

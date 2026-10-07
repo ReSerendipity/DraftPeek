@@ -300,6 +300,8 @@ fun FileBrowserScreen(
     val pinnedFiles by viewModel.pinnedFiles.collectAsStateWithLifecycle()
     val bookmarkedUris by viewModel.bookmarkedUris.collectAsStateWithLifecycle()
     val isMultiSelectMode by viewModel.isMultiSelectMode.collectAsStateWithLifecycle()
+    // 「手动排序」模式（屏 07 收敛）：默认隐藏每行拖拽手柄，进模式后才显示。
+    var isManualOrderMode by rememberSaveable { mutableStateOf(false) }
     val selectedItems by viewModel.selectedItems.collectAsStateWithLifecycle()
 
     // Feature flags
@@ -1277,6 +1279,25 @@ fun FileBrowserScreen(
                         }
                     }
 
+                    // 「手动排序」模式开关（实施指导书 §2.9 屏 07）：手柄由常驻改为按需显示。
+                    BrandIconButton(
+                        onClick = { isManualOrderMode = !isManualOrderMode },
+                        modifier = Modifier.accessibilityEnhanced(
+                            contentDescription = stringResource(R.string.browser_action_manual_order),
+                            stateDescription = if (isManualOrderMode) "手动排序已开启" else "手动排序已关闭"
+                        )
+                    ) {
+                        Icon(
+                            imageVector = Icons.Filled.DragHandle,
+                            contentDescription = null,
+                            tint = if (isManualOrderMode) {
+                                PrototypeTokens.accent
+                            } else {
+                                PrototypeTokens.muted
+                            }
+                        )
+                    }
+
                     // 浏览类入口升为顶栏常驻图标（实施指导书 §2.2）：History / Snippets 不再藏在 FAB 里
                     BrandIconButton(
                         onClick = onNavigateToHistory,
@@ -1681,6 +1702,7 @@ fun FileBrowserScreen(
                                                     viewModel.toggleItemSelected(uri)
                                                 },
                                                 isMultiSelectMode = isMultiSelectMode,
+                                                isManualOrderMode = isManualOrderMode,
                                                 isItemSelected = selectedItems.contains(item.uri.toString()),
                                                 currentDirectoryUri = "",
                                                 modifier = Modifier.fillMaxWidth()
@@ -2319,6 +2341,7 @@ fun FileBrowserScreen(
                                                                 viewModel.toggleItemSelected(uri)
                                                             },
                                                             isMultiSelectMode = isMultiSelectMode,
+                                                            isManualOrderMode = isManualOrderMode,
                                                             isItemSelected = selectedItems.contains(
                                                                 item.uri.toString()
                                                             ),
@@ -2706,6 +2729,7 @@ fun FileBrowserScreen(
                                                                 viewModel.toggleItemSelected(uri)
                                                             },
                                                             isMultiSelectMode = isMultiSelectMode,
+                                                            isManualOrderMode = isManualOrderMode,
                                                             isItemSelected = selectedItems.contains(
                                                                 item.uri.toString()
                                                             ),
@@ -2857,6 +2881,7 @@ fun FileBrowserScreen(
                                     viewModel.toggleItemSelected(uri)
                                 },
                                 isMultiSelectMode = isMultiSelectMode,
+                                isManualOrderMode = isManualOrderMode,
                                 selectedItems = selectedItems,
                                 currentDirectoryUri = currentTreeUri?.toString() ?: "",
                                 layoutMode = layoutMode,
@@ -2896,6 +2921,7 @@ fun FileBrowserScreen(
                                     viewModel.toggleItemSelected(uri)
                                 },
                                 isMultiSelectMode = isMultiSelectMode,
+                                isManualOrderMode = isManualOrderMode,
                                 selectedItems = selectedItems,
                                 currentDirectoryUri = currentTreeUri?.toString() ?: "",
                                 gitFileStatuses = gitFileStatuses,
@@ -2938,6 +2964,7 @@ fun FileBrowserScreen(
                                     viewModel.toggleItemSelected(uri)
                                 },
                                 isMultiSelectMode = isMultiSelectMode,
+                                isManualOrderMode = isManualOrderMode,
                                 selectedItems = selectedItems,
                                 currentDirectoryUri = currentTreeUri?.toString() ?: "",
                                 gitFileStatuses = gitFileStatuses,
@@ -3101,6 +3128,7 @@ fun FileBrowserScreen(
                                                             viewModel.toggleItemSelected(uri)
                                                         },
                                                         isMultiSelectMode = isMultiSelectMode,
+                                                        isManualOrderMode = isManualOrderMode,
                                                         isItemSelected = selectedItems.contains(item.uri.toString()),
                                                         currentDirectoryUri = currentTreeUri?.toString() ?: "",
                                                         modifier = Modifier
@@ -3621,6 +3649,7 @@ private fun FoldableBrowserLayout(
     onMultiSelect: (() -> Unit)? = null,
     onToggleSelect: ((String) -> Unit)? = null,
     isMultiSelectMode: Boolean = false,
+    isManualOrderMode: Boolean = false,
     selectedItems: Set<String> = emptySet(),
     currentDirectoryUri: String = "",
     onSaveExternalFile: (FileItem) -> Unit = {},
@@ -3652,6 +3681,7 @@ private fun FoldableBrowserLayout(
                 onMultiSelect = onMultiSelect,
                 onToggleSelect = onToggleSelect,
                 isMultiSelectMode = isMultiSelectMode,
+                isManualOrderMode = isManualOrderMode,
                 selectedItems = selectedItems,
                 currentDirectoryUri = currentDirectoryUri,
                 onSaveExternalFile = onSaveExternalFile,
@@ -3693,6 +3723,7 @@ private fun FoldableBrowserLayout(
                 onMultiSelect = onMultiSelect,
                 onToggleSelect = onToggleSelect,
                 isMultiSelectMode = isMultiSelectMode,
+                isManualOrderMode = isManualOrderMode,
                 selectedItems = selectedItems,
                 currentDirectoryUri = currentDirectoryUri,
                 onSaveExternalFile = onSaveExternalFile,
@@ -3735,6 +3766,7 @@ private fun TwoPaneFileBrowser(
     onMultiSelect: (() -> Unit)? = null,
     onToggleSelect: ((String) -> Unit)? = null,
     isMultiSelectMode: Boolean = false,
+    isManualOrderMode: Boolean = false,
     selectedItems: Set<String> = emptySet(),
     currentDirectoryUri: String = "",
     onSaveExternalFile: (FileItem) -> Unit = {},
@@ -3757,6 +3789,7 @@ private fun TwoPaneFileBrowser(
                 onMultiSelect = onMultiSelect,
                 onToggleSelect = onToggleSelect,
                 isMultiSelectMode = isMultiSelectMode,
+                isManualOrderMode = isManualOrderMode,
                 selectedItems = selectedItems,
                 currentDirectoryUri = currentDirectoryUri,
                 onSaveExternalFile = onSaveExternalFile,
@@ -4072,6 +4105,7 @@ private fun FileListContent(
     onMultiSelect: (() -> Unit)? = null,
     onToggleSelect: ((String) -> Unit)? = null,
     isMultiSelectMode: Boolean = false,
+    isManualOrderMode: Boolean = false,
     selectedItems: Set<String> = emptySet(),
     currentDirectoryUri: String = "",
     layoutMode: LayoutMode = LayoutMode.COMPACT,
@@ -4240,6 +4274,7 @@ private fun FileListContent(
                                 selected = isSelected,
                                 compareIndex = if (compareIdx >= 0) compareIdx + 1 else 0,
                                 isMultiSelectMode = isMultiSelectMode,
+                                isManualOrderMode = isManualOrderMode,
                                 isItemSelected = selectedItems.contains(item.uri.toString()),
                                 onTogglePin = onTogglePin,
                                 onToggleBookmark = onToggleBookmark,
@@ -4414,6 +4449,7 @@ fun FileItemComposable(
     selected: Boolean = false,
     compareIndex: Int = 0,
     isMultiSelectMode: Boolean = false,
+    isManualOrderMode: Boolean = false,
     isItemSelected: Boolean = false,
     onTogglePin: ((String) -> Unit)? = null,
     onToggleBookmark: ((String, String, String) -> Unit)? = null,
@@ -4543,42 +4579,46 @@ fun FileItemComposable(
                     )
                     Spacer(modifier = Modifier.width(4.dp))
                 }
-                // 拖动手柄 — 使用 clickable 拦截点击，阻止父级长按菜单
-                Box(
-                    modifier = Modifier
-                        .size(28.dp)
-                        .clickable(
-                            interactionSource = remember { MutableInteractionSource() },
-                            indication = null,
-                            onClick = {
-                                // 点击时触发拖动开始，长按时也会触发
-                                onDragStart?.invoke()
-                            }
-                        )
-                        .pointerInput(Unit) {
-                            detectDragGestures(
-                                onDragStart = {
+                // 拖动手柄 — 仅「手动排序」模式下显示（屏 07 收敛）。
+                // 拖拽逻辑本身未改动，只是默认不再常驻，避免与行内 ⋮ 菜单争夺点击。
+                if (isManualOrderMode) {
+                    // 拖动手柄 — 使用 clickable 拦截点击，阻止父级长按菜单
+                    Box(
+                        modifier = Modifier
+                            .size(28.dp)
+                            .clickable(
+                                interactionSource = remember { MutableInteractionSource() },
+                                indication = null,
+                                onClick = {
+                                    // 点击时触发拖动开始，长按时也会触发
                                     onDragStart?.invoke()
-                                },
-                                onDrag = { change, dragAmount ->
-                                    change.consume()
-                                    onDrag?.invoke(dragAmount.y)
-                                },
-                                onDragEnd = {
-                                    onDragEnd?.invoke()
-                                },
-                                onDragCancel = {
-                                    onDragEnd?.invoke()
                                 }
                             )
-                        }
-                ) {
-                    Icon(
-                        imageVector = Icons.Filled.DragHandle,
-                        contentDescription = stringResource(R.string.browser_action_drag_reorder),
-                        tint = PrototypeTokens.muted.copy(alpha = 0.6f),
-                        modifier = Modifier.size(22.dp)
-                    )
+                            .pointerInput(Unit) {
+                                detectDragGestures(
+                                    onDragStart = {
+                                        onDragStart?.invoke()
+                                    },
+                                    onDrag = { change, dragAmount ->
+                                        change.consume()
+                                        onDrag?.invoke(dragAmount.y)
+                                    },
+                                    onDragEnd = {
+                                        onDragEnd?.invoke()
+                                    },
+                                    onDragCancel = {
+                                        onDragEnd?.invoke()
+                                    }
+                                )
+                            }
+                    ) {
+                        Icon(
+                            imageVector = Icons.Filled.DragHandle,
+                            contentDescription = stringResource(R.string.browser_action_drag_reorder),
+                            tint = PrototypeTokens.muted.copy(alpha = 0.6f),
+                            modifier = Modifier.size(22.dp)
+                        )
+                    }
                 }
                 // 尾部收敛为单一「⋮」行内菜单（实施指导书 §2.9 屏 07）：点它即可看到
                 // 原本只藏在长按里的动作，取代原先语义不明的「›」。
