@@ -321,7 +321,7 @@ dependencies {
     testImplementation(libs.androidx.test.core)
     testImplementation(libs.androidx.test.ext.junit)
     // JUnit Vintage engine for JUnit 4 tests (Robolectric @RunWith)
-    testRuntimeOnly("org.junit.vintage:junit-vintage-engine:5.11.3")
+    testRuntimeOnly("org.junit.vintage:junit-vintage-engine:6.1.3")
 
     // Android instrumented test dependencies (Compose UI Test)。:app 带 dev/production
     // flavor，根级聚合任务 connectedDebugAndroidTest 匹配不到它，所以这 4 个测试文件
