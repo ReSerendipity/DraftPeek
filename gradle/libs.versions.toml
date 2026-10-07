@@ -1,31 +1,31 @@
 [versions]
 # Versions
 agp = "8.10.1"
-kotlin = "2.2.21"
-ksp = "2.2.21-2.0.4"
+kotlin = "2.4.20"
+ksp = "2.3.12"
 buildTools = "36.1.0"
 compileSdk = "36"
 minSdk = "26"
 targetSdk = "36"
 compose-bom = "2025.04.01"
-hilt = "2.58"
-hilt-navigation-compose = "1.2.0"
-navigation-compose = "2.8.4"
+hilt = "2.60.1"
+hilt-navigation-compose = "1.4.0"
+navigation-compose = "2.10.2"
 lifecycle = "2.8.7"
-core-ktx = "1.15.0"
+core-ktx = "1.19.1"
 activity-compose = "1.9.3"
-appcompat = "1.7.0"
-room = "2.7.1"
+appcompat = "1.8.0"
+room = "2.8.5"
 datastore = "1.1.1"
 collection = "1.4.0"
-kotlinx-collections-immutable = "0.3.7"
+kotlinx-collections-immutable = "0.5.2"
 retrofit = "2.11.0"
 okhttp = "4.12.0"
 accompanist = "0.36.0"
 material3 = "1.3.0"
 material3-adaptive = "1.1.0"
-coroutines = "1.9.0"
-documentfile = "1.0.1"
+coroutines = "1.11.0"
+documentfile = "1.1.0"
 leakcanary = "2.14"
 # markwon removed — replaced by CommonMark native + WebView pipeline
 windowmanager = "1.3.0"
@@ -41,8 +41,8 @@ windowmanager = "1.3.0"
 #   版本号 6.10.1.202505221210-r 已在 Maven Central 验证存在。
 # 注：实际 CVE 编号需运行 `./gradlew dependencyCheck` 或查阅官方 advisory 校对。
 jgit = "6.10.1.202505221210-r"
-poi-ooxml = "5.3.0"
-sqlcipher = "4.6.0"
+poi-ooxml = "5.5.1"
+sqlcipher = "4.19.1"
 # SECURITY VULN-016: security-crypto (1.1.0-alpha06) removed — replaced by self-built
 # SecureFileStorage + SecurePreferences (Keystore AES-256-GCM directly).
 # Do NOT re-add this alpha dependency.
@@ -50,8 +50,8 @@ juniversalchardet = "2.5.0"
 sora-editor = "0.24.6"
 tree-sitter-binding = "4.3.2"
 desugar = "2.1.5"
-richeditor-compose = "1.0.0-rc13"
-commonmark = "0.24.0"
+richeditor-compose = "1.2.1"
+commonmark = "0.30.0"
 ktlint = "1.3.1"
 timber = "5.0.1"
 
@@ -59,37 +59,37 @@ timber = "5.0.1"
 coil = "2.7.0"
 
 # ===== Mature library replacements (P0+P1) =====
-java-diff-utils = "4.12"
+java-diff-utils = "4.17"
 lsp4j = "0.22.0"
 android-pdf-viewer = "2.0.2"
-pf4j = "3.11.0"
+pf4j = "3.16.0"
 
 # Remote file systems
-commons-net = "3.11.1"    # FTP/FTPS client
+commons-net = "3.13.0"    # FTP/FTPS client
 jsch = "0.2.24"           # SFTP/SSH client (Eclipse maven)
 
 # SECURITY: Google Play Integrity API for device integrity verification (VULN-009)
-play-integrity = "1.3.0"
+play-integrity = "1.6.0"
 
 # ===== New feature dependencies (全功能实施指南 v1.0) =====
 # CRDT: Yjs collaborative editing (note: simple-yjs may need manual setup)
 # Cloud sync: AWS S3 + Dropbox SDK
-aws-s3 = "1.12.658"
+aws-s3 = "1.12.797"
 dropbox-core = "5.1.0"
 
 # Testing
 junit4 = "4.13.2"
 junit5 = "5.11.3"
-mockk = "1.13.13"
-turbine = "1.2.0"
-kotlinx-coroutines-test = "1.9.0"
-androidx-test-core = "1.6.1"
-androidx-test-ext-junit = "1.2.1"
-androidx-test-runner = "1.6.2"
-androidx-test-rules = "1.6.1"
-androidx-test-uiautomator = "2.2.0"
-androidx-benchmark = "1.2.0"
-robolectric = "4.14.1"
+mockk = "1.14.11"
+turbine = "1.2.1"
+kotlinx-coroutines-test = "1.11.0"
+androidx-test-core = "1.7.0"
+androidx-test-ext-junit = "1.3.0"
+androidx-test-runner = "1.7.0"
+androidx-test-rules = "1.7.0"
+androidx-test-uiautomator = "2.4.0"
+androidx-benchmark = "1.5.0"
+robolectric = "4.17"
 paparazzi = "2.0.0-alpha02"
 mockwebserver = "4.12.0"
 jacoco = "0.8.12"
@@ -137,7 +137,7 @@ room-testing = { module = "androidx.room:room-testing", version.ref = "room" }
 datastore-preferences = { module = "androidx.datastore:datastore-preferences", version.ref = "datastore" }
 
 # ProfileInstaller (Baseline Profiles runtime)
-profileinstaller = { module = "androidx.profileinstaller:profileinstaller", version = "1.3.1" }
+profileinstaller = { module = "androidx.profileinstaller:profileinstaller", version = "1.4.1" }
 
 # Glance (App Widgets with Compose)
 glance-appwidget = { module = "androidx.glance:glance-appwidget", version = "1.1.1" }
@@ -268,7 +268,7 @@ kotlin-android = { id = "org.jetbrains.kotlin.android", version.ref = "kotlin" }
 hilt = { id = "com.google.dagger.hilt.android", version.ref = "hilt" }
 ksp = { id = "com.google.devtools.ksp", version.ref = "ksp" }
 compose-compiler = { id = "org.jetbrains.kotlin.plugin.compose", version.ref = "kotlin" }
-spotless = { id = "com.diffplug.spotless", version = "8.10.2" }
+spotless = { id = "com.diffplug.spotless", version = "8.10.3" }
 paparazzi = { id = "app.cash.paparazzi", version.ref = "paparazzi" }
 
 # Gradle plugin artifacts for build-logic convention plugins
