@@ -309,4 +309,5 @@
     <string name="browser_rename_success">已重命名</string>
     <string name="browser_rename_failed">重命名失败：名称重复或该位置不支持</string>
     <string name="browser_error_name_empty">名称不能为空</string>
+    <string name="browser_action_manual_order">手动排序</string>
 </resources>
