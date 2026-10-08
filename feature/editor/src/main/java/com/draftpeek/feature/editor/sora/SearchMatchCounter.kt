@@ -59,11 +59,22 @@ internal object SearchMatchCounter {
     /**
      * 当前光标偏移落在第几个匹配上（**1-based**）。
      *
-     * @return 落在某个匹配内（含其末尾）时返回序号；否则返回 0
+     * 分两步判定，**顺序不能反**：
+     * 1. 先找「光标落在匹配区间内」（`first..last`）的匹配；
+     * 2. 没有命中时，才接受「光标紧跟在某匹配之后」（`last + 1`，对应选区停在匹配末尾）。
+     *
+     * ⚠️ 不能把两步合成 `cursorOffset in it.first..(it.last + 1)`：**相邻匹配**时
+     * 前一个匹配的 `last + 1` 恰好是后一个匹配的 `first`（如 `"bb"` 中两个 `b` 是
+     * `0..0` 与 `1..1`），合并后 `indexOfFirst` 会先命中前一个，导致序号永远停在
+     * `1/N`、↑↓ 导航看起来不生效（真机走查发现）。
+     *
+     * @return 命中时返回序号；光标不在任何匹配上（含其末尾）时返回 0
      */
     fun ordinalAt(matches: List<IntRange>, cursorOffset: Int): Int {
-        val index = matches.indexOfFirst { cursorOffset in it.first..(it.last + 1) }
-        return if (index >= 0) index + 1 else 0
+        val inside = matches.indexOfFirst { cursorOffset in it.first..it.last }
+        if (inside >= 0) return inside + 1
+        val justAfter = matches.indexOfFirst { cursorOffset == it.last + 1 }
+        return if (justAfter >= 0) justAfter + 1 else 0
     }
 
     /** 与 [SoraSearchManager] 的 `buildSearchQuery` 同口径地构造正则串。 */

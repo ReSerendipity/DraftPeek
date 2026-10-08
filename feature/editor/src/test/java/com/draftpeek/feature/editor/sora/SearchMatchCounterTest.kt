@@ -117,5 +117,46 @@ class SearchMatchCounterTest {
         fun noMatches() {
             assertEquals(0, SearchMatchCounter.ordinalAt(emptyList(), 0))
         }
+
+        // ── 回归：相邻匹配（真机走查发现的「序号永远停在 1/N」） ──────────────
+
+        @Test
+        @DisplayName("相邻匹配：光标在前一个匹配上 → 1（不是 2）")
+        fun adjacentMatchesCursorOnFirst() {
+            val matches = SearchMatchCounter.findAll("bb", "b")
+            assertEquals(2, matches.size)
+            assertEquals(1, SearchMatchCounter.ordinalAt(matches, 0))
+        }
+
+        @Test
+        @DisplayName("相邻匹配：光标在后一个匹配上 → 2（旧实现会误判为 1）")
+        fun adjacentMatchesCursorOnSecond() {
+            val matches = SearchMatchCounter.findAll("bb", "b")
+            assertEquals(2, SearchMatchCounter.ordinalAt(matches, 1))
+        }
+
+        @Test
+        @DisplayName("相邻匹配：光标紧跟最后一个匹配之后 → 仍算最后一个")
+        fun adjacentMatchesCursorJustAfterLast() {
+            val matches = SearchMatchCounter.findAll("bb", "b")
+            assertEquals(2, SearchMatchCounter.ordinalAt(matches, 2))
+        }
+
+        @Test
+        @DisplayName("相邻匹配：再往后一格 → 0")
+        fun adjacentMatchesCursorBeyond() {
+            val matches = SearchMatchCounter.findAll("bb", "b")
+            assertEquals(0, SearchMatchCounter.ordinalAt(matches, 3))
+        }
+
+        @Test
+        @DisplayName("三个连续匹配逐个命中 1/2/3（对应 b1b2b3 的场景）")
+        fun threeAdjacentMatches() {
+            val matches = SearchMatchCounter.findAll("bbb", "b")
+            assertEquals(3, matches.size)
+            assertEquals(1, SearchMatchCounter.ordinalAt(matches, 0))
+            assertEquals(2, SearchMatchCounter.ordinalAt(matches, 1))
+            assertEquals(3, SearchMatchCounter.ordinalAt(matches, 2))
+        }
     }
 }
