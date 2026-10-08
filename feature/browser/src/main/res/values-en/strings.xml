@@ -292,4 +292,9 @@
     <string name="browser_rename_failed">Rename failed: duplicate name or unsupported here</string>
     <string name="browser_error_name_empty">Name cannot be empty</string>
     <string name="browser_action_manual_order">Manual order</string>
+    <!-- 文件页顶栏无障碍状态描述 -->
+    <string name="browser_git_state_modified_count">%1$d modification(s)</string>
+    <string name="browser_git_state_no_modification">No modifications</string>
+    <string name="browser_manual_order_state_on">Manual ordering on</string>
+    <string name="browser_manual_order_state_off">Manual ordering off</string>
 </resources>

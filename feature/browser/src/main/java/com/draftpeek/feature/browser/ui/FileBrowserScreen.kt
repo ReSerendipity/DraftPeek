@@ -1259,9 +1259,12 @@ fun FileBrowserScreen(
                                 stateDescription = if (gitUiState.modifiedCount >
                                     0
                                 ) {
-                                    "有 ${gitUiState.modifiedCount} 个修改"
+                                    stringResource(
+                                        R.string.browser_git_state_modified_count,
+                                        gitUiState.modifiedCount
+                                    )
                                 } else {
-                                    "无修改"
+                                    stringResource(R.string.browser_git_state_no_modification)
                                 }
                             )
                         ) {
@@ -1284,7 +1287,11 @@ fun FileBrowserScreen(
                         onClick = { isManualOrderMode = !isManualOrderMode },
                         modifier = Modifier.accessibilityEnhanced(
                             contentDescription = stringResource(R.string.browser_action_manual_order),
-                            stateDescription = if (isManualOrderMode) "手动排序已开启" else "手动排序已关闭"
+                            stateDescription = if (isManualOrderMode) {
+                                stringResource(R.string.browser_manual_order_state_on)
+                            } else {
+                                stringResource(R.string.browser_manual_order_state_off)
+                            }
                         )
                     ) {
                         Icon(

@@ -276,4 +276,9 @@
     <string name="browser_rename_failed">名前を変更できませんでした：名前の重複、またはこの場所は未対応</string>
     <string name="browser_error_name_empty">名前を入力してください</string>
     <string name="browser_action_manual_order">手動並べ替え</string>
+    <!-- 文件页顶栏无障碍状态描述 -->
+    <string name="browser_git_state_modified_count">%1$d 件の変更</string>
+    <string name="browser_git_state_no_modification">変更なし</string>
+    <string name="browser_manual_order_state_on">手動並べ替えオン</string>
+    <string name="browser_manual_order_state_off">手動並べ替えオフ</string>
 </resources>

@@ -276,4 +276,9 @@
     <string name="browser_rename_failed">이름을 바꾸지 못했습니다: 이름 중복 또는 이 위치에서 지원되지 않음</string>
     <string name="browser_error_name_empty">이름을 입력하세요</string>
     <string name="browser_action_manual_order">수동 정렬</string>
+    <!-- 文件页顶栏无障碍状态描述 -->
+    <string name="browser_git_state_modified_count">%1$d건 변경됨</string>
+    <string name="browser_git_state_no_modification">변경 없음</string>
+    <string name="browser_manual_order_state_on">수동 정렬 켜짐</string>
+    <string name="browser_manual_order_state_off">수동 정렬 꺼짐</string>
 </resources>
