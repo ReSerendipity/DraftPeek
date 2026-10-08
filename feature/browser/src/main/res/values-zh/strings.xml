@@ -310,4 +310,9 @@
     <string name="browser_rename_failed">重命名失败：名称重复或该位置不支持</string>
     <string name="browser_error_name_empty">名称不能为空</string>
     <string name="browser_action_manual_order">手动排序</string>
+    <!-- 文件页顶栏无障碍状态描述 -->
+    <string name="browser_git_state_modified_count">有 %1$d 个修改</string>
+    <string name="browser_git_state_no_modification">无修改</string>
+    <string name="browser_manual_order_state_on">手动排序已开启</string>
+    <string name="browser_manual_order_state_off">手动排序已关闭</string>
 </resources>
