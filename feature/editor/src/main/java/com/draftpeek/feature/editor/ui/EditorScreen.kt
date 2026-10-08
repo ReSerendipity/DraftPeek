@@ -1863,10 +1863,13 @@ private fun EditorSearchPanel(
     var searchNavTick by remember { mutableStateOf(0) }
     var matchTotal by remember { mutableStateOf(0) }
     var matchOrdinal by remember { mutableStateOf(0) }
+    // 供 ↑↓ 导航复用（避免再算一遍）
+    var matchRanges by remember { mutableStateOf<List<IntRange>>(emptyList()) }
     LaunchedEffect(searchQuery, searchRegex, searchMatchCase, searchWholeWord, searchNavTick) {
         if (searchQuery.isEmpty()) {
             matchTotal = 0
             matchOrdinal = 0
+            matchRanges = emptyList()
             return@LaunchedEffect
         }
         // 防抖：边输边全量计数会很吵，也让大文件不至于每敲一个字就扫一遍
@@ -1879,7 +1882,27 @@ private fun EditorSearchPanel(
             wholeWord = searchWholeWord
         )
         matchTotal = matches.size
+        matchRanges = matches
         matchOrdinal = SearchMatchCounter.ordinalAt(matches, wrapper.currentCursorOffset())
+    }
+
+    // ↑↓ 导航：**自管移动**，不走 sora 的 gotoNext/gotoPrevious —— 真机走查发现它们在
+    // 「同一行内的相邻匹配」上不推进选区（如 `bb` 里搜 `b`，序号会永远停在 1/N）。
+    // 这里直接用面板自己算出的匹配表定位，与显示的 n/N 天然一致。
+    val moveToAdjacentMatch: (Int) -> Unit = { delta ->
+        val ranges = matchRanges
+        if (ranges.isNotEmpty()) {
+            val current = SearchMatchCounter.ordinalAt(ranges, wrapper.currentCursorOffset())
+            // 光标不在任何匹配上时：下一个 → 第 1 个；上一个 → 最后一个（与多数编辑器一致）
+            val currentIndex = if (current == 0) {
+                if (delta > 0) -1 else 0
+            } else {
+                current - 1
+            }
+            val next = ((currentIndex + delta) % ranges.size + ranges.size) % ranges.size
+            wrapper.selectMatchRange(ranges[next].first, ranges[next].last + 1)
+        }
+        searchNavTick++
     }
 
     // Live search: re-run search when query or options change (for Find and Replace tabs)
@@ -1978,14 +2001,8 @@ private fun EditorSearchPanel(
                                 )
                             }
                             SearchNavButtons(
-                                onPrevious = {
-                                    wrapper.gotoPrevious()
-                                    searchNavTick++
-                                },
-                                onNext = {
-                                    wrapper.gotoNext()
-                                    searchNavTick++
-                                }
+                                onPrevious = { moveToAdjacentMatch(-1) },
+                                onNext = { moveToAdjacentMatch(1) }
                             )
                         }
                     }
@@ -2035,14 +2052,8 @@ private fun EditorSearchPanel(
                                 )
                             }
                             SearchNavButtons(
-                                onPrevious = {
-                                    wrapper.gotoPrevious()
-                                    searchNavTick++
-                                },
-                                onNext = {
-                                    wrapper.gotoNext()
-                                    searchNavTick++
-                                }
+                                onPrevious = { moveToAdjacentMatch(-1) },
+                                onNext = { moveToAdjacentMatch(1) }
                             )
                         }
                         BrandOutlinedTextField(
