@@ -41,7 +41,7 @@
       "report_path": "core/domain/build/reports/jacoco/jacocoTestReport/jacocoTestReport.xml"
     },
     "core/sync": {
-      "measured_pct": 92.78,
+      "measured_pct": 92.5,
       "threshold_pct": 85.4,
       "report_path": "core/sync/build/reports/jacoco/jacocoTestReport/jacocoTestReport.xml"
     },
