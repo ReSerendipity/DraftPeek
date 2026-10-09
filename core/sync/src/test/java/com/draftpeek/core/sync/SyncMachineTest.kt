@@ -169,6 +169,15 @@ class SyncMachineTest {
         }
 
         @Test
+        @DisplayName("冲突类失败不重试（需先重新拉取并合并，交给上层处理）")
+        fun conflictFailsImmediately() {
+            val syncing = reduce(SyncMachineState(), SyncEvent.Requested(t0)).first
+            val (next, effects) = reduce(syncing, SyncEvent.Failed(SyncFailureKind.CONFLICT))
+            assertEquals(SyncPhase.FAILED, next.phase)
+            assertTrue(effects.isEmpty())
+        }
+
+        @Test
         @DisplayName("失败不会污染「已同步」时间戳（规格：仅成功后更新）")
         fun failureKeepsLastSuccess() {
             val successAt = t0 + 5_000L
