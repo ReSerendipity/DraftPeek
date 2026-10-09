@@ -299,4 +299,24 @@
     <string name="profile_open_editor_settings">편집기 설정</string>
     <string name="profile_open_lab">실험실</string>
     <string name="profile_open_about_security">정보 및 보안</string>
+    <!-- 账号身份区（设计回函 v3 · 阶段 A） -->
+    <string name="account_signed_out_title">로그인하지 않음</string>
+    <string name="account_signed_out_desc">로그인하면 읽기 진행률과 스니펫을 기기 간에 동기화</string>
+    <string name="account_sign_in">로그인 / 가입</string>
+    <string name="account_synced_ago">%1$s 전에 동기화됨</string>
+    <string name="account_syncing">동기화 중…</string>
+    <string name="account_sync_cancel">취소</string>
+    <string name="account_sync_failed">동기화 실패 · 재시도</string>
+    <string name="account_offline">오프라인 - 연결 복구 후 재개</string>
+    <string name="account_sign_out">로그아웃</string>
+    <string name="account_sign_out_confirm">로컬 스니펫과 통계는 유지되며, 클라우드 세션만 해제됩니다.</string>
+    <string name="account_sync_now">지금 동기화</string>
+    <string name="account_synced_just_now">방금 동기화됨</string>
+    <string name="account_ago_minutes">%1$d분</string>
+    <string name="account_ago_hours">%1$d시간</string>
+    <string name="account_ago_days">%1$d일</string>
+    <string name="account_sign_in_coming_soon">계정 기능은 준비 중입니다</string>
+    <!-- 身份区验收开关（仅 debug 构建暴露） -->
+    <string name="account_dev_section">개발(디버그 빌드 전용)</string>
+    <string name="account_dev_simulate">계정 상태 시뮬레이션(검수용)</string>
 </resources>

@@ -321,4 +321,24 @@
     <string name="profile_open_editor_settings">Editor settings</string>
     <string name="profile_open_lab">Lab</string>
     <string name="profile_open_about_security">About &amp; security</string>
+    <!-- 账号身份区（设计回函 v3 · 阶段 A） -->
+    <string name="account_signed_out_title">Not signed in</string>
+    <string name="account_signed_out_desc">Sync your reading progress and snippets across devices</string>
+    <string name="account_sign_in">Sign in / Sign up</string>
+    <string name="account_synced_ago">Synced %1$s ago</string>
+    <string name="account_syncing">Syncing…</string>
+    <string name="account_sync_cancel">Cancel</string>
+    <string name="account_sync_failed">Sync failed · Retry</string>
+    <string name="account_offline">Offline — resumes when back online</string>
+    <string name="account_sign_out">Sign out</string>
+    <string name="account_sign_out_confirm">Local snippets and stats stay on this device; only the cloud session is cleared.</string>
+    <string name="account_sync_now">Sync now</string>
+    <string name="account_synced_just_now">Synced just now</string>
+    <string name="account_ago_minutes">%1$d min</string>
+    <string name="account_ago_hours">%1$d h</string>
+    <string name="account_ago_days">%1$d d</string>
+    <string name="account_sign_in_coming_soon">Account features are coming soon</string>
+    <!-- 身份区验收开关（仅 debug 构建暴露） -->
+    <string name="account_dev_section">Development (debug builds only)</string>
+    <string name="account_dev_simulate">Simulate account state (for acceptance)</string>
 </resources>

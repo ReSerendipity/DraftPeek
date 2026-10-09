@@ -299,4 +299,24 @@
     <string name="profile_open_editor_settings">エディタ設定</string>
     <string name="profile_open_lab">ラボ</string>
     <string name="profile_open_about_security">情報とセキュリティ</string>
+    <!-- 账号身份区（设计回函 v3 · 阶段 A） -->
+    <string name="account_signed_out_title">未ログイン</string>
+    <string name="account_signed_out_desc">ログインすると閲覧進捗とスニペットをデバイス間で同期</string>
+    <string name="account_sign_in">ログイン / 登録</string>
+    <string name="account_synced_ago">%1$s前に同期完了</string>
+    <string name="account_syncing">同期中…</string>
+    <string name="account_sync_cancel">キャンセル</string>
+    <string name="account_sync_failed">同期失敗 · 再試行</string>
+    <string name="account_offline">オフライン：接続復帰後に再開</string>
+    <string name="account_sign_out">ログアウト</string>
+    <string name="account_sign_out_confirm">ローカルのスニペットと統計は残り、クラウドのセッションのみ解除されます。</string>
+    <string name="account_sync_now">今すぐ同期</string>
+    <string name="account_synced_just_now">たった今同期しました</string>
+    <string name="account_ago_minutes">%1$d 分</string>
+    <string name="account_ago_hours">%1$d 時間</string>
+    <string name="account_ago_days">%1$d 日</string>
+    <string name="account_sign_in_coming_soon">アカウント機能は開発中です</string>
+    <!-- 身份区验收开关（仅 debug 构建暴露） -->
+    <string name="account_dev_section">開発（デバッグビルドのみ）</string>
+    <string name="account_dev_simulate">アカウント状態をシミュレート（受け入れ確認用）</string>
 </resources>
