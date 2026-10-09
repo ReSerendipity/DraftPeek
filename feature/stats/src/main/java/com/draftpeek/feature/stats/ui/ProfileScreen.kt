@@ -22,6 +22,7 @@ package com.draftpeek.feature.stats.ui
 import android.annotation.SuppressLint
 import android.content.ActivityNotFoundException
 import android.content.Intent
+import android.content.pm.ApplicationInfo
 import android.graphics.BitmapFactory
 import android.net.Uri
 import android.util.Log
@@ -52,7 +53,9 @@ import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.automirrored.filled.Logout
 import androidx.compose.material.icons.filled.Accessibility
+import androidx.compose.material.icons.filled.CheckCircle
 import androidx.compose.material.icons.filled.Close
 import androidx.compose.material.icons.filled.Code
 import androidx.compose.material.icons.filled.DeleteSweep
@@ -63,6 +66,7 @@ import androidx.compose.material.icons.filled.Flag
 import androidx.compose.material.icons.filled.Image
 import androidx.compose.material.icons.filled.Link
 import androidx.compose.material.icons.filled.Palette
+import androidx.compose.material.icons.filled.Person
 import androidx.compose.material.icons.filled.Restore
 import androidx.compose.material.icons.filled.Security
 import androidx.compose.material.icons.filled.Visibility
@@ -72,6 +76,7 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.RadioButton
 import androidx.compose.material3.RadioButtonDefaults
 import androidx.compose.material3.Text
+import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
@@ -102,6 +107,7 @@ import com.draftpeek.core.ui.component.BrandOutlinedTextField
 import com.draftpeek.core.ui.component.BrandPill
 import com.draftpeek.core.ui.component.BrandSettingRow
 import com.draftpeek.core.ui.component.BrandTopBar
+import com.draftpeek.core.ui.component.LocalToastHost
 import com.draftpeek.core.ui.component.accessibilityEnhanced
 import com.draftpeek.core.ui.layout.LayoutMode
 import com.draftpeek.core.ui.theme.JetBrainsMonoFontFamily
@@ -116,16 +122,22 @@ import com.draftpeek.feature.settings.model.AppLanguage
 import com.draftpeek.feature.settings.model.AppTheme
 import com.draftpeek.feature.settings.viewmodel.SettingsViewModel
 import com.draftpeek.feature.stats.R
+import com.draftpeek.feature.stats.account.AccountTimeFormat
+import com.draftpeek.feature.stats.account.AccountUiState
+import com.draftpeek.feature.stats.account.RelativeUnit
+import com.draftpeek.feature.stats.account.SyncUiStatus
 import com.draftpeek.feature.stats.ui.component.DayDetailDialog
 import com.draftpeek.feature.stats.ui.component.GreetingSection
 import com.draftpeek.feature.stats.ui.component.PeriodChipRow
 import com.draftpeek.feature.stats.ui.component.StatCardGrid
 import com.draftpeek.feature.stats.ui.component.YearHeatmapNew
 import com.draftpeek.feature.stats.util.AchievementDefinitions
+import com.draftpeek.feature.stats.viewmodel.AccountViewModel
 import com.draftpeek.feature.stats.viewmodel.StatsMessage
 import com.draftpeek.feature.stats.viewmodel.StatsViewModel
 import com.draftpeek.feature.stats.viewmodel.ThemeManageViewModel
 import java.util.Locale
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 
 @OptIn(ExperimentalMaterial3Api::class, ExperimentalLayoutApi::class)
@@ -156,6 +168,26 @@ fun ProfileScreen(
     val context = LocalContext.current
     val isDark = LocalDarkTheme.current
 
+    // 身份区（设计回函 v3 · 阶段 A）：状态由 AccountViewModel 驱动，五态见 AccountUiState。
+    val accountViewModel: AccountViewModel = hiltViewModel()
+    val accountState by accountViewModel.uiState.collectAsStateWithLifecycle()
+    // 「已同步 · N 分钟前」的相对时间：页面可见时每分钟刷新（设计回函 v3 §3）；
+    // 以 accountState 为键 —— 状态变化（含同步完成）时立即重算，避免显示滞后一分钟。
+    var nowMillis by remember { mutableStateOf(System.currentTimeMillis()) }
+    LaunchedEffect(accountState) {
+        nowMillis = System.currentTimeMillis()
+        while (true) {
+            delay(60_000L)
+            nowMillis = System.currentTimeMillis()
+        }
+    }
+    val showToast = LocalToastHost.current
+    val signInComingSoon = stringResource(R.string.account_sign_in_coming_soon)
+    // 阶段 A 的验收开关只在可调试构建暴露（不引入 BuildConfig 依赖）
+    val isDebuggable = remember(context) {
+        (context.applicationInfo.flags and ApplicationInfo.FLAG_DEBUGGABLE) != 0
+    }
+
     val pageBg = PrototypeTokens.pageBackground
     val fg = PrototypeTokens.fg
     val fgSoft = PrototypeTokens.fgSoft
@@ -165,6 +197,7 @@ fun ProfileScreen(
     var showResetDialog by remember { mutableStateOf(false) }
     var showClearCacheDialog by remember { mutableStateOf(false) }
     var showEditNameDialog by remember { mutableStateOf(false) }
+    var showSignOutDialog by remember { mutableStateOf(false) }
     var editNameText by remember { mutableStateOf("") }
     var showMirrorUrlDialog by remember { mutableStateOf(false) }
     var mirrorUrlText by remember { mutableStateOf(settings.githubMirrorUrl) }
@@ -665,6 +698,29 @@ fun ProfileScreen(
         }
     }
 
+    if (showSignOutDialog) {
+        BrandDialog(
+            onDismissRequest = { showSignOutDialog = false },
+            title = { Text(stringResource(R.string.account_sign_out)) },
+            content = { Text(stringResource(R.string.account_sign_out_confirm)) },
+            confirmButton = {
+                TextButton(
+                    onClick = {
+                        accountViewModel.signOut()
+                        showSignOutDialog = false
+                    }
+                ) {
+                    Text(stringResource(R.string.profile_dialog_confirm))
+                }
+            },
+            dismissButton = {
+                TextButton(onClick = { showSignOutDialog = false }) {
+                    Text(stringResource(R.string.profile_dialog_cancel))
+                }
+            }
+        )
+    }
+
     Box(
         modifier = Modifier
             .fillMaxSize()
@@ -692,80 +748,20 @@ fun ProfileScreen(
                     .padding(horizontal = 20.dp, vertical = 24.dp),
                 horizontalAlignment = Alignment.CenterHorizontally
             ) {
-                Box(
-                    modifier = Modifier.size(PrototypeSpacing.AvatarSize + 8.dp),
-                    contentAlignment = Alignment.BottomEnd
-                ) {
-                    Box(
-                        modifier = Modifier
-                            .size(PrototypeSpacing.AvatarSize)
-                            .clip(CircleShape)
-                            .background(PrototypeTokens.accentSoft)
-                            .clickable {
-                                pickImageLauncher.launch("image/*")
-                            }
-                            .accessibilityEnhanced(
-                                contentDescription = stringResource(R.string.profile_select_avatar)
-                            ),
-                        contentAlignment = Alignment.Center
-                    ) {
-                        if (avatarBitmap != null) {
-                            Image(
-                                bitmap = avatarBitmap,
-                                contentDescription = null,
-                                modifier = Modifier
-                                    .size(PrototypeSpacing.AvatarSize)
-                                    .clip(CircleShape),
-                                contentScale = ContentScale.Crop
-                            )
-                        } else {
-                            Text(
-                                text = getInitials(settings.userName),
-                                fontFamily = JetBrainsMonoFontFamily,
-                                fontWeight = FontWeight.Bold,
-                                fontSize = 22.sp,
-                                color = PrototypeTokens.accent
-                            )
-                        }
-                    }
-                    Box(
-                        modifier = Modifier
-                            .size(28.dp)
-                            .clip(CircleShape)
-                            .background(PrototypeTokens.accent)
-                            .clickable {
-                                pickImageLauncher.launch("image/*")
-                            },
-                        contentAlignment = Alignment.Center
-                    ) {
-                        androidx.compose.material3.Icon(
-                            imageVector = Icons.Filled.Edit,
-                            contentDescription = stringResource(R.string.profile_select_avatar),
-                            modifier = Modifier.size(14.dp),
-                            tint = Color.White
-                        )
-                    }
-                }
-
-                Spacer(modifier = Modifier.height(12.dp))
-
-                Text(
-                    text = settings.userName,
-                    fontWeight = FontWeight.SemiBold,
-                    fontSize = 18.sp,
-                    color = fg,
-                    lineHeight = 24.sp,
-                    modifier = Modifier.clickable {
+                AccountIdentityHeader(
+                    state = accountState,
+                    nowMillis = nowMillis,
+                    versionName = versionName,
+                    avatarBitmap = avatarBitmap,
+                    onPickAvatar = { pickImageLauncher.launch("image/*") },
+                    onEditName = {
                         editNameText = settings.userName
                         showEditNameDialog = true
-                    }
-                )
-
-                Spacer(modifier = Modifier.height(6.dp))
-
-                BrandPill(
-                    text = versionName,
-                    dotColor = SemanticColors.Success
+                    },
+                    onSignIn = { showToast(signInComingSoon) },
+                    onSyncNow = { accountViewModel.retrySync() },
+                    onRetry = { accountViewModel.retrySync() },
+                    onCancelSync = { accountViewModel.cancelSync() }
                 )
             }
 
@@ -948,8 +944,33 @@ fun ProfileScreen(
                 label = stringResource(R.string.profile_setting_reset_settings),
                 onClick = { showResetDialog = true },
                 isDanger = true,
-                showDivider = false
+                showDivider = accountState is AccountUiState.SignedIn
             )
+            // 退出登录移入危险区（设计回函 v2 §2）：红色 + 二次确认
+            if (accountState is AccountUiState.SignedIn) {
+                BrandSettingRow(
+                    icon = Icons.AutoMirrored.Filled.Logout,
+                    label = stringResource(R.string.account_sign_out),
+                    onClick = { showSignOutDialog = true },
+                    isDanger = true,
+                    showDivider = false
+                )
+            }
+
+            // 阶段 A 验收开关：只在可调试构建出现，用于轮转身份区五态
+            // （账号体系属阶段 B，五态无法自然产生）。阶段 B 落地后应删除。
+            if (isDebuggable) {
+                Spacer(modifier = Modifier.height(8.dp))
+
+                SectionHeader(label = stringResource(R.string.account_dev_section))
+
+                BrandSettingRow(
+                    icon = Icons.Filled.Flag,
+                    label = stringResource(R.string.account_dev_simulate),
+                    onClick = { accountViewModel.simulateNextState() },
+                    showDivider = false
+                )
+            }
 
             Spacer(modifier = Modifier.height(32.dp))
 
@@ -975,6 +996,260 @@ fun ProfileScreen(
                 )
             }
         }
+    }
+}
+
+/**
+ * 「我的」页身份区（设计回函 v3 · 阶段 A 五态）。
+ *
+ * 完全由 [AccountUiState] 驱动：未登录（占位 + 价值主张 + 登录按钮）／已登录（昵称 + 邮箱 +
+ * 同步状态行）。阶段 B 接入真实账号与同步后本组件无需改动。
+ *
+ */
+@Composable
+private fun AccountIdentityHeader(
+    state: AccountUiState,
+    nowMillis: Long,
+    versionName: String,
+    avatarBitmap: ImageBitmap?,
+    onPickAvatar: () -> Unit,
+    onEditName: () -> Unit,
+    onSignIn: () -> Unit,
+    onSyncNow: () -> Unit,
+    onRetry: () -> Unit,
+    onCancelSync: () -> Unit
+) {
+    val fg = PrototypeTokens.fg
+    val muted = PrototypeTokens.muted
+    val signedIn = state as? AccountUiState.SignedIn
+
+    Column(
+        modifier = Modifier.fillMaxWidth(),
+        horizontalAlignment = Alignment.CenterHorizontally
+    ) {
+        Box(
+            modifier = Modifier.size(PrototypeSpacing.AvatarSize + 8.dp),
+            contentAlignment = Alignment.BottomEnd
+        ) {
+            Box(
+                modifier = Modifier
+                    .size(PrototypeSpacing.AvatarSize)
+                    .clip(CircleShape)
+                    .background(PrototypeTokens.accentSoft)
+                    .then(
+                        if (signedIn != null) Modifier.clickable(onClick = onPickAvatar) else Modifier
+                    )
+                    .accessibilityEnhanced(
+                        contentDescription = if (signedIn != null) {
+                            stringResource(R.string.profile_select_avatar)
+                        } else {
+                            stringResource(R.string.account_signed_out_title)
+                        }
+                    ),
+                contentAlignment = Alignment.Center
+            ) {
+                when {
+                    signedIn != null && avatarBitmap != null -> Image(
+                        bitmap = avatarBitmap,
+                        contentDescription = null,
+                        modifier = Modifier
+                            .size(PrototypeSpacing.AvatarSize)
+                            .clip(CircleShape),
+                        contentScale = ContentScale.Crop
+                    )
+
+                    signedIn != null -> Text(
+                        text = getInitials(signedIn.displayName),
+                        fontFamily = JetBrainsMonoFontFamily,
+                        fontWeight = FontWeight.Bold,
+                        fontSize = 22.sp,
+                        color = PrototypeTokens.accent
+                    )
+
+                    else -> androidx.compose.material3.Icon(
+                        imageVector = Icons.Filled.Person,
+                        contentDescription = null,
+                        modifier = Modifier.size(30.dp),
+                        tint = muted
+                    )
+                }
+            }
+            if (signedIn != null) {
+                Box(
+                    modifier = Modifier
+                        .size(28.dp)
+                        .clip(CircleShape)
+                        .background(PrototypeTokens.accent)
+                        .clickable(onClick = onPickAvatar),
+                    contentAlignment = Alignment.Center
+                ) {
+                    androidx.compose.material3.Icon(
+                        imageVector = Icons.Filled.Edit,
+                        contentDescription = stringResource(R.string.profile_select_avatar),
+                        modifier = Modifier.size(14.dp),
+                        tint = Color.White
+                    )
+                }
+            }
+        }
+
+        Spacer(modifier = Modifier.height(12.dp))
+
+        when (state) {
+            AccountUiState.SignedOut -> {
+                Text(
+                    text = stringResource(R.string.account_signed_out_title),
+                    fontWeight = FontWeight.SemiBold,
+                    fontSize = 18.sp,
+                    color = fg,
+                    lineHeight = 24.sp
+                )
+                Spacer(modifier = Modifier.height(6.dp))
+                Text(
+                    text = stringResource(R.string.account_signed_out_desc),
+                    fontSize = 13.sp,
+                    color = muted,
+                    textAlign = TextAlign.Center,
+                    lineHeight = 18.sp
+                )
+                Spacer(modifier = Modifier.height(14.dp))
+                BrandFilledButton(
+                    text = stringResource(R.string.account_sign_in),
+                    onClick = onSignIn
+                )
+            }
+
+            is AccountUiState.SignedIn -> {
+                Text(
+                    text = state.displayName,
+                    fontWeight = FontWeight.SemiBold,
+                    fontSize = 18.sp,
+                    color = fg,
+                    lineHeight = 24.sp,
+                    modifier = Modifier.clickable(onClick = onEditName)
+                )
+                Spacer(modifier = Modifier.height(4.dp))
+                Text(
+                    text = state.email,
+                    fontFamily = JetBrainsMonoFontFamily,
+                    fontSize = 12.sp,
+                    color = muted
+                )
+                Spacer(modifier = Modifier.height(10.dp))
+                SyncStatusRow(
+                    sync = state.sync,
+                    nowMillis = nowMillis,
+                    onSyncNow = onSyncNow,
+                    onRetry = onRetry,
+                    onCancelSync = onCancelSync
+                )
+            }
+        }
+
+        Spacer(modifier = Modifier.height(6.dp))
+
+        BrandPill(
+            text = versionName,
+            dotColor = SemanticColors.Success
+        )
+    }
+}
+
+/**
+ * 同步状态行（设计回函 v3 §3）：**一律行内提示，不弹窗**。
+ *
+ * 「正在同步…」超过 [SyncUiStatus.SYNC_CANCEL_AFTER_MS] 后行内出现「取消」。
+ */
+@Composable
+private fun SyncStatusRow(
+    sync: SyncUiStatus,
+    nowMillis: Long,
+    onSyncNow: () -> Unit,
+    onRetry: () -> Unit,
+    onCancelSync: () -> Unit
+) {
+    // 同步中超 30 秒才给「取消」；用独立计时器而非 60 秒的页面 ticker，保证阈值准确
+    var cancelAvailable by remember(sync) { mutableStateOf(false) }
+    LaunchedEffect(sync) {
+        cancelAvailable = false
+        if (sync is SyncUiStatus.Syncing) {
+            delay(SyncUiStatus.SYNC_CANCEL_AFTER_MS)
+            cancelAvailable = true
+        }
+    }
+
+    Row(
+        verticalAlignment = Alignment.CenterVertically,
+        horizontalArrangement = Arrangement.spacedBy(6.dp)
+    ) {
+        when (sync) {
+            is SyncUiStatus.Synced -> {
+                androidx.compose.material3.Icon(
+                    imageVector = Icons.Filled.CheckCircle,
+                    contentDescription = null,
+                    modifier = Modifier.size(14.dp),
+                    tint = SemanticColors.Success
+                )
+                Text(
+                    text = syncedAgoText(sync.lastSuccessAtMillis, nowMillis),
+                    style = MonoLabelStyle,
+                    color = PrototypeTokens.fgSoft
+                )
+                Spacer(modifier = Modifier.weight(1f))
+                TextButton(onClick = onSyncNow) {
+                    Text(text = stringResource(R.string.account_sync_now))
+                }
+            }
+
+            SyncUiStatus.Syncing -> {
+                Text(
+                    text = stringResource(R.string.account_syncing),
+                    style = MonoLabelStyle,
+                    color = PrototypeTokens.fgSoft
+                )
+                if (cancelAvailable) {
+                    TextButton(onClick = onCancelSync) {
+                        Text(text = stringResource(R.string.account_sync_cancel))
+                    }
+                }
+            }
+
+            SyncUiStatus.Failed -> Text(
+                text = stringResource(R.string.account_sync_failed),
+                style = MonoLabelStyle,
+                color = SemanticColors.Danger,
+                modifier = Modifier.clickable(onClick = onRetry)
+            )
+
+            SyncUiStatus.Offline -> Text(
+                text = stringResource(R.string.account_offline),
+                style = MonoLabelStyle,
+                color = PrototypeTokens.muted
+            )
+        }
+    }
+}
+
+/** 「已同步 · N 分钟前」；不足 1 分钟显示「刚刚同步」。 */
+@Composable
+private fun syncedAgoText(lastSuccessAtMillis: Long, nowMillis: Long): String {
+    val relative = AccountTimeFormat.relativeTime(nowMillis, lastSuccessAtMillis)
+    return when (relative.unit) {
+        RelativeUnit.JUST_NOW -> stringResource(R.string.account_synced_just_now)
+        RelativeUnit.MINUTES -> stringResource(
+            R.string.account_synced_ago,
+            stringResource(R.string.account_ago_minutes, relative.value)
+        )
+
+        RelativeUnit.HOURS -> stringResource(
+            R.string.account_synced_ago,
+            stringResource(R.string.account_ago_hours, relative.value)
+        )
+
+        RelativeUnit.DAYS -> stringResource(
+            R.string.account_synced_ago,
+            stringResource(R.string.account_ago_days, relative.value)
+        )
     }
 }
 
