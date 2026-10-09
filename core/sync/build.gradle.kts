@@ -34,12 +34,16 @@ android {
 dependencies {
     // 传输抽象用 suspend 函数（Git 实现在后续批次）
     implementation(libs.kotlinx.coroutines.android)
+    // Git 传输的 HTTP 实现（版本目录已有 okhttp，无需改共享的版本目录）
+    implementation(libs.okhttp)
 
     // Unit test dependencies
     testImplementation(libs.junit5.api)
     testRuntimeOnly(libs.junit5.engine)
     testImplementation(libs.junit5.params)
     testImplementation(libs.kotlinx.coroutines.test)
+    // 用真实本地 HTTP 服务器测 OkHttp 实现（不走外网）
+    testImplementation(libs.mockwebserver)
 }
 
 tasks.withType<Test>().configureEach {
