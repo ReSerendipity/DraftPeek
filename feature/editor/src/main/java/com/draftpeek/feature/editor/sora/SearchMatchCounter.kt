@@ -84,4 +84,41 @@ internal object SearchMatchCounter {
         wholeWord -> "\\b(?:${InputValidator.escapeRegexSpecialChars(query)})\\b"
         else -> InputValidator.escapeRegexSpecialChars(query)
     }
+
+    /**
+     * 「匹配计数 n/N」的显示状态（设计回函 v2 · Q1 定稿）：
+     *
+     * | 场景 | 状态 | 显示 |
+     * |---|---|---|
+     * | 零匹配 | [SearchCountDisplay.NONE] | 「无匹配」 |
+     * | 光标已落在某个匹配上（含 ↑↓ 导航后） | [SearchCountDisplay.LOCATED] | `i / N` |
+     * | 有匹配但光标未落在其上（含刚输入） | [SearchCountDisplay.TOTAL] | 「N 个结果」 |
+     * | 同上且总数超过 [MAX_DISPLAY_TOTAL] | [SearchCountDisplay.TOTAL_CAPPED] | 「999+ 个结果」 |
+     *
+     * **未定位态不显示 `0/N`** —— `0/3` 会被误读成「零结果」。
+     */
+    fun countDisplay(ordinal: Int, total: Int): SearchCountDisplay = when {
+        total <= 0 -> SearchCountDisplay.NONE
+        ordinal in 1..total -> SearchCountDisplay.LOCATED
+        total > MAX_DISPLAY_TOTAL -> SearchCountDisplay.TOTAL_CAPPED
+        else -> SearchCountDisplay.TOTAL
+    }
+
+    /** 总数超过该值且未定位时，显示为「999+ 个结果」。 */
+    const val MAX_DISPLAY_TOTAL = 999
+}
+
+/** [SearchMatchCounter.countDisplay] 的四种显示状态（设计回函 v2 · Q1）。 */
+internal enum class SearchCountDisplay {
+    /** 零匹配 → 「无匹配」 */
+    NONE,
+
+    /** 已定位 → `i / N` */
+    LOCATED,
+
+    /** 未定位 → 「N 个结果」 */
+    TOTAL,
+
+    /** 未定位且总数超限 → 「999+ 个结果」 */
+    TOTAL_CAPPED
 }
