@@ -30,6 +30,11 @@
       "threshold_pct": 25.5,
       "report_path": "core/common/build/reports/jacoco/jacocoTestReport/jacocoTestReport.xml"
     },
+    "core/crdt": {
+      "measured_pct": 81.93,
+      "threshold_pct": 73.7,
+      "report_path": "core/crdt/build/reports/jacoco/jacocoTestReport/jacocoTestReport.xml"
+    },
     "core/data": {
       "measured_pct": 47.15,
       "threshold_pct": 42.4,
