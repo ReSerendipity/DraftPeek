@@ -74,6 +74,11 @@ coverage:
         paths:
           - core/ui/src/main/
         threshold: 1%
+      core-sync:
+        target: 95%
+        paths:
+          - core/sync/src/main/
+        threshold: 1%
       feature-browser:
         target: 2%
         paths:
