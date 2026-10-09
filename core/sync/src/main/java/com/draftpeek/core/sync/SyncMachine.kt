@@ -46,6 +46,15 @@ sealed interface SyncEvent {
     /** 用户点「取消」（仅在超过阈值后有效）。 */
     data object CancelRequested : SyncEvent
 
+    /**
+     * 退避时间到点，可以重试了。
+     *
+     * **为什么需要单独一个事件**：退避期间状态仍是 [SyncPhase.SYNCING]，
+     * 而 [Requested] 会被「同步中禁用重复触发」的守卫挡掉；这里需要的是
+     * **调度器到点后**重新发起传输，所以单列一个事件，语义更清晰、也可单测。
+     */
+    data object RetryDue : SyncEvent
+
     /** 时间推进（用于判定取消阈值）。 */
     data class Tick(val nowMillis: Long) : SyncEvent
 }
@@ -98,8 +107,17 @@ object SyncMachine {
         SyncEvent.WentOffline -> onOffline(state)
         is SyncEvent.WentOnline -> onWentOnline(state, event.nowMillis)
         SyncEvent.CancelRequested -> onCancel(state)
+        SyncEvent.RetryDue -> onRetryDue(state)
         is SyncEvent.Tick -> onTick(state, event.nowMillis)
     }
+
+    private fun onRetryDue(state: SyncMachineState): Pair<SyncMachineState, List<SyncEffect>> =
+        // 仅当仍处于「同步中（退避等待）」才真正重试；期间被取消或断网则忽略
+        if (state.phase == SyncPhase.SYNCING) {
+            state.copy(pendingRetryDelayMs = null) to listOf(SyncEffect.StartTransfer)
+        } else {
+            state to emptyList()
+        }
 
     private fun onRequested(state: SyncMachineState, nowMillis: Long): Pair<SyncMachineState, List<SyncEffect>> =
         if (state.phase == SyncPhase.SYNCING) {

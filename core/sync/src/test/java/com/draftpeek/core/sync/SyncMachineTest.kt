@@ -178,6 +178,25 @@ class SyncMachineTest {
         }
 
         @Test
+        @DisplayName("退避到点（RetryDue）→ 重新发起传输；已离开同步中则忽略")
+        fun retryDueRestartsTransfer() {
+            val syncing = reduce(SyncMachineState(), SyncEvent.Requested(t0)).first
+            val backing = reduce(syncing, SyncEvent.Failed(SyncFailureKind.NETWORK)).first
+            assertEquals(1_000L, backing.pendingRetryDelayMs)
+
+            val (retried, effects) = reduce(backing, SyncEvent.RetryDue)
+            assertEquals(SyncPhase.SYNCING, retried.phase)
+            assertNull(retried.pendingRetryDelayMs)
+            assertEquals(listOf(SyncEffect.StartTransfer), effects)
+
+            // 期间已转失败（如授权类失败）时，到点的重试应被忽略
+            val failed = reduce(backing, SyncEvent.Failed(SyncFailureKind.AUTH)).first
+            val (ignored, noEffects) = reduce(failed, SyncEvent.RetryDue)
+            assertEquals(failed, ignored)
+            assertTrue(noEffects.isEmpty())
+        }
+
+        @Test
         @DisplayName("失败不会污染「已同步」时间戳（规格：仅成功后更新）")
         fun failureKeepsLastSuccess() {
             val successAt = t0 + 5_000L
