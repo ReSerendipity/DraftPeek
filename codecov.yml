@@ -59,6 +59,11 @@ coverage:
         paths:
           - core/common/src/main/
         threshold: 1%
+      core-crdt:
+        target: 95%
+        paths:
+          - core/crdt/src/main/
+        threshold: 1%
       core-data:
         target: 9%
         paths:
