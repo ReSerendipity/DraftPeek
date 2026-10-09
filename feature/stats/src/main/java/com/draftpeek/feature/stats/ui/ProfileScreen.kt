@@ -66,7 +66,6 @@ import androidx.compose.material.icons.filled.Flag
 import androidx.compose.material.icons.filled.Image
 import androidx.compose.material.icons.filled.Link
 import androidx.compose.material.icons.filled.Palette
-import androidx.compose.material.icons.filled.Person
 import androidx.compose.material.icons.filled.Restore
 import androidx.compose.material.icons.filled.Security
 import androidx.compose.material.icons.filled.Visibility
@@ -753,6 +752,7 @@ fun ProfileScreen(
                     nowMillis = nowMillis,
                     versionName = versionName,
                     avatarBitmap = avatarBitmap,
+                    localName = settings.userName,
                     onPickAvatar = { pickImageLauncher.launch("image/*") },
                     onEditName = {
                         editNameText = settings.userName
@@ -1012,6 +1012,7 @@ private fun AccountIdentityHeader(
     nowMillis: Long,
     versionName: String,
     avatarBitmap: ImageBitmap?,
+    localName: String,
     onPickAvatar: () -> Unit,
     onEditName: () -> Unit,
     onSignIn: () -> Unit,
@@ -1021,7 +1022,14 @@ private fun AccountIdentityHeader(
 ) {
     val fg = PrototypeTokens.fg
     val muted = PrototypeTokens.muted
+    val border = PrototypeTokens.border
     val signedIn = state as? AccountUiState.SignedIn
+
+    // 设计回函 v4 §1：**可编辑的是本地资料**（DataStore），「未登录」描述的是**账户/同步状态**，
+    // 两者各司其职。因此本地资料的编辑入口在「未登录」态保留（这是设计侧的底线要求）；
+    // 已登录态的资料合并/迁移策略由阶段 B 设计稿给出，本批**不预支**，只读展示。
+    val localProfileEditable = signedIn == null
+    val displayName = if (localProfileEditable) localName else signedIn?.displayName ?: localName
 
     Column(
         modifier = Modifier.fillMaxWidth(),
@@ -1037,19 +1045,24 @@ private fun AccountIdentityHeader(
                     .clip(CircleShape)
                     .background(PrototypeTokens.accentSoft)
                     .then(
-                        if (signedIn != null) Modifier.clickable(onClick = onPickAvatar) else Modifier
+                        if (localProfileEditable) {
+                            Modifier.clickable(onClick = onPickAvatar)
+                        } else {
+                            Modifier
+                        }
                     )
                     .accessibilityEnhanced(
-                        contentDescription = if (signedIn != null) {
+                        // 未登录态头像可点换 → 播报操作名；已登录态头像是装饰（昵称紧邻下方）→ 不播报
+                        contentDescription = if (localProfileEditable) {
                             stringResource(R.string.profile_select_avatar)
                         } else {
-                            stringResource(R.string.account_signed_out_title)
+                            null
                         }
                     ),
                 contentAlignment = Alignment.Center
             ) {
-                when {
-                    signedIn != null && avatarBitmap != null -> Image(
+                if (avatarBitmap != null) {
+                    Image(
                         bitmap = avatarBitmap,
                         contentDescription = null,
                         modifier = Modifier
@@ -1057,24 +1070,17 @@ private fun AccountIdentityHeader(
                             .clip(CircleShape),
                         contentScale = ContentScale.Crop
                     )
-
-                    signedIn != null -> Text(
-                        text = getInitials(signedIn.displayName),
+                } else {
+                    Text(
+                        text = getInitials(displayName),
                         fontFamily = JetBrainsMonoFontFamily,
                         fontWeight = FontWeight.Bold,
                         fontSize = 22.sp,
                         color = PrototypeTokens.accent
                     )
-
-                    else -> androidx.compose.material3.Icon(
-                        imageVector = Icons.Filled.Person,
-                        contentDescription = null,
-                        modifier = Modifier.size(30.dp),
-                        tint = muted
-                    )
                 }
             }
-            if (signedIn != null) {
+            if (localProfileEditable) {
                 Box(
                     modifier = Modifier
                         .size(28.dp)
@@ -1095,18 +1101,38 @@ private fun AccountIdentityHeader(
 
         Spacer(modifier = Modifier.height(12.dp))
 
+        // 本地资料昵称（未登录态可点改名；编辑徽标在头像上）
+        Text(
+            text = displayName,
+            fontWeight = FontWeight.SemiBold,
+            fontSize = 18.sp,
+            color = fg,
+            lineHeight = 24.sp,
+            modifier = if (localProfileEditable) {
+                Modifier.clickable(onClick = onEditName)
+            } else {
+                Modifier
+            }
+        )
+
+        Spacer(modifier = Modifier.height(10.dp))
+
+        // 分隔：把「本地资料」与「账户状态」两块分开（设计回函 v4 §1）
+        Box(
+            modifier = Modifier
+                .size(width = 40.dp, height = 1.dp)
+                .background(border)
+        )
+
+        Spacer(modifier = Modifier.height(10.dp))
+
         when (state) {
             AccountUiState.SignedOut -> {
+                // 账户状态行：状态 + 价值主张同一行（v4 §1：「未登录」不再是身份区标题）
                 Text(
-                    text = stringResource(R.string.account_signed_out_title),
-                    fontWeight = FontWeight.SemiBold,
-                    fontSize = 18.sp,
-                    color = fg,
-                    lineHeight = 24.sp
-                )
-                Spacer(modifier = Modifier.height(6.dp))
-                Text(
-                    text = stringResource(R.string.account_signed_out_desc),
+                    text = stringResource(R.string.account_signed_out_title) +
+                        ACCOUNT_STATUS_SEPARATOR +
+                        stringResource(R.string.account_signed_out_desc),
                     fontSize = 13.sp,
                     color = muted,
                     textAlign = TextAlign.Center,
@@ -1120,15 +1146,6 @@ private fun AccountIdentityHeader(
             }
 
             is AccountUiState.SignedIn -> {
-                Text(
-                    text = state.displayName,
-                    fontWeight = FontWeight.SemiBold,
-                    fontSize = 18.sp,
-                    color = fg,
-                    lineHeight = 24.sp,
-                    modifier = Modifier.clickable(onClick = onEditName)
-                )
-                Spacer(modifier = Modifier.height(4.dp))
                 Text(
                     text = state.email,
                     fontFamily = JetBrainsMonoFontFamily,
@@ -1154,6 +1171,9 @@ private fun AccountIdentityHeader(
         )
     }
 }
+
+/** 账户状态行里「状态 · 价值主张」的分隔符（标点，非可翻译文案）。 */
+private const val ACCOUNT_STATUS_SEPARATOR = " · "
 
 /**
  * 同步状态行（设计回函 v3 §3）：**一律行内提示，不弹窗**。
