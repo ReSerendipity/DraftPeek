@@ -140,6 +140,7 @@ import com.draftpeek.feature.editor.model.EditorTab
 import com.draftpeek.feature.editor.model.EditorUiState
 import com.draftpeek.feature.editor.model.MarkdownTheme
 import com.draftpeek.feature.editor.model.MarkdownViewMode
+import com.draftpeek.feature.editor.sora.SearchCountDisplay
 import com.draftpeek.feature.editor.sora.SearchMatchCounter
 import com.draftpeek.feature.editor.sora.SoraEditorWrapper
 import com.draftpeek.feature.editor.treesitter.TreeSitterLanguageProvider
@@ -1987,14 +1988,29 @@ private fun EditorSearchPanel(
                             // ↑↓ 匹配导航（实施指导书 §2.3 屏 18）
                             if (searchQuery.isNotEmpty()) {
                                 Text(
-                                    text = if (matchTotal == 0) {
-                                        stringResource(R.string.editor_search_no_match)
-                                    } else {
-                                        stringResource(
-                                            R.string.editor_search_match_count,
-                                            matchOrdinal,
-                                            matchTotal
-                                        )
+                                    // 设计回函 v2 · Q1：未定位显示「N 个结果」而非 0/N；
+                                    // 超过 999 显示「999+ 个结果」；已定位才是 i / N。
+                                    text = when (
+                                        SearchMatchCounter.countDisplay(matchOrdinal, matchTotal)
+                                    ) {
+                                        SearchCountDisplay.NONE ->
+                                            stringResource(R.string.editor_search_no_match)
+
+                                        SearchCountDisplay.LOCATED ->
+                                            stringResource(
+                                                R.string.editor_search_match_count,
+                                                matchOrdinal,
+                                                matchTotal
+                                            )
+
+                                        SearchCountDisplay.TOTAL ->
+                                            stringResource(
+                                                R.string.editor_search_match_total,
+                                                matchTotal
+                                            )
+
+                                        SearchCountDisplay.TOTAL_CAPPED ->
+                                            stringResource(R.string.editor_search_match_total_capped)
                                     },
                                     style = EditorStatusBarStyle,
                                     color = PrototypeTokens.muted
@@ -2038,14 +2054,29 @@ private fun EditorSearchPanel(
                             // ↑↓ 匹配导航（实施指导书 §2.3 屏 18）
                             if (searchQuery.isNotEmpty()) {
                                 Text(
-                                    text = if (matchTotal == 0) {
-                                        stringResource(R.string.editor_search_no_match)
-                                    } else {
-                                        stringResource(
-                                            R.string.editor_search_match_count,
-                                            matchOrdinal,
-                                            matchTotal
-                                        )
+                                    // 设计回函 v2 · Q1：未定位显示「N 个结果」而非 0/N；
+                                    // 超过 999 显示「999+ 个结果」；已定位才是 i / N。
+                                    text = when (
+                                        SearchMatchCounter.countDisplay(matchOrdinal, matchTotal)
+                                    ) {
+                                        SearchCountDisplay.NONE ->
+                                            stringResource(R.string.editor_search_no_match)
+
+                                        SearchCountDisplay.LOCATED ->
+                                            stringResource(
+                                                R.string.editor_search_match_count,
+                                                matchOrdinal,
+                                                matchTotal
+                                            )
+
+                                        SearchCountDisplay.TOTAL ->
+                                            stringResource(
+                                                R.string.editor_search_match_total,
+                                                matchTotal
+                                            )
+
+                                        SearchCountDisplay.TOTAL_CAPPED ->
+                                            stringResource(R.string.editor_search_match_total_capped)
                                     },
                                     style = EditorStatusBarStyle,
                                     color = PrototypeTokens.muted

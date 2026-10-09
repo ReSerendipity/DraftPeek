@@ -159,4 +159,55 @@ class SearchMatchCounterTest {
             assertEquals(3, SearchMatchCounter.ordinalAt(matches, 2))
         }
     }
+
+    @Nested
+    @DisplayName("countDisplay（设计回函 v2 · Q1 显示口径）")
+    inner class CountDisplayTest {
+
+        @Test
+        @DisplayName("零匹配 → NONE（无匹配）")
+        fun zeroMatches() {
+            assertEquals(SearchCountDisplay.NONE, SearchMatchCounter.countDisplay(0, 0))
+        }
+
+        @Test
+        @DisplayName("已定位（ordinal ≥ 1）→ LOCATED（i / N）")
+        fun located() {
+            assertEquals(SearchCountDisplay.LOCATED, SearchMatchCounter.countDisplay(1, 3))
+            assertEquals(SearchCountDisplay.LOCATED, SearchMatchCounter.countDisplay(3, 3))
+        }
+
+        @Test
+        @DisplayName("有匹配但未定位 → TOTAL（N 个结果），绝不显示 0/N")
+        fun unlocatedShowsTotalNotZero() {
+            assertEquals(SearchCountDisplay.TOTAL, SearchMatchCounter.countDisplay(0, 3))
+        }
+
+        @Test
+        @DisplayName("未定位且总数 > 999 → TOTAL_CAPPED（999+ 个结果）")
+        fun capped() {
+            assertEquals(
+                SearchCountDisplay.TOTAL_CAPPED,
+                SearchMatchCounter.countDisplay(0, SearchMatchCounter.MAX_DISPLAY_TOTAL + 1)
+            )
+        }
+
+        @Test
+        @DisplayName("恰好 999 个且未定位 → 仍是 TOTAL（边界：999 不算超限）")
+        fun exactlyAtCapIsNotCapped() {
+            assertEquals(
+                SearchCountDisplay.TOTAL,
+                SearchMatchCounter.countDisplay(0, SearchMatchCounter.MAX_DISPLAY_TOTAL)
+            )
+        }
+
+        @Test
+        @DisplayName("已定位时即使总数超限也走 LOCATED（能定位即总数未过 10000 上限，序号信息更准确）")
+        fun locatedWinsOverCap() {
+            assertEquals(
+                SearchCountDisplay.LOCATED,
+                SearchMatchCounter.countDisplay(2, SearchMatchCounter.MAX_DISPLAY_TOTAL + 1)
+            )
+        }
+    }
 }
