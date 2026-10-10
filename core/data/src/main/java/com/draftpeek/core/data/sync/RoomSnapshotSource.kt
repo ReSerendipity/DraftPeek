@@ -169,7 +169,10 @@ class RoomSnapshotSource @Inject constructor(
 }
 
 /** 内容等价比较（除本地自增 [Snippet.id] 外全字段），用于跳过无意义更新。 */
-private fun Snippet.contentEquals(other: Snippet): Boolean =
-    syncId == other.syncId && title == other.title && content == other.content &&
-        language == other.language && category == other.category &&
-        createdAt == other.createdAt && updatedAt == other.updatedAt
+private fun Snippet.contentEquals(other: Snippet): Boolean = syncId == other.syncId &&
+    title == other.title &&
+    content == other.content &&
+    language == other.language &&
+    category == other.category &&
+    createdAt == other.createdAt &&
+    updatedAt == other.updatedAt
