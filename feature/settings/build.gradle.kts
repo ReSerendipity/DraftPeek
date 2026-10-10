@@ -89,7 +89,7 @@ dependencies {
     // 提供 org.junit.* (JUnit4) 注解，供 Robolectric @RunWith 测试使用
     testImplementation(libs.androidx.test.ext.junit)
     // JUnit Vintage 引擎：在 useJUnitPlatform() 下运行 JUnit4 @RunWith 测试
-    testRuntimeOnly("org.junit.vintage:junit-vintage-engine:5.11.3")
+    testRuntimeOnly("org.junit.vintage:junit-vintage-engine:6.1.3")
 
     // Android instrumented test dependencies (Compose UI Test)
     androidTestImplementation(platform(libs.compose.bom))

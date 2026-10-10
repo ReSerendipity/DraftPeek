@@ -109,7 +109,7 @@ dependencies {
     testImplementation(libs.androidx.test.core)
     testImplementation(libs.androidx.test.ext.junit)
     // JUnit Vintage engine for JUnit 4 tests (Robolectric @RunWith)
-    testRuntimeOnly("org.junit.vintage:junit-vintage-engine:5.11.3")
+    testRuntimeOnly("org.junit.vintage:junit-vintage-engine:6.1.3")
 
     // ===== androidTest（插桩测试）=====
     // Room 迁移 schema 校验：MigrationTestHelper 依赖 Instrumentation，只能放 androidTest
