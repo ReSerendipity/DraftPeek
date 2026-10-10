@@ -1,6 +1,7 @@
 package com.draftpeek.core.data.sync
 
 import com.draftpeek.core.data.entity.Snippet
+import com.draftpeek.core.sync.SyncDataCorruptException
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertNull
 import org.junit.Assert.assertThrows
@@ -58,14 +59,14 @@ class SnippetPayloadTest {
 
     @Test
     fun missingRequiredField_throwsInsteadOfGuessing() {
-        assertThrows(IllegalArgumentException::class.java) {
+        assertThrows(SyncDataCorruptException::class.java) {
             SnippetPayload.decode("""{"content":"x","category":"c","createdAt":"1","updatedAt":"2"}""", "u")
         }
     }
 
     @Test
     fun nonNumericTimestamp_throwsInsteadOfZero() {
-        assertThrows(IllegalArgumentException::class.java) {
+        assertThrows(SyncDataCorruptException::class.java) {
             SnippetPayload.decode(
                 """{"title":"t","content":"c","category":"k","createdAt":"昨天","updatedAt":"2"}""",
                 "u"

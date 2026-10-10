@@ -42,6 +42,8 @@ object SyncFailureMapper {
      * —— 那属于**不该重试**的安全问题，而不是网络抖动。
      */
     fun fromThrowable(throwable: Throwable): SyncFailureKind = when (throwable) {
+        // 数据损坏：重试必然再败，必须走人工修复路径（设计 G7 · B8）
+        is SyncDataCorruptException -> SyncFailureKind.CORRUPT
         is javax.net.ssl.SSLPeerUnverifiedException -> SyncFailureKind.OTHER
         is java.io.IOException -> SyncFailureKind.NETWORK
         else -> SyncFailureKind.OTHER

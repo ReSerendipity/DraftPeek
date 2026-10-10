@@ -99,6 +99,17 @@ class SyncFailureMapperTest {
                 SyncFailureMapper.fromThrowable(IllegalStateException("boom"))
             )
         }
+
+        @Test
+        @DisplayName("数据损坏异常 → CORRUPT（重试必然再败，不做退避）")
+        fun corruptData() {
+            assertEquals(
+                SyncFailureKind.CORRUPT,
+                SyncFailureMapper.fromThrowable(SyncDataCorruptException("bad json"))
+            )
+            // CORRUPT 不可重试（与 isRetryable 口径一致）
+            assertEquals(false, SyncFailureMapper.isRetryable(SyncFailureKind.CORRUPT))
+        }
     }
 
     @Test
