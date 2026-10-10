@@ -28,6 +28,22 @@ class CrdtSnapshotCodec(private val documentPath: String = DEFAULT_DOCUMENT_PATH
         return CrdtJson.read(text)
     }
 
+    /**
+     * 文档 → 本地持久化文本（上层缓存「上次同步后的文档」用）。
+     *
+     * 与 [encode] 的差别只是产物为裸文本 —— 缓存层不必理解快照的文件结构，
+     * 格式知识仍只留在本类（与 [restore] 成对使用）。
+     */
+    fun persist(document: CrdtDocument): String = CrdtJson.write(document)
+
+    /**
+     * 持久化文本 → 文档；损坏时抛 [JsonParseException]（与 [decode] 同策略：不猜）。
+     *
+     * 上层若把该缓存视为**可再生中间态**（真身在 Room 与远端仓库），可捕获异常按
+     * 空文档降级 —— 但降级不得成为常态路径。
+     */
+    fun restore(text: String): CrdtDocument = CrdtJson.read(text)
+
     companion object {
         /** 默认文档文件名（位于仓库的同步目录下）。 */
         const val DEFAULT_DOCUMENT_PATH = "sync.json"
