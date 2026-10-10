@@ -52,7 +52,7 @@ import com.draftpeek.core.data.entity.UserActivity
  */
 @Database(
     entities = [BookmarkEntity::class, LinkEntity::class, RecentFile::class, Snippet::class, SnippetFts::class, UserActivity::class, SecurityEventEntity::class],
-    version = 12,
+    version = 13,
     exportSchema = true
 )
 abstract class AppDatabase : RoomDatabase() {
@@ -433,6 +433,24 @@ abstract class AppDatabase : RoomDatabase() {
                 )
                 db.execSQL("CREATE INDEX IF NOT EXISTS index_links_targetTitle ON links(targetTitle)")
                 db.execSQL("CREATE INDEX IF NOT EXISTS index_links_sourceUri ON links(sourceUri)")
+            }
+        }
+
+        /**
+         * v12 → v13：为 `snippets` 增加跨设备同步标识 `syncId`。
+         *
+         * 同步键必须**跨设备稳定**，而现有主键 `id` 是本地自增（两台设备的第 1 条片段都是
+         * `1`），入键会把不同片段合并成一条 ⇒ 新增 UUID 列，同步键改用 `snippet:<syncId>`。
+         *
+         * 存量数据用 `randomblob(16)` 回填（32 位 hex，唯一性足够）；**刻意不用自增 id
+         * 作派生材料** —— 它跨设备不稳定（规格 v1.2 §1）。
+         */
+        val MIGRATION_12_13 = object : Migration(12, 13) {
+            override fun migrate(db: SupportSQLiteDatabase) {
+                db.execSQL("ALTER TABLE snippets ADD COLUMN syncId TEXT NOT NULL DEFAULT ''")
+                db.execSQL(
+                    "UPDATE snippets SET syncId = lower(hex(randomblob(16))) WHERE syncId = ''"
+                )
             }
         }
 
