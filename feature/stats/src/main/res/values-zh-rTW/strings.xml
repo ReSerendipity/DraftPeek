@@ -10,6 +10,8 @@
     <string name="profile_section_stats">統計</string>
     <!-- 账号身份区（设计回函 v3 · 阶段 A） -->
     <string name="account_signed_out_title">未登入</string>
+    <string name="account_signed_out_status">未登入 · 登入後可跨裝置同步閱讀進度與片段</string>
+    <!-- deprecated：由 account_signed_out_status 取代（设计回函 v6 §2），阶段 B 批次随三条临时词条清理 -->
     <string name="account_signed_out_desc">登入後可跨裝置同步閱讀進度與片段</string>
     <string name="account_sign_in">登入 / 註冊</string>
     <string name="account_synced_ago">已同步 · %1$s前</string>
