@@ -11,7 +11,7 @@
     <!-- 账号身份区（设计回函 v3 · 阶段 A） -->
     <!-- deprecated：G7 无独立「未登录」标题用法（设计回函 v7 §5），阶段 B 清理批（6 键）删除 -->
     <string name="account_signed_out_title">未登入</string>
-    <string name="account_signed_out_status">未登入 · 登入後可跨裝置同步閱讀進度與片段</string>
+    <string name="account_signed_out_status">未登入 · 登入後可跨裝置同步您的片段</string>
     <!-- deprecated：由 account_signed_out_status 取代（设计回函 v6 §2），阶段 B 清理批（6 键）删除 -->
     <string name="account_signed_out_desc">登入後可跨裝置同步閱讀進度與片段</string>
     <string name="account_sign_in">登入 / 註冊</string>
@@ -37,7 +37,7 @@
     <string name="auth_host_gitee_desc">國內連線較快</string>
     <string name="auth_scope_headline">我們不儲存你的任何資料</string>
     <string name="auth_scope_perm">單一倉庫的讀寫權限（不含刪除與管理）</string>
-    <string name="auth_scope_data">同步內容：閱讀進度＋片段（片段包含你的程式碼）</string>
+    <string name="auth_scope_data">同步內容：片段（包含你的程式碼）</string>
     <string name="auth_go">去 %1$s 授權</string>
     <string name="auth_not_now">暫不</string>
     <string name="repo_pick_title">選擇同步倉庫</string>
@@ -56,4 +56,10 @@
     <string name="auth_revoke">撤銷授權</string>
     <string name="auth_revoke_confirm">退出後本機片段與統計保留；雲端檔案留在你的倉庫中；可隨時重新授權接回。</string>
     <string name="repo_switch">更換同步倉庫</string>
+    <!-- 阶段 B · 失败类别文案（规格 v1.2 §3.1） -->
+    <string name="account_sync_auth_expired">Git 授權已過期 · 重新授權</string>
+    <string name="account_sync_repo_unavailable">同步倉庫不可用 · 重新選擇</string>
+    <string name="account_sync_retrying">正在重試（%1$d/%2$d）…</string>
+    <string name="account_sync_rate_limited">操作頻繁 · 稍後自動重試</string>
+    <string name="account_sync_failed_detail">同步失敗 · 檢視</string>
 </resources>
