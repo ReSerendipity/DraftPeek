@@ -66,6 +66,11 @@ ksp {
 dependencies {
     implementation(project(":core:common"))
 
+    // 同步：LocalSnapshotSource 的 Room 实现
+    // （接口在 core:sync，CRDT 文档与编解码在 core:crdt）
+    implementation(project(":core:sync"))
+    implementation(project(":core:crdt"))
+
     implementation(libs.androidx.core.ktx)
     implementation(libs.kotlinx.coroutines.android)
 

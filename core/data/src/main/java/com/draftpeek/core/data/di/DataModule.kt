@@ -92,6 +92,23 @@ abstract class DataModule {
     abstract fun bindSecurityEventRepository(impl: SecurityEventRepositoryImpl): SecurityEventRepository
 
     /**
+     * 本地快照源：Room 实现（阶段 B 第一批，仅 `snippet:` 前缀，规格 v1.2 §1）。
+     * 接口在 `core:sync`（协调器只认接缝），实现在此装配。
+     */
+    @Binds
+    @Singleton
+    abstract fun bindLocalSnapshotSource(
+        impl: com.draftpeek.core.data.sync.RoomSnapshotSource
+    ): com.draftpeek.core.sync.LocalSnapshotSource
+
+    /** CRDT 节点标识来源（接口注入便于单测；实现首次生成后持久化、终身不变）。 */
+    @Binds
+    @Singleton
+    abstract fun bindSyncNodeIdSource(
+        impl: com.draftpeek.core.data.sync.SyncNodeIdProvider
+    ): com.draftpeek.core.data.sync.SyncNodeIdSource
+
+    /**
      * Binds [CredentialManager] as the [CredentialProvider] implementation.
      *
      * [CredentialManager] uses Android Keystore + SecurePreferences for
