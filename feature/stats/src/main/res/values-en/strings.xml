@@ -323,6 +323,8 @@
     <string name="profile_open_about_security">About &amp; security</string>
     <!-- 账号身份区（设计回函 v3 · 阶段 A） -->
     <string name="account_signed_out_title">Not signed in</string>
+    <string name="account_signed_out_status">Not signed in · Sign in to sync reading progress and snippets across devices</string>
+    <!-- deprecated：由 account_signed_out_status 取代（设计回函 v6 §2），阶段 B 批次随三条临时词条清理 -->
     <string name="account_signed_out_desc">Sync your reading progress and snippets across devices</string>
     <string name="account_sign_in">Sign in / Sign up</string>
     <string name="account_synced_ago">Synced %1$s ago</string>

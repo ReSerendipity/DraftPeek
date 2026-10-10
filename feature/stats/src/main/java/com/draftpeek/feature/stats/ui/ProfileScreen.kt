@@ -1129,10 +1129,9 @@ private fun AccountIdentityHeader(
         when (state) {
             AccountUiState.SignedOut -> {
                 // 账户状态行：状态 + 价值主张同一行（v4 §1：「未登录」不再是身份区标题）
+                // v6 §2：改单条独立词条（拼接是 i18n 反模式，各语言语序无法靠拼接保证）
                 Text(
-                    text = stringResource(R.string.account_signed_out_title) +
-                        ACCOUNT_STATUS_SEPARATOR +
-                        stringResource(R.string.account_signed_out_desc),
+                    text = stringResource(R.string.account_signed_out_status),
                     fontSize = 13.sp,
                     color = muted,
                     textAlign = TextAlign.Center,
@@ -1171,9 +1170,6 @@ private fun AccountIdentityHeader(
         )
     }
 }
-
-/** 账户状态行里「状态 · 价值主张」的分隔符（标点，非可翻译文案）。 */
-private const val ACCOUNT_STATUS_SEPARATOR = " · "
 
 /**
  * 同步状态行（设计回函 v3 §3）：**一律行内提示，不弹窗**。
