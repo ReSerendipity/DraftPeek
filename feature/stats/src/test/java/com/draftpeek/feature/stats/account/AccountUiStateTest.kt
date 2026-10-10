@@ -86,7 +86,7 @@ class AccountUiStateTest {
         }
 
         @Test
-        @DisplayName("轮转顺序：未登录 → 已同步 → 同步中 → 失败 → 离线 → 未登录")
+        @DisplayName("轮转顺序：未登录 → 已同步 → 同步中 → 重试中 → 失败(网络) → 离线 → 未登录")
         fun cycleOrder() {
             var state: AccountUiState = AccountUiState.SignedOut
             state = AccountStateSimulation.next(state, now)
@@ -96,7 +96,16 @@ class AccountUiStateTest {
             assertTrue((state as AccountUiState.SignedIn).sync is SyncUiStatus.Syncing)
 
             state = AccountStateSimulation.next(state, now)
-            assertTrue((state as AccountUiState.SignedIn).sync is SyncUiStatus.Failed)
+            val retrying = (state as AccountUiState.SignedIn).sync
+            assertTrue(retrying is SyncUiStatus.Retrying)
+            assertEquals(2, (retrying as SyncUiStatus.Retrying).attempt)
+
+            state = AccountStateSimulation.next(state, now)
+            val failed = (state as AccountUiState.SignedIn).sync
+            assertEquals(
+                com.draftpeek.core.sync.SyncFailureKind.NETWORK,
+                (failed as SyncUiStatus.Failed).kind
+            )
 
             state = AccountStateSimulation.next(state, now)
             assertTrue((state as AccountUiState.SignedIn).sync is SyncUiStatus.Offline)

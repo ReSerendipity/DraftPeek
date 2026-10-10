@@ -36,6 +36,7 @@ import com.draftpeek.core.data.usecase.GetRecentFilesUseCase
 import com.draftpeek.core.ui.theme.RainbowColor
 import com.draftpeek.feature.settings.repository.SettingsRepository
 import com.draftpeek.feature.stats.model.Achievement
+import com.draftpeek.feature.stats.model.AchievementStats
 import com.draftpeek.feature.stats.util.AchievementCalculator
 import com.draftpeek.feature.stats.util.AchievementDefinitions
 import dagger.hilt.android.lifecycle.HiltViewModel
@@ -214,6 +215,10 @@ class StatsViewModel @Inject constructor(
     private val _unlockedAchievements = MutableStateFlow<ImmutableList<Achievement>>(persistentListOf())
     val unlockedAchievements: StateFlow<ImmutableList<Achievement>> = _unlockedAchievements.asStateFlow()
 
+    /** 成就统计数据（当前进度；供成就卡级进度条使用，设计画布 s21 标注 1） */
+    private val _achievementStats = MutableStateFlow(AchievementStats())
+    val achievementStats: StateFlow<AchievementStats> = _achievementStats.asStateFlow()
+
     /** 本年度活动数据（日期字符串 -> UserActivity） */
     val yearActivities: StateFlow<Map<String, UserActivity>> =
         userActivityRepository.getActivityForDateRange(
@@ -291,6 +296,7 @@ class StatsViewModel @Inject constructor(
         val stats = AchievementCalculator.calculate(activities, files)
         val unlocked = AchievementDefinitions.allAchievements.filter { it.check(stats) }
         _unlockedAchievements.value = unlocked.toImmutableList()
+        _achievementStats.value = stats
     }
 
     /**

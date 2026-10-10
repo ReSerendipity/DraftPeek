@@ -18,6 +18,7 @@ import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
@@ -59,6 +60,7 @@ import com.draftpeek.feature.stats.R
 import com.draftpeek.feature.stats.model.Achievement
 import com.draftpeek.feature.stats.model.AchievementCategory
 import com.draftpeek.feature.stats.util.AchievementDefinitions
+import com.draftpeek.feature.stats.util.AchievementProgress
 import com.draftpeek.feature.stats.viewmodel.StatsViewModel
 
 /**
@@ -72,6 +74,7 @@ import com.draftpeek.feature.stats.viewmodel.StatsViewModel
 @Composable
 fun AchievementScreen(onNavigateUp: () -> Unit, viewModel: StatsViewModel = hiltViewModel()) {
     val unlockedAchievements by viewModel.unlockedAchievements.collectAsStateWithLifecycle()
+    val achievementStats by viewModel.achievementStats.collectAsStateWithLifecycle()
     val allAchievements = AchievementDefinitions.allAchievements
     val unlockedIds = unlockedAchievements.map { it.id }.toSet()
 
@@ -152,7 +155,9 @@ fun AchievementScreen(onNavigateUp: () -> Unit, viewModel: StatsViewModel = hilt
                             val isUnlocked = achievement.id in unlockedIds
                             AchievementItem(
                                 achievement = achievement,
-                                isUnlocked = isUnlocked
+                                isUnlocked = isUnlocked,
+                                progress = AchievementProgress.progressOf(achievement, achievementStats),
+                                target = AchievementProgress.targetOf(achievement)
                             )
                         }
                     }
@@ -280,7 +285,7 @@ private fun CategoryHeader(category: AchievementCategory, unlocked: Int, total: 
  * @param isUnlocked 是否已解锁
  */
 @Composable
-private fun AchievementItem(achievement: Achievement, isUnlocked: Boolean) {
+private fun AchievementItem(achievement: Achievement, isUnlocked: Boolean, progress: Int?, target: Int?) {
     val shape = RoundedCornerShape(10.dp)
     val borderColor = if (isUnlocked) {
         PrototypeTokens.accent.copy(alpha = 0.2f)
@@ -337,6 +342,37 @@ private fun AchievementItem(achievement: Achievement, isUnlocked: Boolean) {
                     color = PrototypeTokens.muted.copy(alpha = alpha),
                     maxLines = 1
                 )
+                // 卡级进度（设计 s21 标注 1）：数值化分类才展示；纯数字 N / M + 细进度条，
+                // 单位语义由上方描述承担，不引入新词条。
+                if (progress != null && target != null && target > 0) {
+                    val fraction = (progress.toFloat() / target).coerceIn(0f, 1f)
+                    Spacer(modifier = Modifier.height(4.dp))
+                    Text(
+                        text = "$progress / $target",
+                        fontFamily = JetBrainsMonoFontFamily,
+                        fontSize = 9.sp,
+                        color = (if (isUnlocked) PrototypeTokens.accent else PrototypeTokens.muted)
+                            .copy(alpha = alpha)
+                    )
+                    Spacer(modifier = Modifier.height(3.dp))
+                    Box(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .height(3.dp)
+                            .clip(RoundedCornerShape(2.dp))
+                            .background(PrototypeTokens.border)
+                    ) {
+                        Box(
+                            modifier = Modifier
+                                .fillMaxWidth(fraction)
+                                .fillMaxHeight()
+                                .background(
+                                    (if (isUnlocked) PrototypeTokens.accent else PrototypeTokens.muted)
+                                        .copy(alpha = alpha)
+                                )
+                        )
+                    }
+                }
             }
         }
 

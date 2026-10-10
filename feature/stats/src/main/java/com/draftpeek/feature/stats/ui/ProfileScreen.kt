@@ -99,6 +99,7 @@ import androidx.compose.ui.unit.sp
 import androidx.core.os.LocaleListCompat
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import com.draftpeek.core.sync.SyncFailureKind
 import com.draftpeek.core.ui.component.BrandDialog
 import com.draftpeek.core.ui.component.BrandFilledButton
 import com.draftpeek.core.ui.component.BrandOutlinedButton
@@ -1230,12 +1231,30 @@ private fun SyncStatusRow(
                 }
             }
 
-            SyncUiStatus.Failed -> Text(
-                text = stringResource(R.string.account_sync_failed),
+            is SyncUiStatus.Retrying -> Text(
+                text = stringResource(R.string.account_sync_retrying, sync.attempt, sync.maxAttempts),
                 style = MonoLabelStyle,
-                color = SemanticColors.Danger,
-                modifier = Modifier.clickable(onClick = onRetry)
+                color = PrototypeTokens.fgSoft
             )
+
+            is SyncUiStatus.Failed -> {
+                // 类别 → 文案查表（规格 v1.1 §3.1）；点击目标屏未实现前，仅网络/其他保持可点重试，
+                // 其余（重新授权 / 重新选择 / 查看）待 B1/B4/B7/B8 落位后再接线，不给死入口。
+                val textRes = when (sync.kind) {
+                    SyncFailureKind.NETWORK, SyncFailureKind.OTHER -> R.string.account_sync_failed
+                    SyncFailureKind.AUTH -> R.string.account_sync_auth_expired
+                    SyncFailureKind.REPOSITORY -> R.string.account_sync_repo_unavailable
+                    SyncFailureKind.CONFLICT, SyncFailureKind.CORRUPT -> R.string.account_sync_failed_detail
+                }
+                val clickableRetry =
+                    sync.kind == SyncFailureKind.NETWORK || sync.kind == SyncFailureKind.OTHER
+                Text(
+                    text = stringResource(textRes),
+                    style = MonoLabelStyle,
+                    color = SemanticColors.Danger,
+                    modifier = if (clickableRetry) Modifier.clickable(onClick = onRetry) else Modifier
+                )
+            }
 
             SyncUiStatus.Offline -> Text(
                 text = stringResource(R.string.account_offline),

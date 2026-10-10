@@ -47,6 +47,8 @@ dependencies {
     implementation(project(":core:ui"))
     implementation(project(":core:designsystem"))
     implementation(project(":core:data"))
+    // 身份区同步状态行直接复用引擎的失败分类（SyncFailureKind），见设计规格 v1.1 §3.1
+    implementation(project(":core:sync"))
     implementation(project(":feature:editor"))
 
     // Java 8+ API desugaring (required by tree-sitter AARs)
