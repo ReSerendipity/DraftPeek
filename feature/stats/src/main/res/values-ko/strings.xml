@@ -300,9 +300,10 @@
     <string name="profile_open_lab">실험실</string>
     <string name="profile_open_about_security">정보 및 보안</string>
     <!-- 账号身份区（设计回函 v3 · 阶段 A） -->
+    <!-- deprecated：G7 无独立「未登录」标题用法（设计回函 v7 §5），阶段 B 清理批（6 键）删除 -->
     <string name="account_signed_out_title">로그인하지 않음</string>
     <string name="account_signed_out_status">로그인하지 않음 · 로그인하면 읽기 진행률과 스니펫을 기기 간에 동기화할 수 있습니다</string>
-    <!-- deprecated：由 account_signed_out_status 取代（设计回函 v6 §2），阶段 B 批次随三条临时词条清理 -->
+    <!-- deprecated：由 account_signed_out_status 取代（设计回函 v6 §2），阶段 B 清理批（6 键）删除 -->
     <string name="account_signed_out_desc">로그인하면 읽기 진행률과 스니펫을 기기 간에 동기화</string>
     <string name="account_sign_in">로그인 / 가입</string>
     <string name="account_synced_ago">%1$s 전에 동기화됨</string>
@@ -321,4 +322,29 @@
     <!-- 身份区验收开关（仅 debug 构建暴露） -->
     <string name="account_dev_section">개발(디버그 빌드 전용)</string>
     <string name="account_dev_simulate">계정 상태 시뮬레이션(검수용)</string>
+    <!-- 阶段 B · 授权与同步流程（设计规格 v1 §4） -->
+    <string name="auth_pick_host">인증 방법 선택</string>
+    <string name="auth_host_github_desc">개발자 기본 · 국제 저장소</string>
+    <string name="auth_host_gitee_desc">중국 내 접속 속도 향상</string>
+    <string name="auth_scope_headline">당사는 귀하의 데이터를 저장하지 않습니다</string>
+    <string name="auth_scope_perm">단일 저장소 읽기/쓰기 권한(삭제·관리 권한 없음)</string>
+    <string name="auth_scope_data">동기화: 읽기 진행률 + 스니펫(코드를 포함함)</string>
+    <string name="auth_go">%1$s 인증으로 계속</string>
+    <string name="auth_not_now">나중에</string>
+    <string name="repo_pick_title">동기화 저장소 선택</string>
+    <string name="repo_create_default">저장소 생성(기본 비공개)</string>
+    <string name="repo_file_note">단일 파일만 기록하며 저장소의 다른 파일은 변경되지 않음</string>
+    <string name="first_sync_title">첫 동기화 · 데이터 병합</string>
+    <string name="first_sync_merge">자동 병합(권장)</string>
+    <string name="first_sync_local">로컬 우선</string>
+    <string name="first_sync_remote">원격 우선</string>
+    <string name="first_sync_warn">「로컬/원격 우선」은 반대쪽을 덮어쓰며 되돌릴 수 없습니다</string>
+    <string name="conflict_title">동기화 중 원격이 업데이트되었습니다</string>
+    <string name="conflict_keep_both">양쪽 변경 유지(병합)</string>
+    <string name="corrupt_title">원격 파일을 분석할 수 없습니다</string>
+    <string name="corrupt_safe">로컬 데이터는 영향받지 않았으며 덮어써지지 않았습니다</string>
+    <string name="corrupt_retry">복구 완료 — 재동기화</string>
+    <string name="auth_revoke">인증 취소</string>
+    <string name="auth_revoke_confirm">취소해도 로컬 스니펫과 통계는 유지되고, 클라우드 파일은 저장소에 남습니다. 언제든 재인증으로 재개할 수 있습니다.</string>
+    <string name="repo_switch">동기화 저장소 변경</string>
 </resources>
