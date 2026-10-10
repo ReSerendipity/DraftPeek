@@ -47,6 +47,18 @@ enum class SyncFailureKind {
      */
     CONFLICT,
 
+    /** 数据损坏：远端文档/载荷解析失败 —— 重试无意义，需人工修复（设计 G7 · B8）。 */
+    CORRUPT,
+
     /** 其他未归类失败。 */
     OTHER
 }
+
+/**
+ * 远端同步数据损坏（文档或载荷解析失败）。
+ *
+ * 由文档层/载荷层在**严格失败不猜**的解析失败处抛出，供 [SyncFailureMapper] 归类为
+ * [SyncFailureKind.CORRUPT] —— UI 据此进入「损坏文档人工修复」路径（设计 G7 · B8），
+ * 而不是把损坏当普通网络失败反复重试（重试必然再败）。
+ */
+class SyncDataCorruptException(message: String, cause: Throwable? = null) : RuntimeException(message, cause)

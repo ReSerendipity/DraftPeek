@@ -41,7 +41,7 @@ class CrdtSyncMergerTest {
         @DisplayName("文件内容损坏 → 抛异常（**绝不返回空文档**）")
         fun corruptFileThrows() {
             val corrupt = SyncSnapshot(mapOf("sync.json" to "{ this is not json"))
-            assertThrows(JsonParseException::class.java) { codec.decode(corrupt) }
+            assertThrows(com.draftpeek.core.sync.SyncDataCorruptException::class.java) { codec.decode(corrupt) }
         }
     }
 
@@ -91,7 +91,10 @@ class CrdtSyncMergerTest {
 
             // assertThrows 的 lambda 不是挂起上下文，故用 runCatching 包 suspend 调用
             val thrown = runCatching { merger.merge(snapshotOf(local), corruptRemote) }.exceptionOrNull()
-            assertTrue(thrown is JsonParseException, "期望 JsonParseException，实际 $thrown")
+            assertTrue(
+                thrown is com.draftpeek.core.sync.SyncDataCorruptException,
+                "期望 SyncDataCorruptException，实际 $thrown"
+            )
             // 关键：没有返回任何「可推送的快照」⇒ 协调器不会写本地、不会推远端，两侧数据都安全
         }
 
@@ -100,7 +103,10 @@ class CrdtSyncMergerTest {
         fun corruptLocalAlsoFails() = runTest {
             val corruptLocal = SyncSnapshot(mapOf("sync.json" to "garbage"))
             val thrown = runCatching { merger.merge(corruptLocal, SyncSnapshot.EMPTY) }.exceptionOrNull()
-            assertTrue(thrown is JsonParseException, "期望 JsonParseException，实际 $thrown")
+            assertTrue(
+                thrown is com.draftpeek.core.sync.SyncDataCorruptException,
+                "期望 SyncDataCorruptException，实际 $thrown"
+            )
         }
     }
 }

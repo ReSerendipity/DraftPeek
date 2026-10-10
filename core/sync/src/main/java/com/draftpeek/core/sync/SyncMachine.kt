@@ -22,7 +22,9 @@ data class SyncMachineState(
     /** 「正在同步…」是否已超过取消阈值。 */
     val cancelAvailable: Boolean = false,
     /** 退避等待中的下次重试延迟；非退避态为 null。 */
-    val pendingRetryDelayMs: Long? = null
+    val pendingRetryDelayMs: Long? = null,
+    /** 最近一次失败的类别；进入 FAILED 前写入，`Requested`/`Succeeded`/取消/断网时清空。 */
+    val failureKind: SyncFailureKind? = null
 )
 
 /** 驱动状态机的事件。 */
@@ -100,7 +102,8 @@ object SyncMachine {
             lastSuccessAtMillis = event.nowMillis,
             syncingStartedAtMillis = null,
             cancelAvailable = false,
-            pendingRetryDelayMs = null
+            pendingRetryDelayMs = null,
+            failureKind = null
         ) to emptyList()
 
         is SyncEvent.Failed -> onFailed(state, event.kind)
@@ -129,7 +132,8 @@ object SyncMachine {
                 failureCount = 0,
                 syncingStartedAtMillis = nowMillis,
                 cancelAvailable = false,
-                pendingRetryDelayMs = null
+                pendingRetryDelayMs = null,
+                failureKind = null
             ) to listOf(SyncEffect.StartTransfer)
         }
 
@@ -140,7 +144,8 @@ object SyncMachine {
                 phase = SyncPhase.FAILED,
                 syncingStartedAtMillis = null,
                 cancelAvailable = false,
-                pendingRetryDelayMs = null
+                pendingRetryDelayMs = null,
+                failureKind = kind
             ) to emptyList()
         }
         val attempts = state.failureCount + 1
@@ -150,7 +155,8 @@ object SyncMachine {
             state.copy(
                 phase = SyncPhase.SYNCING,
                 failureCount = attempts,
-                pendingRetryDelayMs = delay
+                pendingRetryDelayMs = delay,
+                failureKind = kind
             ) to listOf(SyncEffect.ScheduleRetry(delay))
         } else {
             state.copy(
@@ -158,7 +164,8 @@ object SyncMachine {
                 failureCount = attempts,
                 syncingStartedAtMillis = null,
                 cancelAvailable = false,
-                pendingRetryDelayMs = null
+                pendingRetryDelayMs = null,
+                failureKind = kind
             ) to emptyList()
         }
     }
@@ -168,7 +175,8 @@ object SyncMachine {
         failureCount = 0,
         syncingStartedAtMillis = null,
         cancelAvailable = false,
-        pendingRetryDelayMs = null
+        pendingRetryDelayMs = null,
+        failureKind = null
     ) to if (state.phase == SyncPhase.SYNCING) listOf(SyncEffect.CancelTransfer) else emptyList()
 
     private fun onWentOnline(state: SyncMachineState, nowMillis: Long): Pair<SyncMachineState, List<SyncEffect>> =
@@ -193,7 +201,8 @@ object SyncMachine {
                 failureCount = 0,
                 syncingStartedAtMillis = null,
                 cancelAvailable = false,
-                pendingRetryDelayMs = null
+                pendingRetryDelayMs = null,
+                failureKind = null
             ) to listOf(SyncEffect.CancelTransfer)
         } else {
             // 未到 30 秒阈值：不允许取消

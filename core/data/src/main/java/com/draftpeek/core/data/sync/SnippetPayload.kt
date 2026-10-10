@@ -17,6 +17,7 @@ package com.draftpeek.core.data.sync
 
 import com.draftpeek.core.crdt.JsonCodec
 import com.draftpeek.core.data.entity.Snippet
+import com.draftpeek.core.sync.SyncDataCorruptException
 
 /** 片段载荷 ⇄ JSON 的编解码（纯函数，可单测）。 */
 object SnippetPayload {
@@ -60,8 +61,8 @@ object SnippetPayload {
     }
 
     private fun Map<String, String?>.require(key: String): String =
-        this[key] ?: throw IllegalArgumentException("片段载荷缺少必需字段 '$key'")
+        this[key] ?: throw SyncDataCorruptException("片段载荷缺少必需字段 '$key'")
 
     private fun Map<String, String?>.requireLong(key: String): Long =
-        this[key]?.toLongOrNull() ?: throw IllegalArgumentException("片段载荷字段 '$key' 不是合法整数")
+        this[key]?.toLongOrNull() ?: throw SyncDataCorruptException("片段载荷字段 '$key' 不是合法整数")
 }

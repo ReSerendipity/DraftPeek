@@ -49,6 +49,15 @@ class CrdtSnapshotCodecTest {
     }
 
     @Test
+    @DisplayName("远端文档损坏 decode → SyncDataCorruptException（供 UI 走人工修复，不反复重试）")
+    fun corruptRemoteDocumentClassifiedAsCorrupt() {
+        val corrupt = SyncSnapshot(mapOf("sync.json" to "corrupt{{"))
+        assertThrows(com.draftpeek.core.sync.SyncDataCorruptException::class.java) {
+            codec.decode(corrupt)
+        }
+    }
+
+    @Test
     @DisplayName("自定义路径与默认路径互不串读")
     fun customPathDoesNotReadDefaultFile() {
         val custom = CrdtSnapshotCodec("custom.json")
