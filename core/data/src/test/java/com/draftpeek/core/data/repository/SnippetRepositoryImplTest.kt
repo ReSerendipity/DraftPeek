@@ -6,10 +6,12 @@ import io.mockk.coEvery
 import io.mockk.coVerify
 import io.mockk.every
 import io.mockk.mockk
+import io.mockk.slot
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.flowOf
 import kotlinx.coroutines.test.runTest
 import org.junit.jupiter.api.Assertions.assertEquals
+import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.DisplayName
 import org.junit.jupiter.api.Nested
@@ -75,11 +77,30 @@ class SnippetRepositoryImplTest {
     inner class CrudTests {
 
         @Test
-        @DisplayName("addSnippet 委托给 dao.insert 并返回 ID")
-        fun addSnippet_delegatesToDao() = runTest {
-            coEvery { dao.insert(sampleSnippet) } returns 42L
+        @DisplayName("addSnippet：syncId 为空时兜底生成 UUID，再委托 dao.insert 并返回 ID")
+        fun addSnippet_generatesSyncIdWhenBlank() = runTest {
+            val inserted = slot<Snippet>()
+            coEvery { dao.insert(capture(inserted)) } returns 42L
+
             val id = repository.addSnippet(sampleSnippet)
+
             assertEquals(42L, id)
+            assertTrue(
+                inserted.captured.syncId.isNotEmpty(),
+                "空 syncId 必须被兜底生成（空键会让所有片段在同步时互相覆盖）"
+            )
+        }
+
+        @Test
+        @DisplayName("addSnippet：已带 syncId 时原样透传（不覆盖调用方给的标识）")
+        fun addSnippet_keepsProvidedSyncId() = runTest {
+            val provided = sampleSnippet.copy(syncId = "fixed-uuid")
+            val inserted = slot<Snippet>()
+            coEvery { dao.insert(capture(inserted)) } returns 7L
+
+            repository.addSnippet(provided)
+
+            assertEquals("fixed-uuid", inserted.captured.syncId)
         }
 
         @Test

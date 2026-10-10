@@ -11,6 +11,7 @@ package com.draftpeek.core.data.repository
 
 import com.draftpeek.core.data.dao.SnippetDao
 import com.draftpeek.core.data.entity.Snippet
+import java.util.UUID
 import javax.inject.Inject
 import kotlinx.coroutines.flow.Flow
 
@@ -41,7 +42,20 @@ class SnippetRepositoryImpl @Inject constructor(private val dao: SnippetDao) : S
 
     override fun getAllCategories(): Flow<List<String>> = dao.getAllCategories()
 
-    override suspend fun addSnippet(snippet: Snippet): Long = dao.insert(snippet)
+    /**
+     * 新增片段。
+     *
+     * 若未显式提供 [Snippet.syncId]，这里**兜底生成** UUID —— syncId 必须「创建时生成、
+     * 终身不变」，不能指望每个调用方都记得；漏了会得到空键，同步时所有空键片段互相覆盖。
+     */
+    override suspend fun addSnippet(snippet: Snippet): Long {
+        val toInsert = if (snippet.syncId.isEmpty()) {
+            snippet.copy(syncId = UUID.randomUUID().toString())
+        } else {
+            snippet
+        }
+        return dao.insert(toInsert)
+    }
 
     override suspend fun updateSnippet(snippet: Snippet) = dao.update(snippet)
 

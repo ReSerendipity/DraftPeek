@@ -41,6 +41,14 @@ import androidx.room.PrimaryKey
 )
 data class Snippet(
     @PrimaryKey(autoGenerate = true) val id: Long = 0,
+    /**
+     * 跨设备同步标识（UUID）。
+     *
+     * **同步键用 `syncId`，绝不用自增 [id]** —— 后者是本地自增，两台设备的第 1 条片段
+     * 都是 `1`，入键会把**不同片段合并成一条**（LWW 后写覆盖先写，且无法察觉）。
+     * 创建时生成、终身不变；导入/恢复场景应重新生成（避免复制出双份同 syncId）。
+     */
+    val syncId: String = "",
     val title: String,
     val content: String,
     val language: String?,

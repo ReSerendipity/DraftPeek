@@ -425,4 +425,45 @@ class DatabaseMigrationTest {
         )
         assertEquals(1, securityDao.getEventCount())
     }
+
+    // ===== v12 → v13：snippets.syncId（跨设备同步键）=====
+
+    /**
+     * 验证 `MIGRATION_12_13` **既加上了 `syncId` 列，也把存量行回填成非空**。
+     *
+     * 只加列不回填的话，存量片段会带着空键进入同步，而所有空键在 CRDT 里是**同一个键**
+     * ⇒ 互相覆盖（用户看到的是「片段被合并/覆盖」而非同步报错）。
+     */
+    @Test
+    fun migrate_12_to_13_snippetSyncIdAddedAndBackfilled() {
+        val db = createEmptyDatabase()
+
+        // 先建出 v12 形态的 snippets 表（尚无 syncId 列）并塞一行存量数据
+        db.execSQL(
+            """
+            CREATE TABLE snippets (
+                id INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL,
+                title TEXT NOT NULL,
+                content TEXT NOT NULL,
+                language TEXT,
+                category TEXT NOT NULL,
+                createdAt INTEGER NOT NULL,
+                updatedAt INTEGER NOT NULL
+            )
+            """.trimIndent()
+        )
+        db.execSQL(
+            "INSERT INTO snippets (title, content, language, category, createdAt, updatedAt) " +
+                "VALUES ('t', 'c', 'kotlin', 'Kotlin', 1, 1)"
+        )
+
+        AppDatabase.MIGRATION_12_13.migrate(db)
+
+        val cursor = db.query("SELECT syncId FROM snippets")
+        cursor.use {
+            assertTrue("迁移后应仍有存量行", it.moveToFirst())
+            val syncId = it.getString(0)
+            assertTrue("存量行必须回填非空 syncId（否则空键片段会互相覆盖）", syncId.isNotEmpty())
+        }
+    }
 }
