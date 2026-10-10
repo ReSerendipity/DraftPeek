@@ -75,14 +75,14 @@ fun KeyboardSafeBottomSheet(
     modifier: Modifier = Modifier,
     containerColor: Color = PrototypeTokens.surface,
     horizontalPadding: Dp = 20.dp,
-    dismissible: Boolean = true,
+    dismissible: Boolean = DEFAULT_DISMISSIBLE,
     header: @Composable ColumnScope.() -> Unit = {},
     body: @Composable ColumnScope.() -> Unit = {}
 ) {
     // 不可关闭时拦住 Hidden 状态，避免用户把弹层拖走却既没确认也没退出。
     val sheetState = rememberModalBottomSheetState(
         skipPartiallyExpanded = true,
-        confirmValueChange = { newValue -> dismissible || newValue != SheetValue.Hidden }
+        confirmValueChange = { newValue -> confirmSheetValueChange(dismissible, newValue) }
     )
 
     ModalBottomSheet(
@@ -113,3 +113,17 @@ fun KeyboardSafeBottomSheet(
         }
     }
 }
+
+/** `dismissible` 默认值：点遮罩 / 下滑可关；需显式确认的场景（协议闸门）传 false。 */
+internal val DEFAULT_DISMISSIBLE = true
+
+/**
+ * 弹层状态迁移的门禁判定（纯函数、可单测）：
+ * `dismissible = false` 时只拦住 `Hidden`（整层关闭），其余目标状态照常放行。
+ *
+ * 抽成纯函数由 `KeyboardSafeBottomSheetDismissalTest` 在无 Compose 运行时下验证；
+ * 对遮罩点击 / 手势的实际拦截效果仍由 Material3 对 `confirmValueChange` 的解读负责。
+ */
+@OptIn(ExperimentalMaterial3Api::class)
+internal fun confirmSheetValueChange(dismissible: Boolean, newValue: SheetValue): Boolean =
+    dismissible || newValue != SheetValue.Hidden
