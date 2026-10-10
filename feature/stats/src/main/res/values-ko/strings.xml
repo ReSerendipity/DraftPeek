@@ -302,7 +302,7 @@
     <!-- 账号身份区（设计回函 v3 · 阶段 A） -->
     <!-- deprecated：G7 无独立「未登录」标题用法（设计回函 v7 §5），阶段 B 清理批（6 键）删除 -->
     <string name="account_signed_out_title">로그인하지 않음</string>
-    <string name="account_signed_out_status">로그인하지 않음 · 로그인하면 읽기 진행률과 스니펫을 기기 간에 동기화할 수 있습니다</string>
+    <string name="account_signed_out_status">로그인하지 않음 · 로그인하면 스니펫을 기기 간에 동기화할 수 있습니다</string>
     <!-- deprecated：由 account_signed_out_status 取代（设计回函 v6 §2），阶段 B 清理批（6 键）删除 -->
     <string name="account_signed_out_desc">로그인하면 읽기 진행률과 스니펫을 기기 간에 동기화</string>
     <string name="account_sign_in">로그인 / 가입</string>
@@ -328,7 +328,7 @@
     <string name="auth_host_gitee_desc">중국 내 접속 속도 향상</string>
     <string name="auth_scope_headline">당사는 귀하의 데이터를 저장하지 않습니다</string>
     <string name="auth_scope_perm">단일 저장소 읽기/쓰기 권한(삭제·관리 권한 없음)</string>
-    <string name="auth_scope_data">동기화: 읽기 진행률 + 스니펫(코드를 포함함)</string>
+    <string name="auth_scope_data">동기화 내용: 스니펫(코드를 포함함)</string>
     <string name="auth_go">%1$s 인증으로 계속</string>
     <string name="auth_not_now">나중에</string>
     <string name="repo_pick_title">동기화 저장소 선택</string>
@@ -347,4 +347,10 @@
     <string name="auth_revoke">인증 취소</string>
     <string name="auth_revoke_confirm">취소해도 로컬 스니펫과 통계는 유지되고, 클라우드 파일은 저장소에 남습니다. 언제든 재인증으로 재개할 수 있습니다.</string>
     <string name="repo_switch">동기화 저장소 변경</string>
+    <!-- 阶段 B · 失败类别文案（规格 v1.2 §3.1） -->
+    <string name="account_sync_auth_expired">Git 인증 만료 · 재인증</string>
+    <string name="account_sync_repo_unavailable">동기화 저장소를 사용할 수 없음 · 다시 선택</string>
+    <string name="account_sync_retrying">재시도 중(%1$d/%2$d)…</string>
+    <string name="account_sync_rate_limited">요청 과다 · 잠시 후 자동 재시도</string>
+    <string name="account_sync_failed_detail">동기화 실패 · 세부 정보</string>
 </resources>

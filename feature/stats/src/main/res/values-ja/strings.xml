@@ -302,7 +302,7 @@
     <!-- 账号身份区（设计回函 v3 · 阶段 A） -->
     <!-- deprecated：G7 无独立「未登录」标题用法（设计回函 v7 §5），阶段 B 清理批（6 键）删除 -->
     <string name="account_signed_out_title">未ログイン</string>
-    <string name="account_signed_out_status">未ログイン · ログインすると閲覧進捗とスニペットをデバイス間で同期できます</string>
+    <string name="account_signed_out_status">未ログイン · ログインするとスニペットをデバイス間で同期できます</string>
     <!-- deprecated：由 account_signed_out_status 取代（设计回函 v6 §2），阶段 B 清理批（6 键）删除 -->
     <string name="account_signed_out_desc">ログインすると閲覧進捗とスニペットをデバイス間で同期</string>
     <string name="account_sign_in">ログイン / 登録</string>
@@ -328,7 +328,7 @@
     <string name="auth_host_gitee_desc">中国本土から高速アクセス</string>
     <string name="auth_scope_headline">私たちはあなたのデータを一切保存しません</string>
     <string name="auth_scope_perm">単一リポジトリの読み取り・書き込み（削除・管理権限なし）</string>
-    <string name="auth_scope_data">同期内容：閲覧進捗＋スニペット（コードを含みます）</string>
+    <string name="auth_scope_data">同期内容：スニペット（コードを含みます）</string>
     <string name="auth_go">%1$s で認証</string>
     <string name="auth_not_now">あとで</string>
     <string name="repo_pick_title">同期リポジトリの選択</string>
@@ -347,4 +347,10 @@
     <string name="auth_revoke">認証を取り消す</string>
     <string name="auth_revoke_confirm">取り消してもローカルのスニペットと統計は残り、クラウドのファイルはあなたのリポジトリに。再認証でいつでも再開できます.</string>
     <string name="repo_switch">同期リポジトリを切り替える</string>
+    <!-- 阶段 B · 失败类别文案（规格 v1.2 §3.1） -->
+    <string name="account_sync_auth_expired">Git 認証の有効期限切れ · 再認証</string>
+    <string name="account_sync_repo_unavailable">同期リポジトリを利用不可 · 再選択</string>
+    <string name="account_sync_retrying">再試行中（%1$d/%2$d）…</string>
+    <string name="account_sync_rate_limited">リクエスト過多 · しばらくして自動再試行</string>
+    <string name="account_sync_failed_detail">同期失敗 · 詳細</string>
 </resources>

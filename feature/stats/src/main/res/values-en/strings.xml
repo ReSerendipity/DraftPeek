@@ -324,7 +324,7 @@
     <!-- 账号身份区（设计回函 v3 · 阶段 A） -->
     <!-- deprecated：G7 无独立「未登录」标题用法（设计回函 v7 §5），阶段 B 清理批（6 键）删除 -->
     <string name="account_signed_out_title">Not signed in</string>
-    <string name="account_signed_out_status">Not signed in · Sign in to sync reading progress and snippets across devices</string>
+    <string name="account_signed_out_status">Not signed in · Sign in to sync your snippets across devices</string>
     <!-- deprecated：由 account_signed_out_status 取代（设计回函 v6 §2），阶段 B 清理批（6 键）删除 -->
     <string name="account_signed_out_desc">Sync your reading progress and snippets across devices</string>
     <string name="account_sign_in">Sign in / Sign up</string>
@@ -350,7 +350,7 @@
     <string name="auth_host_gitee_desc">Faster access from mainland China</string>
     <string name="auth_scope_headline">We do not store any of your data</string>
     <string name="auth_scope_perm">Read &amp; write access to one repository (no delete or admin)</string>
-    <string name="auth_scope_data">Synced: reading progress + snippets (snippets contain your code)</string>
+    <string name="auth_scope_data">Synced: snippets (they contain your code)</string>
     <string name="auth_go">Continue to %1$s</string>
     <string name="auth_not_now">Not now</string>
     <string name="repo_pick_title">Choose sync repository</string>
@@ -369,4 +369,10 @@
     <string name="auth_revoke">Revoke authorization</string>
     <string name="auth_revoke_confirm">Local snippets and stats remain; cloud files stay in your repository; re-authorize anytime to resume.</string>
     <string name="repo_switch">Switch sync repository</string>
+    <!-- 阶段 B · 失败类别文案（规格 v1.2 §3.1） -->
+    <string name="account_sync_auth_expired">Git authorization expired · Re-authorize</string>
+    <string name="account_sync_repo_unavailable">Sync repository unavailable · Choose another</string>
+    <string name="account_sync_retrying">Retrying (%1$d/%2$d)…</string>
+    <string name="account_sync_rate_limited">Too many requests · Auto-retrying shortly</string>
+    <string name="account_sync_failed_detail">Sync failed · View details</string>
 </resources>
