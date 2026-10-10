@@ -25,6 +25,8 @@ jobs:
       - uses: actions/setup-python@v5
         with:
           python-version: '3.12'
+      # 与 structure-guard.yml 的 layout job 保持同一强制等级：无条件执行。
+      # 脚本自身的 CI/本地分流详见 scripts/check_spec_refs.py 顶部 docstring。
       - name: Audit spec references
         run: python scripts/check_spec_refs.py
 

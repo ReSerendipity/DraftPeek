@@ -357,7 +357,7 @@ jobs:
 
       - name: Run Macrobenchmark (Release Variant)
         # 在 Release 构建上跑基准，收集性能指标。
-        # 注意：AGP 8.7.x Baseline Profile 生成器有已知崩溃（Gotcha #13），仅运行 benchmark。
+        # 注意：AGP 8.7.x Baseline Profile 生成器有已知崩溃，仅运行 benchmark。
         uses: reactivecircus/android-emulator-runner@v2
         with:
           api-level: 34

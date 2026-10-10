@@ -100,8 +100,16 @@ jobs:
       - name: Run Unit Tests
         run: ./gradlew test --stacktrace --no-configuration-cache
 
+      # 品牌组件截图回归门禁（Paparazzi）：core:ui 的真实 Brand 组件渲染后与已入库
+      # golden 逐像素比对，任何外观漂移（圆角/配色/间距/排版）即红灯。
+      # 单一模块任务；--no-configuration-cache 与本 job 的 Lint/test/jacoco 步骤同策略
+      # （config-cache 在 CI 上不稳定，见上方 Run Lint 注释）。
+      # golden 由 Paparazzi 固定版本 LayoutLib 软件渲染，跨 OS 字节稳定，故 ubuntu runner 可直接校验。
+      - name: Verify Compose Screenshots (Paparazzi)
+        run: ./gradlew :core:ui:verifyPaparazziDebug --stacktrace --no-configuration-cache
+
       # 覆盖率报告生成（2026-09-29 从 app-only 提升为全模块 blocking）：
-      # 历史（GOTCHAS #37）：报告链路多次静默失效，当时为了不让基础设施问题
+      # 历史陷阱「报告丢失 → 无数据即绿」：报告链路多次静默失效，当时为了不让基础设施问题
       # 阻断主流程，非 app 模块采用 best-effort。现在下方门禁已接上
       # coverage-baseline.json 分模块卡到 ≈ 实测 90%，报告缺失会直接导致
       # 门禁失败——本步骤必须与门禁同优先级，因此一律 blocking：任何报告
@@ -183,7 +191,7 @@ jobs:
       #     • bash 整数除法对 < 1% 的模块会截断为 0，因此门禁改用 Python 小数精度。
       #     • ratchet 机制：Python 脚本对比 origin/main 上的 coverage-baseline.json，
       #       任一模块 threshold_pct 下降即 CI 失败；新增模块无需 ratchet 检查。
-      #     • 历史陷阱（GOTCHAS #37）“报告丢失 → 无数据即绿”仍适用：本脚本对
+      #     • 历史陷阱「报告丢失 → 无数据即绿」仍适用：本脚本对
       #       XML 报告缺失/解析失败一律报 FAIL，不兼容静默退出。
       #
       # 参考：coverage-baseline.json 里的 notes 字段列出完整的 ratchet 规则与升级流程。
@@ -394,7 +402,7 @@ jobs:
   # Macrobenchmark 性能测试 — 在 Android 模拟器上运行启动基准测试和文件读取基准测试
   # 使用 Release 构建（minified）以获取真实的性能数据
   # 档位（测试体系评估报告 Q2）：夜间 schedule 档 + 手动 dispatch 档，不阻塞 PR。
-  # 注意：AGP 8.7.x 有 Baseline Profile 生成器崩溃已知问题（Gotcha #13），
+  # 注意：AGP 8.7.x 有 Baseline Profile 生成器崩溃已知问题，
   #       因此仅运行 benchmark 测试，不生成 Baseline Profile。
   macrobenchmark:
     if: github.event_name == 'workflow_dispatch' || github.event_name == 'schedule'

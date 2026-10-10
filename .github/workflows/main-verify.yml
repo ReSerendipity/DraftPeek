@@ -73,10 +73,14 @@ jobs:
     env:
       # context → 提供该 context 的 workflow 文件。
       # 新增必需检查时两边同步：docs/ci/branch-protection.json 的 contexts
-      # 与这里的映射。
+      # 与这里的映射；映射缺项时本守卫只能 ::warning 无法补跑（见下方 owner 判空）。
+      # 三项均为 live 分支保护的必需检查（2026-10-06 gh api 实测），按 live 对齐；
+      # 校验方式：python scripts/apply_branch_protection.py（无参只读）须报 [OK] 无漂移。
+      # 注意：Server CI (Python)、DCO Check、Instrumented Tests 不在必需检查之列，勿登记。
       CONTEXT_OWNERS: |
         Build & Test=android.yml
         layout=structure-guard.yml
+        Lock Integrity (server lock resolvability)=security.yml
 
     steps:
       - name: Checkout governance config
