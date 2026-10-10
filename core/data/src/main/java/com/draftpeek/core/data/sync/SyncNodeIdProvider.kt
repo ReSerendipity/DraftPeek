@@ -48,9 +48,7 @@ fun interface SyncNodeIdSource {
  * @property context 应用上下文（用于访问 [uiDataStore]）
  */
 @Singleton
-class SyncNodeIdProvider @Inject constructor(
-    @ApplicationContext private val context: Context
-) : SyncNodeIdSource {
+class SyncNodeIdProvider @Inject constructor(@ApplicationContext private val context: Context) : SyncNodeIdSource {
 
     /** 进程内缓存，避免每次同步都读 DataStore。 */
     @Volatile

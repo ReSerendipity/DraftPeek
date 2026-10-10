@@ -19,14 +19,13 @@ object JsonCodec {
      *
      * 值为 `null` 时写 JSON `null`（用于表示「该字段无值」，区别于空字符串）。
      */
-    fun encodeStrings(fields: Map<String, String?>): String =
-        MiniJson.write(
-            JsonValue.Obj(
-                fields.entries.associate { (key, value) ->
-                    key to (value?.let { JsonValue.Str(it) } ?: JsonValue.Null)
-                }
-            )
+    fun encodeStrings(fields: Map<String, String?>): String = MiniJson.write(
+        JsonValue.Obj(
+            fields.entries.associate { (key, value) ->
+                key to (value?.let { JsonValue.Str(it) } ?: JsonValue.Null)
+            }
         )
+    )
 
     /**
      * 解析 JSON 对象文本为扁平映射。

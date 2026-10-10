@@ -76,7 +76,10 @@ class SnippetPayloadTest {
     @Test
     fun nestedValue_throwsBecausePayloadContractIsFlat() {
         assertThrows(Exception::class.java) {
-            SnippetPayload.decode("""{"title":{"a":1},"content":"c","category":"k","createdAt":"1","updatedAt":"2"}""", "u")
+            SnippetPayload.decode(
+                """{"title":{"a":1},"content":"c","category":"k","createdAt":"1","updatedAt":"2"}""",
+                "u"
+            )
         }
     }
 }

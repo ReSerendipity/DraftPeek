@@ -40,8 +40,7 @@ class RoomSnapshotSourceTest {
         docFile().delete()
     }
 
-    private fun docFile(): File =
-        File(context.filesDir, "sync/snippet-doc.json")
+    private fun docFile(): File = File(context.filesDir, "sync/snippet-doc.json")
 
     private fun newSource(nodeId: String = "local-node") = RoomSnapshotSource(
         snippets = repo,
@@ -49,22 +48,23 @@ class RoomSnapshotSourceTest {
         context = context
     )
 
-    private fun snippet(syncId: String, title: String = "t-$syncId", content: String = "val x = 1") =
-        Snippet(
-            id = 0L,
-            syncId = syncId,
-            title = title,
-            content = content,
-            language = "kotlin",
-            category = "默认",
-            createdAt = 1_730_000_000_000,
-            updatedAt = 1_730_000_000_000
-        )
+    private fun snippet(syncId: String, title: String = "t-$syncId", content: String = "val x = 1") = Snippet(
+        id = 0L,
+        syncId = syncId,
+        title = title,
+        content = content,
+        language = "kotlin",
+        category = "默认",
+        createdAt = 1_730_000_000_000,
+        updatedAt = 1_730_000_000_000
+    )
 
     /** 以远端节点身份构造快照（模拟协调器交来的 merged）。 */
     private fun snapshotOf(vararg visible: Snippet, tombstoneKeys: List<String> = emptyList()): SyncSnapshot {
         var document = CrdtDocument()
-        visible.forEach { document = document.put("snippet:${it.syncId}", SnippetPayload.encode(it), remoteClock.next()) }
+        visible.forEach {
+            document = document.put("snippet:${it.syncId}", SnippetPayload.encode(it), remoteClock.next())
+        }
         tombstoneKeys.forEach { document = document.remove("snippet:$it", remoteClock.next()) }
         return codec.encode(document)
     }
@@ -108,7 +108,7 @@ class RoomSnapshotSourceTest {
             snapshotOf(
                 snippet("s1", content = "val a = 1"), // 与本地同值 → 不更新
                 snippet("s2", content = "val b = 2"), // 本地没有 → 插入
-                tombstoneKeys = listOf("s3")          // 本地也没有 → 无操作
+                tombstoneKeys = listOf("s3") // 本地也没有 → 无操作
             )
         )
         assertEquals(0, repo.updateCount)
@@ -175,18 +175,25 @@ class RoomSnapshotSourceTest {
         override fun searchSnippets(query: String) =
             rows.map { list -> list.filter { it.title.contains(query) || it.content.contains(query) } }
 
-        override fun searchSnippetsByLanguage(query: String, language: String) =
-            rows.map { l -> l.filter { (it.title.contains(query) || it.content.contains(query)) && it.language == language } }
+        override fun searchSnippetsByLanguage(query: String, language: String) = rows.map { l ->
+            l.filter {
+                (it.title.contains(query) || it.content.contains(query)) &&
+                    it.language == language
+            }
+        }
 
-        override fun searchSnippetsByCategory(query: String, category: String) =
-            rows.map { l -> l.filter { (it.title.contains(query) || it.content.contains(query)) && it.category == category } }
+        override fun searchSnippetsByCategory(query: String, category: String) = rows.map { l ->
+            l.filter {
+                (it.title.contains(query) || it.content.contains(query)) &&
+                    it.category == category
+            }
+        }
 
         override fun searchSnippetsSubstring(query: String) = searchSnippets(query)
 
         override fun getSnippetById(id: Long) = rows.map { list -> list.firstOrNull { it.id == id } }
 
-        override fun getAllCategories() =
-            rows.map { list -> list.map { it.category }.distinct() }
+        override fun getAllCategories() = rows.map { list -> list.map { it.category }.distinct() }
 
         override suspend fun addSnippet(snippet: Snippet): Long {
             addCount++
