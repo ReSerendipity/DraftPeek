@@ -9,9 +9,10 @@
     <string name="profile_section_settings">設定</string>
     <string name="profile_section_stats">統計</string>
     <!-- 账号身份区（设计回函 v3 · 阶段 A） -->
+    <!-- deprecated：G7 无独立「未登录」标题用法（设计回函 v7 §5），阶段 B 清理批（6 键）删除 -->
     <string name="account_signed_out_title">未登入</string>
     <string name="account_signed_out_status">未登入 · 登入後可跨裝置同步閱讀進度與片段</string>
-    <!-- deprecated：由 account_signed_out_status 取代（设计回函 v6 §2），阶段 B 批次随三条临时词条清理 -->
+    <!-- deprecated：由 account_signed_out_status 取代（设计回函 v6 §2），阶段 B 清理批（6 键）删除 -->
     <string name="account_signed_out_desc">登入後可跨裝置同步閱讀進度與片段</string>
     <string name="account_sign_in">登入 / 註冊</string>
     <string name="account_synced_ago">已同步 · %1$s前</string>
@@ -30,4 +31,29 @@
     <!-- 身份区验收开关（仅 debug 构建暴露） -->
     <string name="account_dev_section">開發（僅除錯組建）</string>
     <string name="account_dev_simulate">模擬帳號狀態（驗收用）</string>
+    <!-- 阶段 B · 授权与同步流程（设计规格 v1 §4） -->
+    <string name="auth_pick_host">選擇授權方式</string>
+    <string name="auth_host_github_desc">開發者預設 · 國際倉庫</string>
+    <string name="auth_host_gitee_desc">國內連線較快</string>
+    <string name="auth_scope_headline">我們不儲存你的任何資料</string>
+    <string name="auth_scope_perm">單一倉庫的讀寫權限（不含刪除與管理）</string>
+    <string name="auth_scope_data">同步內容：閱讀進度＋片段（片段包含你的程式碼）</string>
+    <string name="auth_go">去 %1$s 授權</string>
+    <string name="auth_not_now">暫不</string>
+    <string name="repo_pick_title">選擇同步倉庫</string>
+    <string name="repo_create_default">新建倉庫（預設私人）</string>
+    <string name="repo_file_note">僅寫入一個檔案，不改動倉庫其他檔案</string>
+    <string name="first_sync_title">首次同步 · 資料合併</string>
+    <string name="first_sync_merge">自動合併（建議）</string>
+    <string name="first_sync_local">以本機為準</string>
+    <string name="first_sync_remote">以遠端為準</string>
+    <string name="first_sync_warn">選「以本機/遠端為準」將覆蓋另一側資料，本操作不可復原</string>
+    <string name="conflict_title">遠端在同步期間被更新</string>
+    <string name="conflict_keep_both">保留雙方改動（合併）</string>
+    <string name="corrupt_title">遠端檔案無法解析</string>
+    <string name="corrupt_safe">本機資料未受影響，未被覆蓋</string>
+    <string name="corrupt_retry">我已修復，重新同步</string>
+    <string name="auth_revoke">撤銷授權</string>
+    <string name="auth_revoke_confirm">退出後本機片段與統計保留；雲端檔案留在你的倉庫中；可隨時重新授權接回。</string>
+    <string name="repo_switch">更換同步倉庫</string>
 </resources>

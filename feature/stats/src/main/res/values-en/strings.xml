@@ -322,9 +322,10 @@
     <string name="profile_open_lab">Lab</string>
     <string name="profile_open_about_security">About &amp; security</string>
     <!-- 账号身份区（设计回函 v3 · 阶段 A） -->
+    <!-- deprecated：G7 无独立「未登录」标题用法（设计回函 v7 §5），阶段 B 清理批（6 键）删除 -->
     <string name="account_signed_out_title">Not signed in</string>
     <string name="account_signed_out_status">Not signed in · Sign in to sync reading progress and snippets across devices</string>
-    <!-- deprecated：由 account_signed_out_status 取代（设计回函 v6 §2），阶段 B 批次随三条临时词条清理 -->
+    <!-- deprecated：由 account_signed_out_status 取代（设计回函 v6 §2），阶段 B 清理批（6 键）删除 -->
     <string name="account_signed_out_desc">Sync your reading progress and snippets across devices</string>
     <string name="account_sign_in">Sign in / Sign up</string>
     <string name="account_synced_ago">Synced %1$s ago</string>
@@ -343,4 +344,29 @@
     <!-- 身份区验收开关（仅 debug 构建暴露） -->
     <string name="account_dev_section">Development (debug builds only)</string>
     <string name="account_dev_simulate">Simulate account state (for acceptance)</string>
+    <!-- 阶段 B · 授权与同步流程（设计规格 v1 §4） -->
+    <string name="auth_pick_host">Choose authorization method</string>
+    <string name="auth_host_github_desc">Default for developers · international</string>
+    <string name="auth_host_gitee_desc">Faster access from mainland China</string>
+    <string name="auth_scope_headline">We do not store any of your data</string>
+    <string name="auth_scope_perm">Read &amp; write access to one repository (no delete or admin)</string>
+    <string name="auth_scope_data">Synced: reading progress + snippets (snippets contain your code)</string>
+    <string name="auth_go">Continue to %1$s</string>
+    <string name="auth_not_now">Not now</string>
+    <string name="repo_pick_title">Choose sync repository</string>
+    <string name="repo_create_default">Create repository (private by default)</string>
+    <string name="repo_file_note">Writes a single file only; nothing else in the repo is touched</string>
+    <string name="first_sync_title">First sync · Data merge</string>
+    <string name="first_sync_merge">Auto-merge (recommended)</string>
+    <string name="first_sync_local">Keep local</string>
+    <string name="first_sync_remote">Keep remote</string>
+    <string name="first_sync_warn">Choosing local/remote overwrites the other side and cannot be undone</string>
+    <string name="conflict_title">The remote was updated during sync</string>
+    <string name="conflict_keep_both">Keep both changes (merge)</string>
+    <string name="corrupt_title">Remote file cannot be parsed</string>
+    <string name="corrupt_safe">Local data is intact and was not overwritten</string>
+    <string name="corrupt_retry">Fixed — resync</string>
+    <string name="auth_revoke">Revoke authorization</string>
+    <string name="auth_revoke_confirm">Local snippets and stats remain; cloud files stay in your repository; re-authorize anytime to resume.</string>
+    <string name="repo_switch">Switch sync repository</string>
 </resources>

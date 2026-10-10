@@ -324,9 +324,10 @@
     <string name="profile_open_lab">实验室</string>
     <string name="profile_open_about_security">关于与安全</string>
     <!-- 账号身份区（设计回函 v3 · 阶段 A） -->
+    <!-- deprecated：G7 无独立「未登录」标题用法（设计回函 v7 §5），阶段 B 清理批（6 键）删除 -->
     <string name="account_signed_out_title">未登录</string>
     <string name="account_signed_out_status">未登录 · 登录后可跨设备同步阅读进度与片段</string>
-    <!-- deprecated：由 account_signed_out_status 取代（设计回函 v6 §2），阶段 B 批次随三条临时词条清理 -->
+    <!-- deprecated：由 account_signed_out_status 取代（设计回函 v6 §2），阶段 B 清理批（6 键）删除 -->
     <string name="account_signed_out_desc">登录后可跨设备同步阅读进度与片段</string>
     <string name="account_sign_in">登录 / 注册</string>
     <string name="account_synced_ago">已同步 · %1$s前</string>
@@ -345,4 +346,29 @@
     <!-- 身份区验收开关（仅 debug 构建暴露） -->
     <string name="account_dev_section">开发（仅调试构建）</string>
     <string name="account_dev_simulate">模拟账号状态（验收用）</string>
+    <!-- 阶段 B · 授权与同步流程（设计规格 v1 §4） -->
+    <string name="auth_pick_host">选择授权方式</string>
+    <string name="auth_host_github_desc">开发者默认 · 国际仓库</string>
+    <string name="auth_host_gitee_desc">国内访问更快</string>
+    <string name="auth_scope_headline">我们不存储你的任何数据</string>
+    <string name="auth_scope_perm">单个仓库的读写权限（不含删除与管理）</string>
+    <string name="auth_scope_data">同步内容：阅读进度 + 片段（片段包含你的代码）</string>
+    <string name="auth_go">去 %1$s 授权</string>
+    <string name="auth_not_now">暂不</string>
+    <string name="repo_pick_title">选择同步仓库</string>
+    <string name="repo_create_default">新建仓库（默认私有）</string>
+    <string name="repo_file_note">只写入一个文件，不改动仓库其他文件</string>
+    <string name="first_sync_title">首次同步 · 数据合并</string>
+    <string name="first_sync_merge">自动合并（推荐）</string>
+    <string name="first_sync_local">以本地为准</string>
+    <string name="first_sync_remote">以远端为准</string>
+    <string name="first_sync_warn">选「以本地/远端为准」将覆盖另一侧数据，本操作不可撤销</string>
+    <string name="conflict_title">远端在同步期间被更新</string>
+    <string name="conflict_keep_both">保留双方改动（合并）</string>
+    <string name="corrupt_title">远端文件无法解析</string>
+    <string name="corrupt_safe">本地数据未受影响，未被覆盖</string>
+    <string name="corrupt_retry">我已修复，重新同步</string>
+    <string name="auth_revoke">撤销授权</string>
+    <string name="auth_revoke_confirm">退出后本地片段与统计保留；云端文件留在你的仓库中；可随时重新授权接回。</string>
+    <string name="repo_switch">更换同步仓库</string>
 </resources>
