@@ -1,5 +1,7 @@
 package com.draftpeek.feature.stats.account
 
+import com.draftpeek.core.sync.SyncFailureKind
+
 /**
  * 「我的」页身份区的展示状态（设计回函 v3 · 阶段 A）。
  *
@@ -22,7 +24,12 @@ sealed interface AccountUiState {
     data class SignedIn(val email: String, val displayName: String, val sync: SyncUiStatus) : AccountUiState
 }
 
-/** 同步状态行的四态（设计回函 v3 §3：**一律行内提示，不弹窗**）。 */
+/**
+ * 同步状态行的展示态（设计回函 v3 §3 + 规格 v1.1 §3.1：**一律行内提示，不弹窗**）。
+ *
+ * [Failed] 携带引擎的 [SyncFailureKind]，UI 只做「类别 → 文案」查表（零判断逻辑）；
+ * [Retrying] 对应退避等待期（`正在重试（n/max）…`）。
+ */
 sealed interface SyncUiStatus {
 
     /** 已同步 · N 分钟前。仅全量成功后更新 [lastSuccessAtMillis]。 */
@@ -31,8 +38,11 @@ sealed interface SyncUiStatus {
     /** 正在同步…（行内）；超过 [SYNC_CANCEL_AFTER_MS] 后行内出现「取消」。 */
     data object Syncing : SyncUiStatus
 
-    /** 同步失败 · 重试（网络类失败退避重试后仍失败）。 */
-    data object Failed : SyncUiStatus
+    /** 退避重试等待中：`正在重试（n/max）…`（规格 v1.1 §3.1）。 */
+    data class Retrying(val attempt: Int, val maxAttempts: Int) : SyncUiStatus
+
+    /** 同步失败（携带类别：网络→重试；授权过期→重新授权；仓库不可用→重新选择；冲突/损坏→查看）。 */
+    data class Failed(val kind: SyncFailureKind) : SyncUiStatus
 
     /** 离线，恢复联网后继续。 */
     data object Offline : SyncUiStatus
@@ -96,11 +106,14 @@ object AccountStateSimulation {
      */
     private const val SIMULATED_NAME = "DraftPeek User"
 
-    /** 轮转顺序：未登录 → 已同步 → 同步中 → 失败 → 离线 → 未登录。 */
+    /** 轮转顺序：未登录 → 已同步 → 同步中 → 重试中 → 失败(网络) → 离线 → 未登录。 */
     fun next(current: AccountUiState, nowMillis: Long): AccountUiState = when {
         current !is AccountUiState.SignedIn -> signedIn(SyncUiStatus.Synced(nowMillis - SIMULATED_SYNCED_AGO_MS))
         current.sync is SyncUiStatus.Synced -> signedIn(SyncUiStatus.Syncing)
-        current.sync is SyncUiStatus.Syncing -> signedIn(SyncUiStatus.Failed)
+        current.sync is SyncUiStatus.Syncing -> signedIn(SyncUiStatus.Retrying(attempt = 2, maxAttempts = 3))
+        current.sync is SyncUiStatus.Retrying -> signedIn(
+            SyncUiStatus.Failed(com.draftpeek.core.sync.SyncFailureKind.NETWORK)
+        )
         current.sync is SyncUiStatus.Failed -> signedIn(SyncUiStatus.Offline)
         else -> AccountUiState.SignedOut
     }
