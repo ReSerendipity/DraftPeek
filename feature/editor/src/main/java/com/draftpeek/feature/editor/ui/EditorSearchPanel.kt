@@ -59,6 +59,7 @@ import com.draftpeek.feature.editor.R
 import com.draftpeek.feature.editor.sora.SearchCountDisplay
 import com.draftpeek.feature.editor.sora.SearchMatchCounter
 import com.draftpeek.feature.editor.sora.SoraEditorWrapper
+import com.draftpeek.feature.editor.sora.selectMatchRange
 import kotlinx.coroutines.delay
 
 private const val TAG = "EditorScreen"

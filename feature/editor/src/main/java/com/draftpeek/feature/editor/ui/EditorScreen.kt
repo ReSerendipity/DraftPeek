@@ -143,6 +143,9 @@ import com.draftpeek.feature.editor.model.MarkdownViewMode
 import com.draftpeek.feature.editor.sora.SearchCountDisplay
 import com.draftpeek.feature.editor.sora.SearchMatchCounter
 import com.draftpeek.feature.editor.sora.SoraEditorWrapper
+import com.draftpeek.feature.editor.sora.saveUndoState
+import com.draftpeek.feature.editor.sora.setDiagnostics
+import com.draftpeek.feature.editor.sora.restoreUndoState
 import com.draftpeek.feature.editor.treesitter.TreeSitterLanguageProvider
 import com.draftpeek.feature.editor.viewmodel.CursorPosition
 import com.draftpeek.feature.editor.viewmodel.EditorViewModel
