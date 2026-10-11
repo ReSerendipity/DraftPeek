@@ -44,6 +44,19 @@
 - 改编辑器 → `feature/editor/`；统计看板 → `feature/stats/`；设计系统 → `core/designsystem/`；数据层 → `core/data/`
 - 发版 → `docs/VERSIONING.md` + `docs/RELEASE_CHECKLIST.md`
 
+## 仓外规格本体处置声明（T4 · 2026-10-11）
+
+> **决策**：阶段 B 规格本体（`draftpeek-phaseb-design-spec-v1.md`、`draftpeek-phaseb-taskbook-v1.md`、`draftpeek-phaseb-t0-receipt.md`）**保持仓库外、不纳入本仓库快照**，本仓库显式 skip。
+
+**理由**（显式记录，防未来误判为「缺失」）：
+
+1. **外部引用方**：上述文档正被另一执行 agent 的阶段 B 工作流实时引用（规格 v1.1 / 阶段 B 批次），纳入快照会产生双源漂移（仓库内副本 vs 外部工作流主档），以哪份为准不可判定。
+2. **无实体可复制**：方案 (a)「复制纳入版本库」需要外部文件实体的可读访问；当前会话可访问位置（本仓库 + 本机已知目录）中无该批文件实体，复制无源。
+3. **禁止移动/删除**：指令明确禁止移动/删除外部文件；本仓库仅以引用锚点方式衔接——仓库内 `docs/phaseb-oauth-wip-todo.md`（已入库）记录了任务书 §6②–⑤、§7、§9、§2.5、§1 的引用与阶段 B 范围裁定，版本锚点即该文件所述提交（T0 骨架 `d2b407c`、降级 `c51ddca`/`b6a9010`）。
+4. **可逆**：未来如需纳入快照（外部工作流冻结后），可从外部主档一次性复制并声明版本锚点，本声明区块同步改写。
+
+**影响面**：fresh clone / CI 不会携带阶段 B 规格本体；任何依赖该批文档的任务须先从外部工作流获取，或读取 `docs/phaseb-oauth-wip-todo.md` 的引用摘要。
+
 > 特别提醒：根目录 `release.jks` 是 App 签名密钥（敏感，勿提交勿外传）；`index.html` 是被源码注释引用的 HTML 设计原型，保留。**分发边界**：根 `AGENTS.md` 及其家族（`feature/editor/AGENTS.md`、`core/common/AGENTS.md`、`docs/agents/**`、`FIX_LOG.md`、`LOCAL_RULES.md`）为**仅本地保留、有意不入库**，不会出现在 fresh clone；仓库对外开发规范以本 `docs/README.md` 与 `docs/CODING_STANDARDS.md` 为准，若环境已配置 `AGENTS.md` 则在其基础上叠加。
 
 ## 治理与勘误速查（2026-09-18）
