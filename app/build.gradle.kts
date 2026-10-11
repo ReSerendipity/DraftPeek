@@ -39,10 +39,13 @@ android {
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
 
         // NDK ABI filters: ensure native libraries (SQLCipher, tree-sitter) are packaged
-        // for all supported ABIs. Without this, R8/APK packaging may exclude native libs,
+        // for the supported ABIs. Without this, R8/APK packaging may exclude native libs,
         // causing UnsatisfiedLinkError at runtime.
+        // T7(P2): 裁剪 x86（32 位模拟器 ABI，真实设备占比可忽略），
+        // 保留 x86_64 —— CI macrobenchmark 在 x86_64 模拟器上装 release APK
+        // （android.yml / release.yml 的 benchmark 腿均依赖，裁剪会破坏性能门禁）。
         ndk {
-            abiFilters += listOf("arm64-v8a", "armeabi-v7a", "x86", "x86_64")
+            abiFilters += listOf("arm64-v8a", "armeabi-v7a", "x86_64")
         }
 
         // ===== AI 对抗：构建期基线注入（零误报核心机制） =====

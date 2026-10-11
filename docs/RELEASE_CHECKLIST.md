@@ -43,6 +43,8 @@
 ## 5. 产物与分发
 
 - [ ] draft Release 已生成：APK + AAB + `.sha256` 三类附件齐全
+- [ ] **APK 体积基线（T7）**：production release APK 基线 **≈35.2 MB**（ABI=arm64-v8a/armeabi-v7a/x86_64，
+      x86 已裁剪；x86_64 保留供 CI macrobenchmark）。体积异常（≥+15%）时在 Release 说明中注明原因
 - [ ] 哈希取的是**本次 run** 的资产：重跑 `release.yml` 会覆盖同名资产并换 APK 哈希
       （同 tag 树两次构建实测：AAB 摘要不变、APK 由 `af76e377…` 变 `ad62508e…`，大小一致）。
       因此报告/验签前重新下载一次，别引用上一轮的数字
