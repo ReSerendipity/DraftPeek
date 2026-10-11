@@ -343,6 +343,8 @@
     <string name="account_ago_hours">%1$d 小时</string>
     <string name="account_ago_days">%1$d 天</string>
     <string name="account_sign_in_coming_soon">账号功能开发中，敬请期待</string>
+    <!-- 阶段 B 临时降级（OAuth 注册暂跳过）：同步功能占位，点击提示开发中 -->
+    <string name="account_sync_coming_soon">同步功能开发中，敬请期待</string>
     <!-- 身份区验收开关（仅 debug 构建暴露） -->
     <string name="account_dev_section">开发（仅调试构建）</string>
     <string name="account_dev_simulate">模拟账号状态（验收用）</string>

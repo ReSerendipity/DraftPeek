@@ -319,6 +319,8 @@
     <string name="account_ago_hours">%1$d시간</string>
     <string name="account_ago_days">%1$d일</string>
     <string name="account_sign_in_coming_soon">계정 기능은 준비 중입니다</string>
+    <!-- 阶段 B 临时降级（OAuth 注册暂跳过）：同步功能占位，点击提示开发中 -->
+    <string name="account_sync_coming_soon">동기화 기능은 준비 중입니다</string>
     <!-- 身份区验收开关（仅 debug 构建暴露） -->
     <string name="account_dev_section">개발(디버그 빌드 전용)</string>
     <string name="account_dev_simulate">계정 상태 시뮬레이션(검수용)</string>
