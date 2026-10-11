@@ -68,6 +68,11 @@ else
         echo "    处理2：确属有意则加入 .github/layout-rules.yaml 的 root_allowlist" >&2
         FAILED=1
     fi
+    # T2: 行数上限门禁 —— ui/sora 目录 .kt 单文件超 2000 行即失败。
+    if ! $PY .github/scripts/check_file_line_limit.py; then
+        echo "  [FAIL] 行数上限门禁未通过 —— 见 check_file_line_limit.py 豁免说明。" >&2
+        FAILED=1
+    fi
 fi
 
 if [ "$FAILED" -ne 0 ]; then
