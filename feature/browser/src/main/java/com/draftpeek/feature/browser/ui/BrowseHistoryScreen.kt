@@ -600,18 +600,3 @@ private fun RecentFileRow(recentFile: RecentFile, onClick: () -> Unit, onLongCli
         }
     }
 }
-
-/**
- * 格式化文件大小为人类可读格式
- *
- * @param size 文件大小（字节）
- * @return 格式化后的字符串（如 "1.5 MB"）
- */
-private fun formatFileSize(size: Long): String {
-    if (size <= 0) return "0 B"
-    val units = arrayOf("B", "KB", "MB", "GB", "TB")
-    val digitGroups = (log10(size.toDouble()) / log10(1024.0)).toInt()
-        .coerceAtMost(units.size - 1)
-    val value = size / 1024.0.pow(digitGroups.toDouble())
-    return "%.1f %s".format(value, units[digitGroups])
-}
