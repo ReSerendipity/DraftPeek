@@ -46,6 +46,8 @@ android {
 
 dependencies {
     implementation(project(":core:data"))
+    // 依赖倒置（T1）：Fake*Repository 实现领域层接口，须可见 core:domain 类型
+    implementation(project(":core:domain"))
     implementation(project(":core:common"))
 
     // Room testing
