@@ -13,6 +13,10 @@ import android.content.Context
 import android.os.Build
 import android.util.Log
 import java.io.File
+import java.io.OutputStreamWriter
+import java.net.HttpURLConnection
+import java.net.URL
+import java.util.concurrent.Executors
 import timber.log.Timber
 
 /**
@@ -30,14 +34,23 @@ object AppLogger {
     /** 是否已初始化，防止重复调用 */
     private var initialized = false
 
+    /** 远程崩溃上报端点（空串 = 不启用远程上报） */
+    private var crashReportUrl: String = ""
+
+    /** 远程上报用单线程执行器（避免崩溃路径上做网络 IO 阻塞主线程） */
+    private val reportExecutor = Executors.newSingleThreadExecutor { r ->
+        Thread(r, "AppLoggerCrashReport").apply { isDaemon = true }
+    }
+
     /**
      * 初始化 Timber + 文件持久化 + 全局崩溃捕获。
      *
      * @param context 应用上下文。
      * @param isDebug 是否 debug 构建。debug 输出 DEBUG 级到 Logcat；release 仅文件记录 INFO+。
      * @param versionCode 当前版本号，用于崩溃指标按版本统计。
+     * @param reportUrl 远程崩溃上报端点；非空时崩溃发生后异步上报 error 日志内容。
      */
-    fun init(context: Context, isDebug: Boolean, versionCode: Int = 0) {
+    fun init(context: Context, isDebug: Boolean, versionCode: Int = 0, reportUrl: String = "") {
         if (initialized) return
         synchronized(this) {
             if (initialized) return
@@ -46,6 +59,7 @@ object AppLogger {
             val app = context.applicationContext
             val fileTree = FileLogTree(app)
             errorLogFile = File(app.filesDir, "logs/draftpeek_error.log")
+            crashReportUrl = reportUrl
 
             if (isDebug) {
                 Timber.plant(Timber.DebugTree())
@@ -104,9 +118,22 @@ object AppLogger {
                 sb.append("Message: ${throwable.message}\n")
                 sb.append(Log.getStackTraceString(throwable))
                 sb.append("\n========== END CRASH ==========\n")
+                val crashText = sb.toString()
                 errorLogFile.apply {
                     parentFile?.mkdirs()
-                    appendText(sb.toString())
+                    appendText(crashText)
+                }
+
+                // T3: 远程崩溃上报（异步，失败绝不抛出）
+                if (crashReportUrl.isNotBlank() && crashReportUrl.startsWith("http")) {
+                    val endpoint = crashReportUrl
+                    reportExecutor.execute {
+                        try {
+                            postCrashReport(endpoint, thread, throwable, crashText)
+                        } catch (_: Throwable) {
+                            // 上报失败静默；本地 error 日志仍是兜底
+                        }
+                    }
                 }
             } catch (_: Throwable) {
                 // 崩溃日志写入失败时绝不能再次抛出
@@ -114,6 +141,50 @@ object AppLogger {
             previous?.uncaughtException(thread, throwable) ?: run {
                 // 无上一级处理器时，终止进程避免停留在崩溃状态
                 android.os.Process.killProcess(android.os.Process.myPid())
+            }
+        }
+
+        /** 将崩溃摘要 POST 到远程端点（自建 AppLogger 上报通道）。 */
+        private fun postCrashReport(endpoint: String, thread: Thread, throwable: Throwable, crashText: String) {
+            val payload = StringBuilder()
+            payload.append("{\"thread\":\"")
+            payload.append(jsonEscape(thread.name))
+            payload.append("\",\"device\":\"")
+            payload.append(jsonEscape("${Build.MANUFACTURER} ${Build.MODEL} (API ${Build.VERSION.SDK_INT})"))
+            payload.append("\",\"exception\":\"")
+            payload.append(jsonEscape(throwable.javaClass.name))
+            payload.append("\",\"message\":\"")
+            payload.append(jsonEscape(throwable.message ?: ""))
+            payload.append("\",\"stack\":\"")
+            payload.append(jsonEscape(crashText))
+            payload.append("\"}")
+            val conn = URL(endpoint).openConnection() as HttpURLConnection
+            try {
+                conn.requestMethod = "POST"
+                conn.connectTimeout = 5000
+                conn.readTimeout = 5000
+                conn.doOutput = true
+                conn.setRequestProperty("Content-Type", "application/json; charset=utf-8")
+                conn.setRequestProperty("Accept", "application/json")
+                conn.setFixedLengthStreamingMode(payload.length)
+                OutputStreamWriter(conn.outputStream, Charsets.UTF_8).use { it.write(payload.toString()) }
+                val code = conn.responseCode
+                Log.i(TAG, "Crash report posted to $endpoint -> HTTP $code")
+            } finally {
+                conn.disconnect()
+            }
+        }
+
+        private fun jsonEscape(s: String): String = buildString {
+            for (c in s) {
+                when (c) {
+                    '"' -> append("\\\"")
+                    '\\' -> append("\\\\")
+                    '\n' -> append("\\n")
+                    '\r' -> append("\\r")
+                    '\t' -> append("\\t")
+                    else -> if (c.code < 0x20) append("\\u%04x".format(c.code)) else append(c)
+                }
             }
         }
     }

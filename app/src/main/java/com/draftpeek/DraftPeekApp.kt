@@ -142,7 +142,8 @@ class DraftPeekApp :
                 applicationInfo.flags and
                     android.content.pm.ApplicationInfo.FLAG_DEBUGGABLE
                 ) != 0,
-            versionCode = BuildConfig.VERSION_CODE
+            versionCode = BuildConfig.VERSION_CODE,
+            reportUrl = BuildConfig.CRASH_REPORT_URL
         )
 
         // ════════════════════════════════════════════════════════════════

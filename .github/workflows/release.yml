@@ -211,6 +211,13 @@ jobs:
           done
           mkdir -p dist-release
           cp "$APK_PATH" "$APK_PATH.sha256" "$AAB_PATH" "$AAB_PATH.sha256" dist-release/
+          # T3: R8 mapping 归档 —— proguard-rules.pro 已 -printmapping mapping.txt，
+          # 归档随 Release 发布，配合 retrace 还原混淆栈（release 栈可还原要求）。
+          MAPPING_FILE=$(find app/build/outputs/mapping/productionRelease -name "mapping.txt" | head -1)
+          test -n "$MAPPING_FILE" || { echo "::error::production release mapping.txt 未生成（R8 混淆缺失？）"; exit 1; }
+          test -s "$MAPPING_FILE" || { echo "::error::mapping.txt 为空文件"; exit 1; }
+          cp "$MAPPING_FILE" "dist-release/mapping.txt"
+          echo "已归档 mapping.txt（$(stat -c%s "$MAPPING_FILE" 2>/dev/null || stat -f%z "$MAPPING_FILE") bytes）"
           # 拍平到 dist-release/：publish 与 benchmark 都从这里取，glob 不再依赖 gradle 输出目录结构
           ls -l dist-release
           echo "已暂存 $(find dist-release -type f | wc -l) 个文件"
@@ -255,7 +262,7 @@ jobs:
       - name: Verify artifacts present
         run: |
           set -eu
-          for glob in "*.apk" "*.apk.sha256" "*.aab" "*.aab.sha256"; do
+          for glob in "*.apk" "*.apk.sha256" "*.aab" "*.aab.sha256" "mapping.txt"; do
             n=$(find dist-release -type f -name "$glob" | wc -l)
             test "$n" -ge 1 || { echo "::error::dist-release 里缺 $glob（匹配 $n 个），拒绝建 Release"; exit 1; }
           done
@@ -274,6 +281,7 @@ jobs:
             dist-release/*.apk.sha256
             dist-release/*.aab
             dist-release/*.aab.sha256
+            dist-release/mapping.txt
           body: |
             ## DraftPeek ${{ env.RELEASE_TAG }}
 
@@ -284,6 +292,11 @@ jobs:
             - APK SHA256: `${{ needs.build.outputs.apk_sha256 }}`
             - 验证命令: `sha256sum -c *.apk.sha256`
             - APK 已使用正式签名密钥签名（APK Signature Scheme v2+v3）
+
+            ### 崩溃排查（T3）
+            - 混淆映射已归档为 `mapping.txt`，崩溃堆栈还原：`retrace mapping.txt stacktrace.txt`
+            - 远程崩溃上报：release 构建经 `CRASH_REPORT_URL` 注入端点后由自建 AppLogger 上报
+            - 本地兜底：崩溃详情始终写入应用私有目录 `files/logs/draftpeek_error.log`，可经设置页导出
 
             ### 安全验证
             - 安全模块（反调试、DEX 完整性、签名校验）将在首次启动时自动运行

@@ -108,6 +108,13 @@ android {
             isShrinkResources = true
             buildConfigField("boolean", "IS_BETA", "false")
             buildConfigField("String", "BUILD_CHANNEL", "\"production\"")
+            // T3: 崩溃上报端点。默认空 = 关闭（本地仅文件记录）；CI/发布时经
+            // gradle property CRASH_REPORT_URL 注入（如自建 AppLogger 上报服务）。
+            buildConfigField(
+                "String",
+                "CRASH_REPORT_URL",
+                "\"${project.findProperty("CRASH_REPORT_URL") ?: ""}\""
+            )
             proguardFiles(
                 getDefaultProguardFile("proguard-android-optimize.txt"),
                 "proguard-rules.pro"
