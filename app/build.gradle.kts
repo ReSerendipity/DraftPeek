@@ -96,6 +96,13 @@ android {
             // 启用 debug 变体单元测试覆盖率采集（JaCoCo .exec），
             // 否则单元测试虽跑但通过，却不产出覆盖率数据，导致覆盖率门禁“无数据即绿”。
             enableUnitTestCoverage = true
+            // T3: debug 变体也必须有 CRASH_REPORT_URL 字段（DraftPeekApp 统一引用），
+            // 默认空 = 关闭远程上报；与 release 同一 gradle property 注入。
+            buildConfigField(
+                "String",
+                "CRASH_REPORT_URL",
+                "\"${project.findProperty("CRASH_REPORT_URL") ?: ""}\""
+            )
         }
         release {
             signingConfig = signingConfigs.getByName("release")
