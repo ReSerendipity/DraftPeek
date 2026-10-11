@@ -29,6 +29,9 @@ import com.draftpeek.core.common.util.DocumentTypeHelper
 import com.draftpeek.core.common.util.EncodingDetector
 import com.draftpeek.core.common.util.LanguageConfig
 import com.draftpeek.core.common.util.OfficeDocumentParser
+import com.draftpeek.core.domain.repository.EditorFileReadOutcome
+import com.draftpeek.core.domain.repository.EditorFileReadResult
+import com.draftpeek.core.domain.repository.EditorFileRepository
 import dagger.hilt.android.qualifiers.ApplicationContext
 import java.io.BufferedInputStream
 import java.io.ByteArrayOutputStream

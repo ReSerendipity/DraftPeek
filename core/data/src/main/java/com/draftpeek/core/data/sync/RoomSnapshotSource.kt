@@ -32,8 +32,8 @@ import android.content.Context
 import com.draftpeek.core.crdt.CrdtDocument
 import com.draftpeek.core.crdt.CrdtSnapshotCodec
 import com.draftpeek.core.crdt.HybridLogicalClock
-import com.draftpeek.core.data.entity.Snippet
-import com.draftpeek.core.data.repository.SnippetRepository
+import com.draftpeek.core.domain.model.Snippet
+import com.draftpeek.core.domain.repository.SnippetRepository
 import com.draftpeek.core.sync.LocalSnapshotSource
 import com.draftpeek.core.sync.SyncSnapshot
 import dagger.hilt.android.qualifiers.ApplicationContext

@@ -1,8 +1,8 @@
 /**
- * 编辑器文件操作仓库接口。
+ * 编辑器文件操作仓库接口（领域层）。
  *
  * 遵循 Clean Architecture 和离线优先原则：
- * - 接口位于数据层（core/data），定义文件读写操作契约
+ * - 接口定义在领域层（core/domain），定义文件读写操作契约
  * - 读操作返回结构化结果类型，显式处理成功/错误路径
  * - 写操作返回 Result<Unit> 统一错误处理
  * - 实现类可替换而不影响领域逻辑
@@ -12,7 +12,7 @@
  * @author DraftPeek Team
  * @since 1.0.0
  */
-package com.draftpeek.core.data.repository
+package com.draftpeek.core.domain.repository
 
 import android.net.Uri
 import com.draftpeek.core.common.util.DocumentType

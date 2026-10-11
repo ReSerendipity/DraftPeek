@@ -9,7 +9,7 @@
  */
 package com.draftpeek.core.domain.usecase
 
-import com.draftpeek.core.data.repository.UserActivityRepository
+import com.draftpeek.core.domain.repository.UserActivityRepository
 import javax.inject.Inject
 
 /**

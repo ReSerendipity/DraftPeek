@@ -10,8 +10,8 @@
 package com.draftpeek.core.domain.usecase
 
 import android.net.Uri
-import com.draftpeek.core.data.repository.EditorFileReadOutcome
-import com.draftpeek.core.data.repository.EditorFileRepository
+import com.draftpeek.core.domain.repository.EditorFileReadOutcome
+import com.draftpeek.core.domain.repository.EditorFileRepository
 import javax.inject.Inject
 
 /**

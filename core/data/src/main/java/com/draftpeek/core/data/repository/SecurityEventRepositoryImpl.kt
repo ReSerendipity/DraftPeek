@@ -10,10 +10,14 @@ package com.draftpeek.core.data.repository
 
 import com.draftpeek.core.data.dao.SecurityEventDao
 import com.draftpeek.core.data.entity.SecurityEventEntity
+import com.draftpeek.core.data.mapper.toDomain
+import com.draftpeek.core.domain.model.SecurityEvent
+import com.draftpeek.core.domain.repository.SecurityEventRepository
 import java.util.UUID
 import javax.inject.Inject
 import javax.inject.Singleton
 import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.map
 
 /**
  * [SecurityEventRepository] 的 Room 实现。
@@ -28,7 +32,8 @@ class SecurityEventRepositoryImpl @Inject constructor(private val dao: SecurityE
         UUID.randomUUID().toString()
     }
 
-    override val allEvents: Flow<List<SecurityEventEntity>> = dao.getAllEvents()
+    override val allEvents: Flow<List<SecurityEvent>> =
+        dao.getAllEvents().map { list -> list.map { it.toDomain() } }
 
     override suspend fun record(eventType: String, threatLevel: String, signalsMask: Int, responseLevel: String) {
         dao.insert(
@@ -44,7 +49,8 @@ class SecurityEventRepositoryImpl @Inject constructor(private val dao: SecurityE
         )
     }
 
-    override suspend fun getRecentEvents(limit: Int): List<SecurityEventEntity> = dao.getRecentEvents(limit)
+    override suspend fun getRecentEvents(limit: Int): List<SecurityEvent> =
+        dao.getRecentEvents(limit).map { it.toDomain() }
 
     override suspend fun getEventCount(): Int = dao.getEventCount()
 

@@ -1,6 +1,6 @@
 package com.draftpeek.core.domain.usecase
 
-import com.draftpeek.core.data.repository.RecentFilesRepository
+import com.draftpeek.core.domain.repository.RecentFilesRepository
 import io.mockk.coVerify
 import io.mockk.mockk
 import kotlinx.coroutines.test.runTest

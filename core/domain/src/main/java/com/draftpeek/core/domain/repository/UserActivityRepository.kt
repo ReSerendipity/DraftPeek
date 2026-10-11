@@ -1,17 +1,19 @@
 /**
- * 用户活动统计仓库接口。
+ * 用户活动统计仓库接口（领域层）。
  *
  * 负责记录和查询用户每日活动数据，包括文件打开、文本编辑、搜索、预览、
  * 代码片段操作、差异对比、使用时长、字符写入等行为统计。数据用于热力图展示。
  *
  * 所有 record* 方法使用 Mutex 保证并发安全，日期格式统一为 yyyy-MM-dd。
  *
+ * 接口定义在领域层，由数据层（core:data）实现，遵循依赖倒置原则。
+ *
  * @author DraftPeek Team
  * @since 1.0.0
  */
-package com.draftpeek.core.data.repository
+package com.draftpeek.core.domain.repository
 
-import com.draftpeek.core.data.entity.UserActivity
+import com.draftpeek.core.domain.model.UserActivity
 import kotlinx.coroutines.flow.Flow
 
 /**
