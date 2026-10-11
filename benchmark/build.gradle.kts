@@ -77,6 +77,8 @@ android {
 dependencies {
     implementation(project(":core:common"))
     implementation(project(":core:data"))
+    // 依赖倒置（T1）：FileReadBenchmark 直接引用领域接口 EditorFileRepository
+    implementation(project(":core:domain"))
     implementation(project(":core:ui"))
     implementation(project(":feature:editor"))
     implementation(project(":feature:browser"))

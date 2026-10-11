@@ -22,6 +22,10 @@ jobs:
           python-version: "3.11"
       - name: Check repository root layout
         run: python .github/scripts/check_layout.py
+      # T1-g: 依赖倒置边界守卫 —— core:domain 不得依赖 core:data。
+      # 与根布局守卫同等级：脚本缺失/失败直接使 job 失败，不静默放行。
+      - name: Check domain←data dependency boundary
+        run: python .github/scripts/check_domain_boundary.py
       # 与 docs-consistency.yml 的 spec-refs job 保持同一强制等级：无条件执行。
       # 脚本缺失/改名时 python 直接以非零退出使本 job 失败，不再静默放行；
       # 「auditor 不在库」的降级判定由脚本自身按 CI 环境变量分流（CI=true 则

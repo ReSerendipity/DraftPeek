@@ -253,6 +253,8 @@ dependencies {
     implementation(project(":core:ui"))
     implementation(project(":core:designsystem"))
     implementation(project(":core:data"))
+    // 依赖倒置（T1）：MainActivity/DraftPeekApp 直接引用领域接口与 model
+    implementation(project(":core:domain"))
     // 同步协调器装配层（阶段 B §6② T0）：app 需直接可见 core:sync / core:crdt 的类型
     // （SyncCoordinator / SyncTransport / LocalSnapshotSource / SyncMerger / CrdtSyncMerger）。
     // 此前仅经 core:data、feature:stats 以 implementation 形式传递，未暴露到 app 编译类路径。

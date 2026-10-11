@@ -66,6 +66,10 @@ ksp {
 dependencies {
     implementation(project(":core:common"))
 
+    // 依赖倒置（T1）：data 层实现 domain 层定义的仓库接口与纯 Kotlin model，
+    // 因此 data 依赖 domain（反向于旧的 domain→data）。
+    implementation(project(":core:domain"))
+
     // 同步：LocalSnapshotSource 的 Room 实现
     // （接口在 core:sync，CRDT 文档与编解码在 core:crdt）
     implementation(project(":core:sync"))

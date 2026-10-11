@@ -32,8 +32,8 @@ android {
 }
 
 dependencies {
-    // Domain layer depends only on core:data interfaces (not implementations)
-    implementation(project(":core:data"))
+    // Domain layer depends only on core:common (interfaces & models defined here;
+    // implementations live in core:data which depends on core:domain).
     implementation(project(":core:common"))
 
     // JSR-330 for @Inject, @Singleton annotations
