@@ -28,11 +28,11 @@ import android.util.Log
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.draftpeek.core.common.util.AppCacheManager
-import com.draftpeek.core.data.entity.RecentFile
-import com.draftpeek.core.data.entity.UserActivity
-import com.draftpeek.core.data.repository.RecentFilesRepository
-import com.draftpeek.core.data.repository.UserActivityRepository
-import com.draftpeek.core.data.usecase.GetRecentFilesUseCase
+import com.draftpeek.core.domain.model.RecentFile
+import com.draftpeek.core.domain.model.UserActivity
+import com.draftpeek.core.domain.repository.RecentFilesRepository
+import com.draftpeek.core.domain.repository.UserActivityRepository
+import com.draftpeek.core.domain.usecase.GetRecentFilesUseCase
 import com.draftpeek.core.ui.theme.RainbowColor
 import com.draftpeek.feature.settings.repository.SettingsRepository
 import com.draftpeek.feature.stats.model.Achievement

@@ -49,7 +49,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
-import com.draftpeek.core.data.entity.RecentFile
+import com.draftpeek.core.domain.model.RecentFile
 import com.draftpeek.core.ui.component.BrandDialog
 import com.draftpeek.core.ui.component.BrandFilterChip
 import com.draftpeek.core.ui.component.BrandIconButton

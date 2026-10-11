@@ -31,7 +31,7 @@ import com.draftpeek.core.common.plugin.PluginManager
 import com.draftpeek.core.common.security.SecurityEventRecorder
 import com.draftpeek.core.common.security.SecurityGate
 import com.draftpeek.core.common.util.DeferredInitializer
-import com.draftpeek.core.data.repository.SecurityEventRepository
+import com.draftpeek.core.domain.repository.SecurityEventRepository
 import com.draftpeek.logging.AppLogger
 import com.draftpeek.security.AiDetector
 import com.draftpeek.security.AiResponseExecutor

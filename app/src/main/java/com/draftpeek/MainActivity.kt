@@ -69,7 +69,7 @@ import androidx.navigation.compose.rememberNavController
 import androidx.window.layout.FoldingFeature
 import com.draftpeek.core.common.feature.FeatureToggleManager
 import com.draftpeek.core.common.util.FpsMonitor
-import com.draftpeek.core.data.repository.UserActivityRepository
+import com.draftpeek.core.domain.repository.UserActivityRepository
 import com.draftpeek.core.ui.component.BrandFilledButton
 import com.draftpeek.core.ui.component.BrandToastHost
 import com.draftpeek.core.ui.component.CustomScaffold

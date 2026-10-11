@@ -1,7 +1,7 @@
 package com.draftpeek.core.testing
 
-import com.draftpeek.core.data.entity.RecentFile
-import com.draftpeek.core.data.repository.RecentFilesRepository
+import com.draftpeek.core.domain.model.RecentFile
+import com.draftpeek.core.domain.repository.RecentFilesRepository
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow

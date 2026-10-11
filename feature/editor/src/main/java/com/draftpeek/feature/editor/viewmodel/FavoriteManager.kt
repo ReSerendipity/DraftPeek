@@ -10,7 +10,7 @@
  */
 package com.draftpeek.feature.editor.viewmodel
 
-import com.draftpeek.core.data.repository.RecentFilesRepository
+import com.draftpeek.core.domain.repository.RecentFilesRepository
 import javax.inject.Inject
 import javax.inject.Singleton
 import kotlinx.coroutines.CoroutineScope

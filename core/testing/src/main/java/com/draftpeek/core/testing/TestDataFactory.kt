@@ -1,9 +1,9 @@
 package com.draftpeek.core.testing
 
-import com.draftpeek.core.data.entity.BookmarkEntity
-import com.draftpeek.core.data.entity.RecentFile
-import com.draftpeek.core.data.entity.Snippet
-import com.draftpeek.core.data.entity.UserActivity
+import com.draftpeek.core.domain.model.Bookmark
+import com.draftpeek.core.domain.model.RecentFile
+import com.draftpeek.core.domain.model.Snippet
+import com.draftpeek.core.domain.model.UserActivity
 
 /**
  * 测试数据工厂。
@@ -33,7 +33,7 @@ object TestDataFactory {
         uri: String = "content://test/file.kt",
         fileName: String = "file.kt",
         directoryUri: String = "content://test/"
-    ) = BookmarkEntity(
+    ) = Bookmark(
         uri = uri,
         fileName = fileName,
         directoryUri = directoryUri
