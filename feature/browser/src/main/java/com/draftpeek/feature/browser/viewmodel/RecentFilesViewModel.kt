@@ -31,8 +31,8 @@ package com.draftpeek.feature.browser.viewmodel
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.draftpeek.core.data.entity.RecentFile
-import com.draftpeek.core.data.repository.RecentFilesRepository
+import com.draftpeek.core.domain.model.RecentFile
+import com.draftpeek.core.domain.repository.RecentFilesRepository
 import dagger.hilt.android.lifecycle.HiltViewModel
 import javax.inject.Inject
 import kotlinx.coroutines.flow.SharingStarted

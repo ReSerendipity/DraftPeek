@@ -1,7 +1,7 @@
 package com.draftpeek.core.testing
 
-import com.draftpeek.core.data.entity.BookmarkEntity
-import com.draftpeek.core.data.repository.BookmarkRepository
+import com.draftpeek.core.domain.model.Bookmark
+import com.draftpeek.core.domain.repository.BookmarkRepository
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
@@ -13,11 +13,11 @@ import kotlinx.coroutines.flow.asStateFlow
  */
 class FakeBookmarkRepository : BookmarkRepository {
 
-    private val _bookmarks = MutableStateFlow<List<BookmarkEntity>>(emptyList())
+    private val _bookmarks = MutableStateFlow<List<Bookmark>>(emptyList())
 
-    override val allBookmarks: Flow<List<BookmarkEntity>> = _bookmarks.asStateFlow()
+    override val allBookmarks: Flow<List<Bookmark>> = _bookmarks.asStateFlow()
 
-    override fun getBookmarksByDirectory(directoryUri: String): Flow<List<BookmarkEntity>> =
+    override fun getBookmarksByDirectory(directoryUri: String): Flow<List<Bookmark>> =
         MutableStateFlow(_bookmarks.value.filter { it.directoryUri == directoryUri }).asStateFlow()
 
     override val allBookmarkUris: Flow<List<String>> =
@@ -26,7 +26,7 @@ class FakeBookmarkRepository : BookmarkRepository {
     override suspend fun isBookmarked(uri: String): Boolean = _bookmarks.value.any { it.uri == uri }
 
     override suspend fun addBookmark(uri: String, fileName: String, directoryUri: String) {
-        val bookmark = BookmarkEntity(uri = uri, fileName = fileName, directoryUri = directoryUri)
+        val bookmark = Bookmark(uri = uri, fileName = fileName, directoryUri = directoryUri)
         _bookmarks.value = (_bookmarks.value.filterNot { it.uri == uri } + bookmark)
             .sortedBy { it.fileName }
     }

@@ -1,6 +1,6 @@
 package com.draftpeek.feature.stats.util
 
-import com.draftpeek.core.data.entity.UserActivity
+import com.draftpeek.core.domain.model.UserActivity
 import java.time.LocalDate
 import java.time.format.DateTimeFormatter
 import org.junit.jupiter.api.Assertions.assertEquals

@@ -50,7 +50,7 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import com.draftpeek.core.data.entity.UserActivity
+import com.draftpeek.core.domain.model.UserActivity
 import com.draftpeek.core.ui.modifier.pressScaleEffect
 import com.draftpeek.core.ui.theme.JetBrainsMonoFontFamily
 import com.draftpeek.core.ui.theme.LocalDarkTheme

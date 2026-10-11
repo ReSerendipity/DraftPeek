@@ -23,7 +23,7 @@ import android.os.Environment
 import android.provider.MediaStore
 import android.util.Log
 import com.draftpeek.core.common.security.SecurityGate
-import com.draftpeek.core.data.entity.UserActivity
+import com.draftpeek.core.domain.model.UserActivity
 import java.io.OutputStreamWriter
 import java.text.SimpleDateFormat
 import java.util.Date

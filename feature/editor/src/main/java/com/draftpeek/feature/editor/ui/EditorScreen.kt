@@ -105,7 +105,7 @@ import com.draftpeek.core.common.security.SecurityGate
 import com.draftpeek.core.common.util.AppFileManager
 import com.draftpeek.core.common.util.DocumentType
 import com.draftpeek.core.common.util.FileUtils
-import com.draftpeek.core.data.entity.Snippet
+import com.draftpeek.core.domain.model.Snippet
 import com.draftpeek.core.ui.component.BrandDialog
 import com.draftpeek.core.ui.component.BrandFilledButton
 import com.draftpeek.core.ui.component.BrandFilterChip

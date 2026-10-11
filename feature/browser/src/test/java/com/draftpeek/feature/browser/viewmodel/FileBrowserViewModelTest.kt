@@ -9,9 +9,9 @@ import com.draftpeek.core.common.vcs.GitFileStatus
 import com.draftpeek.core.common.vcs.GitHubApiClient
 import com.draftpeek.core.common.vcs.GitManager
 import com.draftpeek.core.common.vcs.GitStatus
-import com.draftpeek.core.data.repository.BookmarkRepository
-import com.draftpeek.core.data.repository.UserActivityRepository
-import com.draftpeek.core.data.usecase.ManageBookmarksUseCase
+import com.draftpeek.core.domain.repository.BookmarkRepository
+import com.draftpeek.core.domain.repository.UserActivityRepository
+import com.draftpeek.core.domain.usecase.ManageBookmarksUseCase
 import com.draftpeek.core.domain.usecase.RecordUserActivityUseCase
 import com.draftpeek.feature.browser.model.FileItem
 import com.draftpeek.feature.browser.model.FileSortOption

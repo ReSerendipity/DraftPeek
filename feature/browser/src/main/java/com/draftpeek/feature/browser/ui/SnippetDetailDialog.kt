@@ -26,7 +26,7 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import com.draftpeek.core.common.util.InputValidator
 import com.draftpeek.core.common.util.ValidationResult
-import com.draftpeek.core.data.entity.Snippet
+import com.draftpeek.core.domain.model.Snippet
 import com.draftpeek.core.ui.component.BrandDialog
 import com.draftpeek.core.ui.component.BrandFilledButton
 import com.draftpeek.core.ui.component.BrandOutlinedButton

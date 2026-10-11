@@ -49,7 +49,7 @@ import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.navigation.NavController
 import com.draftpeek.core.common.util.LanguageConfig
-import com.draftpeek.core.data.entity.Snippet
+import com.draftpeek.core.domain.model.Snippet
 import com.draftpeek.core.ui.component.BrandChip
 import com.draftpeek.core.ui.component.BrandDialog
 import com.draftpeek.core.ui.component.BrandFAB

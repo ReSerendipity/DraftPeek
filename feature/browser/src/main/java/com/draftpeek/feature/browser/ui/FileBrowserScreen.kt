@@ -140,7 +140,7 @@ import com.draftpeek.core.common.util.ValidationResult
 import com.draftpeek.core.common.vcs.GitFileStatus
 import com.draftpeek.core.common.vcs.GitHubFileEntry
 import com.draftpeek.core.common.vcs.GitStatus
-import com.draftpeek.core.data.entity.RecentFile
+import com.draftpeek.core.domain.model.RecentFile
 import com.draftpeek.core.data.security.FileCipher
 import com.draftpeek.core.ui.component.BrandChip
 import com.draftpeek.core.ui.component.BrandDialog

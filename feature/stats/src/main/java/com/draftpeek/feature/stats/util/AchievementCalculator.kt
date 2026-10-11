@@ -14,8 +14,8 @@
  */
 package com.draftpeek.feature.stats.util
 
-import com.draftpeek.core.data.entity.RecentFile
-import com.draftpeek.core.data.entity.UserActivity
+import com.draftpeek.core.domain.model.RecentFile
+import com.draftpeek.core.domain.model.UserActivity
 import com.draftpeek.feature.stats.model.AchievementStats
 import java.time.Instant
 import java.time.LocalDate

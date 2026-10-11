@@ -19,8 +19,8 @@ import androidx.benchmark.junit4.BenchmarkRule
 import androidx.benchmark.junit4.measureRepeated
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import androidx.test.platform.app.InstrumentationRegistry
-import com.draftpeek.core.data.repository.EditorFileReadOutcome
-import com.draftpeek.core.data.repository.EditorFileRepository
+import com.draftpeek.core.domain.repository.EditorFileReadOutcome
+import com.draftpeek.core.domain.repository.EditorFileRepository
 import com.draftpeek.core.data.repository.EditorFileRepositoryImpl
 import java.io.File
 import kotlinx.coroutines.runBlocking

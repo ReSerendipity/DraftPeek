@@ -20,8 +20,8 @@ import androidx.lifecycle.viewModelScope
 import com.draftpeek.core.common.util.DiffEngine
 import com.draftpeek.core.common.util.DiffResult
 import com.draftpeek.core.common.util.DiffType
-import com.draftpeek.core.data.repository.UserActivityRepository
-import com.draftpeek.core.data.usecase.RecordUserActivityUseCase
+import com.draftpeek.core.domain.repository.UserActivityRepository
+import com.draftpeek.core.domain.usecase.RecordUserActivityUseCase
 import com.draftpeek.feature.editor.repository.EditorRepository
 import dagger.hilt.android.lifecycle.HiltViewModel
 import javax.inject.Inject

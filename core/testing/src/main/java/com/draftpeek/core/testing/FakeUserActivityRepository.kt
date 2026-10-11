@@ -1,7 +1,7 @@
 package com.draftpeek.core.testing
 
-import com.draftpeek.core.data.entity.UserActivity
-import com.draftpeek.core.data.repository.UserActivityRepository
+import com.draftpeek.core.domain.model.UserActivity
+import com.draftpeek.core.domain.repository.UserActivityRepository
 import java.time.Instant
 import java.time.ZoneId
 import java.time.format.DateTimeFormatter
