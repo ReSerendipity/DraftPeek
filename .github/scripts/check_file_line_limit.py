@@ -8,8 +8,9 @@ feature/*/src/main/java/com/draftpeek/feature/*/sora/ 下的 .kt 源文件，
 单文件行数超过 LIMIT（默认 2000）即 FAIL。
 
 已知超限豁免（显式声明，不得静默新增）：
-  - FileBrowserScreen.kt：主 Composable 约 3000 行，虚拟文件夹/目录树/Git 区
-    抽子 Composable 属行为重构，列为后续项；其余拆分产物均已 < 1500 行。
+  （无 —— FileBrowserScreen.kt 已于 2026-10-11 任务A 拆分至 1714 行，豁免移除；
+    拆分产物 VirtualFolderContent.kt / InternalFileListContent.kt /
+    FileBrowserActionDialogs.kt 均已 < 1500 行。）
 
 退出码：0 = OK，1 = hard failure（CI 直接失败，不静默放行）。
 """
@@ -21,9 +22,7 @@ REPO_ROOT = os.path.dirname(os.path.dirname(HERE))         # 仓库根
 LIMIT = 2000
 
 # 豁免清单：相对仓库根路径。添加必须写明原因（更新上方 docstring）。
-EXEMPT = {
-    "feature/browser/src/main/java/com/draftpeek/feature/browser/ui/FileBrowserScreen.kt",
-}
+EXEMPT: set[str] = set()
 
 
 def main():
