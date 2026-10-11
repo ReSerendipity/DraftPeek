@@ -21,8 +21,9 @@
 - [ ] `./gradlew test`（全部模块单测）通过
 - [ ] `./gradlew lint` 通过
 - [ ] CI `release.yml` 建 Release 之前的步骤全绿（产物构建 + 验签 + checksums + draft 创建）
-- [ ] macrobenchmark：**当前不是发布门禁**（PR #88 已把它移到 `Create GitHub Release` 之后，
-      且 13/13 受 issue #87 三类原因阻塞）。它转绿后请把本条恢复为门禁项，并补上"报告已人工查看"
+- [ ] macrobenchmark：**已恢复为发布门禁项**（issue #87 已 CLOSED：Hilt 已去除 #98、被测包安装已修 #99、
+      profileable 已加 #98，13/13 用例 CI 转绿）。发布前查看本次 run 的 benchmark 报告，确认无新失败；
+      运行期基线见 `benchmark/performance-baseline.json`（参考数值，趋势对比用，不阻塞构建）
 - [ ] `apksigner verify --verbose --print-certs` 输出确认 v2+v3 签名方案生效
 
 ## 3. 签名与密钥（人工确认）

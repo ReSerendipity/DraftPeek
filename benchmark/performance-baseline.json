@@ -1,0 +1,19 @@
+{
+  "$schema_version": "1.0",
+  "policy": "reference_only",
+  "metric": "macrobenchmark.runtime",
+  "last_measured": null,
+  "notes": [
+    "本文件是 DraftPeek 运行期性能基线（macrobenchmark）的单一事实来源（single source of truth）。",
+    "采集入口：CI `:benchmark:connectedDebugAndroidTest`（android.yml macrobenchmark job / release.yml benchmark job），",
+    "原始读数在 build/outputs/macrobenchmark/**（upload-artifact 保留 14/30 天）。",
+    "当前 policy=reference_only：模拟器读数不作硬基线（benchmark/build.gradle.kts 已 suppressErrors=EMULATOR,DEBUGGABLE,ACTIVITY-MISSING），",
+    "硬基线只认专用设备 runner（真机 / Cuttlefish）。本文件记录参考数值，供发布说明与趋势对比使用，不阻塞构建。",
+    "回填方式：首次在专用设备 runner 上取得稳定读数后，按用例填写 p50/p95（ms），并置 last_measured 为采集日期；",
+    "CI 数值以该次 run 的 macrobenchmark 产物为准（与 coverage-baseline.json 同规则：本地值仅作参考，CI 产物为准）。",
+    "2026-10-11（T5 落地）：issue #87 已 CLOSED —— Hilt 依赖已去除（FileReadBenchmark 直构，CHANGELOG #98）、",
+    "被测包安装已修（#99）、profileable 已加（#98）；13/13 用例已在 CI 转绿。门禁项见 docs/RELEASE_CHECKLIST.md §2。",
+    "当前状态：本地无模拟器/真机，运行期数值尚未采集；本文件为骨架占位，数值回填前不参与任何门禁判断。"
+  ],
+  "baselines": {}
+}
