@@ -11,8 +11,12 @@ package com.draftpeek.core.data.repository
 
 import com.draftpeek.core.data.dao.BookmarkDao
 import com.draftpeek.core.data.entity.BookmarkEntity
+import com.draftpeek.core.data.mapper.toDomain
+import com.draftpeek.core.domain.model.Bookmark
+import com.draftpeek.core.domain.repository.BookmarkRepository
 import javax.inject.Inject
 import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.map
 
 /**
  * [BookmarkRepository] 的 Room 实现。
@@ -21,10 +25,11 @@ import kotlinx.coroutines.flow.Flow
  */
 class BookmarkRepositoryImpl @Inject constructor(private val dao: BookmarkDao) : BookmarkRepository {
 
-    override val allBookmarks: Flow<List<BookmarkEntity>> = dao.getAllBookmarks()
+    override val allBookmarks: Flow<List<Bookmark>> =
+        dao.getAllBookmarks().map { list -> list.map { it.toDomain() } }
 
-    override fun getBookmarksByDirectory(directoryUri: String): Flow<List<BookmarkEntity>> =
-        dao.getBookmarksByDirectory(directoryUri)
+    override fun getBookmarksByDirectory(directoryUri: String): Flow<List<Bookmark>> =
+        dao.getBookmarksByDirectory(directoryUri).map { list -> list.map { it.toDomain() } }
 
     override val allBookmarkUris: Flow<List<String>> = dao.getAllBookmarkUris()
 

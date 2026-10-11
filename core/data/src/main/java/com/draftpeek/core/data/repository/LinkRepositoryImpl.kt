@@ -11,6 +11,7 @@ package com.draftpeek.core.data.repository
 
 import com.draftpeek.core.data.dao.LinkDao
 import com.draftpeek.core.data.entity.LinkEntity
+import com.draftpeek.core.domain.repository.LinkRepository
 import javax.inject.Inject
 import kotlinx.coroutines.flow.Flow
 

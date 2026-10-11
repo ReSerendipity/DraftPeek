@@ -8,8 +8,8 @@
  */
 package com.draftpeek.core.domain.usecase
 
-import com.draftpeek.core.data.entity.BookmarkEntity
-import com.draftpeek.core.data.repository.BookmarkRepository
+import com.draftpeek.core.domain.model.Bookmark
+import com.draftpeek.core.domain.repository.BookmarkRepository
 import javax.inject.Inject
 import kotlinx.coroutines.flow.Flow
 
@@ -24,7 +24,7 @@ class ManageBookmarksUseCase @Inject constructor(private val repository: Bookmar
      * 获取所有书签的Flow。
      * @return 书签实体列表的Flow流
      */
-    fun allBookmarks(): Flow<List<BookmarkEntity>> = repository.allBookmarks
+    fun allBookmarks(): Flow<List<Bookmark>> = repository.allBookmarks
 
     /**
      * 获取所有书签URI的Flow。
@@ -37,7 +37,7 @@ class ManageBookmarksUseCase @Inject constructor(private val repository: Bookmar
      * @param directoryUri 目录URI字符串
      * @return 该目录下书签实体列表的Flow流
      */
-    fun getBookmarksByDirectory(directoryUri: String): Flow<List<BookmarkEntity>> =
+    fun getBookmarksByDirectory(directoryUri: String): Flow<List<Bookmark>> =
         repository.getBookmarksByDirectory(directoryUri)
 
     /**

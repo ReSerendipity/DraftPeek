@@ -1,6 +1,6 @@
 package com.draftpeek.core.data.sync
 
-import com.draftpeek.core.data.entity.Snippet
+import com.draftpeek.core.domain.model.Snippet
 import com.draftpeek.core.sync.SyncDataCorruptException
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertNull

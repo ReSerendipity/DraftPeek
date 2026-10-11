@@ -1,17 +1,17 @@
 package com.draftpeek.core.data.di
 
-import com.draftpeek.core.data.repository.BookmarkRepository
 import com.draftpeek.core.data.repository.BookmarkRepositoryImpl
-import com.draftpeek.core.data.repository.EditorFileRepository
 import com.draftpeek.core.data.repository.EditorFileRepositoryImpl
-import com.draftpeek.core.data.repository.RecentFilesRepository
 import com.draftpeek.core.data.repository.RecentFilesRepositoryImpl
-import com.draftpeek.core.data.repository.SecurityEventRepository
 import com.draftpeek.core.data.repository.SecurityEventRepositoryImpl
-import com.draftpeek.core.data.repository.SnippetRepository
 import com.draftpeek.core.data.repository.SnippetRepositoryImpl
-import com.draftpeek.core.data.repository.UserActivityRepository
 import com.draftpeek.core.data.repository.UserActivityRepositoryImpl
+import com.draftpeek.core.domain.repository.BookmarkRepository
+import com.draftpeek.core.domain.repository.EditorFileRepository
+import com.draftpeek.core.domain.repository.RecentFilesRepository
+import com.draftpeek.core.domain.repository.SecurityEventRepository
+import com.draftpeek.core.domain.repository.SnippetRepository
+import com.draftpeek.core.domain.repository.UserActivityRepository
 import org.junit.jupiter.api.Assertions
 import org.junit.jupiter.api.DisplayName
 import org.junit.jupiter.api.Nested

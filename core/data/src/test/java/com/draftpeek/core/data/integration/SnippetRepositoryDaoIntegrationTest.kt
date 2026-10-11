@@ -5,8 +5,8 @@ import androidx.room.Room
 import androidx.test.core.app.ApplicationProvider
 import com.draftpeek.core.data.dao.SnippetDao
 import com.draftpeek.core.data.db.AppDatabase
-import com.draftpeek.core.data.entity.Snippet
 import com.draftpeek.core.data.repository.SnippetRepositoryImpl
+import com.draftpeek.core.domain.model.Snippet
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.test.runTest
 import org.junit.After

@@ -177,7 +177,11 @@ docs/_devarchive/
 docs/agents/
 
 # --- 2026-09-06 目录整理补齐（方案 A：路径不动，仅排除）---
-model/
+# 注意：用根级锚定 /model/ 而非 model/ —— 无前缀的 model/ 会误伤任意层级名为 model 的
+# Kotlin 包目录（如 core/domain/.../domain/model、feature/terminal/.../model），
+# 导致领域模型/终端模型永远无法入库（此前 core/domain/model 3 个文件靠历史 -f 入库、
+# feature/terminal/model 2 个文件被静默忽略）。本规则本意只排除根目录 ML 模型产物。
+/model/
 pretrained_models/
 coverage.xml
 .coverage

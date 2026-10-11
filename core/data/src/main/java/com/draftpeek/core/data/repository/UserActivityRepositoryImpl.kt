@@ -12,11 +12,15 @@ package com.draftpeek.core.data.repository
 import com.draftpeek.core.data.dao.RecentFileDao
 import com.draftpeek.core.data.dao.UserActivityDao
 import com.draftpeek.core.data.entity.UserActivity
+import com.draftpeek.core.data.mapper.toDomain
+import com.draftpeek.core.domain.model.UserActivity as UserActivityModel
+import com.draftpeek.core.domain.repository.UserActivityRepository
 import java.time.Instant
 import java.time.ZoneId
 import java.time.format.DateTimeFormatter
 import javax.inject.Inject
 import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.sync.Mutex
 import kotlinx.coroutines.sync.withLock
 
@@ -51,10 +55,11 @@ class UserActivityRepositoryImpl @Inject constructor(
     @Volatile
     private var cachedDateEndMs: Long = 0L
 
-    override fun getActivityForDateRange(start: String, end: String): Flow<List<UserActivity>> =
-        userActivityDao.getActivityForDateRange(start, end)
+    override fun getActivityForDateRange(start: String, end: String): Flow<List<UserActivityModel>> =
+        userActivityDao.getActivityForDateRange(start, end).map { list -> list.map { it.toDomain() } }
 
-    override fun getActivityForDate(date: String): Flow<UserActivity?> = userActivityDao.getActivityForDate(date)
+    override fun getActivityForDate(date: String): Flow<UserActivityModel?> =
+        userActivityDao.getActivityForDate(date).map { it?.toDomain() }
 
     override suspend fun recordAppLaunch() {
         record { date, now ->

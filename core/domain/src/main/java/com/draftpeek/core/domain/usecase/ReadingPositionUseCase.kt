@@ -9,8 +9,8 @@
  */
 package com.draftpeek.core.domain.usecase
 
-import com.draftpeek.core.data.entity.RecentFile
-import com.draftpeek.core.data.repository.RecentFilesRepository
+import com.draftpeek.core.domain.model.RecentFile
+import com.draftpeek.core.domain.repository.RecentFilesRepository
 import javax.inject.Inject
 
 /**

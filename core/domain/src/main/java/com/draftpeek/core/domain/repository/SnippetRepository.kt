@@ -1,15 +1,17 @@
 /**
- * 代码片段仓库接口。
+ * 代码片段仓库接口（领域层）。
  *
  * 提供代码片段的 CRUD 操作、分类/语言筛选、全文搜索（FTS4）和子串模糊搜索功能。
  * 代码片段是用户保存的常用代码模板，支持按分类和编程语言组织管理。
  *
+ * 接口定义在领域层，由数据层（core:data）实现，遵循依赖倒置原则。
+ *
  * @author DraftPeek Team
  * @since 1.0.0
  */
-package com.draftpeek.core.data.repository
+package com.draftpeek.core.domain.repository
 
-import com.draftpeek.core.data.entity.Snippet
+import com.draftpeek.core.domain.model.Snippet
 import kotlinx.coroutines.flow.Flow
 
 /**
@@ -82,20 +84,20 @@ interface SnippetRepository {
 
     /**
      * 添加新代码片段。
-     * @param snippet 要添加的片段实体（id=0 自动生成）
+     * @param snippet 要添加的片段（id=0 自动生成）
      * @return 新插入记录的 ID
      */
     suspend fun addSnippet(snippet: Snippet): Long
 
     /**
      * 更新已有的代码片段。
-     * @param snippet 要更新的片段实体
+     * @param snippet 要更新的片段
      */
     suspend fun updateSnippet(snippet: Snippet)
 
     /**
      * 删除代码片段。
-     * @param snippet 要删除的片段实体
+     * @param snippet 要删除的片段
      */
     suspend fun deleteSnippet(snippet: Snippet)
 }

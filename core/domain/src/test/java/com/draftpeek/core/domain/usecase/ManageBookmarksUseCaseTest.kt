@@ -1,7 +1,7 @@
 package com.draftpeek.core.domain.usecase
 
-import com.draftpeek.core.data.entity.BookmarkEntity
-import com.draftpeek.core.data.repository.BookmarkRepository
+import com.draftpeek.core.domain.model.Bookmark
+import com.draftpeek.core.domain.repository.BookmarkRepository
 import io.mockk.coEvery
 import io.mockk.coVerify
 import io.mockk.every
@@ -35,7 +35,7 @@ class ManageBookmarksUseCaseTest {
         @Test
         @DisplayName("返回 repository.allBookmarks 流")
         fun allBookmarks_delegatesToRepository() = runTest {
-            val bookmarks = listOf(BookmarkEntity(uri = "uri1", fileName = "f1.kt", directoryUri = "dir1"))
+            val bookmarks = listOf(Bookmark(uri = "uri1", fileName = "f1.kt", directoryUri = "dir1"))
             every { repository.allBookmarks } returns flowOf(bookmarks)
 
             val result = useCase.allBookmarks().first()

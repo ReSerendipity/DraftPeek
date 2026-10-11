@@ -1,15 +1,17 @@
 /**
- * 最近文件仓库接口。
+ * 最近文件仓库接口（领域层）。
  *
  * 管理用户最近打开的文件历史列表，支持收藏、阅读位置持久化、过期清理等功能。
  * 收藏的文件不会被自动修剪，非收藏文件保留最近 MAX_RECENT_FILES 条记录。
  *
+ * 接口定义在领域层，由数据层（core:data）实现，遵循依赖倒置原则。
+ *
  * @author DraftPeek Team
  * @since 1.0.0
  */
-package com.draftpeek.core.data.repository
+package com.draftpeek.core.domain.repository
 
-import com.draftpeek.core.data.entity.RecentFile
+import com.draftpeek.core.domain.model.RecentFile
 import kotlinx.coroutines.flow.Flow
 
 /**

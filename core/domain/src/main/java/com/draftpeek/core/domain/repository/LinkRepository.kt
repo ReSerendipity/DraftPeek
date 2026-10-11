@@ -1,13 +1,14 @@
 /**
- * 双向链接仓库接口。
+ * 双向链接仓库接口（领域层）。
  *
- * 定义双链索引的数据层契约，提供正向链接、反向链接查询与索引替换操作。
- * 遵循 Clean Architecture，实现类负责将业务逻辑与 DAO 层解耦。
+ * 定义双链索引的领域层契约，提供正向链接、反向链接查询与索引替换操作。
+ *
+ * 接口定义在领域层，由数据层（core:data）实现，遵循依赖倒置原则。
  *
  * @author DraftPeek Team
  * @since 1.0.0
  */
-package com.draftpeek.core.data.repository
+package com.draftpeek.core.domain.repository
 
 import kotlinx.coroutines.flow.Flow
 

@@ -13,9 +13,13 @@ import android.content.Context
 import com.draftpeek.core.common.util.AppFileManager
 import com.draftpeek.core.data.dao.RecentFileDao
 import com.draftpeek.core.data.entity.RecentFile
+import com.draftpeek.core.data.mapper.toDomain
+import com.draftpeek.core.domain.model.RecentFile as RecentFileModel
+import com.draftpeek.core.domain.repository.RecentFilesRepository
 import dagger.hilt.android.qualifiers.ApplicationContext
 import javax.inject.Inject
 import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.map
 
 /**
  * [RecentFilesRepository] 的 Room 实现。
@@ -33,11 +37,14 @@ class RecentFilesRepositoryImpl @Inject constructor(
         private const val MAX_RECENT_FILES = 50
     }
 
-    override val recentFiles: Flow<List<RecentFile>> = dao.getAllRecentFiles()
+    override val recentFiles: Flow<List<RecentFileModel>> =
+        dao.getAllRecentFiles().map { list -> list.map { it.toDomain() } }
 
-    override val favorites: Flow<List<RecentFile>> = dao.getFavorites()
+    override val favorites: Flow<List<RecentFileModel>> =
+        dao.getFavorites().map { list -> list.map { it.toDomain() } }
 
-    override fun getRecentFile(uri: String): Flow<RecentFile?> = dao.getRecentFile(uri)
+    override fun getRecentFile(uri: String): Flow<RecentFileModel?> =
+        dao.getRecentFile(uri).map { it?.toDomain() }
 
     override suspend fun addRecentFile(uri: String, fileName: String, language: String?, fileSize: Long) {
         val now = System.currentTimeMillis()
@@ -87,5 +94,6 @@ class RecentFilesRepositoryImpl @Inject constructor(
         dao.updateReadingPosition(uri, line, column, scrollX, scrollY)
     }
 
-    override suspend fun getReadingPosition(uri: String): RecentFile? = dao.getReadingPosition(uri)
+    override suspend fun getReadingPosition(uri: String): RecentFileModel? =
+        dao.getReadingPosition(uri)?.toDomain()
 }

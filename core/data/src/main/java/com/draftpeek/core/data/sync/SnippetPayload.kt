@@ -16,7 +16,7 @@
 package com.draftpeek.core.data.sync
 
 import com.draftpeek.core.crdt.JsonCodec
-import com.draftpeek.core.data.entity.Snippet
+import com.draftpeek.core.domain.model.Snippet
 import com.draftpeek.core.sync.SyncDataCorruptException
 
 /** 片段载荷 ⇄ JSON 的编解码（纯函数，可单测）。 */

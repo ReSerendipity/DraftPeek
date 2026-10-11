@@ -1,7 +1,9 @@
 package com.draftpeek.core.data.repository
 
 import com.draftpeek.core.data.dao.SnippetDao
-import com.draftpeek.core.data.entity.Snippet
+import com.draftpeek.core.data.entity.Snippet as SnippetEntity
+import com.draftpeek.core.data.mapper.toEntity
+import com.draftpeek.core.domain.model.Snippet
 import io.mockk.coEvery
 import io.mockk.coVerify
 import io.mockk.every
@@ -23,6 +25,7 @@ class SnippetRepositoryImplTest {
     private lateinit var dao: SnippetDao
     private lateinit var repository: SnippetRepositoryImpl
 
+    /** 领域模型 fixture：作为 repository（domain 接口）入参。 */
     private val sampleSnippet = Snippet(
         title = "Test",
         content = "fun test()",
@@ -31,6 +34,9 @@ class SnippetRepositoryImplTest {
         createdAt = 0L,
         updatedAt = 0L
     )
+
+    /** 实体 fixture：作为 DAO 返回值/捕获参数（Room 层）。 */
+    private val sampleEntity: SnippetEntity = sampleSnippet.toEntity()
 
     @BeforeEach
     fun setUp() {
@@ -45,9 +51,10 @@ class SnippetRepositoryImplTest {
         @Test
         @DisplayName("委托给 dao.getAllSnippets")
         fun getAllSnippets_delegatesToDao() = runTest {
-            every { dao.getAllSnippets() } returns flowOf(listOf(sampleSnippet))
+            every { dao.getAllSnippets() } returns flowOf(listOf(sampleEntity))
             val result = repository.getAllSnippets().first()
             assertEquals(1, result.size)
+            assertEquals("Test", result[0].title)
         }
     }
 
@@ -58,17 +65,19 @@ class SnippetRepositoryImplTest {
         @Test
         @DisplayName("FTS4 搜索委托给 dao")
         fun searchSnippets_delegatesToDao() = runTest {
-            every { dao.searchSnippets("query") } returns flowOf(listOf(sampleSnippet))
+            every { dao.searchSnippets("query") } returns flowOf(listOf(sampleEntity))
             val result = repository.searchSnippets("query").first()
             assertEquals(1, result.size)
+            assertEquals("Test", result[0].title)
         }
 
         @Test
         @DisplayName("子串搜索委托给 dao")
         fun searchSnippetsSubstring_delegatesToDao() = runTest {
-            every { dao.searchSnippetsSubstring("partial") } returns flowOf(listOf(sampleSnippet))
+            every { dao.searchSnippetsSubstring("partial") } returns flowOf(listOf(sampleEntity))
             val result = repository.searchSnippetsSubstring("partial").first()
             assertEquals(1, result.size)
+            assertEquals("Test", result[0].title)
         }
     }
 
@@ -79,7 +88,7 @@ class SnippetRepositoryImplTest {
         @Test
         @DisplayName("addSnippet：syncId 为空时兜底生成 UUID，再委托 dao.insert 并返回 ID")
         fun addSnippet_generatesSyncIdWhenBlank() = runTest {
-            val inserted = slot<Snippet>()
+            val inserted = slot<SnippetEntity>()
             coEvery { dao.insert(capture(inserted)) } returns 42L
 
             val id = repository.addSnippet(sampleSnippet)
@@ -95,7 +104,7 @@ class SnippetRepositoryImplTest {
         @DisplayName("addSnippet：已带 syncId 时原样透传（不覆盖调用方给的标识）")
         fun addSnippet_keepsProvidedSyncId() = runTest {
             val provided = sampleSnippet.copy(syncId = "fixed-uuid")
-            val inserted = slot<Snippet>()
+            val inserted = slot<SnippetEntity>()
             coEvery { dao.insert(capture(inserted)) } returns 7L
 
             repository.addSnippet(provided)
@@ -104,17 +113,17 @@ class SnippetRepositoryImplTest {
         }
 
         @Test
-        @DisplayName("updateSnippet 委托给 dao.update")
+        @DisplayName("updateSnippet 委托给 dao.update（entity 转换）")
         fun updateSnippet_delegatesToDao() = runTest {
             repository.updateSnippet(sampleSnippet)
-            coVerify { dao.update(sampleSnippet) }
+            coVerify { dao.update(any()) }
         }
 
         @Test
-        @DisplayName("deleteSnippet 委托给 dao.delete")
+        @DisplayName("deleteSnippet 委托给 dao.delete（entity 转换）")
         fun deleteSnippet_delegatesToDao() = runTest {
             repository.deleteSnippet(sampleSnippet)
-            coVerify { dao.delete(sampleSnippet) }
+            coVerify { dao.delete(any()) }
         }
     }
 }

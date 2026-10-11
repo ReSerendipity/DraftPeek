@@ -1,14 +1,16 @@
 /**
- * 安全事件仓库接口。
+ * 安全事件仓库接口（领域层）。
  *
  * 提供安全事件的持久化查询和清除操作。
+ *
+ * 接口定义在领域层，由数据层（core:data）实现，遵循依赖倒置原则。
  *
  * @author DraftPeek Team
  * @since 1.0.30
  */
-package com.draftpeek.core.data.repository
+package com.draftpeek.core.domain.repository
 
-import com.draftpeek.core.data.entity.SecurityEventEntity
+import com.draftpeek.core.domain.model.SecurityEvent
 import kotlinx.coroutines.flow.Flow
 
 /**
@@ -17,7 +19,7 @@ import kotlinx.coroutines.flow.Flow
 interface SecurityEventRepository {
 
     /** 所有安全事件的响应式流（按时间倒序） */
-    val allEvents: Flow<List<SecurityEventEntity>>
+    val allEvents: Flow<List<SecurityEvent>>
 
     /**
      * 插入安全事件记录。
@@ -32,7 +34,7 @@ interface SecurityEventRepository {
      * 获取最近 N 条安全事件。
      * @param limit 最大返回数量
      */
-    suspend fun getRecentEvents(limit: Int): List<SecurityEventEntity>
+    suspend fun getRecentEvents(limit: Int): List<SecurityEvent>
 
     /**
      * 获取安全事件总数。

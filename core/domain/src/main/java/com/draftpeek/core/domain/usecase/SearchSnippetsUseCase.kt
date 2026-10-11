@@ -9,8 +9,8 @@
  */
 package com.draftpeek.core.domain.usecase
 
-import com.draftpeek.core.data.entity.Snippet
-import com.draftpeek.core.data.repository.SnippetRepository
+import com.draftpeek.core.domain.model.Snippet
+import com.draftpeek.core.domain.repository.SnippetRepository
 import javax.inject.Inject
 import kotlinx.coroutines.flow.Flow
 

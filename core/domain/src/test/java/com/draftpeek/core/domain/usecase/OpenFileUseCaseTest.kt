@@ -1,9 +1,9 @@
 package com.draftpeek.core.domain.usecase
 
 import android.net.Uri
-import com.draftpeek.core.data.repository.EditorFileReadOutcome
-import com.draftpeek.core.data.repository.EditorFileReadResult
-import com.draftpeek.core.data.repository.EditorFileRepository
+import com.draftpeek.core.domain.repository.EditorFileReadOutcome
+import com.draftpeek.core.domain.repository.EditorFileReadResult
+import com.draftpeek.core.domain.repository.EditorFileRepository
 import io.mockk.coEvery
 import io.mockk.coVerify
 import io.mockk.every
