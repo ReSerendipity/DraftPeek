@@ -29,6 +29,7 @@
 package com.draftpeek.benchmark
 
 import android.util.Log
+import android.view.KeyCharacterMap
 import androidx.test.platform.app.InstrumentationRegistry
 import androidx.test.uiautomator.By
 import androidx.test.uiautomator.UiDevice
@@ -279,12 +280,25 @@ internal fun UiDevice.findByTextOrDesc(label: String): UiObject2? {
 /**
  * 向当前获得焦点的视图发送整段文本。
  *
- * 走 `Instrumentation.sendStringSync` 而不是逐次 `pressKeyCode`：
- * 后者每次按键都是一次跨进程调用，在 40 字符量级上会引入数十毫秒的测试框架噪声，
- * 污染 FrameTimingMetric 的读数。
+ * 走 `UiAutomation.injectInputEvent`（accessibility 服务通道，system_server 身份注入）
+ * 而不是 `Instrumentation.sendStringSync`：后者直连 `InputManager.injectInputEvent`，
+ * 对非系统注入者（benchmark 测试 APK 与被测 app 不同 uid）一律要求 `INJECT_EVENTS`
+ * （signature|privileged 权限，模拟器上不可授予）——本地与 CI 无头档都会抛
+ * `SecurityException: Injecting to another application requires INJECT_EVENTS permission`。
+ * UiAutomation 通道由 AccessibilityManagerService 以系统身份注入，无此限制，
+ * 且事件序列仍由同一个 `KeyCharacterMap` 生成（与 sendStringSync 逐字符语义一致），
+ * 一次注入完成、无逐键跨进程噪声。
  */
 internal fun sendText(text: String) {
-    InstrumentationRegistry.getInstrumentation().sendStringSync(text)
+    val uiAutomation = InstrumentationRegistry.getInstrumentation().uiAutomation
+    val keyCharacterMap = KeyCharacterMap.load(KeyCharacterMap.VIRTUAL_KEYBOARD)
+    val events = keyCharacterMap.getEvents(text.toCharArray())
+    if (events.isNullOrEmpty()) {
+        error("sendText: KeyCharacterMap 无法把文本映射为按键事件: ${text.take(40)}")
+    }
+    for (event in events) {
+        uiAutomation.injectInputEvent(event, true /* sync */)
+    }
 }
 
 /**
