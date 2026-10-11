@@ -253,6 +253,11 @@ dependencies {
     implementation(project(":core:ui"))
     implementation(project(":core:designsystem"))
     implementation(project(":core:data"))
+    // 同步协调器装配层（阶段 B §6② T0）：app 需直接可见 core:sync / core:crdt 的类型
+    // （SyncCoordinator / SyncTransport / LocalSnapshotSource / SyncMerger / CrdtSyncMerger）。
+    // 此前仅经 core:data、feature:stats 以 implementation 形式传递，未暴露到 app 编译类路径。
+    implementation(project(":core:sync"))
+    implementation(project(":core:crdt"))
     implementation(project(":feature:browser"))
     implementation(project(":feature:editor"))
     implementation(project(":feature:settings"))

@@ -11,6 +11,7 @@
 package com.draftpeek.feature.stats.viewmodel
 
 import androidx.lifecycle.ViewModel
+import com.draftpeek.core.sync.SyncMachineState
 import com.draftpeek.feature.stats.account.AccountStateSimulation
 import com.draftpeek.feature.stats.account.AccountUiState
 import com.draftpeek.feature.stats.account.SyncUiStatus
@@ -32,6 +33,14 @@ class AccountViewModel @Inject constructor() : ViewModel() {
 
     /** 身份区展示状态。 */
     val uiState: StateFlow<AccountUiState> = _uiState.asStateFlow()
+
+    /**
+     * 同步机状态流（阶段 B T0 占位）。
+     *
+     * 当前恒为 `null`：真实状态由 [com.draftpeek.core.sync.SyncCoordinator.state]
+     * 经 T4 接线接入（任务书 §7）；本批仅落地字段与类型，不引入 UI、不触发同步。
+     */
+    val syncMachineState: StateFlow<SyncMachineState?> = MutableStateFlow(null)
 
     /**
      * 「重试」：把失败/离线态拉回同步中。
