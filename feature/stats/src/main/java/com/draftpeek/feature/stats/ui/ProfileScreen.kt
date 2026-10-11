@@ -183,6 +183,8 @@ fun ProfileScreen(
     }
     val showToast = LocalToastHost.current
     val signInComingSoon = stringResource(R.string.account_sign_in_coming_soon)
+    // 阶段 B 临时降级（OAuth 注册暂跳过）：同步按钮点击提示「开发中」，不触发真实同步
+    val syncComingSoon = stringResource(R.string.account_sync_coming_soon)
     // 阶段 A 的验收开关只在可调试构建暴露（不引入 BuildConfig 依赖）
     val isDebuggable = remember(context) {
         (context.applicationInfo.flags and ApplicationInfo.FLAG_DEBUGGABLE) != 0
@@ -760,9 +762,11 @@ fun ProfileScreen(
                         showEditNameDialog = true
                     },
                     onSignIn = { showToast(signInComingSoon) },
-                    onSyncNow = { accountViewModel.retrySync() },
-                    onRetry = { accountViewModel.retrySync() },
-                    onCancelSync = { accountViewModel.cancelSync() }
+                    // 阶段 B 临时降级（OAuth 注册暂跳过）：同步相关按钮一律提示「开发中」，
+                    // 不调用 accountViewModel.retrySync()/cancelSync()（避免进入无真实引擎的 Syncing 误导态）
+                    onSyncNow = { showToast(syncComingSoon) },
+                    onRetry = { showToast(syncComingSoon) },
+                    onCancelSync = { showToast(syncComingSoon) }
                 )
             }
 
