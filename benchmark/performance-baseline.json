@@ -1,19 +1,29 @@
 {
   "$schema_version": "1.0",
-  "policy": "reference_only",
+  "policy": "hard_gate",
   "metric": "macrobenchmark.runtime",
-  "last_measured": null,
+  "last_measured": "2026-10-12",
   "notes": [
     "本文件是 DraftPeek 运行期性能基线（macrobenchmark）的单一事实来源（single source of truth）。",
     "采集入口：CI `:benchmark:connectedDebugAndroidTest`（android.yml macrobenchmark job / release.yml benchmark job），",
     "原始读数在 build/outputs/macrobenchmark/**（upload-artifact 保留 14/30 天）。",
-    "当前 policy=reference_only：模拟器读数不作硬基线（benchmark/build.gradle.kts 已 suppressErrors=EMULATOR,DEBUGGABLE,ACTIVITY-MISSING），",
-    "硬基线只认专用设备 runner（真机 / Cuttlefish）。本文件记录参考数值，供发布说明与趋势对比使用，不阻塞构建。",
-    "回填方式：首次在专用设备 runner 上取得稳定读数后，按用例填写 p50/p95（ms），并置 last_measured 为采集日期；",
-    "CI 数值以该次 run 的 macrobenchmark 产物为准（与 coverage-baseline.json 同规则：本地值仅作参考，CI 产物为准）。",
-    "2026-10-11（T5 落地）：issue #87 已 CLOSED —— Hilt 依赖已去除（FileReadBenchmark 直构，CHANGELOG #98）、",
-    "被测包安装已修（#99）、profileable 已加（#98）；13/13 用例已在 CI 转绿。门禁项见 docs/RELEASE_CHECKLIST.md §2。",
-    "当前状态：本地无模拟器/真机，运行期数值尚未采集；本文件为骨架占位，数值回填前不参与任何门禁判断。"
+    "2026-10-12（T12）：policy 由 reference_only 升级为 hard_gate —— startup.cold 以 2026-10-11 首采值",
+    "median 941.5ms（T10 记录）为基准，容差 +20% -> limit 1129.8ms；判据见 benchmark/check_performance_gate.py。",
+    "CI 接入：android.yml macrobenchmark job（workflow_dispatch / schedule）在 connectedDebugAndroidTest 后",
+    "解析 benchmarkData JSON 跑门禁，超标即红（exit 1）；该 job 不阻塞 PR（夜间/手动档），发布门禁见 docs/RELEASE_CHECKLIST.md §2。",
+    "取舍说明（重要）：基线取自本地 AVD DraftPeekApi30（API 30 x86_64）productionRelease 首采；",
+    "模拟器读数波动大（本地同日复跑 cold median 1621.3ms，偏差 +72%），CI 为 API 34 pixel_5 无头 + swiftshader，",
+    "环境读数天然更高——CI 首次真跑若超标即红，属预期：届时以 CI 产物（该次 run 的 benchmarkData JSON）",
+    "重标阈值并回填本文件（与 coverage-baseline.json 同规则：CI 产物为准，本地值仅作参考），无需放宽容差来遮红。",
+    "本门禁只启用 startup.cold 一个用例（用户授权范围）；warm/hot 与其余用例仍仅作趋势参考，未设阈值。"
   ],
-  "baselines": {}
+  "baselines": {
+    "startup.cold": {
+      "metric": "timeToInitialDisplayMs",
+      "measured_ms": 941.5,
+      "tolerance_percent": 20,
+      "limit_ms": 1129.8,
+      "env": "local AVD DraftPeekApi30 (API 30 x86_64), productionRelease, 2026-10-11 首采"
+    }
+  }
 }

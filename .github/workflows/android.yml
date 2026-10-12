@@ -554,6 +554,17 @@ jobs:
             bash benchmark/ci/preseed-onboarding-gate.sh
             ./gradlew :benchmark:connectedDebugAndroidTest --stacktrace
 
+      # T12 性能硬门禁：macrobenchmark 跑完后解析 benchmarkData JSON，
+      # 对照 benchmark/performance-baseline.json（policy=hard_gate，startup.cold
+      # limit=1129.8ms = 941.5ms 基准 +20%）判超标；超标或缺测 exit 1 → job 红。
+      # 判据与用例清单以 benchmark/check_performance_gate.py 为准（单一口径）。
+      - name: Performance baseline gate (macrobenchmark 超标即红)
+        shell: bash
+        run: |
+          DATA=$(find benchmark/build/outputs/connected_android_test_additional_output -name '*benchmarkData.json' | head -1)
+          test -n "$DATA" || { echo '::error::No benchmarkData JSON found（macrobenchmark 未产出测量数据）'; exit 1; }
+          python3 benchmark/check_performance_gate.py --benchmark-data "$DATA"
+
       - name: Upload Benchmark Reports
         if: always()
         uses: actions/upload-artifact@v4

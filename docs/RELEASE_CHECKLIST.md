@@ -23,7 +23,9 @@
 - [ ] CI `release.yml` 建 Release 之前的步骤全绿（产物构建 + 验签 + checksums + draft 创建）
 - [ ] macrobenchmark：**已恢复为发布门禁项**（issue #87 已 CLOSED：Hilt 已去除 #98、被测包安装已修 #99、
       profileable 已加 #98，13/13 用例 CI 转绿）。发布前查看本次 run 的 benchmark 报告，确认无新失败；
-      运行期基线见 `benchmark/performance-baseline.json`（参考数值，趋势对比用，不阻塞构建）
+      运行期基线见 `benchmark/performance-baseline.json`（**policy=hard_gate**，startup.cold 基准 941.5ms
+      +20% 容差 → limit 1129.8ms；android.yml macrobenchmark job 跑完自动执行
+      `benchmark/check_performance_gate.py`，超标或缺测即红；阈值重标规则见 baseline notes）
 - [ ] `apksigner verify --verbose --print-certs` 输出确认 v2+v3 签名方案生效
 
 ## 3. 签名与密钥（人工确认）
