@@ -14,8 +14,8 @@
 | 目录 | 内容 |
 |---|---|
 | `app/` | 应用壳模块（MainActivity、导航、安全模块、AppWidget） |
-| `core/` | 基础层（common / data / domain / designsystem / testing / ui） |
-| `feature/` | 功能模块（browser / editor / settings / stats / terminal） |
+| `core/` | 基础层（common / crdt / data / domain / designsystem / sync / testing / ui） |
+| `feature/` | 功能模块（browser / editor / knowledge / settings / stats / terminal） |
 | `benchmark/` | Macrobenchmark 性能基准 |
 | `build-logic/` | Gradle 约定插件 |
 | `gradle/` | wrapper 与版本目录（libs.versions.toml） |

@@ -35,7 +35,7 @@ DraftPeek 是一款功能强大的 Android 原生文本 / 代码编辑器，主�
 
 > 版本一致性由 `scripts/check_version_consistency.py` 在 CI 中强制校验：上表 AGP / Gradle / Kotlin / Build Tools 必须与 `gradle/libs.versions.toml` 及 `gradle/wrapper/gradle-wrapper.properties` 实际取值一致，否则 CI 失败。本地自查：`python scripts/check_version_consistency.py`
 
-**支持的 ABI**：`arm64-v8a`、`armeabi-v7a`、`x86`、`x86_64`
+**支持的 ABI**：`arm64-v8a`、`armeabi-v7a`、`x86_64`（与 `app/build.gradle.kts` 的 `abiFilters` 一致，2026-10-13 核实；x86 已随 T7 ABI 裁剪移除）
 
 ## 编译步骤
 
@@ -78,12 +78,14 @@ DraftPeek/
 ├── build-logic/            # Gradle 约定插件（统一各模块构建配置）
 ├── core/                   # 基础层（整洁架构）
 │   ├── common/             #   工具类、DiffEngine、GitManager、EventBus、插件系统
+│   ├── crdt/               #   CRDT 数据结构（离线优先协作同步基座）
 │   ├── data/               #   Room + SQLCipher + DataStore、DAO、Repository
 │   ├── designsystem/       #   设计 Token（字体、色彩、形状、间距）
 │   ├── domain/             #   UseCase + 领域模型
+│   ├── sync/               #   同步引擎（CRDT 传输 / 冲突消解，配 server/）
 │   ├── testing/            #   测试 Fixtures
 │   └── ui/                 #   品牌组件、主题、自适应布局
-├── feature/                # 功能层（browser / editor / settings / stats / terminal）
+├── feature/                # 功能层（browser / editor / knowledge / settings / stats / terminal）
 ├── docs/  scripts/  gradle/  migrations/
 ├── server/                 # Python 协作同步服务（实验性/可选）
 └── CHANGELOG.md            # 更新日志
@@ -131,7 +133,7 @@ scripts\coverage.bat                              # Windows 一键覆盖率
 ## CI/CD
 
 - [`.github/workflows/android.yml`](.github/workflows/android.yml)：主 CI（Lint → Debug Build → 单元测试含覆盖率 → 仪器化测试矩阵 → Release 构建验证）
-- [`.github/workflows/release.yml`](.github/workflows/release.yml)：推送 `v*` tag 时自动构建 Release APK 并创建 GitHub Release
+- [`.github/workflows/release.yml`](.github/workflows/release.yml)：推送 `v*` tag 时自动构建 Release APK 并创建 **draft GitHub Release**（草稿态，人工审核后发布）
 
 ## 安全说明
 
