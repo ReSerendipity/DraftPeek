@@ -36,7 +36,7 @@
 | `adr/` | 架构决策记录（含 CRDT vs OT 选型） |
 | `deploy-download-page/` | 下载页部署说明 |
 | `icon-design/` | 应用图标设计与导出 |
-| `reports/` | 测试体系 / 前端工程评估报告 |
+| `reports/` | 测试体系 / 前端工程评估报告；架构评审台账（2026-10-15 起） |
 | `screenshots/` | 界面截图 |
 
 ## 想找内容？
