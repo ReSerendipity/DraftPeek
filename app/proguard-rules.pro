@@ -11,7 +11,7 @@
 
 # ===== R8 Standard Mode 混淆配置 =====
 # 注意：android.enableR8.fullMode=false（见 gradle.properties）。
-# Full Mode 会破坏 Apache POI / JGit 的反射链（详见 AGENTS.md），
+# Full Mode 会破坏 Apache POI / JGit 的反射链（规则见 docs/CODING_STANDARDS.md §7.4），
 # 因此本工程使用 Standard Mode。
 #
 # SECURITY VULN-002: 移除全局 -dontoptimize，恢复 R8 字节码优化。

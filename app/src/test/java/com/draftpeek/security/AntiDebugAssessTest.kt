@@ -24,7 +24,8 @@ import org.robolectric.util.ReflectionHelpers
  * 避免纯 JVM 下 Build.BRAND 为 null 导致的 NPE。
  *
  * 注意：本类使用 JUnit4 + Robolectric 风格（扁平方法，无 @Nested/@DisplayName），
- * 遵循 AGENTS.md Gotcha #23 的范式，避免 JUnit5 注解与 JUnit4 Runner 混用。
+ * 遵循 docs/CODING_STANDARDS.md §7.3 的单测平台约定，避免 JUnit5 注解与 JUnit4 Runner 混用
+ * （该规则由仓内 scripts/check_junit_platform.py 静态拦截）。
  */
 @RunWith(RobolectricTestRunner::class)
 @Config(sdk = [34])
