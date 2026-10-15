@@ -25,7 +25,7 @@ import org.robolectric.RobolectricTestRunner
  * 使用 SupportSQLiteOpenHelper 直接创建空数据库（非 Room 管理），
  * 执行迁移后验证表和索引是否正确创建。
  *
- * 注意：本类使用 JUnit4 + Robolectric 风格（遵循 AGENTS.md Gotcha #23）。
+ * 注意：本类使用 JUnit4 + Robolectric 风格（遵循 docs/CODING_STANDARDS.md §7.3）。
  */
 @RunWith(RobolectricTestRunner::class)
 class DatabaseMigrationTest {

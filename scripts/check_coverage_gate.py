@@ -10,12 +10,13 @@
     0  所有模块通过阈值 + ratchet 未违反
     1  任一模块低于阈值 / 报告缺失 / 解析失败 / ratchet 违反
 
-设计原则（对应 AGENTS.md「覆盖率门禁 = 质量门禁」）：
+设计原则（对应 docs/CODING_STANDARDS.md §7.2「覆盖率门禁 = 质量门禁」）：
     1. 阈值单一来源：`coverage-baseline.json.modules[*].threshold_pct`。
     2. 精度到小数点后 2 位：避开整数除法对低覆盖率模块（如 core/ui 0.92%）
        的截断失真。
     3. Ratchet：只允许 threshold_pct 相对 main 上升；若下降则本次检查失败。
-    4. 报告缺失即失败：不允许「无数据即绿」的历史陷阱重演（GOTCHAS #37）。
+    4. 报告缺失即失败：不允许「无数据即绿」的历史陷阱重演
+       （规则本体见 docs/CODING_STANDARDS.md §7.2；历史事故记录在本地维护、未随仓库分发的 docs/agents/GOTCHAS.md #37）。
 """
 from __future__ import annotations
 

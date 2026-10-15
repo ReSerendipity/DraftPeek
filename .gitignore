@@ -142,7 +142,9 @@ design_system_draft.md
 !.github/SUPPORT.md
 !.github/ISSUE_TEMPLATE/*.md
 !/TESTING_SUMMARY.md
-# AGENTS.md 分发边界声明的可分发权威入口，显式豁免 *.md 通配（2026-09-21）
+# 以下豁免仅针对随仓库分发的公开文档本身（分发边界见 docs/CODING_STANDARDS.md §7.1 / docs/README.md）。
+# AGENTS.md 家族（根/模块级 AGENTS.md、docs/agents/**、FIX_LOG.md、LOCAL_RULES.md）不在豁免之列，
+# 统一由上方 *.md 通配维持「仅本地保留、不入库」。（2026-10-14 勘误：原注释误称本行显式豁免了 AGENTS.md）
 !docs/CODING_STANDARDS.md
 !docs/README.md
 !docs/VERSIONING.md
