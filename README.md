@@ -103,15 +103,9 @@ DraftPeek/
 scripts\coverage.bat                              # Windows 一键覆盖率
 ```
 
-**覆盖率阈值**（详见 [`codecov.yml`](codecov.yml)）：
+**覆盖率阈值（阻断门禁 · 单一事实来源）**：[`coverage-baseline.json`](coverage-baseline.json) 的 `modules[*].threshold_pct`（JaCoCo **INSTRUCTION** 口径，棘轮只升不降；`scripts/check_coverage_gate.py --ratchet` 在 CI 阻断执行，报告缺失即失败，不允许「无数据即绿」）。[`codecov.yml`](codecov.yml)（LINE 展示口径，project 基线 7%）仅作 PR 注释参考，不作为门禁。
 
-| 模块 | 覆盖率要求 |
-|---|---|
-| 项目整体 | 60% |
-| core-common | 70% |
-| core-data | 75% |
-| feature-editor / feature-browser | 60% |
-| app | 50% |
+> ~~历史目标：项目整体 60% ／ core-common 70% ／ core-data 75% ／ feature-editor / feature-browser 60% ／ app 50%（LINE 口径）~~ —— 已被 2026-09-29 的实测基线重置取代（从未被任何一次真实数据验证过；详见 `codecov.yml` 头部基线重置说明与 `coverage-baseline.json` notes）。确需下调阈值先写 ADR（`docs/CODING_STANDARDS.md` §7.2）。
 
 ## 技术栈
 
