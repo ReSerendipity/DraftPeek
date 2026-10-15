@@ -155,6 +155,8 @@ design_system_draft.md
 !docs/adr/*.md
 !docs/reports/2026-10-15-架构评审台账.md
 !docs/reports/2026-10-15-覆盖率爬坡计划.md
+!docs/reports/2026-10-15-失败签名机制与排障路径摘要.md
+!docs/HANDOVER_GUIDE.md
 
 # Cloned learning repos (research reference only, not part of project)
 references/
