@@ -9,7 +9,7 @@
  *
  * 注意：本模块同时存在 Paparazzi 截图测试（JUnit4），因此本文件也使用 JUnit4，
  * 不加 `useJUnitPlatform()` —— 否则 JUnit Platform 会在没有 vintage 引擎的情况下
- * 静默跳过全部 JUnit4 截图用例（详见 docs/agents/GOTCHAS.md）。
+ * 静默跳过全部 JUnit4 截图用例（详见 docs/agents/GOTCHAS.md，本地文档未随仓库发布）。
  */
 package com.draftpeek.core.ui.performance
 
