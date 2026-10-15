@@ -221,6 +221,51 @@ jobs:
           fail_ci_if_error: false
           verbose: true
 
+  # ============================================================
+  # Smoke Feedback（快速首反馈档 · 非必需检查）
+  # 对应报告：《测试 Flash 报告》P1-3（无冒烟子集/快速反馈档）+
+  #           《质量工程效率 Flash 报告》P1-2（PR 反馈超 10 分钟锚点）。
+  # 设计：
+  #   - 与 build-and-test 并行：先跑三个纯 JVM 向、实测覆盖率最高模块的
+  #     testDebugUnitTest（core/sync 92.64% / core/crdt 82.1% / core/domain
+  #     56.19%，coverage-baseline.json），几分钟内给出首反馈；
+  #   - 非必需检查：不在 docs/ci/branch-protection.json 的 contexts 内，
+  #     不阻塞合并；全量门禁仍由 Build & Test 承担。报告中「快速档升必需、
+  #     两档都阻断」的目标需 owner 授权跑 scripts/apply_branch_protection.py
+  #     --apply 写回远端（另批执行，见执行对照表）；
+  #   - 任务名约定：core/* 无 flavor，单变体任务名为 testDebugUnitTest
+  #     （docs/CODING_STANDARDS.md §7.3）；
+  #   - 本 job 的 Actions 运行时行为无法本地验证（静态核验仅保证 YAML 结构
+  #     与任务名约定），首次实跑如有问题按失败签名机制登记。
+  # ============================================================
+  smoke-feedback:
+    name: Smoke Feedback (fast JVM subset, non-required)
+    runs-on: ubuntu-latest
+    timeout-minutes: 12
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v7
+
+      - name: Set up JDK 17
+        uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: 17
+
+      - name: Set up Gradle
+        uses: gradle/actions/setup-gradle@v4
+        with:
+          cache-read-only: ${{ github.ref != 'refs/heads/main' }}
+          gradle-home-cache-cleanup: true
+
+      - name: Create local.properties (CI fallback)
+        run: echo "ci.build=true" > local.properties
+
+      - name: Grant execute permission for gradlew
+        run: chmod +x ./gradlew
+
+      - name: Run smoke unit tests
+        run: ./gradlew :core:sync:testDebugUnitTest :core:crdt:testDebugUnitTest :core:domain:testDebugUnitTest --stacktrace --no-configuration-cache
   # Instrumented 测试矩阵选择器（分级门禁，见测试体系评估报告 Q2）：
   # - PR 档（pull_request）：只跑 API 30（google_apis）单机型，控制 PR 时长增量约 +20min；
   # - 全量档（workflow_dispatch / schedule）：API 26 / 30 / 34 全矩阵，发布前或夜间执行。
