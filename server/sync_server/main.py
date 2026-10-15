@@ -38,6 +38,14 @@ Status note (updated 2026-08-27):
     technical references; the improvements applied here (structured errors,
     SQLite persistence, rate limiting) bring them to a testable prototype
     quality but they are **not production-deployed**.
+
+API contract note (updated 2026-10-15, per backend service design review P1-1):
+    Prototype status means the API contract drifts with the implementation:
+    endpoints are unversioned (no /v1 prefix), OpenAPI is implicitly generated
+    by FastAPI, and server-ci does not snapshot/verify openapi.json against the
+    implementation.  This is an accepted prototype-level limitation, not a
+    production contract.  Should this server ever be promoted to production,
+    add /v1 prefix and an openapi.json snapshot diff gate in server-ci first.
 """
 
 import base64
