@@ -102,6 +102,32 @@ CHANGELOG.md 遵循 Keep a Changelog 格式：
 - **应用商店回滚**：在 Google Play Console 中回滚到上一版本（需上一版本仍上架）
 - **直接下载回退**：维护上一版本 APK + SHA256 校验和，在 GitHub Release 中可访问
 - **Feature Flag Kill-Switch**：通过远程配置（或 BuildConfig）禁用问题功能模块
+- **按版本号回退代码状态**：用 §3.4 的「主干等价提交」列检出，勿直接用版本 tag（部分 tag 不在主干可达集）
+
+### 3.4 版本号 → 主干修订对照与 tag 可达性核查（2026-10-17 建立）
+
+背景：历史身份改写（`.mailmap` 归并 6 个别名身份）会让发布 tag 指向**与主干无祖先关系**的重复提交。此时按 tag 检出或建 hotfix 分支，拿到的是旧提交线的内容，与 `main` 上的等价内容不同源，合并或比对会出现大量无关差异。
+
+截至 2026-10-17 实测：`git tag | wc -l` = 21，其中 `git tag --no-merged HEAD` = 10 不可达 —— 两枚版本 tag（`v1.0.31`、`v1.0.32`）与 8 枚 `ci-verify-*`。版本号到主干修订的对应关系如下表，**回退或核对一律用「主干等价提交」列，不要用 tag 列**。
+
+| 版本号 | tag 指向提交（主干不可达） | 内容树 | 主干等价提交（同树） | 主干侧提交标题 |
+|---|---|---|---|---|
+| 1.0.31 | `74e4a8ac3` | `08a367440873840d48b0e1ed8ff9b26fc812b1d8` | `d1f4bf0` | `release(v1.0.31): bump version + changelog (#82)`（draft Release 从未发布，见 CHANGELOG 该版说明） |
+| 1.0.32 | `b16b951d1` | `6fc9023cad56155f0ff7170a2d0aa4e7b041da41` | `957e0e3` | `chore(release): 准备 v1.0.32，落版 CHANGELOG 与版本号 (#101)` |
+
+判据用**树（tree）相等**，不用 patch-id 或提交信息：改写只换提交元数据与 SHA，内容树不变。以下三条命令均为只读，可复核本表：
+
+```bash
+git merge-base --is-ancestor v1.0.32 HEAD; echo "rc=$?"          # 非 0 = tag 不在主干可达集
+git rev-parse 'v1.0.32^{tree}'                                     # 取 tag 所指提交的内容树
+git log --format='%H %T' HEAD | grep "$(git rev-parse 'v1.0.32^{tree}')"   # 主干历史中的同树提交
+```
+
+规则：
+
+- 需要「回到某一版的代码状态」（排障回归、比对差异、选回退点）时，按本表检出**主干等价提交**；表内没有的版本号，先用上面三条命令求出同树提交并回填本表，再动手。
+- 发布新版本时同步登记本表一行（tag 提交 / 树 / 主干等价提交三元组），并顺手跑一次 `git tag --no-merged HEAD` 确认新增 tag 可达；不可达即说明 tag 建在了非主干提交上，须在发版流程内处置。
+- **重指向或删除 tag、移动任何远端 ref 均属破坏性/远端动作，需仓库所有者单独授权**：`release.yml` 由 `push: tags` 触发，移动已发布 tag 会当场重跑发布链，历史上有过因此产出混年代 Release 资产的情况。
 
 ---
 
@@ -112,6 +138,8 @@ CHANGELOG.md 遵循 Keep a Changelog 格式：
 ```
 1. 从最新 release tag 创建 hotfix 分支：
    git checkout -b hotfix/v1.0.31.1 v1.0.31
+   （先按 §3.4 判定该 tag 是否在主干可达集；不可达时改从 §3.4 表的「主干等价提交」建分支，
+     否则 hotfix 与 main 无共同祖先，第 6 步无法干净合并回去）
 
 2. 最小化修复（仅修复 P0 问题，不引入新功能）
 
@@ -182,3 +210,4 @@ CHANGELOG.md 遵循 Keep a Changelog 格式：
 - [ ] SHA256 校验和已生成
 - [ ] 安全模块（AntiDebug / ApkIntegrityChecker）在 Release APK 上正常工作
 - [ ] Git tag 已推送，触发 release.yml
+- [ ] 本次新打的版本 tag 在主干可达集内（`git tag --no-merged HEAD` 不再列出它），且已在 §3.4 对照表登记「tag 提交 / 内容树 / 主干等价提交」三元组
