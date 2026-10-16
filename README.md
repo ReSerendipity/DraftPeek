@@ -96,12 +96,15 @@ DraftPeek/
 ## 测试与覆盖率
 
 ```bash
-./gradlew testDebugUnitTest                       # 全部单元测试
-./gradlew :core:common:testDebugUnitTest          # 指定模块
+./gradlew test                                    # 全部单元测试（跑全部变体，与 CI 执行命令一致）
+./gradlew :app:testDevDebugUnitTest               # 仅 app 的 dev 调试变体
+./gradlew :core:common:testDebugUnitTest          # 指定模块（feature/*、core/* 无 flavor，单变体任务名为 testDebugUnitTest）
 ./gradlew connectedAndroidTest                    # UI/集成测试（需设备/模拟器）
 ./gradlew jacocoTestReport                        # 覆盖率报告（HTML: build/reports/jacoco/html/index.html）
 scripts\coverage.bat                              # Windows 一键覆盖率
 ```
+
+> 任务名口径以 [`docs/CODING_STANDARDS.md`](docs/CODING_STANDARDS.md) §7.3 为准：**仅 `:app` 有 flavor 维度**，其单测任务名恒为 `test<Flavor>DebugUnitTest`；不限定模块的 `testDebugUnitTest` 不会执行 `:app` 的用例，不要把它当作全量入口。
 
 **覆盖率阈值**（详见 [`codecov.yml`](codecov.yml)）：
 
