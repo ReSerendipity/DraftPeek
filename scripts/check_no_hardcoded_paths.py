@@ -26,6 +26,10 @@ def _repo_root():
     out = subprocess.run(  # nosec B603, B607（固定参数列表 git rev-parse，无 shell=True）
         ["git", "-C", str(_REPO_HINT), "rev-parse", "--show-toplevel"],
         capture_output=True, text=True)
+    if out.returncode != 0 or not out.stdout.strip():
+        # 不能退回 "." —— 那会把「问不到仓库根」伪装成「扫过了当前目录」
+        sys.stderr.write("[path-portability] git rev-parse --show-toplevel 失败，无法确定仓库根；检查中止（非通过）\n")
+        raise SystemExit(2)
     return Path(out.stdout.strip())
 
 
@@ -56,8 +60,17 @@ ALLOWLIST = [
 
 
 def _files_from(cmd):
-    out = subprocess.run(cmd, capture_output=True, text=True, cwd=str(ROOT))  # nosec B603, B607（git 只读命令）
-    return [p for p in out.stdout.split("\0") if p]
+    # 不用 text=True：Windows 下它按本地码（简中=GBK）解码，而 `git … -z` 输出的是原始
+    # UTF-8 路径，仓内只要有非 ASCII 文件名就会让读线程抛 UnicodeDecodeError、stdout 变 None，
+    # 旧代码随后在 .split() 上崩（--all 恒崩），或在 git 真失败时把「0 个文件」当成通过。
+    out = subprocess.run(cmd, capture_output=True, cwd=str(ROOT))  # nosec B603, B607（git 只读命令）
+    if out.returncode != 0:
+        sys.stderr.write(
+            "[path-portability] 取文件清单失败（rc=%d）：%s；检查中止（非通过）\n"
+            % (out.returncode, (out.stderr or b"").decode("utf-8", "replace").strip()[:200]))
+        raise SystemExit(2)
+    return [p.decode("utf-8", "surrogateescape")
+            for p in out.stdout.split(b"\0") if p]
 
 
 def is_exempt(path):
@@ -103,6 +116,8 @@ def main():
     all_mode = "--all" in sys.argv
     files = _files_from(["git", "ls-files", "-z"]) if all_mode \
         else _files_from(["git", "diff", "--cached", "--name-only", "--diff-filter=ACM", "-z"])
+    # 自证覆盖面：绿灯必须说清它看了多少个文件（0 个也照实说，别把空清单演成通过）
+    print(f"[path-portability] 扫描对象 {len(files)} 个文件（模式：{'全库 --all' if all_mode else '暂存区'}）")
     errors = []
     for f in files:
         check_file(f, errors)
