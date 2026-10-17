@@ -8,7 +8,15 @@
 failed=0
 
 # 1) gitleaks 扫描待推送提交（密钥防线）
-if command -v gitleaks >/dev/null 2>&1; then
+#    退出码用 --exit-code 2 分成三类，互不混淆：
+#      0 = 扫描完成且未检出；2 = 检出泄露；其余（含 1）= 工具或配置故障。
+#    故障既不放行也不谎报成「检出」，一律 fail-closed，并把真实类别写在提示里。
+if ! command -v gitleaks >/dev/null 2>&1; then
+    echo "[pre-push] gitleaks 未安装，跳过推送前密钥扫描" >&2
+elif [ ! -r gitleaks.toml ]; then
+    echo "[pre-push] gitleaks.toml 缺失或不可读，无法执行推送前密钥扫描（属故障，不是泄露）" >&2
+    exit 1
+else
     while read lref lsha rref rsha; do
         [ -z "$lsha" ] && continue
         if [ "$lsha" = "0000000000000000000000000000000000000000" ]; then
@@ -20,13 +28,20 @@ if command -v gitleaks >/dev/null 2>&1; then
             range="$rsha..$lsha"
         fi
         echo "[pre-push] gitleaks 扫描: $lref ($range)"
-        if ! gitleaks detect --source "$(pwd)" --redact --log-opts="$range" --config "$(pwd)/gitleaks.toml"; then
-            echo "[pre-push] gitleaks 检测到泄露，推送已拒绝。绕过：git push --no-verify" >&2
-            failed=1
-        fi
+        # --source/--config 一律用相对路径：钩子在 Git-Bash/MSYS 下 $(pwd) 给出 /c/... 形式，
+        # Windows 原生 gitleaks 打不开该配置并以 FTL 退出，历史上被下面的旧判断读成「检出泄露」。
+        gitleaks detect --source . --redact --log-opts="$range" --config gitleaks.toml --exit-code 2
+        rc=$?
+        case "$rc" in
+            0) echo "[pre-push] gitleaks 扫描完成：未检出泄露" ;;
+            2) echo "[pre-push] gitleaks 检出泄露，推送已拒绝。绕过：git push --no-verify" >&2
+               failed=1 ;;
+            *) echo "[pre-push] gitleaks 未能完成扫描（退出码 $rc）：工具或配置故障，" >&2
+               echo "          既不是「无泄露」也不是「检出泄露」；按 fail-closed 拒绝推送。" >&2
+               echo "          绕过：git push --no-verify" >&2
+               failed=1 ;;
+        esac
     done
-else
-    echo "[pre-push] gitleaks 未安装，跳过推送前密钥扫描" >&2
 fi
 
 # 2) precheck.ps1（家族既有门禁）
