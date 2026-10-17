@@ -17,6 +17,7 @@
 
 ### Fixed
 - 文档：`README.md`「测试与覆盖率」的聚合单测入口由 `./gradlew testDebugUnitTest` 改为 `./gradlew test`（与 CI 实跑命令一致），补 `:app:testDevDebugUnitTest` 示例并加 flavor 任务名口径说明——原写法不会执行 `:app` 的任何单测（含 `app/src/test` 下 7 个安全/完整性用例），却被注释为「全部单元测试」（Harness finding `readme-aggregate-test-command-skips-app`）
+- 门禁：`.githooks/pre-push` 的 gitleaks 步骤不再把「工具/配置故障」误报成「检出泄露」——`--source`/`--config` 改用相对路径（Git-Bash 下 `$(pwd)` 给出 `/c/…`，Windows 原生 gitleaks 打不开配置即以 FTL 退出，旧判断 `if ! gitleaks …` 一律读成泄露），并用 `--exit-code 2` 把结果分成三类：0 未检出 / 2 检出泄露（仍拒绝）/ 其余为故障（仍拒绝，按 fail-closed），另加 `gitleaks.toml` 可读性守卫。闸未弱化：三类各自的判定与反例验证见 `FIX_LOG.md` 2026-10-17
 
 ## [1.0.32] - 2026-09-24
 
