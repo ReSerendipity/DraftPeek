@@ -10,6 +10,7 @@
 ## [Unreleased] (开发中)
 
 ### Added
+- 门禁：新增 `scripts/check_branch_protection_doc.py`，把「`docs/CODING_STANDARDS.md` 第 2 节 vs `docs/ci/branch-protection.json`」变成可重复执行的检查（同一条漂移已两次靠人工回填收口，按 `sig:branch-protection-doc-live-drift` 第二次禁止同方向再试）。期望值全部从 JSON 派生：要求本节点名单一来源、把必需检查名单委托给 `contexts`、**不得复述条数**、写明 `enforce_admins` 豁免、并引用 JSON 里真实存在的 `_measured_at` / `_meets_reality`；「小节缺失 / JSON 解析失败」用退出码 2 与「检查不过」分开。已接入 `.github/workflows/docs-consistency.yml`（新增 `bp-doc` job 与两条 PR 触发路径），维持非必需检查分级。「本 JSON vs 远端实况」仍由只读 `scripts/apply_branch_protection.py` 判。7 臂矩阵已验：正控 rc=0，复述条数 / 不点名 / 无实测标记 / `enforce_admins` 反了 四种反例均 rc=1，两种故障臂均 rc=2
 - 文档：`docs/VERSIONING.md` 新增 §3.4「版本号 → 主干修订对照与 tag 可达性核查」——登记 `1.0.31` / `1.0.32` 的 tag 提交、内容树与主干等价提交（`d1f4bf0` / `957e0e3`）三元组、三条只读复核命令与「重指向 tag 需单独授权」边界；§3.3 与 §4.1 改为按该表选回退点，§7 检查清单补 tag 可达性一项（Harness finding `release-version-tags-unreachable-from-main`）
 
 ### Changed
@@ -17,6 +18,8 @@
 
 ### Fixed
 - 文档：`README.md`「测试与覆盖率」的聚合单测入口由 `./gradlew testDebugUnitTest` 改为 `./gradlew test`（与 CI 实跑命令一致），补 `:app:testDevDebugUnitTest` 示例并加 flavor 任务名口径说明——原写法不会执行 `:app` 的任何单测（含 `app/src/test` 下 7 个安全/完整性用例），却被注释为「全部单元测试」（Harness finding `readme-aggregate-test-command-skips-app`）
+- 门禁：`scripts/check_no_hardcoded_paths.py` 修 GBK 解码崩溃——`_files_from` 原先用 `text=True`，Windows 下按本地码（简中=GBK）解 `git … -z` 输出的原始 UTF-8 路径，仓内只要有非 ASCII 文件名就让读线程抛 `UnicodeDecodeError`、`stdout` 变 None，`--all` 因此恒崩（`AttributeError` at line 60）；默认模式只是当下暂存文件恰好全 ASCII 才没炸。现改为取 bytes 后按 UTF-8 解码；并区分「git 调用失败」与「没有文件要查」——前者退出码 2 中止（旧行为是空清单 → 绿灯）；同时打印扫描对象个数，让绿灯能自证覆盖面。反例验证：暂存一个含本机绝对路径、文件名用中文的文件，默认模式与 `--all` 均 rc=1 点名；撤除后恢复 rc=0
+- 门禁：`scripts/check_spec_refs.py` 不再把「没跑」说成「CI green」——family auditor 在本仓外（`docs/CODING_STANDARDS.md` 第 3 节记为需逐步消除的外部依赖），缺席时退出码仍为 0（设计内降级，不改判定强度），但措辞改为 `[spec-refs] SKIPPED … 本轮 0 个规范引用被校验`，在 GitHub Actions 里另发 `::warning::` 注释，使「这一项未运行」在日志与 CI 界面可见
 - 门禁：`.githooks/pre-push` 的 gitleaks 步骤不再把「工具/配置故障」误报成「检出泄露」——`--source`/`--config` 改用相对路径（Git-Bash 下 `$(pwd)` 给出 `/c/…`，Windows 原生 gitleaks 打不开配置即以 FTL 退出，旧判断 `if ! gitleaks …` 一律读成泄露），并用 `--exit-code 2` 把结果分成三类：0 未检出 / 2 检出泄露（仍拒绝）/ 其余为故障（仍拒绝，按 fail-closed），另加 `gitleaks.toml` 可读性守卫。闸未弱化：三类各自的判定与反例验证见 `FIX_LOG.md` 2026-10-17
 
 ## [1.0.32] - 2026-09-24
