@@ -12,6 +12,9 @@ on:
       - 'gradle/libs.versions.toml'
       - 'gradle/wrapper/gradle-wrapper.properties'
       - 'scripts/check_version_consistency.py'
+      # 分支保护单一来源与其文档比对脚本：改这两处也必须跑门禁，否则漂移无人拦
+      - 'docs/ci/branch-protection.json'
+      - 'scripts/check_branch_protection_doc.py'
   push:
     branches: [main]
 permissions:
@@ -45,3 +48,18 @@ jobs:
           python-version: '3.12'
       - name: Check version consistency
         run: python scripts/check_version_consistency.py
+
+  # P1: 文档 vs 分支保护单一来源的一致性（期望值全部从 JSON 派生，脚本内不写死条数）
+  # 分工：本 job 管「docs/CODING_STANDARDS.md 第 2 节 vs docs/ci/branch-protection.json」；
+  #       「该 JSON vs 远端实况」由只读脚本 scripts/apply_branch_protection.py 人工/巡检核对。
+  # 分级：维持非必需检查（勿擅自登记进 branch-protection.json 的 contexts——升必需需 owner 授权）。
+  bp-doc:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v7
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - name: Check branch-protection doc consistency
+        run: python scripts/check_branch_protection_doc.py

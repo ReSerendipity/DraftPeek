@@ -56,7 +56,7 @@ python scripts/check_no_hardcoded_paths.py --all    # 全库
 
 ## 2. Git 工作流（强制）
 
-- main 交付闸门（口径以 `docs/ci/branch-protection.json` 的实测记录 `_measured_at` / `_meets_reality` 为准）：**非 admin 账号禁止直推**，流程为 `git fetch` → 从 `origin/main` 建分支 → 修改 → `git commit -s`（DCO）→ push（过 pre-push 门禁）→ GitHub PR + 1 审批 + 三项必需检查（`Build & Test` / `layout` / `Lock Integrity (server lock resolvability)`）。**仓库 owner/admin 账号因 `enforce_admins=false` 免 PR 直推 main，该路径不经过远端必需检查**——所以直推前唯一阻断点是本地门禁：`.githooks` 的 pre-commit / pre-push 与 `docs/README.md`「Server 改动验证门禁」要求的 `cd server && pytest tests -q`，必须全绿才可提交，不得假设「CI 会拦」。本条与 live 是否漂移用只读命令核查：`python scripts/apply_branch_protection.py`（**不加 `--apply`**）报 `[OK] 无漂移` 即一致，报 `[DRIFT]` 即须回填 `branch-protection.json` 并同步本条。
+- main 交付闸门（**名单与条数一律以 `docs/ci/branch-protection.json` 为准，本节不重复列举具体值**）：**非 admin 账号禁止直推**，流程为 `git fetch` → 从 `origin/main` 建分支 → 修改 → `git commit -s`（DCO）→ push（过 pre-push 门禁）→ GitHub PR + 审批 + 该文件 `contexts` 登记的全部必需检查。**owner/admin 因 `enforce_admins=false` 免 PR 直推 main，该路径不经过远端必需检查**——所以直推前唯一阻断点是本地门禁：`.githooks` 的 pre-commit / pre-push 与 `docs/README.md`「Server 改动验证门禁」要求的 `cd server && pytest tests -q`，必须全绿才可提交，不得假设「CI 会拦」。本节只写口径、不复制值：口径来源是该文件的 `_measured_at` / `_meets_reality` 实测记录。两道漂移分开检——本节与该 JSON 是否一致由 `python scripts/check_branch_protection_doc.py` 判；该 JSON 与远端实况是否一致由只读命令 `python scripts/apply_branch_protection.py`（**不加 `--apply`**）判，报 `[DRIFT]` 即须回填该 JSON 并按实况改写本节。
 - 提交信息使用 Conventional Commits 风格：`feat: / fix: / chore: / docs: / refactor: / test:`；同一仓库内语言保持一致。
 - 钩子存放在 `.githooks/` 并随仓库分发（仓库自包含），克隆后启用：
 
