@@ -2,12 +2,14 @@
 """Thin wrapper -> shared family auditor. Fail if NEW phantom refs appear.
 
 The auditor lives OUTSIDE this repo (a sibling .spec_audit directory next to
-developer machine it is found and the check is authoritative; in a fresh CI
-checkout it is absent and the check degrades to "skip" (keeps CI green).
+the repository). On a developer machine it is found and the check is authoritative;
+in a fresh CI checkout it is absent and the check degrades to "skip" — exit 0 so
+CI stays green, but the skip must be reported as an unrun check, never as a pass.
 """
 from __future__ import annotations
 
 import json
+import os
 import subprocess
 import sys
 import tempfile
@@ -20,7 +22,14 @@ AUDITORS = [
 ]
 auditor = next((p for p in AUDITORS if p.is_file()), None)
 if auditor is None:
-    print("family auditor not found; skipping (CI green)", file=sys.stderr)
+    # 退出码保持 0（CI 侧这是设计内的降级），但措辞不能谎报成「已通过」或「CI green」：
+    # 本轮 0 个引用被校验过，必须让读日志的人和 CI 界面看见「没跑」这件事。
+    msg = ("[spec-refs] SKIPPED — 未找到 family auditor（期望路径："
+           f"{', '.join(str(p) for p in AUDITORS)}）；本轮 0 个规范引用被校验。"
+           "这是设计内的降级（退出码 0），不是通过。")
+    if os.environ.get("GITHUB_ACTIONS") == "true":
+        print("::warning::" + msg)
+    print(msg, file=sys.stderr)
     sys.exit(0)
 
 with tempfile.TemporaryDirectory(prefix="spec_audit_") as td:
