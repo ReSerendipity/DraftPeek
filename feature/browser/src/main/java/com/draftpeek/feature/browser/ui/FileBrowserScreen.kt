@@ -305,6 +305,19 @@ fun FileBrowserScreen(
         viewModel.refreshInternalFiles()
     }
 
+    // 进程死亡后系统仍持有 tree 授权（persistedUriPermissions），但 currentTreeUri
+    // 只在用户选目录时赋值 —— 不回填就会退回「暂无文件」，故进入页面时收养一次。
+    LaunchedEffect(Unit) {
+        if (currentTreeUri != null) return@LaunchedEffect
+        val restored = context.contentResolver.persistedUriPermissions
+            .filter { it.isReadPermission }
+            .map { it.uri }
+            .firstOrNull { it.scheme == "content" && it.pathSegments.firstOrNull() == "tree" }
+            ?: return@LaunchedEffect
+        hasSafPermission = true
+        viewModel.onTreeUriSelected(restored)
+    }
+
     // Clear the preview selection whenever the user switches to a different directory
     LaunchedEffect(currentTreeUri) {
         selectedFile = null
