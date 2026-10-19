@@ -1,7 +1,7 @@
 #!/bin/sh
 # 通用 pre-push（无机器特定路径，可随仓库分发）。
 #   1) 先执行 gitleaks 待推送提交扫描（密钥防线，最高优先）
-#   2) 仓库提供 precheck.ps1 -> 执行它（家族既有门禁口径）
+#   2) 仓库提供 scripts/precheck.ps1 -> 执行它（家族既有门禁口径）
 #   3) 否则 -> 退回根目录守卫 structure-guard
 # gitleaks v8.30.1 无 `git pre-push` 子命令，改用 detect --log-opts 扫描 remote..local 范围。
 # 紧急绕过：git push --no-verify（仅限用户明确要求时）
@@ -29,16 +29,16 @@ else
     echo "[pre-push] gitleaks 未安装，跳过推送前密钥扫描" >&2
 fi
 
-# 2) precheck.ps1（家族既有门禁）
-if [ -f ./precheck.ps1 ]; then
-    echo "[pre-push] 运行本地预检 precheck.ps1 ..."
+# 2) scripts/precheck.ps1（家族既有门禁）
+if [ -f ./scripts/precheck.ps1 ]; then
+    echo "[pre-push] 运行本地预检 scripts/precheck.ps1 ..."
     if command -v powershell.exe >/dev/null 2>&1; then
-        if ! powershell.exe -NoProfile -ExecutionPolicy Bypass -File "./precheck.ps1"; then
+        if ! powershell.exe -NoProfile -ExecutionPolicy Bypass -File "./scripts/precheck.ps1"; then
             echo "[pre-push] 预检未通过。绕过：git push --no-verify" >&2
             exit 1
         fi
     else
-        echo "[pre-push] 未找到 powershell.exe，无法执行 precheck.ps1" >&2
+        echo "[pre-push] 未找到 powershell.exe，无法执行 scripts/precheck.ps1" >&2
         echo "          绕过：git push --no-verify" >&2
         exit 1
     fi
@@ -54,7 +54,7 @@ else
         done
     fi
     if [ -z "$PY" ]; then
-        echo "[pre-push] 无 precheck.ps1 且未找到 python，跳过推送前检查" >&2
+        echo "[pre-push] 无 scripts/precheck.ps1 且未找到 python，跳过推送前检查" >&2
     else
         $PY .github/scripts/check_layout.py || exit 1
     fi
