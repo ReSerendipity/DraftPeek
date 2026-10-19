@@ -73,7 +73,6 @@ import com.draftpeek.feature.stats.account.RelativeUnit
 import com.draftpeek.feature.stats.account.SyncUiStatus
 import kotlinx.coroutines.delay
 
-
 /**
  * 「我的」页身份区（设计回函 v3 · 阶段 A 五态）。
  *
@@ -246,7 +245,6 @@ internal fun AccountIdentityHeader(
     }
 }
 
-
 /**
  * 同步状态行（设计回函 v3 §3）：**一律行内提示，不弹窗**。
  *
@@ -340,7 +338,6 @@ private fun SyncStatusRow(
     }
 }
 
-
 /** 「已同步 · N 分钟前」；不足 1 分钟显示「刚刚同步」。 */
 @Composable
 private fun syncedAgoText(lastSuccessAtMillis: Long, nowMillis: Long): String {
@@ -363,7 +360,6 @@ private fun syncedAgoText(lastSuccessAtMillis: Long, nowMillis: Long): String {
         )
     }
 }
-
 
 private fun getInitials(name: String): String {
     if (name.isEmpty()) return "用"

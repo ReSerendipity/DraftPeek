@@ -9,10 +9,14 @@
 #
 # 注意：这是独立于 Kotlin 主链路的辅助门禁，仅在 server/ 变更时触发。
 #
-# 必需检查身份（2026-10-06 gh api 实测核对）：本工作流**不是**分支保护的必需检查。
+# 必需检查身份（live 只读实测核对）：本工作流**不是**分支保护的必需检查。
 # live required contexts 只有 `Build & Test`、`layout`、`Lock Integrity (server
-# lock resolvability)` 三项，与 docs/ci/branch-protection.json 的 contexts 一致，
-# 其中不含 "Server CI (Python)"。旧注释自称必需检查与远端不符，已按事实更正。
+# lock resolvability)` 三项，其中不含 "Server CI (Python)"。旧注释自称必需检查与
+# 远端不符，已按事实更正；但当时补写的「与 docs/ci/branch-protection.json 的
+# contexts 一致」并不成立 —— 2026-10-06 实测时该 JSON 的 contexts 只有前两项，
+# 镜像落后于 live。2026-10-14 重新只读实测后已把第 3 项对齐补齐，两边从此一致，
+# 必需检查清单的唯一真相仍是 docs/ci/branch-protection.json（本文件只是引用它）。
+# 校验：python scripts/apply_branch_protection.py（无参只读）报 [OK] 无漂移。
 # ============================================================
 
 name: Server CI (Python)

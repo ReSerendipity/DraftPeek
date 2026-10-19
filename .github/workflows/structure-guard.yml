@@ -26,6 +26,11 @@ jobs:
       # 与根布局守卫同等级：脚本缺失/失败直接使 job 失败，不静默放行。
       - name: Check domain←data dependency boundary
         run: python .github/scripts/check_domain_boundary.py
+      # 架构技术债 Flash 报告 P1-3：模块依赖方向全量守卫（R1 core 不依赖 feature/app、
+      # R2/R3 无人依赖 app、R6 自依赖、R7 core 子图无环）。与上一条单边守卫互补；
+      # 脚本缺失/失败直接使本 job 失败，不静默放行。
+      - name: Check module dependency directions
+        run: python .github/scripts/check_module_direction.py
       # 与 docs-consistency.yml 的 spec-refs job 保持同一强制等级：无条件执行。
       # 脚本缺失/改名时 python 直接以非零退出使本 job 失败，不再静默放行；
       # 「auditor 不在库」的降级判定由脚本自身按 CI 环境变量分流（CI=true 则

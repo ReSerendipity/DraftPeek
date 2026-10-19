@@ -10,7 +10,6 @@
 package com.draftpeek.core.data.repository
 
 import com.draftpeek.core.data.dao.SnippetDao
-import com.draftpeek.core.data.entity.Snippet
 import com.draftpeek.core.data.mapper.toDomain
 import com.draftpeek.core.data.mapper.toEntity
 import com.draftpeek.core.domain.model.Snippet as SnippetModel
@@ -48,8 +47,7 @@ class SnippetRepositoryImpl @Inject constructor(private val dao: SnippetDao) : S
     override fun searchSnippetsSubstring(query: String): Flow<List<SnippetModel>> =
         dao.searchSnippetsSubstring(query).map { list -> list.map { it.toDomain() } }
 
-    override fun getSnippetById(id: Long): Flow<SnippetModel?> =
-        dao.getSnippetById(id).map { it?.toDomain() }
+    override fun getSnippetById(id: Long): Flow<SnippetModel?> = dao.getSnippetById(id).map { it?.toDomain() }
 
     override fun getAllCategories(): Flow<List<String>> = dao.getAllCategories()
 

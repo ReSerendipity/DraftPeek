@@ -21,11 +21,9 @@ import androidx.compose.foundation.clickable
 import androidx.compose.foundation.gestures.awaitEachGesture
 import androidx.compose.foundation.gestures.awaitFirstDown
 import androidx.compose.foundation.gestures.awaitHorizontalDragOrCancellation
-import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
@@ -34,19 +32,12 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
-import androidx.compose.foundation.pager.HorizontalPager
 import androidx.compose.foundation.pager.rememberPagerState
 import androidx.compose.foundation.rememberScrollState
-import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
-import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.Redo
 import androidx.compose.material.icons.automirrored.filled.Undo
-import androidx.compose.material.icons.filled.Close
 import androidx.compose.material.icons.filled.Code
-import androidx.compose.material.icons.filled.Error
-import androidx.compose.material.icons.filled.KeyboardArrowDown
-import androidx.compose.material.icons.filled.KeyboardArrowUp
 import androidx.compose.material.icons.filled.MoreVert
 import androidx.compose.material.icons.filled.Refresh
 import androidx.compose.material.icons.filled.Save
@@ -54,21 +45,12 @@ import androidx.compose.material.icons.filled.Search
 import androidx.compose.material.icons.filled.Settings
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
-import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.DropdownMenu
 import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.HorizontalDivider
-import androidx.compose.material3.Icon
-import androidx.compose.material3.LinearProgressIndicator
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.PlainTooltip
-import androidx.compose.material3.SliderDefaults
 import androidx.compose.material3.Text
-import androidx.compose.material3.TextButton
-import androidx.compose.material3.TooltipBox
-import androidx.compose.material3.TooltipDefaults
-import androidx.compose.material3.rememberTooltipState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.LaunchedEffect
@@ -81,10 +63,8 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
-import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.hapticfeedback.HapticFeedbackType
 import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.platform.LocalContext
@@ -92,7 +72,6 @@ import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.platform.LocalHapticFeedback
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.semantics.Role
-import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
@@ -100,35 +79,24 @@ import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.compose.LocalLifecycleOwner
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.draftpeek.core.common.feature.FeatureFlag
-import com.draftpeek.core.common.model.TabId
 import com.draftpeek.core.common.security.SecurityGate
 import com.draftpeek.core.common.util.AppFileManager
-import com.draftpeek.core.common.util.DocumentType
 import com.draftpeek.core.common.util.FileUtils
 import com.draftpeek.core.domain.model.Snippet
 import com.draftpeek.core.ui.component.BrandDialog
 import com.draftpeek.core.ui.component.BrandFilledButton
-import com.draftpeek.core.ui.component.BrandFilterChip
-import com.draftpeek.core.ui.component.BrandIconButton
 import com.draftpeek.core.ui.component.BrandOutlinedButton
 import com.draftpeek.core.ui.component.BrandOutlinedTextField
-import com.draftpeek.core.ui.component.BrandSwitch
 import com.draftpeek.core.ui.component.BrandTopBar
-import com.draftpeek.core.ui.component.KeyboardSafeBottomSheet
 import com.draftpeek.core.ui.component.accessibilityEnhanced
 import com.draftpeek.core.ui.component.rememberHapticController
 import com.draftpeek.core.ui.composition.isFeatureEnabled
 import com.draftpeek.core.ui.icon.StrokeIcon
-import com.draftpeek.core.ui.icon.StrokeIconDef
 import com.draftpeek.core.ui.icon.StrokeIcons
 import com.draftpeek.core.ui.layout.FoldInfo
 import com.draftpeek.core.ui.layout.LayoutMode
-import com.draftpeek.core.ui.layout.SplitOrientation
-import com.draftpeek.core.ui.layout.SplitPane
 import com.draftpeek.core.ui.theme.DraftPeekTypography
-import com.draftpeek.core.ui.theme.EditorStatusBarStyle
 import com.draftpeek.core.ui.theme.FontOptions
-import com.draftpeek.core.ui.theme.H2Style
 import com.draftpeek.core.ui.theme.MonoFileNameStyle
 import com.draftpeek.core.ui.theme.PrototypeShapes
 import com.draftpeek.core.ui.theme.PrototypeSpacing
@@ -136,26 +104,18 @@ import com.draftpeek.core.ui.theme.PrototypeTokens
 import com.draftpeek.feature.editor.R
 import com.draftpeek.feature.editor.input.KeyboardShortcutHandler
 import com.draftpeek.feature.editor.model.EditorMessage
-import com.draftpeek.feature.editor.model.EditorTab
 import com.draftpeek.feature.editor.model.EditorUiState
-import com.draftpeek.feature.editor.model.MarkdownTheme
 import com.draftpeek.feature.editor.model.MarkdownViewMode
-import com.draftpeek.feature.editor.sora.SearchCountDisplay
-import com.draftpeek.feature.editor.sora.SearchMatchCounter
 import com.draftpeek.feature.editor.sora.SoraEditorWrapper
+import com.draftpeek.feature.editor.sora.restoreUndoState
 import com.draftpeek.feature.editor.sora.saveUndoState
 import com.draftpeek.feature.editor.sora.setDiagnostics
-import com.draftpeek.feature.editor.sora.restoreUndoState
 import com.draftpeek.feature.editor.treesitter.TreeSitterLanguageProvider
-import com.draftpeek.feature.editor.viewmodel.CursorPosition
 import com.draftpeek.feature.editor.viewmodel.EditorViewModel
-import com.draftpeek.feature.settings.model.EditorSettings
 import com.draftpeek.feature.settings.viewmodel.SettingsViewModel
-import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 
 private const val TAG = "EditorScreen"
-
 
 /**
  * 编辑器显示模式。
@@ -165,7 +125,6 @@ private const val TAG = "EditorScreen"
  */
 enum class EditorMode { CODE, DOCUMENT }
 
-
 /**
  * 搜索面板页签模式。
  *
@@ -173,7 +132,6 @@ enum class EditorMode { CODE, DOCUMENT }
  * 替代原来三个独立对话框的布尔状态。
  */
 enum class SearchPanelMode { FIND, REPLACE, GOTO }
-
 
 /**
  * 编辑器主界面 Composable。

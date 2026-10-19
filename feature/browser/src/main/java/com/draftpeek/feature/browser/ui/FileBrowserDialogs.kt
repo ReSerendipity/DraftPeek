@@ -22,8 +22,6 @@ import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.CloudDownload
-import androidx.compose.material.icons.filled.Description
-import androidx.compose.material.icons.filled.Folder
 import androidx.compose.material.icons.filled.FolderOff
 import androidx.compose.material.icons.filled.FolderOpen
 import androidx.compose.material3.Card
@@ -41,18 +39,10 @@ import androidx.compose.material3.TooltipDefaults
 import androidx.compose.material3.rememberModalBottomSheetState
 import androidx.compose.material3.rememberTooltipState
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.LaunchedEffect
-import androidx.compose.runtime.derivedStateOf
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableFloatStateOf
-import androidx.compose.runtime.mutableIntStateOf
-import androidx.compose.runtime.mutableStateMapOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
-import androidx.compose.runtime.rememberCoroutineScope
-import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
-import androidx.compose.runtime.withFrameNanos
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -87,7 +77,6 @@ import com.draftpeek.feature.browser.R
  *
  * 定义文件列表的筛选方式：全部、最近、收藏、书签、代码、文档、媒体
  */
-
 
 // ============================================================
 // Import actions sheet — 「导入…」二级弹层（屏 08）
@@ -157,7 +146,6 @@ internal fun ImportActionsSheet(
     }
 }
 
-
 /** 「导入…」弹层中的单行动作。 */
 @Composable
 private fun ImportActionRow(icon: StrokeIconDef, label: String, onClick: () -> Unit) {
@@ -182,7 +170,6 @@ private fun ImportActionRow(icon: StrokeIconDef, label: String, onClick: () -> U
         )
     }
 }
-
 
 @Composable
 internal fun NoPermissionContent(
@@ -290,7 +277,6 @@ internal fun NoPermissionContent(
     }
 }
 
-
 @Composable
 internal fun ErrorContent(message: String, onRetry: () -> Unit, modifier: Modifier = Modifier) {
     Column(
@@ -320,7 +306,6 @@ internal fun ErrorContent(message: String, onRetry: () -> Unit, modifier: Modifi
         )
     }
 }
-
 
 @Composable
 internal fun GitHubImportUrlDialog(onDismiss: () -> Unit, onBrowse: (String) -> Unit) {
@@ -386,7 +371,6 @@ internal fun GitHubImportUrlDialog(onDismiss: () -> Unit, onBrowse: (String) -> 
     )
 }
 
-
 @Composable
 internal fun GitHubLoadingDialog(message: String, onDismiss: () -> Unit) {
     BrandDialog(
@@ -408,7 +392,6 @@ internal fun GitHubLoadingDialog(message: String, onDismiss: () -> Unit) {
         }
     )
 }
-
 
 @Composable
 internal fun GitHubFileSelectionDialog(
@@ -499,7 +482,6 @@ internal fun GitHubFileSelectionDialog(
     )
 }
 
-
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 private fun TooltipIconButton(
@@ -519,7 +501,6 @@ private fun TooltipIconButton(
     }
 }
 
-
 internal data class IRowBounds(
     val key: String, // 'dir_N' | 'file_N' | 'bookmark_N'
     val indexInSection: Int,
@@ -527,7 +508,6 @@ internal data class IRowBounds(
     val bottom: Float,
     val height: Int
 )
-
 
 /** 内部文件列表区：每个 section 内部独立的绝对累计坐标（0 = section header 之后） */
 internal data class IAbsBounds(

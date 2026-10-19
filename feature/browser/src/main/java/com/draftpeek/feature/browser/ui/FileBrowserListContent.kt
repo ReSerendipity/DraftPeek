@@ -3,7 +3,6 @@ package com.draftpeek.feature.browser.ui
 import android.net.Uri
 import android.text.format.DateUtils
 import androidx.compose.animation.core.FastOutSlowInEasing
-import androidx.compose.animation.core.animateFloat
 import androidx.compose.animation.core.animateFloatAsState
 import androidx.compose.animation.core.tween
 import androidx.compose.foundation.BorderStroke
@@ -37,7 +36,6 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Bookmark
 import androidx.compose.material.icons.filled.CheckCircle
 import androidx.compose.material.icons.filled.Delete
-import androidx.compose.material.icons.filled.Description
 import androidx.compose.material.icons.filled.DragHandle
 import androidx.compose.material.icons.filled.Edit
 import androidx.compose.material.icons.filled.FileUpload
@@ -60,17 +58,10 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
-import androidx.compose.runtime.derivedStateOf
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableFloatStateOf
-import androidx.compose.runtime.mutableIntStateOf
-import androidx.compose.runtime.mutableStateMapOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
-import androidx.compose.runtime.rememberCoroutineScope
-import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
-import androidx.compose.runtime.withFrameNanos
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -120,7 +111,6 @@ import com.draftpeek.feature.browser.model.FileSortOption
 import com.draftpeek.feature.browser.viewmodel.FileBrowserViewModel
 import java.util.regex.Pattern
 import kotlinx.coroutines.delay
-import kotlinx.coroutines.launch
 
 // ---- 文件筛选选项 ----
 /**
@@ -128,7 +118,6 @@ import kotlinx.coroutines.launch
  *
  * 定义文件列表的筛选方式：全部、最近、收藏、书签、代码、文档、媒体
  */
-
 
 // ============================================================
 // Section header — mono uppercase label with optional count
@@ -167,7 +156,6 @@ internal fun SectionMonoHeader(
     }
 }
 
-
 // ============================================================
 // Empty state — shown when directory has no files
 // ============================================================
@@ -205,7 +193,6 @@ internal fun EmptyFilesContent(modifier: Modifier = Modifier) {
     }
 }
 
-
 private fun formatRecentFileMeta(recentFile: RecentFile): String {
     val parts = mutableListOf<String>()
     parts.add(
@@ -217,7 +204,6 @@ private fun formatRecentFileMeta(recentFile: RecentFile): String {
     )
     return parts.joinToString(" · ")
 }
-
 
 /**
  * Convert a [RecentFile] entity into a [FileItem] for display in virtual folder views.
@@ -233,7 +219,6 @@ internal fun RecentFile.toFileItem(): FileItem = FileItem(
     isPinned = isFavorite,
     isBookmarked = false
 )
-
 
 /**
  * Map a set of pinned URIs to [FileItem] objects by looking up matching items
@@ -257,7 +242,6 @@ internal fun mapPinnedUrisToFileItems(pinnedUris: Set<String>, internalFiles: Li
         }
     }
 }
-
 
 @Composable
 private fun SectionHeader(title: String, action: @Composable (() -> Unit)? = null) {
@@ -283,7 +267,6 @@ private fun SectionHeader(title: String, action: @Composable (() -> Unit)? = nul
         action?.invoke()
     }
 }
-
 
 @Composable
 internal fun FileListContent(
@@ -492,7 +475,6 @@ internal fun FileListContent(
     }
 }
 
-
 @Composable
 internal fun StaggeredAppearance(index: Int, delayMillis: Int = 50, content: @Composable () -> Unit) {
     var visible by remember { mutableStateOf(false) }
@@ -521,9 +503,7 @@ internal fun StaggeredAppearance(index: Int, delayMillis: Int = 50, content: @Co
     }
 }
 
-
 private fun isCodeExtension(ext: String): Boolean = ext.lowercase() in CODE_EXTENSIONS
-
 
 @Composable
 internal fun ExternalFileCard(
@@ -640,7 +620,6 @@ internal fun ExternalFileCard(
         }
     }
 }
-
 
 @OptIn(ExperimentalFoundationApi::class)
 @Composable
@@ -1010,7 +989,6 @@ fun FileItemComposable(
     }
 }
 
-
 @OptIn(ExperimentalFoundationApi::class)
 @Composable
 private fun FileGridItem(
@@ -1241,7 +1219,6 @@ private fun FileGridItem(
     }
 }
 
-
 // ============================================================
 // Recent file code-preview card — 对应 HTML 原型 recent-card
 // ============================================================
@@ -1353,7 +1330,6 @@ internal fun RecentFilePreviewCard(
     }
 }
 
-
 /** 代码高亮关键字集合（覆盖 Kotlin 常见语法与 Gradle DSL）。 */
 private val CodePreviewKeywords = setOf(
     "fun", "val", "var", "class", "object", "interface", "private", "public", "internal",
@@ -1366,7 +1342,6 @@ private val CodePreviewKeywords = setOf(
     "with", "implementation", "api", "kapt", "ksp", "apply", "plugin", "alias", "libs"
 )
 
-
 /** 分词正则：注释 / 字符串 / 数字 / 标识符 / 其他符号。 */
 private val CodePreviewTokenPattern = Pattern.compile(
     "(//[^\\n]*" +
@@ -1375,7 +1350,6 @@ private val CodePreviewTokenPattern = Pattern.compile(
         "|\\b[A-Za-z_][A-Za-z0-9_]*\\b" +
         "|\\S)"
 )
-
 
 /**
  * 把代码预览文本渲染为带语法高亮的 [AnnotatedString]。
@@ -1415,7 +1389,6 @@ private fun buildCodePreviewAnnotatedString(
     }
 }
 
-
 internal fun formatFileSize(size: Long): String {
     if (size <= 0) return "0 B"
     val units = arrayOf("B", "KB", "MB", "GB", "TB")
@@ -1424,7 +1397,6 @@ internal fun formatFileSize(size: Long): String {
     val value = size / Math.pow(1024.0, digitGroups.toDouble())
     return "%.1f %s".format(value, units[digitGroups])
 }
-
 
 @Composable
 internal fun GitStatusItemComposable(gitFileStatus: GitFileStatus, modifier: Modifier = Modifier) {
@@ -1459,7 +1431,6 @@ internal fun GitStatusItemComposable(gitFileStatus: GitFileStatus, modifier: Mod
     }
 }
 
-
 @Composable
 private fun gitStatusColor(status: GitStatus) = when (status) {
     GitStatus.ADDED -> PrototypeTokens.folder
@@ -1469,7 +1440,6 @@ private fun gitStatusColor(status: GitStatus) = when (status) {
     GitStatus.UNMODIFIED -> SemanticColors.Success
     GitStatus.CONFLICTED -> Color(0xFFFF5722)
 }
-
 
 @androidx.annotation.StringRes
 private fun gitStatusLabelRes(status: GitStatus): Int = when (status) {

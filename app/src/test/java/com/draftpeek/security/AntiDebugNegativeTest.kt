@@ -25,7 +25,7 @@ import org.robolectric.util.ReflectionHelpers
  * 这是评估报告中 P0-4 的修复：补充安全检测的负面测试场景。
  *
  * 注意：本类使用 JUnit4 + Robolectric 风格（扁平方法，无 @Nested/@DisplayName），
- * 遵循 AGENTS.md Gotcha #23 的范式。
+ * 遵循 docs/CODING_STANDARDS.md §7.3 的单测平台约定（由仓内 scripts/check_junit_platform.py 静态拦截）。
  */
 @RunWith(RobolectricTestRunner::class)
 @Config(sdk = [34])

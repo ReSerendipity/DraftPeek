@@ -46,11 +46,11 @@ import com.draftpeek.core.common.error.ErrorHandler
 import com.draftpeek.core.common.security.SecurityGate
 import com.draftpeek.core.common.util.AppFileManager
 import com.draftpeek.core.common.util.LanguageConfig
+import com.draftpeek.core.data.util.FtsQueryBuilder
 import com.draftpeek.core.domain.model.Snippet
 import com.draftpeek.core.domain.repository.SnippetRepository
 import com.draftpeek.core.domain.repository.UserActivityRepository
 import com.draftpeek.core.domain.usecase.RecordUserActivityUseCase
-import com.draftpeek.core.data.util.FtsQueryBuilder
 import com.draftpeek.core.domain.usecase.SearchSnippetsUseCase
 import com.draftpeek.feature.browser.R
 import dagger.hilt.android.lifecycle.HiltViewModel

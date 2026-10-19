@@ -74,9 +74,18 @@ jobs:
       # context → 提供该 context 的 workflow 文件。
       # 新增必需检查时两边同步：docs/ci/branch-protection.json 的 contexts
       # 与这里的映射；映射缺项时本守卫只能 ::warning 无法补跑（见下方 owner 判空）。
-      # 三项均为 live 分支保护的必需检查（2026-10-06 gh api 实测），按 live 对齐；
+      # 三项均为 live 分支保护的必需检查（2026-10-14 gh api 实测），按 live 对齐；
       # 校验方式：python scripts/apply_branch_protection.py（无参只读）须报 [OK] 无漂移。
-      # 注意：Server CI (Python)、DCO Check、Instrumented Tests 不在必需检查之列，勿登记。
+      # 注意：Server CI (Python)、DCO Check、Instrumented Tests 维持非必需分级，勿登记进
+      # branch-protection.json 的 contexts；Server CI 的分级与本地阻断式门禁（改动
+      # server/** 提交前须在 server/ 跑 pytest tests -q 全绿，含红灯升级/回退处置）
+      # 以随仓库分发的 docs/README.md「Server 改动验证门禁」为权威条目。
+      # 本映射的键集合必须与 branch-protection.json 的 contexts 逐项相等 —— 必需检查
+      # 清单只有那一处真相，这里只是 context → owner workflow 的查询表。往映射里
+      # 多登记一条非必需检查（如 Server CI (Python)、DCO Check、Instrumented Tests）
+      # 不会让探针去补跑它们（它只遍历 contexts），却会让两份清单各说各话、下次改动
+      # 时重新长出漂移，故禁止。将来若把某项升为必需：先在同一次改动里往 contexts 与
+      # 本映射各加一行，再跑只读检测确认 [OK]；owner 尚未预登记，升必需时一并补。
       CONTEXT_OWNERS: |
         Build & Test=android.yml
         layout=structure-guard.yml

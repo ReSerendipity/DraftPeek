@@ -36,7 +36,7 @@
 | `adr/` | 架构决策记录（含 CRDT vs OT 选型） |
 | `deploy-download-page/` | 下载页部署说明 |
 | `icon-design/` | 应用图标设计与导出 |
-| `reports/` | 测试体系 / 前端工程评估报告 |
+| `reports/` | 测试体系 / 前端工程评估报告；架构评审台账、覆盖率爬坡计划（2026-10-15 起） |
 | `screenshots/` | 界面截图 |
 
 ## 想找内容？
@@ -57,7 +57,34 @@
 
 **影响面**：fresh clone / CI 不会携带阶段 B 规格本体；任何依赖该批文档的任务须先从外部工作流获取，或读取 `docs/phaseb-oauth-wip-todo.md` 的引用摘要。
 
-> 特别提醒：根目录 `release.jks` 是 App 签名密钥（敏感，勿提交勿外传）；`index.html` 是被源码注释引用的 HTML 设计原型，保留。**分发边界**：根 `AGENTS.md` 及其家族（`feature/editor/AGENTS.md`、`core/common/AGENTS.md`、`docs/agents/**`、`FIX_LOG.md`、`LOCAL_RULES.md`）为**仅本地保留、有意不入库**，不会出现在 fresh clone；仓库对外开发规范以本 `docs/README.md` 与 `docs/CODING_STANDARDS.md` 为准，若环境已配置 `AGENTS.md` 则在其基础上叠加。
+> 特别提醒：根目录 `release.jks` 是 App 签名密钥（敏感，勿提交勿外传）；`index.html` 是被源码注释引用的 HTML 设计原型，保留。**分发边界**：根 `AGENTS.md` 及其家族（`feature/editor/AGENTS.md`、`core/common/AGENTS.md`、`docs/agents/**`、`FIX_LOG.md`、`LOCAL_RULES.md`）为**仅本地保留、有意不入库**，不会出现在 fresh clone；仓库对外开发规范以本 `docs/README.md` 与 `docs/CODING_STANDARDS.md` 为准，若环境已配置 `AGENTS.md` 则在其基础上叠加。**机制已核对（2026-10-14）**：`git check-ignore -v AGENTS.md` 命中 `.gitignore` 的 `*.md`，`git ls-files -- '*AGENTS.md'` 为空 —— `.gitignore` 未为该家族开过任何 `!` 豁免。原先只写在 `AGENTS.md` 里的规范（覆盖率门禁 ratchet、单测平台/注解约定、R8 模式、本分发边界）已落到 **`docs/CODING_STANDARDS.md` 第 7 节**，入库文件引用规范时指向第 7 节，不再指向 fresh clone 取不到的 `AGENTS.md`。
+
+## Server 改动验证门禁（2026-10-14 裁决，权威条目）
+
+> 裁决：`Server CI (Python)` **维持非必需检查分级**（不在分支保护 required contexts 之列，与
+> `docs/ci/branch-protection.json`、`.github/workflows/main-verify.yml` 口径一致；升为必需需
+> 仓库 owner 单独授权）。作为替代，改动 `server/**` 有一条**有主的本地阻断式验证路径**：
+
+- **强制规则**：任何改动 `server/**`（含依赖 pin `server/requirements*.txt`、`server/ruff.toml`）的提交，
+  **提交前必须**在 `server/` 目录跑：
+
+  ```bash
+  cd server && pytest tests -q   # 须 exit 0 全绿才可提交（2026-10-14 实测：40 passed）
+  ```
+
+  与 CI（`.github/workflows/server-ci.yml`）的测试步骤同源；本地建议加跑 `ruff check .`。
+- **有主**：规则守门人 = 仓库 owner（ReSerendipity）；执行义务归改动 `server/**` 的提交者本人。
+  admin 直推 main 豁免远端检查，本地门禁是对其唯一阻断点；非 admin 走 PR 时 `Server CI (Python)`
+  会额外提供远端回归信号（非阻断）。
+- **红灯处置**：
+  - **升级**：测试红且无法在本次改动内修复 → 禁止提交/合并，开 issue 并在 PR 描述写明失败签名，
+    升级至 owner 裁决；owner 可授权暂时以 `--no-verify` 推送（仅限明确授权，事后必须补绿）。
+  - **回退**：红灯由已入库提交引起 → `git revert` 回最近绿灯提交（revert 是止损不是失败），
+    再按需修复；不得为过本地门禁而删改 `server/tests/**` 断言来制造绿灯。
+- **升为必需检查的前置条件**（若将来改变裁决）：先去掉 `server-ci.yml` push 档的 `paths` 过滤或
+  保证每个 main 提交都有该 context，否则不触碰 server/ 的 PR 会永久 Expected-BLOCKED；再同步
+  `docs/ci/branch-protection.json` 的 contexts 与 `main-verify.yml` 的 CONTEXT_OWNERS（owner 已预登记），
+  并由 owner 授权跑 `python scripts/apply_branch_protection.py --apply` 写回远端。
 
 ## 治理与勘误速查（2026-09-18）
 

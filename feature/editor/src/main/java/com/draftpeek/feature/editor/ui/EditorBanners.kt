@@ -18,22 +18,12 @@ import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
-import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Close
-import androidx.compose.material3.Icon
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.DisposableEffect
-import androidx.compose.runtime.LaunchedEffect
-import androidx.compose.runtime.derivedStateOf
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.key
-import androidx.compose.runtime.mutableIntStateOf
-import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
-import androidx.compose.runtime.rememberCoroutineScope
-import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -49,7 +39,6 @@ import com.draftpeek.core.ui.theme.PrototypeTokens
 import com.draftpeek.feature.editor.R
 
 private const val TAG = "EditorScreen"
-
 
 /**
  * 大文件警告横幅。
@@ -83,7 +72,6 @@ internal fun FileSizeWarningBanner(message: String, modifier: Modifier = Modifie
         }
     }
 }
-
 
 /**
  * 大文件预览提示横幅。
@@ -128,7 +116,6 @@ internal fun LargeFilePreviewHintBanner(onPreviewClick: () -> Unit, modifier: Mo
         }
     }
 }
-
 
 /**
  * 只读文件提示横幅。

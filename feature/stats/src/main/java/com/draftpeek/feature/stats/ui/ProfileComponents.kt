@@ -21,7 +21,6 @@ package com.draftpeek.feature.stats.ui
 
 import android.annotation.SuppressLint
 import androidx.appcompat.app.AppCompatDelegate
-import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
@@ -38,7 +37,6 @@ import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.Image
 import androidx.compose.material.icons.filled.Link
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
@@ -46,10 +44,7 @@ import androidx.compose.material3.RadioButton
 import androidx.compose.material3.RadioButtonDefaults
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -73,7 +68,6 @@ import com.draftpeek.feature.settings.model.AppLanguage
 import com.draftpeek.feature.stats.R
 import java.util.Locale
 
-
 @Composable
 internal fun SectionHeader(label: String, isDanger: Boolean = false) {
     Text(
@@ -86,7 +80,6 @@ internal fun SectionHeader(label: String, isDanger: Boolean = false) {
         modifier = Modifier.padding(start = 20.dp, end = 20.dp, top = 16.dp, bottom = 8.dp)
     )
 }
-
 
 @Composable
 internal fun SocialPlatformItem(
@@ -140,7 +133,6 @@ internal fun SocialPlatformItem(
     }
 }
 
-
 @Composable
 internal fun ConfirmActionDialog(
     title: String,
@@ -181,7 +173,6 @@ internal fun ConfirmActionDialog(
     )
 }
 
-
 @SuppressLint("AppBundleLocaleChanges") // 本地切换 5 种语言，不接入 Play Core 语言包分发
 private fun applyLanguage(language: AppLanguage) {
     // 与 DraftPeekApp.applySavedLanguage() 保持一致（全仓语言切换统一走同一入口）：
@@ -197,7 +188,6 @@ private fun applyLanguage(language: AppLanguage) {
     }
     AppCompatDelegate.setApplicationLocales(localeList)
 }
-
 
 /**
  * 应用验证状态

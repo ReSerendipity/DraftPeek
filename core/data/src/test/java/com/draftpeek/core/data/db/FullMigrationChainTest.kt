@@ -10,7 +10,7 @@
  * 3. 在关键节点插入测试数据并验证后续迁移不破坏数据
  * 4. 最终验证 v12 schema 与 Room 实体定义一致
  *
- * 注意：本类使用 JUnit4 + Robolectric 风格（遵循 AGENTS.md Gotcha #23），
+ * 注意：本类使用 JUnit4 + Robolectric 风格（遵循 docs/CODING_STANDARDS.md §7.3），
  * 与现有 DatabaseMigrationTest 保持一致。
  *
  * @author DraftPeek Team

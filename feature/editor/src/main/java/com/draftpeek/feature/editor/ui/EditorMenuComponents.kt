@@ -13,7 +13,6 @@ import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.layout.Arrangement
-import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
@@ -22,29 +21,17 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
-import androidx.compose.material.icons.filled.Code
-import androidx.compose.material.icons.filled.Search
-import androidx.compose.material3.DropdownMenu
 import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.HorizontalDivider
-import androidx.compose.material3.Icon
 import androidx.compose.material3.PlainTooltip
 import androidx.compose.material3.Text
 import androidx.compose.material3.TooltipBox
 import androidx.compose.material3.TooltipDefaults
 import androidx.compose.material3.rememberTooltipState
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.DisposableEffect
-import androidx.compose.runtime.LaunchedEffect
-import androidx.compose.runtime.derivedStateOf
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.key
-import androidx.compose.runtime.mutableIntStateOf
-import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
-import androidx.compose.runtime.rememberCoroutineScope
-import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -52,7 +39,6 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
-import com.draftpeek.core.ui.component.BrandDialog
 import com.draftpeek.core.ui.component.BrandIconButton
 import com.draftpeek.core.ui.icon.StrokeIcon
 import com.draftpeek.core.ui.icon.StrokeIconDef
@@ -66,7 +52,6 @@ import com.draftpeek.feature.editor.model.EditorUiState
 import com.draftpeek.feature.editor.viewmodel.CursorPosition
 
 private const val TAG = "EditorScreen"
-
 
 /**
  * 带工具提示的图标按钮。
@@ -107,7 +92,6 @@ internal fun TooltipIconButton(
 /** 搜索匹配计数的防抖窗口（毫秒）。 */
 internal const val SEARCH_COUNT_DEBOUNCE_MS = 200L
 
-
 /**
  * 溢出菜单内的分组标题（实施指导书 §2.3 屏 15–17）。
  *
@@ -122,7 +106,6 @@ internal fun EditorMenuSectionLabel(text: String) {
         modifier = Modifier.padding(start = 12.dp, top = 8.dp, bottom = 2.dp)
     )
 }
-
 
 /**
  * 溢出菜单内的「一行双按钮」动作（撤销 / 重做）。
@@ -158,7 +141,6 @@ internal fun EditorMenuActionButton(
         )
     }
 }
-
 
 /**
  * 编辑器底部状态栏。
@@ -325,7 +307,6 @@ internal fun EditorBottomStatusBar(
         )
     }
 }
-
 
 /** Small pill-style label used in the status bar (e.g. "Read Only"). */
 @Composable

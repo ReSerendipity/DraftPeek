@@ -4,7 +4,7 @@
   "repo": "DraftPeek",
   "branch": "main",
   "policy": {
-    "required_approving_review_count": 0,
+    "required_approving_review_count": 1,
     "dismiss_stale_reviews": true,
     "require_code_owner_reviews": false,
     "require_last_push_approval": false,
@@ -23,9 +23,11 @@
   },
   "contexts": [
     "Build & Test",
-    "layout"
+    "layout",
+    "Lock Integrity (server lock resolvability)"
   ],
-  "required_conversation_resolution": true,
-  "_measured_at": "2026-09-28T10:25Z（gh api repos/ReSerendipity/DraftPeek/branches/main/protection，启用 PR 要求 + enforce_admins=false）",
-  "_meets_reality": "live 已改为：require PR(1 approval) + enforce_admins=false；owner/admin 直推 main 免 PR，其余账号强制 PR。"
+  "required_conversation_resolution": false,
+  "_server_ci_note": "Server CI (Python) 维持非必需分级（其 push 触发带 paths: server/** 过滤，登记为必需会让不触碰 server/ 的 PR 永久 Expected-BLOCKED）。改动 server/** 的有主阻断式验证 = 本地门禁：提交前必须在 server/ 目录跑 pytest tests -q 全绿，权威条目见 docs/README.md「Server 改动验证门禁」。升为必需检查需仓库 owner 单独授权，并同步本文件 contexts、main-verify.yml 的 CONTEXT_OWNERS、server-ci.yml 触发器（去掉 PR 侧依赖前须先保证 main 每提交都报告），再 apply_branch_protection.py --apply 写回远端。",
+  "_measured_at": "2026-10-14T00:00Z（gh api repos/ReSerendipity/DraftPeek/branches/main/protection 实测：contexts 三项 / review=1 / conv_res=false / strict=false / enforce_admins=false；本文件此前停留在 2026-09-28 意图态未与 live 对齐）",
+  "_meets_reality": "live 已改为：require PR(1 approval) + enforce_admins=false；owner/admin 直推 main 免 PR，其余账号强制 PR。admin 直推豁免意味着远端必需检查拦不住 owner——server/** 的阻断点对 owner 走的是本地门禁（见 _server_ci_note 与 docs/README.md）。"
 }

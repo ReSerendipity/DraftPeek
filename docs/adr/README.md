@@ -1,16 +1,15 @@
 # Architecture Decision Records (ADR)
 
 > 本目录是 DraftPeek 项目的架构决策记录库。
+> 自 2026-10-15 起正文随仓库分发（`.gitignore` 豁免 `!docs/adr/*.md`）；仅索引中标注「正文待补录」的条目尚缺正文。
 > 每个 ADR 编号唯一、只追加不删除（被推翻的标记为 Superseded）。
->
-> ⚠️ 本目录为**本地文档，未随仓库发布**（`.gitignore` 通配 `*.md` 屏蔽，仅作本机决策记录）。
 
 ## 索引
 
-| 编号 | 标题 | 状态 | 日期 |
-|------|------|------|------|
-| [0001](0001-android-security-hardening-layers.md) | 安卓安全加固分层（JNI + Kotlin + 服务端完整性） | Implemented | 2026-08-27 |
-| [0002](0002-editor-sync-crdt.md) | 编辑器同步采用 CRDT（迁移自 docs/project/ADR-001） | Implemented | 2026-08-27 |
+| 编号 | 标题 | 状态 | 日期 | 备注 |
+|------|------|------|------|------|
+| 0001 | 安卓安全加固分层（JNI + Kotlin + 服务端完整性） | Implemented | 2026-08-27 | 正文待补录（本地正文缺失，须由 owner 补录后入库；2026-10-15 勘误：原索引此处为悬空链接，已摘除） |
+| [0002](0002-editor-sync-crdt.md) | 编辑器同步采用 CRDT（迁移自 docs/project/ADR-001） | Implemented | 2026-08-27 | 2026-10-15 入库（本地原件仅保留于 docs/project/，内容应保持同步） |
 
 ## 何时必须写 ADR（满足任一即写）
 
@@ -18,6 +17,7 @@
 - 改变**目录结构或分层边界**
 - 做出**有长期代价的技术选择**
 - 撤销此前的 ADR → 新写一条并把旧条状态改为 `Superseded by NNNN`
+- 架构决议的登记入口另见 `docs/reports/2026-10-15-架构评审台账.md`（轻量台账，与 ADR 分工：台账记「评审与回流」，ADR 记「决策本身」）
 
 ## ADR 格式规范
 

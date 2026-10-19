@@ -297,7 +297,7 @@ internal fun sendText(text: String) {
         error("sendText: KeyCharacterMap 无法把文本映射为按键事件: ${text.take(40)}")
     }
     for (event in events) {
-        uiAutomation.injectInputEvent(event, true /* sync */)
+        uiAutomation.injectInputEvent(event, true) // sync
     }
 }
 
