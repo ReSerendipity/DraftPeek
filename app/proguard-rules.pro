@@ -139,7 +139,7 @@
 # LGPL-2.1 许可组件。以下 -keep 规则保留其类名与成员、禁止重命名与裁剪，依据为
 # LGPL-2.1 第 6 条：再分发方须允许用户以修改后的库版本替换随包版本并重新链接。
 # 请勿删除或弱化以下 keep 规则；若调整混淆策略，须保证上述包名与成员可被替换重新链接。
-# 详见 docs/开源合规说明.md 与 THIRD_PARTY_NOTICES.md 第 5 节。
+# 详见 docs/开源合规说明.md 与 docs/THIRD_PARTY_NOTICES.md 第 5 节。
 # ===== END LGPL-2.1 合规注记 =====
 
 # ===== sora-editor (code editor) =====
