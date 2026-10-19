@@ -43,8 +43,7 @@ class RecentFilesRepositoryImpl @Inject constructor(
     override val favorites: Flow<List<RecentFileModel>> =
         dao.getFavorites().map { list -> list.map { it.toDomain() } }
 
-    override fun getRecentFile(uri: String): Flow<RecentFileModel?> =
-        dao.getRecentFile(uri).map { it?.toDomain() }
+    override fun getRecentFile(uri: String): Flow<RecentFileModel?> = dao.getRecentFile(uri).map { it?.toDomain() }
 
     override suspend fun addRecentFile(uri: String, fileName: String, language: String?, fileSize: Long) {
         val now = System.currentTimeMillis()
