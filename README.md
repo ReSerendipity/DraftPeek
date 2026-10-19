@@ -96,15 +96,17 @@ DraftPeek/
 ## 测试与覆盖率
 
 ```bash
-./gradlew testDebugUnitTest                       # 全部单元测试
-./gradlew :core:common:testDebugUnitTest          # 指定模块
+./gradlew test                                    # 全部单元测试（跑全部变体，与 CI 执行命令一致）
+./gradlew :app:testDevDebugUnitTest               # 仅 app 的 dev 调试变体
+./gradlew :core:common:testDebugUnitTest          # 指定模块（feature/*、core/* 无 flavor，单变体任务名为 testDebugUnitTest）
 ./gradlew connectedAndroidTest                    # UI/集成测试（需设备/模拟器）
 ./gradlew jacocoTestReport                        # 覆盖率报告（HTML: build/reports/jacoco/html/index.html）
 scripts\coverage.bat                              # Windows 一键覆盖率
 ```
 
-**覆盖率阈值（阻断门禁 · 单一事实来源）**：[`coverage-baseline.json`](coverage-baseline.json) 的 `modules[*].threshold_pct`（JaCoCo **INSTRUCTION** 口径，棘轮只升不降；`scripts/check_coverage_gate.py --ratchet` 在 CI 阻断执行，报告缺失即失败，不允许「无数据即绿」）。[`codecov.yml`](codecov.yml)（LINE 展示口径，project 基线 7%）仅作 PR 注释参考，不作为门禁。
+> 任务名口径以 [`docs/CODING_STANDARDS.md`](docs/CODING_STANDARDS.md) §7.3 为准：**仅 `:app` 有 flavor 维度**，其单测任务名恒为 `test<Flavor>DebugUnitTest`；不限定模块的 `testDebugUnitTest` 不会执行 `:app` 的用例，不要把它当作全量入口。
 
+**覆盖率阈值（阻断门禁 · 单一事实来源）**：[`coverage-baseline.json`](coverage-baseline.json) 的 `modules[*].threshold_pct`（JaCoCo **INSTRUCTION** 口径，棘轮只升不降；`scripts/check_coverage_gate.py --ratchet` 在 CI 阻断执行，报告缺失即失败，不允许「无数据即绿」）。[`codecov.yml`](codecov.yml)（LINE 展示口径，project 基线 7%）仅作 PR 注释参考，不作为门禁。
 > ~~历史目标：项目整体 60% ／ core-common 70% ／ core-data 75% ／ feature-editor / feature-browser 60% ／ app 50%（LINE 口径）~~ —— 已被 2026-09-29 的实测基线重置取代（从未被任何一次真实数据验证过；详见 `codecov.yml` 头部基线重置说明与 `coverage-baseline.json` notes）。确需下调阈值先写 ADR（`docs/CODING_STANDARDS.md` §7.2）。
 
 ## 技术栈

@@ -9,6 +9,15 @@
 
 ## [Unreleased] (开发中)
 
+### Added
+- 文档：`docs/VERSIONING.md` 新增 §3.4「版本号 → 主干修订对照与 tag 可达性核查」——登记 `1.0.31` / `1.0.32` 的 tag 提交、内容树与主干等价提交（`d1f4bf0` / `957e0e3`）三元组、三条只读复核命令与「重指向 tag 需单独授权」边界；§3.3 与 §4.1 改为按该表选回退点，§7 检查清单补 tag 可达性一项（Harness finding `release-version-tags-unreachable-from-main`）
+
+### Changed
+- 文档：`docs/CODING_STANDARDS.md` §2 的 main 交付闸门表述与 `docs/ci/branch-protection.json` 的实测记录对齐——写明非 admin 必须走 PR + 1 审批 + 三项必需检查、owner/admin 因 `enforce_admins=false` 免 PR 直推且该路径不经远端必需检查，因此本地钩子与 server pytest 是直推前唯一阻断点，并给出只读漂移核查命令（Harness finding `main-direct-push-policy-contradicts-branch-protection`）
+
+### Fixed
+- 文档：`README.md`「测试与覆盖率」的聚合单测入口由 `./gradlew testDebugUnitTest` 改为 `./gradlew test`（与 CI 实跑命令一致），补 `:app:testDevDebugUnitTest` 示例并加 flavor 任务名口径说明——原写法不会执行 `:app` 的任何单测（含 `app/src/test` 下 7 个安全/完整性用例），却被注释为「全部单元测试」（Harness finding `readme-aggregate-test-command-skips-app`）
+
 ## [1.0.32] - 2026-09-24
 
 > 本版收录 `v1.0.31`（tag `74e4a8a`）之后的 14 个 PR。`v1.0.31` 的 draft Release 从未发布，
