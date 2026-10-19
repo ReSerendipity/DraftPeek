@@ -317,7 +317,7 @@ private fun DraftPeekContent(layoutMode: LayoutMode, foldInfo: FoldInfo, darkThe
  *
  * 使用 [KeyboardSafeBottomSheet]（项目规范禁止原生 AlertDialog）；必须勾选同意后主按钮才可用，
  * 且弹层**不可点外关闭**（dismissible = false）——不勾选无法进入应用。
- * 协议全文见仓库根目录 USER_AGREEMENT.md / PRIVACY_POLICY.md（摘要里的内嵌链接跳 GitHub 查看）。
+ * 协议全文见 docs/USER_AGREEMENT.md / docs/PRIVACY_POLICY.md（摘要里的内嵌链接跳 GitHub 查看）。
  */
 @Composable
 private fun AgreementGateDialog(onAccepted: () -> Unit) {
@@ -328,8 +328,8 @@ private fun AgreementGateDialog(onAccepted: () -> Unit) {
     val linkStyle = TextLinkStyles(
         style = SpanStyle(color = accent, textDecoration = TextDecoration.Underline)
     )
-    val policyUrl = "https://github.com/ReSerendipity/DraftPeek/blob/main/USER_AGREEMENT.md"
-    val privacyUrl = "https://github.com/ReSerendipity/DraftPeek/blob/main/PRIVACY_POLICY.md"
+    val policyUrl = "https://github.com/ReSerendipity/DraftPeek/blob/main/docs/USER_AGREEMENT.md"
+    val privacyUrl = "https://github.com/ReSerendipity/DraftPeek/blob/main/docs/PRIVACY_POLICY.md"
     // 注意：stringResource 是 @Composable，不能在 buildAnnotatedString 的普通 lambda 里调用，先取出来。
     val policyLabel = stringResource(R.string.agreement_gate_policy)
     val privacyLabel = stringResource(R.string.agreement_gate_privacy)

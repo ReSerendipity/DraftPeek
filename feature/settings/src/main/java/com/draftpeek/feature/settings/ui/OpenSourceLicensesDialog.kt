@@ -6,7 +6,7 @@
  *
  * 数据来源：随包许可文本目录 app/src/main/assets/licenses/（GPL-2.0.txt、LGPL-2.1.txt、
  *           MIT.txt、OFL-1.1.txt、BSD-3-Clause.txt、Apache-2.0.txt）。
- * 与 THIRD_PARTY_NOTICES.md 保持同步；新增/升级第三方依赖时须同步更新 ossComponents。
+ * 与 docs/THIRD_PARTY_NOTICES.md 保持同步；新增/升级第三方依赖时须同步更新 ossComponents。
  */
 package com.draftpeek.feature.settings.ui
 
