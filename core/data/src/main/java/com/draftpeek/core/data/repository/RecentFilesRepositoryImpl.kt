@@ -93,6 +93,5 @@ class RecentFilesRepositoryImpl @Inject constructor(
         dao.updateReadingPosition(uri, line, column, scrollX, scrollY)
     }
 
-    override suspend fun getReadingPosition(uri: String): RecentFileModel? =
-        dao.getReadingPosition(uri)?.toDomain()
+    override suspend fun getReadingPosition(uri: String): RecentFileModel? = dao.getReadingPosition(uri)?.toDomain()
 }

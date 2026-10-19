@@ -20,23 +20,12 @@ import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.LaunchedEffect
-import androidx.compose.runtime.derivedStateOf
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableFloatStateOf
-import androidx.compose.runtime.mutableIntStateOf
-import androidx.compose.runtime.mutableStateMapOf
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
-import androidx.compose.runtime.rememberCoroutineScope
-import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
-import androidx.compose.runtime.withFrameNanos
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
-import androidx.compose.ui.unit.sp
 import com.draftpeek.core.ui.component.BrandFilledButton
 import com.draftpeek.core.ui.theme.DraftPeekTypography
 import com.draftpeek.core.ui.theme.PrototypeTokens
@@ -49,7 +38,6 @@ import com.draftpeek.feature.browser.model.FileItem
  *
  * 定义文件列表的筛选方式：全部、最近、收藏、书签、代码、文档、媒体
  */
-
 
 @Composable
 internal fun FilePreviewPane(selectedFile: FileItem?, onOpenFile: (FileItem) -> Unit, modifier: Modifier = Modifier) {
@@ -144,7 +132,6 @@ internal fun FilePreviewPane(selectedFile: FileItem?, onOpenFile: (FileItem) -> 
         }
     }
 }
-
 
 @Composable
 private fun FileInfoRow(label: String, value: String) {

@@ -67,8 +67,6 @@ import com.draftpeek.feature.browser.R
 import com.draftpeek.feature.browser.viewmodel.RecentFilesViewModel
 import java.util.Calendar
 import java.util.concurrent.TimeUnit
-import kotlin.math.log10
-import kotlin.math.pow
 
 /**
  * 最近文件时间筛选枚举

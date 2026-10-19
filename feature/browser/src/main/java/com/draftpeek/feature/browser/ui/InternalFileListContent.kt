@@ -11,8 +11,6 @@ import androidx.compose.foundation.background
 import androidx.compose.foundation.gestures.scrollBy
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
-import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
@@ -21,15 +19,9 @@ import androidx.compose.foundation.layout.offset
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.lazy.LazyColumn
-import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.lazy.itemsIndexed
 import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.History
-import androidx.compose.material.icons.filled.PushPin
-import androidx.compose.material3.Icon
-import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
@@ -49,14 +41,12 @@ import androidx.compose.ui.layout.onGloballyPositioned
 import androidx.compose.ui.layout.onSizeChanged
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.res.stringResource
-import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.IntOffset
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.zIndex
 import com.draftpeek.core.domain.model.RecentFile
 import com.draftpeek.core.ui.component.BrandDirectoryCard
 import com.draftpeek.core.ui.theme.BrandShapes
-import com.draftpeek.core.ui.theme.DraftPeekTypography
 import com.draftpeek.core.ui.theme.PrototypeSpacing
 import com.draftpeek.core.ui.theme.PrototypeTokens
 import com.draftpeek.feature.browser.R
@@ -70,31 +60,26 @@ import kotlinx.coroutines.launch
  * 按搜索词 + 筛选标签过滤文件（非虚拟文件夹类筛选）。
  * 从 FileBrowserScreen 提升为顶层函数（2026-10-11 任务A 第二步）。
  */
-internal fun filterFiles(
-    files: List<FileItem>,
-    searchQuery: String,
-    selectedFilter: FileFilter
-): List<FileItem> {
-        var result = files
-        if (searchQuery.isNotBlank()) {
-            val q = searchQuery.lowercase()
-            result = result.filter { it.name.lowercase().contains(q) }
+internal fun filterFiles(files: List<FileItem>, searchQuery: String, selectedFilter: FileFilter): List<FileItem> {
+    var result = files
+    if (searchQuery.isNotBlank()) {
+        val q = searchQuery.lowercase()
+        result = result.filter { it.name.lowercase().contains(q) }
+    }
+    result = when (selectedFilter) {
+        FileFilter.ALL -> result
+        FileFilter.RECENT -> result.filter {
+            !it.isDirectory &&
+                it.lastModified > 0 &&
+                (System.currentTimeMillis() - it.lastModified) < 7 * 24 * 60 * 60 * 1000L
         }
-        result = when (selectedFilter) {
-            FileFilter.ALL -> result
-            FileFilter.RECENT -> result.filter {
-                !it.isDirectory &&
-                    it.lastModified > 0 &&
-                    (System.currentTimeMillis() - it.lastModified) < 7 * 24 * 60 * 60 * 1000L
-            }
-            FileFilter.FAVORITES -> result.filter { it.isPinned }
-            FileFilter.BOOKMARKS -> result.filter { it.isBookmarked }
-            FileFilter.CODE -> result.filter { !it.isDirectory && it.extension.lowercase() in CODE_EXTENSIONS }
-            FileFilter.DOCUMENTS -> result.filter { !it.isDirectory && it.extension.lowercase() in DOCUMENT_EXTENSIONS }
-            FileFilter.MEDIA -> result.filter { !it.isDirectory && it.extension.lowercase() in MEDIA_EXTENSIONS }
-        }
-        return result
-
+        FileFilter.FAVORITES -> result.filter { it.isPinned }
+        FileFilter.BOOKMARKS -> result.filter { it.isBookmarked }
+        FileFilter.CODE -> result.filter { !it.isDirectory && it.extension.lowercase() in CODE_EXTENSIONS }
+        FileFilter.DOCUMENTS -> result.filter { !it.isDirectory && it.extension.lowercase() in DOCUMENT_EXTENSIONS }
+        FileFilter.MEDIA -> result.filter { !it.isDirectory && it.extension.lowercase() in MEDIA_EXTENSIONS }
+    }
+    return result
 }
 
 /**

@@ -28,9 +28,9 @@ import com.draftpeek.core.common.vcs.GitManager
 import com.draftpeek.core.common.vcs.GitRepoInfo
 import com.draftpeek.core.common.vcs.GitRepository
 import com.draftpeek.core.common.vcs.GitStatus
+import com.draftpeek.core.data.security.FileCipher
 import com.draftpeek.core.domain.repository.BookmarkRepository
 import com.draftpeek.core.domain.repository.UserActivityRepository
-import com.draftpeek.core.data.security.FileCipher
 import com.draftpeek.core.domain.usecase.ManageBookmarksUseCase
 import com.draftpeek.core.domain.usecase.RecordUserActivityUseCase
 import com.draftpeek.feature.browser.R

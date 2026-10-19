@@ -2,28 +2,14 @@ package com.draftpeek.feature.browser.ui
 
 import android.content.Intent
 import android.net.Uri
-import android.text.format.DateUtils
 import android.widget.Toast
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
-import androidx.compose.animation.core.FastOutSlowInEasing
-import androidx.compose.animation.core.Spring
-import androidx.compose.animation.core.animateFloat
-import androidx.compose.animation.core.animateFloatAsState
-import androidx.compose.animation.core.spring
-import androidx.compose.animation.core.tween
-import androidx.compose.animation.core.updateTransition
-import androidx.compose.foundation.BorderStroke
-import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.combinedClickable
-import androidx.compose.foundation.gestures.detectDragGestures
-import androidx.compose.foundation.gestures.detectDragGesturesAfterLongPress
-import androidx.compose.foundation.gestures.scrollBy
 import androidx.compose.foundation.horizontalScroll
-import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -33,45 +19,18 @@ import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
-import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.navigationBarsPadding
-import androidx.compose.foundation.layout.offset
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
-import androidx.compose.foundation.lazy.grid.GridCells
-import androidx.compose.foundation.lazy.grid.GridItemSpan
-import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
 import androidx.compose.foundation.lazy.grid.items
 import androidx.compose.foundation.lazy.items
-import androidx.compose.foundation.lazy.itemsIndexed
-import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.Bookmark
-import androidx.compose.material.icons.filled.CheckCircle
-import androidx.compose.material.icons.filled.CloudDownload
-import androidx.compose.material.icons.filled.Delete
-import androidx.compose.material.icons.filled.Description
 import androidx.compose.material.icons.filled.DragHandle
-import androidx.compose.material.icons.filled.Edit
-import androidx.compose.material.icons.filled.FileUpload
-import androidx.compose.material.icons.filled.Folder
-import androidx.compose.material.icons.filled.FolderOff
-import androidx.compose.material.icons.filled.FolderOpen
-import androidx.compose.material.icons.filled.History
-import androidx.compose.material.icons.filled.Lock
-import androidx.compose.material.icons.filled.PushPin
 import androidx.compose.material.icons.filled.Terminal
-import androidx.compose.material.icons.outlined.BookmarkBorder
-import androidx.compose.material.icons.outlined.PushPin
-import androidx.compose.material3.Card
-import androidx.compose.material3.CardDefaults
-import androidx.compose.material3.Checkbox
-import androidx.compose.material3.CheckboxDefaults
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.DropdownMenu
 import androidx.compose.material3.DropdownMenuItem
@@ -79,105 +38,59 @@ import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.ModalBottomSheet
-import androidx.compose.material3.PlainTooltip
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
-import androidx.compose.material3.TooltipBox
-import androidx.compose.material3.TooltipDefaults
-import androidx.compose.material3.rememberModalBottomSheetState
-import androidx.compose.material3.rememberTooltipState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.derivedStateOf
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableFloatStateOf
-import androidx.compose.runtime.mutableIntStateOf
-import androidx.compose.runtime.mutableStateMapOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
-import androidx.compose.runtime.withFrameNanos
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.draw.shadow
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.graphics.graphicsLayer
-import androidx.compose.ui.graphics.lerp
 import androidx.compose.ui.graphics.vector.ImageVector
-import androidx.compose.ui.input.pointer.pointerInput
-import androidx.compose.ui.layout.onGloballyPositioned
-import androidx.compose.ui.layout.onSizeChanged
 import androidx.compose.ui.platform.LocalContext
-import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.platform.LocalWindowInfo
 import androidx.compose.ui.res.stringResource
-import androidx.compose.ui.text.AnnotatedString
-import androidx.compose.ui.text.SpanStyle
-import androidx.compose.ui.text.buildAnnotatedString
-import androidx.compose.ui.text.font.FontFamily
-import androidx.compose.ui.text.font.FontStyle
 import androidx.compose.ui.text.font.FontWeight
-import androidx.compose.ui.text.input.KeyboardType
-import androidx.compose.ui.text.input.PasswordVisualTransformation
-import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
-import androidx.compose.ui.text.withStyle
-import androidx.compose.ui.unit.IntOffset
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import androidx.compose.ui.zIndex
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.window.layout.FoldingFeature
 import com.draftpeek.core.common.feature.FeatureFlag
 import com.draftpeek.core.common.util.FileUtils
-import com.draftpeek.core.common.util.InputValidator
-import com.draftpeek.core.common.util.ValidationResult
 import com.draftpeek.core.common.vcs.GitFileStatus
-import com.draftpeek.core.common.vcs.GitHubFileEntry
-import com.draftpeek.core.common.vcs.GitStatus
-import com.draftpeek.core.domain.model.RecentFile
 import com.draftpeek.core.data.security.FileCipher
 import com.draftpeek.core.ui.component.BrandChip
 import com.draftpeek.core.ui.component.BrandDialog
 import com.draftpeek.core.ui.component.BrandDirectoryCard
 import com.draftpeek.core.ui.component.BrandFAB
-import com.draftpeek.core.ui.component.BrandFileCard
-import com.draftpeek.core.ui.component.BrandFilledButton
 import com.draftpeek.core.ui.component.BrandIconButton
-import com.draftpeek.core.ui.component.BrandOutlinedTextField
 import com.draftpeek.core.ui.component.BrandSearchBar
 import com.draftpeek.core.ui.component.BrandTopBar
 import com.draftpeek.core.ui.component.FABMenuItem
-import com.draftpeek.core.ui.component.FileTypeIcon
 import com.draftpeek.core.ui.component.accessibilityEnhanced
 import com.draftpeek.core.ui.composition.isFeatureEnabled
 import com.draftpeek.core.ui.icon.StrokeIcon
-import com.draftpeek.core.ui.icon.StrokeIconDef
 import com.draftpeek.core.ui.icon.StrokeIcons
 import com.draftpeek.core.ui.layout.FoldInfo
 import com.draftpeek.core.ui.layout.FoldableState
 import com.draftpeek.core.ui.layout.LayoutMode
 import com.draftpeek.core.ui.layout.SplitScreenLayout
-import com.draftpeek.core.ui.modifier.pressScaleEffect
-import com.draftpeek.core.ui.theme.BrandShapes
-import com.draftpeek.core.ui.theme.CodeTextStyle
-import com.draftpeek.core.ui.theme.DraftPeekSpacing
 import com.draftpeek.core.ui.theme.DraftPeekTypography
-import com.draftpeek.core.ui.theme.FileMetaStyle
-import com.draftpeek.core.ui.theme.FileTypeColors
-import com.draftpeek.core.ui.theme.LocalDarkTheme
-import com.draftpeek.core.ui.theme.MonoFileNameStyle
 import com.draftpeek.core.ui.theme.MonoLabelStyle
 import com.draftpeek.core.ui.theme.MonoUppercaseTitleStyle
 import com.draftpeek.core.ui.theme.PrototypeShapes
 import com.draftpeek.core.ui.theme.PrototypeSpacing
 import com.draftpeek.core.ui.theme.PrototypeTokens
-import com.draftpeek.core.ui.theme.SemanticColors
 import com.draftpeek.feature.browser.R
 import com.draftpeek.feature.browser.model.BrowserUiState
 import com.draftpeek.feature.browser.model.FileItem
@@ -187,10 +100,6 @@ import com.draftpeek.feature.browser.viewmodel.FileBrowserViewModel
 import com.draftpeek.feature.browser.viewmodel.GitEvent
 import com.draftpeek.feature.browser.viewmodel.GitViewModel
 import com.draftpeek.feature.browser.viewmodel.RecentFilesViewModel
-import java.util.regex.Pattern
-import kotlin.math.roundToInt
-import kotlinx.coroutines.Job
-import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 
 // ---- 文件筛选选项 ----
@@ -199,7 +108,6 @@ import kotlinx.coroutines.launch
  *
  * 定义文件列表的筛选方式：全部、最近、收藏、书签、代码、文档、媒体
  */
-
 
 // ---- 文件筛选选项 ----
 /**
@@ -216,7 +124,6 @@ internal enum class FileFilter {
     DOCUMENTS,
     MEDIA
 }
-
 
 /**
  * 获取文件筛选选项的显示标签
@@ -235,7 +142,6 @@ private fun fileFilterLabel(filter: FileFilter): String = when (filter) {
     FileFilter.MEDIA -> stringResource(R.string.browser_filter_media)
 }
 
-
 // 代码文件扩展名集合
 internal val CODE_EXTENSIONS = setOf(
     "kt", "kts", "java", "js", "ts", "jsx", "tsx", "mjs", "cjs", "mts", "cts",
@@ -245,13 +151,11 @@ internal val CODE_EXTENSIONS = setOf(
     "toml", "md", "markdown", "sql", "scala", "r", "dockerfile", "cmake", "make", "proto"
 )
 
-
 // 文档文件扩展名集合
 internal val DOCUMENT_EXTENSIONS = setOf(
     "pdf", "doc", "docx", "xls", "xlsx", "ppt", "pptx",
     "txt", "rtf", "odt", "ods", "odp", "csv"
 )
-
 
 // 媒体文件扩展名集合
 internal val MEDIA_EXTENSIONS = setOf(
@@ -259,7 +163,6 @@ internal val MEDIA_EXTENSIONS = setOf(
     "mp4", "avi", "mkv", "mov", "wmv", "flv", "webm",
     "mp3", "wav", "flac", "aac", "ogg", "m4a", "wma"
 )
-
 
 /**
  * 文件浏览器主界面
@@ -826,7 +729,6 @@ fun FileBrowserScreen(
     val isVirtualFolderActive by remember {
         derivedStateOf { selectedFilter == FileFilter.RECENT || selectedFilter == FileFilter.FAVORITES }
     }
-
 
     Box(
         modifier = Modifier
@@ -1493,7 +1395,6 @@ fun FileBrowserScreen(
     }
 }
 
-
 // ============================================================
 // Breadcrumb bar for subdirectory navigation
 // ============================================================
@@ -1542,7 +1443,6 @@ internal fun SortOptionMenu(current: FileSortOption, onSelect: (FileSortOption) 
     }
 }
 
-
 /** [FileSortOption] 的本地化标签。 */
 @Composable
 private fun fileSortOptionLabel(option: FileSortOption): String = stringResource(
@@ -1556,7 +1456,6 @@ private fun fileSortOptionLabel(option: FileSortOption): String = stringResource
         FileSortOption.TYPE_ASC -> R.string.browser_sort_type
     }
 )
-
 
 // ============================================================
 // Breadcrumb bar for subdirectory navigation
@@ -1605,7 +1504,6 @@ private fun BreadcrumbBar(path: String, onNavigateUp: () -> Unit, modifier: Modi
     }
 }
 
-
 // ============================================================
 // Small FAB menu item (kept for backward compatibility but not used
 // in the new layout — BrandFAB replaces it)
@@ -1648,7 +1546,6 @@ private fun SmallFloatingActionMenuItem(
         )
     }
 }
-
 
 @Composable
 private fun FoldableBrowserLayout(
@@ -1767,7 +1664,6 @@ private fun FoldableBrowserLayout(
         }
     }
 }
-
 
 @Composable
 private fun TwoPaneFileBrowser(

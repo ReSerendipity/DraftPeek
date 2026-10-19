@@ -19,7 +19,6 @@
  */
 package com.draftpeek.feature.stats.ui
 
-import android.annotation.SuppressLint
 import android.content.ActivityNotFoundException
 import android.content.Intent
 import android.content.pm.ApplicationInfo
@@ -29,7 +28,6 @@ import android.util.Log
 import android.widget.Toast
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
-import androidx.appcompat.app.AppCompatDelegate
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
@@ -55,7 +53,6 @@ import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.Logout
 import androidx.compose.material.icons.filled.Accessibility
-import androidx.compose.material.icons.filled.CheckCircle
 import androidx.compose.material.icons.filled.Close
 import androidx.compose.material.icons.filled.Code
 import androidx.compose.material.icons.filled.DeleteSweep
@@ -64,7 +61,6 @@ import androidx.compose.material.icons.filled.EmojiEvents
 import androidx.compose.material.icons.filled.Feedback
 import androidx.compose.material.icons.filled.Flag
 import androidx.compose.material.icons.filled.Image
-import androidx.compose.material.icons.filled.Link
 import androidx.compose.material.icons.filled.Palette
 import androidx.compose.material.icons.filled.Restore
 import androidx.compose.material.icons.filled.Security
@@ -72,8 +68,6 @@ import androidx.compose.material.icons.filled.Visibility
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.RadioButton
-import androidx.compose.material3.RadioButtonDefaults
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
@@ -93,39 +87,28 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
-import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import androidx.core.os.LocaleListCompat
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
-import com.draftpeek.core.sync.SyncFailureKind
 import com.draftpeek.core.ui.component.BrandDialog
 import com.draftpeek.core.ui.component.BrandFilledButton
 import com.draftpeek.core.ui.component.BrandOutlinedButton
 import com.draftpeek.core.ui.component.BrandOutlinedTextField
-import com.draftpeek.core.ui.component.BrandPill
 import com.draftpeek.core.ui.component.BrandSettingRow
 import com.draftpeek.core.ui.component.BrandTopBar
 import com.draftpeek.core.ui.component.LocalToastHost
-import com.draftpeek.core.ui.component.accessibilityEnhanced
 import com.draftpeek.core.ui.layout.LayoutMode
 import com.draftpeek.core.ui.theme.JetBrainsMonoFontFamily
 import com.draftpeek.core.ui.theme.LocalDarkTheme
-import com.draftpeek.core.ui.theme.MonoLabelStyle
 import com.draftpeek.core.ui.theme.PrototypeShapes
-import com.draftpeek.core.ui.theme.PrototypeSpacing
 import com.draftpeek.core.ui.theme.PrototypeTokens
-import com.draftpeek.core.ui.theme.SemanticColors
 import com.draftpeek.feature.editor.model.MarkdownTheme
 import com.draftpeek.feature.settings.model.AppLanguage
 import com.draftpeek.feature.settings.model.AppTheme
 import com.draftpeek.feature.settings.viewmodel.SettingsViewModel
 import com.draftpeek.feature.stats.R
-import com.draftpeek.feature.stats.account.AccountTimeFormat
 import com.draftpeek.feature.stats.account.AccountUiState
-import com.draftpeek.feature.stats.account.RelativeUnit
-import com.draftpeek.feature.stats.account.SyncUiStatus
 import com.draftpeek.feature.stats.ui.component.DayDetailDialog
 import com.draftpeek.feature.stats.ui.component.GreetingSection
 import com.draftpeek.feature.stats.ui.component.PeriodChipRow
@@ -136,10 +119,8 @@ import com.draftpeek.feature.stats.viewmodel.AccountViewModel
 import com.draftpeek.feature.stats.viewmodel.StatsMessage
 import com.draftpeek.feature.stats.viewmodel.StatsViewModel
 import com.draftpeek.feature.stats.viewmodel.ThemeManageViewModel
-import java.util.Locale
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
-
 
 @OptIn(ExperimentalMaterial3Api::class, ExperimentalLayoutApi::class)
 @Composable

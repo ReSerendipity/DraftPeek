@@ -6,18 +6,10 @@ import android.os.Handler
 import android.os.Looper
 import android.util.Log
 import androidx.annotation.UiThread
-import com.draftpeek.feature.editor.data.CacheManager
-import com.draftpeek.feature.editor.diagnostics.DiagnosticItem
-import com.draftpeek.feature.editor.diagnostics.DiagnosticNavigationState
-import com.draftpeek.feature.editor.diagnostics.moveToNext
-import com.draftpeek.feature.editor.diagnostics.moveToPrevious
 import com.draftpeek.feature.editor.ui.MarkdownFormatAction
 import io.github.rosemoe.sora.event.ContentChangeEvent
 import io.github.rosemoe.sora.event.ScrollEvent
 import io.github.rosemoe.sora.event.SelectionChangeEvent
-import io.github.rosemoe.sora.lang.diagnostic.DiagnosticDetail
-import io.github.rosemoe.sora.lang.diagnostic.DiagnosticRegion
-import io.github.rosemoe.sora.lang.diagnostic.DiagnosticsContainer
 import io.github.rosemoe.sora.text.Content
 import io.github.rosemoe.sora.widget.CodeEditor
 import io.github.rosemoe.sora.widget.SymbolPairMatch
@@ -1272,8 +1264,6 @@ class SoraEditorWrapper(context: Context) {
         Log.w(TAG, "currentCursorOffset failed", e)
         -1
     }
-
-
 
     companion object {
         internal const val TAG = "SoraEditorWrapper"
