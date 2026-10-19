@@ -9,13 +9,13 @@
          Only apps signed with the same key as DraftPeek can send broadcasts.
          VULN-001 fix: prevents arbitrary apps from executing terminal commands. -->
     <permission
-        android:name="com.draftpeek.permission.TERMINAL_COMMAND"
+        android:name="${applicationId}.permission.TERMINAL_COMMAND"
         android:protectionLevel="signature"
         android:label="@string/permission_terminal_command_label"
         android:description="@string/permission_terminal_command_desc" />
 
     <!-- DraftPeek itself declares this permission so it can send broadcasts to its own receiver -->
-    <uses-permission android:name="com.draftpeek.permission.TERMINAL_COMMAND" />
+    <uses-permission android:name="${applicationId}.permission.TERMINAL_COMMAND" />
 
     <application>
         <service
@@ -34,7 +34,7 @@
         <receiver
             android:name=".receiver.TerminalCommandReceiver"
             android:exported="true"
-            android:permission="com.draftpeek.permission.TERMINAL_COMMAND"
+            android:permission="${applicationId}.permission.TERMINAL_COMMAND"
             android:enabled="true">
             <intent-filter>
                 <action android:name="com.draftpeek.terminal.RUN_COMMAND" />

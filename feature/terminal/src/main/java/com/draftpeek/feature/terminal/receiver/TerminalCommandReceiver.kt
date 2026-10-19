@@ -6,7 +6,7 @@
  * 所有命令必须通过安全验证管道，无法跳过。
  *
  * SECURITY VULN-001 fix:
- * - 接收器添加 signature 级权限保护（com.draftpeek.permission.TERMINAL_COMMAND）
+ * - 接收器添加 signature 级权限保护（`${applicationId}.permission.TERMINAL_COMMAND`，随 flavor 变化）
  * - 删除 EXTRA_FORCE 参数，所有命令必须经过 SecurityValidator 验证
  *
  * SECURITY VULN-012 fix:
@@ -31,7 +31,8 @@ import com.draftpeek.feature.terminal.service.TerminalService
  * 接收外部应用发送的命令执行广播，经过分词和安全验证后转发给TerminalService执行。
  *
  * 安全模型：
- * - **签名级权限保护**：接收器要求 `com.draftpeek.permission.TERMINAL_COMMAND` 权限，
+ * - **签名级权限保护**：接收器要求 `${applicationId}.permission.TERMINAL_COMMAND` 权限
+ *   （权限名随 applicationId 变化，使 dev/staging/production 三个 flavor 可在同一设备共存），
  *   该权限 protectionLevel=signature，仅同签名应用可发送
  * - **强制安全验证**：所有命令必须经过 SecurityValidator 验证，无跳过选项
  * - 命令执行前通过 ArgumentTokenizer 分词
