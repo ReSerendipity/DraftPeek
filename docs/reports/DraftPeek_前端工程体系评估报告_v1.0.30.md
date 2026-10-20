@@ -68,7 +68,7 @@
 - ✅ 等宽字体/行高/连字可配置：终端用 `FontFamily.Monospace + 12.5sp + lineHeight 1.7`，且有 `FontOptions.kt`。
 
 ### 2.6 模块化与构建体验 — **4 / 5**
-- ✅ 13 个 Gradle 模块边界清晰；`grep projects.feature` 在 `feature/` 内**命中 0** → feature 间无互相依赖。
+- ✅ Gradle 模块边界清晰（评估当时 13 个；2026-10-21 复核现为 15 个：app + benchmark + 8 core + 5 feature，见 `settings.gradle.kts`）；`grep projects.feature` 在 `feature/` 内**命中 0** → feature 间无互相依赖。
 - ✅ `build-logic` 约定插件生效：`core/designsystem/build.gradle.kts` 仅 **39 行**、`core/ui` 64 行、各 feature 74–120 行、`app` 427 行 → 配置显著去重。
 - ⚠️ **构建性能未达标（实测）**：`assembleDevDebug --offline -q` 在 **240s 内未完成**（被 SIGTERM 终止）→ 增量构建仍偏慢，需用 `--profile` 量化瓶颈（R8/Compose 编译/StringEnc IR）。
 - ⚠️ 配置缓存兼容性待验证：自定义任务（`bumpVersion`/`generateChangelog`/`StringEncIrGenerationExtension`）未见 `@UntrackedTask`/`@CacheableTask` 注解，AGENTS.md 提及但未运行验证。

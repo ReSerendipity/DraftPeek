@@ -123,6 +123,6 @@ fullMigrationChain_allTablesWork
 3. **数据保护**：`fallbackToDestructiveMigrationOnDowngrade` 确保降级时重建数据库
    （注意：这是兜底，会丢数据，不作为常规回滚手段宣传）。
 4. **修复迁移**：在 hotfix 分支修复迁移逻辑，发布 hotfix 版本
-   （遵循 `docs/RELEASE_CHECKLIST.md`，tag 只推 `private` 远程）。
+   （遵循 `docs/RELEASE_CHECKLIST.md`，tag 推 `origin`——双仓体系已于 2026-09 废止，仓库全量公开）。
 5. **长期方向**：引入 feature flag / 远程配置作为 kill-switch 轻量替代
    （评估报告 P2 项），使「坏 schema 功能」可被远程关闭而无需撤整个版本。

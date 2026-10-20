@@ -5,13 +5,13 @@
 
 ## 1. 项目是什么
 
-- Android 原生编辑器 App（Jetpack Compose，minSdk 26 / targetSdk 36），app + 7 core + 5 feature 分层（`settings.gradle.kts`）；`server/` 为已裁撤路线的 Python 原型（技术参考，勿投入生产化）。
-- 依赖锁定 `LockMode.STRICT`（15 模块 lockfile 入库）；版本单一来源 `gradle/libs.versions.toml`。
+- Android 原生编辑器 App（Jetpack Compose，minSdk 26 / targetSdk 36），app + 8 core（common / crdt / data / designsystem / domain / sync / testing / ui）+ 5 feature 分层（`settings.gradle.kts`）；`server/` 为已裁撤路线的 Python 原型（技术参考，勿投入生产化）。
+- 依赖锁定 `LockMode.STRICT`（17 个模块级 lockfile 入库：根 + app + benchmark + 8 core + 5 feature + settings，另含 `settings-gradle.lockfile`）；版本单一来源 `gradle/libs.versions.toml`。
 - 分发边界：`docs/` 下按白名单分发；`FIX_LOG.md`、`docs/agents/GOTCHAS.md`、根/模块级 `AGENTS.md` 仅本地保留、不入库。
 
 ## 2. 门禁与验证（改动必读）
 
-- 必需检查三项（`docs/ci/branch-protection.json` 为单一来源）：**Build & Test**、**layout**（根布局 + domain←data 边界 + 模块方向 R1-R7 + spec-refs + 文件行数上限）、**Lock Integrity**。改动涉及任一，必须本地过对应脚本。
+- 必需检查的名单与条数以 `docs/ci/branch-protection.json` 的 `contexts` 为单一来源（本节不重复列举）：按职责分三类——**Build & Test**、**layout**（根布局 + domain←data 边界 + 模块方向 R1-R7 + spec-refs + 文件行数上限）、**Lock Integrity**。改动涉及任一，必须本地过对应脚本。
 - 覆盖率门禁：`coverage-baseline.json` 单一真相，棘轮只升不降；`scripts/check_coverage_gate.py --ratchet` 报告缺失即 FAIL。改模块必更新基线（新增模块还要 codecov.yml）。
 - Server 改动（`server/**`）：提交前必须 `cd server && pytest tests -q` 全绿（`docs/README.md`「Server 改动验证门禁」）。
 - 本地 Gradle 规避：`--no-daemon --max-workers=1`（Robolectric 锁假红）；只跑 CI 变体 `:app:testDevDebugUnitTest`；库模块任务名 `testDebugUnitTest`；验证单类加 `--tests "*XxxTest*"`（防 Paparazzi 录制 golden）。

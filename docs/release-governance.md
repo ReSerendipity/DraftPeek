@@ -56,6 +56,8 @@
 
 ### 3.1 灰度发布四阶段（本仓特有）
 
+> **口径提示（2026-10-21）**：下表是**目标态**分级与阈值。当前崩溃观测为「仅本地」、无 ANR/native 采集、`CRASH_REPORT_URL` 默认空串即关闭（见 §3.2）——因此各阶段 crash rate **尚无远端聚合数据可自动判定**，落地前按 §3.2 以本地抽样与人工导出近似评估，不得宣称已具备远端口径。
+
 | 阶段 | 范围 | 通过标准 | 回滚触发 |
 |------|------|----------|----------|
 | Internal | 开发团队 (5-10 人) | 无 P0/P1 bug，crash rate < 0.1% | 任一 P0 bug |
@@ -90,7 +92,7 @@
 - **判定**（满足任一即触发，对应 §3.1 灰度表）：任一 P0 bug；crash rate 越过上表回滚阈值；数据丢失；关键功能不可用。
 - **执行**：
   - `git revert <bad-commit>`（保历史、可再 forward）为首选。
-  - 应用商店回滚：在 Google Play Console 回滚到上一版本（需上一版本仍上架）。
+  - 应用商店回滚：**当前不适用**——本仓未接入 Google Play，不存在 Play Console 回滚能力（`release.yml` 只产出 GitHub Release 资产，无 Play 发布步骤；分发渠道决策见 `docs/deploy-download-page/README.md`）。若未来接入 Play 分发，本项改为「在 Play Console 回滚到上一版本（需上一版本仍上架）」。
   - 直接下载回退：维护上一版本 APK + SHA256 校验和，在 GitHub Release 中可访问。
   - Feature Flag Kill-Switch：通过远程配置（或 BuildConfig）禁用问题功能模块。
 - **破坏性动作红线**：重指向 / 删除 tag、移动任何远端 ref 属破坏性远端动作，**须仓库所有者单独授权**。`release.yml` 由 `push: tags` 触发，移动已发布 tag 会当场重跑发布链——历史上因此产出过混年代 Release 资产。

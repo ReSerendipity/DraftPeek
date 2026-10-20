@@ -2,6 +2,12 @@
 
 > 只读审计 · 适配版（Android Compose/Kotlin + Gradle + Python CRDT 同步服务，公开仓库）
 > 审计日期：2026-09-01 · 审计对象：`server/`（Python）+ `app/feature/core`（Kotlin）
+>
+> **整改状态（2026-10-21 复核，本节为审计结论的后续更正，正文保留 2026-09-01 现场原貌）**：
+> 下列两项发现已在代码中整改，正文对应条目的「现状」描述已不成立，按代码实测更正：
+> - **D1（integrity_server 硬编码 `0.0.0.0`）→ 已修复（R7 整改）**：`server/integrity_server.py` 现默认仅监听 `127.0.0.1`，监听非回环地址**必须**配置 `INTEGRITY_AUTH_TOKEN`；未配 token 时 fail-closed 拒绝服务（源码注释：「原实现 `__main__` 硬编码 host="0.0.0.0"……现改为默认仅监听 127.0.0.1」）。
+> - **D2（Python 服务端依赖未 pin）→ 已修复**：`server/requirements-lock.txt` 已入库，与 `server/requirements.txt`、`server/requirements-dev.txt` 并存。
+> - D3（sync_server 失败开放）与 D5（导出 VIEW 深链接无 host 限制）未见整改证据，**维持原判定**。
 
 ## 执行摘要（总体评级：中 / Medium）
 
