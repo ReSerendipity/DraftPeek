@@ -5,7 +5,7 @@
 
 ## 1. 许可与发布形态
 
-1.1 项目代码适用 [Apache License 2.0](LICENSE)，可自由使用、修改、再分发（保留版权声明与 LICENSE 副本）。
+1.1 项目代码适用 [Apache License 2.0](../LICENSE)，可自由使用、修改、再分发（保留版权声明与 LICENSE 副本）。
 
 1.2 **第三方组件许可独立**：编辑器核心 sora-editor（LGPL-2.1）等以可替换方式链接，主程序无需开源；再分发须满足对应许可义务（见 [THIRD_PARTY_NOTICES.md](THIRD_PARTY_NOTICES.md)）。
 

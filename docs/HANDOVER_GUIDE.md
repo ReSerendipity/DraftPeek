@@ -22,7 +22,7 @@
 1. **显式覆盖作者身份**（防环境注入 zwork 之类）：
    `$env:GIT_AUTHOR_NAME='ReSerendipity'; $env:GIT_AUTHOR_EMAIL='259081123+ReSerendipity@users.noreply.github.com'; $env:GIT_COMMITTER_NAME='ReSerendipity'; $env:GIT_COMMITTER_EMAIL='259081123+ReSerendipity@users.noreply.github.com'`
 2. **显式路径** `git add -- <文件>`，严禁 `git add -A/.`；提交后 `git show --stat` 核对文件清单。
-3. 禁止 push、force、reset --hard、checkout 丢弃改动、stash、删除他人文件；禁止切分支/merge/rebase/pull（本仓库就地工作约定）。
+3. **push 与分支纪律**（依据 `AGENTS.md` §4「push / CI 铁律」与 `docs/CODING_STANDARDS.md` 第 3 节）：owner/admin（ReSerendipity，本机 gh/git 凭据）因 `enforce_admins=false` **可免 PR 直推 main**（2026-09-28 治理变更），本地预检全绿后 `git push origin main` 即可；非 admin 账号直推会被远端拒绝，须走 PR + 1 审批 + 状态检查全绿。push ≠ 完成，须 `gh run list --branch main` / `gh run view <id> --json conclusion` 盯到终态，红了当场修。**分支不是禁区**：hotfix 流程明确要求 `git checkout -b hotfix/<版本>` 并在收尾 `git merge` 回 main（见 `docs/release-governance.md` §6.1）。**始终禁止**：force push、`--no-verify`（除非用户明确要求）、`reset --hard`、`checkout --` 丢弃改动、stash、删除他人文件。
 4. 每个内聚批次打 annotated tag（`git tag -a <名> -m "<说明>"`）。
 5. 提交后自检：`git log -1 --pretty="author=%an <%ae> committer=%cn <%ce>"`。
 
@@ -34,6 +34,6 @@
 | 评审/决议/回流 | `docs/reports/2026-10-15-架构评审台账.md`（LEDGER-001~007） |
 | 覆盖率爬坡 | `docs/reports/2026-10-15-覆盖率爬坡计划.md`（feature/editor+browser 90 天） |
 | 排障摘要 | `docs/reports/2026-10-15-失败签名机制与排障路径摘要.md` |
-| 完整排障台账（本地） | 根 `FIX_LOG.md`（失败签名 sig 检索）、`docs/agents/GOTCHAS.md`（#DP-01~20） |
+| 完整排障台账（本地） | 根 `FIX_LOG.md`（失败签名 sig 检索）、`docs/agents/GOTCHAS.md`（#DP-01 起递增，2026-10-21 本地最新为 #DP-24） |
 | 版本/灰度/回滚 | `docs/VERSIONING.md` |
 | 发布检查 | `docs/RELEASE_CHECKLIST.md` |
