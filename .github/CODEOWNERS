@@ -9,7 +9,7 @@ app/src/main/java/com/draftpeek/security/ @ReSerendipity
 app/src/main/cpp/ @ReSerendipity
 
 # 安全策略与审查流程
-SECURITY.md @ReSerendipity
+.github/SECURITY.md @ReSerendipity
 .github/workflows/security.yml @ReSerendipity
 .github/CODEOWNERS @ReSerendipity
 

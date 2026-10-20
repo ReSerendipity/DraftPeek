@@ -1,11 +1,11 @@
 # ============================================================
 # DraftPeek Security Review Workflow
 # ============================================================
-# 学习借鉴：Image_MultiModel / Seedvr2 / SpiritPal 的安全审查机制。
+# 学习借鉴：Image-DuoModel / SeedVR2-Lite / SpiritPal 的安全审查机制。
 # 覆盖四种安全审查维度：
 #   1) dependency-review —— PR 中依赖变更的漏洞审查（GitHub 官方，基于 OSV）
 #   2) CodeQL         —— 静态安全分析（kotlin/java），security-and-quality 套件
-#   3) secret-scan    —— 密钥泄露扫描（Trivy FS，学习 Image_MultiModel）
+#   3) secret-scan    —— 密钥泄露扫描（Trivy FS，学习 Image-DuoModel）
 #   4) python-security —— server/ Python 供应链审计（pip-audit）+ SAST（bandit）（R7 补强）
 #   5) 定时任务       —— 每周定期全量安全扫描
 # ============================================================
@@ -31,7 +31,7 @@ concurrency:
 
 jobs:
   # ── 1. 依赖漏洞审查 (dependency-review) ──────────────────
-  # 学习 Image_MultiModel 的依赖扫描思路：审查 PR 引入/变更的
+  # 学习 Image-DuoModel 的依赖扫描思路：审查 PR 引入/变更的
   # Gradle/Maven 依赖，命中已知漏洞时阻断合并。
   dependency-review:
     name: Dependency Review (PR 依赖变更审查)
@@ -50,7 +50,7 @@ jobs:
           comment-summary-in-pr: always
 
   # ── 2. CodeQL 静态安全分析 ──────────────────────────────
-  # 学习 Image_MultiModel / SpiritPal 的 CodeQL 配置，使用
+  # 学习 Image-DuoModel / SpiritPal 的 CodeQL 配置，使用
   # security-and-quality 查询套件（含安全 + 代码质量）。
   codeql:
     if: github.event_name == 'schedule' || github.event_name == 'workflow_dispatch'
@@ -101,7 +101,7 @@ jobs:
           category: '/language:${{ matrix.language }}'
 
   # ── 3. 密钥泄露扫描 (Trivy FS) ──────────────────────────
-  # 学习 Image_MultiModel 的 secret-scan job：扫描整个仓库
+  # 学习 Image-DuoModel 的 secret-scan job：扫描整个仓库
   # 历史中的密钥/Token 泄露，防止凭据意外提交。
   secret-scan:
     name: Secret Scanning (Trivy FS 密钥泄露扫描)
@@ -143,7 +143,7 @@ jobs:
   # 被设为必需，任何上游新披露都会阻塞与本改动毫无关系的 PR。
   # --dry-run 会完整跑一遍 pip 解析器但不安装，足以抓出被独立 bump 后自相矛盾的
   # pin 对（pydantic 2.13.5 要求 pydantic-core==2.46.5，却被组升到 2.49.0，
-  # 见 DraftPeek#92 / TTS_MultiModel#87）。
+  # 见 DraftPeek#92 / TTS-MultiModel#87）。
   lock-integrity:
     name: Lock Integrity (server lock resolvability)
     runs-on: ubuntu-latest
