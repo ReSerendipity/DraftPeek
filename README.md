@@ -139,9 +139,14 @@ scripts\coverage.bat                              # Windows 一键覆盖率
 
 ## 相关文档
 
-- `docs/VERSIONING.md` — 版本管理与发布规范
-- `docs/RELEASE_CHECKLIST.md` — 发布前检查清单
+- [`docs/VERSIONING.md`](docs/VERSIONING.md) — 版本管理与发布规范（现为指针，权威条款见 `docs/release-governance.md`）
+- [`docs/release-governance.md`](docs/release-governance.md) — 发布治理：远端优先、tag 驱动、产物可校验
+- [`docs/RELEASE_CHECKLIST.md`](docs/RELEASE_CHECKLIST.md) — 发布前检查清单
 - [CHANGELOG.md](CHANGELOG.md) — 更新日志
+
+## 分发边界
+
+本仓库随分发的是可公开工程文档：根 `README.md`、`docs/**` 与 `.github/**`。AI 辅助开发的 `AGENTS.md` 家族为**仅本地保留**、有意不入库——fresh clone / CI / 其他协作者环境中不存在该文件属预期行为，勿视为缺失；随仓库分发的 agent 权威入口为根 README 与 `.github/**`（完整说明见 [`docs/CODING_STANDARDS.md`](docs/CODING_STANDARDS.md) §7.1）。
 
 ## 贡献
 
