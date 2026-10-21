@@ -2,6 +2,8 @@
 
 > Android 原生代码 / 文本编辑器：内置终端、Markdown 预览、多语言语法高亮。采用 Jetpack Compose + 整洁架构，安全加固、离线可用。
 
+> 治理规范：[ReSerendipity/.github/governance](https://github.com/ReSerendipity/.github/tree/main/governance)
+
 ## 界面预览
 
 截图请见 [`docs/screenshots/`](docs/screenshots/) 目录。
