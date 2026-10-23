@@ -253,4 +253,3 @@ service-account.json
 # 项目结构收敛（§12.2）：本地私有目录与 AGENTS.md 不入库
 /local/
 AGENTS.md
-!/AGENTS.md
