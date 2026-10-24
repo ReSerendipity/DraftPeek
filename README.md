@@ -1,12 +1,19 @@
 # DraftPeek（撰码轻览）
 
+[![License](https://img.shields.io/badge/license-Apache%202.0-green?style=flat)](LICENSE)
+[![Android CI](https://github.com/ReSerendipity/DraftPeek/actions/workflows/android.yml/badge.svg)](https://github.com/ReSerendipity/DraftPeek/actions/workflows/android.yml)
+
 > Android 原生代码 / 文本编辑器：内置终端、Markdown 预览、多语言语法高亮。采用 Jetpack Compose + 整洁架构，安全加固、离线可用。
+
+**DraftPeek** — a native Android code and text editor with a built-in terminal, Markdown preview, and syntax highlighting for 40+ languages. Built with Jetpack Compose and clean architecture; hardened and offline-first.
 
 > 治理规范：[ReSerendipity/.github/governance](https://github.com/ReSerendipity/.github/tree/main/governance)
 
 ## 界面预览
 
 截图请见 [`docs/screenshots/`](docs/screenshots/) 目录。
+
+![DraftPeek 语言抽屉](docs/screenshots/mobile-ux-2026-10/p0-02-all-languages-drawer.png)
 
 ## 项目简介
 
