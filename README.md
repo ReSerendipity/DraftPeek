@@ -24,7 +24,7 @@ A native Android code & text editor with a built-in terminal, Markdown preview, 
 
 ### 核心特性
 
-![Core Features](docs/assets/readme-draftpeek-4-features.svg)
+![Core Features](https://gcore.jsdelivr.net/gh/ReSerendipity/DraftPeek@main/docs/assets/readme-draftpeek-4-features.svg)
 
 - **多语言语法高亮** — 基于 sora-editor（TextMate + Tree-sitter），支持 Kotlin、Python、JavaScript、C++、Go、Rust、Markdown 等 40+ 语言
 - **Markdown 编辑与预览** — CommonMark 原生解析 + WebView 渲染管线，支持 KaTeX 数学公式、Mermaid 图表与代码高亮
@@ -42,19 +42,19 @@ A native Android code & text editor with a built-in terminal, Markdown preview, 
 
 **文件列表与语言筛选弹窗** — Files 页（搜索框、最近 / 收藏 / 书签 / 代码标签页）上弹出「All languages」语言选择抽屉，展示 Kotlin / Python / JS / Markdown 等 40+ 语言卡片：
 
-![Files Browser with Language Drawer](docs/assets/readme-draftpeek-1-main-files.png)
+![Files Browser with Language Drawer](https://gcore.jsdelivr.net/gh/ReSerendipity/DraftPeek@main/docs/assets/readme-draftpeek-1-main-files.png)
 
 **新建文件对话框** — 文件名输入、语言卡片选择（Kotlin / Python / JS / Markdown 等）、Empty file / Hello World / Class template 模板：
 
-![New File Dialog](docs/assets/readme-draftpeek-3-new-file.png)
+![New File Dialog](https://gcore.jsdelivr.net/gh/ReSerendipity/DraftPeek@main/docs/assets/readme-draftpeek-3-new-file.png)
 
 **编辑界面** — sora-editor 代码编辑区、行号、底部状态栏（语言、缩进、编码、换行符、行列位置）：
 
-![Editor Screen](docs/assets/readme-draftpeek-2-editor.png)
+![Editor Screen](https://gcore.jsdelivr.net/gh/ReSerendipity/DraftPeek@main/docs/assets/readme-draftpeek-2-editor.png)
 
 **分层架构** — app 壳 → feature 功能模块 → core 基础层（domain / data / ui / sync / security）：
 
-![Architecture](docs/assets/readme-draftpeek-5-architecture.svg)
+![Architecture](https://gcore.jsdelivr.net/gh/ReSerendipity/DraftPeek@main/docs/assets/readme-draftpeek-5-architecture.svg)
 
 ### 快速开始
 
@@ -162,19 +162,19 @@ A: 请勿公开 issue。通过 [SECURITY.md](.github/SECURITY.md) 的私密披�
 
 **File list with language picker drawer** — the Files screen (search bar, All / Recent / Favorites / Bookmarks / Code tabs) with the "All languages" drawer open on top, showing 40+ language cards (Kotlin, Python, JS, Markdown …):
 
-![Files Browser with Language Drawer](docs/assets/readme-draftpeek-1-main-files.png)
+![Files Browser with Language Drawer](https://gcore.jsdelivr.net/gh/ReSerendipity/DraftPeek@main/docs/assets/readme-draftpeek-1-main-files.png)
 
 **New file dialog** — filename input, language cards (Kotlin / Python / JS / Markdown …), Empty file / Hello World / Class template presets:
 
-![New File Dialog](docs/assets/readme-draftpeek-3-new-file.png)
+![New File Dialog](https://gcore.jsdelivr.net/gh/ReSerendipity/DraftPeek@main/docs/assets/readme-draftpeek-3-new-file.png)
 
 **Editor screen** — sora-editor editing surface, line numbers, status bar (language, indent, encoding, EOL, cursor position):
 
-![Editor Screen](docs/assets/readme-draftpeek-2-editor.png)
+![Editor Screen](https://gcore.jsdelivr.net/gh/ReSerendipity/DraftPeek@main/docs/assets/readme-draftpeek-2-editor.png)
 
 **Layered architecture** — app shell → feature modules → core layer (domain / data / ui / sync / security):
 
-![Architecture](docs/assets/readme-draftpeek-5-architecture.svg)
+![Architecture](https://gcore.jsdelivr.net/gh/ReSerendipity/DraftPeek@main/docs/assets/readme-draftpeek-5-architecture.svg)
 
 ### Quick Start
 
