@@ -1,168 +1,257 @@
-# DraftPeek（撰码轻览）
+# DraftPeek · 撰码轻览
 
 [![License](https://img.shields.io/badge/license-Apache%202.0-green?style=flat)](LICENSE)
 [![Android CI](https://github.com/ReSerendipity/DraftPeek/actions/workflows/android.yml/badge.svg)](https://github.com/ReSerendipity/DraftPeek/actions/workflows/android.yml)
+[![Release](https://img.shields.io/github/v/release/ReSerendipity/DraftPeek?label=release&sort=semver)](https://github.com/ReSerendipity/DraftPeek/releases/latest)
+![Kotlin](https://img.shields.io/badge/Kotlin-2.2.21-7f52ff?logo=kotlin&logoColor=white)
+![Android](https://img.shields.io/badge/Android-8.0%2B-3ddc84?logo=android&logoColor=white)
+[![PRs Welcome](https://img.shields.io/badge/PRs-welcome-brightgreen.svg)](https://github.com/ReSerendipity/.github/blob/main/CONTRIBUTING.md)
+[![Governance](https://img.shields.io/badge/governance-ReSerendipity%2F.github-orange)](https://github.com/ReSerendipity/.github/tree/main/governance)
 
-> Android 原生代码 / 文本编辑器：内置终端、Markdown 预览、多语言语法高亮。采用 Jetpack Compose + 整洁架构，安全加固、离线可用。
+> [中文](#中文) · [English](#english)
 
-**DraftPeek** — a native Android code and text editor with a built-in terminal, Markdown preview, and syntax highlighting for 40+ languages. Built with Jetpack Compose and clean architecture; hardened and offline-first.
+Android 原生代码 / 文本编辑器：内置终端、Markdown 预览、40+ 语言语法高亮。Jetpack Compose + 整洁架构，安全加固、离线可用。
 
-> 治理规范：[ReSerendipity/.github/governance](https://github.com/ReSerendipity/.github/tree/main/governance)
+A native Android code & text editor with a built-in terminal, Markdown preview, and syntax highlighting for 40+ languages. Jetpack Compose + clean architecture; hardened, offline-first.
 
-## 界面预览
+---
 
-截图请见 [`docs/screenshots/`](docs/screenshots/) 目录。
+## 中文
 
-![DraftPeek 语言抽屉](docs/screenshots/mobile-ux-2026-10/p0-02-all-languages-drawer.png)
+### 项目简介
 
-## 项目简介
+**DraftPeek（撰码轻览）** 是一款面向 Android 的原生代码与文本编辑器，定位为"口袋里的开发工作台"。它将文件浏览、多语言编辑、Markdown 预览、集成终端与远程文件访问整合在一个离线优先的应用中，无需 root 即可使用。
 
-DraftPeek 是一款功能强大的 Android 原生文本 / 代码编辑器，主要特性：
+### 核心特性
 
-- **多语言语法高亮**：基于 sora-editor（TextMate + Tree-sitter），支持 40+ 编程语言
-- **Markdown 编辑与预览**：CommonMark 原生解析 + WebView 渲染管线，支持 KaTeX / Mermaid / 代码高亮
-- **集成终端**：基于 Proot 架构的终端模拟器（proot 二进制与 rootfs 未随包分发，详见 docs/THIRD_PARTY_NOTICES.md）
-- **文件浏览**：本地 / FTP / SFTP 文件系统抽象，支持目录监听、书签、全文搜索
-- **安全加固**：Native C 反调试 + Play Integrity + APK/DEX 校验 + AES-256-GCM 加密
-- **多标签页编辑**：同时打开多个文件，快速切换
-- **LSP 支持**：实验性多语言 LSP 客户端（Python/Kotlin/JS/Java/Go/Dart）
-- **Git 集成**：GitHub 仓库导入与 Git 操作
-- **可访问性**：色盲模式、高对比度主题、折叠屏 / 分屏自适应布局
-- **国际化**：中文（默认）、English、日本語、한국어
+![Core Features](docs/assets/readme-draftpeek-4-features.svg)
 
-## 环境要求
+- **多语言语法高亮** — 基于 sora-editor（TextMate + Tree-sitter），支持 Kotlin、Python、JavaScript、C++、Go、Rust、Markdown 等 40+ 语言
+- **Markdown 编辑与预览** — CommonMark 原生解析 + WebView 渲染管线，支持 KaTeX 数学公式、Mermaid 图表与代码高亮
+- **集成终端** — 基于 Proot 架构的终端模拟器，无需设备 root（rootfs 未随包分发，详见 [THIRD_PARTY_NOTICES](docs/THIRD_PARTY_NOTICES.md)）
+- **文件浏览** — 本地 / FTP / SFTP 文件系统抽象，支持目录监听、书签、全文搜索
+- **安全加固** — Native C 反调试 + Play Integrity + APK/DEX 校验 + AES-256-GCM 文件加密，数据库层 SQLCipher 加密
+- **离线优先同步** — CRDT（无冲突复制数据类型）引擎，可选配 Python 中继服务（`server/`，实验性）
+- **多标签编辑** — 同时打开多个文件，快速切换
+- **实验性 LSP** — 多语言 Language Server Protocol 客户端（Python / Kotlin / JS / Java / Go / Dart）
+- **Git 与插件** — GitHub 仓库导入；PF4J 插件系统
+- **可访问性** — 色盲模式、高对比度主题、折叠屏 / 分屏自适应
+- **国际化** — 中文（默认）、English、日本語、한국어
+
+### 界面展示
+
+**文件列表与语言筛选弹窗** — Files 页（搜索框、最近 / 收藏 / 书签 / 代码标签页）上弹出「All languages」语言选择抽屉，展示 Kotlin / Python / JS / Markdown 等 40+ 语言卡片：
+
+![Files Browser with Language Drawer](docs/assets/readme-draftpeek-1-main-files.png)
+
+**新建文件对话框** — 文件名输入、语言卡片选择（Kotlin / Python / JS / Markdown 等）、Empty file / Hello World / Class template 模板：
+
+![New File Dialog](docs/assets/readme-draftpeek-3-new-file.png)
+
+**编辑界面** — sora-editor 代码编辑区、行号、底部状态栏（语言、缩进、编码、换行符、行列位置）：
+
+![Editor Screen](docs/assets/readme-draftpeek-2-editor.png)
+
+**分层架构** — app 壳 → feature 功能模块 → core 基础层（domain / data / ui / sync / security）：
+
+![Architecture](docs/assets/readme-draftpeek-5-architecture.svg)
+
+### 快速开始
+
+**环境要求**
 
 | 依赖 | 版本 |
 |---|---|
-| Android Studio | Meerkat 2024.3.2+（或任意支持 AGP 8.10.1 的版本） |
 | JDK | 17 |
-| Android SDK | compileSdk 36, targetSdk 36, minSdk 26 (Android 8.0+) |
-| Gradle | 8.14.3（gradle-wrapper 管理，无需手动安装） |
-| AGP | 8.10.1 |
-| Kotlin | 2.2.21 |
-| Build Tools | 36.1.0 |
+| Android Studio | Meerkat 2024.3.2+（或任意支持 AGP 8.10.1 的版本） |
+| Android SDK | compileSdk 36, targetSdk 36, minSdk 26（Android 8.0+） |
+| Gradle | 8.14.3（wrapper 管理，无需手动安装） |
+| 支持 ABI | arm64-v8a · armeabi-v7a · x86_64 |
 
-> 版本一致性由 `scripts/check_version_consistency.py` 在 CI 中强制校验：上表 AGP / Gradle / Kotlin / Build Tools 必须与 `gradle/libs.versions.toml` 及 `gradle/wrapper/gradle-wrapper.properties` 实际取值一致，否则 CI 失败。本地自查：`python scripts/check_version_consistency.py`
-
-**支持的 ABI**：`arm64-v8a`、`armeabi-v7a`、`x86_64`（与 `app/build.gradle.kts` 的 `abiFilters` 一致，2026-10-13 核实；x86 已随 T7 ABI 裁剪移除）
-
-## 编译步骤
-
-### 打开项目
-
-1. Android Studio → `File` → `Open` → 选择 `DraftPeek` 根目录
-2. 等待 Gradle Sync 完成（首次同步需下载依赖，约 5–10 分钟）
-
-### 构建 Debug / Release APK
+**构建 Debug APK**
 
 ```bash
-./gradlew assembleDebug          # Linux/macOS        gradlew.bat assembleDebug          # Windows
-./gradlew assembleRelease        # Release（需签名配置）   scripts\build-release.bat          # 或辅助脚本
+git clone https://github.com/ReSerendipity/DraftPeek.git
+cd DraftPeek
+./gradlew assembleDebug
+# 产物：app/build/outputs/apk/debug/app-debug.apk
 ```
 
-- Debug APK 输出：`app/build/outputs/apk/debug/app-debug.apk`
-- Release APK 输出：`app/build/outputs/apk/release/app-release.apk`
-- 日常开发优先使用 `assembleRelease`，确保 R8 优化、ProGuard 混淆和安全模块均正常工作
+**从 Release 安装**
 
-### 签名配置
+前往 [Releases](https://github.com/ReSerendipity/DraftPeek/releases/latest) 下载 `app-production-release.apk`，开启手机"未知来源安装"后直接安装。
 
-签名凭据通过 `local.properties`（git-ignored）配置，不硬编码在构建脚本中：
+**最小验证**
 
-```properties
-sdk.dir=C\:\\Users\\YourName\\AppData\\Local\\Android\\Sdk
-RELEASE_STORE_FILE=release.jks
-RELEASE_STORE_PASSWORD=your_keystore_password
-RELEASE_KEY_ALIAS=your_key_alias
-RELEASE_KEY_PASSWORD=your_key_password
-```
+安装后打开应用 → 在 Files 标签页新建一个 `.kt` 或 `.md` 文件 → 确认编辑器与语法高亮正常加载。
 
-详见 [`local.properties.example`](local.properties.example)。
+### 系统要求与兼容性
 
-## 项目结构
+- Android 8.0（API 26）及以上
+- 支持 arm64-v8a、armeabi-v7a、x86_64 架构
+- 无需 root；终端功能依赖 Proot（rootfs 需另行获取）
+- 无 Google Play 服务环境亦可运行核心编辑功能
 
-```
-DraftPeek/
-├── app/                    # 壳模块：MainActivity、导航、安全模块、AppWidget
-├── benchmark/              # 性能基准测试（Macrobenchmark）
-├── build-logic/            # Gradle 约定插件（统一各模块构建配置）
-├── core/                   # 基础层（整洁架构）
-│   ├── common/             #   工具类、DiffEngine、GitManager、EventBus、插件系统
-│   ├── crdt/               #   CRDT 数据结构（离线优先协作同步基座）
-│   ├── data/               #   Room + SQLCipher + DataStore、DAO、Repository
-│   ├── designsystem/       #   设计 Token（字体、色彩、形状、间距）
-│   ├── domain/             #   UseCase + 领域模型
-│   ├── sync/               #   同步引擎（CRDT 传输 / 冲突消解，配 server/）
-│   ├── testing/            #   测试 Fixtures
-│   └── ui/                 #   品牌组件、主题、自适应布局
-├── feature/                # 功能层（browser / editor / knowledge / settings / stats / terminal）
-├── docs/  scripts/  gradle/  migrations/
-├── server/                 # Python 协作同步服务（实验性/可选）
-└── CHANGELOG.md            # 更新日志
-```
+### 使用示例
 
-**依赖规则**：`app` → `feature/*` → `core/*`；Feature 之间允许跨模块依赖。
+1. **编辑 Kotlin 文件** — New file → 选择 Kotlin → 输入代码，语法高亮与缩进自动生效
+2. **写 Markdown 笔记** — 新建 `.md` 文件，切换预览视图查看 KaTeX / Mermaid 渲染
+3. **连接 SFTP 远程目录** — Settings → Remote → 添加 SFTP 主机，浏览远程代码库
+4. **多标签对照** — 打开两个文件，顶部分标签切换，Diff 视图并排对比
 
-## 测试与覆盖率
+### FAQ
 
-```bash
-./gradlew test                                    # 全部单元测试（跑全部变体，与 CI 执行命令一致）
-./gradlew :app:testDevDebugUnitTest               # 仅 app 的 dev 调试变体
-./gradlew :core:common:testDebugUnitTest          # 指定模块（feature/*、core/* 无 flavor，单变体任务名为 testDebugUnitTest）
-./gradlew connectedAndroidTest                    # UI/集成测试（需设备/模拟器）
-./gradlew jacocoTestReport                        # 覆盖率报告（HTML: build/reports/jacoco/html/index.html）
-scripts\coverage.bat                              # Windows 一键覆盖率
-```
+**Q: 终端里为什么没有常用命令？**
+A: Proot rootfs 未随 APK 分发（体积与许可原因）。请参考 [THIRD_PARTY_NOTICES](docs/THIRD_PARTY_NOTICES.md) 获取合规 rootfs 镜像。
 
-> 任务名口径以 [`docs/CODING_STANDARDS.md`](docs/CODING_STANDARDS.md) §7.3 为准：**仅 `:app` 有 flavor 维度**，其单测任务名恒为 `test<Flavor>DebugUnitTest`；不限定模块的 `testDebugUnitTest` 不会执行 `:app` 的用例，不要把它当作全量入口。
+**Q: 数据存在哪里？会上传到云端吗？**
+A: 所有文件默认仅保存在本机应用沙盒；SQLCipher 加密数据库存储设置与书签。CRDT 同步为可选功能，不开启则完全离线。
 
-**覆盖率阈值（阻断门禁 · 单一事实来源）**：[`coverage-baseline.json`](coverage-baseline.json) 的 `modules[*].threshold_pct`（JaCoCo **INSTRUCTION** 口径，棘轮只升不降；`scripts/check_coverage_gate.py --ratchet` 在 CI 阻断执行，报告缺失即失败，不允许「无数据即绿」）。[`codecov.yml`](codecov.yml)（LINE 展示口径，project 基线 7%）仅作 PR 注释参考，不作为门禁。
-> ~~历史目标：项目整体 60% ／ core-common 70% ／ core-data 75% ／ feature-editor / feature-browser 60% ／ app 50%（LINE 口径）~~ —— 已被 2026-09-29 的实测基线重置取代（从未被任何一次真实数据验证过；详见 `codecov.yml` 头部基线重置说明与 `coverage-baseline.json` notes）。确需下调阈值先写 ADR（`docs/CODING_STANDARDS.md` §7.2）。
+**Q: 支持折叠屏 / 平板吗？**
+A: 支持。UI 使用 WindowSizeClass 自适应布局，分屏与展开态自动调整列数与面板比例。
 
-## 技术栈
+**Q: 如何贡献代码？**
+A: Fork → 新建分支 → 提交（需 DCO 签名，`git commit -s`）→ 发 PR。规范见 [组织贡献指南](https://github.com/ReSerendipity/.github/blob/main/CONTRIBUTING.md)。
 
-| 领域 | 技术 |
+**Q: 发现安全漏洞怎么报告？**
+A: 请勿公开 issue。通过 [SECURITY.md](.github/SECURITY.md) 的私密披露渠道报告。
+
+### 文档与治理
+
+- [版本与发布治理](docs/release-governance.md) — 远端优先、tag 驱动、产物可校验
+- [发布检查清单](docs/RELEASE_CHECKLIST.md)
+- [编码规范](docs/CODING_STANDARDS.md)
+- [更新日志](CHANGELOG.md)
+- [隐私政策](docs/PRIVACY_POLICY.md) · [用户协议](docs/USER_AGREEMENT.md)
+
+本仓库遵循 [ReSerendipity 组织治理规范](https://github.com/ReSerendipity/.github/tree/main/governance)。
+
+### 贡献、安全与支持
+
+- 贡献流程：[CONTRIBUTING.md](https://github.com/ReSerendipity/.github/blob/main/CONTRIBUTING.md)（Conventional Commits + DCO）
+- 安全披露：[.github/SECURITY.md](.github/SECURITY.md)
+- Bug 与功能请求：[GitHub Issues](https://github.com/ReSerendipity/DraftPeek/issues)
+
+### 许可证
+
+本项目以 **Apache License 2.0** 开源发布（Copyright 2026 ReSerendipity）。详见 [LICENSE](LICENSE) · [NOTICE](NOTICE) · [THIRD_PARTY_NOTICES](docs/THIRD_PARTY_NOTICES.md)。
+
+---
+
+## English
+
+### Overview
+
+**DraftPeek** is a native Android code and text editor built as a "pocket dev workstation." It integrates file browsing, multi-language editing, Markdown preview, an integrated terminal, and remote file access into one offline-first app — no device root required.
+
+### Key Features
+
+- **40+ language highlighting** — sora-editor (TextMate + Tree-sitter): Kotlin, Python, JavaScript, C++, Go, Rust, Markdown, and more
+- **Markdown editing & preview** — CommonMark parser + WebView render pipeline with KaTeX, Mermaid, and code highlighting
+- **Built-in terminal** — Proot-based shell emulator, no device root needed (rootfs not bundled; see [THIRD_PARTY_NOTICES](docs/THIRD_PARTY_NOTICES.md))
+- **Files: local / FTP / SFTP** — filesystem abstraction, directory watch, bookmarks, full-text search
+- **Security hardened** — Native anti-debug, Play Integrity, APK/DEX verification, AES-256-GCM encryption, SQLCipher database
+- **Offline-first CRDT sync** — conflict-free replicated data types; optional Python relay server (`server/`, experimental)
+- **Multi-tab editing** — open multiple files and switch instantly
+- **Experimental LSP** — language server client for Python / Kotlin / JS / Java / Go / Dart
+- **Git & plugins** — GitHub repo import; PF4J extension system
+- **Accessible & adaptive** — color-blind mode, high-contrast theme, foldable / split-screen layouts
+- **i18n** — Chinese (default), English, 日本語, 한국어
+
+### Screenshots
+
+**File list with language picker drawer** — the Files screen (search bar, All / Recent / Favorites / Bookmarks / Code tabs) with the "All languages" drawer open on top, showing 40+ language cards (Kotlin, Python, JS, Markdown …):
+
+![Files Browser with Language Drawer](docs/assets/readme-draftpeek-1-main-files.png)
+
+**New file dialog** — filename input, language cards (Kotlin / Python / JS / Markdown …), Empty file / Hello World / Class template presets:
+
+![New File Dialog](docs/assets/readme-draftpeek-3-new-file.png)
+
+**Editor screen** — sora-editor editing surface, line numbers, status bar (language, indent, encoding, EOL, cursor position):
+
+![Editor Screen](docs/assets/readme-draftpeek-2-editor.png)
+
+**Layered architecture** — app shell → feature modules → core layer (domain / data / ui / sync / security):
+
+![Architecture](docs/assets/readme-draftpeek-5-architecture.svg)
+
+### Quick Start
+
+**Requirements**
+
+| Dependency | Version |
 |---|---|
-| UI 框架 | Jetpack Compose (BOM 2025.04.01) + Material Design 3 |
-| 代码编辑器 | sora-editor（TextMate + Tree-sitter 语法高亮） |
-| Markdown | CommonMark 0.24.0 (GFM 扩展) + WebView 预览（marked.js + KaTeX + Mermaid + highlight.js）+ richeditor-compose（WYSIWYG） |
-| Office 文档 | Apache POI 5.3.0（Word/Excel/PPT → HTML → WebView） |
-| PDF | Android PdfRenderer + android-pdf-viewer |
-| Diff | java-diff-utils 4.12 |
-| DI | Hilt 2.58 + KSP |
-| 数据层 | Room 2.7.1 (SQLCipher 4.6.0 加密) + DataStore |
-| 安全 | Native C 反调试 + Play Integrity + APK/DEX 校验 + AES-256-GCM |
-| 远程文件系统 | FTP (commons-net) + SFTP (jsch) |
-| 插件系统 | PF4J 3.11.0 |
-| LSP | Eclipse LSP4J 0.22.0 |
+| JDK | 17 |
+| Android Studio | Meerkat 2024.3.2+ (or any IDE supporting AGP 8.10.1) |
+| Android SDK | compileSdk 36, targetSdk 36, minSdk 26 (Android 8.0+) |
+| Gradle | 8.14.3 (via wrapper) |
+| ABIs | arm64-v8a · armeabi-v7a · x86_64 |
 
-## CI/CD
+**Build debug APK**
 
-- [`.github/workflows/android.yml`](.github/workflows/android.yml)：主 CI（Lint → Debug Build → 单元测试含覆盖率 → 仪器化测试矩阵 → Release 构建验证）
-- [`.github/workflows/release.yml`](.github/workflows/release.yml)：推送 `v*` tag 时自动构建 Release APK 并创建 **draft GitHub Release**（草稿态，人工审核后发布）
+```bash
+git clone https://github.com/ReSerendipity/DraftPeek.git
+cd DraftPeek
+./gradlew assembleDebug
+# Output: app/build/outputs/apk/debug/app-debug.apk
+```
 
-## 安全说明
+**Install from Release**
 
-- 所有安全校验仅在 Release 构建中启用（`!BuildConfig.DEBUG`）
-- 签名凭据通过 `local.properties` 管理，绝不硬编码；`release.jks` 已通过 `.gitignore` 排除
-- 数据库使用 SQLCipher 加密；敏感文件支持 AES-256-GCM 密码加密
+Download `app-production-release.apk` from the [latest release](https://github.com/ReSerendipity/DraftPeek/releases/latest), enable "install from unknown sources," and install.
 
-## 相关文档
+**Smoke test**
 
-- [`docs/VERSIONING.md`](docs/VERSIONING.md) — 版本管理与发布规范（现为指针，权威条款见 `docs/release-governance.md`）
-- [`docs/release-governance.md`](docs/release-governance.md) — 发布治理：远端优先、tag 驱动、产物可校验
-- [`docs/RELEASE_CHECKLIST.md`](docs/RELEASE_CHECKLIST.md) — 发布前检查清单
-- [CHANGELOG.md](CHANGELOG.md) — 更新日志
+Open the app → create a `.kt` or `.md` file in the Files tab → confirm the editor and syntax highlighting render.
 
-## 分发边界
+### Compatibility
 
-本仓库随分发的是可公开工程文档：根 `README.md`、`docs/**` 与 `.github/**`。AI 辅助开发的 `AGENTS.md` 家族为**仅本地保留**、有意不入库——fresh clone / CI / 其他协作者环境中不存在该文件属预期行为，勿视为缺失；随仓库分发的 agent 权威入口为根 README 与 `.github/**`（完整说明见 [`docs/CODING_STANDARDS.md`](docs/CODING_STANDARDS.md) §7.1）。
+- Android 8.0 (API 26) and above
+- arm64-v8a, armeabi-v7a, x86_64
+- No root required; the terminal needs a separately obtained Proot rootfs image
+- Core editing works without Google Play Services
 
-## 贡献
+### Examples
 
-参与贡献请遵循 [组织级贡献指南](https://github.com/ReSerendipity/.github/blob/main/CONTRIBUTING.md)（Conventional Commits + DCO 签名）。
+1. **Edit Kotlin** — New file → Kotlin → type code; highlighting and indentation apply automatically
+2. **Write Markdown notes** — create a `.md` file, toggle preview to see KaTeX / Mermaid rendering
+3. **SFTP remote** — Settings → Remote → add an SFTP host, browse remote repos
+4. **Multi-tab diff** — open two files, switch via top tabs, compare side by side
 
-安全漏洞请通过 [SECURITY.md](.github/SECURITY.md) 的私密披露渠道报告，勿直接提公开 issue。
+### FAQ
 
-## 许可证
+**Q: Why are common commands missing in the terminal?**
+A: The Proot rootfs is not bundled with the APK (size and licensing). See [THIRD_PARTY_NOTICES](docs/THIRD_PARTY_NOTICES.md) for how to obtain a compliant rootfs image.
 
-本项目以 **Apache License 2.0** 开源发布（Copyright 2026 ReSerendipity）。详见 [LICENSE](LICENSE) · [NOTICE](NOTICE) · [THIRD_PARTY_NOTICES.md](docs/THIRD_PARTY_NOTICES.md)。
+**Q: Where is my data stored? Is it uploaded?**
+A: Files live only in the app sandbox by default; settings and bookmarks are stored in an SQLCipher-encrypted database. CRDT sync is opt-in — without enabling it, the app is fully offline.
+
+**Q: Does it support foldables / tablets?**
+A: Yes. The UI uses WindowSizeClass adaptive layouts and adjusts columns and panel ratios for split-screen and expanded states.
+
+**Q: How do I contribute?**
+A: Fork → feature branch → commit with DCO sign-off (`git commit -s`) → open a PR. See the [org contributing guide](https://github.com/ReSerendipity/.github/blob/main/CONTRIBUTING.md).
+
+**Q: How do I report a security vulnerability?**
+A: Do not open a public issue. Use the private disclosure channel in [SECURITY.md](.github/SECURITY.md).
+
+### Documentation & Governance
+
+- [Release governance](docs/release-governance.md) — trunk-based, tag-driven, verifiable artifacts
+- [Release checklist](docs/RELEASE_CHECKLIST.md)
+- [Coding standards](docs/CODING_STANDARDS.md)
+- [Changelog](CHANGELOG.md)
+- [Privacy policy](docs/PRIVACY_POLICY.md) · [Terms](docs/USER_AGREEMENT.md)
+
+This repo follows the [ReSerendipity org governance](https://github.com/ReSerendipity/.github/tree/main/governance).
+
+### Contributing, Security & Support
+
+- Contributing: [CONTRIBUTING.md](https://github.com/ReSerendipity/.github/blob/main/CONTRIBUTING.md) (Conventional Commits + DCO)
+- Security disclosure: [.github/SECURITY.md](.github/SECURITY.md)
+- Bugs & feature requests: [GitHub Issues](https://github.com/ReSerendipity/DraftPeek/issues)
+
+### License
+
+Released under the **Apache License 2.0** (Copyright 2026 ReSerendipity). See [LICENSE](LICENSE) · [NOTICE](NOTICE) · [THIRD_PARTY_NOTICES](docs/THIRD_PARTY_NOTICES.md).

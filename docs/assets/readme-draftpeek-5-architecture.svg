@@ -1,0 +1,116 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 900 620" font-family="-apple-system, 'Segoe UI', Roboto, sans-serif">
+  <defs>
+    <linearGradient id="bgGrad" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0%" stop-color="#1a1a2e"/>
+      <stop offset="100%" stop-color="#16213e"/>
+    </linearGradient>
+    <filter id="shadow" x="-2%" y="-2%" width="104%" height="104%">
+      <feDropShadow dx="0" dy="2" stdDeviation="3" flood-opacity="0.3"/>
+    </filter>
+  </defs>
+
+  <!-- Background -->
+  <rect width="900" height="620" fill="url(#bgGrad)" rx="12"/>
+
+  <!-- Title -->
+  <text x="450" y="38" text-anchor="middle" fill="#e8e8e8" font-size="20" font-weight="700">DraftPeek Architecture · Clean Architecture</text>
+  <text x="450" y="58" text-anchor="middle" fill="#888" font-size="12">app → feature/* → core/*  ·  Hilt DI  ·  Jetpack Compose</text>
+
+  <!-- App Layer -->
+  <rect x="250" y="80" width="400" height="70" rx="8" fill="#e8a33d" fill-opacity="0.15" stroke="#e8a33d" stroke-width="1.5" filter="url(#shadow)"/>
+  <text x="450" y="105" text-anchor="middle" fill="#e8a33d" font-size="14" font-weight="700">app / Shell</text>
+  <text x="450" y="125" text-anchor="middle" fill="#bbb" font-size="11">MainActivity · Navigation · Security · Widget · Splash</text>
+
+  <!-- Arrow down -->
+  <line x1="450" y1="150" x2="450" y2="170" stroke="#666" stroke-width="1.5" marker-end="url(#arrow)"/>
+  <defs>
+    <marker id="arrow" markerWidth="8" markerHeight="6" refX="8" refY="3" orient="auto">
+      <path d="M0,0 L8,3 L0,6 Z" fill="#666"/>
+    </marker>
+  </defs>
+
+  <!-- Feature Layer -->
+  <text x="450" y="185" text-anchor="middle" fill="#aaa" font-size="12" font-weight="600">Feature Layer</text>
+
+  <rect x="60" y="195" width="120" height="55" rx="6" fill="#4a90d9" fill-opacity="0.15" stroke="#4a90d9" stroke-width="1.2"/>
+  <text x="120" y="218" text-anchor="middle" fill="#4a90d9" font-size="12" font-weight="600">browser</text>
+  <text x="120" y="235" text-anchor="middle" fill="#999" font-size="10">Files · FTP/SFTP</text>
+
+  <rect x="190" y="195" width="120" height="55" rx="6" fill="#4a90d9" fill-opacity="0.15" stroke="#4a90d9" stroke-width="1.2"/>
+  <text x="250" y="218" text-anchor="middle" fill="#4a90d9" font-size="12" font-weight="600">editor</text>
+  <text x="250" y="235" text-anchor="middle" fill="#999" font-size="10">sora-editor · MD</text>
+
+  <rect x="320" y="195" width="120" height="55" rx="6" fill="#4a90d9" fill-opacity="0.15" stroke="#4a90d9" stroke-width="1.2"/>
+  <text x="380" y="218" text-anchor="middle" fill="#4a90d9" font-size="12" font-weight="600">knowledge</text>
+  <text x="380" y="235" text-anchor="middle" fill="#999" font-size="10">Notes · Docs</text>
+
+  <rect x="450" y="195" width="120" height="55" rx="6" fill="#4a90d9" fill-opacity="0.15" stroke="#4a90d9" stroke-width="1.2"/>
+  <text x="510" y="218" text-anchor="middle" fill="#4a90d9" font-size="12" font-weight="600">terminal</text>
+  <text x="510" y="235" text-anchor="middle" fill="#999" font-size="10">Proot shell</text>
+
+  <rect x="580" y="195" width="120" height="55" rx="6" fill="#4a90d9" fill-opacity="0.15" stroke="#4a90d9" stroke-width="1.2"/>
+  <text x="640" y="218" text-anchor="middle" fill="#4a90d9" font-size="12" font-weight="600">settings</text>
+  <text x="640" y="235" text-anchor="middle" fill="#999" font-size="10">Editor · Accessibility</text>
+
+  <rect x="710" y="195" width="120" height="55" rx="6" fill="#4a90d9" fill-opacity="0.15" stroke="#4a90d9" stroke-width="1.2"/>
+  <text x="770" y="218" text-anchor="middle" fill="#4a90d9" font-size="12" font-weight="600">stats</text>
+  <text x="770" y="235" text-anchor="middle" fill="#999" font-size="10">Profile · Achievements</text>
+
+  <!-- Arrow down -->
+  <line x1="450" y1="250" x2="450" y2="275" stroke="#666" stroke-width="1.5" marker-end="url(#arrow)"/>
+
+  <!-- Core Layer -->
+  <text x="450" y="290" text-anchor="middle" fill="#aaa" font-size="12" font-weight="600">Core Layer</text>
+
+  <rect x="60" y="300" width="180" height="60" rx="6" fill="#5cb85c" fill-opacity="0.15" stroke="#5cb85c" stroke-width="1.2"/>
+  <text x="150" y="323" text-anchor="middle" fill="#5cb85c" font-size="12" font-weight="600">domain</text>
+  <text x="150" y="340" text-anchor="middle" fill="#999" font-size="10">UseCases · Models</text>
+
+  <rect x="250" y="300" width="180" height="60" rx="6" fill="#5cb85c" fill-opacity="0.15" stroke="#5cb85c" stroke-width="1.2"/>
+  <text x="340" y="323" text-anchor="middle" fill="#5cb85c" font-size="12" font-weight="600">data</text>
+  <text x="340" y="340" text-anchor="middle" fill="#999" font-size="10">Room · SQLCipher · DataStore</text>
+
+  <rect x="440" y="300" width="180" height="60" rx="6" fill="#5cb85c" fill-opacity="0.15" stroke="#5cb85c" stroke-width="1.2"/>
+  <text x="530" y="323" text-anchor="middle" fill="#5cb85c" font-size="12" font-weight="600">common</text>
+  <text x="530" y="340" text-anchor="middle" fill="#999" font-size="10">DiffEngine · GitManager · Plugins</text>
+
+  <rect x="630" y="300" width="210" height="60" rx="6" fill="#5cb85c" fill-opacity="0.15" stroke="#5cb85c" stroke-width="1.2"/>
+  <text x="735" y="323" text-anchor="middle" fill="#5cb85c" font-size="12" font-weight="600">ui · designsystem</text>
+  <text x="735" y="340" text-anchor="middle" fill="#999" font-size="10">Compose Theme · Tokens · Adaptive</text>
+
+  <!-- Second row of core -->
+  <rect x="150" y="375" width="200" height="55" rx="6" fill="#9b59b6" fill-opacity="0.15" stroke="#9b59b6" stroke-width="1.2"/>
+  <text x="250" y="398" text-anchor="middle" fill="#9b59b6" font-size="12" font-weight="600">crdt · sync</text>
+  <text x="250" y="415" text-anchor="middle" fill="#999" font-size="10">Offline-first CRDT sync engine</text>
+
+  <rect x="370" y="375" width="180" height="55" rx="6" fill="#9b59b6" fill-opacity="0.15" stroke="#9b59b6" stroke-width="1.2"/>
+  <text x="460" y="398" text-anchor="middle" fill="#9b59b6" font-size="12" font-weight="600">testing</text>
+  <text x="460" y="415" text-anchor="middle" fill="#999" font-size="10">Fixtures · Test helpers</text>
+
+  <rect x="570" y="375" width="210" height="55" rx="6" fill="#e74c3c" fill-opacity="0.15" stroke="#e74c3c" stroke-width="1.2"/>
+  <text x="675" y="398" text-anchor="middle" fill="#e74c3c" font-size="12" font-weight="600">security</text>
+  <text x="675" y="415" text-anchor="middle" fill="#999" font-size="10">Native anti-debug · AES-256-GCM</text>
+
+  <!-- External / Optional -->
+  <rect x="150" y="460" width="280" height="55" rx="6" fill="#666" fill-opacity="0.1" stroke="#666" stroke-width="1" stroke-dasharray="4,3"/>
+  <text x="290" y="483" text-anchor="middle" fill="#999" font-size="12" font-weight="600">server/  (optional · Python)</text>
+  <text x="290" y="500" text-anchor="middle" fill="#777" font-size="10">CRDT relay · OAuth · Experimental</text>
+
+  <rect x="460" y="460" width="320" height="55" rx="6" fill="#666" fill-opacity="0.1" stroke="#666" stroke-width="1" stroke-dasharray="4,3"/>
+  <text x="620" y="483" text-anchor="middle" fill="#999" font-size="12" font-weight="600">build-logic · benchmark · scripts</text>
+  <text x="620" y="500" text-anchor="middle" fill="#777" font-size="10">Convention plugins · Macrobenchmark · CI gates</text>
+
+  <!-- Bottom legend -->
+  <rect x="60" y="545" width="780" height="55" rx="6" fill="#222" fill-opacity="0.5" stroke="#444" stroke-width="1"/>
+  <circle cx="85" cy="565" r="5" fill="#e8a33d"/>
+  <text x="98" y="569" fill="#ccc" font-size="11">App shell</text>
+  <circle cx="180" cy="565" r="5" fill="#4a90d9"/>
+  <text x="193" y="569" fill="#ccc" font-size="11">Feature modules</text>
+  <circle cx="310" cy="565" r="5" fill="#5cb85c"/>
+  <text x="323" y="569" fill="#ccc" font-size="11">Core (domain/data/ui)</text>
+  <circle cx="470" cy="565" r="5" fill="#9b59b6"/>
+  <text x="483" y="569" fill="#ccc" font-size="11">Sync · Testing</text>
+  <circle cx="600" cy="565" r="5" fill="#e74c3c"/>
+  <text x="613" y="569" fill="#ccc" font-size="11">Security</text>
+  <text x="450" y="590" text-anchor="middle" fill="#666" font-size="10">Dependency rule: app → feature/* → core/*  ·  Feature cross-communication allowed</text>
+</svg>
