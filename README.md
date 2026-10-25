@@ -24,8 +24,6 @@ A native Android code & text editor with a built-in terminal, Markdown preview, 
 
 ### 核心特性
 
-![Core Features](https://gcore.jsdelivr.net/gh/ReSerendipity/DraftPeek@main/docs/assets/readme-draftpeek-4-features.svg)
-
 - **多语言语法高亮** — 基于 sora-editor（TextMate + Tree-sitter），支持 Kotlin、Python、JavaScript、C++、Go、Rust、Markdown 等 40+ 语言
 - **Markdown 编辑与预览** — CommonMark 原生解析 + WebView 渲染管线，支持 KaTeX 数学公式、Mermaid 图表与代码高亮
 - **集成终端** — 基于 Proot 架构的终端模拟器，无需设备 root（rootfs 未随包分发，详见 [THIRD_PARTY_NOTICES](docs/THIRD_PARTY_NOTICES.md)）
