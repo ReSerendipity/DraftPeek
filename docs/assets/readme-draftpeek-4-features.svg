@@ -1,0 +1,47 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 900 380" font-family="-apple-system, 'Segoe UI', Roboto, sans-serif">
+  <rect width="900" height="380" fill="#1a1a2e" rx="12"/>
+  <text x="450" y="35" text-anchor="middle" fill="#e8a33d" font-size="18" font-weight="700">Core Features</text>
+
+  <!-- Row 1 -->
+  <rect x="40" y="60" width="260" height="80" rx="8" fill="#4a90d9" fill-opacity="0.12" stroke="#4a90d9" stroke-width="1.2"/>
+  <text x="170" y="90" text-anchor="middle" fill="#4a90d9" font-size="13" font-weight="700">40+ Language Highlighting</text>
+  <text x="170" y="110" text-anchor="middle" fill="#aaa" font-size="11">sora-editor · TextMate · Tree-sitter</text>
+  <text x="170" y="126" text-anchor="middle" fill="#888" font-size="10">Kotlin · Python · JS · C++ · Go · Rust…</text>
+
+  <rect x="320" y="60" width="260" height="80" rx="8" fill="#5cb85c" fill-opacity="0.12" stroke="#5cb85c" stroke-width="1.2"/>
+  <text x="450" y="90" text-anchor="middle" fill="#5cb85c" font-size="13" font-weight="700">Markdown Preview</text>
+  <text x="450" y="110" text-anchor="middle" fill="#aaa" font-size="11">CommonMark + KaTeX + Mermaid</text>
+  <text x="450" y="126" text-anchor="middle" fill="#888" font-size="10">Code highlighting · WebView render</text>
+
+  <rect x="600" y="60" width="260" height="80" rx="8" fill="#9b59b6" fill-opacity="0.12" stroke="#9b59b6" stroke-width="1.2"/>
+  <text x="730" y="90" text-anchor="middle" fill="#9b59b6" font-size="13" font-weight="700">Built-in Terminal</text>
+  <text x="730" y="110" text-anchor="middle" fill="#aaa" font-size="11">Proot-based shell emulator</text>
+  <text x="730" y="126" text-anchor="middle" fill="#888" font-size="10">No root required · offline ready</text>
+
+  <!-- Row 2 -->
+  <rect x="40" y="160" width="260" height="80" rx="8" fill="#e8a33d" fill-opacity="0.12" stroke="#e8a33d" stroke-width="1.2"/>
+  <text x="170" y="190" text-anchor="middle" fill="#e8a33d" font-size="13" font-weight="700">Files · FTP / SFTP</text>
+  <text x="170" y="210" text-anchor="middle" fill="#aaa" font-size="11">Local · remote FS abstraction</text>
+  <text x="170" y="226" text-anchor="middle" fill="#888" font-size="10">Bookmarks · full-text search · watch</text>
+
+  <rect x="320" y="160" width="260" height="80" rx="8" fill="#e74c3c" fill-opacity="0.12" stroke="#e74c3c" stroke-width="1.2"/>
+  <text x="450" y="190" text-anchor="middle" fill="#e74c3c" font-size="13" font-weight="700">Security Hardened</text>
+  <text x="450" y="210" text-anchor="middle" fill="#aaa" font-size="11">Native anti-debug · AES-256-GCM</text>
+  <text x="450" y="226" text-anchor="middle" fill="#888" font-size="10">SQLCipher · Play Integrity · DEX verify</text>
+
+  <rect x="600" y="160" width="260" height="80" rx="8" fill="#1abc9c" fill-opacity="0.12" stroke="#1abc9c" stroke-width="1.2"/>
+  <text x="730" y="190" text-anchor="middle" fill="#1abc9c" font-size="13" font-weight="700">Offline-First CRDT Sync</text>
+  <text x="730" y="210" text-anchor="middle" fill="#aaa" font-size="11">Conflict-free replicated data types</text>
+  <text x="730" y="226" text-anchor="middle" fill="#888" font-size="10">Optional Python relay server</text>
+
+  <!-- Row 3 -->
+  <rect x="40" y="260" width="410" height="80" rx="8" fill="#4a90d9" fill-opacity="0.08" stroke="#4a90d9" stroke-width="1" stroke-dasharray="4,3"/>
+  <text x="245" y="290" text-anchor="middle" fill="#4a90d9" font-size="13" font-weight="700">LSP · Git · Plugins</text>
+  <text x="245" y="310" text-anchor="middle" fill="#aaa" font-size="11">Experimental LSP client · GitHub import · PF4J extensions</text>
+  <text x="245" y="326" text-anchor="middle" fill="#888" font-size="10">Multi-language: Python / Kotlin / JS / Java / Go / Dart</text>
+
+  <rect x="470" y="260" width="390" height="80" rx="8" fill="#5cb85c" fill-opacity="0.08" stroke="#5cb85c" stroke-width="1" stroke-dasharray="4,3"/>
+  <text x="665" y="290" text-anchor="middle" fill="#5cb85c" font-size="13" font-weight="700">Accessible · Adaptive · i18n</text>
+  <text x="665" y="310" text-anchor="middle" fill="#aaa" font-size="11">Color-blind mode · high-contrast · foldable / split-screen</text>
+  <text x="665" y="326" text-anchor="middle" fill="#888" font-size="10">中文 · English · 日本語 · 한국어</text>
+</svg>
