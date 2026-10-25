@@ -5,7 +5,7 @@
 [![Release](https://img.shields.io/github/v/release/ReSerendipity/DraftPeek?label=release&sort=semver)](https://github.com/ReSerendipity/DraftPeek/releases/latest)
 ![Kotlin](https://img.shields.io/badge/Kotlin-2.2.21-7f52ff?logo=kotlin&logoColor=white)
 ![Android](https://img.shields.io/badge/Android-8.0%2B-3ddc84?logo=android&logoColor=white)
-[![PRs Welcome](https://img.shields.io/badge/PRs-welcome-brightgreen.svg)](CONTRIBUTING.md)
+[![PRs Welcome](https://img.shields.io/badge/PRs-welcome-brightgreen.svg)](https://github.com/ReSerendipity/.github/blob/main/CONTRIBUTING.md)
 [![Governance](https://img.shields.io/badge/governance-ReSerendipity%2F.github-orange)](https://github.com/ReSerendipity/.github/tree/main/governance)
 
 > [中文](#中文) · [English](#english)
@@ -40,9 +40,9 @@ A native Android code & text editor with a built-in terminal, Markdown preview, 
 
 ### 界面展示
 
-**文件浏览器主界面** — 本地文件列表、搜索、最近 / 收藏 / 书签 / 代码分类标签页，支持新建文件并选择语言模板：
+**文件列表与语言筛选弹窗** — Files 页（搜索框、最近 / 收藏 / 书签 / 代码标签页）上弹出「All languages」语言选择抽屉，展示 Kotlin / Python / JS / Markdown 等 40+ 语言卡片：
 
-![Main Files Browser](docs/assets/readme-draftpeek-1-main-files.png)
+![Files Browser with Language Drawer](docs/assets/readme-draftpeek-1-main-files.png)
 
 **新建文件对话框** — 文件名输入、语言卡片选择（Kotlin / Python / JS / Markdown 等）、Empty file / Hello World / Class template 模板：
 
@@ -160,9 +160,9 @@ A: 请勿公开 issue。通过 [SECURITY.md](.github/SECURITY.md) 的私密披�
 
 ### Screenshots
 
-**Main file browser** — local file list, search, and tabs for All / Recent / Favorites / Bookmarks / Code; new-file dialog with language templates:
+**File list with language picker drawer** — the Files screen (search bar, All / Recent / Favorites / Bookmarks / Code tabs) with the "All languages" drawer open on top, showing 40+ language cards (Kotlin, Python, JS, Markdown …):
 
-![Main Files Browser](docs/assets/readme-draftpeek-1-main-files.png)
+![Files Browser with Language Drawer](docs/assets/readme-draftpeek-1-main-files.png)
 
 **New file dialog** — filename input, language cards (Kotlin / Python / JS / Markdown …), Empty file / Hello World / Class template presets:
 
