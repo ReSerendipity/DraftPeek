@@ -7,16 +7,39 @@
 
 ---
 
-## [Unreleased] (开发中)
+## [1.0.33] - 2026-10-29
+
+> 本版收录 `v1.0.32`（主干等价提交 `957e0e3`）以来的 147 个非合并提交。下面只列用户可感知的
+> 功能与修复；治理 / CI / 文档类改动合并成一条，不逐条罗列。
 
 ### Added
+- 文件浏览器：新增文件重命名（文件行 ⋮ 菜单）；历史记录的危险操作收进 ⋮ 菜单并按时间分组吸顶，同时补回重开入口；示例文件支持复制，语言列表支持按名称搜索（屏 07–11）
+- 文件浏览器信息架构改为三层（虚拟文件夹 / 文件夹内 / 文件详情），文件行与片段库的交互与视觉统一
+- 编辑器：查找面板改为停靠键盘上方的底部弹层，支持 ↑↓ 逐条跳转与「全部替换」二次确认；搜索面板显示匹配计数 `n/N`；状态栏显示「未保存 · N 行改动」；溢出菜单三组化、Quick Settings 升入顶栏、保存按钮置灰、状态条改造（屏 15–18）
+- 设置：编辑器设置、实验室（按三分组分块）、关于与安全各自独立成页；无障碍页迁入设置模块（屏 21–23）
+- Me 页：身份区五态（未登录态仍可编辑本地资料）、成就卡等级进度条；统计摘要并入「统计」区（屏 20）
+- 首次启动引导统一为 01–04 屏；协议确认改为底部弹层，内嵌可折叠条款与文档链接（屏 01–05）
+- 稳定性：自建 AppLogger 应用日志 / 崩溃上报与 R8 mapping 归档；`CRASH_REPORT_URL` 默认空串即关闭上报，崩溃观测仍为「仅本地」口径（见 `docs/release-governance.md` §3.2）
+- 同步（阶段 B 底座，界面入口仍未开放）：新增 `core:crdt`（LWW 合并 + JSON 编解码）与 `core:sync`（状态机 + Git 传输层 + 协调器），均可在 JVM 单测覆盖
 - 门禁：新增 `scripts/check_branch_protection_doc.py`，把「`docs/CODING_STANDARDS.md` 第 2 节 vs `docs/ci/branch-protection.json`」变成可重复执行的检查（同一条漂移已两次靠人工回填收口，按 `sig:branch-protection-doc-live-drift` 第二次禁止同方向再试）。期望值全部从 JSON 派生：要求本节点名单一来源、把必需检查名单委托给 `contexts`、**不得复述条数**、写明 `enforce_admins` 豁免、并引用 JSON 里真实存在的 `_measured_at` / `_meets_reality`；「小节缺失 / JSON 解析失败」用退出码 2 与「检查不过」分开。已接入 `.github/workflows/docs-consistency.yml`（新增 `bp-doc` job 与两条 PR 触发路径），维持非必需检查分级。「本 JSON vs 远端实况」仍由只读 `scripts/apply_branch_protection.py` 判。7 臂矩阵已验：正控 rc=0，复述条数 / 不点名 / 无实测标记 / `enforce_admins` 反了 四种反例均 rc=1，两种故障臂均 rc=2
 - 文档：`docs/VERSIONING.md` 新增 §3.4「版本号 → 主干修订对照与 tag 可达性核查」——登记 `1.0.31` / `1.0.32` 的 tag 提交、内容树与主干等价提交（`d1f4bf0` / `957e0e3`）三元组、三条只读复核命令与「重指向 tag 需单独授权」边界；§3.3 与 §4.1 改为按该表选回退点，§7 检查清单补 tag 可达性一项（Harness finding `release-version-tags-unreachable-from-main`）
 
 ### Changed
+- 发布包 ABI 裁剪为 arm64-v8a / armeabi-v7a / x86_64（移除 x86，x86_64 保留供 CI macrobenchmark），APK 体积基线登记为 ≈35.2 MB
+- 模块依赖倒置：`core/domain` 只保留接口与 model，实现下沉到 `core/data`；新增 R1–R7 依赖方向守卫并接入必需检查
+- 巨型文件按职责拆分：`FileBrowserScreen.kt`、`EditorScreen.kt`、`SoraEditorWrapper.kt`、`ProfileScreen.kt` 等，行为不变；新增 `ui/sora` 目录单文件 ≤2000 行门禁
+- 同步入口按钮暂以「开发中」提示降级（阶段 B 未接线，避免空转）
+- 英文文案补齐 28 个缺失键，并加 locale 对齐棘轮闸与 string-resources CI
+- 治理与 CI（合并）：发布总纲收口为 `docs/release-governance.md`（原 `docs/VERSIONING.md` 收敛为指针），撤掉 GPG 分离签名链路；`release.yml` 拆 build / publish / benchmark 三 job（dispatch 变真 dry-run、benchmark 腿接 preseed、缺产物硬失败）；Macrobenchmark 恢复为发布门禁（`startup.cold` 941.5ms +20% 容差）；并接入分模块覆盖率 ratchet、docs 一致性（含分支保护文档机器比对）等检查
 - 文档：`docs/CODING_STANDARDS.md` §2 的 main 交付闸门表述与 `docs/ci/branch-protection.json` 的实测记录对齐——写明非 admin 必须走 PR + 1 审批 + 三项必需检查、owner/admin 因 `enforce_admins=false` 免 PR 直推且该路径不经远端必需检查，因此本地钩子与 server pytest 是直推前唯一阻断点，并给出只读漂移核查命令（Harness finding `main-direct-push-policy-contradicts-branch-protection`）
 
 ### Fixed
+- 「Me」主标签必崩：补 `profile_theme_import_count` 的 `%1$d` 转换符
+- 编辑器搜索：修正相邻匹配下的序号误判，↑↓ 导航不再停在同一条
+- 文件浏览器：新建文件弹层改为键盘安全布局，键盘升起时主按钮不再被裁切；冷启动收养已持久化的 SAF 目录授权，不再退回「暂无文件」；顶栏状态描述改用字符串资源，修复硬编码 i18n 回退
+- 设置：编辑器设置 / 实验室 / 关于与安全三个新子页面的顶栏与内容重叠
+- 终端：权限名改用 `${applicationId}` 占位符，修复三 flavor 同时安装时的权限冲突
+- 依赖与安全：`certifi`（PYSEC-2026-4320）、`brace-expansion`、`image-size` 等升级关闭已知告警；debug 变体补 `CRASH_REPORT_URL` 字段，修复 devDebug 编译回归
 - 文档：`README.md`「测试与覆盖率」的聚合单测入口由 `./gradlew testDebugUnitTest` 改为 `./gradlew test`（与 CI 实跑命令一致），补 `:app:testDevDebugUnitTest` 示例并加 flavor 任务名口径说明——原写法不会执行 `:app` 的任何单测（含 `app/src/test` 下 7 个安全/完整性用例），却被注释为「全部单元测试」（Harness finding `readme-aggregate-test-command-skips-app`）
 - 门禁：`scripts/check_no_hardcoded_paths.py` 修 GBK 解码崩溃——`_files_from` 原先用 `text=True`，Windows 下按本地码（简中=GBK）解 `git … -z` 输出的原始 UTF-8 路径，仓内只要有非 ASCII 文件名就让读线程抛 `UnicodeDecodeError`、`stdout` 变 None，`--all` 因此恒崩（`AttributeError` at line 60）；默认模式只是当下暂存文件恰好全 ASCII 才没炸。现改为取 bytes 后按 UTF-8 解码；并区分「git 调用失败」与「没有文件要查」——前者退出码 2 中止（旧行为是空清单 → 绿灯）；同时打印扫描对象个数，让绿灯能自证覆盖面。反例验证：暂存一个含本机绝对路径、文件名用中文的文件，默认模式与 `--all` 均 rc=1 点名；撤除后恢复 rc=0
 - 门禁：`scripts/check_spec_refs.py` 不再把「没跑」说成「CI green」——family auditor 在本仓外（`docs/CODING_STANDARDS.md` 第 3 节记为需逐步消除的外部依赖），缺席时退出码仍为 0（设计内降级，不改判定强度），但措辞改为 `[spec-refs] SKIPPED … 本轮 0 个规范引用被校验`，在 GitHub Actions 里另发 `::warning::` 注释，使「这一项未运行」在日志与 CI 界面可见
