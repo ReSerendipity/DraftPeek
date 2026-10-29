@@ -82,7 +82,7 @@ python scripts/check_version_consistency.py --strict --tag vX.Y.Z
 ./gradlew test lint
 ./gradlew assembleRelease bundleRelease
 ./gradlew signingReport | grep -i "Variant\|Config\|Store"
-sha256sum app/build/outputs/apk/release/*.apk
+sha256sum app/build/outputs/apk/production/release/*.apk
 
 # 打 tag（2026-09 修订：双仓体系已废止，推 origin）
 git tag vX.Y.Z && git push origin vX.Y.Z

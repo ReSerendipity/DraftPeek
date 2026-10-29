@@ -20,6 +20,13 @@ repos:
         pass_filenames: false
         always_run: true
         stages: [pre-commit, pre-push]
+      - id: junit-platform
+        name: JUnit platform/annotation consistency
+        entry: python scripts/check_junit_platform.py --strict
+        language: system
+        pass_filenames: false
+        always_run: true
+        stages: [pre-commit, pre-push]
   - repo: https://github.com/gitleaks/gitleaks
     rev: v8.30.1
     hooks:
