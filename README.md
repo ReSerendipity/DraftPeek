@@ -74,7 +74,8 @@ A native Android code & text editor with a built-in terminal, Markdown preview, 
 git clone https://github.com/ReSerendipity/DraftPeek.git
 cd DraftPeek
 ./gradlew assembleDebug
-# 产物：app/build/outputs/apk/debug/app-debug.apk
+# 产物按 flavor 分目录：app/build/outputs/apk/<flavor>/debug/app-<flavor>-debug.apk
+# flavor 取 dev / staging / production（assembleDebug 三个都会产出）
 ```
 
 **从 Release 安装**
@@ -194,7 +195,8 @@ A: 请勿公开 issue。通过 [SECURITY.md](.github/SECURITY.md) 的私密披�
 git clone https://github.com/ReSerendipity/DraftPeek.git
 cd DraftPeek
 ./gradlew assembleDebug
-# Output: app/build/outputs/apk/debug/app-debug.apk
+# Output: app/build/outputs/apk/<flavor>/debug/app-<flavor>-debug.apk
+# flavor is one of dev / staging / production (assembleDebug builds all three)
 ```
 
 **Install from Release**

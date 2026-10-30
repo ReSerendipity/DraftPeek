@@ -55,43 +55,48 @@ ERRORS=0
 
 # ---- 1. 版本号格式 ----
 echo "1. Checking version format..."
-if echo "$VERSION" | grep -qE '^[0-]+\.[0-]+\.[0-]+(\.(beta|rc|alpha)\.[0-]+)?$'; then
+if echo "$VERSION" | grep -qE '^[0-9]+\.[0-9]+\.[0-9]+(\.(beta|rc|alpha)\.[0-9]+)?$'; then
     echo "  $PASS Version format valid: $VERSION"
 else
     echo "  $FAIL Invalid version format: $VERSION (expected: MAJOR.MINOR.PATCH)"
     ERRORS=$((ERRORS + 1))
 fi
 
-# ---- 2. versionCode / versionName 一致性 ----
+# ---- 2. 版本位一致性（权威源 = gradle.properties 的三槽） ----
 echo ""
-echo "2. Checking versionCode/versionName in build.gradle.kts..."
+echo "2. Checking version slots in gradle.properties..."
+PROPS_FILE="gradle.properties"
 BUILD_FILE="app/build.gradle.kts"
-if [ ! -f "$BUILD_FILE" ]; then
-    echo "  $FAIL $BUILD_FILE not found"
+if [ ! -f "$PROPS_FILE" ]; then
+    echo "  $FAIL $PROPS_FILE not found"
     ERRORS=$((ERRORS + 1))
 else
-    # 提取 versionName
-    VERSION_NAME=$(grep 'versionName' "$BUILD_FILE" | head -1 | sed 's/.*"\(.*\)"/\1/')
-    # 提取 versionCode
-    VERSION_CODE=$(grep 'versionCode' "$BUILD_FILE" | head -1 | grep -oE '[0-9]+')
+    # 版本位集中在 draftpeek.version.{major,minor,patch}；build.gradle.kts 只保留推导公式。
+    read_slot() {
+        grep -E "^draftpeek\.version\.$1[[:space:]]*=" "$PROPS_FILE" | head -1 \
+            | cut -d= -f2- | tr -d '[:space:]'
+    }
+    P_MAJOR="$(read_slot major)"
+    P_MINOR="$(read_slot minor)"
+    P_PATCH="$(read_slot patch)"
+    PROPS_VERSION="${P_MAJOR}.${P_MINOR}.${P_PATCH}"
 
-    if [ "$VERSION_NAME" = "$VERSION" ]; then
-        echo "  $PASS versionName matches: $VERSION_NAME"
+    if [ "$PROPS_VERSION" = "$VERSION" ]; then
+        echo "  $PASS gradle.properties version slots match: $PROPS_VERSION"
     else
-        echo "  $FAIL versionName mismatch: expected '$VERSION', got '$VERSION_NAME'"
+        echo "  $FAIL version mismatch: expected '$VERSION', gradle.properties says '$PROPS_VERSION'"
         ERRORS=$((ERRORS + 1))
     fi
 
-    # 验证 versionCode 公式：MAJOR * 10000 + MINOR * 100 + PATCH
-    MAJOR=$(echo "$VERSION" | cut -d. -f1)
-    MINOR=$(echo "$VERSION" | cut -d. -f2)
-    PATCH=$(echo "$VERSION" | cut -d. -f3 | cut -d. -f1)
-    EXPECTED_CODE=$((MAJOR * 10000 + MINOR * 100 + PATCH))
-
-    if [ "$VERSION_CODE" = "$EXPECTED_CODE" ]; then
-        echo "  $PASS versionCode matches formula: $VERSION_CODE"
+    # versionCode 必须由公式推导（major*10000 + minor*100 + patch），不允许被改成字面量。
+    if [ ! -f "$BUILD_FILE" ]; then
+        echo "  $FAIL $BUILD_FILE not found"
+        ERRORS=$((ERRORS + 1))
+    elif grep -qE 'versionCode[[:space:]]*=[[:space:]]*vMajor[[:space:]]*\*[[:space:]]*10000' "$BUILD_FILE"; then
+        echo "  $PASS versionCode is still derived from the formula in $BUILD_FILE"
     else
-        echo "  $WARN versionCode mismatch: expected '$EXPECTED_CODE', got '$VERSION_CODE' (formula: MAJOR*10000+MINOR*100+PATCH)"
+        echo "  $FAIL $BUILD_FILE 的 versionCode 不再是公式（可能被写成了字面量），版本权威源已失效"
+        ERRORS=$((ERRORS + 1))
     fi
 fi
 

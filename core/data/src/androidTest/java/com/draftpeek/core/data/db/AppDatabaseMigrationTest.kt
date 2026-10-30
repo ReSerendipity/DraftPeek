@@ -3,13 +3,14 @@
  *
  * 依赖前置（core/data/build.gradle.kts 已就绪）：
  * - `androidTest.assets.srcDirs(schemas)`：MigrationTestHelper 从测试 APK assets 读取
- *   Room 导出的 schema JSON（core/data/schemas/AppDatabase/7-12.json）；
+ *   Room 导出的 schema JSON（core/data/schemas/AppDatabase/7-13.json）；
  * - `androidTestImplementation(libs.room.testing)` + test runner + ext junit。
  *
  * 覆盖内容：
- * - 7→12 全链路迁移：每一步使用 AppDatabase 中真实的 Migration 对象执行，
- *   最终 schema 与 12.json 严格比对（validateDroppedTables=true，多余/缺失表均报错）；
- * - 10→12 近期迁移：覆盖最近两步（含 11→12 links 表与唯一索引）；
+ * - 7→13 全链路迁移：每一步使用 AppDatabase 中真实的 Migration 对象执行，
+ *   最终 schema 与 13.json 严格比对（validateDroppedTables=true，多余/缺失表均报错）；
+ * - 12→13 单步：新增的 snippets.syncId 列存在，且产物 schema 与 13.json 严格比对；
+ * - 10→12 近期迁移：覆盖 11→12 links 表与唯一索引；
  * - 7→12 数据保全：按 7.json 真实列 seed `user_activity`，验证 8→9 的
  *   DROP+RENAME 重建（数据丢失高发点）不丢行、新增列按 DEFAULT 0 填充。
  *
@@ -43,25 +44,52 @@ class AppDatabaseMigrationTest {
     )
 
     @Test
-    fun migrate7To12_chainValidatesAgainstExportedSchemas() {
-        val dbName = "migration-test-7-12"
+    fun migrate7To13_chainValidatesAgainstExportedSchemas() {
+        val dbName = "migration-test-7-13"
 
         // 以版本 7 的导出 schema 创建空库
         val dbV7 = helper.createDatabase(dbName, 7)
         dbV7.close()
 
-        // 逐版迁移至 12，最终 schema 与 12.json 严格校验
-        val dbV12 = helper.runMigrationsAndValidate(
+        // 逐版迁移至当前版本 13，最终 schema 与 13.json 严格校验
+        val dbV13 = helper.runMigrationsAndValidate(
             dbName,
-            12,
+            13,
             true,
             AppDatabase.MIGRATION_7_8,
             AppDatabase.MIGRATION_8_9,
             AppDatabase.MIGRATION_9_10,
             AppDatabase.MIGRATION_10_11,
-            AppDatabase.MIGRATION_11_12
+            AppDatabase.MIGRATION_11_12,
+            AppDatabase.MIGRATION_12_13
         )
-        dbV12.close()
+        dbV13.close()
+    }
+
+    @Test
+    fun migrate12To13_addsSyncIdAndValidatesExportedSchema() {
+        val dbName = "migration-test-12-13"
+
+        helper.createDatabase(dbName, 12).close()
+
+        val dbV13 = helper.runMigrationsAndValidate(
+            dbName,
+            13,
+            true,
+            AppDatabase.MIGRATION_12_13
+        )
+
+        // 12→13 的产物：snippets 必须带迁移新增的 syncId 列
+        val columns = mutableListOf<String>()
+        dbV13.query("PRAGMA table_info(snippets)").use { cursor ->
+            val nameIndex = cursor.getColumnIndexOrThrow("name")
+            while (cursor.moveToNext()) {
+                columns.add(cursor.getString(nameIndex))
+            }
+        }
+        assertTrue("12→13 迁移后 snippets 应含 syncId 列", columns.contains("syncId"))
+
+        dbV13.close()
     }
 
     @Test

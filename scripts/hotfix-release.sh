@@ -33,6 +33,18 @@ BASE_TAG="v${BASE_VERSION}"
 HOTFIX_BRANCH="hotfix/v${HOTFIX_VERSION}"
 HOTFIX_TAG="v${HOTFIX_VERSION}"
 
+# ---- 版本模型核验（在任何写盘动作之前） ----
+# 本仓版本权威源是 gradle.properties 的 draftpeek.version.{major,minor,patch} 三槽，
+# versionCode 由 app/build.gradle.kts 的公式 major*10000+minor*100+patch 推导。
+# 「<base>.<hotfix 号>」拼出的四段号在这套模型里无法表示，放过去只会把公式改写成字面量。
+if ! printf '%s' "$HOTFIX_VERSION" | grep -qE '^[0-9]+\.[0-9]+\.[0-9]+$'; then
+    echo "[ERROR] 派生出的版本号 '$HOTFIX_VERSION' 不符合本仓的三段版本模型。"
+    echo "        本仓 hotfix 的正确做法：递增 gradle.properties 的 draftpeek.version.patch"
+    echo "        （./gradlew bumpVersion -Pbump=patch），再按 docs/release-governance.md §5"
+    echo "        走主干等价提交 + 正常 tag 发版；不要拼四段号。"
+    exit 1
+fi
+
 # ---- 前置检查 ----
 echo "============================================================"
 echo "  DraftPeek Hotfix Release Helper"
@@ -83,12 +95,16 @@ echo "Creating hotfix branch from $BASE_TAG..."
 git checkout -b "$HOTFIX_BRANCH" "$BASE_TAG"
 echo "Created branch $HOTFIX_BRANCH"
 
-# ---- 更新版本号 ----
+# ---- 更新版本号（只改权威源 gradle.properties，不动 build.gradle.kts 的推导公式） ----
 echo ""
-echo "Updating version in app/build.gradle.kts..."
-sed -i "s/versionCode = .*/versionCode = $(echo $HOTFIX_VERSION | awk -F. '{print $1*10000+$2*100+$3}')/" app/build.gradle.kts
-sed -i "s/versionName = .*/versionName = \"$HOTFIX_VERSION\"/" app/build.gradle.kts
-echo "Updated versionCode and versionName"
+echo "Updating draftpeek.version.* in gradle.properties..."
+HF_MAJOR=$(printf '%s' "$HOTFIX_VERSION" | cut -d. -f1)
+HF_MINOR=$(printf '%s' "$HOTFIX_VERSION" | cut -d. -f2)
+HF_PATCH=$(printf '%s' "$HOTFIX_VERSION" | cut -d. -f3)
+sed -i "s/^draftpeek\.version\.major.*/draftpeek.version.major=${HF_MAJOR}/" gradle.properties
+sed -i "s/^draftpeek\.version\.minor.*/draftpeek.version.minor=${HF_MINOR}/" gradle.properties
+sed -i "s/^draftpeek\.version\.patch.*/draftpeek.version.patch=${HF_PATCH}/" gradle.properties
+echo "Updated gradle.properties to ${HF_MAJOR}.${HF_MINOR}.${HF_PATCH}"
 
 # ---- 更新 CHANGELOG ----
 echo ""

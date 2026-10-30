@@ -15,8 +15,12 @@ import pytest
 PROJECT_ROOT = Path(__file__).resolve().parent.parent
 
 
-def _find_version_file():
-    """查找版本权威源文件"""
+def _read_version():
+    """读取版本权威源，返回 (文件名, 版本号)；无可用来源时返回 (None, "")。
+
+    逐个候选尝试：文件存在但读不出版本号（例如外围 Node 工具的 package.json
+    没有 version 字段）时继续往下找，不要把「文件存在」当成「版本可读」。
+    """
     candidates = [
         "package.json",
         "pyproject.toml",
@@ -24,41 +28,50 @@ def _find_version_file():
         "gradle.properties",
     ]
     for c in candidates:
-        if (PROJECT_ROOT / c).exists():
-            return c
-    return None
+        path = PROJECT_ROOT / c
+        if not path.exists():
+            continue
+        content = path.read_text(encoding="utf-8", errors="ignore")
+
+        # package.json
+        if c == "package.json":
+            version = str(json.loads(content).get("version", "")).strip()
+        # pyproject.toml
+        elif c == "pyproject.toml":
+            m = re.search(r'version\s*=\s*["\']([^"\']+)["\']', content)
+            version = m.group(1) if m else ""
+        # version.json
+        elif c == "version.json":
+            version = str(json.loads(content).get("version", "")).strip()
+        # gradle.properties：版本位集中在 draftpeek.version.{major,minor,patch}
+        elif c == "gradle.properties":
+            parts = [
+                re.search(rf"^{key}\s*=\s*(\S+)", content, re.MULTILINE)
+                for key in (
+                    "draftpeek.version.major",
+                    "draftpeek.version.minor",
+                    "draftpeek.version.patch",
+                )
+            ]
+            version = ".".join(p.group(1) for p in parts) if all(parts) else ""
+        else:
+            version = ""
+
+        if version:
+            return c, version
+    return None, ""
 
 
 def test_version_file_exists():
-    assert _find_version_file() is not None, "未找到版本权威源文件"
+    vfile, _ = _read_version()
+    assert vfile is not None, "未找到版本权威源文件"
 
 
 def test_version_is_semver():
-    vfile = _find_version_file()
+    vfile, version = _read_version()
     assert vfile, "未找到版本文件"
 
-    content = (PROJECT_ROOT / vfile).read_text(encoding="utf-8", errors="ignore")
-
-    # package.json
-    if vfile == "package.json":
-        data = json.loads(content)
-        version = data.get("version", "")
-    # pyproject.toml
-    elif vfile == "pyproject.toml":
-        m = re.search(r'version\s*=\s*["\']([^"\']+)["\']', content)
-        version = m.group(1) if m else ""
-    # version.json
-    elif vfile == "version.json":
-        data = json.loads(content)
-        version = data.get("version", "")
-    # gradle.properties
-    elif vfile == "gradle.properties":
-        m = re.search(r'versionName\s*=\s*([^\n]+)', content)
-        version = m.group(1).strip() if m else ""
-    else:
-        version = ""
-
-    assert re.fullmatch(r"\d+\.\d+\.\d+", version), f"版本号不符合 SemVer: {version}"
+    assert re.fullmatch(r"\d+\.\d+\.\d+", version), f"{vfile} 的版本号不符合 SemVer: {version!r}"
 
 
 def test_no_hardcoded_old_version():

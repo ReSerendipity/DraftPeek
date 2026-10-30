@@ -94,9 +94,16 @@
   - `git revert <bad-commit>`（保历史、可再 forward）为首选。
   - 应用商店回滚：**当前不适用**——本仓未接入 Google Play，不存在 Play Console 回滚能力（`release.yml` 只产出 GitHub Release 资产，无 Play 发布步骤；分发渠道决策见 `docs/deploy-download-page/README.md`）。若未来接入 Play 分发，本项改为「在 Play Console 回滚到上一版本（需上一版本仍上架）」。
   - 直接下载回退：维护上一版本 APK + SHA256 校验和，在 GitHub Release 中可访问。
+    **数据代价（回退前必读）**：上一版 APK 的 schema 版本低于当前库版本，降级打开时 `core/data` 的
+    数据库装配走 `fallbackToDestructiveMigrationOnDowngrade(dropAllTables = true)` 分支（见 `DataModule`，
+    其注释明确该分支就是给「用户从高版本回退」场景用的），书签 / 链接 / 最近文件 / 片段 / 活动统计 /
+    安全事件会被整表重建，且**仓内没有设备侧的导出或恢复通道**（`scripts/backup_data.*` 备份的是本地工作树，
+    不是应用数据）。磁盘上的用户文件不在 Room 内，不受此路径影响。
+    因此执行本项前先确认两件事：① 能否改用上面的 `git revert` + 前滚发版（不动用户数据，首选）；
+    ② 若必须回退，在该版 Release 说明中告知用户本地记录会被重建，不要静默推送旧包。
   - Feature Flag Kill-Switch：通过远程配置（或 BuildConfig）禁用问题功能模块。
 - **破坏性动作红线**：重指向 / 删除 tag、移动任何远端 ref 属破坏性远端动作，**须仓库所有者单独授权**。`release.yml` 由 `push: tags` 触发，移动已发布 tag 会当场重跑发布链——历史上因此产出过混年代 Release 资产。
-- **回滚后验证**：`./gradlew test` 全部通过；`./gradlew lint` 无新增 error；上一版本 APK 的 `apksigner verify --verbose` 通过；SHA256 校验和可复核。
+- **回滚后验证**：`./gradlew test` 全部通过；`./gradlew lint` 无新增 error；上一版本 APK 的 `apksigner verify --verbose` 通过；SHA256 校验和可复核。走「直接下载回退」时还须补一条数据面复核：首启动后检查书签 / 片段 / 最近文件列表是否符合上面声明的数据代价（整表重建后为空属预期，不得当回归处理；若非空说明降级分支未被触发，需记录实际路径）。
 
 ### 5.1 版本号 → 主干等价提交对照与 tag 可达性核查（本仓特有，2026-10-17 建立）
 
