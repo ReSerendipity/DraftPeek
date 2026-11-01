@@ -4,7 +4,7 @@
 # Kept separate from requirements.txt so production installs stay minimal.
 # Versions are exact-pinned (==) for reproducible CI.
 
-pytest==9.1.1
-pytest-asyncio==1.4.0
-ruff==0.16.8
+pytest==9.2.0
+pytest-asyncio==1.4.1
+ruff==0.17.3
 pip-audit==2.10.1
