@@ -7,6 +7,7 @@
 
 - G34R 专用 `gen_export.js` / `gen_pngs.py` 已移入 `../archive/g34r/scripts/`，不在本目录。
 - `apply_export.js` 已改为仅应用 G34O：源为 `../icon-export-g34o/res`，目标为当前仓库 `app/src/main/res`；不要再指向归档的 G34R。
+- `gen8.js` 仍是历史评审板生成器：模板保留 v9/v10 历史字样、输出到旧外部路径；仅作留档，不生成当前 G34O 资产。
 
 ## 说明
 

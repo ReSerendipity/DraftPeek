@@ -33,6 +33,12 @@ python -m http.server 8080 --directory docs/deploy-download-page
 4. （HTTPS 必须）in-app 更新检测（规划，未实现）将 GET `latest.json` 并比较
    `versionCode`，HTTP 明文会被 Android 网络安全策略拦截。
 
+## OG 图片与生产域名
+
+当前仓库没有确定的生产/发布域名；根 `index.html` 与本目录 `index.html` 的 `og:image`
+保持 G34O 的相对路径，离线打开可用。若要对社交平台提供外链预览，需在部署域名确定后
+把 `og:image` 改为绝对 URL；在此之前不得写入未核实的域名。
+
 ## 与发布流程的关系
 
 - `docs/RELEASE_CHECKLIST.md` §5 已包含「分发链接就绪」检查项；

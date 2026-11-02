@@ -1,4 +1,4 @@
-// v11.6: revert G34O accent chord to blue; add accent-chord color comparison strip (blue / amber / mint / crimson / mist-ink)
+// G34O final iteration: restore the accent chord to electric blue; add accent-chord color comparison strip (blue / amber / mint / crimson / mist-ink)
 const fs = require('fs');
 const P = 'C:/Users/Doro/.qwenworkcn/workspace/mtpvei2btqrqc5zn/gen8.js';
 let h = fs.readFileSync(P, 'utf8');
@@ -56,4 +56,4 @@ r("c:'G34 的构图精修:包络圆偏心,窥视有方位。配色定稿:蓝弦�
   "c:'G34 的构图精修:包络圆偏心,窥视有方位。强调弦恢复电光蓝(与朱砂眼冷暖对撞,红弦版经对比落选);近眼三弦雾墨提亮的两级色阶保留——向眼睛旋转汇聚。强调弦五候选见下方对比条。'}");
 
 fs.writeFileSync(P, h);
-console.log('v11.6 done: blue restored + accent shootout strip');
+console.log('G34O accent chord finalized: blue restored + accent-chord shootout strip');
