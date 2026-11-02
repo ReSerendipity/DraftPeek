@@ -11,7 +11,7 @@
 | 归档路径 | 内容 | 来源 / 日期 | 关键哈希（git blob SHA-1 前 8 位） |
 |---|---|---|---|
 | `g34r/icon-export/` | G34R「红弦」完整导出包：`README.md`、`geometry.json`、`res/`（前景、单色层、adaptive XML、背景色）、`store-png/`（7 张） | 工程生效期 2026-09-09（`aa433ce`）→ 2026-09-13（`c6cb379`）被 G34O 替换；导出包快照提交 `c6cb379`（2026-09-13） | 前景 `8dce0eb1`；单色层 `0e12a731`；adaptive `10bc7a5d`；背景色 `235e2fad`；README `99a93e20`；geometry `77a35648` |
-| `g34r/DraftPeek图标评审板-v10-G4R历史版.html` | v10 历史评审板：最终裁定 G4R（G34R 同代历史结论），含 G34 家族附录与“评审当时现状”对照 | 页内快照日期 2026-09-06；提交 `c6cb379`（2026-09-13）；2026-11-02 统一版本并归档 | `b9bf3a01` |
+| `g34r/DraftPeek图标评审板-v10-G4R历史版.html` | v10 历史评审板：最终裁定 G4R（G34R 同代历史结论），含 G34 家族附录与“评审当时现状”对照 | 页内快照日期 2026-09-06；提交 `c6cb379`（2026-09-13）；2026-11-02 统一版本并归档 | `9ff500df` |
 | `g34r/backup-previous-g34r/` | G34R 被替换前的工程备份：`ic_launcher_foreground-g34r.xml`、`ic_launcher_monochrome-g34r.xml` | 提交 `c6cb379`（2026-09-13） | 前景 `8dce0eb1`；单色层 `0e12a731` |
 | `g34r/scripts/` | G34R 专用生成脚本：`gen_export.js`（G34R XML 生成）、`gen_pngs.py`（G34R PNG 渲染） | 提交 `c6cb379`（2026-09-13） | `gen_export.js` `dab9c882`；`gen_pngs.py` `b1d8857d` |
 | `initial-2026-08-15/backup-originals/` | 初版图标备份：`drawable-nodpi__ic_launcher_foreground.png`（512×512、不透明白底）、初版 adaptive XML、初版日/夜背景色 | 提交 `9560934`（2026-08-15）；2026-09-09（`aa433ce`）矢量化时移出构建 | PNG `53797306`；adaptive `a8a8fa55`（launcher / round 同哈希）；浅色背景 `a069564c`；夜间背景 `98c2f44d` |
