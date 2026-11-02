@@ -6,6 +6,13 @@
 <meta name="canvas:width" content="393">
 <meta name="canvas:height" content="852">
 <title>DraftPeek 撰码轻览 · UI 原型</title>
+<link rel="icon" type="image/png" href="docs/icon-design/icon-export-g34o/store-png/ic_launcher-playstore.png">
+<meta property="og:image" content="docs/icon-design/icon-export-g34o/store-png/ic_launcher-playstore.png">
+<meta property="og:image:width" content="512">
+<meta property="og:image:height" content="512">
+<meta property="og:title" content="DraftPeek 撰码轻览 · UI 原型">
+<meta property="og:description" content="DraftPeek（撰码轻览）Android 代码编辑器 UI 原型">
+<meta property="og:type" content="website">
 <style>
 /* ============================================================
    DraftPeek (撰码轻览) 高保真 UI 原型
@@ -164,9 +171,9 @@ body{
   display:flex;align-items:center;justify-content:center;gap:10px;
 }
 .proto-head h1 .mark{
-  width:26px;height:26px;border-radius:7px;background:var(--brand-mark);
-  display:inline-flex;align-items:center;justify-content:center;
-  font-family:var(--font-mono);font-size:14px;font-weight:700;color:#fff;
+  width:26px;height:26px;border-radius:7px;background:#F5F7FA;
+  display:block;object-fit:contain;
+  border:1px solid color-mix(in srgb, var(--shell-fg-strong) 12%, transparent);
 }
 .proto-head p{margin-top:6px;font-size:.8rem;color:var(--shell-muted);letter-spacing:.01em}
 
@@ -624,7 +631,7 @@ body{
 <body>
 
 <div class="proto-head">
-  <h1><span class="mark">D</span>DraftPeek · 撰码轻览 UI 原型</h1>
+  <h1><img class="mark" src="docs/icon-design/icon-export-g34o/store-png/ic_launcher_48.png" alt="DraftPeek 图标">DraftPeek · 撰码轻览 UI 原型</h1>
   <p>高保真可点击原型 · 视觉依据 core/designsystem 设计令牌 · 点击仅切换界面状态, 无真实功能反馈</p>
 </div>
 

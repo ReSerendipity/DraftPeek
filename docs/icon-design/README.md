@@ -6,12 +6,12 @@
 
 | 路径 | 说明 |
 |---|---|
-| `DraftPeek图标评审板-v11.6.html` | **历史评审板**：文件名为 v11.6，但内部标题/页脚实际为 v10/v9，最终裁定仍是早期 G4R，不是当前 G34O 定稿。仅作设计过程归档，浏览器可查看历史候选。 |
-| `archive/README.md` | **历史图标归档索引（HISTORICAL / DO NOT APPLY）**：G34R 导出包、G34R 备份、初版备份、G34R 商店 PNG 与 G34R 脚本的路径、哈希、日期。 |
+| `archive/g34r/DraftPeek图标评审板-v10-G4R历史版.html` | **v10 历史评审板**：最终裁定 G4R（G34R 同代历史结论）；标题/页脚/文件名已统一为 v10 + G4R，并标注“评审当时现状”；不参与构建、不代表当前 G34O。 |
+| `archive/README.md` | **历史图标归档索引（HISTORICAL / DO NOT APPLY）**：G34R 导出包、G4R 历史评审板、G34R 备份、初版备份、G34R 商店 PNG 与 G34R 脚本的路径、哈希、日期。 |
 | `icon-export-g34o/` | **当前 G34O 定稿导出包**：前景/单色层 vector XML、adaptive icon 定义、背景色、G34O 商店 PNG（48/72/96/144/192/512/圆角 512）。 |
 | `archive/g34r/icon-export/` | 历史 G34R·红弦导出包（含 `store-png/` 与 README）；不参与构建，不要复制进 `app/src/main/res/`。 |
 | `archive/initial-2026-08-15/backup-originals/` | 2026-08-15 初版 PNG/adaptive XML/背景色备份。 |
-| `scripts/` | 生成与验证脚本：`gen8.js`（评审板生成器，含全部记号几何定义）、`patch*.js`（各轮单变量修改记录）、`audit*.js`（66dp 安全区审计器）、`apply_export.js`（仅 G34O 应用，使用当前仓库相对路径）、`export_g34o.js`/`gen_pngs_g34o.py`（G34O 导出）。G34R 专用 `gen_export.js`/`gen_pngs.py` 已归档至 `archive/g34r/scripts/`。 |
+| `scripts/` | 生成与验证脚本：`gen8.js`（历史评审板生成器，DEV-ONLY 留档，输出旧版 v9/v10）、`patch*.js`（各轮单变量修改记录）、`audit*.js`（66dp 安全区审计器）、`apply_export.js`（仅 G34O 应用，使用当前仓库相对路径）、`export_g34o.js`/`gen_pngs_g34o.py`（G34O 导出）。G34R 专用 `gen_export.js`/`gen_pngs.py` 已归档至 `archive/g34r/scripts/`。 |
 
 ## 定稿状态（2026-11-02 复核）
 
@@ -21,7 +21,7 @@
 
 ## 历史资产归档
 
-G34R 导出包、G34R 备份、G34R 商店 PNG、G34R 专用脚本与 2026-08-15 初版备份已移入 `archive/`，详见 `archive/README.md`。归档内容不参与构建，禁止复制进 `app/src/main/res/`。
+G34R 导出包、G4R 历史评审板、G34R 备份、G34R 商店 PNG、G34R 专用脚本与 2026-08-15 初版备份已移入 `archive/`，详见 `archive/README.md`。归档内容不参与构建，禁止复制进 `app/src/main/res/`。
 
 ## 夜间配色例外（2026-11-02 确认）
 
@@ -35,9 +35,9 @@ G34R 导出包、G34R 备份、G34R 商店 PNG、G34R 专用脚本与 2026-08-15
 - 适用场景：Material 强调色、`PrototypeTokens.accent`、启动动画 `SplashAnimation` 的强调色。
 - 不适用于启动图标静态资源：G34O 图标仍使用 `#C41E3A`/`#3178C6`/`#33475F`/`#1C2B3A`，背景 `#F5F7FA`。
 
-## 复现
+## 复现（历史脚本）
 
 ```bash
-node scripts/gen8.js        # 重新生成评审板(输出路径需按环境调整)
-node scripts/audit18.js     # 66dp 安全区审计
+node scripts/gen8.js        # 历史评审板生成器（DEV-ONLY 留档，不生成当前资产）
+node scripts/audit18.js     # 历史 66dp 安全区审计
 ```

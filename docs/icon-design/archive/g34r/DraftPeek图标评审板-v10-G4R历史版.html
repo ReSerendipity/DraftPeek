@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>DraftPeek 图标重构 · v10 决赛圈</title>
+<title>DraftPeek 图标评审板 v10 · G4R 历史裁定</title>
 <style>
 :root{
   --seed-bg:#F5F6F8; --seed-surface:#FFFFFF; --seed-fg:#16222E;
@@ -26,7 +26,7 @@
   --show-a:#EDF0F5; --show-b:#DFE4EC;
   --wall-a:#F3F6FA; --wall-b:#E2E8F2; --wall-c:#EBEFF6;
   --mono-fg:#F2F5F9;
-  /* fixed asset-domain constants: faithful reproduction of the CURRENT shipped icon (diagnostic only) */
+  /* fixed asset-domain constants: faithful reproduction of the icon shipped at review time (diagnostic only) */
   --old-panel:#2A3B52; --old-green:#10B981; --old-orange:#D97706; --old-paper:#F8FAFC; --old-paper-line:#E2E8F0; --old-head:#C7D2E0; --old-bar-blue:#3B82F6; --old-bar-red:#DC2626; --old-word:#475569;
   --r:12px; --chip-r:22%;
   --mono:"Cascadia Mono","JetBrains Mono",Consolas,monospace;
@@ -151,6 +151,7 @@ footer{margin-top:64px;padding-top:18px;border-top:1px solid var(--border-strong
 </style>
 </head>
 <body>
+<div style="max-width:1180px;margin:16px auto 0;padding:10px 16px;border:1px solid #C41E3A;border-radius:8px;background:#FCE8EC;color:#7F0F1F;font:600 13px/1.5 'Segoe UI',sans-serif">HISTORICAL / v10 · G4R 历史评审板 — 本板最终裁定为 G4R（G34R 同代历史结论），不代表当前 G34O；当前图标见 <code>docs/icon-design/README.md</code>。</div>
 <svg width="0" height="0" style="position:absolute" aria-hidden="true">
 <defs>
   <pattern id="bpgrid" width="8" height="8" patternUnits="userSpaceOnUse"><path d="M8 0H0V8" fill="none" stroke="rgba(28,43,58,.10)" stroke-width=".5"/></pattern>
@@ -1346,8 +1347,8 @@ footer{margin-top:64px;padding-top:18px;border-top:1px solid var(--border-strong
 <div class="wrap">
 <main>
 <header data-component="page-header">
-  <span class="eyebrow caps">Icon Redesign · Review Board v8 · Geometric Precision</span>
-  <h1>DraftPeek 图标 v10 · 决赛圈:五选一</h1>
+  <span class="eyebrow caps">Icon Redesign · Review Board v10 · G4R Historical Verdict</span>
+  <h1>DraftPeek 图标评审板 v10 · G4R 历史裁定</h1>
   <p class="lede">v7 的教训:高级感不来自装饰(渐变/高光/投影恰恰是幼稚感来源),而来自数学精确。v8 先立构造纪律,再在纪律内生成 8 个记号:所有尺寸落在 8u 网格,线宽恒 8u,角度只取 0/45/60/90°,半径等差递进,平涂色按「结构位」分配而非涂装。色彩不再绑定朱砂——石墨墨、电光蓝、珊瑚红、薄荷绿、琥珀五色按节奏出现。</p>
   <div class="metarow">
     <span class="pill">平台 <b>Android Adaptive Icon · 108dp</b></span>
@@ -1378,8 +1379,8 @@ footer{margin-top:64px;padding-top:18px;border-top:1px solid var(--border-strong
 </header>
 
 <section id="finals" data-component="finals-round">
-  <div class="sec-hd"><span class="no">00</span><h2>决赛圈 · 五个最终候选</h2><span class="sub mono">FINAL FIVE · 以下过程档案仅供参考</span></div>
-  <p class="note">经六轮迭代与两轮淘汰,19 个方向收敛为 5 个决赛候选。淘汰名单与理由见页尾「过程档案」。先看这五个,选一个即进入资源导出。</p>
+  <div class="sec-hd"><span class="no">00</span><h2>v10 决赛圈 · 五个历史候选</h2><span class="sub mono">FINAL FIVE · 历史过程档案</span></div>
+  <p class="note">经六轮迭代与两轮淘汰,19 个方向收敛为 5 个决赛候选。本板最终历史裁定为 G4R（G34R 同代结论）；后续工程已演进到 G34R/G34O，当前图标不以本板为准。</p>
   <div class="wall" data-component="finals-wall" style="margin-bottom:20px">
     <a href="#s-g4r"><span class="stage float"><svg viewBox="0 0 100 100"><use href="#mk-g4r"/></svg></span><span class="code">G4R</span><span class="nm">直刃光圈 · 主推</span></a>
     <a href="#s-g24r"><span class="stage float"><svg viewBox="0 0 100 100"><use href="#mk-g24r"/></svg></span><span class="code">G24R</span><span class="nm">透镜交集 · 强推</span></a>
@@ -1388,9 +1389,9 @@ footer{margin-top:64px;padding-top:18px;border-top:1px solid var(--border-strong
     <a href="#s-g1r"><span class="stage float"><svg viewBox="0 0 100 100"><use href="#mk-g1r"/></svg></span><span class="code">G1R</span><span class="nm">旋转连续环 · 耐看</span></a>
   </div>
   <div class="top3" data-component="final-verdict">
-    <div class="card"><span class="stage"><svg viewBox="0 0 100 100"><use href="#mk-g4r"/></svg></span><div><h5>裁定 · G4R 直刃光圈(主推)</h5><p>六轮中唯一从未被点名批评的方向:窥视语义、机械精确、全形态无短板。如果不想再纠结,选它,直接进资源导出。</p></div></div>
-    <div class="card"><span class="stage"><svg viewBox="0 0 100 100"><use href="#mk-g24r"/></svg></span><div><h5>裁定 · G24R 透镜交集(并列强推)</h5><p>概念密度最高——「编辑∩预览的重合处」就是产品定义本身;墨蓝红三色结构最清晰。想要品牌有「一句话故事」,选它。</p></div></div>
-    <div class="card"><span class="stage"><svg viewBox="0 0 100 100"><use href="#mk-g9r"/></svg></span><div><h5>裁定 · G9R 叶序点阵(签名备选)</h5><p>最独特、延展面最广(动画/插画同源);代价是 29px 依赖简化形态。想要「别人没有的」,选它。</p></div></div>
+    <div class="card"><span class="stage"><svg viewBox="0 0 100 100"><use href="#mk-g4r"/></svg></span><div><h5>历史裁定 · G4R 直刃光圈(主推)</h5><p>六轮中唯一从未被点名批评的方向:窥视语义、机械精确、全形态无短板。本板历史首选；后续工程已另行演进，当前图标以 G34O 为准。</p></div></div>
+    <div class="card"><span class="stage"><svg viewBox="0 0 100 100"><use href="#mk-g24r"/></svg></span><div><h5>历史备选 · G24R 透镜交集(并列强推)</h5><p>概念密度最高——「编辑∩预览的重合处」就是产品定义本身;墨蓝红三色结构最清晰。本板当时列为并列强推。</p></div></div>
+    <div class="card"><span class="stage"><svg viewBox="0 0 100 100"><use href="#mk-g9r"/></svg></span><div><h5>历史备选 · G9R 叶序点阵(签名备选)</h5><p>最独特、延展面最广(动画/插画同源);代价是 29px 依赖简化形态。本板当时列为签名备选。</p></div></div>
   </div>
 </section>
 
@@ -2532,7 +2533,7 @@ footer{margin-top:64px;padding-top:18px;border-top:1px solid var(--border-strong
   <div class="sec-hd"><span class="no">03</span><h2>同框对比 · 悬浮 / 桌面 / 石墨瓦片</h2><span class="sub mono">FLOATING / HOME / INK TILE</span></div>
   <div class="showcase">
     <h3>左:悬浮记号 · 中:启动器桌面 · 右:石墨瓦片</h3>
-    <p class="note">桌面区含现状图标对照(虚线框);通知栏演示 G4/G7 的 22px 单色形态。</p>
+    <p class="note">桌面区含评审当时（G34R 之前）的现状图标对照（虚线框）；通知栏演示 G4/G7 的 22px 单色形态。</p>
     <div class="showcols">
       <div class="floatstrip" data-component="floating-strip">
         <div class="cell"><span class="stage"><svg viewBox="0 0 100 100"><use href="#mk-g1"/></svg></span><span class="code">G1</span></div>
@@ -2701,7 +2702,7 @@ footer{margin-top:64px;padding-top:18px;border-top:1px solid var(--border-strong
         <div class="cell"><span class="chip"><svg viewBox="0 0 100 100"><use href="#mk-g36"/></svg></span><span class="code">G36</span></div>
         <div class="cell"><span class="chip"><svg viewBox="0 0 100 100"><use href="#mk-g37"/></svg></span><span class="code">G37</span></div>
         <div class="cell"><span class="chip"><svg viewBox="0 0 100 100"><use href="#mk-g38"/></svg></span><span class="code">G38</span></div>
-        <div class="cell"><span class="chip" style="border-style:dashed;border-color:color-mix(in srgb, var(--red) 60%, transparent)"><svg viewBox="0 0 100 100"><use href="#mk-old"/></svg></span><span class="code">现状</span></div>
+        <div class="cell"><span class="chip" style="border-style:dashed;border-color:color-mix(in srgb, var(--red) 60%, transparent)"><svg viewBox="0 0 100 100"><use href="#mk-old"/></svg></span><span class="code">评审当时现状</span></div>
         </div>
         <div class="notif" data-component="notification-demo">
           <span class="stage mono-layer" style="color:var(--fg)"><svg viewBox="0 0 100 100"><use href="#mk-g4"/></svg></span>
@@ -2885,16 +2886,16 @@ footer{margin-top:64px;padding-top:18px;border-top:1px solid var(--border-strong
   </table>
   
 <div class="top3" data-component="top3">
-  <div class="card"><span class="stage"><svg viewBox="0 0 100 100"><use href="#mk-g4r"/></svg></span><div><h5>主推 · G4R 直刃光圈</h5><p>「窥视」的精确版,六轮中唯一从未被点名批评的方向;全形态无短板。定稿默认选择。</p></div></div>
-  <div class="card"><span class="stage"><svg viewBox="0 0 100 100"><use href="#mk-g7r"/></svg></span><div><h5>决赛 · G7R 嵌套V形</h5><p>动作性最强:三层等差嵌套给出「向下即预览」的方向直觉;净隙已修正至 4.9u。</p></div></div>
-  <div class="card"><span class="stage"><svg viewBox="0 0 100 100"><use href="#mk-g24r"/></svg></span><div><h5>强推 · G24R 透镜交集</h5><p>概念密度最高:「编辑∩预览的重合处」就是产品定义本身;diff/merge 语义直译,参考集零重合。</p></div></div>
+  <div class="card"><span class="stage"><svg viewBox="0 0 100 100"><use href="#mk-g4r"/></svg></span><div><h5>历史主推 · G4R 直刃光圈</h5><p>「窥视」的精确版,六轮中唯一从未被点名批评的方向;全形态无短板。本板历史默认选择，不代表当前工程选择。</p></div></div>
+  <div class="card"><span class="stage"><svg viewBox="0 0 100 100"><use href="#mk-g7r"/></svg></span><div><h5>历史备选 · G7R 嵌套V形</h5><p>动作性最强:三层等差嵌套给出「向下即预览」的方向直觉;净隙已修正至 4.9u。</p></div></div>
+  <div class="card"><span class="stage"><svg viewBox="0 0 100 100"><use href="#mk-g24r"/></svg></span><div><h5>历史备选 · G24R 透镜交集</h5><p>概念密度最高:「编辑∩预览的重合处」就是产品定义本身;diff/merge 语义直译,参考集零重合。</p></div></div>
 </div>
 </section>
 
 
 <section id="refined" data-component="refined-round">
   <div class="sec-hd"><span class="no">05</span><h2>精修轮 · 四强候选的光学级修正</h2><span class="sub mono">TOP-4 REFINED · G4R / G9R / G7R / G1R</span></div>
-  <p class="note">从 10 个系统记号中收敛出 4 个最强方向,逐项做光学级修正:间隙均匀化、切点落位、着色语义归位、小尺寸简化形态。以下为最终定稿池。</p>
+  <p class="note">从 10 个系统记号中收敛出 4 个最强方向,逐项做光学级修正:间隙均匀化、切点落位、着色语义归位、小尺寸简化形态。以下为当时精修候选池。</p>
   <article class="spec" id="s-g4r" data-component="icon-spec-refined">
   <div class="spec-hd"><span class="code">G4R</span><div><h4>直刃光圈·精修</h4><p class="gene">APERTURE · 外 r26.5 / 光瞳 r11.5 / lead 55° / 线宽 7.5</p></div><p class="concept">机械光圈的最终形态:六刃内外端分别落在 r26.5 与 r11.5 的同心圆上,55° 导程让刃与孔的比例接近真实快门;线宽从 8 收到 7.5,红瞳与光瞳同心悬浮。</p></div>
   <div class="spec-grid">
@@ -2957,17 +2958,17 @@ footer{margin-top:64px;padding-top:18px;border-top:1px solid var(--border-strong
   <div class="orig"><b>精修注记</b> · ①环径 r16→r17、线宽 6.5→7,对比度拉满;②圆心距 18→20,红镜高度 26.4→27.5u,交集存在感更强;③左墨右蓝的结构色与「左写右览」方位一致。</div>
 </article>
   <div class="top3" data-component="final-reco">
-    <div class="card"><span class="stage"><svg viewBox="0 0 100 100"><use href="#mk-g4r"/></svg></span><div><h5>主推 · G4R 直刃光圈</h5><p>「窥视」语义、机械精确、瓦片/单色/29px 全形态无短板;工业感与 DraftPeek 的编辑器身份最契合。定稿风险最低。</p></div></div>
-    <div class="card"><span class="stage"><svg viewBox="0 0 100 100"><use href="#mk-g9r"/></svg></span><div><h5>签名备选 · G9R 叶序点阵</h5><p>全场最独特:程序化生成的生长母题,同套公式可延展加载动画/启动画面/空状态;小尺寸依赖简化形态是唯一代价。</p></div></div>
-    <div class="card"><span class="stage"><svg viewBox="0 0 100 100"><use href="#mk-g7r"/></svg></span><div><h5>动作备选 · G7R 嵌套V形</h5><p>方向性最强、最轻;若想要「工具感」弱一点、更轻盈的品牌气质,选它。</p></div></div>
+    <div class="card"><span class="stage"><svg viewBox="0 0 100 100"><use href="#mk-g4r"/></svg></span><div><h5>历史主推 · G4R 直刃光圈</h5><p>「窥视」语义、机械精确、瓦片/单色/29px 全形态无短板;工业感与 DraftPeek 的编辑器身份最契合。历史评审风险最低。</p></div></div>
+    <div class="card"><span class="stage"><svg viewBox="0 0 100 100"><use href="#mk-g9r"/></svg></span><div><h5>历史签名备选 · G9R 叶序点阵</h5><p>全场最独特:程序化生成的生长母题,同套公式可延展加载动画/启动画面/空状态;小尺寸依赖简化形态是唯一代价。</p></div></div>
+    <div class="card"><span class="stage"><svg viewBox="0 0 100 100"><use href="#mk-g7r"/></svg></span><div><h5>历史动作备选 · G7R 嵌套V形</h5><p>方向性最强、最轻;若想要「工具感」弱一点、更轻盈的品牌气质,当时会选它。</p></div></div>
   </div>
 </section>
 <section id="guide" data-component="export-guide">
-  <div class="sec-hd"><span class="no">06</span><h2>定稿后 · Android 资源导出与替换</h2><span class="sub mono">NEXT ROUND</span></div>
-  <p class="note" style="margin-bottom:16px">圈定方向(可含参数级微调,如「G4 弦宽改 6u」)后,下一轮生成矢量资源并精确替换:</p>
+  <div class="sec-hd"><span class="no">06</span><h2>历史记录 · 当时的 Android 资源导出与替换</h2><span class="sub mono">ARCHIVED</span></div>
+  <p class="note" style="margin-bottom:16px">本板记录当时圈定方向（可含参数级微调，如「G4 弦宽改 6u」）后的下一轮导出流程；以下步骤已归档，不要按本板重新执行。</p>
   <div class="steps">
-    <div class="step"><b>生成前景矢量 <code>ic_launcher_foreground.xml</code></b><p>纯几何记号可直接转 vector path,无渐变转换损失;替换现状位图前景。</p></div>
-    <div class="step"><b>生成单色层 <code>ic_launcher_monochrome.xml</code></b><p>同轮廓单色版,补齐主题图标(现状缺失)。</p></div>
+    <div class="step"><b>生成前景矢量 <code>ic_launcher_foreground.xml</code></b><p>纯几何记号可直接转 vector path,无渐变转换损失;替换评审当时使用的位图前景（现已被矢量资源取代）。</p></div>
+    <div class="step"><b>生成单色层 <code>ic_launcher_monochrome.xml</code></b><p>同轮廓单色版,补齐评审当时缺失的主题单色层（现工程已有 monochrome）。</p></div>
     <div class="step"><b>更新 adaptive icon 定义</b><p><code>mipmap-anydpi/ic_launcher.xml</code> 与 <code>ic_launcher_round.xml</code> 加入 <code>&lt;monochrome&gt;</code>;背景色建议浅底(记号自带深色)或石墨 <code>#22303F</code>。</p></div>
     <div class="step"><b>导出商店位图</b><p>512/192/144/96/72/48 PNG(含圆角母版),供 Google Play、README 与文档站。</p></div>
     <div class="step"><b>近似检索 + 构建验证</b><p>对最终图形做商标近似检索;执行 <span class="mcode">gradlew.bat :app:assembleDebug</span> 核对遮罩、29px、主题单色。</p></div>
@@ -2976,8 +2977,8 @@ footer{margin-top:64px;padding-top:18px;border-top:1px solid var(--border-strong
 </main>
 
 <footer data-component="page-footer">
-  <span>DraftPeek 图标评审板 v9 · v8 十系统 + 四强精修(G4R/G9R/G7R/G1R)· 定稿池已就绪</span>
-  <span class="mono">下一步:圈定方向 → 近似检索 → 导出 Android 矢量资源</span>
+  <span>DraftPeek 图标评审板 v10 · G4R 历史裁定（G34R 同代结论）· 基于 v8 十系统 + 四强精修(G4R/G9R/G7R/G1R)· 已归档</span>
+  <span class="mono">归档位置：docs/icon-design/archive/g34r/ · 当前图标以 G34O 为准</span>
 </footer>
 </div>
 </body>

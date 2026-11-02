@@ -39,6 +39,7 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
+import androidx.core.content.ContextCompat
 import androidx.datastore.preferences.core.booleanPreferencesKey
 import com.draftpeek.core.common.util.FpsMonitor
 import com.draftpeek.core.ui.theme.DraftPeekTheme
@@ -53,7 +54,7 @@ import kotlinx.coroutines.flow.first
  * **职责**：
  * 1. 显示品牌启动动画（SplashAnimation）
  * 2. 异步读取 DataStore 判断是否为首次启动
- * 3. 配置导航栏纯色背景，避免系统级毛玻璃效果
+ * 3. 配置导航栏背景：旧版本使用与启动背景同源的纯色，API 35+ 交由 edge-to-edge 透明处理
  * 4. 动画结束后根据首次启动状态跳转到引导页或主界面
  * 5. 处理配置变更（旋转、折叠屏等），保持动画连续性
  *
@@ -74,10 +75,13 @@ class SplashActivity : ComponentActivity() {
         enableEdgeToEdge()
         FpsMonitor.applyHighRefreshRate(window, this)
 
-        // 防止系统在导航栏区域应用模糊/毛玻璃效果（常见于荣耀/华为/小米定制ROM）
-        // 设置与闪屏背景匹配的纯色，避免系统自动添加透明度+模糊导致视觉不统一
-        @Suppress("DEPRECATION")
-        window.navigationBarColor = android.graphics.Color.parseColor("#F5F7FA")
+        // API 35+ 已强制 edge-to-edge，系统会忽略/覆盖 navigationBarColor；
+        // 保留 enableEdgeToEdge() 的透明系统栏，避免与强制策略对抗。
+        // API < 35 仍使用与启动背景同源的日/夜颜色，避免旧版本出现亮色带。
+        if (Build.VERSION.SDK_INT < Build.VERSION_CODES.VANILLA_ICE_CREAM) {
+            @Suppress("DEPRECATION")
+            window.navigationBarColor = ContextCompat.getColor(this, R.color.splash_background)
+        }
 
         setContent {
             DraftPeekTheme {
