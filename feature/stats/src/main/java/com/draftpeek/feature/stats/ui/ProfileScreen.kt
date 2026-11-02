@@ -438,6 +438,24 @@ fun ProfileScreen(
                 null
             ),
             SocialPlatform(
+                "魔搭",
+                "https://modelscope.cn/profile/ReSerendipity",
+                R.drawable.ic_social_modelscope,
+                null,
+                Color(0xFF624AFF),
+                null,
+                null
+            ),
+            SocialPlatform(
+                "知乎",
+                "https://www.zhihu.com/people/6-50-73-59-83",
+                R.drawable.ic_social_zhihu,
+                null,
+                Color(0xFF0084FF),
+                "com.zhihu.android",
+                "zhihu://"
+            ),
+            SocialPlatform(
                 "B站",
                 "https://space.bilibili.com/499527473",
                 R.drawable.ic_social_bilibili,
