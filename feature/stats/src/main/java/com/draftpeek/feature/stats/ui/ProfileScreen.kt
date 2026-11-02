@@ -430,7 +430,7 @@ fun ProfileScreen(
         listOf(
             SocialPlatform(
                 "GitHub",
-                "https://github.com/ReSerendipity/DraftPeek",
+                "https://github.com/ReSerendipity",
                 R.drawable.ic_social_github,
                 null,
                 Color(0xFF24292E),
