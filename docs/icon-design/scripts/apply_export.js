@@ -1,9 +1,19 @@
-// Apply export package to the DraftPeek project — with automatic backup of originals
+// Apply the G34O final export to DraftPeek app resources — G34O ONLY.
+// Do NOT point SRC at docs/icon-design/archive/g34r/: that is the historical G34R package
+// and would regress the launcher icon.
 const fs = require('fs');
+const os = require('os');
 const path = require('path');
-const BK = 'C:/Users/Doro/.qwenworkcn/workspace/mtpvei2btqrqc5zn/outputs/DraftPeek-icon-export/backup-originals';
-const SRC = 'C:/Users/Doro/.qwenworkcn/workspace/mtpvei2btqrqc5zn/outputs/DraftPeek-icon-export/res';
-const RES = 'C:/Users/Doro/DraftPeek/app/src/main/res';
+
+const ROOT = path.resolve(__dirname, '../../..');
+const SRC = path.join(ROOT, 'docs/icon-design/icon-export-g34o/res');
+const RES = path.join(ROOT, 'app/src/main/res');
+// Runtime safety backup outside the repo; not part of the historical archive.
+const BK = path.join(os.tmpdir(), 'draftpeek-icon-backup-g34o');
+
+if (!fs.existsSync(SRC)) {
+  throw new Error(`G34O export not found: ${SRC}`);
+}
 fs.mkdirSync(BK, { recursive: true });
 
 function backupAndCopy(rel, srcFile) {
@@ -25,14 +35,14 @@ backupAndCopy('mipmap-anydpi/ic_launcher_round.xml', path.join(SRC, 'mipmap-anyd
 // 2) background colors (overwrite day + night)
 backupAndCopy('values/ic_launcher_background.xml', path.join(SRC, 'values/ic_launcher_background.xml'));
 backupAndCopy('values-night/ic_launcher_background.xml', path.join(SRC, 'values-night/ic_launcher_background.xml'));
-// 3) new drawables (foreground vector + monochrome)
+// 3) G34O drawables (foreground vector + monochrome)
 backupAndCopy('drawable/ic_launcher_foreground.xml', path.join(SRC, 'drawable/ic_launcher_foreground.xml'));
 backupAndCopy('drawable/ic_launcher_monochrome.xml', path.join(SRC, 'drawable/ic_launcher_monochrome.xml'));
-// 4) move old PNG foreground out of res (avoid resource-name collision) — backup, then remove from res
-const oldPng = path.join(RES, 'drawable-nodpi/ic_launcher_foreground.png');
-if (fs.existsSync(oldPng)) {
-  fs.copyFileSync(oldPng, path.join(BK, 'drawable-nodpi__ic_launcher_foreground.png'));
-  fs.unlinkSync(oldPng);
-  console.log('moved old PNG out of res (backed up): drawable-nodpi/ic_launcher_foreground.png');
+// 4) legacy cleanup: the initial PNG should already be absent from current res
+const legacyPng = path.join(RES, 'drawable-nodpi/ic_launcher_foreground.png');
+if (fs.existsSync(legacyPng)) {
+  fs.copyFileSync(legacyPng, path.join(BK, 'drawable-nodpi__ic_launcher_foreground.png'));
+  fs.unlinkSync(legacyPng);
+  console.log('moved legacy PNG out of res (backed up): drawable-nodpi/ic_launcher_foreground.png');
 }
-console.log('DONE — project res updated');
+console.log('DONE — G34O resources applied to app/src/main/res');

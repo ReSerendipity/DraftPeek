@@ -56,11 +56,13 @@ val SurfaceTintLight = PrimaryLight
 
 // ---- Dark Theme ----
 
+// 夜间专属配色：暖金强调；与 G34O 朱砂红的日夜分叉为有意设计，不是漏改。
 val PrimaryDark = Color(0xFFE8A838)
 val OnPrimaryDark = Color(0xFFFFFFFF)
 val PrimaryContainerDark = Color(0xFF3D2D15)
 val OnPrimaryContainerDark = Color(0xFFFFD9D9)
 
+// 夜间专属配色：浅蓝辅助色；与 G34O 电光蓝的日夜分叉为有意设计，不是漏改。
 val SecondaryDark = Color(0xFF5A9BD5)
 val OnSecondaryDark = Color(0xFF00335C)
 val SecondaryContainerDark = Color(0xFF0D3E70)
