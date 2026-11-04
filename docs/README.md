@@ -50,7 +50,7 @@
 | 目录 | 存什么 |
 |---|---|
 | [adr/](adr/README.md) | 架构决策记录：[索引](adr/README.md) · [0002 编辑器同步采用 CRDT](adr/0002-editor-sync-crdt.md) |
-| [reports/](reports/2026-10-15-架构评审台账.md) | 7 篇带日期历史报告：[架构评审台账](reports/2026-10-15-架构评审台账.md) · [覆盖率爬坡计划](reports/2026-10-15-覆盖率爬坡计划.md) · [失败签名机制摘要](reports/2026-10-15-失败签名机制与排障路径摘要.md) · [BUILD_PERF](reports/BUILD_PERF_REPORT.md) · [前端工程体系评估](reports/DraftPeek_前端工程体系评估报告_v1.0.30.md) · [测试体系评估](reports/测试体系评估报告_v1.0.30.md) · [学习成果落地分析](reports/学习成果落地分析报告.md) |
+| [reports/](reports/2026-10-15-架构评审台账.md) | 8 篇带日期历史报告：[架构评审台账](reports/2026-10-15-架构评审台账.md) · [覆盖率爬坡计划](reports/2026-10-15-覆盖率爬坡计划.md) · [失败签名机制摘要](reports/2026-10-15-失败签名机制与排障路径摘要.md) · [BUILD_PERF](reports/BUILD_PERF_REPORT.md) · [前端工程体系评估](reports/DraftPeek_前端工程体系评估报告_v1.0.30.md) · [测试体系评估](reports/测试体系评估报告_v1.0.30.md) · [学习成果落地分析](reports/学习成果落地分析报告.md) · [2026-09 Agent 记忆归档](reports/2026-09-agent-memory-archive.md) |
 | [icon-design/](icon-design/README.md) | 图标设计素材档案（109 个文件，素材为主、非文档实体）：[总览](icon-design/README.md) · [历史归档索引](icon-design/archive/README.md) · [G34R 导出包说明](icon-design/archive/g34r/icon-export/README.md) · [scripts 说明](icon-design/scripts/README.md) |
 | [deploy-download-page/](deploy-download-page/README.md) | 自托管下载页工程基座（README + index.html + latest.json.example） |
 | `assets/` | README 展示图（`readme-*`，§8.1 指定位） |
