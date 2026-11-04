@@ -154,9 +154,7 @@ design_system_draft.md
 !docs/VERSIONING.md
 !docs/release-governance.md
 !docs/DATABASE_MIGRATION_STRATEGY.md
-!docs/SKILL.md
 !学习成果落地分析报告.md
-!docs/repo-analysis/**
 !docs/adr/*.md
 !docs/reports/2026-10-15-架构评审台账.md
 !docs/reports/2026-10-15-覆盖率爬坡计划.md

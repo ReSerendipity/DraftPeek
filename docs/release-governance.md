@@ -26,7 +26,7 @@
 | PATCH | 向后兼容的 Bug 修复 | 安全补丁、UI 修复、性能优化 |
 | PRERELEASE | 预发布标识 | `-alpha.N`、`-beta.N`、`-rc.N` |
 
-- **唯一权威版本位**：`gradle.properties` 的集中版本位 `draftpeek.version.major` / `draftpeek.version.minor` / `draftpeek.version.patch`（当前 `1.0.32`）。
+- **唯一权威版本位**：`gradle.properties` 的集中版本位 `draftpeek.version.major` / `draftpeek.version.minor` / `draftpeek.version.patch`（当前 `1.0.33`，截至 2026-11-04）。
 - **必须同步的其它版本位**：`app/build.gradle.kts` 从 `gradle.properties` 读取版本位，**勿手改**；`versionCode` 由 `bumpVersion` task 自动核算，不手写。
 - **versionCode 规则（本仓特有，不得丢失）**：
   - 公式：`versionCode = MAJOR * 10000 + MINOR * 100 + PATCH`（示例：`1.0.30` → `10030`）。
@@ -115,6 +115,7 @@
 |---|---|---|---|---|
 | 1.0.31 | `74e4a8ac3` | `08a367440873840d48b0e1ed8ff9b26fc812b1d8` | `d1f4bf0` | `release(v1.0.31): bump version + changelog (#82)`（draft Release 从未发布，见 CHANGELOG 该版说明） |
 | 1.0.32 | `b16b951d1` | `6fc9023cad56155f0ff7170a2d0aa4e7b041da41` | `957e0e3` | `chore(release): 准备 v1.0.32，落版 CHANGELOG 与版本号 (#101)` |
+| 1.0.33 | `4e37384`（主干可达，非改写提交） | `cf1f7a7fa9a29ad417bd4702e1a4ea546c2a4fc2` | `4e37384`（即 tag 提交自身） | `release(v1.0.33): bump version + changelog`（2026-10-29） |
 
 判据用**树（tree）相等**，不用 patch-id 或提交信息：改写只换提交元数据与 SHA，内容树不变。以下三条命令均为只读，可复核本表：
 

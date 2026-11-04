@@ -15,7 +15,7 @@
 |---|---|
 | `app/` | 应用壳模块（MainActivity、导航、安全模块、AppWidget） |
 | `core/` | 基础层（common / crdt / data / domain / designsystem / sync / testing / ui） |
-| `feature/` | 功能模块（browser / editor / knowledge / settings / stats / terminal） |
+| `feature/` | 功能模块（browser / editor / settings / stats / terminal；`feature/knowledge/` 仅存 graph.html，非构建模块） |
 | `benchmark/` | Macrobenchmark 性能基准 |
 | `build-logic/` | Gradle 约定插件 |
 | `gradle/` | wrapper 与版本目录（libs.versions.toml） |
@@ -24,20 +24,41 @@
 | `docs/` | 项目文档（见下方索引） |
 | `scripts/` | 构建与辅助脚本 |
 
-## docs/ 索引（本目录）
+## docs/ 索引（全部 tracked 文档登记于此）
 
-| 文件 / 子目录 | 存什么 |
+### 顶层文档（14 篇）
+
+| 文档 | 存什么 |
 |---|---|
-| `VERSIONING.md` | 版本号规范、versionCode 公式、发布/灰度/回滚、hotfix 与 SLA |
-| `RELEASE_CHECKLIST.md` | 发布前人工检查清单（与 CI 门禁分工） |
-| `DATABASE_MIGRATION_STRATEGY.md` | Room / SQLCipher 迁移策略 |
-| `release-version-management-evaluation.md` | 发布版本管理评估（版本集中化改造依据） |
-| `SECURITY_AUDIT_DraftPeek.md` | 安全审计 |
-| `adr/` | 架构决策记录（含 CRDT vs OT 选型） |
-| `deploy-download-page/` | 下载页部署说明 |
-| `icon-design/` | 应用图标设计与导出 |
-| `reports/` | 测试体系 / 前端工程评估报告；架构评审台账、覆盖率爬坡计划（2026-10-15 起） |
-| `screenshots/` | 界面截图 |
+| [VERSIONING.md](VERSIONING.md) | 版本管理规范（已收敛为指针 → release-governance.md） |
+| [release-governance.md](release-governance.md) | 发布总纲：版本位、灰度、回滚、§5.1 tag 可达性对照 |
+| [RELEASE_CHECKLIST.md](RELEASE_CHECKLIST.md) | 发布前人工检查清单（与 CI 门禁分工） |
+| [CODING_STANDARDS.md](CODING_STANDARDS.md) | 可移植性 / 依赖 / Git 卫生 + §7 交付体规范单一来源 |
+| [DATABASE_MIGRATION_STRATEGY.md](DATABASE_MIGRATION_STRATEGY.md) | Room / SQLCipher 迁移策略 |
+| [HANDOVER_GUIDE.md](HANDOVER_GUIDE.md) | 接管者指引（最小可执行起点） |
+| [SRE_RUNBOOK.md](SRE_RUNBOOK.md) | server 日志落点与勘误指引 |
+| [THIRD_PARTY_NOTICES.md](THIRD_PARTY_NOTICES.md) | 第三方组件与许可声明 |
+| [PRIVACY_POLICY.md](PRIVACY_POLICY.md) | 隐私政策 |
+| [USER_AGREEMENT.md](USER_AGREEMENT.md) | 用户协议 |
+| [SECURITY_AUDIT_DraftPeek.md](SECURITY_AUDIT_DraftPeek.md) | 安全审计（2026-09-01，含 2026-10-21 整改复核） |
+| [release-version-management-evaluation.md](release-version-management-evaluation.md) | 发布版本管理评估（2026-09-04，版本集中化依据） |
+| [agent-contract.md](agent-contract.md) | Agent 契约 v2（与组织模板逐字节一致） |
+| [phaseb-oauth-wip-todo.md](phaseb-oauth-wip-todo.md) | 阶段 B OAuth 临时降级 TODO（WIP，状态见文内标注） |
+
+### 子目录
+
+| 目录 | 存什么 |
+|---|---|
+| [adr/](adr/README.md) | 架构决策记录：[索引](adr/README.md) · [0002 编辑器同步采用 CRDT](adr/0002-editor-sync-crdt.md) |
+| [reports/](reports/2026-10-15-架构评审台账.md) | 7 篇带日期历史报告：[架构评审台账](reports/2026-10-15-架构评审台账.md) · [覆盖率爬坡计划](reports/2026-10-15-覆盖率爬坡计划.md) · [失败签名机制摘要](reports/2026-10-15-失败签名机制与排障路径摘要.md) · [BUILD_PERF](reports/BUILD_PERF_REPORT.md) · [前端工程体系评估](reports/DraftPeek_前端工程体系评估报告_v1.0.30.md) · [测试体系评估](reports/测试体系评估报告_v1.0.30.md) · [学习成果落地分析](reports/学习成果落地分析报告.md) |
+| [icon-design/](icon-design/README.md) | 图标设计素材档案（109 个文件，素材为主、非文档实体）：[总览](icon-design/README.md) · [历史归档索引](icon-design/archive/README.md) · [G34R 导出包说明](icon-design/archive/g34r/icon-export/README.md) · [scripts 说明](icon-design/scripts/README.md) |
+| [deploy-download-page/](deploy-download-page/README.md) | 自托管下载页工程基座（README + index.html + latest.json.example） |
+| `assets/` | README 展示图（`readme-*`，§8.1 指定位） |
+| `ci/` | `branch-protection.json`（分支保护口径单一来源） |
+
+**仅本地 / 未跟踪（不入库，非遗漏）**：`agents/`（GOTCHAS / CODE_STYLE，AGENTS 家族）、`project/`（ADR-001 本地原件，正文副本为 adr/0002）、`screenshots/`（未跟踪 WIP 截图暂存，§8.1.3）、`_devarchive/`（空目录，已 gitignore）。
+
+**关联工程件**：[ARCHITECTURE.md](../ARCHITECTURE.md) · [CHANGELOG.md](../CHANGELOG.md) · [CONTRIBUTING.md](../CONTRIBUTING.md) · [.github/SECURITY.md](../.github/SECURITY.md) · [.githooks/README.md](../.githooks/README.md) · 根 [README.md](../README.md)
 
 ## 想找内容？
 
@@ -92,3 +113,7 @@
 - **根目录守卫**：新增根目录文件必须登记 `.github/layout-rules.yaml → root_allowlist`（structure-guard；2026-09-17 已补 `.gitattributes` / `.workbuddy` / `gitleaks.toml`）。
 - **提交**：Conventional Commits + DCO（`git commit -s`，commit-msg 钩子校验）。
 - **钩子**：`.githooks/pre-commit` 分发器四级回退；pre-push gitleaks 扫描。
+
+## 观察项（2026-11-04 复核）
+
+- **icon-design 历史评审板 HTML 超体积阈值**：[DraftPeek图标评审板-v10-G4R历史版.html](icon-design/archive/g34r/DraftPeek图标评审板-v10-G4R历史版.html) 为 408 KB（408,044 字节），超组织治理规范 §18.2 的「单文件 ≤256 KB」阈值。该文件属 **HISTORICAL 素材**（G4R 阶段评审留档，非活文档），故**保留原样**、不压缩、不外置；后续同类历史留档如需入库，按 §18.2 先评估是否另存压缩包。

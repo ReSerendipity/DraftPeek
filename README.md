@@ -119,6 +119,7 @@ A: 请勿公开 issue。通过 [SECURITY.md](.github/SECURITY.md) 的私密披�
 
 ### 文档与治理
 
+- [文档索引](docs/README.md) — docs/ 全部文档与子目录导航
 - [版本与发布治理](docs/release-governance.md) — 远端优先、tag 驱动、产物可校验
 - [发布检查清单](docs/RELEASE_CHECKLIST.md)
 - [编码规范](docs/CODING_STANDARDS.md)
