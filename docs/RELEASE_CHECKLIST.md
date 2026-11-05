@@ -44,13 +44,17 @@
 
 ## 5. 产物与分发
 
-- [ ] draft Release 已生成：APK + AAB + `.sha256` 三类附件齐全
+- [ ] draft Release 已生成：APK + AAB + `.sha256` + `sbom.cdx.json`（CycloneDX 1.5 组件清单，
+      由 `scripts/generate_sbom.py` 从 `app/gradle.lockfile` 生成，与 APK 同一 run 产出；
+      release.yml「Verify artifacts present」对它 fail-closed）四类附件齐全
 - [ ] **APK 体积基线（T7）**：production release APK 基线 **≈35.2 MB**（ABI=arm64-v8a/armeabi-v7a/x86_64，
       x86 已裁剪；x86_64 保留供 CI macrobenchmark）。体积异常（≥+15%）时在 Release 说明中注明原因
 - [ ] 哈希取的是**本次 run** 的资产：重跑 `release.yml` 会覆盖同名资产并换 APK 哈希
       （同 tag 树两次构建实测：AAB 摘要不变、APK 由 `af76e377…` 变 `ad62508e…`，大小一致）。
       因此报告/验签前重新下载一次，别引用上一轮的数字
 - [ ] 本地抽查完整性：下载 APK 后 `sha256sum -c *.apk.sha256` 通过
+- [ ] SBOM 抽查：`python scripts/generate_sbom.py --verify sbom.cdx.json` 通过，
+      组件数与 Release 说明一致（口径与已知缺口见 SBOM metadata 的 `draftpeek:*` 属性）
 - [ ] Release 说明中的 SHA256 与 `.sha256` 文件一致
 - [ ] 分发链接已就绪（当前：GitHub Release；若启用自托管下载页/更新检测，须先更新
       对应服务端清单再发版）

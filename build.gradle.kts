@@ -322,6 +322,20 @@ allprojects {
     }
 }
 
+// ===== 可复现构建最小约束（评估 2026-11-05 P1-R1 整改） =====
+// 归档任务确定性：所有 Zip/Jar/Tar 类任务禁用条目时间戳并按固定顺序写入，
+// 使同树构建产出的归档字节可复现（Gradle 官方可复现构建的两项基线约束）。
+// Wrapper 发行包锚定（distributionSha256Sum）见 gradle/wrapper/gradle-wrapper.properties。
+// 已知剩余缺口（如实登记，不在本轮宣称已闭环）：AGP 打包（zipflinger）、
+// R8 与 native strip 等环节不走 AbstractArchiveTask，APK 级可复现性仍须按
+// docs/RELEASE_CHECKLIST.md §5「同 tag 树两次构建摘要对比」实测验证。
+subprojects {
+    tasks.withType<org.gradle.api.tasks.bundling.AbstractArchiveTask>().configureEach {
+        isPreserveFileTimestamps = false
+        isReproducibleFileOrder = true
+    }
+}
+
 // ===== CHANGELOG Generation Task =====
 // Usage: ./gradlew generateChangelog -Pversion=1.0.31
 // Parses conventional commits from git log and inserts a new CHANGELOG.md entry.

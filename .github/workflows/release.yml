@@ -160,6 +160,12 @@ jobs:
       - name: Build Release AAB
         run: ./gradlew :app:bundleProductionRelease --stacktrace
 
+      # 评估 2026-11-05 P1（S8）：SBOM 随发布附。
+      # 从 app/gradle.lockfile（STRICT 依赖锁定，单一事实来源）+ settings.gradle.kts
+      # 生成 CycloneDX 1.5 JSON；脚本自带结构自校验（fail-closed），仅依赖 Python 标准库。
+      - name: Generate SBOM (CycloneDX 1.5)
+        run: python3 scripts/generate_sbom.py --output app/build/sbom/sbom.cdx.json
+
       - name: Verify APK Signature
         run: |
           APK_PATH=$(find app/build/outputs/apk/production/release -name "*.apk" | head -1)
@@ -218,6 +224,12 @@ jobs:
           test -s "$MAPPING_FILE" || { echo "::error::mapping.txt 为空文件"; exit 1; }
           cp "$MAPPING_FILE" "dist-release/mapping.txt"
           echo "已归档 mapping.txt（$(stat -c%s "$MAPPING_FILE" 2>/dev/null || stat -f%z "$MAPPING_FILE") bytes）"
+          # 评估 2026-11-05 P1（S8）：SBOM 与 APK/AAB 同 run 生成、同批归档；缺失即拒绝发布。
+          SBOM_FILE=app/build/sbom/sbom.cdx.json
+          test -s "$SBOM_FILE" || { echo "::error::SBOM 未生成（generate_sbom.py 步骤失败？），不发布"; exit 1; }
+          python3 scripts/generate_sbom.py --verify "$SBOM_FILE"
+          cp "$SBOM_FILE" "dist-release/sbom.cdx.json"
+          echo "已归档 sbom.cdx.json（$(stat -c%s "$SBOM_FILE" 2>/dev/null || stat -f%z "$SBOM_FILE") bytes）"
           # 拍平到 dist-release/：publish 与 benchmark 都从这里取，glob 不再依赖 gradle 输出目录结构
           ls -l dist-release
           echo "已暂存 $(find dist-release -type f | wc -l) 个文件"
@@ -262,7 +274,7 @@ jobs:
       - name: Verify artifacts present
         run: |
           set -eu
-          for glob in "*.apk" "*.apk.sha256" "*.aab" "*.aab.sha256" "mapping.txt"; do
+          for glob in "*.apk" "*.apk.sha256" "*.aab" "*.aab.sha256" "mapping.txt" "sbom.cdx.json"; do
             n=$(find dist-release -type f -name "$glob" | wc -l)
             test "$n" -ge 1 || { echo "::error::dist-release 里缺 $glob（匹配 $n 个），拒绝建 Release"; exit 1; }
           done
@@ -282,6 +294,7 @@ jobs:
             dist-release/*.aab
             dist-release/*.aab.sha256
             dist-release/mapping.txt
+            dist-release/sbom.cdx.json
           body: |
             ## DraftPeek ${{ env.RELEASE_TAG }}
 
@@ -292,6 +305,7 @@ jobs:
             - APK SHA256: `${{ needs.build.outputs.apk_sha256 }}`
             - 验证命令: `sha256sum -c *.apk.sha256`
             - APK 已使用正式签名密钥签名（APK Signature Scheme v2+v3）
+            - 组件清单（SBOM）：`sbom.cdx.json`（CycloneDX 1.5 JSON，由 `scripts/generate_sbom.py` 从 `app/gradle.lockfile` 依赖锁定生成，与 APK 同一 run 产出）
 
             ### 崩溃排查（T3）
             - 混淆映射已归档为 `mapping.txt`，崩溃堆栈还原：`retrace mapping.txt stacktrace.txt`

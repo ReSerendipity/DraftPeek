@@ -65,6 +65,11 @@
 | Open Beta | 公开测试 (1000+ 人) | crash rate < 0.3%，用户反馈正面 | crash rate > 0.5% |
 | Production | 全量发布 | crash rate < 0.2% | crash rate > 0.5% 或关键功能不可用 |
 
+上表的**机器可执行版**：`python scripts/check_release_criteria.py --list`（判据清单 + 数据源缺口标注）；
+`python scripts/check_release_criteria.py --check --input <metrics.json> --stage <stage>`（逐条判定
+PASS / FAIL / SKIP，SKIP = 判据已定义但本轮无数据源；`--strict` 把 SKIP 视为失败，供远端数据源
+落地后切换硬门禁）。脚本仅依赖 Python 标准库，阈值与 §3.1 表逐字对应，改动须两处同步。
+
 ### 3.2 崩溃观测口径（「仅本地」声明，2026-10-19 随 WIP 批次合入）
 
 > 对应《移动端工程体系 Flash 报告》P1-2：稳定性观测缺 ANR 与 native 崩溃采集、崩溃上报端点 `CRASH_REPORT_URL` 默认空串即关闭。本小节把现状口径成文，防止把「灰度通过标准里的 crash rate」误读为已具备远端口径。
@@ -78,14 +83,24 @@
 | 产物 | 构建位置 | 标签 / 命名 | 完整性手段 |
 |---|---|---|---|
 | Android APK（release 包） | **远端**（GitHub Actions runner） | `vX.Y.Z`（不可变 semver tag；不使用 floating latest） | `SHA256SUMS.txt`（`.apk.sha256`）防传输损坏；APK 本身走 Android 签名（`apksigner verify --verbose`），签名密钥存 GitHub Secrets、不入库 |
+| SBOM（组件清单） | **远端**（与 APK 同一 run 生成） | `sbom.cdx.json`（CycloneDX 1.5 JSON） | 由 `scripts/generate_sbom.py` 从 `app/gradle.lockfile`（STRICT 依赖锁定）+ `settings.gradle.kts` 一方模块生成并自校验；release.yml 对其 fail-closed（缺失/校验不过即拒绝发布） |
 
 - 不使用容器镜像；不使用 Tauri ed25519 更新器签名（本仓为原生 Android，非 Tauri 壳）。
 - **不使用 GPG 分离签名**（2026-10-18 裁决撤掉，见 §10.6）。
 - **构建可重复性（本仓特有）**：
   - `gradle/libs.versions.toml` 统一管理所有依赖版本（依赖锁定）。
-  - Gradle wrapper 锁定 Gradle 版本（`gradle/wrapper/gradle-wrapper.properties`）。
+  - 全部 15 个模块的传递依赖经 `gradle.lockfile` 逐模块锁定（`lockAllConfigurations()` +
+    `LockMode.STRICT`，缺锁/漏锁即构建失败；根 `gradle.lockfile` 仅含 jacoco 11 行属正常）。
+  - Gradle wrapper 锁定 Gradle 版本（`gradle/wrapper/gradle-wrapper.properties`），
+    并以 `distributionSha256Sum` 锚定发行包哈希（2026-11-05 起在库；值取自
+    services.gradle.org 官方 checksum 端点，wrapper 下载时 fail-closed 校验）。
+  - 全部 Zip/Jar/Tar 归档任务禁用条目时间戳并按固定顺序写入
+    （根 `build.gradle.kts` 的 `AbstractArchiveTask` 约束，2026-11-05 起在库）。
   - CI 固定 `temurin JDK 17`。
   - 每次 Release 构建后生成 SHA256 校验和，GitHub Release 附 `.apk.sha256`；用户可用 `sha256sum -c app-release.apk.sha256` 校验。
+  - **APK 级可复现性尚未达成**：AGP 打包（zipflinger）/R8/native strip 不受上述归档约束，
+    同 tag 树两次构建的 APK 摘要漂移仍须按 `docs/RELEASE_CHECKLIST.md` §5 实测对比——该约束
+    落地后须重测一次双跑摘要并把结论登记回该清单。
 
 ## 5. 回滚
 
