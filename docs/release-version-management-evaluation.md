@@ -4,6 +4,24 @@
 > 评估日期：2026-09-04 ｜ 项目版本：v1.0.30 (10030)
 > 方法：先逐条核实评估提示词「事实锚点表」，再据真实代码/配置给出判定；不确定项标「未核实」并附核实命令（严守证据绑定铁律，未虚构任何门禁或渠道）。
 
+> **2026-11-06 复核（本报告写于 v1.0.30 时代，下列结论已被现况推翻，正文保留原样作历史）**
+>
+> 复核方式：实跑门禁脚本 + 注入漂移做负控，不是读文档推断。
+>
+> | 当年结论 | 现况（2026-11-06 实测） |
+> |---|---|
+> | §0-D / §1「**无任何 tag**，`v*` 从未触发 release.yml」 | ❌ 已过期。`git tag -l 'v1.*'` = `v1.0.31` / `v1.0.32` / `v1.0.33`，发布链路已被真实触发 |
+> | §1 判定「三处人工同步**没有**门禁，靠人」 | ❌ 已过期。门禁存在且双档接线：`docs-consistency.yml` 的 `version-consistency` job（PR 档）与 `release.yml` 第 129 行 step（tag 档，`--strict --tag <ref>`），两者复用同一份 `scripts/check_version_consistency.py` |
+> | §4 建议 2「补版本一致性 CI 门禁」 | ✅ 已落地，不再是待办 |
+>
+> **实测证据**（本机 `C:\Python312\python.exe`，仓库工作树 = `gradle.properties 1.0.33` / `CHANGELOG 1.0.33`）：
+>
+> 1. 正控：`python scripts/check_version_consistency.py --strict --tag v1.0.33` → `rc=0`，「版本一致性校验通过（告警 0 项）」，且打印 `gradle.properties : 1.0.33 (versionCode=10033)` / `git tag : 1.0.33 (raw=v1.0.33)`。
+> 2. 负控（把 `draftpeek.version.patch` 改成 34 制造漂移，跑完按字节还原、sha256 不变）：`--strict --tag v1.0.33` → **`rc=1`**，两条硬失败点名 —— `FAIL : CHANGELOG 未同步：gradle.properties=1.0.34 > CHANGELOG 最新=1.0.33（--strict 模式下为硬失败）`、`FAIL : tag 与 gradle.properties 不一致：tag=1.0.33 != gradle.properties=1.0.34`。⇒ 门禁**不是空转**。
+> 3. 同一次漂移在**宽容档**（`python scripts/check_version_consistency.py`，即 `docs-consistency.yml` 跑的那条）→ `rc=0`，只出 `WARN : CHANGELOG 未同步…（开发期正常，打 tag 前必须补齐）`。**这是设计如此、active 行为**：开发期允许 gradle 领先 CHANGELOG，打 tag 时由严格档兜底。所以「有没有门禁」的准确答案是——**有，但只在打 tag 时硬阻断；PR 阶段只告警**，别把它当成全时段熔断。
+>
+> 仍未闭合的部分（本次复核一并暴露）：README 缺 AGP / Kotlin / Build Tools 声明，脚本对这三项只能打印 `NOTE : … 跳过比对`——即 README 那条腿**是跳过的，不是通过的**；要盯住 README 漂移，得先把这三项声明补进 README 或目录文档。
+
 ---
 
 ## 0. 事实锚点校正（重要：评估提示词部分假设与仓库实际不符）
