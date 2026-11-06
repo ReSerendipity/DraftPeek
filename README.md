@@ -65,6 +65,9 @@ A native Android code & text editor with a built-in terminal, Markdown preview, 
 | JDK | 17 |
 | Android Studio | Meerkat 2024.3.2+（或任意支持 AGP 8.10.1 的版本） |
 | Android SDK | compileSdk 36, targetSdk 36, minSdk 26（Android 8.0+） |
+| AGP | 8.10.1 |
+| Kotlin | 2.2.21 |
+| Build Tools | 36.1.0 |
 | Gradle | 8.14.3（wrapper 管理，无需手动安装） |
 | 支持 ABI | arm64-v8a · armeabi-v7a · x86_64 |
 
@@ -187,6 +190,9 @@ A: 请勿公开 issue。通过 [SECURITY.md](.github/SECURITY.md) 的私密披�
 | JDK | 17 |
 | Android Studio | Meerkat 2024.3.2+ (or any IDE supporting AGP 8.10.1) |
 | Android SDK | compileSdk 36, targetSdk 36, minSdk 26 (Android 8.0+) |
+| AGP | 8.10.1 |
+| Kotlin | 2.2.21 |
+| Build Tools | 36.1.0 |
 | Gradle | 8.14.3 (via wrapper) |
 | ABIs | arm64-v8a · armeabi-v7a · x86_64 |
 

@@ -20,7 +20,9 @@
 > 2. 负控（把 `draftpeek.version.patch` 改成 34 制造漂移，跑完按字节还原、sha256 不变）：`--strict --tag v1.0.33` → **`rc=1`**，两条硬失败点名 —— `FAIL : CHANGELOG 未同步：gradle.properties=1.0.34 > CHANGELOG 最新=1.0.33（--strict 模式下为硬失败）`、`FAIL : tag 与 gradle.properties 不一致：tag=1.0.33 != gradle.properties=1.0.34`。⇒ 门禁**不是空转**。
 > 3. 同一次漂移在**宽容档**（`python scripts/check_version_consistency.py`，即 `docs-consistency.yml` 跑的那条）→ `rc=0`，只出 `WARN : CHANGELOG 未同步…（开发期正常，打 tag 前必须补齐）`。**这是设计如此、active 行为**：开发期允许 gradle 领先 CHANGELOG，打 tag 时由严格档兜底。所以「有没有门禁」的准确答案是——**有，但只在打 tag 时硬阻断；PR 阶段只告警**，别把它当成全时段熔断。
 >
-> 仍未闭合的部分（本次复核一并暴露）：README 缺 AGP / Kotlin / Build Tools 声明，脚本对这三项只能打印 `NOTE : … 跳过比对`——即 README 那条腿**是跳过的，不是通过的**；要盯住 README 漂移，得先把这三项声明补进 README 或目录文档。
+> 仍未闭合的部分（本次复核一并暴露）：README 缺 AGP / Kotlin / Build Tools 声明，脚本对这三项只能打印 `NOTE : … 跳过比对`——即 README 那条腿**是跳过的，不是通过的**。
+>
+> **2026-11-06 当日晚些时候已闭合**：README 的两张「环境要求 / Requirements」表补上了 `| AGP | 8.10.1 |`、`| Kotlin | 2.2.21 |`、`| Build Tools | 36.1.0 |` 三行（取值取自 `gradle/libs.versions.toml` 的 `agp` / `kotlin` / `buildTools`）。复跑后三条 `NOTE` 全部消失，且做了负控证明它真的会拦：把 README 的 AGP 改成 `8.9.0` → `rc=1`，`FAIL : README.md 声明 AGP=8.9.0，实际为 8.10.1 → 文档漂移，请同步 README.md`；按字节还原后 sha256 不变、`--strict --tag v1.0.33` 复跑 `rc=0`。⇒ README 那条腿从此是**受检的**，不再是跳过。
 
 ---
 
