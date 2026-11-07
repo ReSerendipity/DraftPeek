@@ -1,6 +1,19 @@
 import java.security.KeyStore
 import java.security.MessageDigest
 import java.util.Properties
+import java.util.zip.CRC32
+import java.util.zip.ZipFile
+
+import org.gradle.api.DefaultTask
+import org.gradle.api.file.ConfigurableFileCollection
+import org.gradle.api.file.DirectoryProperty
+import org.gradle.api.provider.Property
+import org.gradle.api.tasks.Input
+import org.gradle.api.tasks.InputFiles
+import org.gradle.api.tasks.OutputDirectory
+import org.gradle.api.tasks.PathSensitive
+import org.gradle.api.tasks.PathSensitivity
+import org.gradle.api.tasks.TaskAction
 
 plugins {
     id("com.android.application")
@@ -56,11 +69,10 @@ android {
             "OFFICIAL_SIGNATURE_SHA256",
             "\"${fetchOfficialSignatureSha256()}\""
         )
-        buildConfigField(
-            "long",
-            "DEX_CRC_BASELINE",
-            "${computeDexCrcBaseline()}"
-        )
+        // DEX_CRC_BASELINE 不再是 BuildConfig 字段：基线值写进 BuildConfig 会改 classes.dex 自身
+        // 的字节，形成"基线依赖 dex / dex 依赖基线"的死循环，永远收敛不到第一次就正确的值。
+        // 现在基线由 DexCrcBaselineTask 生成为 **assets/dex_crc_baseline.txt**（asset 不参与
+        // dex 计算，因此没有循环），运行时由 AiDetector 从 assets 读回。
         buildConfigField(
             "String",
             "LEGAL_NOTICE_HASH",
@@ -456,9 +468,6 @@ fun fetchOfficialSignatureSha256(): String {
     }
 }
 
-/** 计算 DEX CRC 基线（配置期返回占位 0，实际值在构建后由后续步骤更新） */
-fun computeDexCrcBaseline(): Long = 0L
-
 /** 计算 legal_notice_zh.txt 的 SHA-256 哈希（用于运行时校验资源完整性） */
 fun computeLegalNoticeHash(): String {
     val legalFile = file("src/main/res/raw/legal_notice_zh.txt")
@@ -469,5 +478,138 @@ fun computeLegalNoticeHash(): String {
         hash.joinToString("") { byte -> "%02x".format(byte) }
     } catch (_: Exception) {
         ""
+    }
+}
+
+// ===== DEX 完整性基线：构建期真正接线（此前 DEX_CRC_BASELINE 恒为 0，运行时校验被跳过）=====
+//
+// 为什么不放进 BuildConfig：BuildConfig 常量编译进 classes.dex，基线值一变 dex 字节就变，
+// 而基线又要描述 dex —— 循环依赖，永远算不准。assets 不参与 dex 计算，所以能把基线写进
+// 同一个 APK 且不改变被测量的 dex。
+//
+// 实测（2026-11-07，devDebug）：APK 里的 35 个 classes*.dex 全部来自三处中间产物 ——
+//   build/intermediates/dex/<variant>/                       33 个
+//   build/intermediates/global_synthetics_dex/<variant>/      1 个
+//   build/intermediates/desugar_lib_dex/<variant>/            1 个
+// 三处的和与 APK 内 zip 条目 CRC 之和逐位一致（69279869714）。任一处变化都会被
+// verifyDexCrc 抓出来，所以这三条路径不是猜的，是被校验过的。
+
+abstract class DexCrcBaselineTask : DefaultTask() {
+    /** 该变体的 dex 中间产物目录（三处：dex / global_synthetics_dex / desugar_lib_dex）。 */
+    @get:InputFiles
+    @get:PathSensitive(PathSensitivity.RELATIVE)
+    abstract val dexFiles: ConfigurableFileCollection
+
+    /** 变体名，仅用于日志（配置缓存下不能在执行期读 project）。 */
+    @get:Input
+    abstract val variantLabel: Property<String>
+
+    /** 输出到 assets 源集目录（内容即 dex_crc_baseline.txt）。 */
+    @get:OutputDirectory
+    abstract val outputDir: DirectoryProperty
+
+    @TaskAction
+    fun generate() {
+        val crcs = dexFiles.files
+            .filter { it.isFile && it.name.endsWith(".dex") }
+            .sortedBy { it.absolutePath }
+            .map { f ->
+                val crc = CRC32()
+                f.inputStream().use { crc.update(it.readBytes()) }
+                crc.value
+            }
+        val out = outputDir.get().asFile
+        out.mkdirs()
+        val asset = File(out, "dex_crc_baseline.txt")
+        asset.writeText(
+            buildString {
+                appendLine("# DraftPeek 构建期生成的 DEX CRC32 基线，请勿手工编辑。")
+                appendLine("# 与 APK 内 classes*.dex 全部 zip 条目 CRC 之和逐位一致。")
+                appendLine("sum=${crcs.sum()}")
+                appendLine("entries=${crcs.size}")
+            }
+        )
+        logger.lifecycle(
+            "[dex-baseline] ${variantLabel.get()}: ${crcs.size} 个 dex，sum=${crcs.sum()} -> ${asset.path}"
+        )
+    }
+}
+
+androidComponents {
+    onVariants { variant ->
+        val cap = variant.name.replaceFirstChar { it.uppercase() }
+        val taskName = "generate${cap}DexCrcBaseline"
+        val dexTrees = listOf(
+            "intermediates/dex/${variant.name}",
+            "intermediates/global_synthetics_dex/${variant.name}",
+            "intermediates/desugar_lib_dex/${variant.name}"
+        )
+        val genTask = tasks.register<DexCrcBaselineTask>(taskName) {
+            dexTrees.forEach { rel ->
+                dexFiles.from(fileTree(layout.buildDirectory.dir(rel).get().asFile) { include("**/*.dex") })
+            }
+            variantLabel.set(variant.name)
+            outputDir.set(layout.buildDirectory.dir("generated/dexCrcBaseline/${variant.name}/assets"))
+            // 必须先有 dex 才有基线；只依赖本变体的 dex 相关任务，避免跨变体串台。
+            dependsOn(
+                tasks.matching { t ->
+                    t.name != taskName &&
+                        t.name.contains(cap) &&
+                        (t.name.contains("Dex") || t.name.contains("GlobalSynthetics"))
+                }
+            )
+        }
+        variant.sources.assets?.addGeneratedSourceDirectory(genTask, DexCrcBaselineTask::outputDir)
+    }
+}
+
+/**
+ * 校验构建出的 APK：assets 里写的基线 == APK 内 classes*.dex 的 CRC 之和。
+ * 用法：`./gradlew :app:verifyDexCrc`（依赖 assembleDebug）。
+ */
+tasks.register("verifyDexCrc") {
+    group = "verification"
+    description = "校验 APK 内 classes*.dex 的 CRC 之和与 assets/dex_crc_baseline.txt 一致"
+    dependsOn("assembleDebug")
+    val apkRoot = layout.buildDirectory.dir("outputs/apk").get().asFile
+    doLast {
+        val dexEntry = Regex("""classes(\d*)\.dex""")
+        var checked = 0
+        var failures = 0
+        apkRoot.walkTopDown().filter { it.isFile && it.extension == "apk" }.forEach { apk ->
+            ZipFile(apk).use { zip ->
+                val crcs = zip.entries().asSequence()
+                    .filter { dexEntry.matches(it.name) }
+                    .map { it.crc }
+                    .toList()
+                val baselineText = zip.getEntry("assets/dex_crc_baseline.txt")?.let { e ->
+                    zip.getInputStream(e).bufferedReader().readText()
+                }
+                val declaredSum = baselineText?.lineSequence()
+                    ?.firstOrNull { it.startsWith("sum=") }?.removePrefix("sum=")?.toLongOrNull()
+                val declaredCount = baselineText?.lineSequence()
+                    ?.firstOrNull { it.startsWith("entries=") }?.removePrefix("entries=")?.toIntOrNull()
+                checked++
+                val actualSum = crcs.sum()
+                when {
+                    declaredSum == null -> {
+                        failures++
+                        logger.error("[verifyDexCrc] ${apk.name}: assets/dex_crc_baseline.txt 缺失或无法解析")
+                    }
+                    declaredSum != actualSum || declaredCount != crcs.size -> {
+                        failures++
+                        logger.error(
+                            "[verifyDexCrc] ${apk.name}: 基线 $declaredSum/${declaredCount} 条 " +
+                                "!= APK 实际 $actualSum/${crcs.size} 条"
+                        )
+                    }
+                    else -> logger.lifecycle(
+                        "[verifyDexCrc] ${apk.name}: OK sum=$actualSum entries=${crcs.size}"
+                    )
+                }
+            }
+        }
+        require(checked > 0) { "verifyDexCrc 没找到任何 APK，先跑 assembleDebug" }
+        require(failures == 0) { "verifyDexCrc: $failures/$checked 个 APK 的 DEX 基线与实际不符" }
     }
 }

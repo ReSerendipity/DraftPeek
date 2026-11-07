@@ -7,6 +7,7 @@
 package com.draftpeek.security
 
 import com.draftpeek.core.common.security.AiDetectionSignal
+import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertFalse
 import org.junit.jupiter.api.Assertions.assertNotNull
 import org.junit.jupiter.api.Assertions.assertTrue
@@ -167,5 +168,40 @@ class AiDetectorTest {
             AiDetectionSignal.CLASSLOADING_BURST in result,
             "记录数 < 20 应直接返回空集合"
         )
+    }
+
+    // ===== DEX CRC 基线（构建期接线，2026-11-07）=====
+
+    @Test
+    fun `dex baseline parse - reads generated sum line`() {
+        val text = "# DraftPeek 构建期生成\nsum=69279869714\nentries=35\n"
+        assertEquals(69279869714L, AiDetector.parseDexCrcBaseline(text))
+    }
+
+    @Test
+    fun `dex baseline parse - missing or garbage returns zero so check is skipped`() {
+        assertEquals(0L, AiDetector.parseDexCrcBaseline(""))
+        assertEquals(0L, AiDetector.parseDexCrcBaseline("no baseline here"))
+        // 截断/脏值不能被猜成某个数：一律 0（= 跳过校验，零误报）
+        assertEquals(0L, AiDetector.parseDexCrcBaseline("sum=abc"))
+        assertEquals(0L, AiDetector.parseDexCrcBaseline("sum="))
+    }
+
+    @Test
+    fun `dex crc sum - additive and order independent`() {
+        assertEquals(6L, AiDetector.sumDexCrcs(listOf(1L, 2L, 3L)))
+        assertEquals(6L, AiDetector.sumDexCrcs(listOf(3L, 1L, 2L)))
+        assertEquals(0L, AiDetector.sumDexCrcs(emptyList()))
+    }
+
+    @Test
+    fun `dex entry pattern - matches only real classes dex names`() {
+        assertTrue(AiDetector.DEX_ENTRY_PATTERN.matches("classes.dex"))
+        assertTrue(AiDetector.DEX_ENTRY_PATTERN.matches("classes2.dex"))
+        assertTrue(AiDetector.DEX_ENTRY_PATTERN.matches("classes35.dex"))
+        // 负向：别的名字不算 dex 条目
+        assertFalse(AiDetector.DEX_ENTRY_PATTERN.matches("MANIFEST.MF"))
+        assertFalse(AiDetector.DEX_ENTRY_PATTERN.matches("classes.dex.bak"))
+        assertFalse(AiDetector.DEX_ENTRY_PATTERN.matches("assets/classes.dex"))
     }
 }

@@ -166,32 +166,59 @@ object AiDetector {
         return if (kotlin.math.sqrt(variance) < 5.0) setOf(SANDBOX_TOUCH_TIMING) else emptySet()
     }
 
+    /** APK 内 dex 条目名形态：classes.dex / classes2.dex / … / classes35.dex。 */
+    internal val DEX_ENTRY_PATTERN = Regex("classes(\\d*)\\.dex")
+
+    /** 构建期生成的基线 asset 名（见 app/build.gradle.kts 的 DexCrcBaselineTask）。 */
+    internal const val DEX_CRC_BASELINE_ASSET = "dex_crc_baseline.txt"
+
+    /**
+     * 解析基线文本里的 `sum=<long>` 行。
+     * 非法/缺失返回 0，调用方据此跳过校验（零误报口径）。
+     */
+    internal fun parseDexCrcBaseline(text: String): Long =
+        text.lineSequence()
+            .firstOrNull { it.startsWith("sum=") }
+            ?.removePrefix("sum=")
+            ?.trim()
+            ?.toLongOrNull()
+            ?: 0L
+
+    /** classes*.dex 的 zip CRC32 求和。顺序无关，故不依赖遍历次序。 */
+    internal fun sumDexCrcs(crcs: List<Long>): Long = crcs.sum()
+
     /**
      * DEX 运行时 CRC32 校验（A 层）：检测二次打包 / DEX 被 patch。
-     * 基线值由 Gradle 构建期注入到 BuildConfig.DEX_CRC_BASELINE。
-     * 基线为 0（CI 无签名占位）时跳过校验，零误报。
+     *
+     * 基线由构建期 `DexCrcBaselineTask` 写入 **assets/dex_crc_baseline.txt**（不是 BuildConfig：
+     * BuildConfig 常量编译进 dex 会造成"基线依赖 dex、dex 依赖基线"的循环）。
+     * 基线缺失或不可解析时跳过校验，保持零误报口径。
      */
     @WorkerThread
     fun verifyDexIntegrity(context: Context): Set<AiDetectionSignal> {
-        val baseline = try {
-            BuildConfig.DEX_CRC_BASELINE
-        } catch (_: Exception) {
-            0L
-        }
+        val baseline = readDexCrcBaseline(context)
         if (baseline == 0L) return emptySet()
         return try {
             val apkPath = context.packageCodePath
-            val zipFile = java.util.zip.ZipFile(apkPath)
-            var crc = 0L
-            for (idx in 1..4) {
-                val entryName = if (idx == 1) "classes.dex" else "classes$idx.dex"
-                val entry = zipFile.getEntry(entryName) ?: continue
-                crc += entry.crc
+            val crcs = java.util.zip.ZipFile(apkPath).use { zip ->
+                zip.entries().asSequence()
+                    .filter { DEX_ENTRY_PATTERN.matches(it.name) }
+                    .map { it.crc }
+                    .toList()
             }
-            if (crc != baseline) setOf(DEX_TAMPERED) else emptySet()
+            if (crcs.isEmpty()) return emptySet()
+            if (sumDexCrcs(crcs) != baseline) setOf(DEX_TAMPERED) else emptySet()
         } catch (_: Exception) {
             emptySet()
         }
+    }
+
+    /** 从 assets 读回构建期生成的 DEX CRC 基线；缺失/非法一律返回 0（= 跳过校验）。 */
+    private fun readDexCrcBaseline(context: Context): Long = try {
+        val text = context.assets.open(DEX_CRC_BASELINE_ASSET).bufferedReader().use { it.readText() }
+        parseDexCrcBaseline(text)
+    } catch (_: Exception) {
+        0L
     }
 
     /**

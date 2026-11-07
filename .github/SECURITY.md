@@ -56,7 +56,7 @@ DraftPeek 团队重视安全问题。如果您发现安全漏洞，请按以下�
 DraftPeek 已实施以下安全措施：
 
 - **APK 签名校验**：运行时校验签名证书 SHA-256 指纹
-- **DEX 完整性校验**：运行时 CRC 校验框架已实现；构建期基线注入**尚未接线**（`DEX_CRC_BASELINE` 恒为 0，校验自动跳过，属计划未实现项）。当前实际生效的是 APK 签名校验
+- **DEX 完整性校验**：运行时 CRC 校验 + **构建期基线已接线**（2026-11-07）。基线由 `DexCrcBaselineTask` 在打包前算出该变体全部 `classes*.dex` 的 CRC32 之和，写成 `assets/dex_crc_baseline.txt`（`sum=` / `entries=` 两行）；运行时 `AiDetector.verifyDexIntegrity()` 从 assets 读回，与 APK 内全部 `classes*.dex` 条目 CRC 之和逐位比对，不等即 `DEX_TAMPERED`；基线缺失/不可解析时跳过校验（零误报）。基线**不放进 `BuildConfig`**：常量编进 dex 会改 dex 自身字节，形成"基线描述 dex / dex 含基线"的循环。构建期闸门 `./gradlew :app:verifyDexCrc` 对 3 个变体 APK 逐一复核（实测 3/3 OK；故意把输入收窄成只算 `classes.dex` 后 3/3 报错并 FAILED，闸门有效性已验证）
 - **反调试保护**：多层检测（调试器、Frida、Root、模拟器）
 - **Native C 反检测**：`native_security.so` 提供 C 层反调试（加载失败时显式上报 `THREAT_NATIVE_UNAVAILABLE`，不再静默降级）
 - **AI 对抗防护**：AI 逆向检测 + 三级响应（WARNING/LOCKED/SELF_DEFEND）

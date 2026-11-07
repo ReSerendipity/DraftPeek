@@ -61,7 +61,7 @@
 
 - 首启协议弹层：需要清除应用数据回到首次启动才能触发；该设备上存有走查用测试文件（`DraftPeekAudit` 下 28 个），清数据会一并抹掉，未做。
 - 文件详情层级（三层 IA 的中间层）：root 空态只能从 `选择文件夹` 进入，未取得详情页。
-- `DEX_CRC_BASELINE` / `API30 CreateFileDialogFlowTest` 两项与本走查并列，需另行处理，不在本文范围。
+- ~~`DEX_CRC_BASELINE` / `API30 CreateFileDialogFlowTest` 两项与本走查并列，需另行处理，不在本文范围。~~ → **2026-11-07 已分拆**：`DEX_CRC_BASELINE 恒 0` 已于同日完成构建期接线（`DexCrcBaselineTask` 生成 `assets/dex_crc_baseline.txt`，`./gradlew :app:verifyDexCrc` 三变体全绿，SECURITY.md 已同步）；`API30 CreateFileDialogFlowTest` 仍为独立项，与本走查并列。
 
 ## 五、附：设备上 `DraftPeekAudit` 目录归属未查清
 
