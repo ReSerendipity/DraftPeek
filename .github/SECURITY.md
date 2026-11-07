@@ -57,8 +57,9 @@ DraftPeek 已实施以下安全措施：
 
 - **APK 签名校验**：运行时校验签名证书 SHA-256 指纹
 - **DEX 完整性校验**：运行时 CRC 校验 + **构建期基线已接线**（2026-11-07）。基线由 `DexCrcBaselineTask` 在打包前算出该变体全部 `classes*.dex` 的 CRC32 之和，写成 `assets/dex_crc_baseline.txt`（`sum=` / `entries=` 两行）；运行时 `AiDetector.verifyDexIntegrity()` 从 assets 读回，与 APK 内全部 `classes*.dex` 条目 CRC 之和逐位比对，不等即 `DEX_TAMPERED`；基线缺失/不可解析时跳过校验（零误报）。基线**不放进 `BuildConfig`**：常量编进 dex 会改 dex 自身字节，形成"基线描述 dex / dex 含基线"的循环。构建期闸门 `./gradlew :app:verifyDexCrc` 对 3 个变体 APK 逐一复核（实测 3/3 OK；故意把输入收窄成只算 `classes.dex` 后 3/3 报错并 FAILED，闸门有效性已验证）
+  - **已知限制（2026-11-07 真机实测）**：「我的 → 关于与安全」显示的状态读的是 `AiProtectionStateHolder` 快照（`AboutSecurityScreen.kt`），而 `AiDetector.assess()` 整体包在 `try/catch(Exception)` 里；检测没跑完或中途抛异常时 holder 不更新，页面仍显示「DEX 完整性：✅ 通过」（fail-open）。负向对照实测：把 beta 包内基线 `sum=` 改成错误值并重签安装，页面**未**变「❌ 已修改」。故构建期闸门有效，运行时比对的可视证据尚不成立，待补三态（未检测/通过/失败）后再宣称运行时校验生效
 - **反调试保护**：多层检测（调试器、Frida、Root、模拟器）
-- **Native C 反检测**：`native_security.so` 提供 C 层反调试（加载失败时显式上报 `THREAT_NATIVE_UNAVAILABLE`，不再静默降级）
+- **Native C 反检测**：`native_security.so` 提供 C 层反调试（加载失败时显式上报 `THREAT_NATIVE_UNAVAILABLE`，不再静默降级）。**JNI 类名必须与 R8 保持一致**：`native_security.c` 用硬编码路径 `com/draftpeek/security/AiDetector` 做 `FindClass` + `RegisterNatives`，故 `proguard-rules.pro` 对该类用 `-keep`（不可混淆）而不是 `-keep,allowobfuscation`；`JNI_OnLoad` 每处失败分支都 `ExceptionClear`，避免挂起异常抛穿 `System.loadLibrary` 导致整个 `NativeSecurityChecker` 初始化失败。2026-11-07 实测 1.0.32 正式包（minify 开）即因该类被改名而 native 层整体失效（logcat `ClassNotFoundException: com.draftpeek.security.AiDetector`），修复后 `beta` 构建逐 dex 可查到该类名、真机 logcat 无该异常
 - **AI 对抗防护**：AI 逆向检测 + 三级响应（WARNING/LOCKED/SELF_DEFEND）
 - **SQLCipher 加密数据库**：AES-256 加密本地数据
 - **网络安全配置**：全局禁止明文 HTTP 流量；`api.github.com` 证书锁定**已启用**（双 pin 备份，有效期至 2027-08-27）

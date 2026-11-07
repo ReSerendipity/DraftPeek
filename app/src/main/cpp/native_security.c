@@ -480,6 +480,18 @@ static JNINativeMethod ad_methods[] = {
 
 #define ARRAY_LEN(arr) (sizeof(arr) / sizeof(arr[0]))
 
+/*
+ * FindClass 失败时 JNI 会留下一个挂起异常。若不清理，System.loadLibrary 返回时
+ * 调用方（Kotlin 的 NativeSecurityChecker.init）会看到异常，整个类初始化失败
+ * （实测 1.0.32 发行包：ClassNotFoundException 抛穿导致 ExceptionInInitializerError，
+ *  native 检测层整体失效）。所以每次失败都必须 ExceptionClear 后再继续。
+ */
+static void clear_pending(JNIEnv *env) {
+    if ((*env)->ExceptionCheck(env)) {
+        (*env)->ExceptionClear(env);
+    }
+}
+
 jint JNI_OnLoad(JavaVM *vm, void *reserved) {
     JNIEnv *env;
     if ((*vm)->GetEnv(vm, (void **)&env, JNI_VERSION_1_6) != JNI_OK) {
@@ -490,10 +502,12 @@ jint JNI_OnLoad(JavaVM *vm, void *reserved) {
     jclass nsc_class = (*env)->FindClass(env, NSC_CLASS);
     if (nsc_class == NULL) {
         LOGW("Failed to find class %s", NSC_CLASS);
+        clear_pending(env);
         return JNI_ERR;
     }
     if ((*env)->RegisterNatives(env, nsc_class, nsc_methods, ARRAY_LEN(nsc_methods)) < 0) {
         LOGW("Failed to register natives for %s", NSC_CLASS);
+        clear_pending(env);
         return JNI_ERR;
     }
     (*env)->DeleteLocalRef(env, nsc_class);
@@ -503,9 +517,11 @@ jint JNI_OnLoad(JavaVM *vm, void *reserved) {
     if (ssr_class == NULL) {
         LOGW("Failed to find class %s", SSR_CLASS);
         /* SSR is optional (string encryption may be disabled) — continue */
+        clear_pending(env);
     } else {
         if ((*env)->RegisterNatives(env, ssr_class, ssr_methods, ARRAY_LEN(ssr_methods)) < 0) {
             LOGW("Failed to register natives for %s", SSR_CLASS);
+            clear_pending(env);
         }
         (*env)->DeleteLocalRef(env, ssr_class);
     }
@@ -514,9 +530,11 @@ jint JNI_OnLoad(JavaVM *vm, void *reserved) {
     jclass ad_class = (*env)->FindClass(env, AD_CLASS);
     if (ad_class == NULL) {
         LOGW("Failed to find class %s", AD_CLASS);
+        clear_pending(env);
     } else {
         if ((*env)->RegisterNatives(env, ad_class, ad_methods, ARRAY_LEN(ad_methods)) < 0) {
             LOGW("Failed to register natives for %s", AD_CLASS);
+            clear_pending(env);
         }
         (*env)->DeleteLocalRef(env, ad_class);
     }

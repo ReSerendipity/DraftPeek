@@ -469,9 +469,13 @@
 -dontwarn org.pf4j.**
 
 # ===== AI 对抗安全防护类（A+B 第二阶段） =====
-# AI 检测/响应/威慑类允许混淆类名但保留方法签名
--keep,allowobfuscation class com.draftpeek.security.AiDetector { *; }
--keep,allowobfuscation class com.draftpeek.security.AiDetector$* { *; }
+# 注意：AiDetector 的类名**不可混淆**。native_security.c:476 用硬编码 JNI 路径
+# "com/draftpeek/security/AiDetector" 做 FindClass + RegisterNatives（nativeQuickDexChecksum）。
+# 一旦类名被 R8 重命名，FindClass 返回空且 JNI_OnLoad 未清理挂起异常，
+# System.loadLibrary 会把 ClassNotFoundException 抛穿，整个 NativeSecurityChecker 初始化失败
+# （1.0.32 发行包实测：logcat 报 ClassNotFoundException: com.draftpeek.security.AiDetector）。
+-keep class com.draftpeek.security.AiDetector { *; }
+-keep class com.draftpeek.security.AiDetector$* { *; }
 -keep,allowobfuscation class com.draftpeek.security.AiProtectionStateHolder { *; }
 -keep,allowobfuscation class com.draftpeek.security.AiResponseExecutor { *; }
 -keep,allowobfuscation class com.draftpeek.security.LegalDeterrence { *; }
