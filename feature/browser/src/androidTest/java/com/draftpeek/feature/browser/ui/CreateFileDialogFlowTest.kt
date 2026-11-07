@@ -50,6 +50,10 @@ import org.junit.Test
  *    （`root(711.0, 1468.0)`，与 `posOnScreen` 一致），注入本身被拒 `AssertionError: Failed to inject touch input.`。
  *    ⚠ **本条当初把它判成"API 26 的手势几何问题、与生产码无关"，那个结论已被 2026-10-04 的实测否证**，
  *    见 [typedFilenameDrivesCreateCallbackWithKotlinEmptyTemplate] 的注释与 #DP-05（对外取证见 issue #125）。
+ *    **2026-11-07 复测（`b1cbe2a` 之后）**：同一系统镜像新建的 `DraftPeekApi30` AVD 上，
+ *    `boundsInRoot == boundsInWindow == touchBoundsInRoot == [397,1336,1025,1468]`、`screen=1080x2072`
+ *    （活动窗口已按 IME 收缩，2340→2072），`imeAcceptingText=true` —— 零面积**不再出现**。
+ *    完整数据与「为什么不是 root 归属」见该类注释末节「2026-11-07 收口」。
  *
  * ## 进门先等节点出现，且重试必须可见
  * [awaitButton] 轮询到语义树里出现该节点为止（最多重试一次）；每次重试都打一行
@@ -165,10 +169,23 @@ class CreateFileDialogFlowTest {
                     .joinToString(";").ifEmpty { "(输出里没有 mInputShown 行)" }
             }
         }.getOrElse { t -> "dumpsys 不可用(${t.javaClass.simpleName})" }
+        // 窗口 token 计数（2026-11-07 补）：`dumpsys` 里 Compose 自己的 sheet 窗口名仍是
+        // `<pkg>/<Activity>`，按 dialog|sheet 关键字过滤恒为 0 是假阴性，只有按 `Window{` 数
+        // token 才能看出「这一跑里宿主+sheet 两个窗口是否都在」。红/绿与窗口数的关系见类注释。
+        val windowTokens = runCatching {
+            val proc = Runtime.getRuntime().exec(arrayOf("sh", "-c", "dumpsys window windows"))
+            proc.inputStream.bufferedReader().use { reader ->
+                val n = reader.readLines().count { line -> line.contains("Window{") }
+                // 测试进程通常没有 DUMP 权限 ⇒ 输出为空、计数为 0。0 在这里只可能是"没读到"，
+                // 不能读成"没有窗口"（#DP-05 第 6 条同类误读）。
+                if (n == 0) "0(无输出/可能无 DUMP 权限)" else n.toString()
+            }
+        }.getOrElse { t -> "不可用(${t.javaClass.simpleName})" }
         return "screen=${screen.width()}x${screen.height()} boundsInRoot=" + describe(bounds) +
             " 超出屏幕下沿=" + (bounds?.let { it.bottom > screen.height() }?.toString() ?: "?") +
             " boundsInWindow=${describe(sn?.boundsInWindow)}" +
             " touchBoundsInRoot=${describe(sn?.touchBoundsInRoot)} posOnScreen=${sn?.positionOnScreen}" +
+            " windowTokens=$windowTokens" +
             " imeAcceptingText=${imm.isAcceptingText} $dumpsys"
     }
 
@@ -179,6 +196,9 @@ class CreateFileDialogFlowTest {
             CreateFileDialog(onDismiss = {}, onCreate = { _, _, _ -> created++ })
         }
         val node = awaitButton()
+        // 2026-11-07 加一条**无条件**取证行：只走重试分支才打的日志在绿跑里全是空白，
+        // 于是「为什么这次绿」永远没有数据。断言前先把几何/窗口/IME 落一行，红绿都能复盘。
+        log("断言前取证 | ${geometry()}")
         node.assertIsDisplayed()
 
         // Disabled 语义挂在哪个节点上不是我能本机断定的框架事实，所以既记 assertIsNotEnabled
@@ -247,6 +267,29 @@ class CreateFileDialogFlowTest {
      * 是另一个决定；两边都有据，本文件不替产品定。
      *
      * 断言与判据一字未放宽；本条注释只改"为什么这么屏蔽"，不改屏蔽本身。
+     *
+     * ## 2026-11-07 收口：机制已定，红因已被生产侧 `b1cbe2a` 修掉
+     * 上面那一大段是 **2026-10-04/05 的历史形态**，读的时候要知道它今天的状态：
+     * - **机制**：`ModalBottomSheet` 在自己的窗口里，键盘升起时若内容总高超过收缩后的窗口，
+     *   整块内容会被顶出可视区 ⇒ 节点被裁到 `boundsInRoot=[0,0,0,0]`（未裁剪的
+     *   `touchBoundsInRoot` 仍是真实矩形），而 `posOnScreen` 那个点落在 **IME 窗口**上，
+     *   注入被拒 `Failed to inject touch input.`。两条用例同一个成因。
+     * - **修掉它的是生产码，不是测试码**：`b1cbe2a`（2026-10-05 18:10 +0800，
+     *   `fix(browser): 新建文件弹层改为键盘安全布局`）把弹层换成 `KeyboardSafeBottomSheet`
+     *   —— header 吸顶 + body `weight(1f, fill=false)` + `verticalScroll` 可压缩 + footer 停靠底部 + `imePadding()`。
+     * - **实测（本轮，新建 `DraftPeekApi30` AVD，同 `system-images;android-30;google_apis;x86_64`）**：
+     *   整类连跑 **8/8 全绿**；每次断言前打一行无条件取证（`断言前取证` / `点击前取证`），实测
+     *   `screen=1080x2072`（活动窗口已按 IME 从 2340 收缩）、`boundsInRoot == boundsInWindow ==
+     *   touchBoundsInRoot == [397,1336,1025,1468]`、`posOnScreen=(397,1336)`、`imeAcceptingText=true`。
+     *   即：键盘确实在，按钮完整可见且在屏内 ⇒ 零面积不再出现。
+     * - **否掉「节点归属另一个 root」那次改判**：sheet 仍在自己的窗口里，但 `boundsInRoot` 现在非零、
+     *   `onRoot()` 的点击也能打到真实控件。root 归属从来不是变量，`ea4a496` 的结论作废。
+     * - **负控（做了，如实记）**：临时把 `KeyboardSafeBottomSheet` 里的 `.imePadding()` 摘掉后重跑，
+     *   两条仍 **2/2 绿** ⇒ 在本机上 `imePadding()` **不是**决定性变量；起作用的是「窗口随 IME 收缩 +
+     *   body 可压缩 + footer 停靠底部」这套布局。这条负控**没能复现红**，所以"摘掉 imePadding 就会红"
+     *   这个假设不成立，别再照它推定因果。
+     * - 仍未覆盖：`onCreate → SnippetViewModel → 导航到 CodeEditor` 那一头（需 `:app` 的 instrumented
+     *   变体），以及 `MainActivity` 点 FAB 那一步（本模块没有 hilt-android-testing）。
      */
     @Test
     @SdkSuppress(minSdkVersion = 27)
@@ -266,6 +309,7 @@ class CreateFileDialogFlowTest {
 
         nameField().performTextInput("  bench_flow  ")
         val button = awaitButton()
+        log("点击前取证 | ${geometry()}")
         button.assertIsEnabled()
         button.performClick()
 
