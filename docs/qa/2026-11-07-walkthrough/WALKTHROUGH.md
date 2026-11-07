@@ -29,9 +29,12 @@
 - 预览模式：屏上只剩「段落甲 AAA1。」「段落乙 BBB1。」两段，5 个标题行全部缺失。
 - 分屏模式：左侧源码 11 行可见 5 个 `#` 标题（第 1/5/7/9/11 行），右侧预览与预览模式完全一致，只剩两段正文。
 - 富文本模式：同一文件的 5 个标题全部正常（24sp / 20sp / 18sp 加粗）。
-- 判读：这是**渲染路径差异**，不是解析差异——同一份文本在富文本路径能出标题。预览侧首行之上仍留有空白（占位存在），倾向「块被排版但文字没画出来」而不是「块被整块丢弃」。根因未定，候选两处：
-  - `feature/editor/.../ui/LazyMarkdownPreview.kt:173` `HeadingBlock`（`level`/`fontSize`/`headingColor` 逻辑本身自洽，浅色主题取 `fgColor`）
-  - `MarkdownWebViewPreview.kt` 那条 WebView 路径，以及 `EditorContentArea.kt:302` 对 `MarkdownViewMode.SPLIT` 的分流条件
+- 判读：这是**渲染路径差异**，不是解析差异——同一份文本在富文本路径能出标题。预览侧首行之上仍留有空白（占位存在），倾向「块被排版但文字没画出来」而不是「块被整块丢弃」。
+- **根因已定位（2026-11-07 当场修）**：预览走 `MarkdownWebViewPreview` → `assets/markdown/markdown-preview.html`，该页自带 `marked v12.0.0`（`marked.min.js` 头部即 `marked v12.0.0`）。而页面里的自定义 renderer 是按 **v13+ 的 token 入参**写的：
+  - `renderer.heading = function(obj){ var text = obj.text || ''; var level = obj.depth; … }`
+  - v12 实际传的是**字符串**：`heading(text, level, raw)`、`listitem(text, task, checked)`。于是 `obj.text` → `undefined`、`obj.depth` → `undefined`，产出 `<hundefined></hundefined>`——既没有标题样式也没有文字，屏上就是「标题行整片消失」。列表项同理被渲染成空 `<li>`。
+  - 设备侧取证：从已装包 `pm path com.draftpeek` 拉出 `base.apk`，其中 `assets/markdown/markdown-preview.html` 确为上述写法（`var text = obj.text` / `var level = obj.depth` 均命中）。
+  - 修复后对照（用仓库内置的同一份 `marked.min.js` 在 node 里跑）：旧写法 → 5 个 `<hundefined>` 空标题 + 4 个空列表项；新写法 → 5 个标题全部带文字（`<h1>H1 第一块 ZZZ1</h1>` …`<h1>ASCII ONLY H1 ZZZ5</h1>`）+ 2 个列表项 + 2 个任务复选框且勾选态保留。脚本与输出留在 agent 工作区 `scan/dp_marked_v12_check.js`。
 - 影响：Markdown 主要用途（看结构）在预览下失效；分屏（写作时最常用）同样失效。
 
 ### 缺陷 2：格式工具栏末项「有序列表」被裁切 + 逐字竖排
@@ -45,12 +48,21 @@
 - 文件行只有右侧「保存」按钮；短按行不进入详情，长按进入编辑器。
 - 既有文档记载「文件页 ⋮ 菜单（重命名/收藏/删除）」在本构建上找不到入口 → 需业主确认是 IA 改版还是入口回归。
 
-## 三、未覆盖（明确记录，不假装走完）
+## 三、修复与验证（缺陷 1）
+
+- 改动：`feature/editor/src/main/assets/markdown/markdown-preview.html` 的 `renderer.heading` / `renderer.listitem` 改为两种入参形状都兼容（v12 字符串 / v13+ token 对象），并在任务列表项里避免重复插入复选框。
+- 验证（无 AVD、无签名链可装新包，故走「同一份 marked + node」的等价验证）：
+  1. 旧写法（设备包内 asset 原文）在 v12 上产出 5 个 `<hundefined></hundefined>`、4 个空 `<li>` —— 复现真机现象；
+  2. 新写法产出 5 个带文字的 `<h1>/<h2>/<h3>`、2 个列表项、2 个复选框（`checked` 态保留）；
+  3. `:feature:editor:assembleDebug` 与 `:app:assembleDebug` 均 BUILD SUCCESSFUL；从产物 `app-production-debug.apk` 解包确认 `assets/markdown/markdown-preview.html` 已含修复。
+- 未能上机复核的原因（如实记录）：设备上已装的 `com.draftpeek` 与本机构建签名不一致，`adb install -r` 报 `INSTALL_FAILED_UPDATE_INCOMPATIBLE`；卸载重装会连带清掉设备上 `DraftPeekAudit` 的 28 个走查文件，故不做。装同签名包后可直接复看「预览/分屏标题是否恢复」。
+
+## 四、未覆盖（明确记录，不假装走完）
 
 - 首启协议弹层：需要清除应用数据回到首次启动才能触发；该设备上存有走查用测试文件（`DraftPeekAudit` 下 28 个），清数据会一并抹掉，未做。
 - 文件详情层级（三层 IA 的中间层）：root 空态只能从 `选择文件夹` 进入，未取得详情页。
 - `DEX_CRC_BASELINE` / `API30 CreateFileDialogFlowTest` 两项与本走查并列，需另行处理，不在本文范围。
 
-## 四、附：设备上 `DraftPeekAudit` 目录归属未查清
+## 五、附：设备上 `DraftPeekAudit` 目录归属未查清
 
 `adb shell ls /sdcard/DraftPeekAudit` 报 `No such file or directory`，但 `adb push` 到该路径报 `1 file pushed` 成功；`find /sdcard -name ab_h1_matrix.md` 无结果。即文件确实可被应用读到（列表里 28 个文件都在），但路径不在 `/sdcard` 下的常见位置 → 应用侧 VFS 根目录映射待查（可能是应用私有外部目录或内部存储映射）。

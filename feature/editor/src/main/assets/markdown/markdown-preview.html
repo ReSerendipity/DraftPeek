@@ -355,18 +355,42 @@ img{
     try {
       var renderer = new marked.Renderer();
 
-      renderer.listitem = function(obj) {
-        var text = obj.text || '';
-        if (obj.task) {
-          return '<li class="task-list-item"><input type="checkbox"' + (obj.checked ? ' checked' : '') + '>' + text + '</li>';
+      // 仓库内置的是 marked v12.0.0：renderer 的 title 类回调收到的是**字符串**
+      // （heading(text, level, raw)、listitem(text, task, checked)），并没有 obj.text。
+      // 早先按 v13+ 的 token 对象写法取 obj.text，取到 undefined，标题与列表项就被
+      // 渲染成空元素——标题的位置还在、字全白，真机上表现就是「预览里标题全不见」。
+      // 这里两种入参形状都兼容：v12 走字符串，v13+ 走 token 对象里的 tokens/text。
+      renderer.listitem = function(arg, task, checked) {
+        var text, isTask, isChecked;
+        if (arg && typeof arg === 'object') {
+          text = (arg.tokens && this.parser) ? this.parser.parseInline(arg.tokens) : (arg.text || '');
+          isTask = !!arg.task;
+          isChecked = !!arg.checked;
+        } else {
+          text = arg || '';
+          isTask = !!task;
+          isChecked = !!checked;
+        }
+        if (isTask) {
+          // v12 的 text 里已经带好了 marked 生成的任务复选框，别再加一个
+          var box = /type="checkbox"/.test(text)
+            ? ''
+            : '<input type="checkbox"' + (isChecked ? ' checked' : '') + '>';
+          return '<li class="task-list-item">' + box + text + '</li>';
         }
         return '<li>' + text + '</li>';
       };
 
-      renderer.heading = function(obj) {
-        var text = obj.text || '';
-        var level = obj.depth;
-        return '<h' + level + '>' + text + '</h' + level + '>';
+      renderer.heading = function(arg, level) {
+        var text, lvl;
+        if (arg && typeof arg === 'object') {
+          text = (arg.tokens && this.parser) ? this.parser.parseInline(arg.tokens) : (arg.text || '');
+          lvl = arg.depth || level || 1;
+        } else {
+          text = arg || '';
+          lvl = level || 1;
+        }
+        return '<h' + lvl + '>' + text + '</h' + lvl + '>';
       };
 
       marked.setOptions({
