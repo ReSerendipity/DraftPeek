@@ -355,4 +355,24 @@
     <string name="account_sync_retrying">재시도 중(%1$d/%2$d)…</string>
     <string name="account_sync_rate_limited">요청 과다 · 잠시 후 자동 재시도</string>
     <string name="account_sync_failed_detail">동기화 실패 · 세부 정보</string>
+    <string name="profile_open_source_license">오픈소스 라이선스</string>
+    <string name="profile_oss_list_intro">이 앱은 다음 서드파티 오픈소스 구성 요소를 포함합니다. 항목을 탭하면 라이선스 전문을 볼 수 있습니다(라이선스 텍스트는 패키지의 assets/licenses/ 에 포함됨).</string>
+    <string name="profile_oss_not_bundled">패키지에 포함되지 않음</string>
+    <string name="profile_oss_license_load_failed">라이선스 텍스트를 불러오지 못했습니다</string>
+    <string name="profile_oss_open_source">소스 보기</string>
+    <string name="profile_oss_dialog_close">닫기</string>
+    <string name="profile_setting_show_minimap">썸네일 표시(실험적 기능)</string>
+    <string name="profile_setting_theme_manage">테마 관리</string>
+    <string name="profile_theme_manage_dialog_title">테마 관리</string>
+    <string name="profile_theme_import">테마 가져오기</string>
+    <string name="profile_theme_import_hint">VS Code / TextMate 테마 .json 파일 선택</string>
+    <string name="profile_theme_import_success">테마를 가져왔습니다</string>
+    <string name="profile_theme_import_failed">테마 가져오기에 실패했습니다. 파일 형식을 확인하세요</string>
+    <string name="profile_theme_import_read_failed">선택한 파일을 읽을 수 없습니다</string>
+    <string name="profile_theme_delete_success">테마를 삭제했습니다</string>
+    <string name="profile_theme_empty">가져온 테마가 없습니다. 아래 버튼을 눌러 가져오세요</string>
+    <string name="profile_theme_dark_badge">다크</string>
+    <string name="profile_theme_light_badge">라이트</string>
+    <string name="profile_theme_using">사용 중</string>
+    <string name="profile_theme_import_count">%1$d개 가져옴</string>
 </resources>

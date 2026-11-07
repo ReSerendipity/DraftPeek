@@ -28,4 +28,6 @@
     <string name="terminal_proot_ready">Linux 환경이 준비되었습니다</string>
     <string name="terminal_proot_error">Linux 환경 설정에 실패했습니다</string>
     <string name="terminal_unavailable_hint">이 위치에서는 터미널을 열 수 없습니다</string>
+    <string name="terminal_system_shell_hint">현재 시스템 셸(toybox)입니다. 일부 명령을 사용할 수 없습니다. 완전한 Linux 환경에는 proot 설치가 필요합니다.</string>
+    <string name="terminal_dismiss">닫기</string>
 </resources>

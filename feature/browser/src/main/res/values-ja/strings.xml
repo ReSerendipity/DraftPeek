@@ -281,4 +281,16 @@
     <string name="browser_git_state_no_modification">変更なし</string>
     <string name="browser_manual_order_state_on">手動並べ替えオン</string>
     <string name="browser_manual_order_state_off">手動並べ替えオフ</string>
+    <string name="browser_action_encrypt_export">暗号化エクスポート</string>
+    <string name="browser_dialog_encrypt_export_title">暗号化エクスポート</string>
+    <string name="browser_dialog_encrypt_export_password">パスワードを設定（4 文字以上）</string>
+    <string name="browser_dialog_encrypt_export_confirm">パスワードを確認</string>
+    <string name="browser_encrypt_password_mismatch">入力したパスワードが一致しません</string>
+    <string name="browser_encrypt_password_too_short">パスワードは 4 文字以上にしてください</string>
+    <string name="browser_encrypt_export_success">.jenc ファイルとして暗号化エクスポートしました</string>
+    <string name="browser_encrypt_export_failed">暗号化エクスポートに失敗しました</string>
+    <string name="browser_dialog_decrypt_title">復号して開く</string>
+    <string name="browser_dialog_decrypt_password">パスワードを入力</string>
+    <string name="browser_decrypt_success">復号に成功し、ファイルを開きました</string>
+    <string name="browser_decrypt_failed">復号に失敗しました：パスワードが違うか、ファイルが壊れています</string>
 </resources>

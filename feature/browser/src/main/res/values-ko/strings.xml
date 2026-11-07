@@ -281,4 +281,16 @@
     <string name="browser_git_state_no_modification">변경 없음</string>
     <string name="browser_manual_order_state_on">수동 정렬 켜짐</string>
     <string name="browser_manual_order_state_off">수동 정렬 꺼짐</string>
+    <string name="browser_action_encrypt_export">암호화 내보내기</string>
+    <string name="browser_dialog_encrypt_export_title">암호화 내보내기</string>
+    <string name="browser_dialog_encrypt_export_password">비밀번호 설정(4자 이상)</string>
+    <string name="browser_dialog_encrypt_export_confirm">비밀번호 확인</string>
+    <string name="browser_encrypt_password_mismatch">입력한 비밀번호가 일치하지 않습니다</string>
+    <string name="browser_encrypt_password_too_short">비밀번호는 4자 이상이어야 합니다</string>
+    <string name="browser_encrypt_export_success">.jenc 파일로 암호화 내보내기했습니다</string>
+    <string name="browser_encrypt_export_failed">암호화 내보내기에 실패했습니다</string>
+    <string name="browser_dialog_decrypt_title">복호화하여 열기</string>
+    <string name="browser_dialog_decrypt_password">비밀번호 입력</string>
+    <string name="browser_decrypt_success">복호화 성공, 파일을 열었습니다</string>
+    <string name="browser_decrypt_failed">복호화 실패: 비밀번호가 틀렸거나 파일이 손상되었습니다</string>
 </resources>

@@ -355,4 +355,24 @@
     <string name="account_sync_retrying">再試行中（%1$d/%2$d）…</string>
     <string name="account_sync_rate_limited">リクエスト過多 · しばらくして自動再試行</string>
     <string name="account_sync_failed_detail">同期失敗 · 詳細</string>
+    <string name="profile_open_source_license">オープンソースライセンス</string>
+    <string name="profile_oss_list_intro">本アプリは以下のサードパーティ製オープンソースコンポーネントを組み込んでいます。項目をタップするとライセンス全文を表示します（ライセンス文はパッケージ内の assets/licenses/ に同梱）。</string>
+    <string name="profile_oss_not_bundled">パッケージに同梱されていません</string>
+    <string name="profile_oss_license_load_failed">ライセンス文の読み込みに失敗しました</string>
+    <string name="profile_oss_open_source">ソースを表示</string>
+    <string name="profile_oss_dialog_close">閉じる</string>
+    <string name="profile_setting_show_minimap">サムネイルを表示（実験的機能）</string>
+    <string name="profile_setting_theme_manage">テーマ管理</string>
+    <string name="profile_theme_manage_dialog_title">テーマ管理</string>
+    <string name="profile_theme_import">テーマをインポート</string>
+    <string name="profile_theme_import_hint">VS Code / TextMate テーマの .json ファイルを選択</string>
+    <string name="profile_theme_import_success">テーマのインポートに成功しました</string>
+    <string name="profile_theme_import_failed">テーマのインポートに失敗しました。ファイル形式を確認してください</string>
+    <string name="profile_theme_import_read_failed">選択したファイルを読み取れません</string>
+    <string name="profile_theme_delete_success">テーマを削除しました</string>
+    <string name="profile_theme_empty">インポート済みのテーマはありません。下のボタンからインポートしてください</string>
+    <string name="profile_theme_dark_badge">ダーク</string>
+    <string name="profile_theme_light_badge">ライト</string>
+    <string name="profile_theme_using">使用中</string>
+    <string name="profile_theme_import_count">%1$d 件インポート済み</string>
 </resources>

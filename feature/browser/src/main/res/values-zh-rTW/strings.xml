@@ -315,4 +315,16 @@
     <string name="browser_git_state_no_modification">無修改</string>
     <string name="browser_manual_order_state_on">手動排序已開啟</string>
     <string name="browser_manual_order_state_off">手動排序已關閉</string>
+    <string name="browser_action_encrypt_export">加密匯出</string>
+    <string name="browser_dialog_encrypt_export_title">加密匯出</string>
+    <string name="browser_dialog_encrypt_export_password">設定密碼（至少 4 位）</string>
+    <string name="browser_dialog_encrypt_export_confirm">確認密碼</string>
+    <string name="browser_encrypt_password_mismatch">兩次輸入的密碼不一致</string>
+    <string name="browser_encrypt_password_too_short">密碼至少 4 位</string>
+    <string name="browser_encrypt_export_success">已加密匯出為 .jenc 檔案</string>
+    <string name="browser_encrypt_export_failed">加密匯出失敗</string>
+    <string name="browser_dialog_decrypt_title">解密開啟</string>
+    <string name="browser_dialog_decrypt_password">輸入密碼</string>
+    <string name="browser_decrypt_success">解密成功，已開啟檔案</string>
+    <string name="browser_decrypt_failed">解密失敗：密碼錯誤或檔案已損毀</string>
 </resources>

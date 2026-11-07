@@ -4,9 +4,10 @@
 两件事：
   1) 安全性：撇号未转义、`%<n>` 缺 `$<转换符>`、XML 不可解析 —— 这些会在 aapt/运行期炸。
   2) 对齐度：每个 locale 相对默认 values/ 缺多少键。**棘轮**：只许变好不许变坏，
-     基线写在 locale-baseline.json（沿用 coverage-baseline.json 的"单一事实来源"约定），
-     因为 zh-rTW 的 feature/stats 目前 312 键只翻了你 1 个，
-     直接硬卡会让 CI 从第一天就红成噪声 —— 那种闸等于没有闸。
+     基线写在 locale-baseline.json（沿用 coverage-baseline.json 的"单一事实来源"约定）。
+     2026-11-07 之前基线留了余量，因为 zh-rTW 的 feature/stats 曾有 311 键没翻，
+     硬卡会让 CI 从第一天就红成噪声 —— 那种闸等于没有闸；
+     缺口补齐后基线已改为**全 0**：现在新增键漏翻一条就红，闸从"防劣化"变成"防缺失"。
 
 刻意不把正则写成字面量里带反斜杠的形式经 shell 传递：
 本机实测 shell→python 的二次求值会吃掉一层反斜杠，

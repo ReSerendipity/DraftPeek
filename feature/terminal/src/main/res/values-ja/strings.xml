@@ -28,4 +28,6 @@
     <string name="terminal_proot_ready">Linux環境の準備が完了しました</string>
     <string name="terminal_proot_error">Linux環境の準備に失敗しました</string>
     <string name="terminal_unavailable_hint">この位置ではターミナルを開けません</string>
+    <string name="terminal_system_shell_hint">現在はシステムシェル（toybox）です。一部のコマンドは使用できません。完全な Linux 環境には proot のインストールが必要です。</string>
+    <string name="terminal_dismiss">閉じる</string>
 </resources>

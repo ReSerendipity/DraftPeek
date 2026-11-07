@@ -30,4 +30,6 @@
     <string name="permission_terminal_command_desc">Allows apps signed with the same key to send terminal commands to DraftPeek</string>
     <!-- Diff / Encoding dialogs -->
     <string name="terminal_service_running">命令在背景執行中</string>
+    <string name="terminal_system_shell_hint">目前為系統 shell（toybox），部分指令無法使用。完整 Linux 環境需安裝 proot。</string>
+    <string name="terminal_dismiss">關閉</string>
 </resources>
