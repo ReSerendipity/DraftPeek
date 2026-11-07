@@ -163,4 +163,11 @@
 <string name="profile_oss_not_bundled">未随包分发</string>
 <string name="profile_oss_open_source">查看源码</string>
     <string name="settings_about_security_page_title">关于与安全</string>
+  <string name="settings_update_check">检查更新</string>
+  <string name="settings_update_checking">检查中…</string>
+  <string name="settings_update_up_to_date">已是最新版本（%1$s）</string>
+  <string name="settings_update_failed">检查更新失败：%1$s</string>
+  <string name="settings_update_available_title">发现新版本 %1$s</string>
+  <string name="settings_update_available_body">当前 %1$s，最新 %2$s。更新包请前往发布页下载安装。</string>
+  <string name="settings_update_go_download">去下载</string>
 </resources>

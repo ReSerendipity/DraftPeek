@@ -163,4 +163,11 @@
     <string name="profile_oss_not_bundled">번들 미포함</string>
     <string name="profile_oss_open_source">소스 보기</string>
     <string name="settings_about_security_page_title">정보 및 보안</string>
+  <string name="settings_update_check">업데이트 확인</string>
+  <string name="settings_update_checking">확인 중…</string>
+  <string name="settings_update_up_to_date">최신 버전입니다 (%1$s)</string>
+  <string name="settings_update_failed">업데이트 확인 실패: %1$s</string>
+  <string name="settings_update_available_title">새 버전 %1$s 사용 가능</string>
+  <string name="settings_update_available_body">현재 %1$s, 최신 %2$s. 배포 페이지에서 패키지를 내려받으세요.</string>
+  <string name="settings_update_go_download">다운로드</string>
 </resources>

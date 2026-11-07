@@ -163,4 +163,11 @@
     <string name="profile_oss_not_bundled">同梱なし</string>
     <string name="profile_oss_open_source">ソースを表示</string>
     <string name="settings_about_security_page_title">情報とセキュリティ</string>
+  <string name="settings_update_check">アップデートを確認</string>
+  <string name="settings_update_checking">確認中…</string>
+  <string name="settings_update_up_to_date">最新バージョンです（%1$s）</string>
+  <string name="settings_update_failed">アップデート確認に失敗しました：%1$s</string>
+  <string name="settings_update_available_title">新しいバージョン %1$s があります</string>
+  <string name="settings_update_available_body">現在 %1$s、最新 %2$s。配布ページからパッケージを取得してください。</string>
+  <string name="settings_update_go_download">ダウンロード</string>
 </resources>

@@ -4,7 +4,10 @@
  * 通过 GitHub Releases API 检查最新发布版本，对比当前版本号判断是否有可用更新。
  * 设计为离线优先：无网络时静默返回无更新，不阻塞用户使用。
  *
- * 复用 GitHubApiClient 的 OkHttp 基础设施（证书锁定、超时配置）。
+ * 说明（1.0.34 起）：本模块此前是死代码——`UpdateChecker` 在仓内零调用，
+ * 用户看不到任何更新入口。本版把它接进「关于与安全」页的「检查更新」行，
+ * 并修掉三处会让入口不可用的问题：缓存回填缺下载地址、5xx 重试分支是空操作、
+ * 版本比较把 `1.0.33-dev` 当低版本。版本比较已抽到纯逻辑 [UpdateVersion] 便于单测。
  *
  * @author DraftPeek Team
  * @since 1.0.31
@@ -39,6 +42,15 @@ private const val INITIAL_RETRY_DELAY_MS = 2000L
 /** GitHub API 基础 URL */
 private const val API_BASE = "https://api.github.com"
 
+/** 缓存有效期（6 小时） */
+private const val CACHE_TTL_MS = 6 * 60 * 60 * 1000L
+
+/** 默认仓库所有者 */
+const val DEFAULT_OWNER: String = "ReSerendipity"
+
+/** 默认仓库名 */
+const val DEFAULT_REPO: String = "DraftPeek"
+
 /**
  * 版本比较结果。
  */
@@ -68,14 +80,12 @@ sealed class UpdateResult {
  * ```
  * val result = UpdateChecker.checkForUpdate(
  *     context = context,
- *     owner = "Doro",
- *     repo = "DraftPeek",
- *     currentVersion = "1.0.30",
+ *     currentVersion = "1.0.33",
  * )
  * when (result) {
  *     is UpdateResult.UpdateAvailable -> { /* 显示更新弹窗 */ }
  *     is UpdateResult.UpToDate -> { /* 无需更新 */ }
- *     is UpdateResult.Error -> { /* 静默忽略 */ }
+ *     is UpdateResult.Error -> { /* 提示可稍后再试 */ }
  * }
  * ```
  */
@@ -92,7 +102,9 @@ object UpdateChecker {
     private const val PREFS_NAME = "draftpeek_update_check"
     private const val KEY_LAST_CHECK_TIME = "last_check_time"
     private const val KEY_LAST_VERSION = "last_version"
-    private const val CACHE_TTL_MS = 6 * 60 * 60 * 1000L // 6 小时缓存
+    private const val KEY_LAST_DOWNLOAD_URL = "last_download_url"
+    private const val KEY_LAST_HTML_URL = "last_html_url"
+    private const val KEY_LAST_NOTES = "last_notes"
 
     /**
      * 检查是否有新版本可用。
@@ -101,33 +113,41 @@ object UpdateChecker {
      * 结果缓存 6 小时，避免频繁请求消耗速率配额。
      *
      * @param context 应用上下文
-     * @param owner GitHub 仓库所有者
-     * @param repo GitHub 仓库名
-     * @param currentVersion 当前应用版本（如 "1.0.30"）
+     * @param currentVersion 当前应用版本（如 "1.0.33"）
+     * @param owner GitHub 仓库所有者，默认 [DEFAULT_OWNER]
+     * @param repo GitHub 仓库名，默认 [DEFAULT_REPO]
      * @param forceRefresh 是否强制刷新缓存
      * @return 更新检查结果
      */
     suspend fun checkForUpdate(
         context: Context,
-        owner: String,
-        repo: String,
         currentVersion: String,
+        owner: String = DEFAULT_OWNER,
+        repo: String = DEFAULT_REPO,
         forceRefresh: Boolean = false
     ): UpdateResult = withContext(Dispatchers.IO) {
-        // 检查缓存
+        val prefs = context.getSharedPreferences(PREFS_NAME, Context.MODE_PRIVATE)
+
+        // 命中缓存时把下载地址与说明一并回填，否则「有新版本」的弹窗点不出下载页
         if (!forceRefresh) {
-            val prefs = context.getSharedPreferences(PREFS_NAME, Context.MODE_PRIVATE)
-            val lastCheck = prefs.getLong(KEY_LAST_CHECK_TIME, 0)
             val cachedVersion = prefs.getString(KEY_LAST_VERSION, null)
+            val lastCheck = prefs.getLong(KEY_LAST_CHECK_TIME, 0)
             if (cachedVersion != null && System.currentTimeMillis() - lastCheck < CACHE_TTL_MS) {
-                return@withContext buildResult(cachedVersion, currentVersion, null, null)
+                return@withContext buildResult(
+                    latestVersion = cachedVersion,
+                    currentVersion = currentVersion,
+                    downloadUrl = prefs.getString(KEY_LAST_DOWNLOAD_URL, null),
+                    htmlUrl = prefs.getString(KEY_LAST_HTML_URL, null),
+                    releaseNotes = prefs.getString(KEY_LAST_NOTES, null) ?: ""
+                )
             }
         }
 
         val apiUrl = "$API_BASE/repos/$owner/$repo/releases/latest"
-        var lastException: IOException? = null
+        var lastError = "Network error"
+        var attempt = 1
 
-        for (attempt in 1..MAX_RETRIES) {
+        while (attempt <= MAX_RETRIES) {
             try {
                 val request = Request.Builder()
                     .url(apiUrl)
@@ -135,62 +155,61 @@ object UpdateChecker {
                     .build()
 
                 val response = client.newCall(request).execute()
-                response.use { res ->
-                    if (res.code == 404) {
-                        return@withContext UpdateResult.Error("No releases found")
-                    }
-                    if (res.code == 403) {
+                val code = response.code
+                val body = response.use { if (it.isSuccessful) it.body?.string() else null }
+
+                when {
+                    code == 404 -> return@withContext UpdateResult.Error("No releases found")
+                    code == 403 || code == 429 ->
                         return@withContext UpdateResult.Error("GitHub API rate limit exceeded")
+                    code in 500..599 -> {
+                        lastError = "Server error (HTTP $code)"
+                        Log.w(TAG, "$lastError (attempt $attempt/$MAX_RETRIES)")
                     }
-                    if (!res.isSuccessful) {
-                        Log.w(TAG, "GitHub API returned HTTP ${res.code}")
-                        if (res.code in 500..599 && attempt < MAX_RETRIES) {
-                            delay(INITIAL_RETRY_DELAY_MS * attempt)
-                            return@use
+                    !response.isSuccessful ->
+                        return@withContext UpdateResult.Error("Server error (HTTP $code)")
+                    else -> {
+                        if (body.isNullOrBlank()) {
+                            return@withContext UpdateResult.Error("Empty response")
                         }
-                        return@withContext UpdateResult.Error("Server error (HTTP ${res.code})")
+
+                        val json = JSONObject(body)
+                        val tagName = json.optString("tag_name", "").removePrefix("v")
+                        if (tagName.isBlank()) {
+                            return@withContext UpdateResult.Error("Invalid release data: missing tag_name")
+                        }
+
+                        val htmlUrl = json.optString("html_url", "")
+                        val releaseBody = json.optString("body", "")
+                        val downloadUrl = extractApkDownloadUrl(json)
+
+                        prefs.edit()
+                            .putLong(KEY_LAST_CHECK_TIME, System.currentTimeMillis())
+                            .putString(KEY_LAST_VERSION, tagName)
+                            .putString(KEY_LAST_DOWNLOAD_URL, downloadUrl)
+                            .putString(KEY_LAST_HTML_URL, htmlUrl)
+                            .putString(KEY_LAST_NOTES, releaseBody)
+                            .apply()
+
+                        return@withContext buildResult(
+                            latestVersion = tagName,
+                            currentVersion = currentVersion,
+                            downloadUrl = downloadUrl,
+                            htmlUrl = htmlUrl,
+                            releaseNotes = releaseBody
+                        )
                     }
-
-                    val body = res.body?.string()
-                    if (body.isNullOrBlank()) {
-                        return@withContext UpdateResult.Error("Empty response")
-                    }
-
-                    val json = JSONObject(body)
-                    val tagName = json.optString("tag_name", "").removePrefix("v")
-                    if (tagName.isBlank()) {
-                        return@withContext UpdateResult.Error("Invalid release data: missing tag_name")
-                    }
-
-                    val htmlUrl = json.optString("html_url", "")
-                    val releaseBody = json.optString("body", "")
-
-                    // 提取第一个 APK 下载链接
-                    val downloadUrl = extractApkDownloadUrl(json)
-
-                    // 缓存结果
-                    val prefs = context.getSharedPreferences(PREFS_NAME, Context.MODE_PRIVATE)
-                    prefs.edit()
-                        .putLong(KEY_LAST_CHECK_TIME, System.currentTimeMillis())
-                        .putString(KEY_LAST_VERSION, tagName)
-                        .apply()
-
-                    return@withContext buildResult(tagName, currentVersion, downloadUrl, htmlUrl, releaseBody)
-                }
-
-                if (attempt < MAX_RETRIES) {
-                    delay(INITIAL_RETRY_DELAY_MS * attempt)
                 }
             } catch (e: IOException) {
-                lastException = e
-                Log.w(TAG, "Update check failed (attempt $attempt/$MAX_RETRIES): ${e.message}")
-                if (attempt < MAX_RETRIES) {
-                    delay(INITIAL_RETRY_DELAY_MS * attempt)
-                }
+                lastError = e.message ?: "Network error"
+                Log.w(TAG, "Update check failed (attempt $attempt/$MAX_RETRIES): $lastError")
             }
+
+            if (attempt < MAX_RETRIES) delay(INITIAL_RETRY_DELAY_MS * attempt)
+            attempt++
         }
 
-        UpdateResult.Error(lastException?.message ?: "Network error")
+        UpdateResult.Error(lastError)
     }
 
     /**
@@ -222,8 +241,7 @@ object UpdateChecker {
         htmlUrl: String?,
         releaseNotes: String = ""
     ): UpdateResult {
-        val comparison = compareVersions(latestVersion, currentVersion)
-        return if (comparison > 0) {
+        return if (UpdateVersion.compare(latestVersion, currentVersion) > 0) {
             UpdateResult.UpdateAvailable(
                 latestVersion = latestVersion,
                 downloadUrl = downloadUrl,
@@ -233,22 +251,5 @@ object UpdateChecker {
         } else {
             UpdateResult.UpToDate
         }
-    }
-
-    /**
-     * 比较两个语义化版本号。
-     *
-     * @return 正数表示 v1 > v2，负数表示 v1 < v2，0 表示相等
-     */
-    private fun compareVersions(v1: String, v2: String): Int {
-        val parts1 = v1.split(".").map { it.toIntOrNull() ?: 0 }
-        val parts2 = v2.split(".").map { it.toIntOrNull() ?: 0 }
-        val maxLen = maxOf(parts1.size, parts2.size)
-        for (i in 0 until maxLen) {
-            val p1 = parts1.getOrElse(i) { 0 }
-            val p2 = parts2.getOrElse(i) { 0 }
-            if (p1 != p2) return p1 - p2
-        }
-        return 0
     }
 }

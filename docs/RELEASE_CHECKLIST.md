@@ -58,6 +58,10 @@
 - [ ] Release 说明中的 SHA256 与 `.sha256` 文件一致
 - [ ] 分发链接已就绪（当前：GitHub Release；若启用自托管下载页/更新检测，须先更新
       对应服务端清单再发版）
+- [ ] in-app 更新检查口径对上本条 Release：它是**动态**读 `/releases/latest` 的
+      `tag_name`（不预置清单），所以本条 Release 只要**不是 draft / 不是 pre-release**
+      就会被客户端当成最新版；发布前后都要确认 `tag_name` 与 `versionName` 可比
+      （`1.0.34` vs `1.0.34-dev` 判等，不会把 debug 包当旧版）
 - [ ] （如适用）`docs/` 中指向下载的链接仍有效（CI `check_spec_refs.py` 兜底）
 
 ## 6. 文档与策略同步

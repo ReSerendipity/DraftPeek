@@ -7,6 +7,15 @@
 
 ---
 
+## [Unreleased]
+
+### Added
+- 关于与安全页新增「检查更新」行（`AboutSecurityScreen`），点一次即查 GitHub Releases 最新版并给出三种结果：有新版本弹窗（含版本号、Release 说明、「去下载」打开 APK 资产）、已是最新提示、检查失败提示；`UpdateChecker` 由此从零调用死代码变成真入口
+- `core:common` 新增 `UpdateVersion`（纯逻辑版本号比较，无 Android 依赖）与 8 条 JVM 单测；新增真机 Compose 测试 `app/src/androidTest/.../AboutSecurityUpdateDialogTest.kt`，覆盖「点检查更新 → 弹窗 → 取消」与「已是最新不弹窗」
+
+### Fixed
+- 修复 `UpdateChecker` 三处会让入口不可用的问题：① 命中 6h 缓存时把 `downloadUrl` / `htmlUrl` / 说明全丢成 null，用户点「有新版本」拿不到下载地址；② 5xx 重试分支用 `return@use` 只跳出 `use` 块，重试形同空操作；③ 逐段 `toIntOrNull()` 把 `1.0.33-dev` 的 `33-dev` 记成 0，导致 dev 包永远被判成「比 1.0.33 旧」而天天提示更新
+- `UpdateChecker` 默认仓库从占位 `Doro` 改回 `ReSerendipity/DraftPeek`，此前即便接上入口也会 404
 ## [1.0.33] - 2026-10-29
 
 > 本版收录 `v1.0.32`（主干等价提交 `957e0e3`）以来的 147 个非合并提交。下面只列用户可感知的

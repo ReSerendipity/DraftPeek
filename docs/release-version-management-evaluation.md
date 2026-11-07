@@ -115,7 +115,7 @@
 ### P0（商业/交付阻断）
 | 项 | 文件/命令 |
 |---|---|
-| **建立分发渠道**：当前产物仅落 GitHub Release draft，非开发者用户无法便捷获取。决策渠道（F-Droid / 蒲公英 / 自托管下载页）+ 实现 in-app 更新检查 | 需产品决策；工程侧可加 `docs/deploy-download-page` 与更新检测模块 |
+| **建立分发渠道**：当前产物仅落 GitHub Release draft，非开发者用户无法便捷获取。决策渠道（F-Droid / 蒲公英 / 自托管下载页）+ 实现 in-app 更新检查 | 需产品决策；工程侧可加 `docs/deploy-download-page` 与更新检测模块。**进展（2026-11-07）：in-app 更新检查已落地** —— 入口「我的 → 关于与安全 → 检查更新」，走 GitHub Releases API 的 `tag_name` 与本地 `versionName` 比对（`core/common/.../update/{UpdateChecker,UpdateVersion}.kt`），已过真机端到端取证；渠道选择本身仍是产品决策 |
 | **验证并修复发版链路**（因 0 tag，整条 `release.yml` 未跑过）：先修 keystore 路径错配，再打一个测试 tag 跑通全流程 | 见 P1-1；测试 tag：`git tag v0.0.0-dryrun && git push origin v0.0.0-dryrun`（仓库已全量公开，2026-09 修订：测试 tag 直接推 origin 即可） |
 
 ### P1（应在下个发布前完成）

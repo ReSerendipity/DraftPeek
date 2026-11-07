@@ -30,8 +30,10 @@ python -m http.server 8080 --directory docs/deploy-download-page
 # latest.json 必须 no-cache，APK 可长缓存。
 ```
 
-4. （HTTPS 必须）in-app 更新检测（规划，未实现）将 GET `latest.json` 并比较
-   `versionCode`，HTTP 明文会被 Android 网络安全策略拦截。
+4. （HTTPS 必须）in-app 更新检测**已实现**（2026-11-07），但走的是 GitHub Releases API
+   通道（`GET /repos/ReSerendipity/DraftPeek/releases/latest`，比较 `tag_name` 与
+   本地 `versionName`），**不读**本目录的 `latest.json`；本页下载链路依旧只服务
+   浏览器下载。两条通道的分歧见下文「边界」。
 
 ## OG 图片与生产域名
 
@@ -48,7 +50,11 @@ python -m http.server 8080 --directory docs/deploy-download-page
 ## 边界（明确不做 / 未决）
 
 - 渠道选择（自托管 vs Play vs 蒲公英）= 产品决策，本目录只是基座。
-- in-app 更新检测模块（Kotlin 侧）未实现，属后续工程项；契约已由
-  `latest.json` 固化，实现时无需改服务端。
+- in-app 更新检测已实现，入口在「我的 → 关于与安全 → 检查更新」
+  （`feature/settings/.../AboutSecurityScreen.kt`），判定与网络层在
+  `core/common/.../update/{UpdateChecker,UpdateVersion}.kt`。
+  当前实现读 GitHub Releases API 的 `tag_name`，与本目录 `latest.json` 的
+  `versionCode` 契约**尚未统一**：若日后切到自托管通道，需改 `UpdateChecker`
+  的取数地址与比较口径（`latest.json` 契约无需改服务端）。
 - 本仓库已全量公开（2026-09 修订）：GitHub Release 资产可匿名下载，下载页可直接链接其资产——
   分发链路已无私有仓库限制，渠道选择仍属产品决策。
