@@ -91,7 +91,13 @@ mapping.txt
 
 # Archive: temp files, logs, cloned repos, design assets, old planning docs
 _archive/repos/
-_archive/
+# 例外：仓根 _archive/ 同时承担治理 §12.1 的文档归档区——_archive/INDEX.md 与
+# _archive/执行记录/ 必须入库（2026-11-08 文档归档落地，见 _archive/INDEX.md）；
+# 其余（临时文件/日志/克隆仓/设计资产/旧计划）仍仅本地保留。
+# 用 _archive/* 而非 _archive/：父目录被整目录排除后无法再用 ! 包含子项。
+# 注意：本行之后的 `*.md` 通配（下方「Additional Chinese markdown files」区）会再次挡住
+# 归档内的 md，故入库例外统一写在该通配下方的白名单区。
+_archive/*
 
 # Reference / competitor source repos (research only, not part of project)
 repos/
@@ -133,6 +139,10 @@ design_system_draft.md
 *.md
 # docs/ 为纯入库目录（§12.1/§13.1）：docs/ 下全部文档豁免上方 *.md 通配，保持可入库语义
 !docs/**
+# 仓根 _archive/ 的治理归档区（§12.1）：索引与执行记录入库；_archive 下其余 *
+# 仍由上方 `_archive/*` 维持本地保留（临时文件/日志/克隆仓/设计资产/旧计划）
+!_archive/INDEX.md
+!_archive/执行记录/**
 !README.md
 !SECURITY.md
 !CHANGELOG.md
