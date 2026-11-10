@@ -62,6 +62,8 @@
 
 > **2026-11-07 晚补记**：上机障碍已解除——本机 `beta` 构建（minify 开 + debug 签名）可覆盖安装到 `com.draftpeek.dev`。但缺陷 1 的上机复核**仍未完成**，被 §六.4 / §六.5 两处新缺陷挡住（内部文件在文件页不可见、预览态取不到截图），详见 §六.5。
 
+> **2026-11-10 真机上机复核（完成，缺陷 1 关闭）**：设备 RMX5010（Android 16），`adb install -r` 覆盖安装 `app-dev-debug.apk`（1.0.33-dev，`com.draftpeek.dev`），经 SAF 授权 `/sdcard/DraftPeekTest` 打开 `ab_h1_matrix.md`。**预览模式 5 个标题全部可见**（H1 第一块 ZZZ1 / H2 中部 ZZZ2 / H3 中部 ZZZ3 / H1 中部 ZZZ4 / ASCII ONLY H1 ZZZ5），两段正文正常；**分屏模式**左栏 5 个 `#` 与右栏 5 个标题逐项对应。证据：`C:/Users/Doro/Documents/Trae-CN/temp_20261109_01/reports/draftpeek-defect1-device-20261110/01-preview-headings.png`、`02-split-headings.png`。顺带：SAF 授权后文件页正确列出目录与文件（同目录 `03-file-list-ui.xml`），§六.4「列表恒空」修复上机可见。
+
 ## 四、未覆盖（明确记录，不假装走完）
 
 - 首启协议弹层：**2026-11-07 晚已覆盖**（用 `com.draftpeek.dev` 1.0.33-dev 全新数据复现，见 §六.1）。
