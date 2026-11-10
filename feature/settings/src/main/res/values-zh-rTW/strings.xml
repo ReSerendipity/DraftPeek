@@ -140,7 +140,9 @@
     <string name="profile_verify_app">驗證應用程式</string>
     <string name="security_status_clear_logs">清除安全性事件記錄</string>
     <string name="security_status_dex_failed">DEX 完整性：❌ 已修改</string>
+    <string name="security_status_dex_not_checked">DEX 完整性：未檢測</string>
     <string name="security_status_dex_passed">DEX 完整性：✅ 通過</string>
+    <string name="security_status_dex_reason">原因：%1$s</string>
     <string name="security_status_environment_hostile">執行階段環境：敵對</string>
     <string name="security_status_environment_safe">執行階段環境：安全</string>
     <string name="security_status_environment_suspicious">執行階段環境：可疑</string>

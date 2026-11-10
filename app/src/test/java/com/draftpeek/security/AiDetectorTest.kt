@@ -7,8 +7,10 @@
 package com.draftpeek.security
 
 import com.draftpeek.core.common.security.AiDetectionSignal
+import com.draftpeek.core.common.security.DexIntegrityStatus
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertFalse
+import org.junit.jupiter.api.Assertions.assertNotEquals
 import org.junit.jupiter.api.Assertions.assertNotNull
 import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.BeforeEach
@@ -203,5 +205,77 @@ class AiDetectorTest {
         assertFalse(AiDetector.DEX_ENTRY_PATTERN.matches("MANIFEST.MF"))
         assertFalse(AiDetector.DEX_ENTRY_PATTERN.matches("classes.dex.bak"))
         assertFalse(AiDetector.DEX_ENTRY_PATTERN.matches("assets/classes.dex"))
+    }
+
+    // ===== DEX 完整性三态（走查 §六.6：负向对照仍显示「✅ 通过」）=====
+    // 判定逻辑全部走纯函数 resolveDexIntegrity，不依赖 Context / 真机 / 时钟。
+
+    @Test
+    fun `dex outcome - crc sum equals baseline is the only PASS`() {
+        val outcome = AiDetector.resolveDexIntegrity(baseline = 6L, crcs = listOf(1L, 2L, 3L))
+        assertEquals(AiDetector.DexIntegrityOutcome.Verified, outcome)
+        assertEquals(DexIntegrityStatus.PASSED, AiDetector.dexStatusOf(outcome))
+        assertTrue(outcome.signals.isEmpty(), "一致时不得产出任何信号")
+    }
+
+    @Test
+    fun `dex outcome - tampered baseline is FAILED not pass`() {
+        // 负向对照复刻：把 assets/dex_crc_baseline.txt 的 sum 改成 12345678901（实际 13498282265）
+        val outcome = AiDetector.resolveDexIntegrity(
+            baseline = 12345678901L,
+            crcs = listOf(13498282265L)
+        )
+        assertTrue(outcome is AiDetector.DexIntegrityOutcome.Mismatch, "基线被改必须判不一致")
+        assertEquals(DexIntegrityStatus.FAILED, AiDetector.dexStatusOf(outcome))
+        assertTrue(
+            AiDetectionSignal.DEX_TAMPERED in outcome.signals,
+            "篡改必须保留 DEX_TAMPERED 判据"
+        )
+        assertTrue(
+            outcome.detail!!.contains("12345678901") && outcome.detail!!.contains("13498282265"),
+            "失败原因要带上实际值与基线值：${outcome.detail}"
+        )
+    }
+
+    @Test
+    fun `dex outcome - missing baseline is UNKNOWN not PASS`() {
+        // 基线缺失（sum=0）走的是「跳过校验」：不报篡改，但也不能说通过
+        val outcome = AiDetector.resolveDexIntegrity(baseline = 0L, crcs = listOf(1L, 2L, 3L))
+        assertTrue(outcome is AiDetector.DexIntegrityOutcome.NotVerifiable)
+        assertEquals(DexIntegrityStatus.UNKNOWN, AiDetector.dexStatusOf(outcome))
+        assertTrue(outcome.signals.isEmpty())
+    }
+
+    @Test
+    fun `dex outcome - unreadable apk is UNKNOWN not PASS`() {
+        val outcome = AiDetector.resolveDexIntegrity(
+            baseline = 6L,
+            crcs = null,
+            error = java.io.IOException("zip corrupted")
+        )
+        assertTrue(outcome is AiDetector.DexIntegrityOutcome.NotVerifiable)
+        assertEquals(DexIntegrityStatus.UNKNOWN, AiDetector.dexStatusOf(outcome))
+        assertTrue(outcome.detail!!.contains("zip corrupted"))
+    }
+
+    @Test
+    fun `dex outcome - no dex entries is UNKNOWN not PASS`() {
+        val outcome = AiDetector.resolveDexIntegrity(baseline = 6L, crcs = emptyList())
+        assertTrue(outcome is AiDetector.DexIntegrityOutcome.NotVerifiable)
+        assertEquals(DexIntegrityStatus.UNKNOWN, AiDetector.dexStatusOf(outcome))
+    }
+
+    @Test
+    fun `dex outcome - empty signal set is never mapped to PASSED unless verified`() {
+        // 旧实现的 fail-open 就是「空集 == 通过」。逐条确认空集的三种来源都不是 PASSED。
+        val notVerifiableOutcomes = listOf(
+            AiDetector.resolveDexIntegrity(0L, listOf(1L)),
+            AiDetector.resolveDexIntegrity(6L, emptyList()),
+            AiDetector.resolveDexIntegrity(6L, null, java.io.IOException("boom"))
+        )
+        notVerifiableOutcomes.forEach { outcome ->
+            assertTrue(outcome.signals.isEmpty())
+            assertNotEquals(DexIntegrityStatus.PASSED, AiDetector.dexStatusOf(outcome))
+        }
     }
 }

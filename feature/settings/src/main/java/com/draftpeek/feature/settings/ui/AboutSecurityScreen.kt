@@ -30,6 +30,7 @@ import androidx.compose.material.icons.filled.Security
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
+import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -46,6 +47,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.draftpeek.core.common.security.AiProtectionStateHolder
 import com.draftpeek.core.common.security.AiThreatLevel
+import com.draftpeek.core.common.security.DexIntegrityStatus
 import com.draftpeek.core.common.update.UpdateChecker
 import com.draftpeek.core.common.update.UpdateResult
 import com.draftpeek.core.ui.component.BrandDialog
@@ -123,11 +125,13 @@ fun AboutSecurityScreen(
         ) {
             SectionHeader(label = stringResource(R.string.security_status_section_title))
 
-            val aiState = AiProtectionStateHolder.current
+            // 读可观察状态流：后台协程 assess() 完成后这里会重组。
+            // 用 AiProtectionStateHolder.current 读快照会永远停在首帧，正是走查里「仍显示 ✅」的另一半成因。
+            val aiState by AiProtectionStateHolder.state.collectAsState()
             val isSignatureMismatch =
                 com.draftpeek.core.common.security.AiDetectionSignal.SIGNATURE_MISMATCH in aiState.triggeredSignals
-            val isDexTampered =
-                com.draftpeek.core.common.security.AiDetectionSignal.DEX_TAMPERED in aiState.triggeredSignals
+            val dexStatus = aiState.dexIntegrityStatus
+            val dexReason = aiState.dexIntegrityReason
 
             BrandSettingRow(
                 icon = Icons.Filled.Security,
@@ -143,16 +147,23 @@ fun AboutSecurityScreen(
             )
             BrandSettingRow(
                 icon = Icons.Filled.Info,
-                label = stringResource(
-                    if (isDexTampered) {
-                        R.string.security_status_dex_failed
-                    } else {
-                        R.string.security_status_dex_passed
-                    }
-                ),
+                label = stringResource(dexStatusLabelRes(dexStatus)),
+                isDanger = dexStatus == DexIntegrityStatus.FAILED,
                 onClick = {},
-                showDivider = true
+                showDivider = dexReason == null
             )
+            if (dexReason != null) {
+                Text(
+                    text = stringResource(R.string.security_status_dex_reason, dexReason),
+                    style = MaterialTheme.typography.bodySmall,
+                    color = if (dexStatus == DexIntegrityStatus.FAILED) {
+                        SemanticColors.Danger
+                    } else {
+                        PrototypeTokens.muted
+                    },
+                    modifier = Modifier.padding(start = 20.dp, end = 20.dp, bottom = 8.dp)
+                )
+            }
             BrandSettingRow(
                 icon = Icons.Filled.Security,
                 label = stringResource(

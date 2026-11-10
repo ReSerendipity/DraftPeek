@@ -139,7 +139,9 @@
 <string name="profile_verify_app">アプリを検証</string>
 <string name="security_status_clear_logs">セキュリティイベントログをクリア</string>
 <string name="security_status_dex_failed">DEX整合性: ❌ 変更あり</string>
+<string name="security_status_dex_not_checked">DEX整合性: 未検査</string>
 <string name="security_status_dex_passed">DEX整合性: ✅ 合格</string>
+<string name="security_status_dex_reason">理由: %1$s</string>
 <string name="security_status_environment_hostile">実行環境: 敵対的</string>
 <string name="security_status_environment_safe">実行環境: 安全</string>
 <string name="security_status_environment_suspicious">実行環境: 疑わしい</string>

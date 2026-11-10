@@ -38,6 +38,7 @@ import com.draftpeek.feature.browser.model.BrowserUiState
 import com.draftpeek.feature.browser.model.FileItem
 import com.draftpeek.feature.browser.model.FileSortOption
 import com.draftpeek.feature.browser.model.GitHubImportState
+import com.draftpeek.feature.browser.model.SafAccessState
 import com.draftpeek.feature.browser.model.sortFiles
 import com.draftpeek.feature.browser.observer.DirectoryObserver
 import com.draftpeek.feature.browser.repository.FileContentResult
@@ -152,6 +153,21 @@ class FileBrowserViewModel @Inject constructor(
 
     /** 当前浏览的目录 SAF URI */
     val currentTreeUri: StateFlow<Uri?> = _currentTreeUri.asStateFlow()
+
+    private val _safAccessState = MutableStateFlow(SafAccessState.NONE)
+
+    /**
+     * SAF 目录树授权状态（WO-B22）
+     *
+     * 与 [uiState] 同源、同处发布：只有 [SafAccessState.GRANTED] 之后出现的
+     * `BrowserUiState.Success(emptyList())` 才代表「已加载的空目录」，
+     * [SafAccessState.NONE] 代表「没有授权的目录树」（首页）。
+     *
+     * 旧实现把等价状态放在 `FileBrowserScreen.hasSafPermission`（`rememberSaveable`），
+     * 由组合期副作用置真，早于/晚于 `uiState` 与列表数据的发布都不确定 —— 授权后
+     * 首次 `listFiles` 返回空时，界面会把「未授权 / 未加载」渲染成「暂无文件」。
+     */
+    val safAccessState: StateFlow<SafAccessState> = _safAccessState.asStateFlow()
 
     private val _gitRepoInfo = MutableStateFlow<GitRepoInfo?>(null)
 
@@ -426,23 +442,55 @@ class FileBrowserViewModel @Inject constructor(
     /**
      * 用户通过 SAF 选择目录后的入口
      *
-     * 清空之前的 Git 状态防止脏数据，初始化导航栈，加载文件列表和 Git 状态，注册文件观察者
+     * 清空之前的 Git 状态防止脏数据，初始化导航栈，取持久授权，再加载文件列表和
+     * Git 状态，注册文件观察者。
+     *
+     * **发布顺序（WO-B22）**：`PENDING + Loading` → 取授权 → `GRANTED` → 首次加载。
+     * 授权态严格早于任何 `Success` 发布，因此列表里的空结果一定出自「已授权后的真实
+     * 查询」，不会再把「未授权 / 未加载完」当成「暂无文件」。
      *
      * @param treeUri 用户授予权限的 SAF 目录树 URI
      */
     fun onTreeUriSelected(treeUri: Uri) {
         viewModelScope.launch {
-            repository.takeUriPermission(treeUri)
-            clearGitState()
+            _safAccessState.value = SafAccessState.PENDING
             _uiState.value = BrowserUiState.Loading
+            clearGitState()
             _currentTreeUri.value = treeUri
             _navigationStack.value = listOf(treeUri)
             _navigationDisplayPath.value = safUriToDisplayPath(treeUri)
             recordUserActivity.recordFileOpen()
             applyDirectorySortPreference(treeUri)
-            loadFiles(treeUri)
+
+            // 取持久授权。部分 ROM / provider 不支持持久化时会抛 SecurityException，
+            // 此时 picker 给出的临时读授权仍然有效：记日志后按会话内已授权继续，
+            // 不把整个目录会话钉在 Loading 上（旧实现会让协程直接抛出、后续加载全不执行）。
+            runCatching { repository.takeUriPermission(treeUri) }
+                .onFailure { e ->
+                    Log.w(TAG, "takePersistableUriPermission failed for $treeUri; falling back to session grant", e)
+                }
+
+            _safAccessState.value = SafAccessState.GRANTED
+            loadSafDirectoryAfterGrant(treeUri)
             loadGitStatus(treeUri)
             registerFileObserver(treeUri)
+        }
+    }
+
+    /**
+     * 授权落地后的首次加载（WO-B22）
+     *
+     * 调用前 [safAccessState] 必须已是 [SafAccessState.GRANTED]。
+     * 首次查询返回空时显式再加载一次：刚拿到授权的瞬间 SAF provider 可能尚未就绪，
+     * 旧实现在这里只尝试一次就把空列表钉死在界面上，之后没有任何重试路径。
+     * 重试只做一次，且不重复闪 Loading；目录确实为空时第二次查询同样返回空，
+     * 最终仍是「已加载空」的 [BrowserUiState.Success]。
+     */
+    private suspend fun loadSafDirectoryAfterGrant(treeUri: Uri) {
+        loadFiles(treeUri)
+        val first = _uiState.value
+        if (first is BrowserUiState.Success && first.files.isEmpty()) {
+            loadFiles(treeUri, showLoading = false)
         }
     }
 
@@ -521,6 +569,9 @@ class FileBrowserViewModel @Inject constructor(
             _navigationStack.value = emptyList()
             _currentTreeUri.value = null
             _navigationDisplayPath.value = ""
+            // 回到首页即退出目录会话：授权态必须一起回 NONE，否则首页仍按「已授权」
+            // 渲染，会把内部存储的授权引导卡藏掉（与旧 UI 侧标志语义对齐）。
+            _safAccessState.value = SafAccessState.NONE
             _uiState.value = BrowserUiState.Idle
             loadInternalFiles()
             return true
@@ -565,12 +616,18 @@ class FileBrowserViewModel @Inject constructor(
     /**
      * 加载 SAF 目录的文件列表
      *
-     * 异常处理：通过 [catch] 操作符捕获 SAF 访问异常，转换为用户友好的错误消息
+     * 异常处理：通过 [catch] 操作符捕获 SAF 访问异常（含仓储对「树根无法解析」抛出的
+     * [IllegalStateException]），转换为用户友好的错误消息 —— 不静默降级成空列表，
+     * 否则「加载失败」会被渲染成「暂无文件」。
      *
      * @param treeUri SAF 目录树 URI
+     * @param showLoading 是否先把 [uiState] 置为 Loading（授权后的一次补偿加载传 false，
+     *   避免空目录时按钮区闪一次转圈）
      */
-    private suspend fun loadFiles(treeUri: Uri) {
-        _uiState.value = BrowserUiState.Loading
+    private suspend fun loadFiles(treeUri: Uri, showLoading: Boolean = true) {
+        if (showLoading) {
+            _uiState.value = BrowserUiState.Loading
+        }
         val displayPath = safUriToDisplayPath(treeUri)
         repository.listFiles(treeUri)
             .catch { e ->

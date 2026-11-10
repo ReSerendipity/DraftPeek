@@ -376,6 +376,9 @@ class DraftPeekApp :
                 }
             } catch (e: Exception) {
                 Timber.w(e, "AI protection assessment failed")
+                // fail-closed：自检中断时不能让「关于与安全」停在默认文案上装作通过，
+                // 显式落一条 FAILED（含异常细节），界面据此显示失败原因。
+                com.draftpeek.core.common.security.AiProtectionStateHolder.markAssessmentFailed(e)
             }
         }
     }

@@ -39,9 +39,12 @@ class FileRepositoryImpl @Inject constructor(@param:ApplicationContext private v
 
     override fun listFiles(treeUri: Uri): Flow<List<FileItem>> = flow {
         val root = resolveDocumentFile(treeUri)
+        // WO-B22： 「树根解析失败 / 不是目录」不等于「空目录」。旧实现静默
+        // emit(emptyList())，界面于是把授权或查询失败渲染成「暂无文件」（走查 §六.5
+        // 的观感来源之一）。这里抛出，交由 ViewModel 的 catch 归一为
+        // BrowserUiState.Error（「无法加载目录」，带重试入口），空列表只代表真的没子项。
         if (root == null || !root.isDirectory) {
-            emit(emptyList())
-            return@flow
+            throw IllegalStateException("Cannot resolve directory tree: $treeUri")
         }
 
         val files = root.listFiles()

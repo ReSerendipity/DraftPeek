@@ -15,6 +15,7 @@
 package com.draftpeek.feature.editor.ui
 
 import android.util.Log
+import androidx.compose.foundation.horizontalScroll
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -240,17 +241,27 @@ private fun safeSetMarkdown(state: RichTextState, markdown: String) {
  * 提供一键访问最常用的 Markdown 格式化操作：
  * 粗体、斜体、删除线、代码、无序列表、有序列表。
  *
+ * **必须横向可滚动**：六个中文标签按钮的固有宽度之和在窄屏（如 1264px / 411dp）上
+ * 超过可用宽度。Row 给非 weight 子项的约束是「剩余宽度」，剩余宽度耗尽后会退化成 0，
+ * 于是最后一个按钮的 Text 被压成单字宽、四个字各占一行（走查缺陷 2：有序列表被裁切 +
+ * 逐字竖排）。加 horizontalScroll 后子项按固有宽度测量、超出部分横向滚动；
+ * 标签再补 maxLines=1 / softWrap=false 作为第二道防线，任何情况下都不再竖排。
+ *
+ * 回归断言见 `androidTest/.../MarkdownRichEditorToolbarLayoutTest.kt`（需设备：
+ * 缺陷由中文真实字宽驱动，Robolectric 的字宽度量在 JVM 上会退化，测不出竖排）。
+ *
  * @param richTextState 富文本状态对象
  * @param modifier 修饰符
  */
 @Composable
-private fun MarkdownRichEditorToolbar(richTextState: RichTextState, modifier: Modifier = Modifier) {
+internal fun MarkdownRichEditorToolbar(richTextState: RichTextState, modifier: Modifier = Modifier) {
     val fgSoftColor = PrototypeTokens.fgSoft
     val accentColor = PrototypeTokens.accent
 
     Row(
-        modifier = modifier,
-        horizontalArrangement = Arrangement.spacedBy(2.dp)
+        modifier = modifier.horizontalScroll(rememberScrollState()),
+        horizontalArrangement = Arrangement.spacedBy(2.dp),
+        verticalAlignment = Alignment.CenterVertically
     ) {
         // Bold
         ToolbarButton(
@@ -321,6 +332,8 @@ private fun ToolbarButton(label: String, isActive: Boolean, onClick: () -> Unit)
     ) {
         Text(
             text = label,
+            maxLines = 1,
+            softWrap = false,
             style = MaterialTheme.typography.labelMedium.copy(
                 fontWeight = if (isActive) FontWeight.Bold else FontWeight.Normal
             ),

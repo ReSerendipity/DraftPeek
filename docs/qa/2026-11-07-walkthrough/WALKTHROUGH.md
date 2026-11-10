@@ -153,12 +153,21 @@
 - 另一种触发路径同样为空：`选择文件夹` 授权后点面包屑文字（如 `Download`，center 334,736）**不是进目录，而是直接退出当前目录授权**（回到未授权态），说明面包屑不是导航控件 —— 这本身也值得作为 IA 缺陷记录。
 - 新建文件路径的问题：`+` → `新建文件` → 选 Markdown → 输入 `qa-walkthrough-16` → 「创建并打开」→ 应用**掉回文件页**（`topResumedActivity` 仍是 `MainActivity`），文件已真实落地 `files/user_files/qa-walkthrough-16.md`（`run-as` 可见），但文件页列表**不刷新也不显示该文件**，随后无法再从 UI 打开它（`历史记录` 在 `force-stop` 后清空为「暂无历史」）。
 - 结论：`LocalFileSystemProvider.listFiles` 链路（`supportsUri` → `resolveDocumentFile(uri)` → `documentFile.listFiles().filter { it.exists() }` → 排序）**未定位到具体失败点**：既无异常日志，也拿不到非空列表。下一个怀疑点是 `.filter { it.exists() }` 在 ColorOS SAF provider 上对子项恒 false（`DocumentFile.exists()` 依赖 `name != null`）——但这是**假设，未验证**，需 instrumentation 或在 `listFiles` 里加临时日志才能定论。
+- **复核（2026-11-08 S13 报告）**：上述 `LocalFileSystemProvider` 怀疑点**不在主链** —— DI 把 `FileRepository` 绑到 `FileRepositoryImpl`（`BrowserModule`），`LocalFileSystemProvider` 只注册进 `FileSystemRegistry`，生产代码里没有调用点；`FileBrowserViewModel.loadFiles` → `FileRepositoryImpl.listFiles`（`DocumentFile` 树查询）才是文件页唯一数据来源。根因改判为「授权态与列表数据的发布时序」。
+
+#### 六.5-a 处置状态（WO-B22，2026-11-09）
+
+- 采纳方向：**B（授权态上移 ViewModel，与 `uiState` 同源）+ A（授权后显式触发加载）+ C（未授权空 / 已加载空 结构性分离）**。理由与取舍见 `reports/WO-B22-draftpeek-files-fix.md` §3。
+- 改动：`FileBrowserViewModel` 新增 `safAccessState`（`NONE/PENDING/GRANTED`），`onTreeUriSelected` 固定为 `PENDING+Loading → 取持久授权 → GRANTED → 首次加载`，首次加载为空再显式补一次；`FileBrowserScreen` 删掉 `rememberSaveable` 的 `hasSafPermission`（组合期置真 + `LaunchedEffect(isInSubdirectory)` 复位），列表分支改按 `currentTreeUri == null` 判定首页；`FileRepositoryImpl.listFiles` 对「树根无法解析 / 不是目录」由静默 `emit(emptyList())` 改为抛错，`FileBrowserViewModel` 归一为 `BrowserUiState.Error`。
+- 验证（脚本化，无设备）：`:feature:browser:testDebugUnitTest` **154 例全绿**（新增 `SafDirectoryAccessTests` 6 例，含一条能判红的负控：把授权态发布挪到加载之后，该类恰 1 例变红；实测日志见报告 §5）；`:app:assembleDebug` `rc=0`。
+- **真机未验**：本轮没有 AVD 也没有连接设备，走查里那台 ColorOS 上的屏上复核**未做**。设备侧步骤（复制粘贴即可执行）见报告 §7，验收时以该节为准。
 
 ## 七、本轮遗留（明确记录，不假装做完）
 
 - 缺陷 1 修复（`5454de2`）**仍未上机复核**：内部文件在文件页不可见（§六.5），文件页里点不进预览，故没有「预览标题恢复」的屏上证据。
+  - **2026-11-09 决策**：暂不安排上机复核（无设备），登记为「待所有者安排真机时间」。理由：本轮无 AVD 亦无连接设备，§三 已走「同一份 marked + node」的等价验证（旧写法复现 5 个 `<hundefined>`、新写法产出 5 个带文字标题），代码侧修复已成立；SLO ≥99.5%/月 已接受。触发条件：Doro 安排真机时间后执行 §三 步骤 3 的屏上复看。责任人：Doro。
 - 缺陷 2（有序列表竖排）未定位容器代码、未修。
-- §六.5 的列表恒空只做到「排除若干方向 + 记录假设」，未定位到具体失败点。
+- §六.5 的列表恒空：S13 已把根因改判到「授权态 / 列表发布时序」（`LocalFileSystemProvider` 不在主链），WO-B22 已按该根因改代码 + 补 ViewModel 单测（模块 154 例全绿、`:app:assembleDebug` rc=0）；**真机复核未做**（无设备），步骤见 `reports/WO-B22-draftpeek-files-fix.md` §7 —— 在真机上跑完之前，本条只能算「代码侧已处置」。
 - §六.6（安全状态 fail-open，见下）需产品口径确认后决定是否改为三态。
 
 ### 六.6 新缺陷：安全状态「✅ 通过」是 fail-open 展示，负向对照未变红

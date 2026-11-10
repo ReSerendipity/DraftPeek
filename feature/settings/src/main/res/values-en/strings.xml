@@ -140,7 +140,9 @@
 <string name="profile_verify_app">Verify app</string>
 <string name="security_status_clear_logs">Clear security event logs</string>
 <string name="security_status_dex_failed">DEX integrity: ❌ Modified</string>
+<string name="security_status_dex_not_checked">DEX integrity: not checked</string>
 <string name="security_status_dex_passed">DEX integrity: ✅ Passed</string>
+<string name="security_status_dex_reason">Reason: %1$s</string>
 <string name="security_status_environment_hostile">Runtime environment: Hostile</string>
 <string name="security_status_environment_safe">Runtime environment: Safe</string>
 <string name="security_status_environment_suspicious">Runtime environment: Suspicious</string>

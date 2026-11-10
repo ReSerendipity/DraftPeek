@@ -30,6 +30,7 @@ import com.draftpeek.core.common.security.AiDetectionSignal.*
 import com.draftpeek.core.common.security.AiProtectionState
 import com.draftpeek.core.common.security.AiProtectionStateHolder
 import com.draftpeek.core.common.security.AiThreatLevel
+import com.draftpeek.core.common.security.DexIntegrityStatus
 import java.io.File
 import java.util.ArrayDeque
 
@@ -172,6 +173,43 @@ object AiDetector {
     /** 构建期生成的基线 asset 名（见 app/build.gradle.kts 的 DexCrcBaselineTask）。 */
     internal const val DEX_CRC_BASELINE_ASSET = "dex_crc_baseline.txt"
 
+    /** 基线缺失/不可解析时的技术细节（= 跳过校验，结论只能是「未检测」）。 */
+    internal const val DEX_BASELINE_SKIP_DETAIL =
+        "dex_crc_baseline missing or unparsable (sum=0); check skipped"
+
+    /**
+     * DEX 完整性校验结论。
+     *
+     * 三态的单一来源：只有 [Verified] 能映射成「通过」，[Mismatch] 映射「失败」，
+     * [NotVerifiable] 映射「未检测」。原有 `verifyDexIntegrity` 返回的空集不再被
+     * 调用方当作通过——空集只说明「没有产出信号」，不说明「校验过且一致」。
+     */
+    internal sealed class DexIntegrityOutcome {
+
+        /** 产出的检测信号（只有确认篡改时才非空）。 */
+        abstract val signals: Set<AiDetectionSignal>
+
+        /** 非「通过」时的技术细节，供界面展示失败/未检测原因。 */
+        abstract val detail: String?
+
+        /** 校验完成且 CRC 求和与基线一致。 */
+        data object Verified : DexIntegrityOutcome() {
+            override val signals: Set<AiDetectionSignal> get() = emptySet()
+            override val detail: String? get() = null
+        }
+
+        /** CRC 求和与基线不一致：产出 DEX_TAMPERED 信号。 */
+        data class Mismatch(val actualSum: Long, val baseline: Long) : DexIntegrityOutcome() {
+            override val signals: Set<AiDetectionSignal> get() = setOf(DEX_TAMPERED)
+            override val detail: String get() = "dex crc sum=$actualSum != baseline=$baseline"
+        }
+
+        /** 无法判定（基线缺失、APK 条目读不出）：不产出信号，但也不得当成通过。 */
+        data class NotVerifiable(override val detail: String) : DexIntegrityOutcome() {
+            override val signals: Set<AiDetectionSignal> get() = emptySet()
+        }
+    }
+
     /**
      * 解析基线文本里的 `sum=<long>` 行。
      * 非法/缺失返回 0，调用方据此跳过校验（零误报口径）。
@@ -192,25 +230,78 @@ object AiDetector {
      *
      * 基线由构建期 `DexCrcBaselineTask` 写入 **assets/dex_crc_baseline.txt**（不是 BuildConfig：
      * BuildConfig 常量编译进 dex 会造成"基线依赖 dex、dex 依赖基线"的循环）。
-     * 基线缺失或不可解析时跳过校验，保持零误报口径。
+     * 基线缺失或不可解析时跳过校验，保持零误报口径 —— 但结论是「未检测」，
+     * 不是「通过」（见 [checkDexIntegrity]）。
+     *
+     * @return 仅确认篡改时返回 `{DEX_TAMPERED}`；其余情况返回空集。
+     *   调用方若要区分三态，必须用 [checkDexIntegrity]，不要用空集推定为通过。
      */
     @WorkerThread
-    fun verifyDexIntegrity(context: Context): Set<AiDetectionSignal> {
+    fun verifyDexIntegrity(context: Context): Set<AiDetectionSignal> = checkDexIntegrity(context).signals
+
+    /**
+     * DEX 完整性校验（带显式结论）。
+     *
+     * 把「读基线」和「读 APK 条目」的 I/O 与「怎么判」的决策分开：
+     * 判定逻辑在纯函数 [resolveDexIntegrity] 里，可脱离 Context 单测；
+     * 这里的异常一律折算成 [DexIntegrityOutcome.NotVerifiable]（跳过校验、不报篡改、不算通过）。
+     */
+    @WorkerThread
+    internal fun checkDexIntegrity(context: Context): DexIntegrityOutcome {
         val baseline = readDexCrcBaseline(context)
-        if (baseline == 0L) return emptySet()
-        return try {
-            val apkPath = context.packageCodePath
-            val crcs = java.util.zip.ZipFile(apkPath).use { zip ->
+        val crcs: List<Long>? = try {
+            java.util.zip.ZipFile(context.packageCodePath).use { zip ->
                 zip.entries().asSequence()
                     .filter { DEX_ENTRY_PATTERN.matches(it.name) }
                     .map { it.crc }
                     .toList()
             }
-            if (crcs.isEmpty()) return emptySet()
-            if (sumDexCrcs(crcs) != baseline) setOf(DEX_TAMPERED) else emptySet()
-        } catch (_: Exception) {
-            emptySet()
+        } catch (e: Exception) {
+            return resolveDexIntegrity(baseline, null, e)
         }
+        return resolveDexIntegrity(baseline, crcs)
+    }
+
+    /**
+     * DEX 完整性判定的纯函数（无 I/O、无 Context，便于穷举三态）。
+     *
+     * @param baseline 构建期基线（0 = 缺失/不可解析）
+     * @param crcs APK 内 classes*.dex 的 CRC32 列表；读取失败时传 null
+     * @param error 读取 APK 时的异常（非空即优先按「无法判定」处理）
+     */
+    internal fun resolveDexIntegrity(
+        baseline: Long,
+        crcs: List<Long>?,
+        error: Throwable? = null
+    ): DexIntegrityOutcome {
+        if (error != null) {
+            val message = error.message ?: error::class.simpleName ?: "unknown"
+            return DexIntegrityOutcome.NotVerifiable("apk dex entries unreadable: $message")
+        }
+        if (baseline == 0L) {
+            return DexIntegrityOutcome.NotVerifiable(DEX_BASELINE_SKIP_DETAIL)
+        }
+        if (crcs.isNullOrEmpty()) {
+            return DexIntegrityOutcome.NotVerifiable("no classes*.dex entries found in apk")
+        }
+        val actualSum = sumDexCrcs(crcs)
+        return if (actualSum != baseline) {
+            DexIntegrityOutcome.Mismatch(actualSum, baseline)
+        } else {
+            DexIntegrityOutcome.Verified
+        }
+    }
+
+    /**
+     * 校验结论 → 界面三态。纯函数，便于把每条分支都钉在测试里。
+     *
+     * 只有 [DexIntegrityOutcome.Verified] 是 `PASSED`；「跳过校验」「读不出 APK」一律
+     * `UNKNOWN`，不会被当成通过。
+     */
+    internal fun dexStatusOf(outcome: DexIntegrityOutcome): DexIntegrityStatus = when (outcome) {
+        is DexIntegrityOutcome.Verified -> DexIntegrityStatus.PASSED
+        is DexIntegrityOutcome.Mismatch -> DexIntegrityStatus.FAILED
+        is DexIntegrityOutcome.NotVerifiable -> DexIntegrityStatus.UNKNOWN
     }
 
     /** 从 assets 读回构建期生成的 DEX CRC 基线；缺失/非法一律返回 0（= 跳过校验）。 */
@@ -313,7 +404,8 @@ object AiDetector {
         allSignals += detectEnhancedEmulator()
         allSignals += detectClassloadingBurst()
         allSignals += detectReflectionTimingAnomaly()
-        allSignals += verifyDexIntegrity(context)
+        val dexOutcome = checkDexIntegrity(context)
+        allSignals += dexOutcome.signals
         allSignals += verifyOfficialSignature(context)
         allSignals += detectAsmClassFornameBurst()
         allSignals += detectAsmMethodInvokeBurst()
@@ -340,7 +432,17 @@ object AiDetector {
             }
         }
 
-        val state = AiProtectionState(threatLevel, allSignals.toSet(), responseLevel)
+        // 三态：只有 Verified 是「通过」；跳过校验（基线缺失/异常）只能是「未检测」。
+        // 空信号集合不再等价于通过 —— 这正是走查里「负向对照仍显示 ✅」的成因之一。
+        val dexStatus = dexStatusOf(dexOutcome)
+
+        val state = AiProtectionState(
+            threatLevel = threatLevel,
+            triggeredSignals = allSignals.toSet(),
+            responseLevel = responseLevel,
+            dexIntegrityStatus = dexStatus,
+            dexIntegrityReason = dexOutcome.detail
+        )
         AiProtectionStateHolder.update(state)
         return state
     }

@@ -256,7 +256,6 @@ fun FileBrowserScreen(
         fileToDelete = item
         showDeleteConfirmDialog = true
     }
-    var hasSafPermission by rememberSaveable { mutableStateOf(false) }
     var selectedFile by remember { mutableStateOf<FileItem?>(null) }
     var showCreateFileDialog by rememberSaveable { mutableStateOf(false) }
     var showImportSheet by rememberSaveable { mutableStateOf(false) }
@@ -314,7 +313,6 @@ fun FileBrowserScreen(
             .map { it.uri }
             .firstOrNull { it.scheme == "content" && it.pathSegments.firstOrNull() == "tree" }
             ?: return@LaunchedEffect
-        hasSafPermission = true
         viewModel.onTreeUriSelected(restored)
     }
 
@@ -331,7 +329,8 @@ fun FileBrowserScreen(
         contract = ActivityResultContracts.OpenDocumentTree()
     ) { uri ->
         if (uri != null) {
-            hasSafPermission = true
+            // 授权态由 ViewModel 单一持有（WO-B22）：这里不再本地置真，
+            // 避免「UI 认为已授权」早于/晚于「列表数据发布」的时序错位。
             viewModel.onTreeUriSelected(uri)
         }
     }
@@ -386,11 +385,6 @@ fun FileBrowserScreen(
                 Toast.makeText(context, message, Toast.LENGTH_SHORT).show()
             }
         }
-    }
-
-    // Sync permission state with current tree URI
-    if (currentTreeUri != null && !hasSafPermission) {
-        hasSafPermission = true
     }
 
     // Create file dialog
@@ -677,12 +671,8 @@ fun FileBrowserScreen(
         derivedStateOf { (uiState as? BrowserUiState.Success)?.currentPath ?: "" }
     }
 
-    // Reset SAF permission flag when returning to root
-    LaunchedEffect(isInSubdirectory) {
-        if (!isInSubdirectory) {
-            hasSafPermission = false
-        }
-    }
+    // （已移除「回到根目录时复位 SAF 授权标志」的 LaunchedEffect：授权态改由
+    //   FileBrowserViewModel.safAccessState 持有，navigateUp() 在 ViewModel 内一并回 NONE — WO-B22）
 
     // Handle system back button to navigate up when in a subdirectory
     androidx.activity.compose.BackHandler(enabled = isInSubdirectory) {
@@ -928,7 +918,10 @@ fun FileBrowserScreen(
                             selectedItems = selectedItems
                         )
                     }
-                    !hasSafPermission -> {
+                    // 没有活动目录会话（currentTreeUri == null）→ 首页：内部存储 + 授权引导卡。
+                    // 授权态与列表数据同源在 ViewModel（safAccessState，WO-B22），这里不再用
+                    // UI 侧 rememberSaveable 标志判定，避免组合期置真与数据发布错位。
+                    currentTreeUri == null -> {
                         InternalFileListContent(
                             internalFiles = internalFiles,
                             internalFilesOrder = internalFilesOrder,

@@ -50,6 +50,15 @@ python -m http.server 8080 --directory docs/deploy-download-page
 ## 边界（明确不做 / 未决）
 
 - 渠道选择（自托管 vs Play vs 蒲公英）= 产品决策，本目录只是基座。
+- **当前默认分发渠道：GitHub Releases 直链下载**（资产可匿名下载，见本节末条）。
+  本目录（自托管下载页）**保持基座态、不部署**；`latest.json` 不随 GitHub Release 更新。
+  **切换触发条件**（满足任一即启用自托管页，并改 in-app 更新通道，见下条）：
+  ① 确定对外发布域名与服务器；② 决定不再依赖 GitHub 作为唯一分发入口（Play / 蒲公英 / 镜像站落地）。
+  切换时本目录 `index.html` 直接可部署，`og:image` 按 §OG 图片节同步改绝对 URL。
+- **versionCode 契约（唯一规则）**：`versionCode = MAJOR * 10000 + MINOR * 100 + PATCH`，
+  单调递增；与 `versionName` 的对应关系为 `versionName = "MAJOR.MINOR.PATCH"`（预发布加 `-alpha.N` /
+  `-beta.N` / `-rc.N` 后缀）。`latest.json` 的 `versionCode` 必须等于 `gradle.properties`
+  集中版本位按上式的计算值，`versionName` 必须与同版本 tag 一致；两者任一对不上即为契约破坏。
 - in-app 更新检测已实现，入口在「我的 → 关于与安全 → 检查更新」
   （`feature/settings/.../AboutSecurityScreen.kt`），判定与网络层在
   `core/common/.../update/{UpdateChecker,UpdateVersion}.kt`。

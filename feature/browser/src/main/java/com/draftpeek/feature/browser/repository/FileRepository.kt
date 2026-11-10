@@ -6,6 +6,13 @@ import com.draftpeek.feature.browser.model.FileItem
 import kotlinx.coroutines.flow.Flow
 
 interface FileRepository {
+    /**
+     * 列出 [treeUri] 目录树下的直接子项。
+     *
+     * 空列表只表示「目录确实没有子项」；树根无法解析 / 不是目录时抛
+     * [IllegalStateException]，由调用方归一为错误态 —— 不得用空列表掩盖失败
+     * （WO-B22：否则「未授权 / 加载失败」会被渲染成「暂无文件」）。
+     */
     fun listFiles(treeUri: Uri): Flow<List<FileItem>>
 
     /**

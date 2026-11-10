@@ -65,16 +65,38 @@ enum class AiDetectionSignal {
 }
 
 /**
+ * DEX 完整性校验的三态结论。
+ *
+ * 只有 [PASSED] 表示「已校验且与构建期基线一致」。默认值必须是 [UNKNOWN]：
+ * 检测尚未执行、基线缺失导致跳过校验、校验过程异常时都停在或回到该值，
+ * 不允许用「没发现 DEX_TAMPERED 信号」推定通过（安全状态不 fail-open）。
+ */
+enum class DexIntegrityStatus {
+    /** 未检测：自检尚未执行、缺少基线跳过校验，或校验过程无法判定 */
+    UNKNOWN,
+
+    /** 通过：校验完成且 CRC 求和与构建期基线一致 */
+    PASSED,
+
+    /** 失败：CRC 与基线不一致（DEX 被 patch / 二次打包），或自检整体中断 */
+    FAILED
+}
+
+/**
  * AI 对抗防护状态数据类。
  *
  * @property threatLevel 当前威胁等级
  * @property triggeredSignals 已触发的检测信号集合
  * @property responseLevel 当前响应级别
+ * @property dexIntegrityStatus DEX 完整性三态结论（默认未检测）
+ * @property dexIntegrityReason 非 [DexIntegrityStatus.PASSED] 时的技术细节（供 UI 展示原因）
  */
 data class AiProtectionState(
     val threatLevel: AiThreatLevel = AiThreatLevel.SAFE,
     val triggeredSignals: Set<AiDetectionSignal> = emptySet(),
-    val responseLevel: ResponseLevel = ResponseLevel.NONE
+    val responseLevel: ResponseLevel = ResponseLevel.NONE,
+    val dexIntegrityStatus: DexIntegrityStatus = DexIntegrityStatus.UNKNOWN,
+    val dexIntegrityReason: String? = null
 ) {
     /**
      * 响应级别枚举。

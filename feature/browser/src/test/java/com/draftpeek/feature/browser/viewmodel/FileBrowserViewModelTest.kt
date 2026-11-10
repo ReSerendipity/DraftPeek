@@ -1,6 +1,7 @@
 package com.draftpeek.feature.browser.viewmodel
 
 import android.content.Context
+import android.net.Uri
 import app.cash.turbine.test
 import com.draftpeek.core.common.event.AppEvent
 import com.draftpeek.core.common.event.AppEventBus
@@ -13,13 +14,17 @@ import com.draftpeek.core.domain.repository.BookmarkRepository
 import com.draftpeek.core.domain.repository.UserActivityRepository
 import com.draftpeek.core.domain.usecase.ManageBookmarksUseCase
 import com.draftpeek.core.domain.usecase.RecordUserActivityUseCase
+import com.draftpeek.feature.browser.model.BrowserUiState
 import com.draftpeek.feature.browser.model.FileItem
 import com.draftpeek.feature.browser.model.FileSortOption
 import com.draftpeek.feature.browser.model.GitHubImportState
+import com.draftpeek.feature.browser.model.SafAccessState
 import com.draftpeek.feature.browser.model.sortFiles
 import com.draftpeek.feature.browser.observer.DirectoryObserver
 import com.draftpeek.feature.browser.repository.FileRepository
 import com.draftpeek.feature.settings.repository.SettingsRepository
+import io.mockk.coEvery
+import io.mockk.coVerify
 import io.mockk.every
 import io.mockk.mockk
 import io.mockk.mockkObject
@@ -28,6 +33,8 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.emptyFlow
+import kotlinx.coroutines.flow.flow
+import kotlinx.coroutines.flow.flowOf
 import kotlinx.coroutines.test.UnconfinedTestDispatcher
 import kotlinx.coroutines.test.resetMain
 import kotlinx.coroutines.test.runTest
@@ -468,6 +475,212 @@ class FileBrowserViewModelTest {
                 assertEquals(GitHubImportState.Idle, viewModel.gitHubImportState.value)
                 cancelAndIgnoreRemainingEvents()
             }
+        }
+    }
+
+    // ------------------------------------------------------------------
+    // SAF 目录授权 → 列表加载（WO-B22「文件页列表恒空」）
+    // ------------------------------------------------------------------
+
+    /**
+     * 覆盖 S13 定位的根因：授权态在 UI 组合期置真、与 `uiState` 的发布时机错位，
+     * 授权后首次 `listFiles` 返回空即被渲染成「暂无文件」，且没有重试路径。
+     *
+     * 断言点全部落在 ViewModel 的公开状态（`safAccessState` / `uiState`）与仓储交互
+     * （`listFiles` 调用次数、调用瞬间的授权态），可在 JVM 上跑，不需要 Robolectric。
+     */
+    @Nested
+    @DisplayName("SAF 目录授权（WO-B22）")
+    inner class SafDirectoryAccessTests {
+
+        private lateinit var repository: FileRepository
+        private lateinit var settingsRepository: SettingsRepository
+        private lateinit var userActivityRepository: UserActivityRepository
+        private lateinit var bookmarkRepository: BookmarkRepository
+        private lateinit var manageBookmarks: ManageBookmarksUseCase
+        private lateinit var recordUserActivity: RecordUserActivityUseCase
+        private lateinit var appEventBus: AppEventBus
+        private lateinit var gitManager: GitManager
+        private lateinit var gitHubApiClient: GitHubApiClient
+        private lateinit var directoryObserver: DirectoryObserver
+        private lateinit var context: Context
+        private lateinit var viewModel: FileBrowserViewModel
+
+        private val mainDispatcher = UnconfinedTestDispatcher()
+        private val treeUri = mockk<Uri>(relaxed = true)
+
+        /** `listFiles` 被调用次数（空结果会触发一次补偿加载，故非空 ≠ 1）。 */
+        private var listFilesCalls = 0
+
+        /** `listFiles` 被调用那一刻的授权态 —— 负控判据：必须是 GRANTED。 */
+        private var accessStateAtLoad: SafAccessState? = null
+
+        @BeforeEach
+        fun setUp() {
+            Dispatchers.setMain(mainDispatcher)
+            mockkObject(AppFileManager)
+            every { AppFileManager.listUserFiles(any()) } returns emptyList()
+
+            every { treeUri.toString() } returns "file:///storage/emulated/0/DraftPeekAudit"
+            every { treeUri.scheme } returns "file"
+            every { treeUri.path } returns "/storage/emulated/0/DraftPeekAudit"
+
+            repository = mockk(relaxed = true)
+            coEvery { repository.takeUriPermission(any()) } returns Unit
+
+            settingsRepository = mockk(relaxed = true)
+            every { settingsRepository.settings } returns emptyFlow()
+            every { settingsRepository.getPinnedFiles() } returns MutableStateFlow(emptySet())
+            every { settingsRepository.getPinnedOrder() } returns MutableStateFlow(emptyList())
+            every { settingsRepository.getRecentOrder() } returns MutableStateFlow(emptyList())
+            every { settingsRepository.getInternalFilesOrder() } returns MutableStateFlow(emptyList())
+            every { settingsRepository.getBookmarkOrder() } returns MutableStateFlow(emptyList())
+            every { settingsRepository.getDirectorySortOption(any()) } returns flowOf(null)
+
+            manageBookmarks = mockk(relaxed = true)
+            every { manageBookmarks.allBookmarkUris() } returns MutableStateFlow(emptyList())
+
+            appEventBus = mockk(relaxed = true)
+            every { appEventBus.events } returns MutableSharedFlow<AppEvent>()
+
+            directoryObserver = mockk(relaxed = true)
+            every { directoryObserver.refreshEvents } returns MutableSharedFlow<Unit>()
+
+            gitManager = mockk(relaxed = true)
+            every { gitManager.findRepository(any()) } returns null
+
+            gitHubApiClient = mockk(relaxed = true)
+            userActivityRepository = mockk(relaxed = true)
+            bookmarkRepository = mockk(relaxed = true)
+            recordUserActivity = mockk(relaxed = true)
+            context = mockk(relaxed = true)
+
+            stubListFiles(listOf())
+
+            viewModel = FileBrowserViewModel(
+                repository,
+                settingsRepository,
+                userActivityRepository,
+                bookmarkRepository,
+                manageBookmarks,
+                recordUserActivity,
+                appEventBus,
+                gitManager,
+                gitHubApiClient,
+                directoryObserver,
+                context
+            )
+        }
+
+        @AfterEach
+        fun tearDown() {
+            Dispatchers.resetMain()
+            unmockkObject(AppFileManager)
+        }
+
+        /**
+         * 按批次返回 `listFiles` 结果；批次用尽后一直返回最后一组。
+         * 顺带记录调用次数与调用瞬间的授权态。
+         */
+        private fun stubListFiles(vararg batches: List<FileItem>) {
+            val pending = batches.toList().toMutableList()
+            every { repository.listFiles(any()) } answers {
+                listFilesCalls++
+                accessStateAtLoad = viewModel.safAccessState.value
+                val batch = if (pending.isEmpty()) batches.last() else pending.removeAt(0)
+                flowOf(batch)
+            }
+        }
+
+        private fun safFile(name: String, isDir: Boolean = false): FileItem = FileItem(
+            name = name,
+            uri = mockk(relaxed = true),
+            isDirectory = isDir
+        )
+
+        @Test
+        @DisplayName("授权前：停在首页（NONE + Idle），不会把空结果发布成 Success")
+        fun beforeGrant_staysOnHomeWithoutLoad() {
+            assertEquals(SafAccessState.NONE, viewModel.safAccessState.value)
+            assertEquals(BrowserUiState.Idle, viewModel.uiState.value)
+            assertEquals(0, listFilesCalls)
+            coVerify(exactly = 0) { repository.takeUriPermission(any()) }
+        }
+
+        @Test
+        @DisplayName("授权后：先发布 GRANTED 再加载；非空列表发布 Success（负控：授权晚于加载即红）")
+        fun afterGrant_publishesGrantedBeforeLoad() {
+            stubListFiles(listOf(safFile("a.md"), safFile("src", isDir = true)))
+
+            viewModel.onTreeUriSelected(treeUri)
+
+            assertEquals(SafAccessState.GRANTED, viewModel.safAccessState.value)
+            val state = viewModel.uiState.value
+            assertTrue(state is BrowserUiState.Success, "授权后应有加载结果，实际 $state")
+            assertEquals(2, (state as BrowserUiState.Success).files.size)
+            // 负控判据：加载发生时授权态必须已经发布，否则「空列表」就无法被区分为已加载空
+            assertEquals(SafAccessState.GRANTED, accessStateAtLoad)
+            assertEquals(1, listFilesCalls)
+            coVerify(exactly = 1) { repository.takeUriPermission(treeUri) }
+        }
+
+        @Test
+        @DisplayName("授权后首次为空：显式补一次加载，仍空则作为「已加载空」收敛")
+        fun afterGrant_emptyDirectoryRetriesOnceThenAcceptsEmpty() {
+            stubListFiles(emptyList())
+
+            viewModel.onTreeUriSelected(treeUri)
+
+            assertEquals(SafAccessState.GRANTED, viewModel.safAccessState.value)
+            val state = viewModel.uiState.value
+            assertTrue(state is BrowserUiState.Success, "空目录也应落到 Success，实际 $state")
+            assertTrue((state as BrowserUiState.Success).files.isEmpty())
+            assertEquals(2, listFilesCalls, "首次授权后应显式补一次加载")
+        }
+
+        @Test
+        @DisplayName("首次空、补偿加载取到文件：最终 Success 非空（复现「授权后停在空列表」的症状）")
+        fun firstEmptyThenFilled_surfacesFiles() {
+            stubListFiles(emptyList(), listOf(safFile("qa-walkthrough-16.md")))
+
+            viewModel.onTreeUriSelected(treeUri)
+
+            val state = viewModel.uiState.value
+            assertTrue(state is BrowserUiState.Success, "应落到 Success，实际 $state")
+            assertEquals(1, (state as BrowserUiState.Success).files.size)
+            assertEquals("qa-walkthrough-16.md", state.files.first().name)
+            assertEquals(2, listFilesCalls)
+        }
+
+        @Test
+        @DisplayName("授权成功但查询抛错：落到 Error，不静默变成「暂无文件」")
+        fun loadFailure_surfacesErrorInsteadOfEmpty() {
+            every { repository.listFiles(any()) } answers {
+                listFilesCalls++
+                accessStateAtLoad = viewModel.safAccessState.value
+                flow { throw IllegalStateException("Cannot resolve directory tree") }
+            }
+
+            viewModel.onTreeUriSelected(treeUri)
+
+            val state = viewModel.uiState.value
+            assertTrue(state is BrowserUiState.Error, "加载失败应曝光为错误态，实际 $state")
+            assertEquals(1, listFilesCalls)
+        }
+
+        @Test
+        @DisplayName("回到根目录：授权态与目录会话一起复位（NONE + Idle）")
+        fun navigateUpToRoot_resetsAccessState() {
+            stubListFiles(listOf(safFile("a.md")))
+
+            viewModel.onTreeUriSelected(treeUri)
+            assertEquals(SafAccessState.GRANTED, viewModel.safAccessState.value)
+
+            assertTrue(viewModel.navigateUp())
+
+            assertEquals(SafAccessState.NONE, viewModel.safAccessState.value)
+            assertEquals(null, viewModel.currentTreeUri.value)
+            assertEquals(BrowserUiState.Idle, viewModel.uiState.value)
         }
     }
 
