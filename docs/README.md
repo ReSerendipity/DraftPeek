@@ -24,7 +24,9 @@
 | `docs/` | 项目文档（见下方索引） |
 | `scripts/` | 构建与辅助脚本 |
 
-## docs/ 索引（全部 tracked 文档登记于此）
+## docs/ 索引（全部 tracked 文档登记于此：26 篇）
+
+> 全量逐文件清单（含路径 / 用途 / 状态 / 核对日期 2026-11-10）见 [`INDEX.md`](INDEX.md)，两者冲突时以 `INDEX.md` 为准。
 
 ### 顶层文档（14 篇）
 
@@ -51,6 +53,7 @@
 |---|---|
 | [adr/](adr/README.md) | 架构决策记录：[索引](adr/README.md) · [0002 编辑器同步采用 CRDT](adr/0002-editor-sync-crdt.md) |
 | [reports/](reports/2026-10-15-架构评审台账.md) | 3 篇活动报告：[架构评审台账](reports/2026-10-15-架构评审台账.md) · [覆盖率爬坡计划](reports/2026-10-15-覆盖率爬坡计划.md) · [失败签名机制摘要](reports/2026-10-15-失败签名机制与排障路径摘要.md)。5 篇一次性评估/分析报告（BUILD_PERF、前端工程体系评估、测试体系评估、学习成果落地分析、2026-09 记忆归档）已归档至 [_archive/执行记录/2026-11/](../_archive/执行记录/2026-11/)，索引见 [_archive/INDEX.md](../_archive/INDEX.md) |
+| [qa/](qa/2026-11-07-walkthrough/WALKTHROUGH.md) | 真机走查记录：[2026-11-07 走查](qa/2026-11-07-walkthrough/WALKTHROUGH.md)（RMX5010 / Android 16 / SDK 36，缺陷 1 复核通过） |
 | [icon-design/](icon-design/README.md) | 图标设计素材档案（109 个文件，素材为主、非文档实体）：[总览](icon-design/README.md) · [历史归档索引](icon-design/archive/README.md) · [G34R 导出包说明](icon-design/archive/g34r/icon-export/README.md) · [scripts 说明](icon-design/scripts/README.md) |
 | [deploy-download-page/](deploy-download-page/README.md) | 自托管下载页工程基座（README + index.html + latest.json.example） |
 | `assets/` | README 展示图（`readme-*`，§8.1 指定位） |
