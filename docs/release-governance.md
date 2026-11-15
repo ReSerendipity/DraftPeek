@@ -26,7 +26,7 @@
 | PATCH | 向后兼容的 Bug 修复 | 安全补丁、UI 修复、性能优化 |
 | PRERELEASE | 预发布标识 | `-alpha.N`、`-beta.N`、`-rc.N` |
 
-- **唯一权威版本位**：`gradle.properties` 的集中版本位 `draftpeek.version.major` / `draftpeek.version.minor` / `draftpeek.version.patch`（当前 `1.0.33`，截至 2026-11-04）。
+- **唯一权威版本位**：`gradle.properties` 的集中版本位 `draftpeek.version.major` / `draftpeek.version.minor` / `draftpeek.version.patch`（当前 `1.1.0`，截至 2026-11-15）。
 - **必须同步的其它版本位**：`app/build.gradle.kts` 从 `gradle.properties` 读取版本位，**勿手改**；`versionCode` 由 `bumpVersion` task 自动核算，不手写。
 - **versionCode 规则（本仓特有，不得丢失）**：
   - 公式：`versionCode = MAJOR * 10000 + MINOR * 100 + PATCH`（示例：`1.0.30` → `10030`）。

@@ -7,15 +7,30 @@
 
 ---
 
-## [Unreleased]
+## [1.1.0] - 2026-11-15
+
+> 本版收录 `v1.0.33`（`4e37384`）以来的 41 个非合并提交；下面只列用户可感知的功能与修复，
+> 治理 / CI / 文档类改动合并成一条。
 
 ### Added
+- 终端：真 PTY 会话——新增 forkpty/openpty JNI 桥与 `TerminalPtySession`（master fd + reader/writer/waiter 三线程），`TerminalSessionManager` 改为 PTY 优先、管道回退；`resize` 接 `TIOCSWINSZ`，真机验证 `stty` / `vim` / Ctrl-C 通过
+- 插件：加载签名/哈希信任闸门（fail-closed）——新增 `plugin_trust.json` 信任清单，校验 APK 全部签名者与 DEX 文件 SHA-256、路径与大小约束；默认空清单拒绝动态插件
+- 插件：DEX 类级扫描与受限 API 准入——纯 Kotlin 解析 DEX header/string_ids/type_ids/class_defs，导出定义类与引用类型；信任清单 v2 新增 `allowedClassPrefixes`（必填）与 `restrictedClasses`，`PolicyEnforcingDexClassLoader` 做运行时二次校验（447 个单测通过）
 - 关于与安全页新增「检查更新」行（`AboutSecurityScreen`），点一次即查 GitHub Releases 最新版并给出三种结果：有新版本弹窗（含版本号、Release 说明、「去下载」打开 APK 资产）、已是最新提示、检查失败提示；`UpdateChecker` 由此从零调用死代码变成真入口
 - `core:common` 新增 `UpdateVersion`（纯逻辑版本号比较，无 Android 依赖）与 8 条 JVM 单测；新增真机 Compose 测试 `app/src/androidTest/.../AboutSecurityUpdateDialogTest.kt`，覆盖「点检查更新 → 弹窗 → 取消」与「已是最新不弹窗」
+
+### Changed
+- 安全与编辑：AI 防护三态语义收口，文件页补齐 SAF 权限态，编辑器工具栏布局修正
+- 治理与 CI（合并）：根 `CONTRIBUTING.md` / `CODE_OF_CONDUCT.md` 交回 `ReSerendipity/.github` 继承；坑点台账迁至随仓分发的 `docs/project/KNOWN_GOTCHAS.md`（`docs/agents/GOTCHAS.md` 转为本地历史分片），pre-push 台账门禁同步指向新路径；`app/build.gradle.kts` 与 Kotlin 源码按 Spotless/ktlint 全量对齐
 
 ### Fixed
 - 修复 `UpdateChecker` 三处会让入口不可用的问题：① 命中 6h 缓存时把 `downloadUrl` / `htmlUrl` / 说明全丢成 null，用户点「有新版本」拿不到下载地址；② 5xx 重试分支用 `return@use` 只跳出 `use` 块，重试形同空操作；③ 逐段 `toIntOrNull()` 把 `1.0.33-dev` 的 `33-dev` 记成 0，导致 dev 包永远被判成「比 1.0.33 旧」而天天提示更新
 - `UpdateChecker` 默认仓库从占位 `Doro` 改回 `ReSerendipity/DraftPeek`，此前即便接上入口也会 404
+- 修复 R8 混淆打断 JNI 类查找导致发行包 native 层整体失效
+- 修复 marked v12 入参不兼容导致预览标题/列表渲染成空元素
+- 补齐 ja / ko / zh-rTW / zh 全部缺失词条，本地化基线收紧到 0
+- DEX CRC 基线改为构建期真接线，运行时校验不再被跳过
+
 ## [1.0.33] - 2026-10-29
 
 > 本版收录 `v1.0.32`（主干等价提交 `957e0e3`）以来的 147 个非合并提交。下面只列用户可感知的
