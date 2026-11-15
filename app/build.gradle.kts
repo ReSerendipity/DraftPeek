@@ -3,7 +3,6 @@ import java.security.MessageDigest
 import java.util.Properties
 import java.util.zip.CRC32
 import java.util.zip.ZipFile
-
 import org.gradle.api.DefaultTask
 import org.gradle.api.file.ConfigurableFileCollection
 import org.gradle.api.file.DirectoryProperty
@@ -599,7 +598,7 @@ tasks.register("verifyDexCrc") {
                     declaredSum != actualSum || declaredCount != crcs.size -> {
                         failures++
                         logger.error(
-                            "[verifyDexCrc] ${apk.name}: 基线 $declaredSum/${declaredCount} 条 " +
+                            "[verifyDexCrc] ${apk.name}: 基线 $declaredSum/$declaredCount 条 " +
                                 "!= APK 实际 $actualSum/${crcs.size} 条"
                         )
                     }
