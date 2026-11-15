@@ -26,20 +26,18 @@ internal object DexParser {
 
     private val DEX_VERSIONS = setOf("35", "37", "38", "39", "40")
 
-    fun parse(bytes: ByteArray, sourceName: String = "dex"): DexScanResult {
-        return ByteArrayDexSource(bytes).use { parse(it, sourceName) }
+    fun parse(bytes: ByteArray, sourceName: String = "dex"): DexScanResult = ByteArrayDexSource(bytes).use {
+        parse(it, sourceName)
     }
 
-    fun parse(source: DexSource, sourceName: String): DexScanResult {
-        return try {
-            parseInternal(source, sourceName)
-        } catch (e: DexParseException) {
-            DexScanResult.Failure("$sourceName: ${e.message}")
-        } catch (e: Exception) {
-            DexScanResult.Failure(
-                "$sourceName: 解析异常: ${e.message ?: e.javaClass.simpleName}",
-            )
-        }
+    fun parse(source: DexSource, sourceName: String): DexScanResult = try {
+        parseInternal(source, sourceName)
+    } catch (e: DexParseException) {
+        DexScanResult.Failure("$sourceName: ${e.message}")
+    } catch (e: Exception) {
+        DexScanResult.Failure(
+            "$sourceName: 解析异常: ${e.message ?: e.javaClass.simpleName}"
+        )
     }
 
     private fun parseInternal(source: DexSource, sourceName: String): DexScanResult.Success {
@@ -68,13 +66,31 @@ internal object DexParser {
         }
 
         val stringTable = readTable(
-            source, header, 0x38, 0x3C, 4, MAX_STRING_IDS, "string_ids",
+            source,
+            header,
+            0x38,
+            0x3C,
+            4,
+            MAX_STRING_IDS,
+            "string_ids"
         )
         val typeTable = readTable(
-            source, header, 0x40, 0x44, 4, MAX_TYPE_IDS, "type_ids",
+            source,
+            header,
+            0x40,
+            0x44,
+            4,
+            MAX_TYPE_IDS,
+            "type_ids"
         )
         val classTable = readTable(
-            source, header, 0x60, 0x64, 32, MAX_CLASS_DEFS, "class_defs",
+            source,
+            header,
+            0x60,
+            0x64,
+            32,
+            MAX_CLASS_DEFS,
+            "class_defs"
         )
 
         val dataSize = u32(header, 0x68)
@@ -86,7 +102,10 @@ internal object DexParser {
         }
 
         val stringOffsets = readU32Array(
-            source, stringTable.offset, stringTable.count, "string_ids",
+            source,
+            stringTable.offset,
+            stringTable.count,
+            "string_ids"
         )
         for (index in stringOffsets.indices) {
             val offset = stringOffsets[index]
@@ -99,7 +118,10 @@ internal object DexParser {
         }
 
         val typeDescriptorIndices = readU32Array(
-            source, typeTable.offset, typeTable.count, "type_ids",
+            source,
+            typeTable.offset,
+            typeTable.count,
+            "type_ids"
         )
         val typeDescriptors = arrayOfNulls<String>(typeTable.count)
         val referencedTypes = LinkedHashSet<String>(typeTable.count.coerceAtMost(1024))
@@ -111,7 +133,7 @@ internal object DexParser {
             val descriptor = readStringAt(
                 source,
                 stringOffsets[stringIndex.toInt()],
-                "type_ids[$index]",
+                "type_ids[$index]"
             )
             if (!isValidTypeDescriptor(descriptor)) {
                 fail("type_ids[$index] 不是合法类型描述符：$descriptor")
@@ -127,7 +149,7 @@ internal object DexParser {
         }
         val classBytes = source.readBytes(
             classTable.offset,
-            classTable.count * 32,
+            classTable.count * 32
         )
         val definedClasses = LinkedHashSet<String>(classTable.count)
         for (index in 0 until classTable.count) {
@@ -157,37 +179,44 @@ internal object DexParser {
                 u32(classBytes, base + 12),
                 dataOffset,
                 dataSize,
-                "class_defs[$index].interfaces_off",
+                "class_defs[$index].interfaces_off"
             )
             validateOptionalDataOffset(
                 u32(classBytes, base + 20),
                 dataOffset,
                 dataSize,
-                "class_defs[$index].annotations_off",
+                "class_defs[$index].annotations_off"
             )
             validateOptionalDataOffset(
                 u32(classBytes, base + 24),
                 dataOffset,
                 dataSize,
-                "class_defs[$index].class_data_off",
+                "class_defs[$index].class_data_off"
             )
             validateOptionalDataOffset(
                 u32(classBytes, base + 28),
                 dataOffset,
                 dataSize,
-                "class_defs[$index].static_values_off",
+                "class_defs[$index].static_values_off"
             )
         }
 
         return DexScanResult.Success(
             definedClasses = definedClasses.toList(),
-            referencedTypes = referencedTypes.toSet(),
+            referencedTypes = referencedTypes.toSet()
         )
     }
 
     private fun validateMagic(header: ByteArray) {
         val expected = byteArrayOf(
-            0x64, 0x65, 0x78, 0x0A, 0x30, 0x00, 0x00, 0x00,
+            0x64,
+            0x65,
+            0x78,
+            0x0A,
+            0x30,
+            0x00,
+            0x00,
+            0x00
         )
         if (header[0] != expected[0] ||
             header[1] != expected[1] ||
@@ -209,12 +238,7 @@ internal object DexParser {
 
     private data class Table(val count: Int, val offset: Long)
 
-    private fun validateOptionalDataOffset(
-        value: Long,
-        dataOffset: Long,
-        dataSize: Long,
-        path: String,
-    ) {
+    private fun validateOptionalDataOffset(value: Long, dataOffset: Long, dataSize: Long, path: String) {
         if (value == 0L) return
         if (dataSize <= 0L || value < dataOffset || value >= dataOffset + dataSize) {
             fail("$path 越界：$value")
@@ -228,8 +252,9 @@ internal object DexParser {
         offsetOffset: Int,
         entrySize: Int,
         maxCount: Int,
-        name: String,
-    ): Table {        val count = u32(header, sizeOffset)
+        name: String
+    ): Table {
+        val count = u32(header, sizeOffset)
         if (count > maxCount.toLong()) {
             fail("$name 数量过大：$count > $maxCount")
         }
@@ -248,12 +273,7 @@ internal object DexParser {
         return Table(count.toInt(), offset)
     }
 
-    private fun readU32Array(
-        source: DexSource,
-        offset: Long,
-        count: Int,
-        name: String,
-    ): LongArray {
+    private fun readU32Array(source: DexSource, offset: Long, count: Int, name: String): LongArray {
         if (count == 0) return LongArray(0)
         val bytes = source.readBytes(offset, count * 4)
         return LongArray(count) { index -> u32(bytes, index * 4) }
@@ -343,9 +363,15 @@ internal object DexParser {
         if (value.isEmpty()) return false
         if (value.any { it < ' ' || it == '\u007F' }) return false
         if (value.length == 1) {
-            return value[0] == 'V' || value[0] == 'Z' || value[0] == 'B' ||
-                value[0] == 'S' || value[0] == 'C' || value[0] == 'I' ||
-                value[0] == 'J' || value[0] == 'F' || value[0] == 'D'
+            return value[0] == 'V' ||
+                value[0] == 'Z' ||
+                value[0] == 'B' ||
+                value[0] == 'S' ||
+                value[0] == 'C' ||
+                value[0] == 'I' ||
+                value[0] == 'J' ||
+                value[0] == 'F' ||
+                value[0] == 'D'
         }
 
         var index = 0
@@ -358,9 +384,8 @@ internal object DexParser {
         return isValidClassBody(base.substring(1, base.length - 1))
     }
 
-    private fun isClassDescriptor(value: String): Boolean {
-        return value.startsWith("L") && value.endsWith(";") && isValidTypeDescriptor(value)
-    }
+    private fun isClassDescriptor(value: String): Boolean =
+        value.startsWith("L") && value.endsWith(";") && isValidTypeDescriptor(value)
 
     private fun isValidClassBody(body: String): Boolean {
         if (body.isEmpty()) return false
@@ -376,10 +401,12 @@ internal object DexParser {
         if (offset < 0 || offset + 4 > bytes.size) {
             fail("读取 32 位字段越界：offset=$offset")
         }
-        return ((bytes[offset].toLong() and 0xFF) or
-            ((bytes[offset + 1].toLong() and 0xFF) shl 8) or
-            ((bytes[offset + 2].toLong() and 0xFF) shl 16) or
-            ((bytes[offset + 3].toLong() and 0xFF) shl 24))
+        return (
+            (bytes[offset].toLong() and 0xFF) or
+                ((bytes[offset + 1].toLong() and 0xFF) shl 8) or
+                ((bytes[offset + 2].toLong() and 0xFF) shl 16) or
+                ((bytes[offset + 3].toLong() and 0xFF) shl 24)
+            )
     }
 
     private fun fail(message: String): Nothing = throw DexParseException(message)

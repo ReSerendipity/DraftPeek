@@ -113,7 +113,7 @@ class Pf4jPluginLoader(private val context: Context) {
 
     private val securityVerifier: PluginSecurityVerifier = PluginSecurityVerifier(
         trustStore = trustStore,
-        apkInspector = AndroidApkInspector(context.applicationContext ?: context),
+        apkInspector = AndroidApkInspector(context.applicationContext ?: context)
     )
 
     /**
@@ -172,7 +172,7 @@ class Pf4jPluginLoader(private val context: Context) {
                 is PluginVerificationResult.Allowed -> {
                     Log.d(
                         TAG,
-                        "Plugin ${file.name} verified by trust entry ${verification.entry.id}",
+                        "Plugin ${file.name} verified by trust entry ${verification.entry.id}"
                     )
                     verification.entry
                 }
@@ -213,8 +213,8 @@ class Pf4jPluginLoader(private val context: Context) {
                 parent = parent,
                 policy = PluginRuntimePolicy(
                     entry = entry,
-                    restrictedClasses = trustStore.restrictedClasses,
-                ),
+                    restrictedClasses = trustStore.restrictedClasses
+                )
             )
 
             val className = readPluginClassName(loader)

@@ -16,18 +16,18 @@ class PluginSecurityVerifierTest {
 
     private val fakeSuccessScan = DexScanResult.Success(
         definedClasses = listOf("Lcom/example/plugin/Main;"),
-        referencedTypes = setOf("Lcom/example/plugin/Main;"),
+        referencedTypes = setOf("Lcom/example/plugin/Main;")
     )
 
     @TempDir
     lateinit var tempDir: Path
 
-    private fun writePlugin(name: String, content: String): File {
-        return tempDir.resolve(name).toFile().apply { writeText(content) }
+    private fun writePlugin(name: String, content: String): File = tempDir.resolve(name).toFile().apply {
+        writeText(content)
     }
 
-    private fun writeBytes(name: String, bytes: ByteArray): File {
-        return tempDir.resolve(name).toFile().apply { writeBytes(bytes) }
+    private fun writeBytes(name: String, bytes: ByteArray): File = tempDir.resolve(name).toFile().apply {
+        writeBytes(bytes)
     }
 
     private fun fakeScanner(): PluginDexScanner = PluginDexScanner { fakeSuccessScan }
@@ -35,13 +35,13 @@ class PluginSecurityVerifierTest {
     private fun verifier(
         store: PluginTrustStore,
         inspector: ApkInspector,
-        scanner: PluginDexScanner = fakeScanner(),
+        scanner: PluginDexScanner = fakeScanner()
     ): PluginSecurityVerifier = PluginSecurityVerifier(store, inspector, scanner)
 
     private fun trustStoreWithApk(
         packageName: String = "com.example.plugin",
         cert: String = trustedCert,
-        fileSha256: String? = null,
+        fileSha256: String? = null
     ): PluginTrustStore {
         val fileLine = fileSha256?.let { ",\"fileSha256\":\"$it\"" } ?: ""
         return PluginTrustStore.parse(
@@ -58,14 +58,14 @@ class PluginSecurityVerifierTest {
                 }
               ]
             }
-            """.trimIndent(),
+            """.trimIndent()
         )
     }
 
     private fun trustStoreWithDex(
         fileSha256: String,
         prefixes: List<String> = listOf("com.example.plugin"),
-        restricted: List<String> = emptyList(),
+        restricted: List<String> = emptyList()
     ): PluginTrustStore {
         val restrictedJson = restricted.joinToString(",") { "\"$it\"" }
         val prefixesJson = prefixes.joinToString(",") { "\"$it\"" }
@@ -82,7 +82,7 @@ class PluginSecurityVerifierTest {
                 }
               ]
             }
-            """.trimIndent(),
+            """.trimIndent()
         )
     }
 
@@ -96,7 +96,7 @@ class PluginSecurityVerifierTest {
             store,
             ApkInspector {
                 PluginIdentity.Apk("com.example.plugin", setOf(trustedCert))
-            },
+            }
         )
 
         assertTrue(verifier.verify(apk) is PluginVerificationResult.Allowed)
@@ -111,7 +111,7 @@ class PluginSecurityVerifierTest {
             store,
             ApkInspector {
                 PluginIdentity.Apk("com.example.plugin", setOf(otherCert))
-            },
+            }
         )
 
         assertTrue(verifier.verify(apk) is PluginVerificationResult.Denied)
@@ -127,9 +127,9 @@ class PluginSecurityVerifierTest {
             ApkInspector {
                 PluginIdentity.Apk(
                     "com.example.plugin",
-                    setOf(trustedCert, otherCert),
+                    setOf(trustedCert, otherCert)
                 )
-            },
+            }
         )
 
         assertTrue(verifier.verify(apk) is PluginVerificationResult.Denied)
@@ -144,7 +144,7 @@ class PluginSecurityVerifierTest {
             store,
             ApkInspector {
                 PluginIdentity.Apk("com.other.plugin", setOf(trustedCert))
-            },
+            }
         )
 
         assertTrue(verifier.verify(apk) is PluginVerificationResult.Denied)
@@ -159,7 +159,7 @@ class PluginSecurityVerifierTest {
             store,
             ApkInspector {
                 PluginIdentity.Apk("com.example.plugin", setOf(trustedCert))
-            },
+            }
         )
 
         assertTrue(verifier.verify(apk) is PluginVerificationResult.Denied)
@@ -195,7 +195,7 @@ class PluginSecurityVerifierTest {
         val verifier = PluginSecurityVerifier(
             store,
             ApkInspector { null },
-            DefaultPluginDexScanner,
+            DefaultPluginDexScanner
         )
 
         assertTrue(verifier.verify(dex) is PluginVerificationResult.Allowed)
@@ -206,14 +206,14 @@ class PluginSecurityVerifierTest {
     fun deniesDexWithClassOutsidePrefix() {
         val dex = writeBytes(
             "demo.dex",
-            DexTestData.minimalDex(definedClass = "Lcom/evil/Main;"),
+            DexTestData.minimalDex(definedClass = "Lcom/evil/Main;")
         )
         val hash = PluginSecurityVerifier.sha256Hex(dex)
         val store = trustStoreWithDex(hash)
         val verifier = PluginSecurityVerifier(
             store,
             ApkInspector { null },
-            DefaultPluginDexScanner,
+            DefaultPluginDexScanner
         )
 
         assertTrue(verifier.verify(dex) is PluginVerificationResult.Denied)
@@ -224,17 +224,17 @@ class PluginSecurityVerifierTest {
     fun deniesDexReferencingRestrictedClass() {
         val dex = writeBytes(
             "demo.dex",
-            DexTestData.minimalDex(extraType = "Ljava/lang/Runtime;"),
+            DexTestData.minimalDex(extraType = "Ljava/lang/Runtime;")
         )
         val hash = PluginSecurityVerifier.sha256Hex(dex)
         val store = trustStoreWithDex(
             fileSha256 = hash,
-            restricted = listOf("java.lang.Runtime"),
+            restricted = listOf("java.lang.Runtime")
         )
         val verifier = PluginSecurityVerifier(
             store,
             ApkInspector { null },
-            DefaultPluginDexScanner,
+            DefaultPluginDexScanner
         )
 
         assertTrue(verifier.verify(dex) is PluginVerificationResult.Denied)
@@ -249,7 +249,7 @@ class PluginSecurityVerifierTest {
         val verifier = PluginSecurityVerifier(
             store,
             ApkInspector { null },
-            DefaultPluginDexScanner,
+            DefaultPluginDexScanner
         )
 
         assertTrue(verifier.verify(dex) is PluginVerificationResult.Denied)
@@ -265,7 +265,7 @@ class PluginSecurityVerifierTest {
             ApkInspector {
                 PluginIdentity.Apk("com.example.plugin", setOf(trustedCert))
             },
-            DefaultPluginDexScanner,
+            DefaultPluginDexScanner
         )
 
         assertTrue(verifier.verify(apk) is PluginVerificationResult.Denied)

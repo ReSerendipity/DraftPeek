@@ -86,21 +86,17 @@ object PluginClassNames {
      * `com.example.plugin.Main`、`com.example.plugin.Main$Inner`，不允许
      * `com.example.plugin2.Main`。
      */
-    fun isUnderPrefixes(className: String, prefixes: List<String>): Boolean {
-        return prefixes.any { prefix ->
-            className == prefix ||
-                className.startsWith(prefix + ".") ||
-                className.startsWith(prefix + "$")
-        }
+    fun isUnderPrefixes(className: String, prefixes: List<String>): Boolean = prefixes.any { prefix ->
+        className == prefix ||
+            className.startsWith(prefix + ".") ||
+            className.startsWith(prefix + "$")
     }
 
     /**
      * 类名是否命中 restrictedClasses（精确类名；其内部类 `Outer$Inner` 也命中）。
      */
-    fun isRestricted(className: String, restrictedClasses: Set<String>): Boolean {
-        return restrictedClasses.any { restricted ->
-            className == restricted || className.startsWith(restricted + "$")
-        }
+    fun isRestricted(className: String, restrictedClasses: Set<String>): Boolean = restrictedClasses.any { restricted ->
+        className == restricted || className.startsWith(restricted + "$")
     }
 
     private fun isValidSegment(segment: String): Boolean {

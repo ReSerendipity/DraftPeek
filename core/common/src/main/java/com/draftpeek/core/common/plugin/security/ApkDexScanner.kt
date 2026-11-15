@@ -23,7 +23,7 @@ internal object ApkDexScanner {
         }
         if (apk.length() > DexParser.MAX_DEX_BYTES) {
             return DexScanResult.Failure(
-                "APK 超过 ${DexParser.MAX_DEX_BYTES / 1024 / 1024} MB 上限",
+                "APK 超过 ${DexParser.MAX_DEX_BYTES / 1024 / 1024} MB 上限"
             )
         }
 
@@ -48,7 +48,7 @@ internal object ApkDexScanner {
                 for (entry in dexEntries) {
                     if (entry.size > DexParser.MAX_DEX_BYTES) {
                         return DexScanResult.Failure(
-                            "APK 条目 ${entry.name} 超过 50 MB 上限",
+                            "APK 条目 ${entry.name} 超过 50 MB 上限"
                         )
                     }
                     val bytes = zip.getInputStream(entry).use { input ->
@@ -57,7 +57,7 @@ internal object ApkDexScanner {
                     totalBytes += bytes.size.toLong()
                     if (totalBytes > DexParser.MAX_DEX_BYTES) {
                         return DexScanResult.Failure(
-                            "APK 内 DEX 解压后总量超过 50 MB 上限",
+                            "APK 内 DEX 解压后总量超过 50 MB 上限"
                         )
                     }
 
@@ -75,12 +75,12 @@ internal object ApkDexScanner {
                 }
                 DexScanResult.Success(
                     definedClasses = definedClasses.toList(),
-                    referencedTypes = referencedTypes.toSet(),
+                    referencedTypes = referencedTypes.toSet()
                 )
             }
         } catch (e: Exception) {
             DexScanResult.Failure(
-                "${apk.name}: 无法扫描 APK 内 DEX: ${e.message ?: e.javaClass.simpleName}",
+                "${apk.name}: 无法扫描 APK 内 DEX: ${e.message ?: e.javaClass.simpleName}"
             )
         }
     }

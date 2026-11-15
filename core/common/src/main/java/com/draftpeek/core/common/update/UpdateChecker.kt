@@ -240,16 +240,14 @@ object UpdateChecker {
         downloadUrl: String?,
         htmlUrl: String?,
         releaseNotes: String = ""
-    ): UpdateResult {
-        return if (UpdateVersion.compare(latestVersion, currentVersion) > 0) {
-            UpdateResult.UpdateAvailable(
-                latestVersion = latestVersion,
-                downloadUrl = downloadUrl,
-                releaseNotes = releaseNotes,
-                htmlUrl = htmlUrl ?: ""
-            )
-        } else {
-            UpdateResult.UpToDate
-        }
+    ): UpdateResult = if (UpdateVersion.compare(latestVersion, currentVersion) > 0) {
+        UpdateResult.UpdateAvailable(
+            latestVersion = latestVersion,
+            downloadUrl = downloadUrl,
+            releaseNotes = releaseNotes,
+            htmlUrl = htmlUrl ?: ""
+        )
+    } else {
+        UpdateResult.UpToDate
     }
 }

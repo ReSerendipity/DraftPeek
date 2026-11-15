@@ -214,13 +214,12 @@ object AiDetector {
      * 解析基线文本里的 `sum=<long>` 行。
      * 非法/缺失返回 0，调用方据此跳过校验（零误报口径）。
      */
-    internal fun parseDexCrcBaseline(text: String): Long =
-        text.lineSequence()
-            .firstOrNull { it.startsWith("sum=") }
-            ?.removePrefix("sum=")
-            ?.trim()
-            ?.toLongOrNull()
-            ?: 0L
+    internal fun parseDexCrcBaseline(text: String): Long = text.lineSequence()
+        .firstOrNull { it.startsWith("sum=") }
+        ?.removePrefix("sum=")
+        ?.trim()
+        ?.toLongOrNull()
+        ?: 0L
 
     /** classes*.dex 的 zip CRC32 求和。顺序无关，故不依赖遍历次序。 */
     internal fun sumDexCrcs(crcs: List<Long>): Long = crcs.sum()
@@ -269,11 +268,7 @@ object AiDetector {
      * @param crcs APK 内 classes*.dex 的 CRC32 列表；读取失败时传 null
      * @param error 读取 APK 时的异常（非空即优先按「无法判定」处理）
      */
-    internal fun resolveDexIntegrity(
-        baseline: Long,
-        crcs: List<Long>?,
-        error: Throwable? = null
-    ): DexIntegrityOutcome {
+    internal fun resolveDexIntegrity(baseline: Long, crcs: List<Long>?, error: Throwable? = null): DexIntegrityOutcome {
         if (error != null) {
             val message = error.message ?: error::class.simpleName ?: "unknown"
             return DexIntegrityOutcome.NotVerifiable("apk dex entries unreadable: $message")

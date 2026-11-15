@@ -15,14 +15,12 @@ object PluginTrustStoreLoader {
 
     private const val TAG = "PluginTrustStore"
 
-    fun load(context: Context): PluginTrustStore {
-        return try {
-            context.assets.open(ASSET_NAME).use { input ->
-                PluginTrustStore.parse(input.readBytes().toString(Charsets.UTF_8))
-            }
-        } catch (e: Exception) {
-            Log.w(TAG, "插件信任清单加载失败，按空清单处理（fail-closed）", e)
-            PluginTrustStore.EMPTY
+    fun load(context: Context): PluginTrustStore = try {
+        context.assets.open(ASSET_NAME).use { input ->
+            PluginTrustStore.parse(input.readBytes().toString(Charsets.UTF_8))
         }
+    } catch (e: Exception) {
+        Log.w(TAG, "插件信任清单加载失败，按空清单处理（fail-closed）", e)
+        PluginTrustStore.EMPTY
     }
 }

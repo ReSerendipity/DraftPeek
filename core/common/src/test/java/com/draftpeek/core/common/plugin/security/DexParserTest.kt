@@ -26,7 +26,7 @@ class DexParserTest {
         val success = result as DexScanResult.Success
         assertEquals(
             listOf("Lcom/example/plugin/Main;"),
-            success.definedClasses,
+            success.definedClasses
         )
         assertTrue(success.referencedTypes.contains("Lcom/example/plugin/Main;"))
     }
@@ -35,7 +35,7 @@ class DexParserTest {
     @DisplayName("exports extra type_ids as referenced types")
     fun parsesReferencedTypes() {
         val result = DexParser.parse(
-            DexTestData.minimalDex(extraType = "Ljava/lang/Runtime;"),
+            DexTestData.minimalDex(extraType = "Ljava/lang/Runtime;")
         )
 
         assertTrue(result is DexScanResult.Success)
@@ -71,7 +71,7 @@ class DexParserTest {
         val bytes = DexTestData.withIntLe(
             DexTestData.minimalDex(),
             0x28,
-            0x12345679,
+            0x12345679
         )
         assertTrue(DexParser.parse(bytes) is DexScanResult.Failure)
     }
@@ -82,7 +82,7 @@ class DexParserTest {
         val bytes = DexTestData.withIntLe(
             DexTestData.minimalDex(),
             0x3C,
-            0x7FFFFFFF,
+            0x7FFFFFFF
         )
         assertTrue(DexParser.parse(bytes) is DexScanResult.Failure)
     }
@@ -102,7 +102,7 @@ class DexParserTest {
         val bytes = DexTestData.withIntLe(
             DexTestData.minimalDex(),
             0x44,
-            0x7FFFFFFF,
+            0x7FFFFFFF
         )
         assertTrue(DexParser.parse(bytes) is DexScanResult.Failure)
     }
@@ -144,7 +144,7 @@ class DexParserTest {
         val mutated = DexTestData.withIntLe(
             bytes,
             classDefsOffset + 12,
-            dataOffset + dataSize + 4,
+            dataOffset + dataSize + 4
         )
         assertTrue(DexParser.parse(mutated) is DexScanResult.Failure)
     }
@@ -159,7 +159,7 @@ class DexParserTest {
         val mutated = DexTestData.withIntLe(
             bytes,
             classDefsOffset + 24,
-            dataOffset + dataSize + 4,
+            dataOffset + dataSize + 4
         )
         assertTrue(DexParser.parse(mutated) is DexScanResult.Failure)
     }
@@ -185,7 +185,7 @@ class DexParserTest {
         val bytes = DexTestData.withIntLe(
             DexTestData.minimalDex(),
             0x38,
-            1_000_001,
+            1_000_001
         )
         assertTrue(DexParser.parse(bytes) is DexScanResult.Failure)
     }
@@ -194,7 +194,7 @@ class DexParserTest {
     @DisplayName("rejects a malformed class descriptor")
     fun rejectsMalformedClassDescriptor() {
         val bytes = DexTestData.minimalDex(
-            definedClass = "Lcom/example/plugin/Main",
+            definedClass = "Lcom/example/plugin/Main"
         )
         assertTrue(DexParser.parse(bytes) is DexScanResult.Failure)
     }
@@ -208,9 +208,9 @@ class DexParserTest {
             mapOf(
                 "classes.dex" to DexTestData.minimalDex(),
                 "classes2.dex" to DexTestData.minimalDex(
-                    definedClass = "Lcom/example/plugin/Second;",
-                ),
-            ),
+                    definedClass = "Lcom/example/plugin/Second;"
+                )
+            )
         )
 
         val result = ApkDexScanner.scan(apk)
@@ -242,23 +242,23 @@ class DexParserTest {
     fun classNamesNormalize() {
         assertEquals(
             "com.example.Foo",
-            PluginClassNames.normalizeClassName("[Lcom/example/Foo;"),
+            PluginClassNames.normalizeClassName("[Lcom/example/Foo;")
         )
         assertEquals(
             "com.example.plugin",
-            PluginClassNames.normalizePrefix("Lcom/example/plugin;"),
+            PluginClassNames.normalizePrefix("Lcom/example/plugin;")
         )
         assertFalse(
             PluginClassNames.isUnderPrefixes(
                 "com.example.pluginEvil.Main",
-                listOf("com.example.plugin"),
-            ),
+                listOf("com.example.plugin")
+            )
         )
         assertTrue(
             PluginClassNames.isUnderPrefixes(
                 "com.example.plugin.Main\$Inner",
-                listOf("com.example.plugin"),
-            ),
+                listOf("com.example.plugin")
+            )
         )
     }
 

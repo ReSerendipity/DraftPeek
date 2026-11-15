@@ -13,7 +13,7 @@ class PluginClassPolicyTest {
         packageName = null,
         certificateSha256 = emptySet(),
         fileSha256 = "b".repeat(64),
-        allowedClassPrefixes = listOf("com.example.plugin"),
+        allowedClassPrefixes = listOf("com.example.plugin")
     )
     private val restricted = setOf("java.lang.Runtime", "java.lang.reflect.Method")
 
@@ -22,7 +22,7 @@ class PluginClassPolicyTest {
     fun allowsDefinedClassUnderPrefix() {
         val scan = DexScanResult.Success(
             definedClasses = listOf("Lcom/example/plugin/Main;"),
-            referencedTypes = setOf("Lcom/example/plugin/Main;"),
+            referencedTypes = setOf("Lcom/example/plugin/Main;")
         )
 
         val decision = PluginClassPolicy.evaluateDex(scan, entry, restricted)
@@ -35,7 +35,7 @@ class PluginClassPolicyTest {
     fun deniesDefinedClassOutsidePrefix() {
         val scan = DexScanResult.Success(
             definedClasses = listOf("Lcom/evil/Main;"),
-            referencedTypes = setOf("Lcom/evil/Main;"),
+            referencedTypes = setOf("Lcom/evil/Main;")
         )
 
         val decision = PluginClassPolicy.evaluateDex(scan, entry, restricted)
@@ -48,7 +48,7 @@ class PluginClassPolicyTest {
     fun deniesDefinedRestrictedClass() {
         val scan = DexScanResult.Success(
             definedClasses = listOf("Ljava/lang/Runtime;"),
-            referencedTypes = setOf("Ljava/lang/Runtime;"),
+            referencedTypes = setOf("Ljava/lang/Runtime;")
         )
 
         val decision = PluginClassPolicy.evaluateDex(scan, entry, restricted)
@@ -63,8 +63,8 @@ class PluginClassPolicyTest {
             definedClasses = listOf("Lcom/example/plugin/Main;"),
             referencedTypes = setOf(
                 "Lcom/example/plugin/Main;",
-                "Ljava/lang/reflect/Method;",
-            ),
+                "Ljava/lang/reflect/Method;"
+            )
         )
 
         val decision = PluginClassPolicy.evaluateDex(scan, entry, restricted)
@@ -77,13 +77,13 @@ class PluginClassPolicyTest {
     fun deniesEmptyPrefixes() {
         val scan = DexScanResult.Success(
             definedClasses = listOf("Lcom/example/plugin/Main;"),
-            referencedTypes = emptySet(),
+            referencedTypes = emptySet()
         )
 
         val decision = PluginClassPolicy.evaluateDex(
             scan,
             entry.copy(allowedClassPrefixes = emptyList()),
-            restricted,
+            restricted
         )
 
         assertTrue(decision is ClassPolicyDecision.Denied)
@@ -95,7 +95,7 @@ class PluginClassPolicyTest {
         val decision = PluginClassPolicy.evaluateDex(
             DexScanResult.Success(emptyList(), emptySet()),
             entry,
-            restricted,
+            restricted
         )
 
         assertTrue(decision is ClassPolicyDecision.Denied)
@@ -106,7 +106,7 @@ class PluginClassPolicyTest {
     fun runtimeDeniesRestrictedClass() {
         assertTrue(
             PluginClassPolicy.checkRestricted("java.lang.Runtime", restricted)
-                is ClassPolicyDecision.Denied,
+                is ClassPolicyDecision.Denied
         )
     }
 
@@ -115,7 +115,7 @@ class PluginClassPolicyTest {
     fun runtimeDeniesRestrictedArray() {
         assertTrue(
             PluginClassPolicy.checkRestricted("[Ljava.lang.Runtime;", restricted)
-                is ClassPolicyDecision.Denied,
+                is ClassPolicyDecision.Denied
         )
     }
 
@@ -124,7 +124,7 @@ class PluginClassPolicyTest {
     fun runtimeDeniesOutsidePrefix() {
         assertTrue(
             PluginClassPolicy.checkAllowedClass("com.evil.Main", entry, restricted)
-                is ClassPolicyDecision.Denied,
+                is ClassPolicyDecision.Denied
         )
     }
 
@@ -135,8 +135,8 @@ class PluginClassPolicyTest {
             PluginClassPolicy.checkAllowedClass(
                 "com.example.plugin.Main\$Inner",
                 entry,
-                restricted,
-            ) is ClassPolicyDecision.Allowed,
+                restricted
+            ) is ClassPolicyDecision.Allowed
         )
     }
 
@@ -147,8 +147,8 @@ class PluginClassPolicyTest {
             false,
             PluginClassNames.isUnderPrefixes(
                 "com.example.pluginEvil.Main",
-                listOf("com.example.plugin"),
-            ),
+                listOf("com.example.plugin")
+            )
         )
     }
 }

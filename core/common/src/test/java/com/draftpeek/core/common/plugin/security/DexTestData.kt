@@ -15,7 +15,7 @@ object DexTestData {
     fun minimalDex(
         definedClass: String = "Lcom/example/plugin/Main;",
         extraType: String? = null,
-        includeClassDef: Boolean = true,
+        includeClassDef: Boolean = true
     ): ByteArray {
         val strings = mutableListOf(definedClass)
         if (extraType != null && extraType != definedClass) {
@@ -91,16 +91,14 @@ object DexTestData {
         }
     }
 
-    fun withIntLe(bytes: ByteArray, offset: Int, value: Int): ByteArray {
-        return bytes.copyOf().apply { putIntLe(offset, value) }
+    fun withIntLe(bytes: ByteArray, offset: Int, value: Int): ByteArray = bytes.copyOf().apply {
+        putIntLe(offset, value)
     }
 
-    fun readIntLe(bytes: ByteArray, offset: Int): Int {
-        return (bytes[offset].toInt() and 0xFF) or
-            ((bytes[offset + 1].toInt() and 0xFF) shl 8) or
-            ((bytes[offset + 2].toInt() and 0xFF) shl 16) or
-            ((bytes[offset + 3].toInt() and 0xFF) shl 24)
-    }
+    fun readIntLe(bytes: ByteArray, offset: Int): Int = (bytes[offset].toInt() and 0xFF) or
+        ((bytes[offset + 1].toInt() and 0xFF) shl 8) or
+        ((bytes[offset + 2].toInt() and 0xFF) shl 16) or
+        ((bytes[offset + 3].toInt() and 0xFF) shl 24)
 
     fun classDefsOffset(bytes: ByteArray): Int = readIntLe(bytes, 0x64)
 

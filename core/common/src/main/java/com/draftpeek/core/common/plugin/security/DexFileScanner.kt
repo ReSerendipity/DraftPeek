@@ -15,7 +15,7 @@ internal object DexFileScanner {
         }
         if (length > DexParser.MAX_DEX_BYTES) {
             return DexScanResult.Failure(
-                "DEX 超过 ${DexParser.MAX_DEX_BYTES / 1024 / 1024} MB 上限",
+                "DEX 超过 ${DexParser.MAX_DEX_BYTES / 1024 / 1024} MB 上限"
             )
         }
 
@@ -25,7 +25,7 @@ internal object DexFileScanner {
             }
         } catch (e: Exception) {
             DexScanResult.Failure(
-                "${file.name}: 无法读取 DEX: ${e.message ?: e.javaClass.simpleName}",
+                "${file.name}: 无法读取 DEX: ${e.message ?: e.javaClass.simpleName}"
             )
         }
     }

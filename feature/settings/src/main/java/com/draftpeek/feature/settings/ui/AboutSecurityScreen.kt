@@ -30,8 +30,8 @@ import androidx.compose.material.icons.filled.Security
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
-import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -324,22 +324,20 @@ private suspend fun resolveUpdateDialog(
     checkUpdate: suspend (String) -> UpdateResult,
     onUpToDate: () -> Unit,
     onError: (String) -> Unit
-): UpdateDialogState {
-    return when (val result = checkUpdate(currentVersion)) {
-        is UpdateResult.UpdateAvailable -> UpdateDialogState.Available(
-            latestVersion = result.latestVersion,
-            releaseNotes = result.releaseNotes,
-            downloadUrl = result.downloadUrl,
-            htmlUrl = result.htmlUrl
-        )
-        is UpdateResult.UpToDate -> {
-            onUpToDate()
-            UpdateDialogState.None
-        }
-        is UpdateResult.Error -> {
-            onError(result.message)
-            UpdateDialogState.None
-        }
+): UpdateDialogState = when (val result = checkUpdate(currentVersion)) {
+    is UpdateResult.UpdateAvailable -> UpdateDialogState.Available(
+        latestVersion = result.latestVersion,
+        releaseNotes = result.releaseNotes,
+        downloadUrl = result.downloadUrl,
+        htmlUrl = result.htmlUrl
+    )
+    is UpdateResult.UpToDate -> {
+        onUpToDate()
+        UpdateDialogState.None
+    }
+    is UpdateResult.Error -> {
+        onError(result.message)
+        UpdateDialogState.None
     }
 }
 
@@ -401,13 +399,11 @@ private fun UpdateAvailableDialog(
 }
 
 /** 用系统浏览器打开 Release 页；没有浏览器时返回 false，由调用方保持弹窗。 */
-private fun openInBrowser(context: Context, url: String): Boolean {
-    return try {
-        context.startActivity(Intent(Intent.ACTION_VIEW, Uri.parse(url)))
-        true
-    } catch (_: ActivityNotFoundException) {
-        false
-    }
+private fun openInBrowser(context: Context, url: String): Boolean = try {
+    context.startActivity(Intent(Intent.ACTION_VIEW, Uri.parse(url)))
+    true
+} catch (_: ActivityNotFoundException) {
+    false
 }
 
 sealed class VerifyAppState {

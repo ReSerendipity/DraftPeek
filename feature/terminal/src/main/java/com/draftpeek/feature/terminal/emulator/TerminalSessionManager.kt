@@ -546,8 +546,7 @@ class TerminalSessionManager @Inject constructor(private val prootSessionManager
     }
 
     /** 会话是否仍然存在（未被 destroy）。 */
-    private fun isSessionAlive(sessionId: String): Boolean =
-        sessionOutputBuffers.containsKey(sessionId)
+    private fun isSessionAlive(sessionId: String): Boolean = sessionOutputBuffers.containsKey(sessionId)
 
     /** 追加原始字节到会话文本缓冲。 */
     private fun feedOutput(sessionId: String, bytes: ByteArray) {

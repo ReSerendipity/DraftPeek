@@ -7,10 +7,7 @@ internal sealed interface ClassPolicyDecision {
 }
 
 /** 运行时 ClassLoader 需要的策略上下文。 */
-data class PluginRuntimePolicy(
-    val entry: PluginTrustEntry,
-    val restrictedClasses: Set<String>,
-)
+data class PluginRuntimePolicy(val entry: PluginTrustEntry, val restrictedClasses: Set<String>)
 
 /**
  * 插件类准入的纯函数策略。
@@ -25,7 +22,7 @@ internal object PluginClassPolicy {
     fun evaluateDex(
         scan: DexScanResult.Success,
         entry: PluginTrustEntry,
-        restrictedClasses: Set<String>,
+        restrictedClasses: Set<String>
     ): ClassPolicyDecision {
         if (entry.allowedClassPrefixes.isEmpty()) {
             return ClassPolicyDecision.Denied("插件未配置 allowedClassPrefixes")
@@ -39,7 +36,7 @@ internal object PluginClassPolicy {
                 ?: return ClassPolicyDecision.Denied("非法类描述符：$descriptor")
             if (!PluginClassNames.isUnderPrefixes(className, entry.allowedClassPrefixes)) {
                 return ClassPolicyDecision.Denied(
-                    "类 $className 不在 allowedClassPrefixes 内",
+                    "类 $className 不在 allowedClassPrefixes 内"
                 )
             }
             if (PluginClassNames.isRestricted(className, restrictedClasses)) {
@@ -51,7 +48,7 @@ internal object PluginClassPolicy {
             val className = PluginClassNames.descriptorToDotted(descriptor) ?: continue
             if (PluginClassNames.isRestricted(className, restrictedClasses)) {
                 return ClassPolicyDecision.Denied(
-                    "DEX 引用了受限类 $className",
+                    "DEX 引用了受限类 $className"
                 )
             }
         }
@@ -60,10 +57,7 @@ internal object PluginClassPolicy {
     }
 
     /** 仅检查 restrictedClasses；供 ClassLoader 在父加载之前调用。 */
-    fun checkRestricted(
-        className: String,
-        restrictedClasses: Set<String>,
-    ): ClassPolicyDecision {
+    fun checkRestricted(className: String, restrictedClasses: Set<String>): ClassPolicyDecision {
         val normalized = PluginClassNames.normalizeClassName(className)
             ?: return ClassPolicyDecision.Denied("非法类名：$className")
         if (PluginClassNames.isRestricted(normalized, restrictedClasses)) {
@@ -76,7 +70,7 @@ internal object PluginClassPolicy {
     fun checkAllowedClass(
         className: String,
         entry: PluginTrustEntry,
-        restrictedClasses: Set<String>,
+        restrictedClasses: Set<String>
     ): ClassPolicyDecision {
         val normalized = PluginClassNames.normalizeClassName(className)
             ?: return ClassPolicyDecision.Denied("非法类名：$className")
@@ -85,7 +79,7 @@ internal object PluginClassPolicy {
         }
         if (!PluginClassNames.isUnderPrefixes(normalized, entry.allowedClassPrefixes)) {
             return ClassPolicyDecision.Denied(
-                "类 $normalized 不在 allowedClassPrefixes 内",
+                "类 $normalized 不在 allowedClassPrefixes 内"
             )
         }
         return ClassPolicyDecision.Allowed

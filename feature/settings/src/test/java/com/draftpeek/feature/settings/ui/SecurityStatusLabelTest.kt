@@ -26,8 +26,7 @@ class SecurityStatusLabelTest {
 
     private val context: Context = ApplicationProvider.getApplicationContext()
 
-    private fun label(status: DexIntegrityStatus): String =
-        context.getString(dexStatusLabelRes(status))
+    private fun label(status: DexIntegrityStatus): String = context.getString(dexStatusLabelRes(status))
 
     @Test
     fun `UNKNOWN renders as not checked`() {

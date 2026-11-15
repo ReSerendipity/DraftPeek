@@ -19,11 +19,11 @@ class PolicyEnforcingDexClassLoaderTest {
         packageName = null,
         certificateSha256 = emptySet(),
         fileSha256 = "b".repeat(64),
-        allowedClassPrefixes = listOf("com.example.plugin"),
+        allowedClassPrefixes = listOf("com.example.plugin")
     )
     private val policy = PluginRuntimePolicy(
         entry = entry,
-        restrictedClasses = setOf("java.lang.Runtime"),
+        restrictedClasses = setOf("java.lang.Runtime")
     )
 
     @Test
@@ -90,7 +90,7 @@ class PolicyEnforcingDexClassLoaderTest {
             optimizedDirectory = optimizedDir.absolutePath,
             librarySearchPath = null,
             parent = javaClass.classLoader,
-            policy = policy,
+            policy = policy
         )
     }
 }

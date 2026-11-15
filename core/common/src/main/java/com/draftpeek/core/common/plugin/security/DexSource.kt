@@ -20,9 +20,7 @@ internal class ByteArrayDexSource(private val bytes: ByteArray) : DexSource {
 
     override val length: Long get() = bytes.size.toLong()
 
-    override fun readByte(offset: Long): Byte {
-        return bytes[checkedIndex(offset, 1)]
-    }
+    override fun readByte(offset: Long): Byte = bytes[checkedIndex(offset, 1)]
 
     override fun readIntLe(offset: Long): Int {
         val index = checkedIndex(offset, 4)

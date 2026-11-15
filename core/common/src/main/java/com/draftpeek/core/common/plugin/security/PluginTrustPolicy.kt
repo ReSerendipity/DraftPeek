@@ -7,11 +7,7 @@ package com.draftpeek.core.common.plugin.security
  */
 internal object PluginTrustPolicy {
 
-    fun evaluate(
-        store: PluginTrustStore,
-        identity: PluginIdentity,
-        fileSha256: String,
-    ): PluginVerificationResult {
+    fun evaluate(store: PluginTrustStore, identity: PluginIdentity, fileSha256: String): PluginVerificationResult {
         val normalizedHash = fileSha256.lowercase()
         return when (identity) {
             is PluginIdentity.Apk -> evaluateApk(store, identity, normalizedHash)
@@ -22,7 +18,7 @@ internal object PluginTrustPolicy {
     private fun evaluateApk(
         store: PluginTrustStore,
         identity: PluginIdentity.Apk,
-        fileSha256: String,
+        fileSha256: String
     ): PluginVerificationResult {
         if (identity.packageName.isBlank()) {
             return PluginVerificationResult.Denied("APK 包名为空")
@@ -34,7 +30,7 @@ internal object PluginTrustPolicy {
         val candidates = store.findByPackage(identity.packageName)
         if (candidates.isEmpty()) {
             return PluginVerificationResult.Denied(
-                "包名 ${identity.packageName} 未在插件信任清单中",
+                "包名 ${identity.packageName} 未在插件信任清单中"
             )
         }
 
@@ -53,17 +49,14 @@ internal object PluginTrustPolicy {
         }
 
         return PluginVerificationResult.Denied(
-            "APK 签名或文件哈希与信任清单不匹配",
+            "APK 签名或文件哈希与信任清单不匹配"
         )
     }
 
-    private fun evaluateDex(
-        store: PluginTrustStore,
-        fileSha256: String,
-    ): PluginVerificationResult {
+    private fun evaluateDex(store: PluginTrustStore, fileSha256: String): PluginVerificationResult {
         val match = store.findDexByHash(fileSha256).firstOrNull()
             ?: return PluginVerificationResult.Denied(
-                "DEX 文件哈希未在插件信任清单中",
+                "DEX 文件哈希未在插件信任清单中"
             )
         return PluginVerificationResult.Allowed(match)
     }

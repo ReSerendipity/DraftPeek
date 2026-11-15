@@ -20,7 +20,7 @@ import java.security.MessageDigest
 class PluginSecurityVerifier(
     private val trustStore: PluginTrustStore,
     private val apkInspector: ApkInspector,
-    private val dexScanner: PluginDexScanner = DefaultPluginDexScanner,
+    private val dexScanner: PluginDexScanner = DefaultPluginDexScanner
 ) {
 
     fun verify(file: File): PluginVerificationResult {
@@ -33,7 +33,7 @@ class PluginSecurityVerifier(
         }
         if (length > MAX_PLUGIN_FILE_BYTES) {
             return PluginVerificationResult.Denied(
-                "插件文件超过 ${MAX_PLUGIN_FILE_BYTES / 1024 / 1024} MB 上限",
+                "插件文件超过 ${MAX_PLUGIN_FILE_BYTES / 1024 / 1024} MB 上限"
             )
         }
 
@@ -41,7 +41,7 @@ class PluginSecurityVerifier(
             sha256Hex(file)
         } catch (e: Exception) {
             return PluginVerificationResult.Denied(
-                "无法计算插件文件 SHA-256: ${e.message ?: e.javaClass.simpleName}",
+                "无法计算插件文件 SHA-256: ${e.message ?: e.javaClass.simpleName}"
             )
         }
 
@@ -52,7 +52,7 @@ class PluginSecurityVerifier(
                 } catch (e: Exception) {
                     null
                 } ?: return PluginVerificationResult.Denied(
-                    "无法读取 APK 包名或签名信息",
+                    "无法读取 APK 包名或签名信息"
                 )
                 PluginTrustPolicy.evaluate(trustStore, identity, fileSha256)
             }
@@ -60,7 +60,7 @@ class PluginSecurityVerifier(
             "dex" -> PluginTrustPolicy.evaluate(
                 trustStore,
                 PluginIdentity.Dex,
-                fileSha256,
+                fileSha256
             )
 
             else -> return PluginVerificationResult.Denied("仅支持 .apk / .dex 插件")
@@ -75,13 +75,13 @@ class PluginSecurityVerifier(
             dexScanner.scan(file)
         } catch (e: Exception) {
             return PluginVerificationResult.Denied(
-                "DEX 类级扫描异常: ${e.message ?: e.javaClass.simpleName}",
+                "DEX 类级扫描异常: ${e.message ?: e.javaClass.simpleName}"
             )
         }
 
         return when (scanResult) {
             is DexScanResult.Failure -> PluginVerificationResult.Denied(
-                "DEX 类级扫描失败: ${scanResult.reason}",
+                "DEX 类级扫描失败: ${scanResult.reason}"
             )
 
             is DexScanResult.Success -> {
@@ -89,12 +89,12 @@ class PluginSecurityVerifier(
                     val decision = PluginClassPolicy.evaluateDex(
                         scanResult,
                         entry,
-                        trustStore.restrictedClasses,
+                        trustStore.restrictedClasses
                     )
                 ) {
                     is ClassPolicyDecision.Allowed -> trustResult
                     is ClassPolicyDecision.Denied -> PluginVerificationResult.Denied(
-                        "插件类准入拒绝: ${decision.reason}",
+                        "插件类准入拒绝: ${decision.reason}"
                     )
                 }
             }

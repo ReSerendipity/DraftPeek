@@ -60,7 +60,7 @@ data class PluginTrustEntry(
     val packageName: String?,
     val certificateSha256: Set<String>,
     val fileSha256: String?,
-    val allowedClassPrefixes: List<String>,
+    val allowedClassPrefixes: List<String>
 )
 
 /**
@@ -69,13 +69,9 @@ data class PluginTrustEntry(
  * 解析失败必须由调用方按 fail-closed 处理（使用 [EMPTY] 或拒绝加载），
  * 不允许“解析失败就放行”。
  */
-class PluginTrustStore private constructor(
-    val entries: List<PluginTrustEntry>,
-    val restrictedClasses: Set<String>,
-) {
+class PluginTrustStore private constructor(val entries: List<PluginTrustEntry>, val restrictedClasses: Set<String>) {
 
-    fun findByPackage(packageName: String): List<PluginTrustEntry> =
-        entries.filter { it.packageName == packageName }
+    fun findByPackage(packageName: String): List<PluginTrustEntry> = entries.filter { it.packageName == packageName }
 
     fun findDexByHash(fileSha256: String): List<PluginTrustEntry> =
         entries.filter { it.packageName == null && it.fileSha256 == fileSha256 }
@@ -113,7 +109,7 @@ class PluginTrustStore private constructor(
                     .takeIf { it.isNotEmpty() }
                 val certificates = parseSha256Set(
                     item.optJSONArray("certSha256"),
-                    "plugins[$index].certSha256",
+                    "plugins[$index].certSha256"
                 )
                 val fileSha256 = item.optString("fileSha256").trim()
                     .takeIf { it.isNotEmpty() }
@@ -136,7 +132,7 @@ class PluginTrustStore private constructor(
 
                 val allowedClassPrefixes = parseAllowedClassPrefixes(
                     item.optJSONArray("allowedClassPrefixes"),
-                    "plugins[$index].allowedClassPrefixes",
+                    "plugins[$index].allowedClassPrefixes"
                 )
 
                 entries += PluginTrustEntry(
@@ -144,7 +140,7 @@ class PluginTrustStore private constructor(
                     packageName = packageName,
                     certificateSha256 = certificates,
                     fileSha256 = fileSha256,
-                    allowedClassPrefixes = allowedClassPrefixes,
+                    allowedClassPrefixes = allowedClassPrefixes
                 )
             }
 
@@ -173,7 +169,7 @@ class PluginTrustStore private constructor(
                 require(raw.isNotEmpty()) { "restrictedClasses[$index] 不能为空" }
                 val normalized = PluginClassNames.normalizeRestrictedClass(raw)
                     ?: throw IllegalArgumentException(
-                        "restrictedClasses[$index] 不是合法类名: $raw",
+                        "restrictedClasses[$index] 不是合法类名: $raw"
                     )
                 result += normalized
             }

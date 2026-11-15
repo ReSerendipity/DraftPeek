@@ -6,10 +6,7 @@ import java.io.File
 sealed interface PluginIdentity {
 
     /** APK 插件：包名 + 全部签名证书 SHA-256。 */
-    data class Apk(
-        val packageName: String,
-        val signerSha256: Set<String>,
-    ) : PluginIdentity
+    data class Apk(val packageName: String, val signerSha256: Set<String>) : PluginIdentity
 
     /** DEX 插件：无包名/签名，只能靠文件哈希固定。 */
     data object Dex : PluginIdentity

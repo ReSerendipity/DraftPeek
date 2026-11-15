@@ -53,13 +53,7 @@ internal object TerminalPtyNative {
      * @param columns 终端列数
      * @return `[masterFd, pid]`
      */
-    external fun createPty(
-        argv: Array<String>,
-        cwd: String,
-        env: Array<String>,
-        rows: Int,
-        columns: Int
-    ): IntArray
+    external fun createPty(argv: Array<String>, cwd: String, env: Array<String>, rows: Int, columns: Int): IntArray
 
     /** 通过 TIOCSWINSZ 调整窗口大小。 */
     external fun resize(masterFd: Int, rows: Int, columns: Int): Boolean

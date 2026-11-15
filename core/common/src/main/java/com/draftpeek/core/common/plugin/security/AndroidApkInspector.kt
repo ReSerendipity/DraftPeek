@@ -38,7 +38,7 @@ class AndroidApkInspector(private val context: Context) : ApkInspector {
                 .toSet()
             PluginIdentity.Apk(
                 packageName = info.packageName,
-                signerSha256 = hashes,
+                signerSha256 = hashes
             )
         } catch (e: Exception) {
             null

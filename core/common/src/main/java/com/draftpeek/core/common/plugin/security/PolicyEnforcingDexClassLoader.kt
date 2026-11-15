@@ -20,7 +20,7 @@ class PolicyEnforcingDexClassLoader(
     optimizedDirectory: String?,
     librarySearchPath: String?,
     parent: ClassLoader?,
-    private val policy: PluginRuntimePolicy,
+    private val policy: PluginRuntimePolicy
 ) : DexClassLoader(dexPath, optimizedDirectory, librarySearchPath, parent) {
 
     override fun loadClass(name: String, resolve: Boolean): Class<*> {
@@ -48,7 +48,7 @@ class PolicyEnforcingDexClassLoader(
         val allowed = PluginClassPolicy.checkAllowedClass(
             name,
             policy.entry,
-            policy.restrictedClasses,
+            policy.restrictedClasses
         )
         if (allowed is ClassPolicyDecision.Denied) {
             throw PluginClassAccessDeniedException(allowed.reason)
