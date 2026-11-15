@@ -18,12 +18,15 @@
  * - 单个插件加载失败（ClassNotFoundException / InstantiationException 等）只记录日志，
  *   不影响其他插件
  *
- * ## ⚠️ 安全说明
+ * ## 安全闸门（P0-2）
  *
- * Android 上动态加载代码意味着运行任意第三方字节码。插件代码与宿主运行在同一进程、
- * 同一 uid 下，可访问应用全部私有数据，无沙箱隔离。**仅应加载受信任来源（如官方插件市场
- * 校验过签名）的插件**，切勿加载来源不明的 `.apk`。生产环境应在加载前校验签名/哈希，
- * 并配合后续的权限沙箱（本类当前不提供）。
+ * 加载前由 [PluginSecurityVerifier] 对每个文件做 fail-closed 校验：
+ * - APK：包名 + 全部签名证书 SHA-256 必须命中 `assets/plugin_trust.json`；
+ * - DEX：文件 SHA-256 必须精确命中信任清单；
+ * - 空清单/解析失败 = 全部拒绝；空文件、超过 50 MB、canonical path 不在插件目录内一律拒绝。
+ *
+ * 仍未提供进程内沙箱或 DEX 字节码静态扫描；插件代码与宿主同进程、同 uid 运行，
+ * 可访问应用全部私有数据。**仅应加载受信任来源的插件**，切勿加载来源不明的 `.apk`。
  *
  * ## PF4J
  *
@@ -38,6 +41,10 @@ package com.draftpeek.core.common.plugin
 
 import android.content.Context
 import android.util.Log
+import com.draftpeek.core.common.plugin.security.AndroidApkInspector
+import com.draftpeek.core.common.plugin.security.PluginSecurityVerifier
+import com.draftpeek.core.common.plugin.security.PluginTrustStoreLoader
+import com.draftpeek.core.common.plugin.security.PluginVerificationResult
 import dalvik.system.DexClassLoader
 import java.io.File
 import java.util.Properties
@@ -86,12 +93,23 @@ class Pf4jPluginLoader(private val context: Context) {
     private val loadedPlugins = mutableListOf<DraftPeekPlugin>()
 
     /**
+     * 插件信任清单与校验器。
+     *
+     * 构造时加载 `assets/plugin_trust.json`；加载失败按空清单 fail-closed。
+     */
+    private val securityVerifier: PluginSecurityVerifier = PluginSecurityVerifier(
+        trustStore = PluginTrustStoreLoader.load(context.applicationContext ?: context),
+        apkInspector = AndroidApkInspector(context.applicationContext ?: context),
+    )
+
+    /**
      * 扫描插件目录并加载发现的插件。
      *
      * 对每个 `.apk` / `.dex` 文件：
-     * 1. 用 [DexClassLoader] 加载（parent = 当前线程 contextClassLoader）
-     * 2. 从 `plugin.properties` 或 `META-INF/services/...` 读取实现类名
-     * 3. 反射加载并实例化（无参构造），校验实现 [DraftPeekPlugin]
+     * 1. 由 [PluginSecurityVerifier] 校验信任清单、签名/哈希与路径约束（失败跳过）
+     * 2. 用 [DexClassLoader] 加载（parent = 当前线程 contextClassLoader）
+     * 3. 从 `plugin.properties` 或 `META-INF/services/...` 读取实现类名
+     * 4. 反射加载并实例化（无参构造），校验实现 [DraftPeekPlugin]
      *
      * 单个插件失败不中断整体扫描。
      *
@@ -103,6 +121,12 @@ class Pf4jPluginLoader(private val context: Context) {
         val pluginsDir = context.getDir(PLUGINS_DIR, Context.MODE_PRIVATE)
         if (!pluginsDir.exists()) {
             Log.d(TAG, "Plugins directory does not exist: ${pluginsDir.absolutePath}")
+            return emptyList()
+        }
+
+        val pluginsDirCanonical = runCatching { pluginsDir.canonicalFile }.getOrNull()
+        if (pluginsDirCanonical == null) {
+            Log.w(TAG, "Cannot resolve plugins directory: ${pluginsDir.absolutePath}")
             return emptyList()
         }
 
@@ -118,7 +142,27 @@ class Pf4jPluginLoader(private val context: Context) {
 
         val infos = mutableListOf<PluginInfo>()
         for (file in pluginFiles) {
-            val plugin = loadPlugin(file)
+            val canonical = runCatching { file.canonicalFile }.getOrNull()
+            if (canonical == null || canonical.parentFile != pluginsDirCanonical) {
+                Log.w(TAG, "Rejected plugin outside plugins dir: ${file.name}")
+                continue
+            }
+
+            when (val verification = securityVerifier.verify(canonical)) {
+                is PluginVerificationResult.Denied -> {
+                    Log.w(TAG, "Rejected plugin ${file.name}: ${verification.reason}")
+                    continue
+                }
+
+                is PluginVerificationResult.Allowed -> {
+                    Log.d(
+                        TAG,
+                        "Plugin ${file.name} verified by trust entry ${verification.entry.id}",
+                    )
+                }
+            }
+
+            val plugin = loadPlugin(canonical)
             if (plugin != null) {
                 loadedPlugins += plugin
                 infos += plugin.info

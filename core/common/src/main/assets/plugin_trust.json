@@ -1,0 +1,5 @@
+{
+  "_comment": "DraftPeek 插件信任清单（fail-closed）。只有在此登记且签名/哈希匹配的 APK/DEX 才允许加载。字段格式见 PluginTrustStore.kt 文件头注释；正式发布前请填入真实条目。",
+  "version": 1,
+  "plugins": []
+}
