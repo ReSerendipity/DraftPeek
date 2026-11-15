@@ -59,9 +59,9 @@
 | `assets/` | README 展示图（`readme-*`，§8.1 指定位） |
 | `ci/` | `branch-protection.json`（分支保护口径单一来源） |
 
-**仅本地 / 未跟踪（不入库，非遗漏）**：`agents/`（GOTCHAS / CODE_STYLE，AGENTS 家族）、`project/`（ADR-001 本地原件，正文副本为 adr/0002）、`screenshots/`（未跟踪 WIP 截图暂存，§8.1.3）、`_devarchive/`（空目录，已 gitignore）。
+**仅本地 / 未跟踪（不入库，非遗漏）**：`agents/`（GOTCHAS / CODE_STYLE，AGENTS 家族）、`project/`（`KNOWN_GOTCHAS.md` 公开台账随仓分发；ADR-001 本地原件仅本地，正文副本为 adr/0002）、`screenshots/`（未跟踪 WIP 截图暂存，§8.1.3）、`_devarchive/`（空目录，已 gitignore）。
 
-**关联工程件**：[ARCHITECTURE.md](../ARCHITECTURE.md) · [CHANGELOG.md](../CHANGELOG.md) · [CONTRIBUTING.md](../CONTRIBUTING.md) · [.github/SECURITY.md](../.github/SECURITY.md) · [.githooks/README.md](../.githooks/README.md) · 根 [README.md](../README.md)
+**关联工程件**：[ARCHITECTURE.md](../ARCHITECTURE.md) · [CHANGELOG.md](../CHANGELOG.md) · [CONTRIBUTING.md](https://github.com/ReSerendipity/.github/blob/main/CONTRIBUTING.md) · [.github/SECURITY.md](../.github/SECURITY.md) · [.githooks/README.md](../.githooks/README.md) · 根 [README.md](../README.md)
 
 ## 想找内容？
 

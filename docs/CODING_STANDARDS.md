@@ -117,7 +117,7 @@ python scripts/check_no_hardcoded_paths.py --all    # 全库
   ```
 
 - 后果：fresh clone 中没有 `AGENTS.md` 属**预期行为**，不得视为缺失，也不得以「补齐 AGENTS.md」为由新建该文件。agent / 新协作者的上下文落点依次为 `docs/README.md` → 本文件 → 根 `README.md` + `.github/**`。
-- 短引用约定：入库文件（`build.gradle.kts`、`codecov.yml`、测试 KDoc、基线 JSON notes 等）里出现的 `GOTCHAS #nn` / `#DP-nn` 一律指本地维护、**不随仓库分发**的 `docs/agents/GOTCHAS.md`，仅作历史事故归因；该结论的**可执行部分**必须能在本节或机器可验证的配置里取到。新写引用时推荐直接写成 `docs/agents/GOTCHAS.md #nn（本地文档，未随仓库发布）`。
+- 短引用约定：入库文件（`build.gradle.kts`、`codecov.yml`、测试 KDoc、基线 JSON notes 等）里出现的 `GOTCHAS #nn` / `#DP-nn` 优先指随仓库分发的 `docs/project/KNOWN_GOTCHAS.md`；`#DP-01`～`#DP-30` 等历史条目仍只存在于本地 `docs/agents/GOTCHAS.md`，仅作历史事故归因；该结论的**可执行部分**必须能在本节或机器可验证的配置里取到。新写引用时推荐直接写成 `docs/project/KNOWN_GOTCHAS.md #nn`（历史条目另注「本地文档，未随仓库发布」）。
 
 ### 7.2 覆盖率门禁 = 质量门禁
 

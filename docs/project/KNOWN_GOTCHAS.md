@@ -1,0 +1,13 @@
+# KNOWN GOTCHAS（公开坑点台账）
+
+> 本文件是随仓库分发的公开台账；路径经 `ReSerendipity/.github` 的 `GOVERNANCE-EXCLUSIONS.md` 第七节 7.1 家族白名单放行（`docs/project/KNOWN_GOTCHAS.md`）。
+> 历史条目 `#DP-01`～`#DP-30`（含本机环境细节）保留在本地 `docs/agents/GOTCHAS.md`，按 §7.1 / ADR-0008 不随仓库分发；本文件从 `#DP-31` 起继续追加。
+> 追加纪律：编号稳定递增、追加到表尾；一条只写一个坑；历史行不改不删；不写密钥 / token / 口令 / 连接串与本机绝对路径。
+
+| # | 坑点标题 | 触发场景 | 现象/报错 | 正确做法 | 首次发现日期 |
+|---|---|---|---|---|---|
+| DP-31 | 竞品改进批次收尾未同步台账，push 被 ledger-gate 拦截 | 插件安全闸门与 PTY 两批代码提交后直接 push | 预检提示「代码/配置/脚本变更，但 GOTCHAS 未新增行」，远端拒绝 | 批次收尾固定动作：凡改代码/配置/脚本，先在 GOTCHAS 追加一行再 push；不要用 [skip-ledger] 掩盖流程缺口 | 2026-11-15 |
+| DP-32 | 本地台账 `docs/agents/GOTCHAS.md` 被 git 跟踪，触发 Self-Purify 阻断 | 改进批次收尾时把本地台账一并 `git add` 入库并推送（c27e6d0） | `自净化核心规则（阻断）` 报 `以下本地治理文档被 git 跟踪（应 git rm --cached；规则见 §7.1 / ADR-0008）：docs/agents/GOTCHAS.md` | ① 台账迁到家族白名单允许的 `docs/project/KNOWN_GOTCHAS.md`，并对旧路径 `git rm --cached`（工作区保留本地历史分片）；② 删除 `.gitignore` 里 `!docs/agents/GOTCHAS.md` / `!docs/agents/REVISION_LOG.md` 豁免，确保 `git ls-files | grep '^docs/agents/'` 为空；③ pre-push 的 `check-ledger-append.ps1` 用 `-GotchasPath` 指向新台账，并重跑非 `-Enforce` 档刷新 `.ledger-baseline.json`；④ 验收看 self-purify 两个 job 均绿 | 2026-11-15 |
+| DP-33 | 根 `CONTRIBUTING.md` / `CODE_OF_CONDUCT.md` 被重新入库，自净化 ② 判红 | 社区健康文件删除后又被 PR 加回根目录 | `自净化检查` 报 `根目录不应存在以下健康文件（继承自 ReSerendipity/.github）：CODE_OF_CONDUCT.md / CONTRIBUTING.md` | 根健康文件一律交回 org 级 `ReSerendipity/.github` 继承：`git rm` 两文件，并删掉 `.gitignore` 的 `!CONTRIBUTING.md` / `!CODE_OF_CONDUCT.md` 豁免（否则 `git add -A` 会再入库）；同步把 docs 内的相对链接改为 org 级 URL；验收 `git ls-files -- 'CONTRIBUTING.md' 'CODE_OF_CONDUCT.md' 'SUPPORT.md'` 为空 | 2026-11-15 |
+| DP-34 | Spotless 只点名 `app/build.gradle.kts`：import 组间空行 + 字符串模板多余花括号 | push 后 `Android CI / Run Spotless Check` 在 `:spotlessKotlinGradleCheck` 失败 | `The following files had format violations: app/build.gradle.kts`；diff 要求删除 import 之间的空行，并把 `基线 $declaredSum/${declaredCount} 条` 改为 `基线 $declaredSum/$declaredCount 条` | 按 CI 日志的 `+` 行逐行手工对齐，**不要**跑 `spotlessApply`（Windows 上 `PLATFORM_NATIVE` 会按 CRLF 重写工作树，见 #DP-06）；改完验证目标文件 CR 字节为 0、`git diff` 只含这两处 | 2026-11-15 |
+| DP-35 | 台账迁到 docs/project 后，ledger-gate 仍按旧路径解析；缩表还会被 `>` 判据误拦 | 按 §7.1 把 `docs/agents/GOTCHAS.md` 迁到 `docs/project/KNOWN_GOTCHAS.md`，pre-push 仍调用共享 `check-ledger-append.ps1` | 共享脚本 `Resolve-Ledger` 只认 `local/agents/GOTCHAS.md` → `docs/agents/GOTCHAS.md`，新路径读不到；若把旧 41 行缩成新表，baseline 仍是旧行数，push 时「当前行数 > 基线」不成立 ⇒ `ledger-gate FAIL：代码/配置/脚本变更，但 GOTCHAS 未新增行` | ① 共享脚本加 `-GotchasPath` 可选参数（缺省行为不变）；② 仓内 `local/hooks/pre-push` 显式传 `-GotchasPath "docs/project/KNOWN_GOTCHAS.md"`；③ 迁移前把 `.ledger-baseline.json` 的 `gotchasLines` 重刷为新表行数，并在同一批追加一条新坑行，保证 push 时严格递增；④ 验收：`pwsh ... -Enforce` 退出 0 | 2026-11-15 |

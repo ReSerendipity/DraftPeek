@@ -21,8 +21,8 @@
 | [`README.md`](../README.md) | 项目总入口：能力、截图、构建与发布、贡献入口 | 现行 | 2026-11-10 |
 | [`ARCHITECTURE.md`](../ARCHITECTURE.md) | 分层架构与模块关系（Compose 多模块） | 现行 | 2026-11-10 |
 | [`CHANGELOG.md`](../CHANGELOG.md) | 版本变更记录 | 现行 | 2026-11-10 |
-| [`CONTRIBUTING.md`](../CONTRIBUTING.md) | 贡献指南 | 现行 | 2026-11-10 |
-| [`CODE_OF_CONDUCT.md`](../CODE_OF_CONDUCT.md) | 行为准则 | 现行 | 2026-11-10 |
+| [CONTRIBUTING.md](https://github.com/ReSerendipity/.github/blob/main/CONTRIBUTING.md) | 贡献指南（org 级继承） | 现行 | 2026-11-15 |
+| [CODE_OF_CONDUCT.md](https://github.com/ReSerendipity/.github/blob/main/CODE_OF_CONDUCT.md) | 行为准则（org 级继承） | 现行 | 2026-11-15 |
 | [`SECURITY_MATRIX.md`](../SECURITY_MATRIX.md) | 安全控制措施对照 | 现行 | 2026-11-10 |
 | [`.github/SECURITY.md`](../.github/SECURITY.md) | 安全漏洞披露渠道 | 现行 | 2026-11-10 |
 | `AGENTS.md` / `FIX_LOG.md` / `LOCAL_RULES.md` | 编码代理契约与本地台账：**仅本地保留、不入库**（引用规范时以 `docs/CODING_STANDARDS.md` §7 为准） | 本地 | 2026-11-10 |
