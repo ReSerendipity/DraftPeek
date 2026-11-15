@@ -1,11 +1,18 @@
 /**
  * 终端会话管理器文件。
  *
- * 使用Android Process API管理终端会话，每个会话拥有独立的shell进程、IO流和读取线程。
- * 所有MutableStateFlow状态更新限制在Main调度器以保证线程安全，IO和进程管理在Dispatchers.IO上运行。
+ * 每条终端会话优先使用真 PTY（native openpty + fork + TIOCSCTTY），
+ * 使 shell / proot 看到真实 tty：`stty size`、`tput cols`、Ctrl-C、SIGWINCH、
+ * vim/top 等全屏程序都依赖它。PTY 不可用时回退到既有 ProcessBuilder 管道，
+ * 并在输出区明确提示。
  *
- * @author DraftPeek Team
- * @since 1.0.0
+ * 线程模型：
+ * - PTY 会话：reader / writer / waiter 三条 daemon 线程（见 TerminalPtySession）；
+ * - 管道回退：reader / waiter 两条线程；
+ * - 所有 StateFlow 更新在 Main 调度器，IO / 进程管理在 Dispatchers.IO。
+ *
+ * 作者：DraftPeek Team
+ * 起始版本：1.0.0
  */
 package com.draftpeek.feature.terminal.emulator
 
@@ -22,24 +29,24 @@ import javax.inject.Inject
 import javax.inject.Singleton
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.Job
 import kotlinx.coroutines.SupervisorJob
 import kotlinx.coroutines.cancelChildren
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.launch
 
 private const val TAG = "TerminalSessionManager"
-private const val OUTPUT_BUFFER_MAX = 50_000
-private const val OUTPUT_BUFFER_KEEP = 40_000
+private const val OUTPUT_PUBLISH_INTERVAL_MS = 32L
 
 /**
  * 终端会话管理器。
  *
- * 管理多个终端会话，每个会话有独立的shell进程和IO流。
- * 提供基础的Android原生shell会话支持，不依赖proot。
- *
- * 线程安全：所有状态更新在Main调度器执行，IO操作在IO调度器执行。
+ * 管理多个终端会话，每个会话有独立 PTY / 进程和 IO 线程。
+ * 线程安全：状态更新在 Main 调度器执行，IO 操作在 IO 调度器执行；
+ * map 的注册 / 注销用 `@Synchronized` 保证与 destroy 的竞态安全。
  */
 @Singleton
 class TerminalSessionManager @Inject constructor(private val prootSessionManager: ProotSessionManager) {
@@ -61,18 +68,46 @@ class TerminalSessionManager @Inject constructor(private val prootSessionManager
 
     private val sessionOutputBuffers = ConcurrentHashMap<String, MutableStateFlow<String>>()
 
+    private val textBuffers = ConcurrentHashMap<String, TerminalTextBuffer>()
+
+    private val ptySessions = ConcurrentHashMap<String, TerminalPtySession>()
+
+    private val processSessions = ConcurrentHashMap<String, ProcessSession>()
+
+    private val publishJobs = ConcurrentHashMap<String, Job>()
+    private val publishLock = Any()
+
+    /** 最近一次 UI 尺寸，用于新建会话时直接以正确行列启动。 */
+    @Volatile
+    private var lastColumns: Int = 0
+
+    @Volatile
+    private var lastRows: Int = 0
+
     /**
-     * 进程会话内部数据类，持有进程和相关流/线程。
+     * PTY 会话内部数据类，持有 native 会话句柄。
      */
     private data class ProcessSession(
         val process: Process,
         val outputStream: DataOutputStream,
         val readerThread: Thread,
-        val stdoutThread: Thread,
-        val stderrThread: Thread
+        val waiterThread: Thread
     )
 
-    private val processSessions = ConcurrentHashMap<String, ProcessSession>()
+    /**
+     * 一次启动的完整命令描述。
+     *
+     * @property argv 完整 argv（proot 模式含 proot 参数）
+     * @property cwd 子进程工作目录
+     * @property environment 完整环境变量
+     * @property notices 启动前要写入输出区的提示（降级原因等）
+     */
+    private data class LaunchSpec(
+        val argv: List<String>,
+        val cwd: String,
+        val environment: Map<String, String>,
+        val notices: List<String>
+    )
 
     /**
      * 获取会话的输出缓冲区流。
@@ -84,43 +119,53 @@ class TerminalSessionManager @Inject constructor(private val prootSessionManager
 
     /**
      * 创建新的终端会话。
-     * @param config 终端配置，使用默认配置
+     * @param config 终端配置
      * @param title 会话标题
      * @return 新创建的终端会话
      */
     fun createSession(config: TerminalConfig = TerminalConfig(), title: String? = null): TerminalSession {
         val sessionTitle = title ?: "Shell #${_sessions.value.size + 1}"
+        val columns = lastColumns.takeIf { it > 0 } ?: config.columns
+        val rows = lastRows.takeIf { it > 0 } ?: config.rows
+        val effectiveConfig = config.copy(columns = columns, rows = rows)
         val session = TerminalSession(
             id = UUID.randomUUID().toString(),
-            config = config,
+            config = effectiveConfig,
             title = sessionTitle,
             workingDirectory = config.workingDirectory
         )
 
         sessionOutputBuffers[session.id] = MutableStateFlow("")
+        textBuffers[session.id] = TerminalTextBuffer()
 
         scope.launch(Dispatchers.Main.immediate) {
             _sessions.value = _sessions.value + session
             _activeSession.value = session
         }
 
-        startProcess(session.id, config)
+        startSession(session.id, effectiveConfig)
         return session
     }
 
     /**
      * 向指定会话发送输入。
      * @param sessionId 会话ID
-     * @param input 输入字符串
+     * @param input 输入字符串（UTF-8 编码后按原始字节写入）
      */
     fun sendInput(sessionId: String, input: String) {
+        val bytes = input.toByteArray(Charsets.UTF_8)
         scope.launch(Dispatchers.IO) {
+            ptySessions[sessionId]?.let { session ->
+                session.write(bytes)
+                return@launch
+            }
+
             try {
                 val ps = processSessions[sessionId] ?: return@launch
-                ps.outputStream.writeBytes(input)
+                ps.outputStream.write(bytes)
                 ps.outputStream.flush()
-            } catch (e: Exception) {
-                Log.w(TAG, "向会话 $sessionId 发送输入失败", e)
+            } catch (error: Exception) {
+                Log.w(TAG, "向会话 $sessionId 发送输入失败", error)
             }
         }
     }
@@ -156,17 +201,42 @@ class TerminalSessionManager @Inject constructor(private val prootSessionManager
     }
 
     /**
-     * 调整终端大小（当前未实现）。
+     * 调整当前活动会话的终端大小。
+     *
+     * 由 UI 在旋转 / 分屏 / 键盘弹出导致输出区尺寸变化时调用；
+     * PTY 会话走 `ioctl(TIOCSWINSZ)`，内核自动向前台进程组发 SIGWINCH。
      */
     fun resize(columns: Int, rows: Int) {
+        _activeSession.value?.id?.let { resize(it, columns, rows) }
     }
 
     /**
-     * 销毁指定会话。
+     * 调整指定会话的终端大小。
+     */
+    fun resize(sessionId: String, columns: Int, rows: Int) {
+        if (columns <= 0 || rows <= 0) return
+        lastColumns = columns
+        lastRows = rows
+        ptySessions[sessionId]?.resize(columns, rows)
+    }
+
+    /**
+     * 销毁指定会话。幂等：重复调用不会二次关闭 fd / 二次 kill。
      * @param sessionId 要销毁的会话ID
      */
+    @Synchronized
     fun destroySession(sessionId: String) {
-        destroyProcess(sessionId)
+        val pty = ptySessions.remove(sessionId)
+        val processSession = processSessions.remove(sessionId)
+
+        pty?.destroy()
+        if (processSession != null) {
+            scope.launch(Dispatchers.IO) { destroyPipe(processSession) }
+        }
+
+        publishJobs.remove(sessionId)?.cancel()
+        sessionOutputBuffers.remove(sessionId)
+        textBuffers.remove(sessionId)
 
         scope.launch(Dispatchers.Main.immediate) {
             val currentList = _sessions.value.filter { it.id != sessionId }
@@ -176,8 +246,6 @@ class TerminalSessionManager @Inject constructor(private val prootSessionManager
                 _activeSession.value = currentList.lastOrNull()
             }
         }
-
-        sessionOutputBuffers.remove(sessionId)
     }
 
     /**
@@ -192,173 +260,216 @@ class TerminalSessionManager @Inject constructor(private val prootSessionManager
     /**
      * 销毁所有会话并清理资源。
      *
-     * 修复：原实现调用 `scope.cancel()` 会永久取消该 CoroutineScope。由于本类为 @Singleton，
-     * 当 TerminalService.onDestroy 调用后，若用户重新打开终端，已死的 scope 会使后续
-     * createSession 中的 launch 静默失败（进程启动但无人管理，可能产生僵尸进程）。
-     * 改为 `cancelChildren()` 仅取消当前运行中的子协程（进程已在上方销毁），
-     * 保留 scope 供未来会话复用。
+     * `scope.cancelChildren()` 只取消当前子协程，保留 scope 供服务重启后再次 createSession；
+     * 这是原实现的既有修复，PTY 改造保持不变。destroy 幂等，可重复调用。
      */
+    @Synchronized
     fun destroyAll() {
-        processSessions.keys.toList().forEach { destroyProcess(it) }
-        processSessions.clear()
+        ptySessions.keys.toList().forEach { ptySessions.remove(it)?.destroy() }
+        processSessions.keys.toList().forEach { key ->
+            processSessions.remove(key)?.let { destroyPipe(it) }
+        }
+        publishJobs.values.forEach { it.cancel() }
+        publishJobs.clear()
         sessionOutputBuffers.clear()
+        textBuffers.clear()
         _sessions.value = emptyList()
         _activeSession.value = null
         scope.coroutineContext.cancelChildren()
     }
 
     /**
-     * 启动shell进程。
-     *
-     * 当 [TerminalConfig.useProot] 为 true 且 proot 可用时，使用 proot 包装的 Linux shell；
-     * 否则回退到 Android 原生 shell 并在输出区提示。
+     * 启动会话：优先 PTY，失败则回退 ProcessBuilder。
      */
-    private fun startProcess(sessionId: String, config: TerminalConfig) {
-        destroyProcess(sessionId)
+    private fun startSession(sessionId: String, config: TerminalConfig) {
+        if (!isSessionAlive(sessionId)) return
 
         scope.launch(Dispatchers.IO) {
             try {
-                val workDir = File(config.workingDirectory).takeIf { it.isDirectory }
-                    ?: File("/sdcard")
+                val spec = buildLaunchSpec(config)
+                spec.notices.forEach { feedText(sessionId, it) }
 
-                // 尝试使用 proot 模式
-                var process: Process? = null
-                var prootFallback = false
-
-                if (config.useProot) {
+                if (TerminalPtyNative.isAvailable) {
                     try {
-                        val availability = prootSessionManager.checkProotAvailable()
-                        if (availability.isReady) {
-                            val prootPath = availability.prootPath!!
-                            val rootfsPath = availability.rootfsPath!!
-                            val prootCmd = buildProotCommand(
-                                prootPath = prootPath,
-                                rootfsPath = rootfsPath,
-                                cwd = config.workingDirectory,
-                                shell = "/bin/bash"
-                            )
-
-                            val processBuilder = ProcessBuilder(prootCmd)
-                                .directory(File(rootfsPath))
-                                .redirectErrorStream(true)
-
-                            val processEnv = processBuilder.environment()
-                            processEnv["HOME"] = "/root"
-                            processEnv["PATH"] = "/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin"
-                            processEnv["TERM"] = "xterm-256color"
-                            processEnv["LANG"] = "en_US.UTF-8"
-                            processEnv["PROOT_NO_SECCOMP"] = "1"
-                            config.environment.forEach { (key, value) -> processEnv[key] = value }
-
-                            process = processBuilder.start()
-                            Log.d(TAG, "会话 $sessionId 使用 proot 模式启动")
-                        } else {
-                            prootFallback = true
-                            Log.w(TAG, "Proot 未就绪，回退到原生 shell")
-                        }
-                    } catch (e: Exception) {
-                        prootFallback = true
-                        Log.w(TAG, "Proot 启动失败，回退到原生 shell", e)
+                        val pty = TerminalPtySession(
+                            sessionId = sessionId,
+                            argv = spec.argv,
+                            cwd = spec.cwd,
+                            environment = spec.environment,
+                            rows = config.rows,
+                            columns = config.columns,
+                            onOutput = { bytes -> feedOutput(sessionId, bytes) },
+                            onExit = { exitCode -> handleExit(sessionId, exitCode) }
+                        )
+                        if (registerPty(sessionId, pty)) return@launch
+                        pty.destroy()
+                        return@launch
+                    } catch (error: Throwable) {
+                        Log.w(TAG, "会话 $sessionId PTY 启动失败，回退管道", error)
+                        feedText(
+                            sessionId,
+                            "[PTY 启动失败：${error.message.orEmpty()}，已回退到管道模式]\n"
+                        )
                     }
-                }
-
-                // 回退到原生 shell
-                if (process == null) {
-                    val envArray = config.environment.map { "${it.key}=${it.value}" }.toTypedArray()
-                    process = Runtime.getRuntime().exec(
-                        arrayOf(config.shell),
-                        envArray,
-                        workDir
+                } else {
+                    feedText(
+                        sessionId,
+                        "[PTY 不可用：${TerminalPtyNative.unavailableReason()}，已回退到管道模式]\n"
                     )
-                    if (prootFallback) {
-                        val buffer = sessionOutputBuffers.getOrPut(sessionId) { MutableStateFlow("") }
-                        scope.launch(Dispatchers.Main.immediate) {
-                            buffer.value = buffer.value + "[Proot 不可用，已回退到原生 shell]\n"
-                        }
-                    }
                 }
 
-                val outputStream = DataOutputStream(process!!.outputStream)
-
-                val buffer = sessionOutputBuffers.getOrPut(sessionId) { MutableStateFlow("") }
-
-                fun appendOutput(text: String) {
-                    scope.launch(Dispatchers.Main.immediate) {
-                        val current = buffer.value
-                        val newBuffer = if (current.length > OUTPUT_BUFFER_MAX) {
-                            current.substring(current.length - OUTPUT_BUFFER_KEEP) + text
-                        } else {
-                            current + text
-                        }
-                        buffer.value = newBuffer
-                    }
-                }
-
-                val stdoutThread = Thread {
-                    try {
-                        BufferedReader(InputStreamReader(process!!.inputStream)).use { reader ->
-                            reader.forEachLine { line ->
-                                appendOutput(line + "\n")
-                            }
-                        }
-                    } catch (e: Exception) {
-                        Log.d(TAG, "会话 $sessionId stdout读取结束: ${e.message}")
-                    }
-                }.apply {
-                    name = "stdout-$sessionId"
-                    isDaemon = true
-                }
-
-                val stderrThread = Thread {
-                    try {
-                        BufferedReader(InputStreamReader(process!!.errorStream)).use { reader ->
-                            reader.forEachLine { line ->
-                                appendOutput(line + "\n")
-                            }
-                        }
-                    } catch (e: Exception) {
-                        Log.d(TAG, "会话 $sessionId stderr读取结束: ${e.message}")
-                    }
-                }.apply {
-                    name = "stderr-$sessionId"
-                    isDaemon = true
-                }
-
-                val readerThread = Thread {
-                    stdoutThread.start()
-                    stderrThread.start()
-                    try {
-                        val exitCode = process!!.waitFor()
-                        appendOutput("\n[进程退出，代码 $exitCode]\n")
-                    } catch (e: InterruptedException) {
-                        Log.d(TAG, "会话 $sessionId 读取线程被中断")
-                    } finally {
-                        stdoutThread.interrupt()
-                        stderrThread.interrupt()
-                        process!!.destroyForcibly()
-                    }
-                }.apply {
-                    name = "waiter-$sessionId"
-                    isDaemon = true
-                }
-
-                processSessions[sessionId] = ProcessSession(
-                    process = process!!,
-                    outputStream = outputStream,
-                    readerThread = readerThread,
-                    stdoutThread = stdoutThread,
-                    stderrThread = stderrThread
-                )
-
-                readerThread.start()
-            } catch (e: Exception) {
-                Log.e(TAG, "会话 $sessionId 启动进程失败", e)
-                val buffer = sessionOutputBuffers.getOrPut(sessionId) { MutableStateFlow("") }
-                scope.launch(Dispatchers.Main.immediate) {
-                    buffer.value = buffer.value + "启动shell错误: ${e.message}\n"
-                }
+                if (!isSessionAlive(sessionId)) return@launch
+                startPipeProcess(sessionId, spec)
+            } catch (error: Throwable) {
+                Log.e(TAG, "会话 $sessionId 启动失败", error)
+                feedText(sessionId, "启动shell错误: ${error.message.orEmpty()}\n")
             }
         }
+    }
+
+    /**
+     * 构造启动命令：proot 可用时把 proot 作为 PTY 子进程执行；
+     * 否则执行 Android 原生 shell。
+     */
+    private suspend fun buildLaunchSpec(config: TerminalConfig): LaunchSpec {
+        val workDir = File(config.workingDirectory).takeIf { it.isDirectory } ?: File("/sdcard")
+        val notices = mutableListOf<String>()
+
+        if (config.useProot) {
+            try {
+                val availability = prootSessionManager.checkProotAvailable()
+                if (availability.isReady) {
+                    val prootPath = availability.prootPath!!
+                    val rootfsPath = availability.rootfsPath!!
+                    return LaunchSpec(
+                        argv = buildProotCommand(
+                            prootPath = prootPath,
+                            rootfsPath = rootfsPath,
+                            cwd = config.workingDirectory,
+                            shell = "/bin/bash"
+                        ),
+                        cwd = rootfsPath,
+                        environment = prootEnvironment(config),
+                        notices = emptyList()
+                    )
+                }
+                notices.add("[Proot 未就绪，已回退到原生 shell]\n")
+            } catch (error: Exception) {
+                notices.add("[Proot 启动失败，已回退到原生 shell：${error.message.orEmpty()}]\n")
+                Log.w(TAG, "Proot 不可用，回退原生 shell", error)
+            }
+        }
+
+        return LaunchSpec(
+            argv = listOf(config.shell),
+            cwd = workDir.absolutePath,
+            environment = nativeEnvironment(config, workDir),
+            notices = notices
+        )
+    }
+
+    /** 原生 shell 环境：继承配置，补 HOME / PWD / TERM / LANG / PATH。 */
+    private fun nativeEnvironment(config: TerminalConfig, workDir: File): Map<String, String> {
+        val environment = LinkedHashMap<String, String>()
+        environment.putAll(config.environment)
+        environment.putIfAbsent("TERM", "xterm-256color")
+        environment.putIfAbsent("LANG", "en_US.UTF-8")
+        environment.putIfAbsent("PATH", "/system/bin:/system/xbin")
+        environment["HOME"] = workDir.absolutePath
+        environment["PWD"] = workDir.absolutePath
+        return environment
+    }
+
+    /**
+     * Proot 环境：PATH / HOME 必须指向 rootfs 语义，不能被默认配置里的
+     * Android PATH 覆盖（否则 proot 内的 shell 找不到 /usr/bin 工具）。
+     */
+    private fun prootEnvironment(config: TerminalConfig): Map<String, String> {
+        val environment = LinkedHashMap<String, String>()
+        environment["HOME"] = "/root"
+        environment["PATH"] = "/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin"
+        environment["TERM"] = "xterm-256color"
+        environment["LANG"] = "en_US.UTF-8"
+        environment["PROOT_NO_SECCOMP"] = "1"
+        config.environment.forEach { (key, value) ->
+            if (key != "PATH" && key != "HOME") {
+                environment[key] = value
+            }
+        }
+        return environment
+    }
+
+    /**
+     * 注册 PTY 会话；若期间会话已被销毁则返回 false。
+     */
+    @Synchronized
+    private fun registerPty(sessionId: String, pty: TerminalPtySession): Boolean {
+        if (!isSessionAlive(sessionId)) return false
+        ptySessions[sessionId] = pty
+        return true
+    }
+
+    /**
+     * 启动 ProcessBuilder 管道回退（无 PTY 语义，仅保证旧功能可用）。
+     */
+    @Synchronized
+    private fun startPipeProcess(sessionId: String, spec: LaunchSpec) {
+        if (!isSessionAlive(sessionId)) return
+
+        try {
+            val builder = ProcessBuilder(spec.argv)
+                .directory(File(spec.cwd))
+                .redirectErrorStream(true)
+            builder.environment().apply {
+                clear()
+                putAll(spec.environment)
+            }
+            val process = builder.start()
+            val outputStream = DataOutputStream(process.outputStream)
+
+            val readerThread = Thread({
+                try {
+                    BufferedReader(InputStreamReader(process.inputStream)).use { reader ->
+                        reader.forEachLine { line -> feedText(sessionId, line + "\n") }
+                    }
+                } catch (error: Exception) {
+                    Log.d(TAG, "会话 $sessionId 管道输出结束: ${error.message}")
+                }
+            }, "pipe-reader-$sessionId").apply { isDaemon = true }
+
+            val waiterThread = Thread({
+                try {
+                    val exitCode = process.waitFor()
+                    feedText(sessionId, "\n[进程退出，代码 $exitCode]\n")
+                } catch (interrupted: InterruptedException) {
+                    Thread.currentThread().interrupt()
+                }
+            }, "pipe-waiter-$sessionId").apply { isDaemon = true }
+
+            val processSession = ProcessSession(process, outputStream, readerThread, waiterThread)
+            processSessions[sessionId] = processSession
+
+            if (!isSessionAlive(sessionId)) {
+                processSessions.remove(sessionId)
+                destroyPipe(processSession)
+                return
+            }
+
+            readerThread.start()
+            waiterThread.start()
+            Log.i(TAG, "会话 $sessionId 使用管道回退启动 argv=${spec.argv.joinToString(" ")}")
+        } catch (error: Exception) {
+            Log.e(TAG, "会话 $sessionId 启动管道进程失败", error)
+            feedText(sessionId, "启动shell错误: ${error.message.orEmpty()}\n")
+        }
+    }
+
+    /** 子进程退出：冲刷残留输出，追加退出码，移除 PTY 句柄。 */
+    private fun handleExit(sessionId: String, exitCode: Int) {
+        textBuffers[sessionId]?.flush()
+        feedText(sessionId, "\n[进程退出，代码 $exitCode]\n")
+        ptySessions.remove(sessionId)
+        Log.d(TAG, "会话 $sessionId 已退出，code=$exitCode")
     }
 
     /**
@@ -408,18 +519,16 @@ class TerminalSessionManager @Inject constructor(private val prootSessionManager
     }
 
     /**
-     * 销毁进程并清理资源。
+     * 销毁管道回退进程并清理资源。
      */
-    private fun destroyProcess(sessionId: String) {
-        val ps = processSessions.remove(sessionId) ?: return
-
+    private fun destroyPipe(ps: ProcessSession) {
         try {
             ps.outputStream.close()
-        } catch (_: Exception) {}
+        } catch (_: Exception) {
+        }
 
         ps.readerThread.interrupt()
-        ps.stdoutThread.interrupt()
-        ps.stderrThread.interrupt()
+        ps.waiterThread.interrupt()
 
         try {
             ps.process.destroy()
@@ -427,11 +536,46 @@ class TerminalSessionManager @Inject constructor(private val prootSessionManager
             if (!exited) {
                 ps.process.destroyForcibly()
             }
-        } catch (e: Exception) {
-            Log.w(TAG, "销毁会话 $sessionId 进程错误", e)
+        } catch (error: Exception) {
+            Log.w(TAG, "销毁管道会话进程错误", error)
             try {
                 ps.process.destroyForcibly()
-            } catch (_: Exception) {}
+            } catch (_: Exception) {
+            }
+        }
+    }
+
+    /** 会话是否仍然存在（未被 destroy）。 */
+    private fun isSessionAlive(sessionId: String): Boolean =
+        sessionOutputBuffers.containsKey(sessionId)
+
+    /** 追加原始字节到会话文本缓冲。 */
+    private fun feedOutput(sessionId: String, bytes: ByteArray) {
+        val buffer = textBuffers[sessionId] ?: return
+        buffer.feed(bytes)
+        schedulePublish(sessionId)
+    }
+
+    /** 追加纯文本（用于提示 / 退出码）。 */
+    private fun feedText(sessionId: String, text: String) {
+        feedOutput(sessionId, text.toByteArray(Charsets.UTF_8))
+    }
+
+    /**
+     * 32ms 合并发布一次快照，避免逐字节输出触发 O(n²) 字符串拼接与高频重组。
+     */
+    private fun schedulePublish(sessionId: String) {
+        synchronized(publishLock) {
+            if (publishJobs[sessionId]?.isActive == true) return
+            val job = scope.launch(Dispatchers.Main.immediate) {
+                delay(OUTPUT_PUBLISH_INTERVAL_MS)
+                val text = textBuffers[sessionId]?.snapshot()
+                if (text != null) {
+                    sessionOutputBuffers[sessionId]?.value = text
+                }
+                synchronized(publishLock) { publishJobs.remove(sessionId) }
+            }
+            publishJobs[sessionId] = job
         }
     }
 }

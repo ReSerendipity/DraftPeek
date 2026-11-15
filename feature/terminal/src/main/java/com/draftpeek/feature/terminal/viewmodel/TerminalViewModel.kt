@@ -187,6 +187,20 @@ class TerminalViewModel @Inject constructor(
     }
 
     /**
+     * 调整活动会话的 PTY 窗口大小。
+     *
+     * 输出区尺寸（旋转 / 分屏 / 软键盘）变化时由 UI 调用；
+     * 具体落到 `ioctl(TIOCSWINSZ)` 与 SIGWINCH 由 TerminalPtySession 完成。
+     *
+     * @param columns 列数
+     * @param rows 行数
+     */
+    fun resize(columns: Int, rows: Int) {
+        val sessionId = activeSession.value?.id ?: return
+        sessionManager.resize(sessionId, columns, rows)
+    }
+
+    /**
      * 提交输入缓冲区内容到终端并清空缓冲区。
      */
     fun submitInput() {

@@ -18,6 +18,7 @@ import androidx.compose.foundation.clickable
 import androidx.compose.foundation.horizontalScroll
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.BoxWithConstraints
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
@@ -48,12 +49,15 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.SolidColor
+import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.semantics.contentDescription
 import androidx.compose.ui.semantics.semantics
+import androidx.compose.ui.text.AnnotatedString
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.rememberTextMeasurer
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.hilt.navigation.compose.hiltViewModel
@@ -61,6 +65,7 @@ import com.draftpeek.core.ui.icon.StrokeIcon
 import com.draftpeek.core.ui.icon.StrokeIcons
 import com.draftpeek.feature.terminal.R
 import com.draftpeek.feature.terminal.emulator.ProotSetupState
+import com.draftpeek.feature.terminal.emulator.TerminalKey
 import com.draftpeek.feature.terminal.model.TerminalConfig
 import com.draftpeek.feature.terminal.viewmodel.TerminalViewModel
 // 无障碍语义：为无 label 的 BasicTextField 暴露提示文案
@@ -368,28 +373,79 @@ fun TerminalScreen(
         val lines by remember {
             derivedStateOf { outputBuffer.lines().ifEmpty { listOf("") } }
         }
+        val outputTextStyle = remember(theme.foreground) {
+            TextStyle.Default.copy(
+                fontFamily = FontFamily.Monospace,
+                fontSize = 12.5.sp,
+                lineHeight = (12.5 * 1.7).sp,
+                color = Color(theme.foreground)
+            )
+        }
+        val density = LocalDensity.current
+        val textMeasurer = rememberTextMeasurer()
 
-        LazyColumn(
-            state = listState,
+        BoxWithConstraints(
             modifier = Modifier
                 .weight(1f)
                 .fillMaxWidth()
                 .background(bg)
-                .padding(horizontal = 14.dp, vertical = 12.dp),
-            verticalArrangement = Arrangement.spacedBy(1.dp)
         ) {
-            itemsIndexed(lines, key = { index, _ -> index }) { _, line ->
-                Text(
-                    text = line,
-                    style = TextStyle.Default.copy(
-                        fontFamily = FontFamily.Monospace,
-                        fontSize = 12.5.sp,
-                        lineHeight = (12.5 * 1.7).sp,
-                        color = Color(theme.foreground)
-                    ),
-                    modifier = Modifier.fillMaxWidth()
-                )
+            // 按等宽字体实测 cell 宽高，把输出区尺寸换算成 PTY 的 columns / rows。
+            // 旋转、分屏、软键盘改变高度时 maxWidth/maxHeight 变化，LaunchedEffect 会再次 resize。
+            val cellWidthPx = remember(textMeasurer, outputTextStyle) {
+                textMeasurer.measure(AnnotatedString("M"), style = outputTextStyle)
+                    .size.width.toFloat()
             }
+            val cellHeightPx = with(density) { outputTextStyle.lineHeight.toPx() }
+            val contentWidthPx = with(density) { (maxWidth - 28.dp).toPx() }
+            val contentHeightPx = with(density) { (maxHeight - 24.dp).toPx() }
+            val columns = if (cellWidthPx > 0f) {
+                (contentWidthPx / cellWidthPx).toInt().coerceIn(20, 400)
+            } else {
+                TerminalConfig().columns
+            }
+            val rows = if (cellHeightPx > 0f) {
+                (contentHeightPx / cellHeightPx).toInt().coerceIn(4, 200)
+            } else {
+                TerminalConfig().rows
+            }
+
+            LaunchedEffect(activeSession?.id, columns, rows) {
+                if (activeSession != null) {
+                    viewModel.resize(columns, rows)
+                }
+            }
+
+            LazyColumn(
+                state = listState,
+                modifier = Modifier
+                    .fillMaxSize()
+                    .padding(horizontal = 14.dp, vertical = 12.dp),
+                verticalArrangement = Arrangement.spacedBy(1.dp)
+            ) {
+                itemsIndexed(lines, key = { index, _ -> index }) { _, line ->
+                    Text(
+                        text = line,
+                        style = outputTextStyle,
+                        modifier = Modifier.fillMaxWidth()
+                    )
+                }
+            }
+        }
+
+        // 特殊按键辅助栏：ESC / TAB / Ctrl-C 以原始字节写入 PTY，
+        // 用于 vi 进入命令模式、补全和中断前台进程；不依赖软键盘 IME。
+        Row(
+            modifier = Modifier
+                .fillMaxWidth()
+                .background(surfaceVariant)
+                .padding(horizontal = 12.dp, vertical = 6.dp),
+            horizontalArrangement = Arrangement.spacedBy(8.dp),
+            verticalAlignment = Alignment.CenterVertically
+        ) {
+            TerminalKeyChip("ESC") { viewModel.sendKey(TerminalKey.ESC) }
+            TerminalKeyChip("TAB") { viewModel.sendKey(TerminalKey.TAB) }
+            TerminalKeyChip("^C") { viewModel.sendKey(TerminalKey.CTRL_C) }
         }
 
         // 输入区域
@@ -462,5 +518,33 @@ fun TerminalScreen(
                 )
             }
         }
+    }
+}
+
+/**
+ * 终端特殊按键按钮。
+ *
+ * 仅负责把 ESC / TAB / Ctrl-C 这类控制字节交给 ViewModel，
+ * 由 TerminalSessionManager 以原始字节写入 PTY。
+ */
+@Composable
+private fun TerminalKeyChip(label: String, onClick: () -> Unit) {
+    Box(
+        modifier = Modifier
+            .height(30.dp)
+            .clip(RoundedCornerShape(8.dp))
+            .background(MaterialTheme.colorScheme.surface)
+            .clickable(onClick = onClick)
+            .padding(horizontal = 12.dp),
+        contentAlignment = Alignment.Center
+    ) {
+        Text(
+            text = label,
+            style = TextStyle.Default.copy(
+                fontFamily = FontFamily.Monospace,
+                fontSize = 12.sp,
+                color = MaterialTheme.colorScheme.onSurfaceVariant
+            )
+        )
     }
 }

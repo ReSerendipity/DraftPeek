@@ -12,10 +12,25 @@ android {
     compileSdk = libs.versions.compileSdk.get().toInt()
     buildToolsVersion = libs.versions.buildTools.get()
 
+    // 真 PTY 桥使用 NDK 27（16 KB page size 支持）；与 app 的 NDK 27.0.12077973 对齐。
+    ndkVersion = "27.0.12077973"
+
     defaultConfig {
         minSdk = libs.versions.minSdk.get().toInt()
         consumerProguardFiles("consumer-rules.pro")
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
+
+        // 与 app/build.gradle.kts 的 abiFilters 保持一致：真机 arm64-v8a，
+        // CI 仍保留 armeabi-v7a / x86_64，不新增 ABI。
+        ndk {
+            abiFilters += listOf("arm64-v8a", "armeabi-v7a", "x86_64")
+        }
+
+        externalNativeBuild {
+            cmake {
+                cFlags("-Wall", "-Wextra", "-Werror", "-O2")
+            }
+        }
     }
 
     compileOptions {
@@ -31,6 +46,14 @@ android {
 
     buildFeatures {
         compose = true
+    }
+
+    // 真 PTY native 桥：forkpty/openpty/TIOCSCTTY/TIOCSWINSZ/waitpid。
+    externalNativeBuild {
+        cmake {
+            path = file("src/main/cpp/CMakeLists.txt")
+            version = "3.22.1"
+        }
     }
 
     testOptions {
