@@ -2,8 +2,8 @@ package com.draftpeek.core.common.plugin.security
 
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertNull
-import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.Assertions.assertThrows
+import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.DisplayName
 import org.junit.jupiter.api.Test
 
@@ -13,23 +13,31 @@ class PluginTrustStoreTest {
     private val certSha256 = "a".repeat(64)
     private val fileSha256 = "b".repeat(64)
 
+    private fun manifest(plugins: String, restricted: String = "[]"): String {
+        return """
+            {
+              "version": 2,
+              "restrictedClasses": $restricted,
+              "plugins": [$plugins]
+            }
+        """.trimIndent()
+    }
+
     @Test
-    @DisplayName("parses an APK entry and keeps SHA-256 values")
+    @DisplayName("parses an APK entry with allowed class prefixes")
     fun parsesApkEntry() {
         val store = PluginTrustStore.parse(
-            """
-            {
-              "version": 1,
-              "plugins": [
+            manifest(
+                """
                 {
                   "id": "demo.apk",
                   "packageName": "com.example.plugin",
                   "certSha256": ["$certSha256"],
-                  "fileSha256": "$fileSha256"
+                  "fileSha256": "$fileSha256",
+                  "allowedClassPrefixes": ["com.example.plugin"]
                 }
-              ]
-            }
-            """.trimIndent(),
+                """.trimIndent(),
+            ),
         )
 
         assertEquals(1, store.entries.size)
@@ -38,34 +46,123 @@ class PluginTrustStoreTest {
         assertEquals("com.example.plugin", entry.packageName)
         assertEquals(setOf(certSha256), entry.certificateSha256)
         assertEquals(fileSha256, entry.fileSha256)
+        assertEquals(listOf("com.example.plugin"), entry.allowedClassPrefixes)
+        assertTrue(store.restrictedClasses.isEmpty())
         assertEquals(listOf(entry), store.findByPackage("com.example.plugin"))
     }
 
     @Test
-    @DisplayName("parses a DEX entry without a package name")
+    @DisplayName("parses a DEX entry and normalizes slash prefixes")
     fun parsesDexEntry() {
         val store = PluginTrustStore.parse(
-            """
-            {
-              "version": 1,
-              "plugins": [
-                { "id": "demo.dex", "fileSha256": "$fileSha256" }
-              ]
-            }
-            """.trimIndent(),
+            manifest(
+                """
+                {
+                  "id": "demo.dex",
+                  "fileSha256": "$fileSha256",
+                  "allowedClassPrefixes": ["com/example/plugin"]
+                }
+                """.trimIndent(),
+            ),
         )
 
         val entry = store.entries.single()
         assertNull(entry.packageName)
         assertTrue(entry.certificateSha256.isEmpty())
+        assertEquals(listOf("com.example.plugin"), entry.allowedClassPrefixes)
         assertEquals(listOf(entry), store.findDexByHash(fileSha256))
+    }
+
+    @Test
+    @DisplayName("parses and normalizes global restrictedClasses")
+    fun parsesRestrictedClasses() {
+        val store = PluginTrustStore.parse(
+            manifest(
+                plugins = "",
+                restricted = """
+                    [
+                      "java.lang.Runtime",
+                      "java/lang/ProcessBuilder",
+                      "Ljava/lang/reflect/Method;"
+                    ]
+                """.trimIndent(),
+            ),
+        )
+
+        assertEquals(
+            setOf(
+                "java.lang.Runtime",
+                "java.lang.ProcessBuilder",
+                "java.lang.reflect.Method",
+            ),
+            store.restrictedClasses,
+        )
     }
 
     @Test
     @DisplayName("empty plugin list yields an empty store")
     fun emptyPluginList() {
-        val store = PluginTrustStore.parse("""{"version":1,"plugins":[]}""")
+        val store = PluginTrustStore.parse(
+            """{"version":2,"restrictedClasses":[],"plugins":[]}""",
+        )
         assertTrue(store.entries.isEmpty())
+        assertTrue(store.restrictedClasses.isEmpty())
+    }
+
+    @Test
+    @DisplayName("requires restrictedClasses")
+    fun rejectsMissingRestrictedClasses() {
+        assertThrows(IllegalArgumentException::class.java) {
+            PluginTrustStore.parse("""{"version":2,"plugins":[]}""")
+        }
+    }
+
+    @Test
+    @DisplayName("requires allowedClassPrefixes for every entry")
+    fun rejectsMissingAllowedPrefixes() {
+        assertThrows(IllegalArgumentException::class.java) {
+            PluginTrustStore.parse(
+                manifest(
+                    """{"id":"bad","fileSha256":"$fileSha256"}""",
+                ),
+            )
+        }
+    }
+
+    @Test
+    @DisplayName("rejects an empty allowedClassPrefixes array")
+    fun rejectsEmptyAllowedPrefixes() {
+        assertThrows(IllegalArgumentException::class.java) {
+            PluginTrustStore.parse(
+                manifest(
+                    """
+                    {
+                      "id": "bad",
+                      "fileSha256": "$fileSha256",
+                      "allowedClassPrefixes": []
+                    }
+                    """.trimIndent(),
+                ),
+            )
+        }
+    }
+
+    @Test
+    @DisplayName("rejects wildcard class prefixes")
+    fun rejectsWildcardPrefix() {
+        assertThrows(IllegalArgumentException::class.java) {
+            PluginTrustStore.parse(
+                manifest(
+                    """
+                    {
+                      "id": "bad",
+                      "fileSha256": "$fileSha256",
+                      "allowedClassPrefixes": ["com.example.*"]
+                    }
+                    """.trimIndent(),
+                ),
+            )
+        }
     }
 
     @Test
@@ -73,18 +170,16 @@ class PluginTrustStoreTest {
     fun rejectsMalformedCertificateHash() {
         assertThrows(IllegalArgumentException::class.java) {
             PluginTrustStore.parse(
-                """
-                {
-                  "version": 1,
-                  "plugins": [
+                manifest(
+                    """
                     {
                       "id": "bad",
                       "packageName": "com.example.plugin",
-                      "certSha256": ["not-a-sha256"]
+                      "certSha256": ["not-a-sha256"],
+                      "allowedClassPrefixes": ["com.example.plugin"]
                     }
-                  ]
-                }
-                """.trimIndent(),
+                    """.trimIndent(),
+                ),
             )
         }
     }
@@ -94,14 +189,15 @@ class PluginTrustStoreTest {
     fun rejectsApkEntryWithoutCertificates() {
         assertThrows(IllegalArgumentException::class.java) {
             PluginTrustStore.parse(
-                """
-                {
-                  "version": 1,
-                  "plugins": [
-                    { "id": "bad", "packageName": "com.example.plugin" }
-                  ]
-                }
-                """.trimIndent(),
+                manifest(
+                    """
+                    {
+                      "id": "bad",
+                      "packageName": "com.example.plugin",
+                      "allowedClassPrefixes": ["com.example.plugin"]
+                    }
+                    """.trimIndent(),
+                ),
             )
         }
     }
@@ -111,14 +207,14 @@ class PluginTrustStoreTest {
     fun rejectsDexEntryWithoutFileHash() {
         assertThrows(IllegalArgumentException::class.java) {
             PluginTrustStore.parse(
-                """
-                {
-                  "version": 1,
-                  "plugins": [
-                    { "id": "bad" }
-                  ]
-                }
-                """.trimIndent(),
+                manifest(
+                    """
+                    {
+                      "id": "bad",
+                      "allowedClassPrefixes": ["com.example.plugin"]
+                    }
+                    """.trimIndent(),
+                ),
             )
         }
     }
@@ -128,15 +224,12 @@ class PluginTrustStoreTest {
     fun rejectsDuplicateIds() {
         assertThrows(IllegalArgumentException::class.java) {
             PluginTrustStore.parse(
-                """
-                {
-                  "version": 1,
-                  "plugins": [
-                    { "id": "dup", "fileSha256": "$fileSha256" },
-                    { "id": "dup", "fileSha256": "$fileSha256" }
-                  ]
-                }
-                """.trimIndent(),
+                manifest(
+                    """
+                    {"id":"dup","fileSha256":"$fileSha256","allowedClassPrefixes":["com.example.plugin"]},
+                    {"id":"dup","fileSha256":"$fileSha256","allowedClassPrefixes":["com.example.plugin"]}
+                    """.trimIndent(),
+                ),
             )
         }
     }
@@ -145,7 +238,22 @@ class PluginTrustStoreTest {
     @DisplayName("rejects an unsupported manifest version")
     fun rejectsUnsupportedVersion() {
         assertThrows(IllegalArgumentException::class.java) {
-            PluginTrustStore.parse("""{"version":2,"plugins":[]}""")
+            PluginTrustStore.parse(
+                """{"version":3,"restrictedClasses":[],"plugins":[]}""",
+            )
+        }
+    }
+
+    @Test
+    @DisplayName("rejects an invalid restricted class")
+    fun rejectsInvalidRestrictedClass() {
+        assertThrows(IllegalArgumentException::class.java) {
+            PluginTrustStore.parse(
+                manifest(
+                    plugins = "",
+                    restricted = """["not a class"]""",
+                ),
+            )
         }
     }
 }

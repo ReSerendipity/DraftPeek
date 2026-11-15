@@ -10,14 +10,17 @@ import java.security.MessageDigest
  * 1. 必须是应用私有插件目录内的普通文件（由调用方做目录约束）；
  * 2. 文件非空且不超过 [MAX_PLUGIN_FILE_BYTES]；
  * 3. 计算文件 SHA-256；
- * 4. APK 读取包名与签名证书，DEX 仅按文件哈希；
- * 5. 与 [PluginTrustStore] 做 fail-closed 匹配。
+ * 4. APK 读取包名与签名证书，DEX 直接使用 [PluginIdentity.Dex]；
+ * 5. 与 [PluginTrustStore] 做 fail-closed 匹配（签名/哈希/包名）；
+ * 6. 对命中的插件做 DEX 类级扫描：class_defs 必须全部在
+ *    `allowedClassPrefixes` 内，且定义/引用类型不得命中 `restrictedClasses`。
  *
- * 该类不依赖 Android API，APK 信息由 [ApkInspector] 注入，便于单测。
+ * 该类不依赖 Android API，APK 信息与 DEX 扫描器均可注入，便于单测。
  */
 class PluginSecurityVerifier(
     private val trustStore: PluginTrustStore,
     private val apkInspector: ApkInspector,
+    private val dexScanner: PluginDexScanner = DefaultPluginDexScanner,
 ) {
 
     fun verify(file: File): PluginVerificationResult {
@@ -42,7 +45,7 @@ class PluginSecurityVerifier(
             )
         }
 
-        return when (file.extension.lowercase()) {
+        val trustResult = when (file.extension.lowercase()) {
             "apk" -> {
                 val identity = try {
                     apkInspector.inspect(file)
@@ -60,7 +63,41 @@ class PluginSecurityVerifier(
                 fileSha256,
             )
 
-            else -> PluginVerificationResult.Denied("仅支持 .apk / .dex 插件")
+            else -> return PluginVerificationResult.Denied("仅支持 .apk / .dex 插件")
+        }
+
+        val entry = when (trustResult) {
+            is PluginVerificationResult.Denied -> return trustResult
+            is PluginVerificationResult.Allowed -> trustResult.entry
+        }
+
+        val scanResult = try {
+            dexScanner.scan(file)
+        } catch (e: Exception) {
+            return PluginVerificationResult.Denied(
+                "DEX 类级扫描异常: ${e.message ?: e.javaClass.simpleName}",
+            )
+        }
+
+        return when (scanResult) {
+            is DexScanResult.Failure -> PluginVerificationResult.Denied(
+                "DEX 类级扫描失败: ${scanResult.reason}",
+            )
+
+            is DexScanResult.Success -> {
+                when (
+                    val decision = PluginClassPolicy.evaluateDex(
+                        scanResult,
+                        entry,
+                        trustStore.restrictedClasses,
+                    )
+                ) {
+                    is ClassPolicyDecision.Allowed -> trustResult
+                    is ClassPolicyDecision.Denied -> PluginVerificationResult.Denied(
+                        "插件类准入拒绝: ${decision.reason}",
+                    )
+                }
+            }
         }
     }
 

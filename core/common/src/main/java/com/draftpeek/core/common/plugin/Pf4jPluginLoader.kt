@@ -7,26 +7,32 @@
  * ## 当前实现（任务26：简化实现 + 明确标注）
  *
  * - 扫描目录：`context.getDir("plugins", MODE_PRIVATE)`
- * - 加载器：[DexClassLoader]，optimizedDirectory 使用 [Context.getCodeCacheDir]（应用可写）
+ * - 加载器：[PolicyEnforcingDexClassLoader]（继承 Android `DexClassLoader`），
+ *   optimizedDirectory 使用 [Context.getCodeCacheDir]（应用可写）
  * - 父 ClassLoader：当前线程的 contextClassLoader，使插件类能解析宿主的
  *   [DraftPeekPlugin] 接口（接口由宿主 ClassLoader 加载，保证类型一致）
- * - 插件类发现：由于 Android 上无法安全地枚举 dex 内所有类名（DexFile 已废弃），
- *   要求插件在 classpath 根放置清单文件声明实现类：
+ * - 插件类发现：优先由插件在 classpath 根放置清单文件声明实现类：
  *     1. `plugin.properties`，含 `pluginClass=com.example.MyPlugin`
  *     2. 或 ServiceLoader 风格的 `META-INF/services/com.draftpeek.core.common.plugin.DraftPeekPlugin`
+ *   类级安全扫描由纯 Kotlin [com.draftpeek.core.common.plugin.security.DexParser]
+ *   完成，不再依赖已废弃的 `DexFile` 枚举；实现类仍由清单声明，避免猜测入口。
  * - 实例化：要求插件类提供无参公开构造函数，强转为 [DraftPeekPlugin]
- * - 单个插件加载失败（ClassNotFoundException / InstantiationException 等）只记录日志，
- *   不影响其他插件
+ * - 单个插件加载失败（ClassNotFoundException / InstantiationException / 类准入拒绝等）
+ *   只记录日志，不影响其他插件
  *
  * ## 安全闸门（P0-2）
  *
  * 加载前由 [PluginSecurityVerifier] 对每个文件做 fail-closed 校验：
  * - APK：包名 + 全部签名证书 SHA-256 必须命中 `assets/plugin_trust.json`；
  * - DEX：文件 SHA-256 必须精确命中信任清单；
- * - 空清单/解析失败 = 全部拒绝；空文件、超过 50 MB、canonical path 不在插件目录内一律拒绝。
+ * - 空清单/解析失败 = 全部拒绝；空文件、超过 50 MB、canonical path 不在插件目录内一律拒绝；
+ * - 命中信任条目后，解析 DEX 的 class_defs/type_ids：定义类必须全部落在
+ *   条目 `allowedClassPrefixes` 内，定义/引用类型不得命中全局 `restrictedClasses`；
+ * - 运行时使用 [PolicyEnforcingDexClassLoader] 在 `loadClass` 复用同一套纯函数
+ *   再次拒绝受限类与前缀外类（父 ClassLoader 命中宿主 API 时仍先拒绝 restrictedClasses）。
  *
- * 仍未提供进程内沙箱或 DEX 字节码静态扫描；插件代码与宿主同进程、同 uid 运行，
- * 可访问应用全部私有数据。**仅应加载受信任来源的插件**，切勿加载来源不明的 `.apk`。
+ * 仍未提供进程内沙箱；DEX 扫描是类级结构检查，不覆盖方法体内的反射/动态调用。
+ * 插件代码与宿主同进程、同 uid 运行，可访问应用全部私有数据。**仅应加载受信任来源的插件**。
  *
  * ## PF4J
  *
@@ -42,10 +48,14 @@ package com.draftpeek.core.common.plugin
 import android.content.Context
 import android.util.Log
 import com.draftpeek.core.common.plugin.security.AndroidApkInspector
+import com.draftpeek.core.common.plugin.security.PluginClassAccessDeniedException
+import com.draftpeek.core.common.plugin.security.PluginRuntimePolicy
 import com.draftpeek.core.common.plugin.security.PluginSecurityVerifier
+import com.draftpeek.core.common.plugin.security.PluginTrustEntry
+import com.draftpeek.core.common.plugin.security.PluginTrustStore
 import com.draftpeek.core.common.plugin.security.PluginTrustStoreLoader
 import com.draftpeek.core.common.plugin.security.PluginVerificationResult
-import dalvik.system.DexClassLoader
+import com.draftpeek.core.common.plugin.security.PolicyEnforcingDexClassLoader
 import java.io.File
 import java.util.Properties
 import org.pf4j.PluginState
@@ -96,9 +106,13 @@ class Pf4jPluginLoader(private val context: Context) {
      * 插件信任清单与校验器。
      *
      * 构造时加载 `assets/plugin_trust.json`；加载失败按空清单 fail-closed。
+     * 信任清单同时提供全局 restrictedClasses，供运行时 ClassLoader 复用。
      */
+    private val trustStore: PluginTrustStore =
+        PluginTrustStoreLoader.load(context.applicationContext ?: context)
+
     private val securityVerifier: PluginSecurityVerifier = PluginSecurityVerifier(
-        trustStore = PluginTrustStoreLoader.load(context.applicationContext ?: context),
+        trustStore = trustStore,
         apkInspector = AndroidApkInspector(context.applicationContext ?: context),
     )
 
@@ -106,8 +120,9 @@ class Pf4jPluginLoader(private val context: Context) {
      * 扫描插件目录并加载发现的插件。
      *
      * 对每个 `.apk` / `.dex` 文件：
-     * 1. 由 [PluginSecurityVerifier] 校验信任清单、签名/哈希与路径约束（失败跳过）
-     * 2. 用 [DexClassLoader] 加载（parent = 当前线程 contextClassLoader）
+     * 1. 由 [PluginSecurityVerifier] 校验信任清单、签名/哈希、DEX 类级准入与路径约束（失败跳过）
+     * 2. 用 [PolicyEnforcingDexClassLoader] 加载（parent = 当前线程 contextClassLoader，
+     *    loadClass 时再次执行 restrictedClasses/前缀校验）
      * 3. 从 `plugin.properties` 或 `META-INF/services/...` 读取实现类名
      * 4. 反射加载并实例化（无参构造），校验实现 [DraftPeekPlugin]
      *
@@ -148,7 +163,7 @@ class Pf4jPluginLoader(private val context: Context) {
                 continue
             }
 
-            when (val verification = securityVerifier.verify(canonical)) {
+            val entry = when (val verification = securityVerifier.verify(canonical)) {
                 is PluginVerificationResult.Denied -> {
                     Log.w(TAG, "Rejected plugin ${file.name}: ${verification.reason}")
                     continue
@@ -159,10 +174,11 @@ class Pf4jPluginLoader(private val context: Context) {
                         TAG,
                         "Plugin ${file.name} verified by trust entry ${verification.entry.id}",
                     )
+                    verification.entry
                 }
             }
 
-            val plugin = loadPlugin(canonical)
+            val plugin = loadPlugin(canonical, entry)
             if (plugin != null) {
                 loadedPlugins += plugin
                 infos += plugin.info
@@ -180,20 +196,25 @@ class Pf4jPluginLoader(private val context: Context) {
     fun getLoadedPlugins(): List<DraftPeekPlugin> = loadedPlugins.toList()
 
     /**
-     * 加载单个插件文件，失败返回 null。
+     * 加载单个插件文件；[entry] 是 [PluginSecurityVerifier] 已放行的信任条目。
+     * 失败返回 null。
      */
-    private fun loadPlugin(file: File): DraftPeekPlugin? {
+    private fun loadPlugin(file: File, entry: PluginTrustEntry): DraftPeekPlugin? {
         return try {
             val parent = Thread.currentThread().contextClassLoader
                 ?: Pf4jPluginLoader::class.java.classLoader
                 ?: ClassLoader.getSystemClassLoader()
 
             val optimizedDir = File(context.codeCacheDir, "dex").apply { mkdirs() }
-            val loader = DexClassLoader(
-                file.absolutePath,
-                optimizedDir.absolutePath,
-                null,
-                parent
+            val loader = PolicyEnforcingDexClassLoader(
+                dexPath = file.absolutePath,
+                optimizedDirectory = optimizedDir.absolutePath,
+                librarySearchPath = null,
+                parent = parent,
+                policy = PluginRuntimePolicy(
+                    entry = entry,
+                    restrictedClasses = trustStore.restrictedClasses,
+                ),
             )
 
             val className = readPluginClassName(loader)
@@ -222,6 +243,9 @@ class Pf4jPluginLoader(private val context: Context) {
             }
 
             instance as? DraftPeekPlugin
+        } catch (e: PluginClassAccessDeniedException) {
+            Log.w(TAG, "Plugin class access denied for ${file.name}: ${e.message}")
+            null
         } catch (e: Exception) {
             // 覆盖 DexClassLoader 创建失败、IO 异常等，单个插件失败不影响其他
             Log.w(TAG, "Failed to load plugin file: ${file.name}", e)

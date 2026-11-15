@@ -1,5 +1,17 @@
 {
-  "_comment": "DraftPeek 插件信任清单（fail-closed）。只有在此登记且签名/哈希匹配的 APK/DEX 才允许加载。字段格式见 PluginTrustStore.kt 文件头注释；正式发布前请填入真实条目。",
-  "version": 1,
-  "plugins": []
+  "_comment": "DraftPeek 插件信任清单（fail-closed）。version 必须为 2；restrictedClasses 为全局受限类；plugins 中每条记录必须声明非空 allowedClassPrefixes，DEX 定义类必须全部落在这些前缀内。字段格式见 PluginTrustStore.kt 文件头注释。正式发布前请填入真实条目。",
+  "version": 2,
+  "restrictedClasses": [
+    "java.lang.Runtime",
+    "java.lang.ProcessBuilder",
+    "java.lang.reflect.Method"
+  ],
+  "plugins": [],
+  "_example": {
+    "id": "example.dex.plugin",
+    "fileSha256": "<64 位小写十六进制>",
+    "allowedClassPrefixes": [
+      "com.example.draftpeek.plugin"
+    ]
+  }
 }
