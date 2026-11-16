@@ -148,6 +148,10 @@ docs/screenshots/
 !_archive/执行记录/**
 !README.md
 !SECURITY.md
+# COC / CONTRIBUTING 指针文件（2026-11-17，§12.5「入口页 + 详情页」例外）：
+# 正文仍由组织级 ReSerendipity/.github 唯一承载（DP-33 口径），根文件只放一行指向
+!CODE_OF_CONDUCT.md
+!CONTRIBUTING.md
 !CHANGELOG.md
 !USER_AGREEMENT.md
 !THIRD_PARTY_NOTICES.md
