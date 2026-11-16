@@ -324,9 +324,10 @@ jobs:
     needs: build
     runs-on: ubuntu-latest
     # 与 publish 同理分开跑：接上 preseed 后这条腿要真跑完 13 个用例（android.yml 同腿
-    # 实测 41m05s），跟构建共用 45 分钟必然被砍。60 = 实测 41m + 取产物/起模拟器/emulator
-    # 冷启动的余量，不是"红了就加时间"。
-    timeout-minutes: 60
+    # 实测 41m05s），跟构建共用 45 分钟必然被砍。90 = 实测 13 用例（EditorScroll
+    # 约 33m + 起模拟器/安装/preseed 约 11m + FileRead/Startup 尾部）的余量；
+    # 2026-11-16 run 43790319903 在 60m 被砍在 FileRead 第 8 个用例，Startup 尚未执行。
+    timeout-minutes: 90
 
     steps:
       - name: Checkout
