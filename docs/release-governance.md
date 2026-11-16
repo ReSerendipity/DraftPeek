@@ -131,7 +131,8 @@ PASS / FAIL / SKIP，SKIP = 判据已定义但本轮无数据源；`--strict` �
 | 1.0.31 | `74e4a8ac3` | `08a367440873840d48b0e1ed8ff9b26fc812b1d8` | `d1f4bf0` | `release(v1.0.31): bump version + changelog (#82)`（draft Release 从未发布，见 CHANGELOG 该版说明） |
 | 1.0.32 | `b16b951d1` | `6fc9023cad56155f0ff7170a2d0aa4e7b041da41` | `957e0e3` | `chore(release): 准备 v1.0.32，落版 CHANGELOG 与版本号 (#101)` |
 | 1.0.33 | `4e37384`（主干可达，非改写提交） | `cf1f7a7fa9a29ad417bd4702e1a4ea546c2a4fc2` | `4e37384`（即 tag 提交自身） | `release(v1.0.33): bump version + changelog`（2026-10-29） |
-| 1.1.0 | `9b05f8a`（主干可达） | `61f2c83ef613a1d088eb8f46b2d2fccc76018031` | `9b05f8a`（即 tag 提交自身） | `release(v1.1.0): bump version + changelog`（2026-11-15） |
+| 1.1.0 | `9b05f8a`（主干可达） | `61f2c83ef613a1d088eb8f46b2d2fccc76018031` | `9b05f8a`（即 tag 提交自身） | `release(v1.1.0): bump version + changelog`（2026-11-15；启动回归，draft 未发布） |
+| 1.1.1 | `9f65b94`（主干可达） | `be1c4a4774ba042b3fe795be9ec2c45123b597e7` | `9f65b94`（即 tag 提交自身） | `release(v1.1.1): bump version + changelog`（2026-11-16；修复启动回归，已发布） |
 
 判据用**树（tree）相等**，不用 patch-id 或提交信息：改写只换提交元数据与 SHA，内容树不变。以下三条命令均为只读，可复核本表：
 
