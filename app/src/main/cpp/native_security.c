@@ -299,149 +299,6 @@ static jbyteArray native_get_key_fragment3(
     return result;
 }
 
-/*
- * A 层：DEX 快速 CRC 辅助
- * P2-1: Dynamically registered via RegisterNatives.
- *
- * IMPLEMENTED (P3-4): Reads the APK as a ZIP file, locates the Central
- * Directory, finds the classes.dex entry, and returns its CRC32 value
- * from the ZIP Central Directory header. This avoids Java-level file IO
- * that could be hooked by Frida/Xposed.
- *
- * Returns: CRC32 of classes.dex as jlong, or 0 on error / not found.
- */
-static jlong native_quick_dex_checksum(
-    JNIEnv *env, jobject thiz, jstring apk_path) {
-    const char *path = (*env)->GetStringUTFChars(env, apk_path, NULL);
-    if (path == NULL) return 0;
-
-    FILE *fp = fopen(path, "rb");
-    if (fp == NULL) {
-        (*env)->ReleaseStringUTFChars(env, apk_path, path);
-        return 0;
-    }
-
-    jlong dex_crc = 0;
-
-    /* Step 1: Find the End of Central Directory (EOCD) record by scanning
-     * backwards from the end of the file. EOCD signature: 0x06054b50 */
-    fseek(fp, 0, SEEK_END);
-    long file_size = ftell(fp);
-    if (file_size < 22) { /* Minimum ZIP file size */
-        fclose(fp);
-        (*env)->ReleaseStringUTFChars(env, apk_path, path);
-        return 0;
-    }
-
-    /* Scan backwards for EOCD signature (max 65557 bytes = 64KB + 22) */
-    long scan_start = file_size - 65557;
-    if (scan_start < 0) scan_start = 0;
-    long eocd_offset = -1;
-    unsigned char eocd_buf[65557];
-    size_t eocd_read_size = file_size - scan_start;
-    if (eocd_read_size > sizeof(eocd_buf)) eocd_read_size = sizeof(eocd_buf);
-    fseek(fp, scan_start, SEEK_SET);
-    if (fread(eocd_buf, 1, eocd_read_size, fp) != eocd_read_size) {
-        fclose(fp);
-        (*env)->ReleaseStringUTFChars(env, apk_path, path);
-        return 0;
-    }
-
-    for (long i = (long)eocd_read_size - 22; i >= 0; i--) {
-        if (eocd_buf[i]   == 0x50 && eocd_buf[i+1] == 0x4b &&
-            eocd_buf[i+2] == 0x05 && eocd_buf[i+3] == 0x06) {
-            eocd_offset = scan_start + i;
-            break;
-        }
-    }
-
-    if (eocd_offset < 0) {
-        fclose(fp);
-        (*env)->ReleaseStringUTFChars(env, apk_path, path);
-        return 0;
-    }
-
-    /* Step 2: Read Central Directory offset and size from EOCD */
-    unsigned char eocd[22];
-    fseek(fp, eocd_offset, SEEK_SET);
-    if (fread(eocd, 1, 22, fp) != 22) {
-        fclose(fp);
-        (*env)->ReleaseStringUTFChars(env, apk_path, path);
-        return 0;
-    }
-
-    /* CD offset at byte 16, CD size at byte 12 (little-endian uint32) */
-    long cd_offset = (long)((eocd[16] & 0xFF) |
-                            ((eocd[17] & 0xFF) << 8) |
-                            ((eocd[18] & 0xFF) << 16) |
-                            ((unsigned long)(eocd[19]) << 24));
-    long cd_size = (long)((eocd[12] & 0xFF) |
-                          ((eocd[13] & 0xFF) << 8) |
-                          ((eocd[14] & 0xFF) << 16) |
-                          ((unsigned long)(eocd[15]) << 24));
-
-    if (cd_offset < 0 || cd_size <= 0 || cd_offset + cd_size > file_size) {
-        fclose(fp);
-        (*env)->ReleaseStringUTFChars(env, apk_path, path);
-        return 0;
-    }
-
-    /* Step 3: Scan Central Directory entries for "classes.dex" */
-    fseek(fp, cd_offset, SEEK_SET);
-    long pos = cd_offset;
-    long cd_end = cd_offset + cd_size;
-
-    while (pos < cd_end) {
-        unsigned char cd_header[46];
-        if (fread(cd_header, 1, 46, fp) != 46) break;
-
-        /* Check CD entry signature: 0x02014b50 */
-        if (cd_header[0] != 0x50 || cd_header[1] != 0x4b ||
-            cd_header[2] != 0x01 || cd_header[3] != 0x02) {
-            break;
-        }
-
-        /* CRC32 at bytes 16-19 (little-endian uint32) */
-        unsigned int crc32 = ((unsigned int)(cd_header[16] & 0xFF)) |
-                            ((unsigned int)(cd_header[17] & 0xFF) << 8) |
-                            ((unsigned int)(cd_header[18] & 0xFF) << 16) |
-                            ((unsigned int)(cd_header[19] & 0xFF) << 24);
-
-        /* Filename length at bytes 28-29 */
-        unsigned int name_len = (cd_header[28] & 0xFF) |
-                               ((cd_header[29] & 0xFF) << 8);
-        unsigned int extra_len = (cd_header[30] & 0xFF) |
-                                ((cd_header[31] & 0xFF) << 8);
-        unsigned int comment_len = (cd_header[32] & 0xFF) |
-                                 ((cd_header[33] & 0xFF) << 8);
-
-        /* Read filename */
-        char filename[256];
-        if (name_len >= sizeof(filename)) {
-            /* Skip oversized entries */
-            fseek(fp, name_len + extra_len + comment_len, SEEK_CUR);
-            pos += 46 + name_len + extra_len + comment_len;
-            continue;
-        }
-        if (fread(filename, 1, name_len, fp) != name_len) break;
-        filename[name_len] = '\0';
-
-        /* Check if this is classes.dex */
-        if (strcmp(filename, "classes.dex") == 0) {
-            dex_crc = (jlong)crc32;
-            break;
-        }
-
-        /* Skip extra field and comment */
-        fseek(fp, extra_len + comment_len, SEEK_CUR);
-        pos += 46 + name_len + extra_len + comment_len;
-    }
-
-    fclose(fp);
-    (*env)->ReleaseStringUTFChars(env, apk_path, path);
-    return dex_crc;
-}
-
 // ===== P2-1: JNI_OnLoad + RegisterNatives 动态注册 =====
 /*
  * 使用 RegisterNatives 动态注册 JNI 方法，替代传统的 Java_ 前缀命名导出。
@@ -454,7 +311,6 @@ static jlong native_quick_dex_checksum(
  * 注册两个类的方法：
  * - NativeSecurityChecker: 4 个安全检测方法
  * - SecureStringResolver: 1 个密钥分片方法
- * - AiDetector: 1 个 DEX CRC 方法
  */
 
 /* NativeSecurityChecker 的方法注册表 */
@@ -470,12 +326,6 @@ static JNINativeMethod nsc_methods[] = {
 static const char *SSR_CLASS = "com/draftpeek/core/common/security/SecureStringResolver";
 static JNINativeMethod ssr_methods[] = {
     {"nativeGetKeyFragment3", "()[B",                                        (void *)native_get_key_fragment3},
-};
-
-/* AiDetector 的方法注册表 */
-static const char *AD_CLASS = "com/draftpeek/security/AiDetector";
-static JNINativeMethod ad_methods[] = {
-    {"nativeQuickDexChecksum", "(Ljava/lang/String;)J",                      (void *)native_quick_dex_checksum},
 };
 
 #define ARRAY_LEN(arr) (sizeof(arr) / sizeof(arr[0]))
@@ -526,19 +376,6 @@ jint JNI_OnLoad(JavaVM *vm, void *reserved) {
         (*env)->DeleteLocalRef(env, ssr_class);
     }
 
-    /* Register AiDetector methods */
-    jclass ad_class = (*env)->FindClass(env, AD_CLASS);
-    if (ad_class == NULL) {
-        LOGW("Failed to find class %s", AD_CLASS);
-        clear_pending(env);
-    } else {
-        if ((*env)->RegisterNatives(env, ad_class, ad_methods, ARRAY_LEN(ad_methods)) < 0) {
-            LOGW("Failed to register natives for %s", AD_CLASS);
-            clear_pending(env);
-        }
-        (*env)->DeleteLocalRef(env, ad_class);
-    }
-
-    LOGD("JNI_OnLoad: all native methods registered successfully");
+    LOGD("JNI_OnLoad: native methods registered successfully");
     return JNI_VERSION_1_6;
 }
