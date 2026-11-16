@@ -7,6 +7,15 @@
 
 ---
 
+## [1.1.1] - 2026-11-16
+
+> 修复 `v1.1.0` 的启动路径回归；该问题会让 release APK 在启动阶段被自身安全模块 SIGKILL，Macrobenchmark 无法确认 activity launch completion。
+
+### Fixed
+- 移除 `native_security.c` 中已失效的 `AiDetector.nativeQuickDexChecksum` JNI 注册表与注册块，并删除对应 ProGuard keep，避免 `RegisterNatives` 找不到方法后触发进程异常
+- 修复 `AntiDebug` 在 x86_64 模拟器上把系统自带 `libndk_translation.so` 与 `su` 误判为 Zygisk/Root 的问题：模拟器仍计 3 分，但 root/zygisk 仅在非模拟器计分，真实设备策略不变
+- 将 Release Macrobenchmark job 的 timeout 从 60 分钟放宽到 90 分钟，覆盖 13 个用例约 46 分钟的实测耗时
+
 ## [1.1.0] - 2026-11-15
 
 > 本版收录 `v1.0.33`（`4e37384`）以来的 41 个非合并提交；下面只列用户可感知的功能与修复，
