@@ -9,3 +9,4 @@
 | v1.0 | YYYY-MM-DD | 初始化台账 | 建立 GOTCHAS / REVISION_LOG 标准表头 | 当前版本 | — |
 | v1.1 | 2026-10-31 | ADR-0012 台账格式统一 | GOTCHAS 24 条条目式记录重构为标准 6 列表格；迁移前原文备份于 local/agents/_migration/GOTCHAS.md.pre-migration.bak | 当前版本 | rows 24/24，missing_snippets=0 |
 | v1.2 | 2026-11-01 | 同步治理 §17 自主收口条款（ADR-0015） | 根 AGENTS.md §6 增「提交 / 推送 / 合并 / CI 监控在任务结尾自主完成，不询问用户」一行 | — | ✅ |
+| v1.3 | 2026-11-15 | Self-Purify 阻断台账被跟踪（ADR-0008 / §7.1） | 公开台账迁至 `docs/project/KNOWN_GOTCHAS.md`；`docs/agents/GOTCHAS.md` 改为本地历史分片；pre-push 台账门禁指向新路径；§7 索引与坑点累积落点同步 | 1.1.0 | ✅ |

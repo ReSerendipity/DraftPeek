@@ -327,10 +327,34 @@ fun EditorScreen(
         }
     }
 
+    // 保存当前文件。
+    //
+    // 内容来源按当前视图模式解析：原生编辑器（sora-editor）只在 EDIT / SPLIT /
+    // 非 Markdown 模式下可见，是这些模式的内容源头；在 WYSIWYG / PREVIEW 模式下
+    // 原生编辑器不可见且内容落后，必须以状态管理器的实时内容（liveContent）为准，
+    // 否则「富文本编辑 → 保存」会把旧内容写回磁盘（缺陷 R1 的保存症状）。
+    //
+    // 从 ViewModel 的 StateFlow 读取当前值，而不是捕获 Compose 状态：
+    // 本函数会被 remember 的 shortcutHandler 长期持有，捕获 Compose 状态会过期。
+    fun saveCurrentFile() {
+        val successState = viewModel.uiState.value as? EditorUiState.Success
+        val mode = viewModel.markdownViewMode.value
+        val useLiveContent = successState?.isMarkdownFile == true &&
+            (mode == MarkdownViewMode.WYSIWYG || mode == MarkdownViewMode.PREVIEW)
+        if (useLiveContent) {
+            viewModel.saveFile(viewModel.liveContent.value)
+            return
+        }
+        if (!wrapper.isUsable()) return
+        // 先同步原生编辑器的最新内容（内容变更回调有 150ms 防抖），再以其为准保存
+        wrapper.forceSyncContent()
+        viewModel.saveFile(wrapper.getContent())
+    }
+
     // Keyboard shortcut handler for external keyboards
     val shortcutHandler = remember(wrapper) {
         KeyboardShortcutHandler(
-            onSave = { if (wrapper.isUsable()) viewModel.saveFile(wrapper.getContent()) },
+            onSave = { saveCurrentFile() },
             onUndo = { if (wrapper.isUsable()) wrapper.undo() },
             onRedo = { if (wrapper.isUsable()) wrapper.redo() },
             onOpenSearch = { searchPanelMode = SearchPanelMode.FIND },
@@ -511,6 +535,33 @@ fun EditorScreen(
                 loadedFileKey = key
             } catch (_: Exception) {}
         }
+    }
+
+    // WYSIWYG → 原生编辑器内容同步。
+    //
+    // 富文本（WYSIWYG）编辑通过 onContentChanged 把内容写入状态管理器（liveContent），
+    // 但原生编辑器（sora-editor）不会自动跟随，导致「富文本编辑 → 切源码/分屏」时
+    // 原生编辑器仍展示旧内容。这里在原生编辑器可见的模式（EDIT / SPLIT）下，
+    // 若发现其内容落后于 liveContent，回灌一次。
+    LaunchedEffect(markdownViewMode, uiState) {
+        if (markdownViewMode != MarkdownViewMode.EDIT &&
+            markdownViewMode != MarkdownViewMode.SPLIT
+        ) {
+            return@LaunchedEffect
+        }
+        val successState = uiState as? EditorUiState.Success ?: return@LaunchedEffect
+        if (!successState.isMarkdownFile || successState.isReadOnly) return@LaunchedEffect
+        if (!wrapper.isUsable()) return@LaunchedEffect
+        val live = viewModel.liveContent.value
+        val native = try {
+            wrapper.getContent()
+        } catch (_: Exception) {
+            return@LaunchedEffect
+        }
+        // 仅比较归一化换行后的文本：富文本侧统一为 LF，原生编辑器可能保留文件的 CRLF，
+        // 纯换行差异不算内容落后，避免无意义的光标重置。
+        if (native.replace("\r\n", "\n") == live.replace("\r\n", "\n")) return@LaunchedEffect
+        wrapper.loadContent(live, successState.language, cursorPosition.line)
     }
 
     // P1-7: Collect diagnostic items from ViewModel and apply wavy underlines
@@ -848,7 +899,7 @@ fun EditorScreen(
     // Command Palette
     if (showCommandPalette) {
         val commandActions = EditorCommandActions(
-            onSave = { if (wrapper.isUsable()) viewModel.saveFile(wrapper.getContent()) },
+            onSave = { saveCurrentFile() },
             onNewFile = { /* new file not directly available from editor */ },
             onOpenFile = { /* open file not directly available from editor */ },
             onExport = {
@@ -1062,7 +1113,7 @@ fun EditorScreen(
                     val canSave = isModified && wrapper.isUsable()
                     TooltipIconButton(
                         tooltip = stringResource(R.string.editor_save),
-                        onClick = { if (canSave) viewModel.saveFile(wrapper.getContent()) },
+                        onClick = { if (canSave) saveCurrentFile() },
                         modifier = Modifier.accessibilityEnhanced(
                             role = Role.Button,
                             contentDescription = stringResource(R.string.editor_save),

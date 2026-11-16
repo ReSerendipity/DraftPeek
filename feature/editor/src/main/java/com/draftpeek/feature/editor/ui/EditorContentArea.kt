@@ -340,8 +340,12 @@ internal fun EditorContentArea(
                             markdownViewMode == MarkdownViewMode.WYSIWYG &&
                                 successState.isMarkdownFile &&
                                 !isLargeMarkdownFile -> {
+                                // 传入 liveContent（状态管理器的实时内容）而非 successState.content：
+                                // 后者自文件加载后不再更新，切走再切回富文本会加载回旧内容，
+                                // 导致富文本中的编辑丢失。MarkdownRichEditor 内部用
+                                // lastLoadedMarkdown 判断来源，编辑器自身触发的回灌不会重置内容。
                                 MarkdownRichEditor(
-                                    markdownContent = successState.content,
+                                    markdownContent = liveContent,
                                     onContentChanged = { newContent ->
                                         viewModel.onContentChanged(newContent)
                                     },

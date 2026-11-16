@@ -33,7 +33,10 @@ import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.testTag
@@ -99,19 +102,30 @@ fun MarkdownRichEditor(
 
     // Track the last Markdown source we loaded to avoid infinite loops
     // when onContentChanged triggers a re-composition with the same content.
-    var lastLoadedMarkdown = remember { markdownContent }
+    //
+    // 必须用 mutableStateOf 承载：普通 `remember { ... }` 局部变量在每次重组时都会
+    // 被重新初始化为「首帧取值」，导致「已加载」标记丢失、setMarkdown 被反复触发。
+    //
+    // 统一按 LF 归一化后记账：富文本内部（safeSetMarkdown）会把 CRLF/CR 归一为 LF，
+    // toMarkdown() 的输出也是 LF。若这里保留原始 CRLF，加载完成后 annString 效应会
+    // 因「LF != CRLF」把它误判成用户编辑，立刻触发一次假的 onContentChanged，
+    // 使文件在用户未做任何修改时就显示为已修改。
+    var lastLoadedMarkdown by remember { mutableStateOf(normalizeLineEndings(markdownContent)) }
     // Suppress callback during programmatic content loading (setMarkdown)
     // to prevent false "modified" signals when switching view modes.
-    var suppressCallback = remember { true }
+    //
+    // 必须用 mutableStateOf 承载：否则初始加载后的释放动作会被重组重置回 true，
+    // 用户编辑回调将被永久抑制（缺陷 R1 根因）。
+    var suppressCallback by remember { mutableStateOf(true) }
 
     // Load Markdown content into the rich editor when it changes externally.
     LaunchedEffect(markdownContent) {
-        if (markdownContent != lastLoadedMarkdown) {
+        if (normalizeLineEndings(markdownContent) != lastLoadedMarkdown) {
             // 双重检查：防止在 LaunchedEffect 排队期间内容变大
             if (markdownContent.length > MAX_SAFE_CONTENT_SIZE) return@LaunchedEffect
             suppressCallback = true
             safeSetMarkdown(richTextState, markdownContent)
-            lastLoadedMarkdown = markdownContent
+            lastLoadedMarkdown = normalizeLineEndings(markdownContent)
             // Release suppression after a microtask to allow annotatedString
             // to settle before user edits can trigger callbacks again.
             kotlinx.coroutines.yield()
@@ -125,7 +139,7 @@ fun MarkdownRichEditor(
         if (markdownContent.length > MAX_SAFE_CONTENT_SIZE) return@LaunchedEffect
         suppressCallback = true
         safeSetMarkdown(richTextState, markdownContent)
-        lastLoadedMarkdown = markdownContent
+        lastLoadedMarkdown = normalizeLineEndings(markdownContent)
         kotlinx.coroutines.yield()
         suppressCallback = false
     }
@@ -207,6 +221,16 @@ private fun LargeContentFallback(contentLength: Int, modifier: Modifier = Modifi
 }
 
 /**
+ * 归一化换行符：CRLF / 单独 CR → LF。
+ *
+ * 富文本内部统一使用 LF（[safeSetMarkdown] 在解析前做同样的归一），
+ * 这里用于「已加载内容」的记账，使其与 [RichTextState.toMarkdown] 的输出可比，
+ * 避免 CRLF 文件在加载后因换行差异被误判为已编辑。
+ */
+private fun normalizeLineEndings(value: String): String =
+    value.replace("\r\n", "\n").replace("\r", "\n")
+
+/**
  * 安全地将 Markdown 内容加载到 RichTextState 中。
  *
  * richeditor-compose 内部使用 org.intellij.markdown 解析 AST，
@@ -225,7 +249,7 @@ private fun safeSetMarkdown(state: RichTextState, markdown: String) {
         return
     }
     // Normalize line endings: CRLF / lone CR → LF
-    val normalized = markdown.replace("\r\n", "\n").replace("\r", "\n")
+    val normalized = normalizeLineEndings(markdown)
     try {
         state.setMarkdown(normalized)
     } catch (e: Exception) {
