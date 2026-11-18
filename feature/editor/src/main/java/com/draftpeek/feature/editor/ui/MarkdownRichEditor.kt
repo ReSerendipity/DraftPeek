@@ -227,8 +227,7 @@ private fun LargeContentFallback(contentLength: Int, modifier: Modifier = Modifi
  * 这里用于「已加载内容」的记账，使其与 [RichTextState.toMarkdown] 的输出可比，
  * 避免 CRLF 文件在加载后因换行差异被误判为已编辑。
  */
-private fun normalizeLineEndings(value: String): String =
-    value.replace("\r\n", "\n").replace("\r", "\n")
+private fun normalizeLineEndings(value: String): String = value.replace("\r\n", "\n").replace("\r", "\n")
 
 /**
  * 安全地将 Markdown 内容加载到 RichTextState 中。

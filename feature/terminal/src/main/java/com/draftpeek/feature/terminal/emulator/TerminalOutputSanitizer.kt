@@ -179,7 +179,8 @@ internal class TerminalOutputSanitizer {
             'K' -> if (parameters.isEmpty() || parameters == "0" || parameters == "1" || parameters == "2") {
                 current.setLength(0)
             }
-            'h', 'l' -> if (parameters.contains("1049") || parameters.contains("1047") ||
+            'h', 'l' -> if (parameters.contains("1049") ||
+                parameters.contains("1047") ||
                 parameters.contains("47")
             ) {
                 clearScreen = true
